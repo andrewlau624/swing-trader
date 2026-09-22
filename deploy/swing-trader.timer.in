@@ -1,0 +1,17 @@
+# Three cycles per trading day, in US/Eastern regardless of host timezone.
+#   09:05 ET  decide on yesterday's close, submit market-on-open (OPG cutoff 09:28)
+#   09:47 ET  reconcile fills, arm GTC stops, measure slippage
+#   15:52 ET  pre-close sweep: nothing unprotected overnight
+[Unit]
+Description=swing-trader schedule
+
+[Timer]
+OnCalendar=Mon..Fri *-*-* 09:05:00 America/New_York
+OnCalendar=Mon..Fri *-*-* 09:47:00 America/New_York
+OnCalendar=Mon..Fri *-*-* 15:52:00 America/New_York
+Persistent=true
+AccuracySec=30s
+Unit=swing-trader.service
+
+[Install]
+WantedBy=timers.target

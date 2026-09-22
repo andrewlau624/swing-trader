@@ -1,0 +1,15 @@
+# Installed by `make persist`. Paths filled in from the clone location.
+[Unit]
+Description=swing-trader mean-reversion paper loop (one cycle)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=__USER__
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=-__APP_DIR__/.env
+ExecStart=__APP_DIR__/.venv/bin/python -u scripts/live.py
+# Output goes to journald, not a file. Redirecting it to a file is how you end
+# up with an empty journalctl and no idea what the trader decided.
+TimeoutStartSec=900

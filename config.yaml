@@ -1,0 +1,54 @@
+# Swing trader - mean-reversion scanner + walk-forward backtest.
+# Unknown keys here raise a warning (llm-trader dropped them silently, which
+# means you believe you swept a parameter and didn't).
+
+data:
+  start: "2021-01-01"
+  end: "2026-09-18"
+  feed: "iex"            # free tier. NOTE: IEX reports only its own share of volume.
+  adjustment: "all"      # MUST be "all" - raw bars turn splits into phantom crashes.
+
+walkforward:
+  formation_days: 126    # ~6 months to measure range behaviour
+  trade_days: 42         # ~2 months to trade it, strictly after formation
+  step_days: 42
+
+selection:
+  halflife_min: 3.0      # "not for too long" - the core of the user's ask
+  halflife_max: 15.0
+  hurst_max: 0.5         # < 0.5 = anti-persistent = mean reverting
+  max_abs_drift_t: 2.5   # HAC-corrected t-stat; reject "ranged while trending"
+  min_amplitude_pct: 6.0 # round-trip swing must clear costs with room
+  max_efficiency_ratio: 0.25 # outlier guard only; drift_t is the binding trend filter
+  top_n: 8               # candidates carried into each trading window
+
+cohorts:
+  highvol:               # the RGTI species
+    price_min: 5.0
+    price_max: 50.0
+    min_iex_dollar_vol: 2000000
+    min_annual_vol: 0.60
+  broad:
+    price_min: 5.0
+    price_max: 100000.0
+    min_iex_dollar_vol: 2000000
+    min_annual_vol: 0.0
+
+strategy:
+  z_window: 20
+  z_entry: -2.0          # long when stretched below the mean
+  z_exit: 0.0            # exit on reversion to mean
+  time_stop_days: 20
+  stop_pct: null         # null = no stop (the user's actual method); grid overrides
+
+portfolio:
+  equity: 100000.0
+  max_positions: 8
+  slippage_bps: 20.0     # per side. high-vol smallcaps are not free to trade.
+  commission_per_share: 0.0
+  # Capital deployment. Mean concurrent positions is 1.29 against 8 slots, so
+  # equal-weighting on the CAP leaves 86% of position-days idle. position_pct
+  # sizes against typical usage; max_gross_pct bounds the tail.
+  position_pct: null     # null -> 1/max_positions (12.5%). 0.25 doubles exposure.
+  max_gross_pct: 100.0   # hard cap on total exposure; refuses, never levers
+  cash_yield_annual: 0.0 # flat fallback; prefer --cash BIL for the real rate path
