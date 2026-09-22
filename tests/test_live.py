@@ -96,3 +96,54 @@ def test_entry_skips_symbols_with_work_in_flight():
     st.pending["BBB"] = {"coid": "x"}
     busy = set(st.positions) | set(st.pending)
     assert busy == {"AAA", "BBB"}, "both held and in-flight symbols must block re-entry"
+
+
+def _capture(notifier):
+    seen = {}
+    def fake(subject, html, dedupe_key=None):
+        seen["subject"], seen["html"] = subject, html
+        return "captured"
+    notifier.send = fake
+    notifier.enabled = True
+    return seen
+
+
+def test_alert_subject_has_exactly_one_prefix(tmp_path):
+    from swingtrader.live.notify import Notifier
+    n = Notifier(tmp_path)
+    seen = _capture(n)
+    common = dict(equity=97_826.56, fills=[], positions={}, pending={},
+                  slippage=None, log_tail=[])
+    n.activity(actions=["x"], warnings=[], **common)
+    assert seen["subject"].count("[swing-trader]") == 1
+    n.activity(actions=["x"], warnings=["stop failed"], **common)
+    assert seen["subject"].count("[swing-trader]") == 1, seen["subject"]
+    assert "⚠" in seen["subject"], "a warning must be visible in the subject line"
+
+
+def test_alert_body_carries_the_decision_critical_fields(tmp_path):
+    from swingtrader.live.notify import Notifier
+    from swingtrader.live.broker import Fill
+    n = Notifier(tmp_path)
+    seen = _capture(n)
+    n.activity(equity=97_826.56, actions=["submitted MOO buy 894 VG"],
+               fills=[Fill("VG", "buy", 894, 13.71, 13.66, 36.6, "a", "t")],
+               positions={"VG": {"qty": 894, "entry_px": 13.71,
+                                 "stop_px": 12.34, "bars_held": 0}},
+               pending={}, slippage={"n": 1, "mean": 64.7, "median": 64.7, "p90": 64.7},
+               warnings=[], log_tail=["line"])
+    h = seen["html"]
+    for must in ("VG", "13.71", "36.6", "12.34", "WORSE", "line"):
+        assert must in h, f"alert omitted {must!r}"
+
+
+def test_slippage_verdict_flips_at_the_backtest_assumption(tmp_path):
+    from swingtrader.live.notify import Notifier
+    n = Notifier(tmp_path)
+    seen = _capture(n)
+    common = dict(equity=1.0, actions=["a"], fills=[], positions={}, pending={},
+                  warnings=[], log_tail=[])
+    n.activity(slippage={"n": 9, "mean": 18.0, "median": 18.0, "p90": 20.0}, **common)
+    assert "holding up" in seen["html"]
+    n.activity(slippage={"n": 9, "mean": 41.0, "median": 41.0, "p90": 60.0}, **common)
+    assert "WORSE" in seen["html"]

@@ -85,10 +85,10 @@ class Notifier:
         """The one alert that matters: something happened, here is everything."""
         when = dt.datetime.now().astimezone().strftime("%Y-%m-%d %H:%M %Z")
         n_fill, n_act = len(fills), len(actions)
-        subject = (f"[swing-trader] {n_act} order(s), {n_fill} fill(s) — "
-                   f"{_fmt_money(equity)}")
-        if warnings:
-            subject = "[swing-trader] ⚠ " + subject
+        # one prefix, not two -- the warning path used to prepend a second
+        # "[swing-trader]" and produce a doubled subject line
+        prefix = "[swing-trader] ⚠" if warnings else "[swing-trader]"
+        subject = f"{prefix} {n_act} order(s), {n_fill} fill(s) — {_fmt_money(equity)}"
 
         def rows(hdr, body):
             return (f"<h3 style='margin:18px 0 6px;font:600 13px system-ui'>{hdr}</h3>"
