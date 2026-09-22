@@ -127,9 +127,12 @@ ssh ihearthim@<host>
 cd ~/llm-trader && make persist
 ```
 
-Lingering is what keeps a user timer alive after you disconnect. Without it a
-systemd user unit stops at logout, which is the usual reason a "running" bot
-quietly is not running.
+Lingering is what keeps a user timer alive after you disconnect. **Without it
+the timer looks perfectly installed and simply never runs** once you close the
+SSH session — the single most likely way this ends up quietly dead.
+
+`make persist-status` reports lingering on its own line, and `make linger`
+prints the exact command.
 
 ### Timezones
 
@@ -176,7 +179,10 @@ malfunction.
 ## Stopping it
 
 ```bash
-make unpersist   # remove the schedule
+make stop        # aliases: make persist-stop, make unpersist
 ```
+
+Removes both the systemd timer and any cron entries. Open positions keep their
+GTC stops at the broker and are unaffected.
 
 Open positions keep their GTC stops at the broker and are unaffected.

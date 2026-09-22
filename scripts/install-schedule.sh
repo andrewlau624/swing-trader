@@ -12,12 +12,7 @@ UID_="$(id -u)"
 
 have_systemd_user() {
   command -v systemctl >/dev/null 2>&1 || return 1
-  # a user bus needs XDG_RUNTIME_DIR; try to supply it if the dir exists
-  if [[ -z "${XDG_RUNTIME_DIR:-}" && -d "/run/user/$UID_" ]]; then
-    export XDG_RUNTIME_DIR="/run/user/$UID_"
-    export DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/$UID_/bus"
-  fi
-  systemctl --user show-environment >/dev/null 2>&1
+  "$APP/scripts/sysd.sh" show-environment >/dev/null 2>&1
 }
 
 install_systemd() {
@@ -26,15 +21,22 @@ install_systemd() {
   sed -e "s|__USER__|$USER_|g" -e "s|__APP_DIR__|$APP|g" \
       "$APP/deploy/swing-trader.service.in" > "$HOME/.config/systemd/user/swing-trader.service"
   cp "$APP/deploy/swing-trader.timer.in" "$HOME/.config/systemd/user/swing-trader.timer"
-  systemctl --user daemon-reload
-  systemctl --user enable --now swing-trader.timer
+  "$APP/scripts/sysd.sh" daemon-reload
+  "$APP/scripts/sysd.sh" enable --now swing-trader.timer
   if ! loginctl show-user "$USER_" -p Linger 2>/dev/null | grep -q "Linger=yes"; then
     echo ""
-    echo "  WARNING: lingering is OFF, so this timer stops when you log out of SSH."
-    echo "  Fix it as root:   sudo loginctl enable-linger $USER_"
+    echo "  ############################################################"
+    echo "  #  LINGERING IS OFF - THIS TIMER DIES WHEN YOU LOG OUT.    #"
+    echo "  #  The bot will look installed and simply never run.       #"
+    echo "  #                                                          #"
+    echo "  #  Fix it now, as root:                                    #"
+    echo "  #      loginctl enable-linger $USER_"
+    echo "  #                                                          #"
+    echo "  #  Then verify:  make persist-status                       #"
+    echo "  ############################################################"
   fi
   echo ""
-  systemctl --user list-timers swing-trader.timer --no-pager || true
+  "$APP/scripts/sysd.sh" list-timers swing-trader.timer --no-pager || true
 }
 
 install_cron() {

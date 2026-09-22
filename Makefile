@@ -13,7 +13,7 @@ UNAME := $(shell uname -s)
 
 .PHONY: help setup env test lint kill-old persist unpersist persist-status \
         results status positions slippage logs once dry digest notify-test \
-        notify-setup doctor pull scan backtest clean
+        notify-setup doctor pull scan backtest clean stop persist-stop linger
 
 help:
 	@echo "swing-trader"
@@ -26,7 +26,8 @@ help:
 	@echo ""
 	@echo "  kill-old       STOP the previous llm-trader (dry run; add YES=1 to apply)"
 	@echo "  persist        install + start the scheduled loop (systemd timer, or cron)"
-	@echo "  unpersist      stop and remove the schedule"
+	@echo "  stop           stop and remove the schedule (alias: unpersist)"
+	@echo "  linger         how to make a systemd timer survive logout"
 	@echo "  persist-status is it actually scheduled and running?"
 	@echo ""
 	@echo "  results        positions, P&L, measured slippage, recent activity"
@@ -88,11 +89,25 @@ endif
 persist:
 	@./scripts/install-schedule.sh
 
+linger:
+	@echo "A systemd USER timer stops when you log out unless lingering is on."
+	@echo "It needs root, so run this yourself:"
+	@echo ""
+	@echo "    sudo loginctl enable-linger $$(whoami)"
+	@echo ""
+	@echo "or, if this shell came from 'su -' and has no sudo, exit to root and run:"
+	@echo ""
+	@echo "    loginctl enable-linger $$(whoami)"
+	@echo ""
+	@echo "Then confirm with:  make persist-status"
+
+stop persist-stop: unpersist
+
 unpersist:
-	@-systemctl --user disable --now swing-trader.timer 2>/dev/null
+	@-./scripts/sysd.sh disable --now swing-trader.timer 2>/dev/null
 	@-rm -f $(HOME)/.config/systemd/user/swing-trader.service \
 	        $(HOME)/.config/systemd/user/swing-trader.timer
-	@-systemctl --user daemon-reload 2>/dev/null
+	@-./scripts/sysd.sh daemon-reload 2>/dev/null
 	@-crontab -l 2>/dev/null | grep -v 'run-live.sh' \
 	  | grep -vE '^CRON_TZ=America/New_York|^# swing-trader|^# *[0-9]{2}:[0-9]{2} PT' \
 	  | crontab - 2>/dev/null
@@ -100,8 +115,12 @@ unpersist:
 
 persist-status:
 	@echo "--- systemd user timer ---"
-	@systemctl --user list-timers swing-trader.timer --no-pager 2>/dev/null \
-	  || echo "  not installed (or no systemd user session on this box)"
+	@./scripts/sysd.sh list-timers swing-trader.timer --no-pager 2>/dev/null \
+	  | grep -E "swing-trader|NEXT" || echo "  not installed"
+	@printf "  lingering: "; \
+	  if loginctl show-user $$(whoami) -p Linger 2>/dev/null | grep -q "Linger=yes"; \
+	  then echo "ON (survives logout)"; \
+	  else echo "OFF  <-- timer dies at logout. run: make linger"; fi
 	@echo "--- cron ---"
 	@crontab -l 2>/dev/null | grep -A4 'swing-trader' || echo "  no cron entries"
 	@echo "--- clocks ---"

@@ -93,6 +93,7 @@ make test                  # 36 tests
 make kill-old              # stop any previous llm-trader (dry run)
 make persist               # schedule it
 make results               # positions, P&L, measured slippage
+make stop                  # remove the schedule
 ```
 
 Updating an existing clone after a force-push: `make pull` (plain `git pull`
