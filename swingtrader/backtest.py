@@ -22,7 +22,7 @@ import numpy as np
 import pandas as pd
 
 from .config import Config
-from .metrics import zscore
+from .metrics import factor_returns, overnight_share, residual_zscore, zscore
 from .portfolio import Portfolio, Trade
 from .scan import scan_window
 from .strategy import (LONG, SHORT, Signal, apply_control, entry_signal,
@@ -82,6 +82,9 @@ def run(
     time_stop_days: int | None = None,
     select_mode: str = "reversion",
     z_entry_override: float | None = None,
+    min_overnight_share: float | None = None,
+    residual: bool = False,
+    overnight_window: int = 5,
     seed: int = 7,
     verbose: bool = True,
 ) -> Result:
@@ -110,6 +113,10 @@ def run(
     # market regime: block new entries when SPY is below its own 200d average.
     # Computed causally (rolling mean of past closes) and only ever read for
     # dates at or before the decision bar.
+    factors = factor_returns(bars) if residual else pd.DataFrame()
+    if residual and factors.empty:
+        raise ValueError("residual=True needs SPY, IWM, IWB, IWD and IWF in bars")
+
     regime_ok = None
     if regime_filter and "SPY" in bars:
         spy = bars["SPY"]["close"]
@@ -153,7 +160,12 @@ def run(
                 continue
             d = bars[sym]
             hist = d.loc[d.index <= fold.trade_end, "close"]
-            zcache[sym] = zscore(hist, strat.z_window)
+            if residual:
+                # betas fitted on formation bars only, then held fixed
+                z = residual_zscore(hist, factors, strat.z_window, fold.form_end)
+                zcache[sym] = z if z.notna().any() else zscore(hist, strat.z_window)
+            else:
+                zcache[sym] = zscore(hist, strat.z_window)
             # entry rate measured on FORMATION bars only, so the shuffle
             # control gets the same trade frequency without seeing the future
             if trail_atr:
@@ -274,6 +286,17 @@ def run(
                 if not np.isfinite(zt):
                     continue
                 ze = strat.z_entry if z_entry_override is None else z_entry_override
+                # quality gate: was this dip made of overnight gaps or of
+                # intraday selling? Computed from bars at or before the
+                # decision bar only.
+                if min_overnight_share is not None:
+                    hist = bars[sym].loc[bars[sym].index <= t]
+                    if len(hist) < overnight_window + 2:
+                        continue
+                    osh = overnight_share(hist, overnight_window)
+                    if not np.isfinite(osh) or osh < min_overnight_share:
+                        continue
+
                 if control == "shuffle":
                     # same stock, same entry rate, random day instead of z < -2
                     sig = (Signal(LONG, zt)
@@ -318,7 +341,7 @@ def run(
             "stop_pct": stop_pct, "control": control,
             "slippage_bps": pcfg.slippage_bps, "max_positions": pcfg.max_positions,
             "z_entry": strat.z_entry, "z_exit": strat.z_exit,
-            "exit_mode": exit_mode, "trail_pct": trail_pct, "trail_atr": trail_atr,
+            "residual": residual, "min_overnight_share": min_overnight_share, "exit_mode": exit_mode, "trail_pct": trail_pct, "trail_atr": trail_atr,
             "trail_after_pct": trail_after_pct, "time_stop_days": tstop,
             "position_pct": pf.position_pct, "max_gross_pct": pcfg.max_gross_pct,
             "cash_yield": cash_symbol or pcfg.cash_yield_annual, "regime_filter": regime_filter,

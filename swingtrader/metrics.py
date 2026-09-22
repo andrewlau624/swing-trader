@@ -170,3 +170,86 @@ def describe(bars: pd.DataFrame) -> dict:
         "last_close": float(c.iloc[-1]) if len(c) else np.nan,
         "n_bars": int(len(c)),
     }
+
+
+def overnight_share(bars: pd.DataFrame, window: int = 5) -> float:
+    """What fraction of the recent move happened overnight rather than intraday.
+
+    Decomposes each day into prev_close -> open (overnight) and open -> close
+    (intraday), after Lou, Polk & Skouras. The hypothesis this tests: a dip
+    created by overnight gaps is a liquidity/sentiment shock that reverts,
+    while a dip ground out intraday is informed selling that continues.
+
+    Returns the overnight fraction of the total move. For a decline, values
+    near 1 mean the drop happened almost entirely in gaps; near 0 or negative
+    means it was intraday selling.
+    """
+    if len(bars) < window + 2:
+        return float("nan")
+    c, o = bars["close"].astype(float), bars["open"].astype(float)
+    overnight = np.log(o / c.shift())
+    total = np.log(c / c.shift())
+    on = float(overnight.iloc[-window:].sum())
+    tot = float(total.iloc[-window:].sum())
+    if tot == 0 or not np.isfinite(tot) or not np.isfinite(on):
+        return float("nan")
+    return on / tot
+
+
+def factor_returns(bars: dict) -> pd.DataFrame:
+    """FF3-style daily factor proxies built from liquid ETFs.
+
+    MKT = SPY, SMB = IWM - IWB (small minus broad), HML = IWD - IWF
+    (value minus growth). Proxies, not Ken French's series, but they capture
+    the same variation and need no extra data source.
+    """
+    need = ("SPY", "IWM", "IWB", "IWD", "IWF")
+    if any(s not in bars for s in need):
+        return pd.DataFrame()
+    r = {s: np.log(bars[s]["close"]).diff() for s in need}
+    df = pd.DataFrame(r).dropna()
+    return pd.DataFrame({
+        "MKT": df["SPY"],
+        "SMB": df["IWM"] - df["IWB"],
+        "HML": df["IWD"] - df["IWF"],
+    })
+
+
+def residual_zscore(close: pd.Series, factors: pd.DataFrame, window: int,
+                    fit_end: pd.Timestamp, min_obs: int = 60) -> pd.Series:
+    """Z-score of CUMULATIVE RESIDUAL return rather than of raw price.
+
+    Both the academic and the open-source surveys land on this independently as
+    the single largest documented improvement to short-term reversal: a raw
+    price z-score is contaminated by factor and industry momentum, so part of
+    what looks like an oversold stock is really an oversold *market*. Blitz,
+    Huij, Lansdorp & Verbeek report Sharpe 0.62 -> 1.28 moving to residuals,
+    and find plain reversal insignificant post-1990 while the residual version
+    survives costs.
+
+    Betas are fitted ONLY on data up to fit_end (the formation window), then
+    held fixed through the trading window -- both to avoid lookahead and
+    because refitting daily is not what a real desk would do.
+    """
+    r = np.log(close.astype(float)).diff()
+    fx = factors.reindex(r.index)
+    fit = pd.concat([r, fx], axis=1).dropna()
+    fit = fit[fit.index <= fit_end]
+    if len(fit) < min_obs:
+        return pd.Series(index=close.index, dtype=float)
+
+    y = fit.iloc[:, 0].values
+    X = np.column_stack([np.ones(len(fit)), fit.iloc[:, 1:].values])
+    try:
+        beta, *_ = np.linalg.lstsq(X, y, rcond=None)
+    except np.linalg.LinAlgError:
+        return pd.Series(index=close.index, dtype=float)
+
+    full = pd.concat([r, fx], axis=1).dropna()
+    Xf = np.column_stack([np.ones(len(full)), full.iloc[:, 1:].values])
+    resid = pd.Series(full.iloc[:, 0].values - Xf @ beta, index=full.index)
+
+    cum = resid.cumsum()
+    mu = cum.rolling(window).mean()
+    sd = cum.rolling(window).std(ddof=1)
+    return ((cum - mu) / sd.replace(0.0, np.nan)).reindex(close.index)

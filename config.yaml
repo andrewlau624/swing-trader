@@ -40,6 +40,11 @@ strategy:
   z_exit: 0.0            # exit on reversion to mean
   time_stop_days: 20
   stop_pct: null         # null = no stop (the user's actual method); grid overrides
+  # Overnight-gap quality filter. Research finding, NOT enabled live yet --
+  # changing the strategy mid-experiment would contaminate the slippage
+  # measurement the live run exists to produce. See RESULTS.md addendum 4.
+  min_overnight_share: null   # 0.3 in backtest: Sharpe 0.95 -> 1.34
+  overnight_window: 5
 
 portfolio:
   equity: 100000.0

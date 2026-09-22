@@ -90,6 +90,8 @@ class StrategyCfg:
     z_exit: float = 0.0
     time_stop_days: int = 20
     stop_pct: float | None = None
+    min_overnight_share: float | None = None
+    overnight_window: int = 5
 
 
 @dataclass

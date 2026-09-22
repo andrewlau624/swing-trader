@@ -100,3 +100,24 @@ def test_zscore_uses_only_past_bars():
     assert z.iloc[:19].isna().all(), "z-score produced a value before its window filled"
     # recompute point 50 from the first 51 bars only; must match the full-series value
     assert zscore(s.iloc[:51], 20).iloc[-1] == pytest.approx(z.iloc[50])
+
+
+def test_residual_zscore_strips_the_factor_move():
+    """A stock that only moved because the market moved is not oversold."""
+    from swingtrader.metrics import residual_zscore
+    idx = pd.bdate_range("2021-01-04", periods=400)
+    rng = np.random.default_rng(5)
+    mkt = pd.Series(rng.standard_normal(400) * 0.01, index=idx)
+    mkt.iloc[-15:] -= 0.02                       # market-wide selloff
+    factors = pd.DataFrame({"MKT": mkt,
+                            "SMB": rng.standard_normal(400) * 0.002,
+                            "HML": rng.standard_normal(400) * 0.002}, index=idx)
+    # a pure beta-1 stock with tiny idiosyncratic noise: it falls with the market
+    px = pd.Series(np.exp(np.log(30.0) + (mkt + rng.standard_normal(400) * 0.001).cumsum()),
+                   index=idx)
+    raw = zscore(px, 20).iloc[-1]
+    res = residual_zscore(px, factors, 20, idx[-60]).iloc[-1]
+    assert raw < -1.0, f"raw z-score should look oversold, got {raw:.2f}"
+    assert abs(res) < abs(raw), (
+        f"residual z ({res:.2f}) must be less extreme than raw ({raw:.2f}) -- "
+        "the drop was the market, not the stock")

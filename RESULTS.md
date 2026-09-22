@@ -385,3 +385,121 @@ high weight.
    the last free slots varied run to run. The same config returned 18.1%, 18.3%
    and 20.6% CAGR in three processes. Now ordered by scanner rank; three
    consecutive processes return 15.11% / 20.55% identically.
+
+---
+
+# Addendum 4 — signal research: one finding, three failures
+
+Two literature/code surveys were run (academic short-term-reversal research;
+open-source stat-arb repos). Both independently named the same top
+recommendation. It did not survive testing here. Something else did.
+
+## The finding: filter dips by how they were made
+
+Decompose each day into **overnight** (`prev_close -> open`) and **intraday**
+(`open -> close`), then require that the 5-day decline be mostly *overnight*
+gaps rather than intraday selling. Mechanism: a gap is a liquidity/sentiment
+shock that reverts; a grind down through the session is informed selling that
+continues.
+
+| | baseline | overnight share ≥ 0.3 |
+|---|---|---|
+| trades | 207 | 111 |
+| CAGR | 15.1% | **17.2%** |
+| **Sharpe** | 0.95 | **1.34** |
+| max drawdown | −14.4% | **−11.1%** |
+| Calmar | 1.05 | **1.55** |
+| avg per trade | +2.46% | **+5.00%** |
+| win rate | 51.7% | 61.3% |
+| profit factor | 1.50 | 2.27 |
+| P(mean trade ≤ 0) | 0.004 | **0.000** |
+| months to significance | 40.5 | **19.5** |
+| **risk-matched CAGR** | 15.1% | **22.3%** |
+
+Risk-matched (both scaled to −14.4% drawdown) the edge grows **48%**, and the
+time needed to prove it live halves.
+
+### Robustness
+
+- **Plateau, not a spike.** Risk-matched CAGR across thresholds 0.0 → 0.7:
+  15.6, 18.0, 21.6, **22.3**, 17.9, 16.2, 15.1, 14.8. A smooth hill with a
+  broad top, not a knife-edge.
+- **Window is not special.** 3d/5d/8d/10d give 16.7 / 22.3 / 17.8 / 19.2 —
+  every one beats the 15.1% baseline; 5d is best of four tested.
+- **Replicates in the other cohort.** Broad-market: 2.2% → 5.3% risk-matched.
+  Independent confirmation in a universe the parameter was not chosen on.
+- **Consistent across folds**, not a few lucky ones: profitable folds go
+  65% → 79%, mean fold return +3.45% → +4.39%.
+- **Survives costs**: +4.80% per trade even at +10bps extra slippage per side.
+
+### What is weak about it
+
+- The original feature correlation was **nominally** significant only
+  (Spearman +0.158, p = 0.020) and did **not** survive Bonferroni correction
+  for the 9 features tested.
+- The inverse-filter falsification was **inconclusive** — negating the signal
+  leaves only 7–15 trades, too few to read. That test needs redesigning.
+- Trade count drops 207 → 111, so capital utilisation falls 14.2% → 7.9%. The
+  edge per trade nearly doubles, but the idle-capital problem gets worse.
+- Both the 0.3 threshold and the 5-day window were the best of several tested.
+  That is mild selection even though both surfaces are plateaus.
+
+## Three things the research recommended that did NOT work here
+
+**1. Residualization — the top recommendation of both surveys.** Replace the raw
+price z-score with a z-score of cumulative FF3 residual return (market = SPY,
+SMB = IWM−IWB, HML = IWD−IWF; betas fitted on formation bars only). Blitz et al.
+report Sharpe 0.62 → 1.28 and that plain reversal is dead post-1990 while
+residual reversal survives.
+
+Result here, at every threshold tested:
+
+| | trades | CAGR | Sharpe | risk-matched |
+|---|---|---|---|---|
+| raw z < −2.0 | 207 | 15.1% | 0.95 | **15.1%** |
+| residual z < −2.0 | 221 | 13.0% | 0.88 | 9.1% |
+| residual z < −1.25 | 732 | 16.3% | 0.66 | 5.3% |
+
+**Why it fails here, measured rather than guessed:** FF3 explains a median of
+only **22%** of the variance of names in this universe (p90 = 0.40). There is
+little factor contamination to remove, so residualization strips 22% of the
+variance while adding the estimation noise of four fitted parameters. The
+literature's gains come from large-cap universes where factor exposure
+dominates; this screen deliberately selects idiosyncratic, high-volatility
+names. The drift filter also already rejects stocks that fell because their
+sector fell.
+
+**2. Bertram optimal thresholds.** Bertram (2010) solves analytically for the
+entry/exit maximising return per unit *time* — the right objective when capital
+is idle 86% of the time. With 40bps round-trip costs it prescribes entry at
+**−0.37 to −0.64σ**, not −2σ, and claims ~53% of return per day is forfeited at
+−2σ.
+
+Empirically the direction is wrong past a point. Sweeping entry thresholds and
+comparing at constant risk:
+
+| z entry | trades | CAGR | Sharpe | maxDD | util | risk-matched |
+|---|---|---|---|---|---|---|
+| −2.00 | 207 | 15.1% | 0.95 | −14.4% | 14.2% | **15.1%** |
+| −1.75 | 381 | 18.2% | 0.85 | −18.1% | 27.0% | 14.5% |
+| −1.25 | 655 | 23.3% | 0.85 | −30.6% | 43.5% | 11.0% |
+| −0.50 | 962 | 21.2% | 0.75 | −41.6% | 53.9% | 7.4% |
+
+Shallower entries do raise raw CAGR and fix utilisation — but drawdown rises
+faster, so risk-matched return falls monotonically. Bertram assumes a true OU
+process with known parameters and one position at a time; these are estimated
+parameters on stocks that are only approximately OU, held in an 8-slot
+portfolio. **−2.0 was already the right answer.**
+
+**3. News sentiment** (addendum 2): mean P&L difference +0.97pp at p = 0.63.
+
+## Standing conclusion
+
+The strategy's entry threshold is already optimal, and its signal cannot be
+usefully factor-neutralized in this universe. The one improvement found is a
+*quality filter on how the dip formed*, not a better dip detector.
+
+It is **not enabled in the live config.** Changing the strategy mid-experiment
+would contaminate the slippage measurement the live run exists to produce, and
+the finding rests on a feature whose original correlation was nominal-only.
+It is available as `strategy.min_overnight_share: 0.3`.
