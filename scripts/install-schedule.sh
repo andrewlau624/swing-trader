@@ -18,7 +18,7 @@ have_systemd_user() {
 install_systemd() {
   echo "installing systemd user timer..."
   mkdir -p "$HOME/.config/systemd/user"
-  sed -e "s|__USER__|$USER_|g" -e "s|__APP_DIR__|$APP|g" \
+  sed -e "s|__APP_DIR__|$APP|g" \
       "$APP/deploy/swing-trader.service.in" > "$HOME/.config/systemd/user/swing-trader.service"
   cp "$APP/deploy/swing-trader.timer.in" "$HOME/.config/systemd/user/swing-trader.timer"
   "$APP/scripts/sysd.sh" daemon-reload

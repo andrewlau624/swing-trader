@@ -122,6 +122,10 @@ persist-status:
 	  if loginctl show-user $$(whoami) -p Linger 2>/dev/null | grep -q "Linger=yes"; \
 	  then echo "ON (survives logout)"; \
 	  else echo "OFF  <-- timer dies at logout. run: make linger"; fi
+	@R=$$(./scripts/sysd.sh show swing-trader.service -p Result --value 2>/dev/null); \
+	  if [ -n "$$R" ] && [ "$$R" != "success" ]; then \
+	    echo "  last result: $$R  <-- LAST RUN FAILED. see 'last run' below"; \
+	  elif [ -n "$$R" ]; then echo "  last result: success"; fi
 	@echo "--- cron ---"
 	@crontab -l 2>/dev/null | grep -A4 'swing-trader' || echo "  no cron entries"
 	@echo "--- clocks ---"

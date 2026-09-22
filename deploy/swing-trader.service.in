@@ -6,7 +6,9 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
-User=__USER__
+# No User= here: this is a *user* unit, already running as the owner. User=
+# makes the user manager call setgroups(), which it lacks the capability for,
+# and every run dies with status=216/GROUP before Python even starts.
 WorkingDirectory=__APP_DIR__
 EnvironmentFile=-__APP_DIR__/.env
 ExecStart=__APP_DIR__/.venv/bin/python -u scripts/live.py
