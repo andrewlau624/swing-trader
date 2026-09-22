@@ -5,6 +5,25 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## 0. Uncap the candidate list — READY, YOUR CALL
+
+**Status:** found 2026-09-22, validated (RESULTS.md addendum 5), **not enabled.**
+
+`selection.top_n: 8 -> 999` plus `portfolio.position_pct: 0.10`:
+Sharpe 0.95 -> 1.16, CAGR 15.1% -> 22.3%, maxDD -14.4% -> -15.3%,
+risk-matched 15.1% -> ~21%. The rank score has no predictive power (ranks 9+
+earn the same as 1-8), shuffle/flip controls pass, beats baseline every year.
+
+**Why now is cheap:** the systemd unit failed with 216/GROUP on every run until
+924d854, so the live slippage sample is ~empty. Switching before fills
+accumulate costs the experiment nothing.
+
+**Open question before trusting live numbers:** live re-selects daily; the
+backtest re-selects every 42 days, and an honest 21-day refresh scored far
+worse (9.5%). Build a short-refresh backtest that matches the executor.
+
+---
+
 ## 1. Switch on the overnight-gap filter — WAITING ON LIVE FILLS
 
 **Status:** researched, validated, committed, **deliberately not enabled.**
@@ -77,9 +96,13 @@ but "should" is not "did".
 | Broad-market cohort | **weak** | 1.6% CAGR vs 15.1% — the edge needs high volatility |
 | Momentum sleeve at 25% | **promising, unvalidated** | blend Sharpe 1.09 vs 0.95, but standalone CAGR swings 1.2–43.6% across settings |
 | Parking idle cash in BIL/SGOV | **ADOPTED** | 86% of position-days were idle; +3.3pp CAGR, free |
+| Uncapped candidates (top_n 999) | **found, pending** | risk-matched 15.1 -> 21.0%, controls pass (addendum 5) |
+| z_window 10 / 40, formation 63 / 252 | **dead** | all 4-9% risk-matched vs 15.1% |
 | −10% stop vs no stop | **ADOPTED** | 11.8% vs 8.6% CAGR, and lower drawdown |
 
 ## Ideas not yet tested
+
+- Backtest with the executor's daily re-selection (see item 0)
 
 - Multiple formation horizons (5/10/20d) simultaneously — the one remaining
   structural fix for 14% capital utilisation

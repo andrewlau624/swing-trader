@@ -503,3 +503,68 @@ It is **not enabled in the live config.** Changing the strategy mid-experiment
 would contaminate the slippage measurement the live run exists to produce, and
 the finding rests on a feature whose original correlation was nominal-only.
 It is available as `strategy.min_overnight_share: 0.3`.
+
+---
+
+# Addendum 5 — the candidate cap was discarding good signals
+
+`selection.top_n: 8` keeps only the 8 best-ranked survivors of the hard
+filters each fold. Mean concurrent positions was 1.29, so the cap was never
+about slot pressure: it simply threw away candidates. Removing it
+(`top_n: 999`, i.e. every name that clears the gates) — highvol, −10% stop,
+cash in BIL, 20bps/side:
+
+| | top_n 8 (live) | uncapped | uncapped, `position_pct` 0.10 |
+|---|---|---|---|
+| trades | 207 | 370 | 370 |
+| CAGR | 15.1% | 26.6% | 22.3% |
+| Sharpe | 0.95 | **1.13** | **1.16** |
+| max drawdown | −14.4% | −18.0% | −15.3% |
+| avg per trade | +2.46% | +2.63% | +2.63% |
+| win rate | 51.7% | 55.4% | 55.4% |
+| **risk-matched CAGR** | 15.1% | **21.0%** | 20.9% |
+
+The last column is deployable as-is, no leverage.
+
+### Why it is believable
+
+- **The rank carries no information.** Trades from ranks 9+ average +2.60% vs
+  +2.58% for ranks 1–8 (Welch p = 0.99; Spearman rank-vs-P&L +0.08, p = 0.17).
+  Ranks 9+ are significant on their own (p = 0.024). Uncapping is close to
+  parameter-free: it stops discarding signals as good as the kept ones.
+- **Controls pass.** Uncapped shuffle (same names, same entry rate, random
+  days): 3.0% / 5.8% CAGR over two seeds, avg trade ≈ 0. Flip: −7.9%. The
+  extra trades carry timing edge, not selection luck.
+- **Every year at least matches baseline:** 2021 1.3 vs 0.8, 2022 **11.6 vs
+  −0.3**, 2023 44.3 vs 27.3, 2024 23.3 vs 23.3, 2025 46.3 vs 25.4, 2026 YTD
+  15.2 vs 4.9. 24 of 32 folds profitable.
+- **Costs:** at 30bps/side 18.3% risk-matched, at 40bps 16.8% — both still
+  above the baseline *at 20bps*.
+- **Plateau:** top_n 12/16/24/40/80 → 19.8/18.8/25.4/23.3/21.0. Trades
+  saturate at ~370 by top_n ≈ 30. 24 is the peak; report the uncapped 21.0,
+  not the cherry-picked 25.4.
+- **Gates are not fragile once uncapped:** halflife_max 25, amplitude 4%,
+  hurst 0.55, drift_t 3.5 all land at 19.5–21.0 risk-matched.
+
+### What is weak about it
+
+- **Does not replicate in the broad cohort** (2.4% → 1.2%). Consistent with
+  "the edge needs high volatility", but it is a failed replication.
+- **Does not stack with the overnight filter.** top8+ovn 22.7%, uncapped+ovn
+  24.7%; with the filter on, ranks 9+ add only +1.11%/trade (p = 0.46). They
+  are partial substitutes — pick one, or accept a small combined gain.
+- **Refresh cadence matters and live does not match the backtest.** The
+  backtest re-selects every 42 days; `live/executor.py` re-selects daily on a
+  rolling window. An honest 21/21 walk-forward scored only 9.5% risk-matched.
+  Until a short-refresh backtest agrees, live results may not track these
+  numbers regardless of top_n.
+
+### Trap found and fixed
+
+`step_days < trade_days` made trade windows overlap and the loop walked the
+same dates twice, "returning" 91% CAGR / Sharpe 1.86. `make_folds` now refuses
+that configuration (test: `test_overlapping_trade_windows_are_refused`).
+
+Other results this round: `z_window` 10 → 8.6%, 40 → 8.3% (20 stays);
+formation 63 → 4.1%, 252 → 4.6% (126 stays); `position_pct` 0.15 uncapped →
+20.1% (more size, lower Sharpe).

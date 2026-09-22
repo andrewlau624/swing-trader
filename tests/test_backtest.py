@@ -71,6 +71,13 @@ def test_folds_are_disjoint_and_ordered():
         assert n_form == cfg.walkforward.formation_days
 
 
+def test_overlapping_trade_windows_are_refused():
+    cfg = Config.load()
+    cfg.walkforward.step_days = cfg.walkforward.trade_days - 1
+    with pytest.raises(ValueError, match="overlap"):
+        make_folds(pd.bdate_range("2021-01-04", periods=600), cfg)
+
+
 # ------------------------------------------------------------------ lookahead
 def _oscillator(n=400, period=30, amp=0.18, base=20.0, seed=0):
     rng = np.random.default_rng(seed)

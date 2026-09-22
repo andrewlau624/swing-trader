@@ -55,6 +55,12 @@ class Result:
 
 def make_folds(dates: pd.DatetimeIndex, cfg: Config) -> list[Fold]:
     w = cfg.walkforward
+    # step < trade makes consecutive trade windows overlap, and the loop then
+    # walks the same dates twice: positions are marked and traded twice and the
+    # curve compounds on itself. step=21/trade=42 "returned" 91% CAGR this way.
+    if w.step_days < w.trade_days:
+        raise ValueError(f"step_days ({w.step_days}) < trade_days ({w.trade_days}): "
+                         "trade windows would overlap and double-count days")
     out, i, k = [], 0, 0
     while i + w.formation_days + w.trade_days <= len(dates):
         fs, fe = dates[i], dates[i + w.formation_days - 1]
