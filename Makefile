@@ -13,7 +13,7 @@ UNAME := $(shell uname -s)
 
 .PHONY: help setup env test lint kill-old persist unpersist persist-status \
         results status positions slippage logs once dry digest notify-test \
-        notify-setup doctor pull scan backtest clean stop persist-stop linger
+        notify-setup doctor pull scan backtest clean stop persist-stop linger _lastlog
 
 help:
 	@echo "swing-trader"
@@ -126,13 +126,13 @@ persist-status:
 	@echo "--- clocks ---"
 	@echo "  server $$(date '+%H:%M %Z')   US/Eastern $$(TZ=America/New_York date '+%H:%M %Z')"
 	@echo "--- last run ---"
-	@tail -4 logs/cron.log 2>/dev/null || tail -4 $$(ls -t logs/live-*.log 2>/dev/null | head -1) 2>/dev/null || echo "  (no runs yet)"
+	@$(MAKE) --no-print-directory _lastlog N=6
 
 # --------------------------------------------------------------- results
 results: status slippage
 	@echo ""
 	@echo "=== recent activity ==="
-	@tail -30 $$(ls -t logs/live-*.log 2>/dev/null | head -1) 2>/dev/null || echo "(no runs yet)"
+	@$(MAKE) --no-print-directory _lastlog N=30
 
 status:
 	@$(PY) scripts/live.py --status
@@ -154,8 +154,26 @@ slippage:
 	  print(f'slippage over {len(v)} fills: mean {v.mean():+.1f} bps  median {np.median(v):+.1f}  p90 {np.percentile(v,90):+.1f}') if rows else None; \
 	  print(f'backtest assumed +20.0 bps/side -> ' + ('HOLDING UP' if v.mean()<=25 else 'WORSE THAN MODELLED, edge shrinks')) if rows else None"
 
+# `tail` with no filename argument reads STDIN and blocks forever, which is
+# how `make persist-status` appeared to hang. Every log target goes through
+# here so the empty case is handled once.
+_lastlog:
+	@N=$${N:-20}; \
+	 LOG=$$(ls -t logs/live-*.log 2>/dev/null | head -1); \
+	 if [ -n "$$LOG" ] && [ -f "$$LOG" ]; then tail -n $$N "$$LOG"; \
+	 elif [ -f logs/cron.log ]; then tail -n $$N logs/cron.log; \
+	 elif ./scripts/sysd.sh list-units swing-trader.service >/dev/null 2>&1; then \
+	   journalctl --user -u swing-trader -n $$N --no-pager 2>/dev/null \
+	     || echo "  (no runs yet)"; \
+	 else echo "  (no runs yet)"; fi
+
 logs:
-	@tail -f $$(ls -t logs/live-*.log 2>/dev/null | head -1)
+	@LOG=$$(ls -t logs/live-*.log 2>/dev/null | head -1); \
+	 if [ -n "$$LOG" ] && [ -f "$$LOG" ]; then echo "tailing $$LOG (ctrl-c to stop)"; tail -f "$$LOG"; \
+	 elif ./scripts/sysd.sh list-units swing-trader.service >/dev/null 2>&1; then \
+	   echo "no log file yet - following journald (ctrl-c to stop)"; \
+	   journalctl --user -u swing-trader -f; \
+	 else echo "no runs yet. after the first fire, this follows logs/live-<date>.log"; fi
 
 # ----------------------------------------------------------------- runs
 once:
