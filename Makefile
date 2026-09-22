@@ -86,51 +86,28 @@ endif
 
 # ----------------------------------------------------------- persistence
 persist:
-ifeq ($(UNAME),Linux)
-	@echo "installing systemd user units..."
-	@mkdir -p $(HOME)/.config/systemd/user
-	@sed -e 's|__USER__|$(USER_)|g' -e 's|__APP_DIR__|$(APP)|g' \
-	    deploy/swing-trader.service.in > $(HOME)/.config/systemd/user/swing-trader.service
-	@cp deploy/swing-trader.timer.in $(HOME)/.config/systemd/user/swing-trader.timer
-	@systemctl --user daemon-reload
-	@systemctl --user enable --now swing-trader.timer
-	@loginctl enable-linger $(USER_) 2>/dev/null || \
-	  echo "  NOTE: could not enable linger; the timer may pause when you log out."
-	@echo ""
-	@systemctl --user list-timers swing-trader.timer --no-pager || true
-	@echo "installed. 'make persist-status' to check, 'make unpersist' to remove."
-else
-	@echo "installing cron entries (macOS)..."
-	@( crontab -l 2>/dev/null | grep -v 'swing-trader/scripts/run-live.sh' ; \
-	   echo '# swing-trader — ET = local + 3h (Pacific). 09:05 / 09:47 / 15:52 ET' ; \
-	   echo ' 5 6 * * 1-5 $(APP)/scripts/run-live.sh' ; \
-	   echo '47 6 * * 1-5 $(APP)/scripts/run-live.sh' ; \
-	   echo '52 12 * * 1-5 $(APP)/scripts/run-live.sh' ) | crontab -
-	@crontab -l | grep -A3 swing-trader
-	@echo "installed. macOS may require Full Disk Access for cron."
-endif
+	@./scripts/install-schedule.sh
 
 unpersist:
-ifeq ($(UNAME),Linux)
-	@systemctl --user disable --now swing-trader.timer 2>/dev/null || true
-	@rm -f $(HOME)/.config/systemd/user/swing-trader.{service,timer}
-	@systemctl --user daemon-reload
-	@echo "schedule removed."
-else
-	@crontab -l 2>/dev/null | grep -v 'run-live.sh' \
-	  | grep -vE '^# swing-trader|^# *[0-9]{2}:[0-9]{2} PT' | crontab - || true
-	@echo "cron entries removed (comment lines too)."
-endif
+	@-systemctl --user disable --now swing-trader.timer 2>/dev/null
+	@-rm -f $(HOME)/.config/systemd/user/swing-trader.service \
+	        $(HOME)/.config/systemd/user/swing-trader.timer
+	@-systemctl --user daemon-reload 2>/dev/null
+	@-crontab -l 2>/dev/null | grep -v 'run-live.sh' \
+	  | grep -vE '^CRON_TZ=America/New_York|^# swing-trader|^# *[0-9]{2}:[0-9]{2} PT' \
+	  | crontab - 2>/dev/null
+	@echo "schedule removed (systemd timer and cron entries)."
 
 persist-status:
-ifeq ($(UNAME),Linux)
-	@systemctl --user list-timers swing-trader.timer --no-pager 2>/dev/null || echo "timer not installed"
-	@systemctl --user status swing-trader.service --no-pager -n 20 2>/dev/null || true
-else
-	@crontab -l 2>/dev/null | grep -B1 -A3 swing-trader || echo "no cron entries installed"
-	@echo "--- last cron run ---"
-	@tail -5 logs/cron.log 2>/dev/null || echo "(no cron log yet)"
-endif
+	@echo "--- systemd user timer ---"
+	@systemctl --user list-timers swing-trader.timer --no-pager 2>/dev/null \
+	  || echo "  not installed (or no systemd user session on this box)"
+	@echo "--- cron ---"
+	@crontab -l 2>/dev/null | grep -A4 'swing-trader' || echo "  no cron entries"
+	@echo "--- clocks ---"
+	@echo "  server $$(date '+%H:%M %Z')   US/Eastern $$(TZ=America/New_York date '+%H:%M %Z')"
+	@echo "--- last run ---"
+	@tail -4 logs/cron.log 2>/dev/null || tail -4 $$(ls -t logs/live-*.log 2>/dev/null | head -1) 2>/dev/null || echo "  (no runs yet)"
 
 # --------------------------------------------------------------- results
 results: status slippage

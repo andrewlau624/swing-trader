@@ -100,11 +100,48 @@ make persist        # systemd user timer on Linux, cron on macOS
 make persist-status # confirm it is actually scheduled
 ```
 
-On Linux this installs a `swing-trader.timer` firing at 09:05, 09:47 and
-15:52 **America/New_York**, declared in the unit, so the host's timezone does
-not matter. `loginctl enable-linger` is set so it keeps running after you log
-out of SSH — without that, systemd user units stop when your session ends,
-which is the usual reason a "running" bot quietly isn't.
+`make persist` picks whatever the box actually supports and says which it used.
+
+### "Failed to connect to bus: No medium found"
+
+This is the normal result of reaching the account with `su - ihearthim` from
+root: you get a shell, but no D-Bus session and no `XDG_RUNTIME_DIR`, so
+`systemctl --user` has nothing to talk to. It is not a permissions problem and
+nothing is broken.
+
+`make persist` detects it and **falls back to cron automatically** — cron needs
+no session, survives logout, and is entirely adequate here. If that is what you
+see, you are done.
+
+To use systemd instead (slightly cleaner: timezone lives in the unit, and it
+catches up a missed run after a reboot), as **root**:
+
+```bash
+loginctl enable-linger ihearthim
+```
+
+then reconnect as the user directly rather than via `su`:
+
+```bash
+ssh ihearthim@<host>
+cd ~/llm-trader && make persist
+```
+
+Lingering is what keeps a user timer alive after you disconnect. Without it a
+systemd user unit stops at logout, which is the usual reason a "running" bot
+quietly is not running.
+
+### Timezones
+
+The systemd unit declares `America/New_York`, so the host's timezone is
+irrelevant. The cron fallback sets `CRON_TZ=America/New_York`, which
+Debian/Ubuntu cron and cronie honour. Every run stamps ET in the log, so after
+the first fire confirm it landed when you expected:
+
+```bash
+make persist-status   # shows both clocks side by side
+make logs
+```
 
 ### How long a run takes
 
