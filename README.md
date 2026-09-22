@@ -86,13 +86,18 @@ The headline return is the least informative output. What decides the question:
 ## Quick start
 
 ```bash
-make setup && make env     # venv, deps, .env
-$EDITOR .env               # ALPACA_*, RESEND_API_KEY, NOTIFY_EMAIL
+make setup                 # venv + deps
+make doctor                # where .env is, what is set, what is missing
+make notify-setup EMAIL=you@example.com KEY=re_xxx
 make test                  # 36 tests
 make kill-old              # stop any previous llm-trader (dry run)
 make persist               # schedule it
 make results               # positions, P&L, measured slippage
 ```
+
+Updating an existing clone after a force-push: `make pull` (plain `git pull`
+reports "divergent branches" and stops — the old commits are gone, so there is
+nothing to merge).
 
 Replacing an existing `llm-trader` deployment on a server? See **DEPLOY.md**.
 

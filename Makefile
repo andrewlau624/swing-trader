@@ -13,11 +13,13 @@ UNAME := $(shell uname -s)
 
 .PHONY: help setup env test lint kill-old persist unpersist persist-status \
         results status positions slippage logs once dry digest notify-test \
-        scan backtest clean
+        notify-setup doctor pull scan backtest clean
 
 help:
 	@echo "swing-trader"
 	@echo ""
+	@echo "  doctor         where is .env, what is set, what is missing"
+	@echo "  pull           update from GitHub (survives a force-push)"
 	@echo "  setup          create venv and install dependencies"
 	@echo "  env            create .env from the example (then edit it)"
 	@echo "  test           run the test suite"
@@ -36,11 +38,26 @@ help:
 	@echo "  dry            run one cycle now, submit nothing"
 	@echo "  digest         email a status report right now"
 	@echo "  notify-test    prove the Resend key works"
+	@echo "  notify-setup   add email settings to .env (EMAIL=... KEY=... [FROM=...])"
 	@echo ""
 	@echo "  scan           what looks tradable today"
 	@echo "  backtest       full walk-forward (slow; writes out/)"
 
 # ---------------------------------------------------------------- setup
+doctor:
+	@$(PY) scripts/doctor.py 2>/dev/null || python3 scripts/doctor.py
+
+# `git pull` cannot reconcile after a force-push -- the old commits are simply
+# gone, so there is nothing to merge and git stops with "divergent branches".
+# Discard local history and take the remote exactly. .env, state/ and logs/ are
+# gitignored, so credentials and books survive this.
+pull:
+	@git fetch origin
+	@git reset --hard origin/main
+	@echo ""
+	@git log --oneline -1
+	@echo "(.env, state/ and logs/ are gitignored and were not touched)"
+
 setup:
 	@test -d .venv || python3 -m venv .venv
 	@$(PIP) install -q --upgrade pip
@@ -160,6 +177,24 @@ notify-test:
 	  print('enabled:',n.enabled,'|',n.reason or 'ready'); \
 	  print(n.send('[swing-trader] notification test', \
 	    '<p>If you are reading this, alerts work.</p>', dedupe_key=None))"
+
+notify-setup:
+ifndef EMAIL
+	@echo "usage: make notify-setup EMAIL=you@example.com KEY=re_xxx [FROM=alerts@yourdomain.com]"
+	@echo ""
+	@echo "FROM must be a Resend-VERIFIED domain. The default shared sender"
+	@echo "(onboarding@resend.dev) only delivers to the address that owns the"
+	@echo "Resend account, so a different destination needs your own domain."
+	@exit 1
+endif
+	@touch .env
+	@sed -i.bak -E '/^(RESEND_API_KEY|NOTIFY_EMAIL|NOTIFY_FROM)=/d' .env && rm -f .env.bak
+	@echo "RESEND_API_KEY=$(KEY)" >> .env
+	@echo "NOTIFY_EMAIL=$(EMAIL)" >> .env
+	@echo "NOTIFY_FROM=$(if $(FROM),$(FROM),onboarding@resend.dev)" >> .env
+	@chmod 600 .env
+	@echo "wrote email settings to .env (chmod 600)"
+	@$(MAKE) --no-print-directory notify-test
 
 scan:
 	@$(PY) scripts/scan.py --cohort highvol --top 15

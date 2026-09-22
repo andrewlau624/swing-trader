@@ -7,12 +7,42 @@ never touching the same Alpaca account.
 ## 1. Pull the new code
 
 ```bash
-cd ~/swing-trader        # wherever the old clone lives
-git fetch origin
-git reset --hard origin/main
+cd ~/llm-trader      # the clone directory; its name does not matter
+make pull            # or, before this Makefile exists:
+                     #   git fetch origin && git reset --hard origin/main
 ```
 
-Your `.env` is gitignored, so **Alpaca keys survive this**. That was the point.
+**`git pull` will not work here**, and the error is expected:
+
+```
+hint: You have divergent branches and need to specify how to reconcile them.
+fatal: Need to specify how to reconcile divergent branches.
+```
+
+main was force-pushed, so the old llm-trader commits no longer exist upstream.
+There is nothing to merge — `reset --hard` is the correct move, not a
+workaround. `make pull` does exactly that.
+
+If the remote still points at the old repo name, that is fine: GitHub redirects
+`andrewlau624/llm-trader` to `andrewlau624/swing-trader`, which is why the fetch
+worked. To stop relying on the redirect:
+
+```bash
+git remote set-url origin https://github.com/andrewlau624/swing-trader.git
+```
+
+### Where is .env?
+
+In the clone directory, next to the Makefile — `~/llm-trader/.env`. It is
+gitignored, so **`git reset --hard` does not touch it** and your Alpaca keys
+survive. To confirm what is set, masked:
+
+```bash
+make doctor
+```
+
+That prints the absolute path, which variables are present, whether Alpaca
+answers, whether email is configured, and whether anything is scheduled.
 
 ## 2. Stop the old trader
 
@@ -39,12 +69,29 @@ manage them under *its* rules, which is probably not what you want.
 ## 3. Set up
 
 ```bash
-make setup                 # venv + dependencies
-make env                   # only if .env is missing
-$EDITOR .env               # add RESEND_API_KEY, NOTIFY_EMAIL, NOTIFY_FROM
-make test                  # 36 tests, none touch the network
-make dry                   # one full cycle, submits nothing
+make setup     # venv + dependencies
+make doctor    # where .env is, what is set, what is missing
+make test      # 36 tests, none touch the network
+make dry       # one full cycle, submits nothing
 ```
+
+Add email alerts (appends to `.env`, then sends a test):
+
+```bash
+make notify-setup EMAIL=andrew.lau@berkeley.edu KEY=re_xxxxxxxx
+```
+
+**The sender matters.** `onboarding@resend.dev` is Resend's shared test address
+and only delivers to the mailbox that owns the Resend account. If alerts must
+reach a *different* address than the one you signed up with, verify a domain in
+Resend and pass it:
+
+```bash
+make notify-setup EMAIL=andrew.lau@berkeley.edu KEY=re_xxx FROM=alerts@yourdomain.com
+```
+
+`make notify-test` reports Resend's actual error if delivery is refused, so you
+will not be left guessing.
 
 ## 4. Start it
 
