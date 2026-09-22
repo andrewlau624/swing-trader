@@ -83,6 +83,9 @@ The headline return is the least informative output. What decides the question:
 5. **Bootstrap** (iid / block / stationary) → `P(mean trade ≤ 0)`, plus cost
    shocks at +0/2/4/6/10 bps and `months_to_significance()`.
 
+> **Picking this up again?** Read `NEXT.md` first — pending decisions and a
+> list of what has already been tested and ruled out.
+
 ## Quick start
 
 ```bash

@@ -13,7 +13,7 @@ UNAME := $(shell uname -s)
 
 .PHONY: help setup env test lint kill-old persist unpersist persist-status \
         results status positions slippage logs once dry digest notify-test \
-        notify-setup doctor pull scan backtest clean stop persist-stop linger _lastlog
+        notify-setup doctor pull scan backtest clean stop persist-stop linger _lastlog pending
 
 help:
 	@echo "swing-trader"
@@ -31,6 +31,7 @@ help:
 	@echo "  persist-status is it actually scheduled and running?"
 	@echo ""
 	@echo "  results        positions, P&L, measured slippage, recent activity"
+	@echo "  pending        decisions waiting on something (from NEXT.md)"
 	@echo "  positions      open positions straight from Alpaca"
 	@echo "  slippage       measured fill cost vs the 20bps the backtest assumed"
 	@echo "  logs           tail the run log"
@@ -129,10 +130,17 @@ persist-status:
 	@$(MAKE) --no-print-directory _lastlog N=6
 
 # --------------------------------------------------------------- results
-results: status slippage
+results: status slippage pending
 	@echo ""
 	@echo "=== recent activity ==="
 	@$(MAKE) --no-print-directory _lastlog N=30
+
+pending:
+	@if [ -f NEXT.md ]; then \
+	  echo ""; echo "=== pending (NEXT.md) ==="; \
+	  awk '/^## [0-9]/{f=1} /^---$$/{f=0} f' NEXT.md | grep -E '^## |^\*\*Status|^\*\*Trigger' \
+	    | sed 's/\*\*//g;s/^/  /'; \
+	fi
 
 status:
 	@$(PY) scripts/live.py --status
