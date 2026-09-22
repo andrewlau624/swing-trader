@@ -212,8 +212,17 @@ def refresh_bars(symbols: list[str], end: str | dt.date, lookback_days: int = 10
     feed_enum = DataFeed.IEX if feed == "iex" else DataFeed.SIP
     out: dict[str, pd.DataFrame] = {}
 
+    import time as _time
+    t0 = _time.time()
+    nbatch = (len(symbols) + BATCH - 1) // BATCH
     for i in range(0, len(symbols), BATCH):
         chunk = symbols[i : i + BATCH]
+        if verbose and (i // BATCH) % 10 == 0 and i:
+            done = i / len(symbols)
+            el = _time.time() - t0
+            eta = el / done - el if done > 0 else 0
+            print(f"    refresh {i}/{len(symbols)} ({100*done:.0f}%) "
+                  f"{el:.0f}s elapsed, ~{eta:.0f}s left", flush=True)
         try:
             df = data.get_stock_bars(StockBarsRequest(
                 symbol_or_symbols=chunk, timeframe=TimeFrame.Day,

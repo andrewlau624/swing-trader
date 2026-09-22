@@ -125,14 +125,26 @@ class Executor:
             fh.write("\n".join(self.lines) + "\n")
 
     # ----------------------------------------------------------------- data
-    def load_market(self) -> tuple[dict, pd.Timestamp]:
-        """Universe bars, refreshed at the tail only."""
+    def load_market(self, refresh: bool = True) -> tuple[dict, pd.Timestamp]:
+        """Universe bars, refreshed at the tail only.
+
+        `refresh` is skipped while the market is open. Those runs cannot submit
+        market-on-open orders anyway -- they reconcile fills, arm stops and
+        measure slippage, all of which read broker state, not bars. And the
+        last COMPLETE daily bar does not change intraday, so refreshing would
+        buy nothing for 1-3 minutes of API calls against 14,760 symbols.
+        """
         u = all_assets()
         today = dt.date.today()
-        self.log(f"refreshing recent bars for {len(u.symbols)} symbols...")
-        refresh_bars(u.symbols + ["SPY", "SGOV"], today,
-                     lookback_days=15, feed=self.cfg.data.feed,
-                     adjustment=self.cfg.data.adjustment)
+        if refresh:
+            self.log(f"refreshing recent bars for {len(u.symbols)} symbols "
+                     f"(1-3 min; only the decision run pays this)...")
+            refresh_bars(u.symbols + ["SPY", "SGOV"], today,
+                         lookback_days=15, feed=self.cfg.data.feed,
+                         adjustment=self.cfg.data.adjustment, verbose=True)
+        else:
+            self.log("market is open - using cached bars "
+                     "(the last complete bar does not change intraday)")
         bars = fetch_bars(u.symbols + ["SPY", "SGOV"], self.cfg.data.start, today,
                           feed=self.cfg.data.feed,
                           adjustment=self.cfg.data.adjustment, verbose=False)
@@ -197,7 +209,9 @@ class Executor:
         self.log(f"=== swing-trader live run | equity ${equity:,.2f} | "
                  f"market {'OPEN' if clock.is_open else 'closed'} ===")
 
-        bars, asof = self.load_market()
+        # the decision run happens while the market is shut; the other two
+        # only manage what is already open, so they skip the slow refresh
+        bars, asof = self.load_market(refresh=not clock.is_open)
         today = dt.date.today().isoformat()
 
         rev_path = self.state_dir / "book-reversion.json"

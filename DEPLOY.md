@@ -106,6 +106,22 @@ not matter. `loginctl enable-linger` is set so it keeps running after you log
 out of SSH — without that, systemd user units stop when your session ends,
 which is the usual reason a "running" bot quietly isn't.
 
+### How long a run takes
+
+| run | market | what it does | time |
+|---|---|---|---|
+| 09:05 ET | closed | refreshes ~14,760 symbols, decides, submits | **1–3 min** |
+| 09:47 ET | open | reconciles fills, arms stops, measures slippage | ~10 s |
+| 15:52 ET | open | pre-close sweep | ~10 s |
+
+Only the decision run pays for the data refresh, and it prints progress with an
+ETA. If `make dry` looks frozen on `refreshing recent bars...`, it is working —
+give it a few minutes, or watch the percentage tick up.
+
+**You do not need to wait for it.** `make persist` only installs the timer; it
+runs no cycle. Ctrl+C a long `make dry` and run `make persist` straight away,
+or use a second SSH session.
+
 ## 5. Watch it
 
 ```bash

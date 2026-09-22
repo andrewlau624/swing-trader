@@ -117,9 +117,9 @@ ifeq ($(UNAME),Linux)
 	@systemctl --user daemon-reload
 	@echo "schedule removed."
 else
-	@crontab -l 2>/dev/null | grep -v 'swing-trader/scripts/run-live.sh' | \
-	  grep -v '^# swing-trader' | crontab - || true
-	@echo "cron entries removed."
+	@crontab -l 2>/dev/null | grep -v 'run-live.sh' \
+	  | grep -vE '^# swing-trader|^# *[0-9]{2}:[0-9]{2} PT' | crontab - || true
+	@echo "cron entries removed (comment lines too)."
 endif
 
 persist-status:

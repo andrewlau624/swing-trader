@@ -147,3 +147,30 @@ def test_slippage_verdict_flips_at_the_backtest_assumption(tmp_path):
     assert "holding up" in seen["html"]
     n.activity(slippage={"n": 9, "mean": 41.0, "median": 41.0, "p90": 60.0}, **common)
     assert "WORSE" in seen["html"]
+
+
+def test_refresh_is_skipped_while_the_market_is_open(monkeypatch, tmp_path):
+    """The two management runs must not pay for a 14,760-symbol refresh.
+
+    They cannot submit market-on-open orders anyway, and the last COMPLETE
+    daily bar does not change intraday, so the refresh buys nothing.
+    """
+    import swingtrader.live.executor as E
+    calls = []
+    monkeypatch.setattr(E, "refresh_bars", lambda *a, **k: calls.append(1))
+    monkeypatch.setattr(E, "fetch_bars", lambda *a, **k: {})
+    monkeypatch.setattr(E, "all_assets",
+                        lambda: type("U", (), {"symbols": ["AAA"]})())
+
+    class Ex(E.Executor):
+        def __init__(self):
+            self.cfg = __import__("swingtrader.config", fromlist=["Config"]).Config.load()
+            self.log_dir = tmp_path; self.state_dir = tmp_path
+            self.lines = []; self.actions = []; self.warnings = []
+
+    ex = Ex()
+    try:
+        ex.load_market(refresh=False)
+    except ValueError:
+        pass                      # empty bar dict is fine; we only count calls
+    assert calls == [], "a management run triggered the slow refresh"
