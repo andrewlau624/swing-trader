@@ -49,9 +49,15 @@ SCHWAB_CALLBACK_URL=https://127.0.0.1
 ## 4. Every 7 days: `make schwab-login`
 
 Schwab refresh tokens die after 7 days, and nothing can renew them
-automatically. From day 6 every live run emails a warning. If the token expires,
-live runs fail loudly and place nothing, while paper keeps running. Put a weekly
-reminder in your calendar.
+automatically. `schwab-reminder.timer` (installed by `make persist`, every 2
+hours, weekends included) emails you **2 days before, 1 day before, and under 6
+hours before** it expires, then once when it has expired. Each `make
+schwab-login` emails a confirmation with the exact expiry time and restarts the
+sequence. `make schwab-reminder` shows the current status. Log in during the
+day, so the expiry and its last reminder land while you're awake.
+
+If the token does expire, live runs fail loudly and place nothing, while paper
+keeps running and the 15:40 scan falls back to Alpaca data.
 
 ## What is different from Alpaca
 
