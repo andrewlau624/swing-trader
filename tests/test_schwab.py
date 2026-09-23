@@ -14,6 +14,13 @@ from swingtrader.daily.brokers import SchwabAdapter, schwab_token_age_s
 ET = ZoneInfo("America/New_York")
 
 
+@pytest.fixture(autouse=True)
+def _isolate_from_real_env(monkeypatch):
+    # get_env() back-fills os.environ from the real .env with setdefault, so an
+    # empty value here keeps a developer's real account number out of the tests
+    monkeypatch.setenv("SCHWAB_ACCOUNT_NUMBER", "")
+
+
 class Resp:
     def __init__(self, data=None, status=200, headers=None):
         self._d, self.status_code, self.headers, self.text = data, status, headers or {}, ""
