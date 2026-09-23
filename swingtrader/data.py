@@ -194,8 +194,12 @@ def to_panel(bars: dict[str, pd.DataFrame], field: str = "close") -> pd.DataFram
 
 def refresh_bars(symbols: list[str], end: str | dt.date, lookback_days: int = 10,
                  feed: str = "iex", adjustment: str = "all",
-                 verbose: bool = False) -> dict[str, pd.DataFrame]:
+                 verbose: bool = False) -> set[str]:
     """Append recent bars to the cache instead of refetching all history.
+
+    Returns the symbols refreshed, not their frames: holding every merged
+    full-history frame here, then loading them all again in fetch_bars, doubled
+    peak memory and got the live run OOM-killed on a small server.
 
     A live daily run needs bars through today, which the coverage check treats
     as a cache miss -- refetching ~6 minutes of history every day. This pulls
@@ -210,7 +214,7 @@ def refresh_bars(symbols: list[str], end: str | dt.date, lookback_days: int = 10
     s_ts = e_ts - pd.Timedelta(days=lookback_days)
     data, _ = _clients()
     feed_enum = DataFeed.IEX if feed == "iex" else DataFeed.SIP
-    out: dict[str, pd.DataFrame] = {}
+    out: set[str] = set()
 
     import time as _time
     t0 = _time.time()
@@ -253,5 +257,5 @@ def refresh_bars(symbols: list[str], end: str | dt.date, lookback_days: int = 10
             merged.attrs["adjustment"] = adjustment
             merged.attrs["feed"] = feed
             merged.to_parquet(_cache_path(sym))
-            out[sym] = merged
+            out.add(sym)
     return out

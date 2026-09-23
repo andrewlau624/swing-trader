@@ -145,7 +145,13 @@ class Executor:
         else:
             self.log("market is open - using cached bars "
                      "(the last complete bar does not change intraday)")
-        bars = fetch_bars(u.symbols + ["SPY", "SGOV"], self.cfg.data.start, today,
+        # Decisions read one formation window (~1.5x formation_days calendar
+        # days) plus a 20-bar z-score; nothing needs history back to 2021.
+        # Loading all of it for ~14k symbols is what exhausted server memory.
+        # ~400 calendar days keeps well over the 150-bar filter below.
+        days = max(400, int(self.cfg.walkforward.formation_days * 1.5) + 60)
+        start = max(pd.Timestamp(self.cfg.data.start), pd.Timestamp(today) - pd.Timedelta(days=days))
+        bars = fetch_bars(u.symbols + ["SPY", "SGOV"], start, today,
                           feed=self.cfg.data.feed,
                           adjustment=self.cfg.data.adjustment, verbose=False)
         bars = {s: d for s, d in bars.items() if len(d) > 150}
