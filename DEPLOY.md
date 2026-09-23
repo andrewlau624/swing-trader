@@ -176,6 +176,33 @@ anything warns. Quiet runs send nothing — with ~40 trades a year and 1.29 mean
 concurrent positions, most days are quiet, and that is normal rather than a
 malfunction.
 
+## The daily book (added 2026-09-22)
+
+A second, independent book runs on the same paper account: `scripts/daily.py`,
+its own timer (`daily-trader.timer`), its own state (`state/book-daily.json`),
+and a **$3,000 virtual starting equity** that changes only through its own
+fills. See RESULTS.md addendum 6 for the research, and NEXT.md item 4 for the rules.
+
+To install it on a box that already runs the swing timer:
+
+```bash
+make pull
+make test            # 55 tests, no network
+make daily-dry       # runs the current phase, submits nothing, saves nothing
+make persist         # re-installs BOTH timers (swing + daily)
+make persist-status  # should list swing-trader.timer AND daily-trader.timer
+```
+
+Watch it with `make daily-status` (equity, positions per leg, slippage) and
+`make daily-logs`. The first real activity is the 15:40 ET run: it buys
+at the close auction. The 09:15 run next morning sells those at the open auction.
+
+The two books never share a symbol. Alpaca nets positions per symbol, so a
+shared name would corrupt both books' accounting. The daily book skips
+anything the swing book holds or has pending. The swing executor ignores
+anything listed in the daily book: it won't adopt it, stop it, or trade it.
+Daily positions carry no stop by design; `make positions` labels them.
+
 ## Stopping it
 
 ```bash

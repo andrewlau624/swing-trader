@@ -1,0 +1,26 @@
+# Daily book, US/Eastern regardless of host timezone. The phase is chosen
+# from the ET clock inside scripts/daily.py.
+#   09:15        open: sell night leg at the open auction, rebalance IBS
+#   09:50        reconcile opening fills
+#   10:01-15:31  intraday leg decision every 30 min (shadow below $25k)
+#   15:40        close: scan losers, buy at the close auction (cutoff 15:50)
+#   16:10        reconcile closing fills
+[Unit]
+Description=swing-trader daily book schedule
+
+[Timer]
+OnCalendar=Mon..Fri *-*-* 09:15:00 America/New_York
+OnCalendar=Mon..Fri *-*-* 09:50:00 America/New_York
+OnCalendar=Mon..Fri *-*-* 10..15:01:00 America/New_York
+OnCalendar=Mon..Fri *-*-* 10..15:31:00 America/New_York
+OnCalendar=Mon..Fri *-*-* 15:40:00 America/New_York
+OnCalendar=Mon..Fri *-*-* 16:10:00 America/New_York
+# Persistent=false on purpose: a run replayed hours late (after downtime)
+# must not fire a stale phase. phase_for() also refuses the close window
+# after 15:50, but there is no reason to replay these at all.
+Persistent=false
+AccuracySec=15s
+Unit=daily-trader.service
+
+[Install]
+WantedBy=timers.target

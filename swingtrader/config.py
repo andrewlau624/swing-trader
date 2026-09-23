@@ -106,6 +106,37 @@ class PortfolioCfg:
 
 
 @dataclass
+class DailyCfg:
+    """The daily-cadence book (RESULTS.md addendum 6). Runs beside the swing
+    book on the same account but owns disjoint symbols and tracks its own
+    virtual equity, so the experiment compounds from its own fills only."""
+    enabled: bool = True
+    start_equity: float = 3_000.0
+    # Day-trading leg (QQQ intraday) is SHADOW until book equity reaches this.
+    # 25k is the FINRA pattern-day-trader floor for a margin account.
+    daytrade_min_equity: float = 25_000.0
+    # leg 1: IBS on tech ETFs. Signal on the last complete bar, enter at the
+    # next open, re-evaluated every morning.
+    ibs_symbols: list = field(default_factory=lambda: ["QQQ", "SMH", "XLK"])
+    ibs_max: float = 0.2
+    ibs_weight: float = 0.5          # fraction of book equity for this leg
+    # leg 2: overnight loser bounce. Scan ~15:40 ET, buy at the close auction,
+    # sell at the next open auction.
+    night_weight: float = 0.5
+    night_max_name_pct: float = 0.10 # of the leg, per name
+    night_day_ret_max: float = -0.08
+    night_ibs_max: float = 0.10
+    night_price_min: float = 5.0
+    night_price_max: float = 2_000.0
+    night_adv_min: float = 10_000_000.0   # SIP 20-day dollar volume
+    # leg 3: QQQ noise-area intraday momentum (shadow until the gate trips)
+    noise_symbol: str = "QQQ"
+    noise_lookback: int = 14
+    noise_target_vol: float = 0.02
+    noise_max_lev: float = 3.5       # 4x intraday limit minus the IBS leg
+
+
+@dataclass
 class Config:
     data: DataCfg = field(default_factory=DataCfg)
     walkforward: WalkForwardCfg = field(default_factory=WalkForwardCfg)
@@ -113,6 +144,7 @@ class Config:
     cohorts: dict[str, CohortCfg] = field(default_factory=dict)
     strategy: StrategyCfg = field(default_factory=StrategyCfg)
     portfolio: PortfolioCfg = field(default_factory=PortfolioCfg)
+    daily: DailyCfg = field(default_factory=DailyCfg)
 
     @classmethod
     def load(cls, path: Path | None = None, **overrides: Any) -> "Config":
@@ -146,6 +178,7 @@ class Config:
             },
             strategy=build(StrategyCfg, raw.get("strategy", {})),
             portfolio=build(PortfolioCfg, raw.get("portfolio", {})),
+            daily=build(DailyCfg, raw.get("daily", {})),
         )
 
         # dotted overrides from argparse: strategy__z_entry=-2.5

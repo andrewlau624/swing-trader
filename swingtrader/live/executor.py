@@ -29,6 +29,7 @@ from ..data import fetch_bars, refresh_bars
 from ..metrics import zscore
 from ..scan import scan_window
 from ..universe import all_assets
+from ..daily.book import owned_by_daily
 from .broker import PaperBroker
 from .lock import AccountLock, account_fingerprint
 from .notify import Notifier
@@ -89,6 +90,7 @@ class Executor:
         self.warnings: list[str] = []     # anything a human must see
         self.always_notify = always_notify
         self.notifier = Notifier(self.state_dir)
+        self.daily_owned: set[str] = set()
 
     # ------------------------------------------------------------------ util
     def log(self, msg: str) -> None:
@@ -186,7 +188,9 @@ class Executor:
                     exits.append((sym, "reversion"))
 
         exiting = {s for s, _ in exits}
-        busy = set(state.positions) | set(state.pending)
+        # the daily book shares this account; Alpaca nets per symbol, so a
+        # name it holds or has pending is off-limits here
+        busy = set(state.positions) | set(state.pending) | self.daily_owned
         room = self.cfg.portfolio.max_positions - (len(busy) - len(exiting))
         for sym in watch:
             if room <= 0:
@@ -231,7 +235,16 @@ class Executor:
         # reconciled away: an OPG order sits unfilled for hours, and treating
         # that as "position gone" would re-submit it under the next day's id
         # and open the position twice.
-        held = self.broker.positions()
+        # Symbols owned by the daily book (state/book-daily.json) are
+        # invisible to this book: not adopted, not stopped, not traded.
+        # Without this the adoption loop below would take over its overnight
+        # positions and arm -10% stops on them.
+        self.daily_owned = owned_by_daily(self.state_dir)
+        held = {s: p for s, p in self.broker.positions().items()
+                if s not in self.daily_owned}
+        if self.daily_owned:
+            self.log(f"  ignoring {len(self.daily_owned)} daily-book symbol(s): "
+                     f"{sorted(self.daily_owned)}")
         live_coids = {o.client_order_id for o in self.broker.open_orders()
                       if o.client_order_id}
 

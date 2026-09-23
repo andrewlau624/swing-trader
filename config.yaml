@@ -57,3 +57,26 @@ portfolio:
   position_pct: null     # null -> 1/max_positions (12.5%). 0.25 doubles exposure.
   max_gross_pct: 100.0   # hard cap on total exposure; refuses, never levers
   cash_yield_annual: 0.0 # flat fallback; prefer --cash BIL for the real rate path
+
+# Daily-cadence book (RESULTS.md addendum 6). Separate executor
+# (scripts/daily.py), separate state (state/book-daily.json), virtual equity
+# that compounds from its own fills only. Never trades a symbol the swing book
+# holds, and vice versa.
+daily:
+  enabled: true
+  start_equity: 3000.0
+  daytrade_min_equity: 25000.0   # QQQ intraday leg is SHADOW below this (PDT floor)
+  ibs_symbols: ["QQQ", "SMH", "XLK"]
+  ibs_max: 0.2
+  ibs_weight: 0.5                # 0.5 + 0.5 = 1x, no margin. 1.0 + 1.0 = 2x overnight:
+  night_weight: 0.5              #   backtest 21.8% CAGR/-11% DD -> 44.5%/-22%
+  night_max_name_pct: 0.10
+  night_day_ret_max: -0.08
+  night_ibs_max: 0.10
+  night_price_min: 5.0
+  night_price_max: 2000.0
+  night_adv_min: 10000000.0
+  noise_symbol: QQQ
+  noise_lookback: 14
+  noise_target_vol: 0.02
+  noise_max_lev: 3.5

@@ -1,0 +1,13 @@
+# Installed by `make persist`. The daily-cadence book (scripts/daily.py).
+[Unit]
+Description=swing-trader daily book (one phase)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+# No User= here: user unit (see swing-trader.service.in for the 216/GROUP story)
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=-__APP_DIR__/.env
+ExecStart=__APP_DIR__/.venv/bin/python -u scripts/daily.py
+TimeoutStartSec=900

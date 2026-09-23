@@ -113,13 +113,32 @@ but "should" is not "did".
 
 ---
 
-## 4. Daily-cadence book — NEW, see RESULTS.md addendum 6
+## 4. Daily-cadence book — RUNNING (paper), $3k virtual equity
 
-Three near-uncorrelated legs. Combo 38% CAGR / Sharpe 1.58 / −18% DD,
-positive every year 2021–26, trades daily. Suggested paper order, most
-robust first:
-1. IBS tech ETFs at next open (simplest, no intraday infra needed)
-2. QQQ noise-area intraday (needs a 30-minute intraday loop)
-3. Overnight loser bounce (15:50 scan → MOC, MOO exit): regime-dependent,
-   paper-trade it the longest before trusting it
-Each needs its own executor. None of this touches the current swing config.
+**Status:** built 2026-09-22 (`scripts/daily.py`, `swingtrader/daily/`),
+research in RESULTS.md addendum 6.
+
+| leg | what | live? |
+|---|---|---|
+| IBS tech ETFs | QQQ/SMH/XLK, IBS<0.2 on the last bar -> buy at the open (fractional DAY order), hold while it stays <0.2 | **live** |
+| overnight losers | 15:40 ET scan: down >= 8%, within 10% of the day's low -> buy at the close auction, sell at the open auction | **live** |
+| QQQ intraday momentum | noise-area breakout, 30-min decisions, flat at the close | **shadow** until book equity >= `daily.daytrade_min_equity` ($25k) |
+
+Weights 0.5 / 0.5 of book equity: 1x, no margin. Backtest (honest, 15:50
+signal, 7.5bp/side): 21.8% CAGR, Sharpe 1.30, maxDD -11%. Both at 1.0 is
+44.5% / -22% and needs 2x overnight margin: one line each in config.yaml.
+
+**Why $25k for the switch:** FINRA's pattern-day-trader rule. Below $25k, a
+margin account may make at most 3 day trades in 5 days. The intraday leg makes
+one to two a day. The shadow ledger (`make daily-status`) accumulates
+out-of-sample evidence for it until then.
+
+**What to watch:**
+- night-leg slippage vs the 15:40 reference price (`make daily-status`).
+  Research assumed 7.5bp/side. The edge is gone around 15bp.
+- whether 2021-23-style weakness shows up: that leg's return was almost all 2024+.
+- CLS/OPG rejections in the email. Paper has not yet been proven to accept
+  auction orders from this code; the first 15:40 run is the test.
+
+**Not modelled:** at $3k, whole-share rounding on auction orders ($150 per
+name), and names above ~$150 buy one share or none.

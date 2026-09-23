@@ -21,8 +21,12 @@ install_systemd() {
   sed -e "s|__APP_DIR__|$APP|g" \
       "$APP/deploy/swing-trader.service.in" > "$HOME/.config/systemd/user/swing-trader.service"
   cp "$APP/deploy/swing-trader.timer.in" "$HOME/.config/systemd/user/swing-trader.timer"
+  sed -e "s|__APP_DIR__|$APP|g" \
+      "$APP/deploy/daily-trader.service.in" > "$HOME/.config/systemd/user/daily-trader.service"
+  cp "$APP/deploy/daily-trader.timer.in" "$HOME/.config/systemd/user/daily-trader.timer"
   "$APP/scripts/sysd.sh" daemon-reload
   "$APP/scripts/sysd.sh" enable --now swing-trader.timer
+  "$APP/scripts/sysd.sh" enable --now daily-trader.timer
   if ! loginctl show-user "$USER_" -p Linger 2>/dev/null | grep -q "Linger=yes"; then
     echo ""
     echo "  ############################################################"
@@ -36,13 +40,13 @@ install_systemd() {
     echo "  ############################################################"
   fi
   echo ""
-  "$APP/scripts/sysd.sh" list-timers swing-trader.timer --no-pager || true
+  "$APP/scripts/sysd.sh" list-timers swing-trader.timer daily-trader.timer --no-pager || true
 }
 
 install_cron() {
   echo "installing cron entries..."
   local tmp; tmp="$(mktemp)"
-  crontab -l 2>/dev/null | grep -v 'run-live.sh' \
+  crontab -l 2>/dev/null | grep -v 'run-live.sh' | grep -v 'run-daily.sh' \
     | grep -vE '^CRON_TZ=America/New_York|^# swing-trader' > "$tmp" || true
 
   if [[ "$(uname -s)" == "Darwin" ]]; then
@@ -62,6 +66,10 @@ notes = {(9,5):"decide + submit market-on-open",
 for (h, m), note in notes.items():
     t = dt.datetime.combine(today, dt.time(h, m), tzinfo=et).astimezone(local)
     print(f"{t.minute:2d} {t.hour} * * 1-5 {app}/scripts/run-live.sh  # {h:02d}:{m:02d} ET - {note}")
+daily = [(9,15),(9,50)] + [(h,m) for h in range(10,16) for m in (1,31)] + [(15,40),(16,10)]
+for (h, m) in daily:
+    t = dt.datetime.combine(today, dt.time(h, m), tzinfo=et).astimezone(local)
+    print(f"{t.minute:2d} {t.hour} * * 1-5 {app}/scripts/run-daily.sh  # {h:02d}:{m:02d} ET - daily book")
 PYEOF
   else
     echo "# swing-trader - times below are US/Eastern via CRON_TZ" >> "$tmp"
@@ -70,12 +78,17 @@ PYEOF
       echo " 5 9 * * 1-5 $APP/scripts/run-live.sh   # decide + submit market-on-open"
       echo "47 9 * * 1-5 $APP/scripts/run-live.sh   # reconcile fills, arm stops"
       echo "52 15 * * 1-5 $APP/scripts/run-live.sh  # pre-close sweep"
+      echo "15 9 * * 1-5 $APP/scripts/run-daily.sh  # daily book: open auction"
+      echo "50 9 * * 1-5 $APP/scripts/run-daily.sh  # daily book: reconcile"
+      echo "1,31 10-15 * * 1-5 $APP/scripts/run-daily.sh  # daily book: intraday leg"
+      echo "40 15 * * 1-5 $APP/scripts/run-daily.sh  # daily book: close auction (cutoff 15:50)"
+      echo "10 16 * * 1-5 $APP/scripts/run-daily.sh  # daily book: reconcile closing fills"
     } >> "$tmp"
   fi
 
   crontab "$tmp" && rm -f "$tmp"
   echo ""
-  crontab -l | grep -A4 'swing-trader'
+  crontab -l | grep -A12 'swing-trader'
   echo ""
   echo "  server timezone : $(date +%Z) ($(date '+%H:%M'))"
   echo "  US/Eastern now  : $(TZ=America/New_York date '+%H:%M %Z')"

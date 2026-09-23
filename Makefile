@@ -12,6 +12,7 @@ UNAME := $(shell uname -s)
 .DEFAULT_GOAL := help
 
 .PHONY: help setup env test lint kill-old persist unpersist persist-status \
+        daily-status daily-dry daily-once daily-logs \
         results status positions slippage logs once dry digest notify-test \
         notify-setup doctor pull scan backtest clean stop persist-stop linger _lastlog pending
 
@@ -41,6 +42,11 @@ help:
 	@echo "  digest         email a status report right now"
 	@echo "  notify-test    prove the Resend key works"
 	@echo "  notify-setup   add email settings to .env (EMAIL=... KEY=... [FROM=...])"
+	@echo ""
+	@echo "  daily-status   daily book: equity, positions, legs, slippage"
+	@echo "  daily-dry      run the daily book's current phase, submit nothing"
+	@echo "  daily-once     run the daily book's current phase now (paper orders)"
+	@echo "  daily-logs     tail the daily book log"
 	@echo ""
 	@echo "  scan           what looks tradable today"
 	@echo "  backtest       full walk-forward (slow; writes out/)"
@@ -106,18 +112,21 @@ stop persist-stop: unpersist
 
 unpersist:
 	@-./scripts/sysd.sh disable --now swing-trader.timer 2>/dev/null
+	@-./scripts/sysd.sh disable --now daily-trader.timer 2>/dev/null
 	@-rm -f $(HOME)/.config/systemd/user/swing-trader.service \
-	        $(HOME)/.config/systemd/user/swing-trader.timer
+	        $(HOME)/.config/systemd/user/swing-trader.timer \
+	        $(HOME)/.config/systemd/user/daily-trader.service \
+	        $(HOME)/.config/systemd/user/daily-trader.timer
 	@-./scripts/sysd.sh daemon-reload 2>/dev/null
-	@-crontab -l 2>/dev/null | grep -v 'run-live.sh' \
+	@-crontab -l 2>/dev/null | grep -v 'run-live.sh' | grep -v 'run-daily.sh' \
 	  | grep -vE '^CRON_TZ=America/New_York|^# swing-trader|^# *[0-9]{2}:[0-9]{2} PT' \
 	  | crontab - 2>/dev/null
 	@echo "schedule removed (systemd timer and cron entries)."
 
 persist-status:
 	@echo "--- systemd user timer ---"
-	@./scripts/sysd.sh list-timers swing-trader.timer --no-pager 2>/dev/null \
-	  | grep -E "swing-trader|NEXT" || echo "  not installed"
+	@./scripts/sysd.sh list-timers swing-trader.timer daily-trader.timer --no-pager 2>/dev/null \
+	  | grep -E "swing-trader|daily-trader|NEXT" || echo "  not installed"
 	@printf "  lingering: "; \
 	  if loginctl show-user $$(whoami) -p Linger 2>/dev/null | grep -q "Linger=yes"; \
 	  then echo "ON (survives logout)"; \
@@ -127,15 +136,20 @@ persist-status:
 	  if [ -n "$$R" ] && [ "$$R" != "success" ]; then \
 	    echo "  last timer run: $$R at $${W:-?}  <-- FAILED (stale if before your last fix)"; \
 	  elif [ -n "$$R" ]; then echo "  last timer run: success at $${W:-?}"; fi
+	@R=$$(./scripts/sysd.sh show daily-trader.service -p Result --value 2>/dev/null); \
+	  W=$$(./scripts/sysd.sh show daily-trader.service -p ExecMainExitTimestamp --value 2>/dev/null); \
+	  if [ -n "$$R" ] && [ "$$R" != "success" ]; then \
+	    echo "  daily book last run: $$R at $${W:-?}  <-- FAILED"; \
+	  elif [ -n "$$R" ]; then echo "  daily book last run: success at $${W:-?}"; fi
 	@echo "--- cron ---"
-	@crontab -l 2>/dev/null | grep -A4 'swing-trader' || echo "  no cron entries"
+	@crontab -l 2>/dev/null | grep -A12 'swing-trader' || echo "  no cron entries"
 	@echo "--- clocks ---"
 	@echo "  server $$(date '+%H:%M %Z')   US/Eastern $$(TZ=America/New_York date '+%H:%M %Z')"
 	@echo "--- last run (log file: includes manual/dry runs) ---"
 	@$(MAKE) --no-print-directory _lastlog N=6
 
 # --------------------------------------------------------------- results
-results: status slippage pending
+results: status daily-status slippage pending
 	@echo ""
 	@echo "=== recent activity ==="
 	@$(MAKE) --no-print-directory _lastlog N=30
@@ -151,12 +165,13 @@ status:
 	@$(PY) scripts/live.py --status
 
 positions:
-	@$(PY) -c "from swingtrader.live.broker import PaperBroker; b=PaperBroker(); \
+	@$(PY) -c "from swingtrader.live.broker import PaperBroker; from swingtrader.daily.book import owned_by_daily; \
+	  from swingtrader.config import ROOT; d=owned_by_daily(ROOT/'state'); b=PaperBroker(); \
 	  p=b.positions(); s=b.stops_by_symbol(); \
 	  print(f'{len(p)} open position(s)'); \
 	  [print(f\"  {k:6} {float(v.qty):7.0f} sh @ {float(v.avg_entry_price):8.2f}  \
 P&L {float(v.unrealized_pl):+9.2f} ({float(v.unrealized_plpc)*100:+5.1f}%)  \
-stop {'YES' if k in s else 'MISSING'}\") for k,v in p.items()]"
+stop {'daily book (no stop by design)' if k in d else 'YES' if k in s else 'MISSING'}\") for k,v in p.items()]"
 
 slippage:
 	@$(PY) -c "import json,numpy as np,pathlib; \
@@ -187,6 +202,23 @@ logs:
 	   echo "no log file yet - following journald (ctrl-c to stop)"; \
 	   journalctl --user -u swing-trader -f; \
 	 else echo "no runs yet. after the first fire, this follows logs/live-<date>.log"; fi
+
+# ------------------------------------------------------------ daily book
+daily-status:
+	@$(PY) scripts/daily.py --status
+
+daily-dry:
+	@$(PY) scripts/daily.py --dry-run
+
+daily-once:
+	@$(PY) scripts/daily.py
+
+daily-logs:
+	@LOG=$$(ls -t logs/daily-2*.log 2>/dev/null | head -1); \
+	 if [ -n "$$LOG" ] && [ -f "$$LOG" ]; then echo "tailing $$LOG (ctrl-c to stop)"; tail -f "$$LOG"; \
+	 elif ./scripts/sysd.sh list-units daily-trader.service >/dev/null 2>&1; then \
+	   journalctl --user -u daily-trader -f; \
+	 else echo "no daily-book runs yet"; fi
 
 # ----------------------------------------------------------------- runs
 once:
