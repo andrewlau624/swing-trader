@@ -256,10 +256,11 @@ def test_reminder_stages_fire_once_each(tmp_path):
     p.write_text(json.dumps({"creation_timestamp": created.timestamp(), "token": {}}))
     n = FakeNotifier()
     at = lambda d, h: dt.datetime(2026, 9, d, h, 0, tzinfo=ET)
-    assert "days left" in check(n, at(26, 12), p) and n.sent == []       # 4 days out: quiet
-    check(n, at(28, 15), p); check(n, at(28, 17), p)                     # 47h left, twice
-    check(n, at(29, 15), p)                                              # 23h left
-    check(n, at(30, 9), p)                                               # 5h left: day of
+    ok = lambda: None
+    assert "days left" in check(n, at(26, 12), p, probe_fn=ok) and n.sent == []       # 4 days out: quiet
+    check(n, at(28, 15), p, probe_fn=ok); check(n, at(28, 17), p, probe_fn=ok)                     # 47h left, twice
+    check(n, at(29, 15), p, probe_fn=ok)                                              # 23h left
+    check(n, at(30, 9), p, probe_fn=ok)                                               # 5h left: day of
     check(n, at(30, 15), p); check(n, at(30, 17), p)                     # expired, twice
     assert [s.split("login ")[1].split(" -")[0] for s in n.sent] == [
         "expires in 2 days", "expires TOMORROW", "expires in a few HOURS", "has EXPIRED"]
@@ -271,9 +272,9 @@ def test_reminder_after_downtime_sends_only_the_most_urgent(tmp_path):
     p = tmp_path / "tok.json"
     p.write_text(json.dumps({"creation_timestamp": created.timestamp(), "token": {}}))
     n = FakeNotifier()
-    check(n, dt.datetime(2026, 9, 30, 10, 0, tzinfo=ET), p)              # box was off until 4h left
+    check(n, dt.datetime(2026, 9, 30, 10, 0, tzinfo=ET), p, probe_fn=lambda: None)              # box was off until 4h left
     assert len(n.sent) == 1 and "HOURS" in n.sent[0]
-    check(n, dt.datetime(2026, 9, 30, 11, 0, tzinfo=ET), p)
+    check(n, dt.datetime(2026, 9, 30, 11, 0, tzinfo=ET), p, probe_fn=lambda: None)
     assert len(n.sent) == 1, "skipped stages must not arrive late"
 
 
@@ -283,5 +284,19 @@ def test_new_login_restarts_the_sequence(tmp_path):
     for day in (23, 30):
         created = dt.datetime(2026, 9, day, 14, 0, tzinfo=ET)
         p.write_text(json.dumps({"creation_timestamp": created.timestamp(), "token": {}}))
-        check(n, created + dt.timedelta(days=6, hours=1), p)
+        check(n, created + dt.timedelta(days=6, hours=1), p, probe_fn=lambda: None)
     assert len(n.sent) == 2, "each login gets its own reminders"
+
+
+
+def test_revoked_login_is_caught_before_it_expires(tmp_path):
+    from swingtrader.daily.schwab_reminder import check
+    created = dt.datetime(2026, 9, 23, 14, 0, tzinfo=ET)
+    p = tmp_path / "tok.json"
+    p.write_text(json.dumps({"creation_timestamp": created.timestamp(), "token": {}}))
+    n = FakeNotifier()
+    revoked = lambda: "invalid_grant: Refresh token is invalid, expired or revoked"
+    out = check(n, dt.datetime(2026, 9, 24, 9, 0, tzinfo=ET), p, probe_fn=revoked)
+    assert "REVOKED" in out and len(n.sent) == 1 and "REVOKED" in n.sent[0]
+    check(n, dt.datetime(2026, 9, 24, 11, 0, tzinfo=ET), p, probe_fn=revoked)
+    assert len(n.sent) == 1, "one revocation email per login"

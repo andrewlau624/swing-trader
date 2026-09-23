@@ -56,6 +56,11 @@ schwab-login` emails a confirmation with the exact expiry time and restarts the
 sequence. `make schwab-reminder` shows the current status. Log in during the
 day, so the expiry and its last reminder land while you're awake.
 
+**Only ONE machine can hold the login.** Schwab keeps one active login per app:
+running `make schwab-login` anywhere else (a laptop) silently revokes the
+server's. The reminder timer probes Schwab every 2 hours and emails you if
+that happens. Always log in *on the server*.
+
 If the token does expire, live runs fail loudly and place nothing, while paper
 keeps running and the 15:40 scan falls back to Alpaca data.
 

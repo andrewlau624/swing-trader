@@ -49,13 +49,40 @@ def _body(headline: str, expires: dt.datetime) -> str:
             "running; the 15:40 scan uses Alpaca data instead of Schwab.</p>")
 
 
-def check(notifier, now: dt.datetime | None = None, path: Path | None = None) -> str:
+def probe(path: Path | None = None) -> str | None:
+    """Ask Schwab whether the login still works. Returns an error string if it
+    was revoked -- Schwab allows ONE active login per app, so logging in on a
+    second machine silently kills the first. Age alone cannot see that."""
+    try:
+        from .brokers import schwab_client
+        r = schwab_client().get_account_numbers()
+        r.raise_for_status()
+        return None
+    except Exception as exc:
+        msg = str(exc)
+        if "invalid_grant" in msg or "invalid, expired or revoked" in msg or "401" in msg:
+            return msg[:200]
+        return None           # network hiccup etc.: not evidence of revocation
+
+
+def check(notifier, now: dt.datetime | None = None, path: Path | None = None,
+          probe_fn=None) -> str:
     t = token_times(path)
     if t is None:
         return "no Schwab login on this machine"
     created, expires = t
     now = now or dt.datetime.now(ET)
     hours_left = (expires - now).total_seconds() / 3600
+    if hours_left > 0:
+        err = (probe_fn or (lambda: probe(path)))()
+        if err:
+            return "Schwab login REVOKED: " + notifier.send(
+                "[swing-trader] Schwab login was REVOKED - run make schwab-login on the server",
+                "<p>Schwab rejected the saved login before its 7 days were up. Most likely "
+                "cause: you logged in on another machine. Schwab keeps only ONE active login "
+                "per app, and the newest wins.</p><p>Real-money trading is stopped until you run "
+                "<code>make schwab-login</code> <b>on the server</b>. Paper keeps running.</p>"
+                f"<pre>{err}</pre>", dedupe_key=f"schwab-token:{int(created)}:revoked")
     due = [s for s in STAGES if hours_left <= s[0]]
     if not due:
         return f"Schwab login OK: {hours_left/24:.1f} days left (expires {expires:%a %b %d %I:%M %p} ET)"

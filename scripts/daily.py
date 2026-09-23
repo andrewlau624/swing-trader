@@ -83,6 +83,18 @@ def main(argv=None):
         except Exception as exc:
             print(f"[{acc}] run failed: {type(exc).__name__}: {exc}", flush=True)
             rc |= 1
+            # a silent failure on the real-money book is the worst outcome
+            try:
+                import datetime as _dt
+                from swingtrader.live.notify import Notifier
+                print(Notifier(ROOT / "state").send(
+                    f"[daily{' LIVE $' if acc == 'live' else ''}] run FAILED: {type(exc).__name__}",
+                    f"<p>The {acc} daily book could not run.</p><pre>{exc}</pre>"
+                    + ("<p>If this mentions invalid_grant or revoked: run "
+                       "<code>make schwab-login</code> on the server.</p>" if acc == "live" else ""),
+                    dedupe_key=f"daily-fail:{acc}:{_dt.date.today()}:{type(exc).__name__}"))
+            except Exception:
+                pass
     return rc
 
 
