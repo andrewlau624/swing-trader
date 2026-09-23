@@ -730,3 +730,33 @@ longs; a down signal can be taken as a long SQQQ, so no shorting is needed.
 Confidence: moderate. The leg itself was validated before this round (so
 not mined here), and the threshold was fixed on 2016–23 and held out of
 sample. But per-trade OOS t is only 1.2–1.4. Paper-shadow it before real money.
+
+---
+
+# Addendum 9 — the PDT rule is gone (2026-09-23)
+
+FINRA's Rule 4210 amendments (SEC approval 2026-04-14, effective
+2026-06-04) removed the pattern-day-trader designation, day-trade counting,
+and the $25k minimum. Alpaca implemented them 2026-06-04: 4x intraday buying
+power from $2,000 on leverage-enabled accounts; `daytrade_count` and
+`pattern_day_trader` were removed from the API on 2026-07-06. Schwab
+implemented them 2026-06-08. Brokers have until 2027-10-20.
+
+Consequences, now in the code:
+- `daily.daytrade_min_equity` $25,000 -> **$2,000** (the Reg T margin
+  minimum). The $3k book qualifies, so the QQQ intraday leg places orders
+  from the next 09:15 run.
+- intraday leverage capped at broker multiplier − IBS weight (4x account
+  -> 3.5x, 2x -> 1.5x, cash -> 0.5x)
+- when the IBS leg holds QQQ, the intraday leg trades QQQM (same index)
+- `make daily-live-check` no longer reads the removed `daytrade_count`
+
+Addendum 8's 3-per-5-days cap no longer binds. Without it (2021–26, same book):
+
+| intraday leg added | CAGR | Sharpe | maxDD |
+|---|---|---|---|
+| none | 23.8 | 1.46 | −14 |
+| **full QQQ noise-area, up to 3.5x (now live)** | **40.7** | 1.70 | −20 |
+| TQQQ strongest first-breakouts, 50% equity | 35.7 | 1.82 | −13 |
+| TQQQ strongest first-breakouts, 100% equity | 47.5 | 1.79 | −16 |
+| half and half | 44.4 | 1.83 | −17 |

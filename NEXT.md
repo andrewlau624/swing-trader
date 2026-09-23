@@ -113,12 +113,12 @@ but "should" is not "did".
 
 ---
 
-## 6. PDT-capped TQQQ breakout leg — FOUND, NOT BUILT
+## 6. TQQQ strongest-breakout leg — FOUND, NOT BUILT (optional)
 
-<= 3 day trades per 5 days, first QQQ noise-area breakout of the day with
-strength >= 0.341 sigma, traded as TQQQ (up) / SQQQ (down) with 50% of
-equity. Book 23.8%/1.46 -> 36.0%/1.84, same -14% max drop (addendum 8).
-Must hard-block a 4th day trade in 5 days.
+The PDT rule is gone (addendum 9), so the full QQQ intraday leg is now live
+instead. Revisit this only after ~3 months of real intraday fills: the
+TQQQ variant scores Sharpe 1.79-1.83 vs 1.70 with a smaller max drop.
+First breakout of the day, strength >= 0.341 sigma, TQQQ up / SQQQ down.
 
 ---
 
@@ -165,16 +165,15 @@ research in RESULTS.md addendum 6.
 |---|---|---|
 | IBS tech ETFs | QQQ/SMH/XLK, IBS<0.2 on the last bar -> buy at the open (fractional DAY order), hold while it stays <0.2 | **live** |
 | overnight losers | 15:40 ET scan: down >= 8%, within 10% of the day's low -> buy at the close auction, sell at the open auction | **live** |
-| QQQ intraday momentum | noise-area breakout, 30-min decisions, flat at the close | **shadow** until book equity >= `daily.daytrade_min_equity` ($25k) |
+| QQQ intraday momentum | noise-area breakout, 30-min decisions, flat at the close | **live** from $2k (PDT rule retired 2026-06-04; addendum 9) |
 
 Weights 0.5 / 0.5 of book equity: 1x, no margin. Backtest (honest, 15:50
 signal, 7.5bp/side): 21.8% CAGR, Sharpe 1.30, maxDD -11%. Both at 1.0 is
 44.5% / -22% and needs 2x overnight margin: one line each in config.yaml.
 
-**Why $25k for the switch:** FINRA's pattern-day-trader rule. Below $25k, a
-margin account may make at most 3 day trades in 5 days. The intraday leg makes
-one to two a day. The shadow ledger (`make daily-status`) accumulates
-out-of-sample evidence for it until then.
+**Day-trading gate:** $2,000 (Reg T). The $25k pattern-day-trader floor was
+retired 2026-06-04. For the REAL account, ask Alpaca for a leverage-enabled
+margin account (4x intraday); a standard margin account caps this leg at 1.5x.
 
 **What to watch:**
 - night-leg slippage vs the 15:40 reference price (`make daily-status`).

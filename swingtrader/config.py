@@ -119,14 +119,15 @@ class DailyCfg:
     # NOTE: the real-money switch itself lives in .env (DAILY_LIVE=on), not
     # here -- `make pull` does `git reset --hard`, which would silently revert
     # a switch stored in this tracked file. See resolved_accounts().
-    # auto: the intraday leg places orders once equity >= daytrade_min_equity
-    #       (and the broker account is >= $25k, the PDT floor)
+    # auto: the intraday leg places orders once equity >= daytrade_min_equity.
+    #       FINRA retired the pattern-day-trader rule (Rule 4210 amendments,
+    #       effective 2026-06-04; Alpaca 06-04, Schwab 06-08): no day-trade
+    #       count, no $25k floor. What remains is Reg T's $2,000 margin minimum.
     # off:  intraday leg stays shadow forever
     daytrade_mode: str = "auto"
     start_equity: float = 3_000.0
-    # Day-trading leg (QQQ intraday) is SHADOW until book equity reaches this.
-    # 25k is the FINRA pattern-day-trader floor for a margin account.
-    daytrade_min_equity: float = 25_000.0
+    # Intraday (QQQ) leg is SHADOW below this. $2,000 = Reg T margin minimum.
+    daytrade_min_equity: float = 2_000.0
     # leg 1: IBS on tech ETFs. Signal on the last complete bar, enter at the
     # next open, re-evaluated every morning.
     ibs_symbols: list = field(default_factory=lambda: [
@@ -149,6 +150,9 @@ class DailyCfg:
     night_crowd_n: int = 30          # more raw signals than this = market-wide selloff: scale down
     # leg 3: QQQ noise-area intraday momentum (shadow until the gate trips)
     noise_symbol: str = "QQQ"
+    # traded instead when another leg (IBS) already holds noise_symbol --
+    # Alpaca nets positions per symbol, so two legs cannot share one
+    noise_alt_symbol: str = "QQQM"
     noise_lookback: int = 14
     noise_target_vol: float = 0.02
     noise_max_lev: float = 3.5       # 4x intraday limit minus the IBS leg

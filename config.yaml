@@ -68,9 +68,11 @@ daily:
   # `make daily-live-on` / `make daily-live-off`. (.env survives `make pull`;
   # this file is reset by it.) Live keys: ALPACA_LIVE_API_KEY / _SECRET_KEY.
   accounts: ["paper"]
-  daytrade_mode: auto            # auto = intraday leg goes live at $25k; off = never
+  daytrade_mode: auto            # auto = intraday leg live once equity >= daytrade_min_equity; off = never
   start_equity: 3000.0           # paper book's virtual start. live uses the real balance
-  daytrade_min_equity: 25000.0   # QQQ intraday leg is SHADOW below this (PDT floor)
+  # PDT rule retired 2026-06-04 (FINRA Rule 4210; Alpaca 06-04, Schwab 06-08).
+  # Floor is now Reg T's $2,000 margin minimum.
+  daytrade_min_equity: 2000.0
   # IBS leg: top-3 of these by 12-1 month momentum (re-ranked monthly), then
   # IBS < 0.2. Was a hand-picked ["QQQ","SMH","XLK"]; the rule is the honest
   # version of that choice (RESULTS.md addendum 7).
@@ -90,6 +92,7 @@ daily:
   night_vol_min: 0.60            # skip quiet names (a -8% day there is news, not overreaction)
   night_crowd_n: 30              # >30 signals = market-wide selloff: exposure x 30/n
   noise_symbol: QQQ
+  noise_alt_symbol: QQQM         # used on days the IBS leg holds QQQ
   noise_lookback: 14
   noise_target_vol: 0.02
   noise_max_lev: 3.5

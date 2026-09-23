@@ -28,7 +28,8 @@ def status(account: str):
     print(f"daily book  equity ${eq:,.2f}  start ${b.start_equity:,.0f}  "
           f"({(eq/b.start_equity-1)*100:+.1f}%)  cash ${b.cash:,.2f}  last run {b.last_run or '-'}")
     print(f"day-trade leg {'LIVE' if b.daytrade_live else 'shadow'} "
-          f"(mode {cfg.daily.daytrade_mode}; switches on at ${cfg.daily.daytrade_min_equity:,.0f})")
+          f"(mode {cfg.daily.daytrade_mode}; on at ${cfg.daily.daytrade_min_equity:,.0f}; "
+          f"intraday leverage cap {b.noise_lev_cap:g}x)")
     for s, p in sorted(b.positions.items()):
         print(f"   {p['leg']:6} {s:6} {float(p['qty']):10.4f} @ {float(p['avg_px']):9.2f}  since {p['entry_date']}")
     op = b.open_orders()

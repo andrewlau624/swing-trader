@@ -11,9 +11,10 @@
                        BUY them at the close auction (cutoff 15:50); flatten a
                        live noise position at the close
 
-No leg day-trades: the IBS leg holds open -> next open, the night leg holds
-close -> next open. The noise leg is the only day trade, and it places orders
-only once the book's own equity reaches `daytrade_min_equity`.
+The IBS leg holds open -> next open and the night leg close -> next open. The
+noise leg is the only day trade; it places orders once equity reaches
+`daytrade_min_equity` ($2,000, Reg T -- the PDT rule was retired 2026-06-04)
+and never uses more intraday leverage than the broker grants.
 
 The swing book shares the account. The two books never touch each other's
 symbols: this book skips anything the swing book holds or has pending, and
@@ -427,21 +428,47 @@ class DailyExecutor:
 
     def _gate(self, book: DailyBook, equity: float) -> None:
         """Latch the day-trading leg on for the day, or keep it in shadow."""
-        acct = float(self.broker.account().equity)
+        a = self.broker.account()
+        acct = float(a.equity)
         was = book.daytrade_live
         book.daytrade_live = (self.d.daytrade_mode == "auto"
-                              and equity >= self.d.daytrade_min_equity and acct >= 25_000)
+                              and equity >= self.d.daytrade_min_equity
+                              and acct >= self.d.daytrade_min_equity)
+        # intraday leverage the broker actually grants (4 = leverage-enabled
+        # margin, 2 = standard, 1 = cash); the IBS half stays invested intraday
+        mult = float(getattr(a, "multiplier", 1) or 1)
+        book.noise_lev_cap = max(0.0, min(self.d.noise_max_lev, mult - self.d.ibs_weight))
         if book.daytrade_live and not was:
             self.act(f"DAY-TRADE LEG SWITCHED ON: book equity ${equity:,.0f} >= "
                      f"${self.d.daytrade_min_equity:,.0f}")
         elif was and not book.daytrade_live:
             self.warn(f"day-trade leg switched OFF: book equity ${equity:,.0f}")
 
-    def _sync_noise_live(self, book: DailyBook, today: str, px: float) -> None:
-        sym = self.d.noise_symbol
+    def _noise_instrument(self, book: DailyBook) -> str:
+        """QQQ, unless another leg holds it today -- then QQQM (same index)."""
         n = book.noise
+        if n.get("instrument"):
+            return n["instrument"]
+        sym = self.d.noise_symbol
+        other = {s for s, p in book.positions.items() if p.get("leg") != "noise"}
+        other |= {o["sym"] for o in book.open_orders().values() if o["leg"] != "noise"}
+        if sym in other or sym in self._foreign_symbols(book):
+            sym = self.d.noise_alt_symbol
+        n["instrument"] = sym
+        return sym
+
+    def _sync_noise_live(self, book: DailyBook, today: str, px_signal: float) -> None:
+        n = book.noise
+        sym = self._noise_instrument(book)
+        px = px_signal
+        if sym != self.d.noise_symbol:
+            rows = md.live_rows([sym], max_age_min=5)
+            if rows.empty:
+                self.warn(f"[noise:LIVE] no live price for {sym} - skipping"); return
+            px = float(rows.price.iloc[0])
         equity = self._sizing_equity(book)
-        want = int(n["pos"]) * math.floor(n["lev"] * equity / px)
+        lev = min(float(n["lev"]), float(getattr(book, "noise_lev_cap", n["lev"]) or 0))
+        want = int(n["pos"]) * math.floor(lev * equity / px)
         have = float(book.positions.get(sym, {}).get("qty", 0.0))
         pend = [o for o in book.open_orders().values() if o["sym"] == sym]
         if pend:
@@ -453,7 +480,7 @@ class DailyExecutor:
                         kind=f"m{n['last_m']}")
 
     def _flatten_noise(self, book: DailyBook, today: str) -> None:
-        sym = self.d.noise_symbol
+        sym = book.noise.get("instrument") or self.d.noise_symbol
         have = float(book.positions.get(sym, {}).get("qty", 0.0))
         if abs(have) >= 1:
             self._order(book, today, sym, "sell" if have > 0 else "buy", "noise",

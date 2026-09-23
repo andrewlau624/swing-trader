@@ -1,5 +1,6 @@
 """Daily-book tests. Nothing here touches the network."""
 import datetime as dt
+import math
 import json
 from types import SimpleNamespace
 from zoneinfo import ZoneInfo
@@ -339,3 +340,59 @@ def test_tbills_sold_when_ibs_fires(tmp_path, monkeypatch):
     buys = [r for r in reqs if r.side.value == "buy"]
     assert [r.symbol for r in sells] == ["SGOV"]
     assert len(buys) == 3 and "SGOV" not in {r.symbol for r in buys}, "top-3 momentum ETFs, all at IBS 0.05"
+
+
+# ------------------------------------------- PDT rule retired (2026-06-04)
+def test_gate_opens_at_3k_and_caps_leverage_by_broker(tmp_path, monkeypatch):
+    ex = _executor(tmp_path, monkeypatch)
+    book = DailyBook(cash=3000, start_equity=3000)
+    for mult, cap in [("4", 3.5), ("2", 1.5), ("1", 0.5)]:
+        ex.broker.account = lambda m=mult: SimpleNamespace(equity="3000", multiplier=m)
+        ex._gate(book, 3000)
+        assert book.daytrade_live, "$3k clears the $2k Reg T floor; no $25k PDT floor any more"
+        assert book.noise_lev_cap == pytest.approx(cap)
+    ex.broker.account = lambda: SimpleNamespace(equity="1500", multiplier="4")
+    ex._gate(book, 1500)
+    assert not book.daytrade_live, "below Reg T's $2,000 margin minimum"
+
+
+def _live_noise_book(pos=1, lev=3.0, cap=3.5):
+    b = DailyBook(cash=3000, start_equity=3000)
+    b.daytrade_live, b.noise_lev_cap = True, cap
+    b.noise = {"day": "2026-09-24", "pos": pos, "lev": lev, "last_m": 30, "entry": 500.0}
+    return b
+
+
+def test_live_noise_sizes_by_capped_leverage(tmp_path, monkeypatch):
+    ex = _executor(tmp_path, monkeypatch)
+    b = _live_noise_book(lev=3.0, cap=1.5)
+    ex._sync_noise_live(b, "2026-09-24", 500.0)
+    r = ex.broker.client.submitted[0]
+    # 1.5x cap * $3000 / $500 = 9 shares, not the 18 the signal's 3.0x asks for
+    assert r.symbol == "QQQ" and r.qty == 9 and r.side.value == "buy"
+    assert r.time_in_force.value == "day"
+
+
+def test_live_noise_uses_qqqm_when_ibs_holds_qqq(tmp_path, monkeypatch):
+    from swingtrader.daily import executor as E
+    monkeypatch.setattr(E.md, "live_rows", lambda syms, **k: pd.DataFrame(
+        {"price": [200.0], "high": [201.0], "low": [199.0]}, index=syms))
+    held = {"QQQ": SimpleNamespace(current_price="500", qty="3")}
+    ex = _executor(tmp_path, monkeypatch, held=held)
+    b = _live_noise_book(pos=-1, lev=2.0)
+    b.positions["QQQ"] = {"qty": 3, "avg_px": 500.0, "leg": "ibs", "entry_date": "2026-09-23"}
+    ex._sync_noise_live(b, "2026-09-24", 500.0)
+    r = ex.broker.client.submitted[0]
+    assert r.symbol == "QQQM", "two legs must never share a symbol: Alpaca nets per symbol"
+    assert r.side.value == "sell" and r.qty == math.floor(2.0 * b.equity({"QQQ": 500}) / 200.0)
+
+
+def test_live_noise_flattens_its_own_instrument_at_the_close(tmp_path, monkeypatch):
+    ex = _executor(tmp_path, monkeypatch)
+    b = _live_noise_book()
+    b.noise["instrument"] = "QQQM"
+    b.positions["QQQM"] = {"qty": -12, "avg_px": 200.0, "leg": "noise", "entry_date": "2026-09-24"}
+    ex._flatten_noise(b, "2026-09-24")
+    r = ex.broker.client.submitted[0]
+    assert r.symbol == "QQQM" and r.side.value == "buy" and r.qty == 12
+    assert r.time_in_force.value == "cls"

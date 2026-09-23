@@ -31,6 +31,7 @@ class DailyBook:
     equity_log: list = field(default_factory=list)  # [{date, equity}]
     noise: dict = field(default_factory=dict)       # shadow/live intraday leg state
     daytrade_live: bool = False
+    noise_lev_cap: float = 0.0                      # set each morning from the broker's multiplier
     last_run: str = ""
 
     # ------------------------------------------------------------ persist

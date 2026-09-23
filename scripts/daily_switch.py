@@ -44,7 +44,7 @@ def check() -> bool:
     mult = float(a.multiplier or 1)
     print(f"LIVE account {str(a.account_number)[:3]}***  status {a.status}")
     print(f"  equity ${float(a.equity):,.2f}   cash ${float(a.cash):,.2f}   "
-          f"margin multiplier {mult:g}   day trades (5d) {a.daytrade_count}")
+          f"margin multiplier {mult:g} (4 = leverage-enabled: full intraday leg)")
     print(f"  open positions {len(b.positions())}")
     ok = True
     if mult < 2:
@@ -73,7 +73,7 @@ def main():
             sys.exit("\nnot switching on.")
         print("\nThis places REAL orders with REAL money from the next scheduled run:")
         print(f"  IBS leg {cfg.daily.ibs_weight:.0%} + overnight leg {cfg.daily.night_weight:.0%} of the account,")
-        print(f"  intraday leg {'goes live at $' + format(cfg.daily.daytrade_min_equity, ',.0f') if cfg.daily.daytrade_mode == 'auto' else 'OFF'}.")
+        print(f"  intraday QQQ leg {'live (equity >= $' + format(cfg.daily.daytrade_min_equity, ',.0f') + ')' if cfg.daily.daytrade_mode == 'auto' else 'OFF'}.")
         if input('Type REAL MONEY to confirm: ').strip() != "REAL MONEY":
             sys.exit("not confirmed; nothing changed.")
         set_live(True)
