@@ -29,6 +29,12 @@ def main():
     if len(rows) > 1:
         print("  more than one account: add SCHWAB_ACCOUNT_NUMBER=<the full number> to .env")
     path.chmod(0o600)
+    from swingtrader.config import ROOT
+    from swingtrader.daily.schwab_reminder import confirm_login, token_times
+    from swingtrader.live.notify import Notifier
+    _, expires = token_times(path)
+    print(f"  expires {expires:%a %b %d %I:%M %p} ET. Reminder emails: 2 days, 1 day and 6 hours before.")
+    print(f"  {confirm_login(Notifier(ROOT / 'state'), path)}")
 
 
 if __name__ == "__main__":

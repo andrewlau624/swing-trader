@@ -230,3 +230,55 @@ def test_decision_rows_falls_back_to_alpaca(monkeypatch):
     monkeypatch.setattr(md, "live_rows", lambda syms, *a, **k: pd.DataFrame({"price": [1.0]}, index=["X"]))
     rows, src = md.decision_rows(["X"], "auto", log=lambda *a: None)
     assert src == "alpaca" and list(rows.index) == ["X"]
+
+
+# ---------------------------------------------------------- login reminders
+class FakeNotifier:
+    def __init__(self):
+        self._seen, self.sent = set(), []
+
+    def send(self, subject, html, dedupe_key=None):
+        if dedupe_key in self._seen:
+            return "email skipped (already sent)"
+        self.sent.append(subject); self._seen.add(dedupe_key); return "email sent"
+
+    def _remember(self, k):
+        self._seen.add(k)
+
+
+def test_reminder_stages_fire_once_each(tmp_path):
+    from swingtrader.daily.schwab_reminder import check
+    created = dt.datetime(2026, 9, 23, 14, 0, tzinfo=ET)          # expires Wed Sep 30 14:00 ET
+    p = tmp_path / "tok.json"
+    p.write_text(json.dumps({"creation_timestamp": created.timestamp(), "token": {}}))
+    n = FakeNotifier()
+    at = lambda d, h: dt.datetime(2026, 9, d, h, 0, tzinfo=ET)
+    assert "days left" in check(n, at(26, 12), p) and n.sent == []       # 4 days out: quiet
+    check(n, at(28, 15), p); check(n, at(28, 17), p)                     # 47h left, twice
+    check(n, at(29, 15), p)                                              # 23h left
+    check(n, at(30, 9), p)                                               # 5h left: day of
+    check(n, at(30, 15), p); check(n, at(30, 17), p)                     # expired, twice
+    assert [s.split("login ")[1].split(" -")[0] for s in n.sent] == [
+        "expires in 2 days", "expires TOMORROW", "expires in a few HOURS", "has EXPIRED"]
+
+
+def test_reminder_after_downtime_sends_only_the_most_urgent(tmp_path):
+    from swingtrader.daily.schwab_reminder import check
+    created = dt.datetime(2026, 9, 23, 14, 0, tzinfo=ET)
+    p = tmp_path / "tok.json"
+    p.write_text(json.dumps({"creation_timestamp": created.timestamp(), "token": {}}))
+    n = FakeNotifier()
+    check(n, dt.datetime(2026, 9, 30, 10, 0, tzinfo=ET), p)              # box was off until 4h left
+    assert len(n.sent) == 1 and "HOURS" in n.sent[0]
+    check(n, dt.datetime(2026, 9, 30, 11, 0, tzinfo=ET), p)
+    assert len(n.sent) == 1, "skipped stages must not arrive late"
+
+
+def test_new_login_restarts_the_sequence(tmp_path):
+    from swingtrader.daily.schwab_reminder import check
+    p = tmp_path / "tok.json"; n = FakeNotifier()
+    for day in (23, 30):
+        created = dt.datetime(2026, 9, day, 14, 0, tzinfo=ET)
+        p.write_text(json.dumps({"creation_timestamp": created.timestamp(), "token": {}}))
+        check(n, created + dt.timedelta(days=6, hours=1), p)
+    assert len(n.sent) == 2, "each login gets its own reminders"

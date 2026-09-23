@@ -17,6 +17,10 @@ def main():
     s = md.schwab_rows(SYMS, max_age_min=1e9)
     a = md.live_rows(SYMS, max_age_min=1e9)
     print(f"Schwab returned {len(s)}/{len(SYMS)} symbols, Alpaca {len(a)}/{len(SYMS)}\n")
+    if s.empty:
+        print("Schwab gave no usable quotes. Before 09:30 ET that is expected: its day")
+        print("high/low stay 0 until the regular session opens. Run this during market hours.")
+        return
     df = s.join(a, lsuffix="_schwab", rsuffix="_alpaca", how="outer")
     for c in ("price", "high", "low"):
         df[f"{c}_diff_bp"] = (df[f"{c}_schwab"] / df[f"{c}_alpaca"] - 1) * 1e4

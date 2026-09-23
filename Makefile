@@ -12,7 +12,7 @@ UNAME := $(shell uname -s)
 .DEFAULT_GOAL := help
 
 .PHONY: help setup env test lint kill-old persist unpersist persist-status \
-        daily-status daily-dry daily-once daily-logs daily-live-check daily-live-on daily-live-off schwab-login schwab-quote-check \
+        daily-status daily-dry daily-once daily-logs daily-live-check daily-live-on daily-live-off schwab-login schwab-quote-check schwab-reminder \
         results status positions slippage logs once dry digest notify-test \
         notify-setup doctor pull scan backtest clean stop persist-stop linger _lastlog pending
 
@@ -118,20 +118,24 @@ stop persist-stop: unpersist
 unpersist:
 	@-./scripts/sysd.sh disable --now swing-trader.timer 2>/dev/null
 	@-./scripts/sysd.sh disable --now daily-trader.timer 2>/dev/null
+	@-./scripts/sysd.sh disable --now schwab-reminder.timer 2>/dev/null
 	@-rm -f $(HOME)/.config/systemd/user/swing-trader.service \
 	        $(HOME)/.config/systemd/user/swing-trader.timer \
 	        $(HOME)/.config/systemd/user/daily-trader.service \
-	        $(HOME)/.config/systemd/user/daily-trader.timer
+	        $(HOME)/.config/systemd/user/daily-trader.timer \
+	        $(HOME)/.config/systemd/user/schwab-reminder.service \
+	        $(HOME)/.config/systemd/user/schwab-reminder.timer
 	@-./scripts/sysd.sh daemon-reload 2>/dev/null
-	@-crontab -l 2>/dev/null | grep -v 'run-live.sh' | grep -v 'run-daily.sh' \
+	@-crontab -l 2>/dev/null | grep -v 'run-live.sh' | grep -v 'run-daily.sh' | grep -v 'schwab_reminder.py' \
 	  | grep -vE '^CRON_TZ=America/New_York|^# swing-trader|^# *[0-9]{2}:[0-9]{2} PT' \
 	  | crontab - 2>/dev/null
 	@echo "schedule removed (systemd timer and cron entries)."
 
 persist-status:
 	@echo "--- systemd user timer ---"
-	@./scripts/sysd.sh list-timers swing-trader.timer daily-trader.timer --no-pager 2>/dev/null \
-	  | grep -E "swing-trader|daily-trader|NEXT" || echo "  not installed"
+	@./scripts/sysd.sh list-timers swing-trader.timer daily-trader.timer schwab-reminder.timer --no-pager 2>/dev/null \
+	  | grep -E "swing-trader|daily-trader|schwab-reminder|NEXT" || echo "  not installed"
+	@$(PY) scripts/schwab_reminder.py 2>/dev/null | sed 's/^/  /' || true
 	@printf "  lingering: "; \
 	  if loginctl show-user $$(whoami) -p Linger 2>/dev/null | grep -q "Linger=yes"; \
 	  then echo "ON (survives logout)"; \
@@ -222,6 +226,9 @@ daily-once:
 
 schwab-login:
 	@$(PY) scripts/schwab_login.py
+
+schwab-reminder:
+	@$(PY) scripts/schwab_reminder.py
 
 schwab-quote-check:
 	@$(PY) scripts/schwab_quote_check.py

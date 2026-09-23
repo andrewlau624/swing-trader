@@ -1,0 +1,10 @@
+# Installed by `make persist`. Emails before the Schwab login expires.
+[Unit]
+Description=swing-trader Schwab login expiry reminder
+
+[Service]
+Type=oneshot
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=-__APP_DIR__/.env
+ExecStart=__APP_DIR__/.venv/bin/python -u scripts/schwab_reminder.py
+TimeoutStartSec=120

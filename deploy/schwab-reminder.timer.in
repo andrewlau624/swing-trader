@@ -1,0 +1,11 @@
+# Every 2 hours, 7 days a week: a 7-day token can expire on a weekend.
+[Unit]
+Description=swing-trader Schwab login reminder schedule
+
+[Timer]
+OnCalendar=*-*-* 00/2:07:00 America/New_York
+Persistent=true
+Unit=schwab-reminder.service
+
+[Install]
+WantedBy=timers.target

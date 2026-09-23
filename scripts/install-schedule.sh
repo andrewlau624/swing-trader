@@ -24,9 +24,13 @@ install_systemd() {
   sed -e "s|__APP_DIR__|$APP|g" \
       "$APP/deploy/daily-trader.service.in" > "$HOME/.config/systemd/user/daily-trader.service"
   cp "$APP/deploy/daily-trader.timer.in" "$HOME/.config/systemd/user/daily-trader.timer"
+  sed -e "s|__APP_DIR__|$APP|g" \
+      "$APP/deploy/schwab-reminder.service.in" > "$HOME/.config/systemd/user/schwab-reminder.service"
+  cp "$APP/deploy/schwab-reminder.timer.in" "$HOME/.config/systemd/user/schwab-reminder.timer"
   "$APP/scripts/sysd.sh" daemon-reload
   "$APP/scripts/sysd.sh" enable --now swing-trader.timer
   "$APP/scripts/sysd.sh" enable --now daily-trader.timer
+  "$APP/scripts/sysd.sh" enable --now schwab-reminder.timer
   if ! loginctl show-user "$USER_" -p Linger 2>/dev/null | grep -q "Linger=yes"; then
     echo ""
     echo "  ############################################################"
@@ -40,13 +44,13 @@ install_systemd() {
     echo "  ############################################################"
   fi
   echo ""
-  "$APP/scripts/sysd.sh" list-timers swing-trader.timer daily-trader.timer --no-pager || true
+  "$APP/scripts/sysd.sh" list-timers swing-trader.timer daily-trader.timer schwab-reminder.timer --no-pager || true
 }
 
 install_cron() {
   echo "installing cron entries..."
   local tmp; tmp="$(mktemp)"
-  crontab -l 2>/dev/null | grep -v 'run-live.sh' | grep -v 'run-daily.sh' \
+  crontab -l 2>/dev/null | grep -v 'run-live.sh' | grep -v 'run-daily.sh' | grep -v 'schwab_reminder.py' \
     | grep -vE '^CRON_TZ=America/New_York|^# swing-trader' > "$tmp" || true
 
   if [[ "$(uname -s)" == "Darwin" ]]; then
@@ -70,6 +74,7 @@ daily = [(9,15),(9,50)] + [(h,m) for h in range(10,16) for m in (1,31)] + [(15,4
 for (h, m) in daily:
     t = dt.datetime.combine(today, dt.time(h, m), tzinfo=et).astimezone(local)
     print(f"{t.minute:2d} {t.hour} * * 1-5 {app}/scripts/run-daily.sh  # {h:02d}:{m:02d} ET - daily book")
+print(f"7 */2 * * * cd {app} && ./.venv/bin/python scripts/schwab_reminder.py >> logs/cron-reminder.log 2>&1  # Schwab login reminder")
 PYEOF
   else
     echo "# swing-trader - times below are US/Eastern via CRON_TZ" >> "$tmp"
@@ -83,6 +88,7 @@ PYEOF
       echo "1,31 10-15 * * 1-5 $APP/scripts/run-daily.sh  # daily book: intraday leg"
       echo "40 15 * * 1-5 $APP/scripts/run-daily.sh  # daily book: close auction (cutoff 15:50)"
       echo "10 16 * * 1-5 $APP/scripts/run-daily.sh  # daily book: reconcile closing fills"
+      echo "7 */2 * * * cd $APP && ./.venv/bin/python scripts/schwab_reminder.py >> logs/cron-reminder.log 2>&1  # Schwab login reminder"
     } >> "$tmp"
   fi
 
