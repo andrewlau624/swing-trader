@@ -123,14 +123,15 @@ persist-status:
 	  then echo "ON (survives logout)"; \
 	  else echo "OFF  <-- timer dies at logout. run: make linger"; fi
 	@R=$$(./scripts/sysd.sh show swing-trader.service -p Result --value 2>/dev/null); \
+	  W=$$(./scripts/sysd.sh show swing-trader.service -p ExecMainExitTimestamp --value 2>/dev/null); \
 	  if [ -n "$$R" ] && [ "$$R" != "success" ]; then \
-	    echo "  last result: $$R  <-- LAST RUN FAILED. see 'last run' below"; \
-	  elif [ -n "$$R" ]; then echo "  last result: success"; fi
+	    echo "  last timer run: $$R at $${W:-?}  <-- FAILED (stale if before your last fix)"; \
+	  elif [ -n "$$R" ]; then echo "  last timer run: success at $${W:-?}"; fi
 	@echo "--- cron ---"
 	@crontab -l 2>/dev/null | grep -A4 'swing-trader' || echo "  no cron entries"
 	@echo "--- clocks ---"
 	@echo "  server $$(date '+%H:%M %Z')   US/Eastern $$(TZ=America/New_York date '+%H:%M %Z')"
-	@echo "--- last run ---"
+	@echo "--- last run (log file: includes manual/dry runs) ---"
 	@$(MAKE) --no-print-directory _lastlog N=6
 
 # --------------------------------------------------------------- results
