@@ -168,6 +168,9 @@ def test_account_number_accepts_last_four(monkeypatch):
     assert adapter().hash == "HASH"
     monkeypatch.setenv("SCHWAB_ACCOUNT_NUMBER", "12345678")
     assert adapter().hash == "HASH"
+    for messy in ("...5678", " 5678 ", '"5678"', "5678\r"):
+        monkeypatch.setenv("SCHWAB_ACCOUNT_NUMBER", messy)
+        assert adapter().hash == "HASH", repr(messy)
     monkeypatch.setenv("SCHWAB_ACCOUNT_NUMBER", "9999")
     with pytest.raises(RuntimeError, match="matches 0"):
         adapter()

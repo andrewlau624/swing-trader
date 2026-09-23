@@ -127,7 +127,8 @@ class SchwabAdapter:
     def _pick_account(self) -> str:
         r = self.c.get_account_numbers(); r.raise_for_status()
         rows = r.json()
-        want = (get_env("SCHWAB_ACCOUNT_NUMBER") or "").strip()
+        # digits only: tolerate "...6422", quotes, spaces, a stray \r from Windows editors
+        want = "".join(ch for ch in (get_env("SCHWAB_ACCOUNT_NUMBER") or "") if ch.isdigit())
         if want:
             # full number, or just the last digits (what `make schwab-login` shows)
             hits = [x for x in rows if x["accountNumber"] == want
