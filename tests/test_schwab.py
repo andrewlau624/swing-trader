@@ -174,3 +174,23 @@ def test_account_number_accepts_last_four(monkeypatch):
     monkeypatch.setenv("SCHWAB_ACCOUNT_NUMBER", "9999")
     with pytest.raises(RuntimeError, match="matches 0"):
         adapter()
+
+
+def test_live_sizes_from_free_equity_not_your_holdings(tmp_path, monkeypatch):
+    from swingtrader.daily import executor as E
+    # $3,514 account: $3,512 in YOUR five positions, $2.48 cash
+    a = adapter(positions=[("AAA", 10, 100.0), ("BBB", 20, 50.0), ("CCC", 5, 200.0),
+                           ("DDD", 4, 128.0), ("EEE", 1, 0.0)], equity=3514.60)
+    ex = E.DailyExecutor(Config.load(), account="live", broker=a, state_dir=tmp_path, log_dir=tmp_path)
+    ex.notifier.send = lambda *x, **k: "skipped"
+    book = DailyBook(cash=0, start_equity=0)
+    assert ex.free_equity() == pytest.approx(3514.60 - 3512.0)
+    ex._order(book, "2026-09-24", "LOSER", "buy", "night", tif="cls", ref_px=9, kind="entry", qty=16)
+    assert a.c.placed == [], "no free cash: never borrow against the user's holdings"
+    assert any("free for the bot" in w for w in ex.warnings)
+    # after selling AAA and BBB ($2,000): the bot has ~$2,002 to work with
+    b = adapter(positions=[("CCC", 5, 200.0), ("DDD", 4, 128.0)], equity=3514.60)
+    ex2 = E.DailyExecutor(Config.load(), account="live", broker=b, state_dir=tmp_path, log_dir=tmp_path)
+    assert ex2._sizing_equity(book) == pytest.approx(3514.60 - 1512.0)
+    ex2.d.live_capital = 1500
+    assert ex2._sizing_equity(book) == 1500

@@ -117,6 +117,12 @@ class DailyCfg:
     # side by side: `make daily-live-on` / `make daily-live-off`.
     accounts: list = field(default_factory=lambda: ["paper"])
     live_broker: str = "schwab"      # broker for the "live" account: schwab | alpaca
+    # Real-money capital. The live book sizes from the account's FREE equity:
+    # equity minus the market value of positions it does not own (your own
+    # holdings), so it never borrows against them. live_capital (dollars)
+    # optionally caps it further; None = all free equity.
+    live_capital: float | None = None
+    live_min_capital: float = 500.0  # below this the live book places no new buys
     # NOTE: the real-money switch itself lives in .env (DAILY_LIVE=on), not
     # here -- `make pull` does `git reset --hard`, which would silently revert
     # a switch stored in this tracked file. See resolved_accounts().

@@ -53,7 +53,20 @@ def check_schwab() -> bool:
     print(f"  equity ${a.equity:,.2f}   cash ${a.cash:,.2f}   buying power ${a.buying_power:,.2f}"
           f"   est. intraday multiplier {a.multiplier:g}")
     print(f"  open positions {len(pos)}")
+    from swingtrader.daily.book import DailyBook, book_file
+    from swingtrader.config import ROOT
+    own = set(DailyBook.load(ROOT / "state", 0.0, book_file("live")).positions)
+    foreign = sum(abs(float(p.qty) * float(p.current_price or 0)) for s, p in pos.items() if s not in own)
+    free = a.equity - foreign
+    cap = Config.load().daily.live_capital
+    use = min(free, cap) if cap else free
+    print(f"  your other holdings ${foreign:,.2f}  ->  FREE for the bot ${free:,.2f}"
+          + (f" (capped at ${cap:,.0f})" if cap else "") + f"  ->  bot sizes from ${max(use,0):,.2f}")
     ok = True
+    if use < Config.load().daily.live_min_capital:
+        print(f"  PROBLEM: under ${Config.load().daily.live_min_capital:,.0f} free. The bot never borrows against")
+        print("  your holdings, so it would place nothing. Sell some positions or deposit cash.")
+        ok = False
     if a.account_type != "MARGIN":
         print("  PROBLEM: not a margin account. This book re-uses same-day sale proceeds;")
         print("  in a cash account that is a good-faith violation. Apply for margin at Schwab.")

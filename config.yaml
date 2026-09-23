@@ -69,6 +69,9 @@ daily:
   # this file is reset by it.) Live keys: ALPACA_LIVE_API_KEY / _SECRET_KEY.
   accounts: ["paper"]
   live_broker: schwab            # real money: schwab (paper always runs on Alpaca)
+  live_capital: null             # null = all FREE equity (cash + the bot's own positions);
+                                 # a number caps the bot at that many dollars
+  live_min_capital: 500.0        # below this the live book makes no new buys
   daytrade_mode: auto            # auto = intraday leg live once equity >= daytrade_min_equity; off = never
   start_equity: 3000.0           # paper book's virtual start. live uses the real balance
   # PDT rule retired 2026-06-04 (FINRA Rule 4210; Alpaca 06-04, Schwab 06-08).

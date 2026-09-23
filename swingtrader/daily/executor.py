@@ -118,8 +118,8 @@ class DailyExecutor:
         phase = phase or phase_for(now)
         clock = self.broker.clock()
         acct = self.broker.account()
-        # live: a dedicated account, so the book starts at its real balance
-        start = float(acct.equity) if self.live else self.d.start_equity
+        # live: the book starts at the FREE equity (not your other holdings)
+        start = self._live_start() if self.live else self.d.start_equity
         book = DailyBook.load(self.state_dir, start, self.fname)
         self.acct_equity = float(acct.equity)
         self.log(f"=== daily book [{self.account.upper()}] | phase {phase} | {now:%Y-%m-%d %H:%M} ET | "
@@ -438,6 +438,11 @@ class DailyExecutor:
         elif was and not book.daytrade_live:
             self.warn(f"day-trade leg switched OFF: book equity ${equity:,.0f}")
 
+    def _live_start(self) -> float:
+        free = self.free_equity()
+        cap = self.d.live_capital
+        return max(0.0, min(free, float(cap)) if cap else free)
+
     def _noise_instrument(self, book: DailyBook) -> str:
         """QQQ, unless another leg holds it today -- then QQQM (same index)."""
         n = book.noise
@@ -495,6 +500,12 @@ class DailyExecutor:
             self.log(f"  {sym}: {leg} {side} already submitted today (idempotent skip)"); return
         desc = f"{leg} {side} {sym} " + (f"${notional:,.2f}" if notional else f"{qty:g} sh") + \
                f" [{tif.upper()}] ref {ref_px:.2f}"
+        if self.live and side == "buy" and kind == "entry":
+            cap = self._sizing_equity(book)
+            if cap < self.d.live_min_capital:
+                self.warn(f"{desc} skipped: only ${cap:,.2f} free for the bot "
+                          f"(< ${self.d.live_min_capital:,.0f}). Sell holdings or deposit cash.")
+                return
         if self.dry_run:
             self.log(f"  [dry] would {desc}"); return
         try:
@@ -521,11 +532,23 @@ class DailyExecutor:
         self.act(f"submitted {desc}")
 
     # ---------------------------------------------------------------- utils
+    def free_equity(self) -> float:
+        """Account equity minus the market value of every position this book
+        does not own. = cash + the book's own positions. Your other holdings
+        (and their gains or losses) never size the bot, so it cannot borrow
+        against them. Deposits count immediately."""
+        book_syms = set(DailyBook.load(self.state_dir, 0.0, self.fname).positions)
+        eq = float(self.broker.account().equity)
+        foreign = sum(abs(float(p.qty) * float(p.current_price or 0))
+                      for s, p in self.broker.positions().items() if s not in book_syms)
+        return eq - foreign
+
     def _sizing_equity(self, book: DailyBook) -> float:
-        """Paper: the virtual book. Live: the real account, which this book
-        owns outright -- deposits and withdrawals size in immediately."""
+        """Paper: the virtual book. Live: free equity, optionally capped."""
         if self.live:
-            return float(self.broker.account().equity)
+            free = self.free_equity()
+            cap = self.d.live_capital
+            return max(0.0, min(free, float(cap)) if cap else free)
         return book.equity(self._marks(book))
 
     def _marks(self, book: DailyBook) -> dict[str, float]:
