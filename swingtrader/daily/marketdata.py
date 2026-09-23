@@ -104,6 +104,53 @@ def eligibility(symbols: list[str], today: dt.date, *, price_min: float,
         columns=["prev_close", "adv20", "vol20", "prev_date"])
 
 
+QUOTE_BATCH = 200
+
+
+def schwab_rows(symbols: list[str], max_age_min: float = 10.0, client=None) -> pd.DataFrame:
+    """Decision-time rows from Schwab real-time consolidated quotes: regular-
+    session last price and the day's high/low. Closer to the research's SIP
+    data than IEX, whose range misses most of the tape."""
+    if client is None:
+        from .brokers import schwab_client
+        client = schwab_client()
+    now_ms = pd.Timestamp.now(tz="UTC").value / 1e6
+    rows = {}
+    for i in range(0, len(symbols), QUOTE_BATCH):
+        chunk = symbols[i:i + QUOTE_BATCH]
+        r = client.get_quotes(chunk)
+        r.raise_for_status()
+        for sym, d in (r.json() or {}).items():
+            q, reg = d.get("quote") or {}, d.get("regular") or {}
+            px = reg.get("regularMarketLastPrice") or q.get("lastPrice")
+            t = reg.get("regularMarketTradeTime") or q.get("tradeTime")
+            hi, lo = q.get("highPrice"), q.get("lowPrice")
+            if not (px and t and hi and lo):
+                continue
+            age = (now_ms - float(t)) / 60000
+            if age > max_age_min:
+                continue
+            rows[sym] = {"price": float(px), "high": float(hi), "low": float(lo),
+                         "trade_age_min": age}
+    return pd.DataFrame.from_dict(rows, orient="index")
+
+
+def decision_rows(symbols: list[str], source: str = "auto", max_age_min: float = 10.0,
+                  log=print) -> tuple[pd.DataFrame, str]:
+    """Pick the data source. auto: Schwab when a valid login exists, else
+    Alpaca. Any Schwab failure falls back to Alpaca rather than skipping the day."""
+    if source in ("auto", "schwab"):
+        try:
+            rows = schwab_rows(symbols, max_age_min)
+            if not rows.empty:
+                return rows, "schwab"
+            log("  Schwab quotes returned nothing fresh - falling back to Alpaca")
+        except Exception as exc:
+            if source == "schwab":
+                log(f"  Schwab quotes failed ({str(exc)[:90]}) - falling back to Alpaca")
+    return live_rows(symbols, max_age_min), "alpaca"
+
+
 def live_rows(symbols: list[str], max_age_min: float = 10.0) -> pd.DataFrame:
     """Decision-time price and day range for each symbol.
     price = IEX latest trade (real time); range = union of IEX and delayed-SIP

@@ -104,20 +104,26 @@ def schwab_credentials() -> tuple[str, str, str]:
     return k, s, cb
 
 
+def schwab_client():
+    """Token-file client (auto-refreshes the 30-minute access token). Raises
+    if there is no login or it is past Schwab's 7-day limit."""
+    k, s, _ = schwab_credentials()
+    age = schwab_token_age_s()
+    if age is None:
+        raise RuntimeError("no Schwab token yet - run: make schwab-login")
+    if age > TOKEN_MAX_AGE_S:
+        raise RuntimeError(f"Schwab token is {age/86400:.1f} days old (limit 7) - run: make schwab-login")
+    from schwab.auth import client_from_token_file
+    return client_from_token_file(str(schwab_token_path()), k, s)
+
+
 class SchwabAdapter:
     fractional = False
 
     def __init__(self, client=None, account_hash: str | None = None, clock_source=None):
         k, s, _ = schwab_credentials() if client is None else ("test", "test", "")
         if client is None:
-            age = schwab_token_age_s()
-            if age is None:
-                raise RuntimeError("no Schwab token yet - run: make schwab-login")
-            if age > TOKEN_MAX_AGE_S:
-                raise RuntimeError(f"Schwab token is {age/86400:.1f} days old (limit 7) - "
-                                   "run: make schwab-login")
-            from schwab.auth import client_from_token_file
-            client = client_from_token_file(str(schwab_token_path()), k, s)
+            client = schwab_client()
         self.c = client
         self.hash = account_hash or self._pick_account()
         self.key, self.secret = f"schwab:{k}", self.hash

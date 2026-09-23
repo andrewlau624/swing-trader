@@ -72,6 +72,7 @@ daily:
   live_capital: null             # null = all FREE equity (cash + the bot's own positions);
                                  # a number caps the bot at that many dollars
   live_min_capital: 500.0        # below this the live book makes no new buys
+  quote_source: auto             # 15:40 scan prices: Schwab real-time if logged in, else Alpaca
   daytrade_mode: auto            # auto = intraday leg live once equity >= daytrade_min_equity; off = never
   start_equity: 3000.0           # paper book's virtual start. live uses the real balance
   # PDT rule retired 2026-06-04 (FINRA Rule 4210; Alpaca 06-04, Schwab 06-08).

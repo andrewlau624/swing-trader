@@ -140,12 +140,13 @@ def test_live_close_phase_routes_through_schwab(tmp_path, monkeypatch):
     from swingtrader.daily import executor as E
     monkeypatch.setattr(E.md, "eligibility", lambda *a, **k: pd.DataFrame(
         {"prev_close": [10.0], "vol20": [0.9]}, index=["LOSER"]))
-    monkeypatch.setattr(E.md, "live_rows", lambda syms: pd.DataFrame(
+    monkeypatch.setattr(E.md, "live_rows", lambda syms, *a, **k: pd.DataFrame(
         {"price": [9.0], "high": [10.0], "low": [8.99]}, index=["LOSER"]))
     monkeypatch.setattr(E, "all_assets", lambda: SimpleNamespace(symbols=["LOSER"]))
     a = adapter()
     ex = E.DailyExecutor(Config.load(), account="live", broker=a, state_dir=tmp_path, log_dir=tmp_path)
     ex.notifier.send = lambda *x, **k: "skipped"
+    ex.d.quote_source = "alpaca"
     book = DailyBook(cash=3000, start_equity=3000)
     ex.phase_close(book, "2026-09-24", dt.datetime(2026, 9, 24, 15, 40, tzinfo=ET), a.clock())
     o = a.c.placed[0]
@@ -194,3 +195,38 @@ def test_live_sizes_from_free_equity_not_your_holdings(tmp_path, monkeypatch):
     assert ex2._sizing_equity(book) == pytest.approx(3514.60 - 1512.0)
     ex2.d.live_capital = 1500
     assert ex2._sizing_equity(book) == 1500
+
+
+
+class QuoteClient:
+    def __init__(self, payload):
+        self.payload, self.calls = payload, 0
+
+    def get_quotes(self, syms):
+        self.calls += 1
+        return Resp({k: v for k, v in self.payload.items() if k in syms})
+
+
+def test_schwab_quote_rows_parse_and_freshness():
+    from swingtrader.daily import marketdata as md
+    now = pd.Timestamp.now(tz="UTC").value / 1e6
+    c = QuoteClient({
+        "LOSER": {"quote": {"lastPrice": 9.01, "highPrice": 10.0, "lowPrice": 8.9, "tradeTime": now},
+                  "regular": {"regularMarketLastPrice": 9.0, "regularMarketTradeTime": now}},
+        "STALE": {"quote": {"lastPrice": 5, "highPrice": 6, "lowPrice": 4, "tradeTime": now - 3.6e6}},
+        "NOHILO": {"quote": {"lastPrice": 5, "tradeTime": now}}})
+    r = md.schwab_rows(["LOSER", "STALE", "NOHILO"], client=c)
+    assert list(r.index) == ["LOSER"], "stale (1h old) and incomplete quotes are dropped"
+    assert r.loc["LOSER", "price"] == 9.0, "regular-session last, not an extended-hours print"
+    assert (r.loc["LOSER", "high"], r.loc["LOSER", "low"]) == (10.0, 8.9)
+    md.schwab_rows([f"S{i}" for i in range(450)], client=c)
+    assert c.calls == 1 + 3, "batched 200 per request"
+
+
+def test_decision_rows_falls_back_to_alpaca(monkeypatch):
+    from swingtrader.daily import marketdata as md
+    def boom(*a, **k): raise RuntimeError("token expired")
+    monkeypatch.setattr(md, "schwab_rows", boom)
+    monkeypatch.setattr(md, "live_rows", lambda syms, *a, **k: pd.DataFrame({"price": [1.0]}, index=["X"]))
+    rows, src = md.decision_rows(["X"], "auto", log=lambda *a: None)
+    assert src == "alpaca" and list(rows.index) == ["X"]

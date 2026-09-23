@@ -291,15 +291,18 @@ class DailyExecutor:
             self.warn("night universe empty - skipping"); return
         foreign = self._foreign_symbols(book) | set(self.d.ibs_symbols) | set(book.positions)
         syms = [s for s in elig.index if s not in foreign]
-        rows = md.live_rows(syms)
+        rows, src = md.decision_rows(syms, self.d.quote_source, log=self.log)
         if rows.empty:
             self.warn("no live prices returned - skipping night leg"); return
+        self.log(f"[night] prices from {src.upper()} ({len(rows)} fresh quotes)")
         cols = [c for c in ("prev_close", "vol20") if c in elig.columns]
         rows = rows.join(elig[cols], how="inner")
         picks = sg.loser_picks(rows, day_ret_max=self.d.night_day_ret_max,
                                ibs_max=self.d.night_ibs_max, price_min=self.d.night_price_min,
                                price_max=self.d.night_price_max)
         self.log(f"[night] scanned {len(rows)} live names -> {len(picks)} signal(s)")
+        if src == "schwab":
+            self._log_alt_source(syms, elig, picks)
         if picks.empty:
             return
         n_raw = len(picks)
@@ -437,6 +440,25 @@ class DailyExecutor:
                      f"${self.d.daytrade_min_equity:,.0f}")
         elif was and not book.daytrade_live:
             self.warn(f"day-trade leg switched OFF: book equity ${equity:,.0f}")
+
+    def _log_alt_source(self, syms, elig, picks) -> None:
+        """Diagnostics only: what Alpaca's IEX data would have picked. Builds a
+        daily record of how much the data source changes the trades."""
+        try:
+            alt = md.live_rows(syms)
+            if alt.empty:
+                return
+            alt = alt.join(elig[[c for c in ("prev_close", "vol20") if c in elig.columns]], how="inner")
+            ap = sg.loser_picks(alt, day_ret_max=self.d.night_day_ret_max, ibs_max=self.d.night_ibs_max,
+                                price_min=self.d.night_price_min, price_max=self.d.night_price_max)
+            a, b = set(ap.index), set(picks.index)
+            self.log(f"[night] data check: Schwab {len(b)} picks, Alpaca would have {len(a)}; "
+                     f"both {len(a & b)}, Schwab-only {sorted(b - a)[:8]}, Alpaca-only {sorted(a - b)[:8]}")
+            with open(self.log_dir / "daily-source-diff.jsonl", "a") as fh:
+                fh.write(json.dumps({"date": dt.date.today().isoformat(), "schwab": sorted(b),
+                                     "alpaca": sorted(a)}) + "\n")
+        except Exception as exc:
+            self.log(f"[night] data check skipped: {str(exc)[:80]}")
 
     def _live_start(self) -> float:
         free = self.free_equity()

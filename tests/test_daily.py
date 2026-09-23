@@ -165,6 +165,7 @@ def _executor(tmp_path, monkeypatch, held=None):
     ex = DailyExecutor(Config.load(), broker=FakeBroker(held), state_dir=tmp_path,
                        log_dir=tmp_path)
     ex.notifier.send = lambda *a, **k: "notify skipped (test)"
+    ex.d.quote_source = "alpaca"      # never let a test reach a real Schwab login
     return ex
 
 
@@ -176,7 +177,7 @@ def test_close_phase_places_whole_share_moc_buys(tmp_path, monkeypatch):
                          "low": [8.99, 44.9, 17.9, 9.8]},
                         index=["LOSER", "PRICEY", "SWINGY", "FINE"])
     monkeypatch.setattr(E.md, "eligibility", lambda *a, **k: elig)
-    monkeypatch.setattr(E.md, "live_rows", lambda syms: live.loc[[s for s in syms if s in live.index]])
+    monkeypatch.setattr(E.md, "live_rows", lambda syms, *a, **k: live.loc[[s for s in syms if s in live.index]])
     monkeypatch.setattr(E, "all_assets", lambda: SimpleNamespace(symbols=list(elig.index)))
     (tmp_path / "book-reversion.json").write_text(json.dumps(
         {"positions": {"SWINGY": {}}, "pending": {}}))
