@@ -793,3 +793,29 @@ is dropped. On that day's real data: 20 -> 14 bets, the 6 SpaceX duplicates
 collapse into SPCU, and nothing unrelated is touched. It also catches a
 stock alongside its own leveraged ETF. No name parsing, so new products are
 covered as they launch. Crowding is now counted on distinct bets.
+
+---
+
+# Addendum 12 — news filters on the overnight leg: dead (2026-09-23)
+
+Point-in-time Alpaca/Benzinga headlines, published between the previous close
+and the 15:40 decision, for 17,432 honest overnight trades (vol ≥ 60%). 34%
+had news. Categories were fixed before looking; the exclusion rule was t < −3
+AND negative in both halves.
+
+| news | n | mean | 2021–23 | 2024–26 | excess vs same night |
+|---|---|---|---|---|---|
+| none | 66% | +18.3bp | +20.9 | +16.5 | +2.0 (t 0.8) |
+| FDA / trial | 0.9% | −8.2 | **−60** | **+68** | +8.5 (t 0.4) |
+| legal / fraud | 0.4% | −35.6 | −77 | +18 | −37.8 (t −0.9) |
+| dilution / offering | 1.4% | **+72.4** | +42 | +94 | +38.1 (t 1.6) |
+| earnings | 9.2% | +19.7 | +28 | +12 | +0.6 |
+| downgrade | 4.8% | +3.5 | −2 | +10 | +0.3 |
+
+Nothing passes: bad-news categories flip sign between halves, and after
+controlling for the night, every category is ≈ 0. The only outlier runs
+against intuition (dilution bounces most, consistent with a stock recovering
+toward its offering price) and is not significant. The leg buys *after* the
+market has priced the news; its edge is whether the selling overshot, which
+headlines do not measure. Same verdict as the swing strategy's news test.
+Binary-event risk is handled by sizing (10% per name, duplicate-bet filter).
