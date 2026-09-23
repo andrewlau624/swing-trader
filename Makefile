@@ -12,7 +12,7 @@ UNAME := $(shell uname -s)
 .DEFAULT_GOAL := help
 
 .PHONY: help setup env test lint kill-old persist unpersist persist-status \
-        daily-status daily-dry daily-once daily-logs daily-live-check daily-live-on daily-live-off schwab-login schwab-quote-check schwab-reminder \
+        daily-status daily-dry daily-once daily-logs daily-live-check daily-live-on daily-live-off schwab-login schwab-quote-check schwab-reminder review \
         results status positions slippage logs once dry digest notify-test \
         notify-setup doctor pull scan backtest clean stop persist-stop linger _lastlog pending
 
@@ -47,6 +47,7 @@ help:
 	@echo "  daily-dry      run the daily book's current phase, submit nothing"
 	@echo "  daily-once     run the daily book's current phase now (paper orders)"
 	@echo "  daily-logs     tail the daily book log"
+	@echo "  review SINCE=YYYY-MM-DD   live vs backtest: signal, fills, paper vs live, P&L"
 	@echo "  schwab-login      create/renew the Schwab API login (every 7 days!)"
 	@echo "  schwab-quote-check  compare Schwab vs Alpaca quotes (market hours)"
 	@echo "  daily-live-check  connect to the REAL-money account, change nothing"
@@ -226,6 +227,10 @@ daily-once:
 
 schwab-login:
 	@$(PY) scripts/schwab_login.py
+
+review:
+	@test -n "$(SINCE)" || { echo "usage: make review SINCE=YYYY-MM-DD   (first live day)"; exit 1; }
+	@$(PY) scripts/review.py --since $(SINCE) $(ARGS)
 
 schwab-reminder:
 	@$(PY) scripts/schwab_reminder.py
