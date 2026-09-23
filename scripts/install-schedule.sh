@@ -70,7 +70,7 @@ notes = {(9,5):"decide + submit market-on-open",
 for (h, m), note in notes.items():
     t = dt.datetime.combine(today, dt.time(h, m), tzinfo=et).astimezone(local)
     print(f"{t.minute:2d} {t.hour} * * 1-5 {app}/scripts/run-live.sh  # {h:02d}:{m:02d} ET - {note}")
-daily = [(9,15),(9,50)] + [(h,m) for h in range(10,16) for m in (1,31)] + [(15,40),(16,10)]
+daily = [(9,15),(9,50)] + [(h,m) for h in range(10,16) for m in (1,31)] + [(15,40),(15,57),(16,10)]
 for (h, m) in daily:
     t = dt.datetime.combine(today, dt.time(h, m), tzinfo=et).astimezone(local)
     print(f"{t.minute:2d} {t.hour} * * 1-5 {app}/scripts/run-daily.sh  # {h:02d}:{m:02d} ET - daily book")
@@ -87,6 +87,7 @@ PYEOF
       echo "50 9 * * 1-5 $APP/scripts/run-daily.sh  # daily book: reconcile"
       echo "1,31 10-15 * * 1-5 $APP/scripts/run-daily.sh  # daily book: intraday leg"
       echo "40 15 * * 1-5 $APP/scripts/run-daily.sh  # daily book: close auction (cutoff 15:50)"
+      echo "57 15 * * 1-5 $APP/scripts/run-daily.sh  # daily book: flatten intraday leg"
       echo "10 16 * * 1-5 $APP/scripts/run-daily.sh  # daily book: reconcile closing fills"
       echo "7 */2 * * * cd $APP && ./.venv/bin/python scripts/schwab_reminder.py >> logs/cron-reminder.log 2>&1  # Schwab login reminder"
     } >> "$tmp"

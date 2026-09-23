@@ -56,6 +56,8 @@ def phase_for(now_et: dt.datetime) -> str:
         return "intraday"
     if 15 * 60 + 38 <= t < 15 * 60 + 50:
         return "close"
+    if 15 * 60 + 55 <= t < 16 * 60:
+        return "flatten"
     return "reconcile"
 
 
@@ -142,11 +144,13 @@ class DailyExecutor:
                           "re-uses same-day sale proceeds; in a cash account that is a "
                           "good-faith violation. Enable margin at Alpaca before trading.")
                 return 1
-        if self.live:
-            self._sync_live_cash(book)
         trading_day = clock.is_open or (
             pd.Timestamp(clock.next_open).tz_convert(ET).date() == now.date())
         self.reconcile(book, today)
+        if self.live:
+            # AFTER reconcile: fresh fills must count as the bot's own, or they
+            # are subtracted as "your holdings" and then again as spent cash
+            self._sync_live_cash(book)
 
         if not trading_day:
             self.log("not a trading day - reconcile only")
@@ -156,6 +160,8 @@ class DailyExecutor:
             self.phase_intraday(book, today, now, clock)
         elif phase == "close":
             self.phase_close(book, today, now, clock)
+        elif phase == "flatten":
+            self._flatten_noise(book, today, tif="day", kind="flat")
 
         marks = self._marks(book)
         eq = book.equity(marks)
@@ -209,6 +215,10 @@ class DailyExecutor:
     def phase_open(self, book: DailyBook, today: str) -> None:
         marks = self._marks(book)
         equity = self._sizing_equity(book)
+        if book.leg_positions("noise"):
+            self.warn(f"intraday-leg position left over from yesterday: {list(book.leg_positions('noise'))} "
+                      "- closing it at the open")
+            self._flatten_noise(book, today, tif="day", kind="leftover")
         self._settle_noise(book, today)
         self._gate(book, equity)
 
@@ -280,9 +290,6 @@ class DailyExecutor:
         if close_et.date() != now.date() or close_et.hour != 16:
             self.log("early close today - night leg skipped (research excludes half days)")
             return
-        if book.daytrade_live and book.noise.get("pos", 0) != 0:
-            self._flatten_noise(book, today)
-
         elig_path = self.state_dir / f"daily-universe-{today}.json"
         if not elig_path.exists():
             self.warn("no eligibility file for today (did the 09:15 run fail?) - building now")
@@ -527,13 +534,22 @@ class DailyExecutor:
                         qty=abs(delta), tif="day", ref_px=px,
                         kind=f"m{n['last_m']}")
 
-    def _flatten_noise(self, book: DailyBook, today: str) -> None:
-        sym = book.noise.get("instrument") or self.d.noise_symbol
-        have = float(book.positions.get(sym, {}).get("qty", 0.0))
-        if abs(have) >= 1:
+    def _flatten_noise(self, book: DailyBook, today: str, tif: str = "day",
+                       kind: str = "flat") -> None:
+        """Close every intraday-leg position. 15:57 ET with a market order
+        (Alpaca paper expires close-auction orders unpredictably -- on the first
+        live day a CLS flatten of QQQ filled 0 of 7), and again at the next
+        open as a safety net for anything left over."""
+        for sym, p in list(book.leg_positions("noise").items()):
+            have = float(p["qty"])
+            if abs(have) < 1e-9:
+                continue
+            if any(o["sym"] == sym for o in book.open_orders().values()):
+                self.log(f"[noise] {sym}: an order is still working - not stacking a flatten"); continue
+            self.log(f"[noise] flattening {have:+g} {sym} ({kind})")
             self._order(book, today, sym, "sell" if have > 0 else "buy", "noise",
-                        qty=abs(have), tif="cls", ref_px=float(book.noise.get("entry") or 0),
-                        kind="flat")
+                        qty=abs(have), tif=tif, ref_px=float(book.noise.get("entry") or p["avg_px"]),
+                        kind=kind)
 
     # --------------------------------------------------------------- orders
     def _order(self, book: DailyBook, today: str, sym: str, side: str, leg: str, *,
@@ -576,12 +592,13 @@ class DailyExecutor:
         self.act(f"submitted {desc}")
 
     # ---------------------------------------------------------------- utils
-    def free_equity(self) -> float:
+    def free_equity(self, book: DailyBook | None = None) -> float:
         """Account equity minus the market value of every position this book
         does not own. = cash + the book's own positions. Your other holdings
         (and their gains or losses) never size the bot, so it cannot borrow
         against them. Deposits count immediately."""
-        book_syms = set(DailyBook.load(self.state_dir, 0.0, self.fname).positions)
+        b = book if book is not None else DailyBook.load(self.state_dir, 0.0, self.fname)
+        book_syms = b.owned_symbols()          # positions AND symbols with pending bot orders
         eq = float(self.broker.account().equity)
         foreign = sum(abs(float(p.qty) * float(p.current_price or 0))
                       for s, p in self.broker.positions().items() if s not in book_syms)
@@ -598,7 +615,7 @@ class DailyExecutor:
     def _sizing_equity(self, book: DailyBook) -> float:
         """Paper: the virtual book. Live: free equity, optionally capped."""
         if self.live:
-            free = self.free_equity()
+            free = self.free_equity(book)
             cap = self.live_cap()
             return max(0.0, min(free, cap) if cap else free)
         return book.equity(self._marks(book))

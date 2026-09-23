@@ -127,6 +127,8 @@ def test_phase_clock():
     assert phase_for(at(15, 31)) == "intraday"
     assert phase_for(at(15, 40)) == "close"
     assert phase_for(at(15, 52)) == "reconcile", "past the MOC cutoff: never submit"
+    assert phase_for(at(15, 57)) == "flatten"
+    assert phase_for(at(16, 10)) == "reconcile"
 
 
 # --------------------------------------------- executor against a fake broker
@@ -388,7 +390,7 @@ def test_live_noise_uses_qqqm_when_ibs_holds_qqq(tmp_path, monkeypatch):
     assert r.side.value == "sell" and r.qty == math.floor(2.0 * b.equity({"QQQ": 500}) / 200.0)
 
 
-def test_live_noise_flattens_its_own_instrument_at_the_close(tmp_path, monkeypatch):
+def test_live_noise_flattens_with_a_market_order_at_1557(tmp_path, monkeypatch):
     ex = _executor(tmp_path, monkeypatch)
     b = _live_noise_book()
     b.noise["instrument"] = "QQQM"
@@ -396,7 +398,21 @@ def test_live_noise_flattens_its_own_instrument_at_the_close(tmp_path, monkeypat
     ex._flatten_noise(b, "2026-09-24")
     r = ex.broker.client.submitted[0]
     assert r.symbol == "QQQM" and r.side.value == "buy" and r.qty == 12
-    assert r.time_in_force.value == "cls"
+    assert r.time_in_force.value == "day", "Alpaca paper expired a CLS flatten of QQQ: 0 of 7 filled"
+
+
+def test_open_phase_closes_a_leftover_intraday_position(tmp_path, monkeypatch):
+    from swingtrader.daily import executor as E
+    monkeypatch.setattr(E.md, "sip_daily", lambda syms, *a, **k: {})
+    monkeypatch.setattr(E.md, "eligibility", lambda *a, **k: pd.DataFrame())
+    monkeypatch.setattr(E, "all_assets", lambda: SimpleNamespace(symbols=[]))
+    ex = _executor(tmp_path, monkeypatch, held={"QQQ": SimpleNamespace(current_price="740", qty="-7")})
+    book = DailyBook(cash=8173, start_equity=3000)
+    book.positions["QQQ"] = {"qty": -7, "avg_px": 739.08, "leg": "noise", "entry_date": "2026-09-23"}
+    ex.phase_open(book, "2026-09-24")
+    r = [x for x in ex.broker.client.submitted if x.symbol == "QQQ"][0]
+    assert r.side.value == "buy" and r.qty == 7 and r.time_in_force.value == "day"
+    assert any("left over" in w for w in ex.warnings)
 
 
 def test_duplicate_bets_collapse_to_one():

@@ -4,6 +4,7 @@
 #   09:50        reconcile opening fills
 #   10:01-15:31  intraday leg decision every 30 min (shadow below $25k)
 #   15:40        close: scan losers, buy at the close auction (cutoff 15:50)
+#   15:57        flatten the intraday leg with a market order
 #   16:10        reconcile closing fills
 [Unit]
 Description=swing-trader daily book schedule
@@ -14,6 +15,7 @@ OnCalendar=Mon..Fri *-*-* 09:50:00 America/New_York
 OnCalendar=Mon..Fri *-*-* 10..15:01:00 America/New_York
 OnCalendar=Mon..Fri *-*-* 10..15:31:00 America/New_York
 OnCalendar=Mon..Fri *-*-* 15:40:00 America/New_York
+OnCalendar=Mon..Fri *-*-* 15:57:00 America/New_York
 OnCalendar=Mon..Fri *-*-* 16:10:00 America/New_York
 # Persistent=false on purpose: a run replayed hours late (after downtime)
 # must not fire a stale phase. phase_for() also refuses the close window

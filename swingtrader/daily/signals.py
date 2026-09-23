@@ -57,6 +57,8 @@ def momentum_top(closes: pd.DataFrame, today: pd.Timestamp, k: int,
     Replaces a hand-picked tech list: same idea, chosen by rule, so it rotates
     on its own if tech stops leading. closes: session-date index, one column
     per ETF, bars strictly before today."""
+    if closes is None or closes.empty or not isinstance(closes.index, pd.DatetimeIndex):
+        return []                     # no data today: hold nothing rather than crash
     c = closes[closes.index < today]
     mom = c.shift(skip) / c.shift(lookback) - 1
     month_ends = mom.groupby([mom.index.year, mom.index.month]).tail(1)

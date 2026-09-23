@@ -323,3 +323,15 @@ def test_live_book_created_before_selling_still_trades_after(tmp_path, monkeypat
     ex.phase_close(book, "2026-09-24", dt.datetime(2026, 9, 24, 15, 40, tzinfo=ET), after.clock())
     assert after.c.placed, "must buy with the freed cash, not report 'cash exhausted'"
     assert leg(after.c.placed[0])["quantity"] == int(2002.48 * 0.5 * 0.10 // 9.0)
+
+
+
+def test_fresh_fills_are_not_counted_as_your_holdings(tmp_path, monkeypatch):
+    """16:10 run: Schwab already shows the 19 new night positions; the book has
+    them as pending orders. They must count as the bot's, not as yours."""
+    from swingtrader.daily import executor as E
+    a = adapter(positions=[("AAPL", 3, 340.0), ("JAGX", 2, 8.91)], equity=1020 + 1227.14)
+    ex = E.DailyExecutor(Config.load(), account="live", broker=a, state_dir=tmp_path, log_dir=tmp_path)
+    book = DailyBook(cash=1000, start_equity=1000)
+    book.register("dlv.JAGX.x", sym="JAGX", side="buy", leg="night", ref_px=9.0, tif="cls")
+    assert ex.free_equity(book) == pytest.approx(1227.14), "JAGX is the bot's (pending order), AAPL is yours"
