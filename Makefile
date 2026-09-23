@@ -141,9 +141,11 @@ persist-status:
 	  elif [ -n "$$R" ]; then echo "  last timer run: success at $${W:-?}"; fi
 	@R=$$(./scripts/sysd.sh show daily-trader.service -p Result --value 2>/dev/null); \
 	  W=$$(./scripts/sysd.sh show daily-trader.service -p ExecMainExitTimestamp --value 2>/dev/null); \
-	  if [ -n "$$R" ] && [ "$$R" != "success" ]; then \
-	    echo "  daily book last run: $$R at $${W:-?}  <-- FAILED"; \
-	  elif [ -n "$$R" ]; then echo "  daily book last run: success at $${W:-?}"; fi
+	  if [ -z "$$W" ] || [ "$$W" = "n/a" ]; then \
+	    [ -n "$$R" ] && echo "  daily book last run: not run by the timer yet"; \
+	  elif [ "$$R" != "success" ]; then \
+	    echo "  daily book last run: $$R at $$W  <-- FAILED"; \
+	  else echo "  daily book last run: success at $$W"; fi
 	@echo "--- cron ---"
 	@crontab -l 2>/dev/null | grep -A12 'swing-trader' || echo "  no cron entries"
 	@echo "--- clocks ---"
