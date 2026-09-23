@@ -1,0 +1,13 @@
+exec(open(__file__.replace('combo.py','ovnport.py')).read().split("rules={")[0])
+import sys; sys.path.insert(0,SP)
+from noise import noise
+A,_=port((day<=-0.08)&(ibs<0.1),-day,maxw=0.1,cost=5)
+A15,_=port((day<=-0.08)&(ibs<0.1),-day,maxw=0.1,cost=10)
+B,_=noise('QQQ',cost_bps=0.5); B1,_=noise('QQQ',cost_bps=0.5,sizing='fixed')
+df=pd.concat([A.rename('night'),A15.rename('night10'),B.rename('dayQQQ'),B1.rename('dayQQQ1x')],axis=1).loc['2020-11':].fillna(0)
+print(df.corr().round(2))
+for c in df: print(stats(df[c],c))
+print(stats(df.night+df.dayQQQ,'night + QQQ noise (vol-tgt)'))
+print(stats(df.night10+df.dayQQQ,'night(10bp) + QQQ noise'))
+print(stats(df.night+df.dayQQQ1x,'night + QQQ noise 1x'))
+print(stats(0.5*df.night+df.dayQQQ,'0.5 night + QQQ noise'))

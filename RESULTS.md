@@ -568,3 +568,76 @@ that configuration (test: `test_overlapping_trade_windows_are_refused`).
 Other results this round: `z_window` 10 → 8.6%, 40 → 8.3% (20 stays);
 formation 63 → 4.1%, 252 → 4.6% (126 stays); `position_pct` 0.15 uncapped →
 20.1% (more size, lower Sharpe).
+
+---
+
+# Addendum 6 — daily-cadence strategies (2026-09-22)
+
+Goal: something that trades every day and is more consistent than a ~36
+trades/year swing book. Data re-pulled from the **SIP** feed (consolidated
+tape). IEX-only bars have wrong opens (RGTI 2026-09-18: IEX 16.31, official
+16.25) and ~5% of true volume, so they are unusable for gap, auction or volume work.
+Scripts are in `research/daily-strategies/`.
+
+## Honest head-to-head, Feb 2021 – Sep 2026
+
+| leg | CAGR | Sharpe | maxDD | +months | active days |
+|---|---|---|---|---|---|
+| swing (current, for reference) | 15.1 | 0.95 | −14.4 | — | ~14% capital used |
+| **IBS tech ETFs** (QQQ/SMH/XLK, IBS<0.2, enter next open, hold 1 day) | 20.1 | 1.27 | −14.9 | 59% | 43% |
+| **QQQ intraday "noise area" momentum** (flat every night) | 13.8 | 0.98 | −24.8 | 69% | 60% |
+| **Overnight loser bounce** (signal at 15:50, MOC in / MOO out, 7.5bp/side) | 20.3 | 0.79 | −29.3 | 62% | 97% |
+| **combo: QQQ day + ½ night + ½ IBS** | **38.4** | **1.58** | **−17.8** | **72%** | 99% |
+
+Pairwise correlations between the three legs: |ρ| ≤ 0.06. Combo by year:
+14 / 34 / 52 / 46 / 43 / 28 (2026 YTD). Capital does not stack beyond 1×
+overnight. Intraday it can reach ~4.5× if noise is at max leverage while IBS
+is held, so live needs noise leverage capped at 3.5× (PDT account, ≥ $25k).
+
+### 1. IBS on tech ETFs — most robust
+Longer history (2016+). 2016–20 / 2021–26: 19.4% / 19.9% CAGR executing at
+the next open. Works on QQQ, SMH, XLK, SOXL, TECL, TQQQ; does nothing on
+defensive, bond or commodity ETFs, and weakly on the 18-ETF equity basket (12.7%).
+**Weakness:** the tech list was chosen after seeing per-ETF results. With the
+signal at 15:50 and an MOC fill, QQQ degrades (13.9 → 8.8%) and SMH holds
+(28 → 23%). Trade it at the next open, not MOC.
+
+### 2. QQQ noise-area momentum (Zarattini/Aziz/Barbon 2024)
+Reproduces the paper gross. 14.7% / 14.7% CAGR in both halves at 0.5bp/side.
+Robust to a 1–5 minute fill delay (13.7–13.9%). Also works on TQQQ (1×: 25%)
+and on SMH/SOXL in 2021+. **Fails on SPY after costs and on IWM entirely.**
+Cost-sensitive: at 1bp/side it drops to 9%. Needs a liquid Nasdaq instrument.
+
+### 3. Overnight loser bounce — biggest raw edge, most fragile
+Stocks with day return ≤ −8% that close within 10% of the day's low (IBS < 0.1),
+price ≥ $5, ADV ≥ $10M. Buy at the close auction, sell at the open auction.
+The daily close *is* the 16:00 auction print (exact match 90%). Controls pass:
+random names with the same count earn 11% (market overnight drift); the same
+losers closing off the low (IBS > 0.5) lose 20%/yr. Not outlier-driven:
+winsorised at ±10%/night it still gives 40% CAGR.
+**The trap:** with the signal computed from the close (lookahead) it shows
+58% CAGR / Sharpe 1.75. Recomputed at 15:50, when an MOC order must be sent,
+it is **31% / 1.08** at 5bp and **20% / 0.79** at 7.5bp. Nearly all of the
+honest return is 2024+ (2021–23: −1 / 0 / 7%). Strongest subsets: vol20 >
+120% (+81bp/trade) and names up >20% in the prior 20 days (+87bp, positive
+all 7 years). vol20 < 60% is negative.
+
+## Dead (do not redo)
+
+| idea | verdict |
+|---|---|
+| Mobius **TMO** as entry | **negative edge**: cross-up from oversold lags −20bp/5d (t −7.5), losing all 7 years; high-vol −54bp. It fires after the bounce |
+| TMO as swing veto | +1.8pp risk-matched, but it is the overnight-share filter by another name (counts close<open); adds nothing on top of it |
+| **TTM Squeeze** | fire → ~0 or negative; "in squeeze" −11bp/10d. No edge; ETF versions lose to buy-and-hold |
+| IBS + TMO/TTM hybrids on ETFs | flip sign between 2016–20 and 2021–26 = noise |
+| Stocks-in-play 5-min ORB (Zarattini/Aziz) | negative **gross** (−12bp/trade, 10% win) |
+| QQQ / SPY 5-min ORB | QQQ 3–13% decaying post-2021; SPY ≈ 0 |
+| Gap-down reclaim long | negative every variant |
+| Gap-up ≥ 15% fade short | +55bp gross, 3.8% CAGR at 20bp, needs HTB borrow |
+| RSI(2) Connors on ETFs | flat 2016–20, works only 2021+ |
+
+## Bugs caught during the research
+- Minute fetch: an API error on "recent SIP data" left the previous year's
+  frame in scope, and it was saved as 2026. Caught before use.
+- Gap minute fetch used fixed UTC offsets, which drop the last hour in winter (EST).
+  Re-fetched with America/New_York.

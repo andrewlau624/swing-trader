@@ -110,3 +110,16 @@ but "should" is not "did".
 - Crypto sleeve (24/7, AVAX/DOT/LTC screen as tradable)
 - Limit orders at the bid instead of market-on-open — this strategy *supplies*
   liquidity, so it may earn the spread rather than pay it
+
+---
+
+## 4. Daily-cadence book — NEW, see RESULTS.md addendum 6
+
+Three near-uncorrelated legs. Combo 38% CAGR / Sharpe 1.58 / −18% DD,
+positive every year 2021–26, trades daily. Suggested paper order, most
+robust first:
+1. IBS tech ETFs at next open (simplest, no intraday infra needed)
+2. QQQ noise-area intraday (needs a 30-minute intraday loop)
+3. Overnight loser bounce (15:50 scan → MOC, MOO exit): regime-dependent,
+   paper-trade it the longest before trusting it
+Each needs its own executor. None of this touches the current swing config.
