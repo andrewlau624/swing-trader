@@ -68,6 +68,7 @@ daily:
   # `make daily-live-on` / `make daily-live-off`. (.env survives `make pull`;
   # this file is reset by it.) Live keys: ALPACA_LIVE_API_KEY / _SECRET_KEY.
   accounts: ["paper"]
+  live_broker: schwab            # real money: schwab (paper always runs on Alpaca)
   daytrade_mode: auto            # auto = intraday leg live once equity >= daytrade_min_equity; off = never
   start_equity: 3000.0           # paper book's virtual start. live uses the real balance
   # PDT rule retired 2026-06-04 (FINRA Rule 4210; Alpaca 06-04, Schwab 06-08).

@@ -34,6 +34,7 @@ import pandas as pd
 
 from ..config import Config, ROOT, get_env
 from ..live.broker import PaperBroker
+from .brokers import AlpacaAdapter, SchwabAdapter, make_adapter
 from ..live.lock import AccountLock, account_fingerprint
 from ..live.notify import Notifier
 from ..universe import all_assets, valid_symbol
@@ -67,7 +68,9 @@ class DailyExecutor:
         self.account = account
         self.live = account == "live"
         self.dry_run = dry_run
-        self.broker = broker or self._make_broker(account)
+        b = broker or make_adapter(account, getattr(cfg.daily, "live_broker", "schwab"))
+        # a raw PaperBroker (or test double) gets the Alpaca adapter
+        self.broker = b if hasattr(b, "submit") else AlpacaAdapter(b)
         self.fname = book_file(account)
         self.tag = "" if not self.live else "-live"
         self.state_dir = state_dir or ROOT / "state"
@@ -77,18 +80,6 @@ class DailyExecutor:
         self.actions: list[str] = []
         self.warnings: list[str] = []
         self.notifier = Notifier(self.state_dir)
-
-    @staticmethod
-    def _make_broker(account: str) -> PaperBroker:
-        if account == "paper":
-            return PaperBroker()
-        if account != "live":
-            raise ValueError(f"unknown daily account {account!r} (paper|live)")
-        k, s = get_env("ALPACA_LIVE_API_KEY"), get_env("ALPACA_LIVE_SECRET_KEY")
-        if not (k and s):
-            raise RuntimeError("daily.accounts includes 'live' but ALPACA_LIVE_API_KEY / "
-                               "ALPACA_LIVE_SECRET_KEY are not in .env")
-        return PaperBroker(paper=False, key=k, secret=s)
 
     # ------------------------------------------------------------- logging
     def log(self, msg: str) -> None:
@@ -134,6 +125,12 @@ class DailyExecutor:
         self.log(f"=== daily book [{self.account.upper()}] | phase {phase} | {now:%Y-%m-%d %H:%M} ET | "
                  f"market {'OPEN' if clock.is_open else 'closed'} ===")
 
+        if self.live and isinstance(self.broker, SchwabAdapter):
+            from .brokers import TOKEN_WARN_AGE_S, schwab_token_age_s
+            age = schwab_token_age_s()
+            if age is not None and age > TOKEN_WARN_AGE_S:
+                self.warn(f"Schwab login is {age/86400:.1f} days old and dies at 7 - "
+                          "run `make schwab-login` on the server TODAY")
         if self.live:
             if getattr(acct, "trading_blocked", False) or getattr(acct, "account_blocked", False):
                 self.warn("LIVE account is blocked from trading - nothing submitted")
@@ -180,14 +177,11 @@ class DailyExecutor:
         """Book any fills since the last run. Broker is the source of truth."""
         for coid, o in list(book.open_orders().items()):
             try:
-                bo = self.broker.client.get_order_by_client_id(coid)
+                status, fq, px, when = self.broker.order_status(coid, o)
             except Exception as exc:
                 self.warn(f"cannot look up order {coid}: {str(exc)[:80]}")
                 continue
-            status = str(bo.status).split(".")[-1].lower()
-            fq = float(bo.filled_qty or 0)
-            px = float(bo.filled_avg_price or 0)
-            when = str(bo.filled_at or bo.updated_at or today)
+            when = when or today
             new = book.apply_fill(coid, fq, px, status, when)
             if new:
                 ref = float(o.get("ref_px") or px)
@@ -473,6 +467,11 @@ class DailyExecutor:
         pend = [o for o in book.open_orders().values() if o["sym"] == sym]
         if pend:
             self.log(f"[noise:LIVE] order still working on {sym} - not stacking another"); return
+        if have * want < 0:
+            # flipping long<->short in one order is fragile at both brokers:
+            # flatten now, open the new side at the next decision point
+            self.log(f"[noise:LIVE] flip {have:+g} -> {want:+d}: flattening first")
+            want = 0
         delta = want - have
         if abs(delta) >= 1:
             self._order(book, today, sym, "buy" if delta > 0 else "sell", "noise",
@@ -491,8 +490,6 @@ class DailyExecutor:
     def _order(self, book: DailyBook, today: str, sym: str, side: str, leg: str, *,
                tif: str, ref_px: float, kind: str, qty: float | None = None,
                notional: float | None = None) -> None:
-        from alpaca.trading.enums import OrderSide, TimeInForce
-        from alpaca.trading.requests import MarketOrderRequest
         coid = PaperBroker.coid("dlv" if self.live else "dly", sym, today, f"{leg}-{side}-{kind}")
         if coid in book.orders:
             self.log(f"  {sym}: {leg} {side} already submitted today (idempotent skip)"); return
@@ -500,16 +497,9 @@ class DailyExecutor:
                f" [{tif.upper()}] ref {ref_px:.2f}"
         if self.dry_run:
             self.log(f"  [dry] would {desc}"); return
-        req = dict(symbol=sym, side=OrderSide.BUY if side == "buy" else OrderSide.SELL,
-                   time_in_force={"day": TimeInForce.DAY, "opg": TimeInForce.OPG,
-                                  "cls": TimeInForce.CLS}[tif],
-                   client_order_id=coid)
-        if notional:
-            req["notional"] = round(notional, 2)
-        else:
-            req["qty"] = qty if tif == "day" else int(qty)
         try:
-            o = self.broker.client.submit_order(MarketOrderRequest(**req))
+            broker_id = self.broker.submit(sym, side, tif, coid, qty=qty,
+                                           notional=notional, ref_px=ref_px)
         except Exception as exc:
             msg = str(exc)
             if "client_order_id" in msg or "duplicate" in msg.lower():
@@ -524,7 +514,10 @@ class DailyExecutor:
                 return
             self.warn(f"{desc} REJECTED: {msg[:140]}"); return
         book.register(coid, sym=sym, side=side, leg=leg, ref_px=ref_px, tif=tif,
-                      broker_id=str(o.id), submitted=dt.datetime.now().isoformat(timespec="seconds"))
+                      broker_id=broker_id, submitted=dt.datetime.now().isoformat(timespec="seconds"))
+        # persist immediately: Schwab has no client order id, so the book is
+        # the idempotency record -- a crash here must not lose the order
+        book.save(self.state_dir, self.fname)
         self.act(f"submitted {desc}")
 
     # ---------------------------------------------------------------- utils

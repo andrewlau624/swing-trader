@@ -116,6 +116,7 @@ class DailyCfg:
     # account (ALPACA_LIVE_API_KEY) sized from its actual equity. Both may run
     # side by side: `make daily-live-on` / `make daily-live-off`.
     accounts: list = field(default_factory=lambda: ["paper"])
+    live_broker: str = "schwab"      # broker for the "live" account: schwab | alpaca
     # NOTE: the real-money switch itself lives in .env (DAILY_LIVE=on), not
     # here -- `make pull` does `git reset --hard`, which would silently revert
     # a switch stored in this tracked file. See resolved_accounts().

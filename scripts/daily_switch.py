@@ -29,34 +29,57 @@ def set_live(on: bool) -> None:
 
 
 def check() -> bool:
+    cfg = Config.load()
+    if cfg.daily.live_broker == "schwab":
+        return check_schwab()
+    return check_alpaca_live()
+
+
+def check_schwab() -> bool:
+    from swingtrader.daily.brokers import SchwabAdapter, schwab_token_age_s
+    if not (get_env("SCHWAB_APP_KEY") and get_env("SCHWAB_APP_SECRET")):
+        print("SCHWAB_APP_KEY / SCHWAB_APP_SECRET are not in .env.")
+        print("developer.schwab.com -> Dashboard -> your app -> App Key and Secret.")
+        return False
+    age = schwab_token_age_s()
+    if age is None:
+        print("no Schwab login yet - run: make schwab-login"); return False
+    print(f"Schwab login age {age/86400:.1f} days (dies at 7; renew with make schwab-login)")
+    try:
+        b = SchwabAdapter(); a = b.account(); pos = b.positions()
+    except Exception as exc:
+        print(f"cannot reach the Schwab account: {exc}"); return False
+    print(f"LIVE (Schwab) account ...{str(a.account_number)[-4:]}  type {a.account_type}")
+    print(f"  equity ${a.equity:,.2f}   cash ${a.cash:,.2f}   buying power ${a.buying_power:,.2f}"
+          f"   est. intraday multiplier {a.multiplier:g}")
+    print(f"  open positions {len(pos)}")
+    ok = True
+    if a.account_type != "MARGIN":
+        print("  PROBLEM: not a margin account. This book re-uses same-day sale proceeds;")
+        print("  in a cash account that is a good-faith violation. Apply for margin at Schwab.")
+        ok = False
+    if a.trading_blocked:
+        print("  PROBLEM: account is restricted to closing trades only."); ok = False
+    if pos:
+        print("  NOTE: existing positions are left alone (the book only trades what it owns).")
+    return ok
+
+
+def check_alpaca_live() -> bool:
     k, s = get_env("ALPACA_LIVE_API_KEY"), get_env("ALPACA_LIVE_SECRET_KEY")
     if not (k and s):
-        print("ALPACA_LIVE_API_KEY / ALPACA_LIVE_SECRET_KEY are not in .env.")
-        print("Get them from app.alpaca.markets -> switch to the LIVE account -> API keys,")
-        print("then add both lines to .env on the machine that runs the bot.")
-        return False
+        print("ALPACA_LIVE_API_KEY / ALPACA_LIVE_SECRET_KEY are not in .env."); return False
     from swingtrader.live.broker import PaperBroker
     try:
-        b = PaperBroker(paper=False, key=k, secret=s)
-        a = b.account()
+        b = PaperBroker(paper=False, key=k, secret=s); a = b.account()
     except Exception as exc:
         print(f"cannot connect to the live account: {exc}"); return False
     mult = float(a.multiplier or 1)
-    print(f"LIVE account {str(a.account_number)[:3]}***  status {a.status}")
-    print(f"  equity ${float(a.equity):,.2f}   cash ${float(a.cash):,.2f}   "
-          f"margin multiplier {mult:g} (4 = leverage-enabled: full intraday leg)")
-    print(f"  open positions {len(b.positions())}")
-    ok = True
+    print(f"LIVE (Alpaca) account {str(a.account_number)[:3]}***  status {a.status}")
+    print(f"  equity ${float(a.equity):,.2f}   cash ${float(a.cash):,.2f}   margin multiplier {mult:g}")
+    ok = mult >= 2 and not (a.trading_blocked or a.account_blocked)
     if mult < 2:
-        print("  PROBLEM: not a margin account. This book sells at the open and re-buys at")
-        print("  the close with the same unsettled cash; in a cash account that is a")
-        print("  good-faith violation. Enable margin in the Alpaca dashboard (needs >= $2k).")
-        ok = False
-    if a.trading_blocked or a.account_blocked:
-        print("  PROBLEM: account is blocked from trading."); ok = False
-    if b.positions():
-        print("  NOTE: positions already exist. The daily book never trades a symbol it")
-        print("  does not own, so they are left alone, but they are not part of the experiment.")
+        print("  PROBLEM: not a margin account (good-faith violations with this book).")
     return ok
 
 
@@ -71,7 +94,7 @@ def main():
             print("real money is already ON:", accts); return
         if not check():
             sys.exit("\nnot switching on.")
-        print("\nThis places REAL orders with REAL money from the next scheduled run:")
+        print(f"\nThis places REAL orders with REAL money via {cfg.daily.live_broker.upper()} from the next scheduled run:")
         print(f"  IBS leg {cfg.daily.ibs_weight:.0%} + overnight leg {cfg.daily.night_weight:.0%} of the account,")
         print(f"  intraday QQQ leg {'live (equity >= $' + format(cfg.daily.daytrade_min_equity, ',.0f') + ')' if cfg.daily.daytrade_mode == 'auto' else 'OFF'}.")
         if input('Type REAL MONEY to confirm: ').strip() != "REAL MONEY":

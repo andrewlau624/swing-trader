@@ -142,7 +142,9 @@ instruments (book.noise is single-instrument today).
 same two overnight legs. When the real account reaches $25k, the QQQ
 intraday leg switches on by itself (`daytrade_mode: auto`).
 
-**Going real-money** (paper keeps running beside it, for comparison):
+**Going real-money — via SCHWAB, see SCHWAB.md** (paper stays on Alpaca and
+keeps running beside it). The Alpaca-live steps below still work if
+`daily.live_broker: alpaca`.
 ```bash
 # 1. Alpaca dashboard: open the LIVE account, make sure it is a MARGIN
 #    account (a cash account causes good-faith violations with this book),
