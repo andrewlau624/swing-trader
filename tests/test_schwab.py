@@ -154,3 +154,13 @@ def test_token_age(tmp_path):
     assert schwab_token_age_s(p) is None
     p.write_text(json.dumps({"creation_timestamp": dt.datetime.now().timestamp() - 3 * 86400, "token": {}}))
     assert 2.9 * 86400 < schwab_token_age_s(p) < 3.1 * 86400
+
+
+def test_account_number_accepts_last_four(monkeypatch):
+    monkeypatch.setenv("SCHWAB_ACCOUNT_NUMBER", "5678")
+    assert adapter().hash == "HASH"
+    monkeypatch.setenv("SCHWAB_ACCOUNT_NUMBER", "12345678")
+    assert adapter().hash == "HASH"
+    monkeypatch.setenv("SCHWAB_ACCOUNT_NUMBER", "9999")
+    with pytest.raises(RuntimeError, match="matches 0"):
+        adapter()

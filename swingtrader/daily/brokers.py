@@ -127,12 +127,16 @@ class SchwabAdapter:
     def _pick_account(self) -> str:
         r = self.c.get_account_numbers(); r.raise_for_status()
         rows = r.json()
-        want = get_env("SCHWAB_ACCOUNT_NUMBER")
+        want = (get_env("SCHWAB_ACCOUNT_NUMBER") or "").strip()
         if want:
-            for x in rows:
-                if x["accountNumber"] == want:
-                    return x["hashValue"]
-            raise RuntimeError(f"SCHWAB_ACCOUNT_NUMBER {want[-4:]} not linked to this app")
+            # full number, or just the last digits (what `make schwab-login` shows)
+            hits = [x for x in rows if x["accountNumber"] == want
+                    or x["accountNumber"].endswith(want)]
+            if len(hits) == 1:
+                return hits[0]["hashValue"]
+            linked = ", ".join("..." + x["accountNumber"][-4:] for x in rows)
+            raise RuntimeError(f"SCHWAB_ACCOUNT_NUMBER ...{want[-4:]} matches {len(hits)} of the "
+                               f"linked accounts ({linked})")
         if len(rows) != 1:
             raise RuntimeError(f"{len(rows)} Schwab accounts linked - set SCHWAB_ACCOUNT_NUMBER in .env")
         return rows[0]["hashValue"]
