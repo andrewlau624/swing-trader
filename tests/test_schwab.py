@@ -300,3 +300,26 @@ def test_revoked_login_is_caught_before_it_expires(tmp_path):
     assert "REVOKED" in out and len(n.sent) == 1 and "REVOKED" in n.sent[0]
     check(n, dt.datetime(2026, 9, 24, 11, 0, tzinfo=ET), p, probe_fn=revoked)
     assert len(n.sent) == 1, "one revocation email per login"
+
+
+
+def test_live_book_created_before_selling_still_trades_after(tmp_path, monkeypatch):
+    """Book first runs while the account is all your holdings ($2.48 free);
+    you then sell $2,000 of them. The bot must see the $2,000."""
+    from swingtrader.daily import executor as E
+    monkeypatch.setattr(E.md, "eligibility", lambda *a, **k: pd.DataFrame(
+        {"prev_close": [10.0], "vol20": [0.9]}, index=["LOSER"]))
+    monkeypatch.setattr(E.md, "live_rows", lambda syms, *a, **k: pd.DataFrame(
+        {"price": [9.0], "high": [10.0], "low": [8.99]}, index=["LOSER"]))
+    monkeypatch.setattr(E, "all_assets", lambda: SimpleNamespace(symbols=["LOSER"]))
+    before = adapter(positions=[("AAA", 35, 100.0)], equity=3502.48)
+    ex = E.DailyExecutor(Config.load(), account="live", broker=before, state_dir=tmp_path, log_dir=tmp_path)
+    ex.d.quote_source = "alpaca"
+    book = DailyBook(cash=2.48, start_equity=2.48)         # created at the 09:50 run, before selling
+    after = adapter(positions=[("AAA", 15, 100.0)], equity=3502.48)   # sold 20 AAA = $2,000
+    ex.broker = after
+    ex._sync_live_cash(book)
+    assert book.cash == pytest.approx(2002.48) and book.start_equity == pytest.approx(2002.48)
+    ex.phase_close(book, "2026-09-24", dt.datetime(2026, 9, 24, 15, 40, tzinfo=ET), after.clock())
+    assert after.c.placed, "must buy with the freed cash, not report 'cash exhausted'"
+    assert leg(after.c.placed[0])["quantity"] == int(2002.48 * 0.5 * 0.10 // 9.0)

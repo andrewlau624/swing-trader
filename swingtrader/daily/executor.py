@@ -142,6 +142,8 @@ class DailyExecutor:
                           "re-uses same-day sale proceeds; in a cash account that is a "
                           "good-faith violation. Enable margin at Alpaca before trading.")
                 return 1
+        if self.live:
+            self._sync_live_cash(book)
         trading_day = clock.is_open or (
             pd.Timestamp(clock.next_open).tz_convert(ET).date() == now.date())
         self.reconcile(book, today)
@@ -459,6 +461,19 @@ class DailyExecutor:
                                      "alpaca": sorted(a)}) + "\n")
         except Exception as exc:
             self.log(f"[night] data check skipped: {str(exc)[:80]}")
+
+    def _sync_live_cash(self, book: DailyBook) -> None:
+        """Real money: the bot's cash is whatever the broker says is free for it
+        right now (free equity, capped, minus its own positions), not a ledger
+        started on day one. Otherwise selling your holdings after the book was
+        created, or depositing, would never reach the bot, and it would skip
+        every buy as 'cash exhausted'. Closed trades keep the P&L record."""
+        cap_eq = self._sizing_equity(book)
+        marks = self._marks(book)
+        mv = sum(float(p["qty"]) * float(marks.get(s, p["avg_px"])) for s, p in book.positions.items())
+        book.cash = cap_eq - mv
+        if book.start_equity < self.d.live_min_capital <= cap_eq:
+            book.start_equity = cap_eq          # first day it actually had money to trade
 
     def _live_start(self) -> float:
         free = self.free_equity()
