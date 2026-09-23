@@ -71,8 +71,14 @@ daily:
   daytrade_mode: auto            # auto = intraday leg goes live at $25k; off = never
   start_equity: 3000.0           # paper book's virtual start. live uses the real balance
   daytrade_min_equity: 25000.0   # QQQ intraday leg is SHADOW below this (PDT floor)
-  ibs_symbols: ["QQQ", "SMH", "XLK"]
+  # IBS leg: top-3 of these by 12-1 month momentum (re-ranked monthly), then
+  # IBS < 0.2. Was a hand-picked ["QQQ","SMH","XLK"]; the rule is the honest
+  # version of that choice (RESULTS.md addendum 7).
+  ibs_symbols: ["SPY", "QQQ", "IWM", "DIA", "MDY", "XLK", "XLF", "XLE", "XLV",
+                "XLI", "XLY", "XLP", "XLU", "XLB", "SMH", "XBI", "EEM", "EFA"]
+  ibs_top_k: 3
   ibs_max: 0.2
+  ibs_cash_symbol: SGOV          # idle IBS half parks in T-bills (+~1.3%/yr)
   ibs_weight: 0.5                # 0.5 + 0.5 = 1x, no margin. 1.0 + 1.0 = 2x overnight:
   night_weight: 0.5              #   backtest 21.8% CAGR/-11% DD -> 44.5%/-22%
   night_max_name_pct: 0.10
@@ -81,6 +87,8 @@ daily:
   night_price_min: 5.0
   night_price_max: 2000.0
   night_adv_min: 10000000.0
+  night_vol_min: 0.60            # skip quiet names (a -8% day there is news, not overreaction)
+  night_crowd_n: 30              # >30 signals = market-wide selloff: exposure x 30/n
   noise_symbol: QQQ
   noise_lookback: 14
   noise_target_vol: 0.02

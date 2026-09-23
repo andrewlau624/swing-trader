@@ -78,7 +78,8 @@ def eligibility(symbols: list[str], today: dt.date, *, price_min: float,
     path = cache_dir / f"daily-universe-{today.isoformat()}.json"
     if path.exists():
         d = json.loads(path.read_text())
-        return pd.DataFrame(d).set_index("symbol")
+        if d and "vol20" in d[0]:          # older cache files lack vol20: rebuild
+            return pd.DataFrame(d).set_index("symbol")
     bars = sip_daily(symbols, pd.Timestamp(today) - pd.Timedelta(days=45),
                      pd.Timestamp(today))
     rows = []
@@ -88,8 +89,11 @@ def eligibility(symbols: list[str], today: dt.date, *, price_min: float,
             continue
         adv = float((b["close"] * b["volume"]).iloc[-20:].mean())
         pc = float(b["close"].iloc[-1])
+        lr = np.log(b["close"] / b["close"].shift(1)).iloc[-20:]
+        vol20 = float(lr.std() * np.sqrt(252))
         if pc >= price_min and adv >= adv_min:
             rows.append({"symbol": sym, "prev_close": pc, "adv20": adv,
+                         "vol20": vol20 if np.isfinite(vol20) else 0.0,
                          "prev_date": str(b.index[-1].date())})
     cache_dir.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(rows))
@@ -97,7 +101,7 @@ def eligibility(symbols: list[str], today: dt.date, *, price_min: float,
         if old != path:
             old.unlink(missing_ok=True)
     return pd.DataFrame(rows).set_index("symbol") if rows else pd.DataFrame(
-        columns=["prev_close", "adv20", "prev_date"])
+        columns=["prev_close", "adv20", "vol20", "prev_date"])
 
 
 def live_rows(symbols: list[str], max_age_min: float = 10.0) -> pd.DataFrame:

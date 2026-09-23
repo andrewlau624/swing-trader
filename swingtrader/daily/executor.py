@@ -220,28 +220,9 @@ class DailyExecutor:
             self._order(book, today, sym, "sell", "night", qty=float(p["qty"]),
                         tif="opg", ref_px=marks.get(sym, p["avg_px"]), kind="exit")
 
-        # IBS leg: decide on the last complete SIP bar
-        bars = md.sip_daily(list(self.d.ibs_symbols),
-                            pd.Timestamp(today) - pd.Timedelta(days=10), pd.Timestamp(today))
-        last = {s: b[b.index < pd.Timestamp(today)].iloc[-1].to_dict()
-                for s, b in bars.items() if len(b[b.index < pd.Timestamp(today)])}
-        targets = [s for s in sg.ibs_targets(last, self.d.ibs_max)
-                   if s not in self._foreign_symbols(book)]
-        held = book.leg_positions("ibs")
-        self.log(f"[ibs] IBS last bar: " + ", ".join(
-            f"{s} {sg.ibs(b['high'], b['low'], b['close']):.2f}" for s, b in sorted(last.items()))
-                 + f" -> hold {targets or 'nothing'}")
-        for sym, p in held.items():
-            if sym not in targets:
-                self._order(book, today, sym, "sell", "ibs", qty=float(p["qty"]),
-                            tif="day", ref_px=last.get(sym, {}).get("close", p["avg_px"]), kind="exit")
-        if targets:
-            per = self.d.ibs_weight * equity / len(targets)
-            for sym in targets:
-                if sym in held:
-                    continue
-                self._order(book, today, sym, "buy", "ibs", notional=per, tif="day",
-                            ref_px=last[sym]["close"], kind="entry")
+        # IBS leg: rank the universe by 12-1 momentum (month-end, bars before
+        # today), then IBS < ibs_max on the last complete SIP bar of the top-k
+        self._ibs_open(book, today, equity)
 
         # night-leg universe for this afternoon (pays the ~30s SIP pull now)
         u = [s for s in all_assets().symbols if valid_symbol(s)]
@@ -249,6 +230,52 @@ class DailyExecutor:
                               adv_min=self.d.night_adv_min, cache_dir=self.state_dir)
         self.log(f"[night] {len(elig)} names eligible today "
                  f"(close >= ${self.d.night_price_min:.0f}, 20d SIP $vol >= ${self.d.night_adv_min/1e6:.0f}M)")
+
+    def _ibs_open(self, book: DailyBook, today: str, equity: float) -> None:
+        t = pd.Timestamp(today)
+        cash_sym = self.d.ibs_cash_symbol
+        syms = list(self.d.ibs_symbols) + ([cash_sym] if cash_sym else [])
+        bars = md.sip_daily(syms, t - pd.Timedelta(days=420), t)
+        bars = {s: b[b.index < t] for s, b in bars.items() if len(b[b.index < t])}
+        closes = pd.DataFrame({s: b["close"] for s, b in bars.items()
+                               if s in self.d.ibs_symbols})
+        if self.d.ibs_top_k:
+            universe = sg.momentum_top(closes, t, self.d.ibs_top_k)
+            self.log(f"[ibs] top-{self.d.ibs_top_k} by 12-1 momentum this month: {universe or 'n/a'}")
+        else:
+            universe = list(closes.columns)
+        last = {s: bars[s].iloc[-1].to_dict() for s in universe if s in bars}
+        foreign = self._foreign_symbols(book)
+        targets = [s for s in sg.ibs_targets(last, self.d.ibs_max) if s not in foreign]
+        self.log("[ibs] IBS last bar: " + ", ".join(
+            f"{s} {sg.ibs(b['high'], b['low'], b['close']):.2f}" for s, b in sorted(last.items()))
+            + f" -> hold {targets or ('T-bills (' + cash_sym + ')' if cash_sym else 'cash')}")
+        held = book.leg_positions("ibs")
+        for sym, p in held.items():
+            if sym not in targets:
+                ref = bars.get(sym, pd.DataFrame({"close": [p["avg_px"]]}))["close"].iloc[-1]
+                self._order(book, today, sym, "sell", "ibs", qty=float(p["qty"]),
+                            tif="day", ref_px=float(ref), kind="exit")
+        leg = self.d.ibs_weight * equity
+        # T-bills hold the leg's money whenever it has nothing to own
+        tb = book.leg_positions("tbill")
+        if cash_sym:
+            if targets:
+                for sym, p in tb.items():
+                    self._order(book, today, sym, "sell", "tbill", qty=float(p["qty"]),
+                                tif="day", ref_px=float(bars[sym]["close"].iloc[-1]) if sym in bars else float(p["avg_px"]),
+                                kind="exit")
+            elif not tb and not held and cash_sym in bars and cash_sym not in foreign:
+                if leg >= 50:
+                    self._order(book, today, cash_sym, "buy", "tbill", notional=leg, tif="day",
+                                ref_px=float(bars[cash_sym]["close"].iloc[-1]), kind="entry")
+        if targets:
+            per = leg / len(targets)
+            for sym in targets:
+                if sym in held:
+                    continue
+                self._order(book, today, sym, "buy", "ibs", notional=per, tif="day",
+                            ref_px=float(last[sym]["close"]), kind="entry")
 
     # --------------------------------------------------------------- close
     def phase_close(self, book: DailyBook, today: str, now, clock) -> None:
@@ -272,16 +299,26 @@ class DailyExecutor:
         rows = md.live_rows(syms)
         if rows.empty:
             self.warn("no live prices returned - skipping night leg"); return
-        rows = rows.join(elig[["prev_close"]], how="inner")
+        cols = [c for c in ("prev_close", "vol20") if c in elig.columns]
+        rows = rows.join(elig[cols], how="inner")
         picks = sg.loser_picks(rows, day_ret_max=self.d.night_day_ret_max,
                                ibs_max=self.d.night_ibs_max, price_min=self.d.night_price_min,
                                price_max=self.d.night_price_max)
         self.log(f"[night] scanned {len(rows)} live names -> {len(picks)} signal(s)")
         if picks.empty:
             return
+        n_raw = len(picks)
+        picks, frac = sg.night_sizing(picks, vol_min=self.d.night_vol_min,
+                                      crowd_n=self.d.night_crowd_n,
+                                      max_name_pct=self.d.night_max_name_pct)
+        self.log(f"[night] {len(picks)} after vol20 >= {self.d.night_vol_min:.0%}"
+                 + (f"; crowded day ({n_raw} signals): exposure x {self.d.night_crowd_n / n_raw:.2f}"
+                    if n_raw > self.d.night_crowd_n else ""))
+        if picks.empty:
+            return
         equity = self._sizing_equity(book)
         leg = self.d.night_weight * equity
-        per = leg * min(1.0 / len(picks), self.d.night_max_name_pct)
+        per = leg * frac
         # never let this book borrow beyond the gross its weights allow
         floor = -(max(1.0, self.d.ibs_weight + self.d.night_weight) - 1.0) * equity
         cash = book.cash

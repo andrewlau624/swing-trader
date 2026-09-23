@@ -50,6 +50,23 @@ def equal_weights(symbols: list[str], leg_equity: float,
     return {s: per for s in symbols}
 
 
+def momentum_top(closes: pd.DataFrame, today: pd.Timestamp, k: int,
+                 lookback: int = 252, skip: int = 21) -> list[str]:
+    """Top-k ETFs by 12-1 month momentum, ranked at the last month-end BEFORE
+    today and held for the month (research: h5a.py, "top-3 by 12m momentum").
+    Replaces a hand-picked tech list: same idea, chosen by rule, so it rotates
+    on its own if tech stops leading. closes: session-date index, one column
+    per ETF, bars strictly before today."""
+    c = closes[closes.index < today]
+    mom = c.shift(skip) / c.shift(lookback) - 1
+    month_ends = mom.groupby([mom.index.year, mom.index.month]).tail(1)
+    month_ends = month_ends[month_ends.index.to_period("M") < today.to_period("M")]
+    if month_ends.empty:
+        return []
+    last = month_ends.iloc[-1].dropna()
+    return sorted(last.sort_values(ascending=False).index[:k])
+
+
 # ---------------------------------------------------------------- night leg
 def loser_picks(rows: pd.DataFrame, *, day_ret_max: float, ibs_max: float,
                 price_min: float, price_max: float) -> pd.DataFrame:
@@ -71,6 +88,24 @@ def loser_picks(rows: pd.DataFrame, *, day_ret_max: float, ibs_max: float,
          & (r["price"] >= price_min) & (r["price"] <= price_max)
          & np.isfinite(r["day_ret"]) & np.isfinite(r["ibs"]))
     return r[m].sort_values("day_ret")
+
+
+def night_sizing(picks: pd.DataFrame, *, vol_min: float, crowd_n: int,
+                 max_name_pct: float) -> tuple[pd.DataFrame, float]:
+    """Filter and size the night leg (research: h1.py / h1port.py, rule R6).
+
+    - drop names whose 20-day volatility is under `vol_min`: in quiet names a
+      -8% day is news, not overreaction (-33bp/trade, t -8)
+    - count the day's raw signals BEFORE that filter; on days with more than
+      `crowd_n` of them the selloff is market-wide and the bounce is weak
+      (-9bp vs +25bp on ordinary days), so exposure scales by crowd_n / n.
+    Returns (kept picks, fraction of the leg per name)."""
+    n_raw = len(picks)
+    kept = picks[picks["vol20"] >= vol_min] if "vol20" in picks else picks
+    if kept.empty:
+        return kept, 0.0
+    per = min(1.0 / len(kept), max_name_pct) * min(1.0, crowd_n / max(n_raw, 1))
+    return kept, per
 
 
 # ---------------------------------------------------------------- noise leg

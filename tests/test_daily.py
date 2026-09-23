@@ -204,11 +204,13 @@ def test_open_phase_sells_night_leg_at_the_auction(tmp_path, monkeypatch):
     book = DailyBook(cash=3000 - 16 * 9, start_equity=3000)
     book.positions["LOSER"] = {"qty": 16, "avg_px": 9.0, "leg": "night", "entry_date": "2026-09-22"}
     ex.phase_open(book, "2026-09-23")
-    reqs = ex.broker.client.submitted
-    assert len(reqs) == 1, "IBS 0.5 on every ETF -> no IBS buys; only the night exit"
-    r = reqs[0]
-    assert r.symbol == "LOSER" and r.side.value == "sell" and r.qty == 16
-    assert r.time_in_force.value == "opg"
+    reqs = {r.symbol: r for r in ex.broker.client.submitted}
+    assert set(reqs) == {"LOSER", "SGOV"}, "no IBS signal -> night exit + park the IBS half in T-bills"
+    r = reqs["LOSER"]
+    assert r.side.value == "sell" and r.qty == 16 and r.time_in_force.value == "opg"
+    t = reqs["SGOV"]
+    assert t.side.value == "buy" and t.time_in_force.value == "day"
+    assert t.notional == pytest.approx(0.5 * (3000 - 16 * 9 + 16 * 9.5), abs=0.01)
 
 
 def test_dry_run_submits_nothing(tmp_path, monkeypatch):
@@ -286,3 +288,54 @@ def test_live_switch_edits_only_its_own_env_line(tmp_path, monkeypatch):
     assert "ALPACA_API_KEY=PKX" in env.read_text()
     monkeypatch.setenv("DAILY_LIVE", "on")
     assert Config.load().daily.resolved_accounts() == ["paper", "live"]
+
+
+# ------------------------------------------------ addendum 7: optimised legs
+def test_momentum_top_uses_last_month_end_before_today():
+    idx = pd.bdate_range("2025-01-01", "2026-03-20")
+    up = pd.Series(np.linspace(100, 200, len(idx)), index=idx)
+    flat = pd.Series(100.0, index=idx)
+    down = pd.Series(np.linspace(100, 50, len(idx)), index=idx)
+    c = pd.DataFrame({"UP": up, "FLAT": flat, "DOWN": down})
+    assert sg.momentum_top(c, pd.Timestamp("2026-03-20"), k=1) == ["UP"]
+    assert sg.momentum_top(c, pd.Timestamp("2026-03-20"), k=2) == ["FLAT", "UP"]
+    # ranking must not see today's month: flip everything in March, still Feb's ranks
+    c2 = c.copy(); c2.loc["2026-03-01":, "DOWN"] = 10_000
+    assert sg.momentum_top(c2, pd.Timestamp("2026-03-20"), k=1) == ["UP"]
+
+
+def test_night_sizing_vol_floor_and_crowding():
+    picks = pd.DataFrame({"vol20": [0.3] + [0.9] * 9}, index=[f"S{i}" for i in range(10)])
+    kept, per = sg.night_sizing(picks, vol_min=0.6, crowd_n=30, max_name_pct=0.10)
+    assert "S0" not in kept.index and len(kept) == 9
+    assert per == pytest.approx(0.10), "9 names -> capped at 10% each"
+    crowd = pd.DataFrame({"vol20": [0.9] * 60}, index=[f"C{i}" for i in range(60)])
+    kept, per = sg.night_sizing(crowd, vol_min=0.6, crowd_n=30, max_name_pct=0.10)
+    # 60 raw signals: 1/60 each, scaled by 30/60 -> half the leg invested
+    assert per == pytest.approx(1 / 60 * 0.5) and per * len(kept) == pytest.approx(0.5)
+
+
+def test_tbills_sold_when_ibs_fires(tmp_path, monkeypatch):
+    from swingtrader.daily import executor as E
+    idx = pd.bdate_range("2025-06-01", "2026-09-22")
+    def bars(syms, *a, **k):
+        out = {}
+        for i, s in enumerate(syms):
+            c = pd.Series(np.linspace(100, 100 + 10 * (i + 1), len(idx)), index=idx)
+            df = pd.DataFrame({"open": c, "high": c + 1, "low": c - 1, "close": c, "volume": 1})
+            df.iloc[-1, df.columns.get_loc("close")] = df["low"].iloc[-1] + 0.1   # IBS 0.05
+            out[s] = df
+        return out
+    monkeypatch.setattr(E.md, "sip_daily", bars)
+    monkeypatch.setattr(E.md, "eligibility", lambda *a, **k: pd.DataFrame())
+    monkeypatch.setattr(E, "all_assets", lambda: SimpleNamespace(symbols=[]))
+    held = {"SGOV": SimpleNamespace(current_price="100.5", qty="15")}
+    ex = _executor(tmp_path, monkeypatch, held=held)
+    book = DailyBook(cash=1500, start_equity=3000)
+    book.positions["SGOV"] = {"qty": 15, "avg_px": 100.0, "leg": "tbill", "entry_date": "2026-09-01"}
+    ex.phase_open(book, "2026-09-23")
+    reqs = ex.broker.client.submitted
+    sells = [r for r in reqs if r.side.value == "sell"]
+    buys = [r for r in reqs if r.side.value == "buy"]
+    assert [r.symbol for r in sells] == ["SGOV"]
+    assert len(buys) == 3 and "SGOV" not in {r.symbol for r in buys}, "top-3 momentum ETFs, all at IBS 0.05"

@@ -129,8 +129,12 @@ class DailyCfg:
     daytrade_min_equity: float = 25_000.0
     # leg 1: IBS on tech ETFs. Signal on the last complete bar, enter at the
     # next open, re-evaluated every morning.
-    ibs_symbols: list = field(default_factory=lambda: ["QQQ", "SMH", "XLK"])
+    ibs_symbols: list = field(default_factory=lambda: [
+        "SPY", "QQQ", "IWM", "DIA", "MDY", "XLK", "XLF", "XLE", "XLV", "XLI",
+        "XLY", "XLP", "XLU", "XLB", "SMH", "XBI", "EEM", "EFA"])
+    ibs_top_k: int | None = 3        # trade the top-k by 12-1 momentum (monthly); None = all
     ibs_max: float = 0.2
+    ibs_cash_symbol: str | None = "SGOV"   # idle IBS money sits here; None = cash
     ibs_weight: float = 0.5          # fraction of book equity for this leg
     # leg 2: overnight loser bounce. Scan ~15:40 ET, buy at the close auction,
     # sell at the next open auction.
@@ -141,6 +145,8 @@ class DailyCfg:
     night_price_min: float = 5.0
     night_price_max: float = 2_000.0
     night_adv_min: float = 10_000_000.0   # SIP 20-day dollar volume
+    night_vol_min: float = 0.60      # 20-day annualised vol floor
+    night_crowd_n: int = 30          # more raw signals than this = market-wide selloff: scale down
     # leg 3: QQQ noise-area intraday momentum (shadow until the gate trips)
     noise_symbol: str = "QQQ"
     noise_lookback: int = 14

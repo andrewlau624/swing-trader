@@ -113,6 +113,15 @@ but "should" is not "did".
 
 ---
 
+## 5. Swing sleeve inside the daily book — FOUND, BLOCKED ON ITEM 0
+
+Adding the swing strategy as a third of the capital: Sharpe 1.46 -> 1.58+,
+max drop -14% -> -9% (RESULTS.md addendum 7). First build the daily-refresh
+swing backtest (item 0); if it holds, run swing on the live account at 1/3
+with night/IBS at 1/3 each.
+
+---
+
 ## 4. Daily-cadence book — RUNNING (paper), $3k virtual equity
 
 **The plan:** paper-test now. Then real money starting at $3k, with the

@@ -641,3 +641,52 @@ all 7 years). vol20 < 60% is negative.
   frame in scope, and it was saved as 2026. Caught before use.
 - Gap minute fetch used fixed UTC offsets, which drop the last hour in winter (EST).
   Re-fetched with America/New_York.
+
+---
+
+# Addendum 7 — structural optimisation of the daily book (2026-09-23)
+
+Rules set before looking: an economic prior for every idea, honest 15:50
+signals only, both halves (2021–23 / 2024–26) must agree, parameters must
+sit on a plateau, controls where possible. **About 50 variants were tested
+this round**, so a lone t≈2 result means nothing. Everything adopted below
+has t ≥ 4 or a monotone relationship, plus a written prior.
+
+## Adopted
+
+| change | why (prior) | evidence |
+|---|---|---|
+| **Night leg: skip names with 20d vol < 60%** | in quiet names a −8% day is news, not overreaction | those trades −33bp (t −8); the same 60% cut the swing cohort uses |
+| **Night leg: on days with >30 raw signals, exposure × 30/n** | a market-wide liquidation is beta, not liquidity provision | per-day: ordinary days +20 to +52bp every year 2021–25; crowded days −24/−156/−37bp in 2022/24/25. Cutoff plateau 20–60 |
+| **IBS leg: top-3 of 18 equity ETFs by 12-1 momentum (monthly)** replaces hand-picked QQQ/SMH/XLK | same idea as "tech", but chosen by rule, so it rotates | 15.0% / Sharpe 1.08 2016–26, both halves; control (bottom-3) 7.8%. Lower than tech3's 19.7%, which was hindsight |
+| **Idle IBS half parked in SGOV** | free | +1.3pp/yr |
+
+Night leg alone (7.5bp/side): Sharpe 0.78 → 0.98; weak half 1.1% → 6.9%.
+
+| book (7.5bp/side, honest) | CAGR | Sharpe | maxDD |
+|---|---|---|---|
+| no-daytrade, before | 21.8 | 1.30 | −11.5 |
+| **no-daytrade, now** | **23.8** | **1.46** | −14 |
+| full (with QQQ intraday), before | 38.4 | 1.58 | −18 |
+| **full, now** | **40.7** | **1.70** | −20 |
+
+## Found, NOT yet adopted: the swing strategy as a third leg
+
+Correlation with the night leg −0.03, with IBS +0.22. Equal thirds, no margin:
+Sharpe 1.46 → **1.58–1.74**, maxDD −14% → **−9%**. At an equal −14% max
+drop that is **24.6% → 30.6–34.3%/yr**. The low end uses the *honest*
+21-day-refresh swing (9.9%/yr alone). The benefit survives even that.
+**Blocked on:** the swing executor re-selects daily, and no backtest yet matches
+that cadence (NEXT.md item 0). Resolve that, then give the live account a swing sleeve.
+
+## Dead (do not redo)
+
+| idea | verdict |
+|---|---|
+| portfolio vol targeting | Sharpe 1.30–1.38 vs 1.39 flat: no help |
+| IBS only above 200d SMA (Connors) | hurts: 12.3% → 4.9% |
+| crypto trend (BTC/ETH SMA 20/50/100, basket) | = buy-and-hold Sharpe, −60% DDs; basket negative after 25bp fees |
+| crypto IBS | negative on BTC and ETH |
+| overnight momentum (Lou-Polk-Skouras) | replicates, monotone deciles, but top decile +8.7bp/night < 15bp auction round trip |
+| entering the night leg at 15:50 instead of MOC | +8bp into the close ≈ the spread you pay: no gain |
+| depth ≤ −12% only | monotone, but halves trades; worse as a portfolio |
