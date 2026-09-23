@@ -760,3 +760,19 @@ Addendum 8's 3-per-5-days cap no longer binds. Without it (2021–26, same book)
 | TQQQ strongest first-breakouts, 50% equity | 35.7 | 1.82 | −13 |
 | TQQQ strongest first-breakouts, 100% equity | 47.5 | 1.79 | −16 |
 | half and half | 44.4 | 1.83 | −17 |
+
+---
+
+# Addendum 10 — post-PDT improvements (2026-09-23)
+
+| question | answer |
+|---|---|
+| **Night-leg decision time** (live scans 15:40; research used 15:49) | 15:35 37.8% / 15:40 34.8% / 15:45 26.1% / 15:49 28.4% CAGR: **no monotone relation, so no change needed**. The spread (±5pp) is this leg's real uncertainty |
+| **Night-leg exit time** (not a day-trade question since the PDT rule went) | **open auction is decisively best**: +20.1bp/trade; 9:35 +1.9bp, 10:00 −9.3bp, 10:30 −21.5bp. The whole edge is in the opening auction, so OPG fills matter most |
+| **Second intraday stream: QQQ + SMH in the same 3.5x budget** | ρ 0.60. Book 40.7%/1.70/−20 → **40.3%/1.78/−16**. Adopt when the QQQ leg has a few weeks of live fills |
+| **Swing refresh cadence** (NEXT.md item 0) | 42d 16.8%/1.22 · 21d 10.8%/0.81 · 5d 16.1%/1.17 · **1d (matches live) 12.3% / 0.87 / −13.2%** |
+| **Swing as a sleeve, using the honest 1d version** | with the QQQ/SMH split: Sharpe 1.78 → 1.82, maxDD −16 → −13, **CAGR 40.3 → 36.0–37.8**. Mostly a drawdown trade; **not worth a second executor on the live account** |
+
+**Warning:** the intraday momentum leg alone did ~20%/yr in 2021–23 but only
+~7%/yr in 2024–26, on both QQQ and SMH. It is the most likely leg to
+disappoint live. Judge it by its first few months of fills.

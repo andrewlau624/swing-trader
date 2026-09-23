@@ -122,12 +122,17 @@ First breakout of the day, strength >= 0.341 sigma, TQQQ up / SQQQ down.
 
 ---
 
-## 5. Swing sleeve inside the daily book — FOUND, BLOCKED ON ITEM 0
+## 5. Swing sleeve inside the daily book — RESOLVED: not worth it
 
-Adding the swing strategy as a third of the capital: Sharpe 1.46 -> 1.58+,
-max drop -14% -> -9% (RESULTS.md addendum 7). First build the daily-refresh
-swing backtest (item 0); if it holds, run swing on the live account at 1/3
-with night/IBS at 1/3 each.
+Daily-refresh swing backtest (matches live): 12.3% CAGR, Sharpe 0.87. As a
+sleeve it only trades return for drawdown (addendum 10). Keep it as its own
+paper book.
+
+## 7. Add SMH to the intraday leg — READY after QQQ has live fills
+
+Split the 3.5x intraday budget QQQ/SMH: Sharpe 1.70 -> 1.78, max drop -20%
+-> -16%, same return. Needs the noise leg generalised to several
+instruments (book.noise is single-instrument today).
 
 ---
 
