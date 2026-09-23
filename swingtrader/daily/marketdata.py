@@ -78,7 +78,7 @@ def eligibility(symbols: list[str], today: dt.date, *, price_min: float,
     path = cache_dir / f"daily-universe-{today.isoformat()}.json"
     if path.exists():
         d = json.loads(path.read_text())
-        if d and "vol20" in d[0]:          # older cache files lack vol20: rebuild
+        if d and "vol20" in d[0] and "rets" in d[0]:   # older caches lack these: rebuild
             return pd.DataFrame(d).set_index("symbol")
     bars = sip_daily(symbols, pd.Timestamp(today) - pd.Timedelta(days=45),
                      pd.Timestamp(today))
@@ -94,6 +94,7 @@ def eligibility(symbols: list[str], today: dt.date, *, price_min: float,
         if pc >= price_min and adv >= adv_min:
             rows.append({"symbol": sym, "prev_close": pc, "adv20": adv,
                          "vol20": vol20 if np.isfinite(vol20) else 0.0,
+                         "rets": [round(float(v), 5) if np.isfinite(v) else 0.0 for v in lr.values],
                          "prev_date": str(b.index[-1].date())})
     cache_dir.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(rows))

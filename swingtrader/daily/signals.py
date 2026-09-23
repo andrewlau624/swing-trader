@@ -90,6 +90,30 @@ def loser_picks(rows: pd.DataFrame, *, day_ret_max: float, ibs_max: float,
     return r[m].sort_values("day_ret")
 
 
+def dedupe_correlated(picks: pd.DataFrame, rets: dict, max_corr: float = 0.9) -> tuple[pd.DataFrame, list]:
+    """One position per underlying bet. Walk the picks most-beaten first and
+    drop any whose last-20-day returns correlate above max_corr with one
+    already kept. Seven 2x SpaceX ETFs from seven issuers are one bet, not
+    seven; so are a stock and its own leveraged ETF. No name parsing, so new
+    products are handled as they launch. Returns (kept, [(dropped, kept_as)])."""
+    kept, dropped, series = [], [], []
+    for sym in picks.index:
+        r = np.asarray(rets.get(sym) or [], dtype=float)
+        dup = None
+        if len(r) >= 10 and np.std(r) > 0:
+            for k, rk in series:
+                n = min(len(r), len(rk))
+                if n >= 10 and np.std(rk[-n:]) > 0 and np.corrcoef(r[-n:], rk[-n:])[0, 1] > max_corr:
+                    dup = k; break
+        if dup is None:
+            kept.append(sym)
+            if len(r) >= 10:
+                series.append((sym, r))
+        else:
+            dropped.append((sym, dup))
+    return picks.loc[kept], dropped
+
+
 def night_sizing(picks: pd.DataFrame, *, vol_min: float, crowd_n: int,
                  max_name_pct: float) -> tuple[pd.DataFrame, float]:
     """Filter and size the night leg (research: h1.py / h1port.py, rule R6).

@@ -307,6 +307,13 @@ class DailyExecutor:
             self._log_alt_source(syms, elig, picks)
         if picks.empty:
             return
+        if "rets" in elig.columns:
+            picks, dropped = sg.dedupe_correlated(picks, elig["rets"].to_dict(), self.d.night_max_corr)
+            if dropped:
+                self.log(f"[night] {len(dropped)} duplicate bet(s) dropped (20d corr > {self.d.night_max_corr}): "
+                         + ", ".join(f"{d} ~ {k}" for d, k in dropped[:12]))
+        else:
+            self.warn("eligibility cache has no return history - duplicate-bet check skipped today")
         n_raw = len(picks)
         picks, frac = sg.night_sizing(picks, vol_min=self.d.night_vol_min,
                                       crowd_n=self.d.night_crowd_n,

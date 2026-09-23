@@ -159,6 +159,7 @@ class DailyCfg:
     night_adv_min: float = 10_000_000.0   # SIP 20-day dollar volume
     night_vol_min: float = 0.60      # 20-day annualised vol floor
     night_crowd_n: int = 30          # more raw signals than this = market-wide selloff: scale down
+    night_max_corr: float = 0.9      # one position per underlying (e.g. seven 2x SpaceX ETFs = one bet)
     # leg 3: QQQ noise-area intraday momentum (shadow until the gate trips)
     noise_symbol: str = "QQQ"
     # traded instead when another leg (IBS) already holds noise_symbol --

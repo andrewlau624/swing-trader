@@ -776,3 +776,20 @@ Addendum 8's 3-per-5-days cap no longer binds. Without it (2021–26, same book)
 **Warning:** the intraday momentum leg alone did ~20%/yr in 2021–23 but only
 ~7%/yr in 2024–26, on both QQQ and SMH. It is the most likely leg to
 disappoint live. Judge it by its first few months of fills.
+
+---
+
+# Addendum 11 — first live scan: duplicate bets (2026-09-23)
+
+The first real-money 15:40 scan bought 20 names, and 7 of them were **2x long
+SpaceX ETFs** from different issuers (SPCU, SPCF, SPCH, SPCM, SPAL, SPAX,
+LOFF): one leveraged bet counted seven times, ~35% of the night leg. It barely
+existed in the 2021–26 backtest, because single-stock leveraged ETFs have only
+recently multiplied.
+
+Fix (`daily.night_max_corr: 0.9`): picks are walked most-beaten first, and
+one whose last-20-day returns correlate above 0.9 with an already-kept pick
+is dropped. On that day's real data: 20 -> 14 bets, the 6 SpaceX duplicates
+collapse into SPCU, and nothing unrelated is touched. It also catches a
+stock alongside its own leveraged ETF. No name parsing, so new products are
+covered as they launch. Crowding is now counted on distinct bets.

@@ -397,3 +397,20 @@ def test_live_noise_flattens_its_own_instrument_at_the_close(tmp_path, monkeypat
     r = ex.broker.client.submitted[0]
     assert r.symbol == "QQQM" and r.side.value == "buy" and r.qty == 12
     assert r.time_in_force.value == "cls"
+
+
+def test_duplicate_bets_collapse_to_one():
+    rng = np.random.default_rng(0)
+    spacex = rng.normal(0, 0.05, 20)
+    rets = {f"SPX{i}": list(2 * spacex + rng.normal(0, 0.002, 20)) for i in range(7)}   # seven 2x SpaceX ETFs
+    rets["ASTS"] = list(rng.normal(0, 0.04, 20))
+    rets["ASTX"] = list(2 * np.array(rets["ASTS"]) + rng.normal(0, 0.002, 20))           # 2x ASTS
+    rets["JAGX"] = list(rng.normal(0, 0.06, 20))                                          # unrelated
+    picks = pd.DataFrame({"day_ret": [-0.20, -0.19, -0.18, -0.17, -0.16, -0.15, -0.14, -0.13, -0.12, -0.11]},
+                         index=["SPX3", "ASTX", "SPX0", "SPX1", "JAGX", "SPX2", "ASTS", "SPX4", "SPX5", "SPX6"])
+    kept, dropped = sg.dedupe_correlated(picks, rets, 0.9)
+    assert list(kept.index) == ["SPX3", "ASTX", "JAGX"], "most-beaten of each bet is the one kept"
+    assert dict(dropped)["ASTS"] == "ASTX" and dict(dropped)["SPX6"] == "SPX3"
+    # no history -> kept (never silently dropped)
+    k2, _ = sg.dedupe_correlated(pd.DataFrame(index=["NEW"]), {}, 0.9)
+    assert list(k2.index) == ["NEW"]

@@ -96,6 +96,7 @@ daily:
   night_adv_min: 10000000.0
   night_vol_min: 0.60            # skip quiet names (a -8% day there is news, not overreaction)
   night_crowd_n: 30              # >30 signals = market-wide selloff: exposure x 30/n
+  night_max_corr: 0.9            # 20d-return correlation above this = same bet: keep the most beaten one
   noise_symbol: QQQ
   noise_alt_symbol: QQQM         # used on days the IBS leg holds QQQ
   noise_lookback: 14
