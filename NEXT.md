@@ -113,6 +113,15 @@ but "should" is not "did".
 
 ---
 
+## 6. PDT-capped TQQQ breakout leg — FOUND, NOT BUILT
+
+<= 3 day trades per 5 days, first QQQ noise-area breakout of the day with
+strength >= 0.341 sigma, traded as TQQQ (up) / SQQQ (down) with 50% of
+equity. Book 23.8%/1.46 -> 36.0%/1.84, same -14% max drop (addendum 8).
+Must hard-block a 4th day trade in 5 days.
+
+---
+
 ## 5. Swing sleeve inside the daily book — FOUND, BLOCKED ON ITEM 0
 
 Adding the swing strategy as a third of the capital: Sharpe 1.46 -> 1.58+,

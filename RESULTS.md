@@ -690,3 +690,43 @@ that cadence (NEXT.md item 0). Resolve that, then give the live account a swing 
 | overnight momentum (Lou-Polk-Skouras) | replicates, monotone deciles, but top decile +8.7bp/night < 15bp auction round trip |
 | entering the night leg at 15:50 instead of MOC | +8bp into the close ≈ the spread you pay: no gain |
 | depth ≤ −12% only | monotone, but halves trades; worse as a portfolio |
+
+---
+
+# Addendum 8 — high-conviction day trades under the PDT limit (2026-09-23)
+
+Question: under $25k a margin account gets **3 day trades per rolling 5
+business days** (not per day). Is there a rare, high-conviction intraday
+setup worth spending them on? Protocol: pick on 2016–23 (ETFs) / 2021–23
+(stocks), judge once on the 2024–26 holdout, intraday costs (1–3bp ETFs,
+10bp stocks), rank by net expectancy, not win rate.
+
+**No "90% winner" exists.** The highest win rates are traps: TQQQ gap-fill
+longs win 62.7% of the time and lose money on average.
+
+| family | result |
+|---|---|
+| ETF gap-fill, last-half-hour momentum (Gao), afternoon capitulation, midday trend, opening-drive fade — 6 ETFs × 4 strength tiers | **nothing reaches t ≥ 2.5 even in-sample**; best in-sample cells collapse out of sample |
+| stocks: gap-and-go, gap-down squeeze, pm capitulation long, 15:30 losers → close | **all negative, both halves** (t −2 to −8) |
+| stocks: gap-up fade short | in-sample t 0.5–0.7: fails |
+| stocks down ≥25% by 15:00 keep falling into the close (~−1.5% gross) | real, both halves, but **untradable**: SEC Rule 201 short-sale restriction applies at −10%, and these are usually hard to borrow |
+| **QQQ noise-area, FIRST breakout only, strength ≥ 0.341σ (in-sample median), ≤3 per 5 days** | QQQ ~5%/yr Sharpe 0.93 IS / 0.97 OOS. **On TQQQ, 1× equity (no margin)**: 9.7% IS / 13.1% OOS |
+
+## The finding
+
+The capped TQQQ breakout uses the night half's idle *daytime* cash (50% of
+equity). Correlation with the book is −0.02.
+
+| 2021–26 | CAGR | Sharpe | maxDD |
+|---|---|---|---|
+| no-daytrade book | 23.8 | 1.46 | −14 |
+| **+ TQQQ PDT-capped, 50% of equity** | **36.0** | **1.84** | **−14** |
+| + QQQ version instead | 28.3 | 1.67 | −13 |
+
+Profile: ~70 trades/yr, win rate ~40% (trend-following: small frequent
+losses, larger wins). 59% of entries at 10:00. Shorts slightly better than
+longs; a down signal can be taken as a long SQQQ, so no shorting is needed.
+
+Confidence: moderate. The leg itself was validated before this round (so
+not mined here), and the threshold was fixed on 2016–23 and held out of
+sample. But per-trade OOS t is only 1.2–1.4. Paper-shadow it before real money.
