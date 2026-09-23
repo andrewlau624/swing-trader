@@ -12,7 +12,12 @@ import json
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 
-BOOK_FILE = "book-daily.json"
+BOOK_FILE = "book-daily.json"          # paper account (shared with the swing book)
+LIVE_BOOK_FILE = "book-daily-live.json"  # real-money account (dedicated)
+
+
+def book_file(account: str) -> str:
+    return LIVE_BOOK_FILE if account == "live" else BOOK_FILE
 TERMINAL = {"filled", "canceled", "expired", "rejected", "done_for_day", "replaced"}
 
 
@@ -30,15 +35,16 @@ class DailyBook:
 
     # ------------------------------------------------------------ persist
     @classmethod
-    def load(cls, state_dir: Path, start_equity: float) -> "DailyBook":
-        p = state_dir / BOOK_FILE
+    def load(cls, state_dir: Path, start_equity: float,
+             fname: str = BOOK_FILE) -> "DailyBook":
+        p = state_dir / fname
         if p.exists():
             return cls(**json.loads(p.read_text()))
         return cls(cash=start_equity, start_equity=start_equity)
 
-    def save(self, state_dir: Path) -> None:
+    def save(self, state_dir: Path, fname: str = BOOK_FILE) -> None:
         state_dir.mkdir(parents=True, exist_ok=True)
-        p = state_dir / BOOK_FILE
+        p = state_dir / fname
         tmp = p.with_suffix(".tmp")
         tmp.write_text(json.dumps(asdict(self), indent=2, default=str))
         tmp.replace(p)
@@ -110,7 +116,8 @@ class DailyBook:
 
 
 def owned_by_daily(state_dir: Path) -> set[str]:
-    """For the swing executor: symbols it must neither adopt nor trade."""
+    """For the swing executor: symbols it must neither adopt nor trade.
+    Paper book only -- the live book trades a different account."""
     p = state_dir / BOOK_FILE
     if not p.exists():
         return set()

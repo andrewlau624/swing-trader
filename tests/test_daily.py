@@ -217,3 +217,72 @@ def test_dry_run_submits_nothing(tmp_path, monkeypatch):
     book = DailyBook(cash=3000, start_equity=3000)
     ex._order(book, "2026-09-23", "X", "buy", "night", tif="cls", ref_px=9, kind="entry", qty=5)
     assert ex.broker.client.submitted == [] and not book.orders
+
+
+# ---------------------------------------------------------- real-money mode
+def test_broker_refuses_key_mixups(monkeypatch):
+    from swingtrader.live.broker import PaperBroker
+    with pytest.raises(RuntimeError, match="PAPER key"):
+        PaperBroker(paper=False, key="PKABC", secret="s")
+    with pytest.raises(RuntimeError, match="not a paper key"):
+        PaperBroker(paper=True, key="AKABC", secret="s")
+
+
+def test_live_and_paper_books_never_share_state():
+    from swingtrader.daily.book import book_file
+    assert book_file("paper") != book_file("live")
+
+
+class LiveCashBroker(FakeBroker):
+    key, secret = "AKTEST", "SEC"
+
+    def account(self):
+        return SimpleNamespace(equity="3000", multiplier="1", trading_blocked=False,
+                               account_blocked=False)
+
+
+def test_live_refuses_a_cash_account(tmp_path, monkeypatch):
+    ex = DailyExecutor(Config.load(), account="live", broker=LiveCashBroker(),
+                       state_dir=tmp_path, log_dir=tmp_path)
+    ex.notifier.send = lambda *a, **k: "skipped"
+    assert ex.run(phase="close") == 1
+    assert any("margin" in w for w in ex.warnings)
+    assert ex.broker.client.submitted == []
+
+
+def test_live_ignores_the_paper_swing_book(tmp_path, monkeypatch):
+    (tmp_path / "book-reversion.json").write_text(json.dumps(
+        {"positions": {"SWINGY": {}}, "pending": {}}))
+    live = DailyExecutor(Config.load(), account="live", broker=LiveCashBroker(),
+                         state_dir=tmp_path, log_dir=tmp_path)
+    paper = _executor(tmp_path, monkeypatch)
+    book = DailyBook(cash=3000, start_equity=3000)
+    assert "SWINGY" in paper._foreign_symbols(book)
+    assert "SWINGY" not in live._foreign_symbols(book), "different account, no conflict"
+
+
+def test_daytrade_mode_off_keeps_the_intraday_leg_shadow(tmp_path, monkeypatch):
+    ex = _executor(tmp_path, monkeypatch)
+    book = DailyBook(cash=3000, start_equity=3000)
+    ex.broker.account = lambda: SimpleNamespace(equity="30000")
+    ex._gate(book, 30_000)
+    assert book.daytrade_live
+    ex.d.daytrade_mode = "off"
+    ex._gate(book, 30_000)
+    assert not book.daytrade_live
+
+
+def test_live_switch_edits_only_its_own_env_line(tmp_path, monkeypatch):
+    import importlib, sys as _s
+    _s.path.insert(0, "scripts")
+    sw = importlib.import_module("daily_switch")
+    env = tmp_path / ".env"
+    env.write_text("ALPACA_API_KEY=PKX\nALPACA_SECRET_KEY=S\n")
+    monkeypatch.setattr(sw, "ENV", env)
+    sw.set_live(True)
+    assert env.read_text() == "ALPACA_API_KEY=PKX\nALPACA_SECRET_KEY=S\nDAILY_LIVE=on\n"
+    sw.set_live(False)
+    assert env.read_text().count("DAILY_LIVE") == 1 and "DAILY_LIVE=off" in env.read_text()
+    assert "ALPACA_API_KEY=PKX" in env.read_text()
+    monkeypatch.setenv("DAILY_LIVE", "on")
+    assert Config.load().daily.resolved_accounts() == ["paper", "live"]

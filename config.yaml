@@ -64,7 +64,12 @@ portfolio:
 # holds, and vice versa.
 daily:
   enabled: true
-  start_equity: 3000.0
+  # The REAL-MONEY switch is NOT here: it is DAILY_LIVE=on|off in .env, set by
+  # `make daily-live-on` / `make daily-live-off`. (.env survives `make pull`;
+  # this file is reset by it.) Live keys: ALPACA_LIVE_API_KEY / _SECRET_KEY.
+  accounts: ["paper"]
+  daytrade_mode: auto            # auto = intraday leg goes live at $25k; off = never
+  start_equity: 3000.0           # paper book's virtual start. live uses the real balance
   daytrade_min_equity: 25000.0   # QQQ intraday leg is SHADOW below this (PDT floor)
   ibs_symbols: ["QQQ", "SMH", "XLK"]
   ibs_max: 0.2

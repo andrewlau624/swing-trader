@@ -31,14 +31,14 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 
-from ..config import Config, ROOT
+from ..config import Config, ROOT, get_env
 from ..live.broker import PaperBroker
 from ..live.lock import AccountLock, account_fingerprint
 from ..live.notify import Notifier
 from ..universe import all_assets, valid_symbol
 from . import marketdata as md
 from . import signals as sg
-from .book import DailyBook
+from .book import DailyBook, book_file
 
 ET = "America/New_York"
 NOISE_COST_BPS = 0.5          # per side, shadow accounting (research: noise.py)
@@ -58,12 +58,17 @@ def phase_for(now_et: dt.datetime) -> str:
 
 
 class DailyExecutor:
-    def __init__(self, cfg: Config, broker: PaperBroker | None = None,
+    def __init__(self, cfg: Config, account: str = "paper",
+                 broker: PaperBroker | None = None,
                  state_dir: Path | None = None, log_dir: Path | None = None,
                  dry_run: bool = False):
         self.cfg, self.d = cfg, cfg.daily
+        self.account = account
+        self.live = account == "live"
         self.dry_run = dry_run
-        self.broker = broker or PaperBroker()
+        self.broker = broker or self._make_broker(account)
+        self.fname = book_file(account)
+        self.tag = "" if not self.live else "-live"
         self.state_dir = state_dir or ROOT / "state"
         self.log_dir = log_dir or ROOT / "logs"
         self.log_dir.mkdir(parents=True, exist_ok=True)
@@ -71,6 +76,18 @@ class DailyExecutor:
         self.actions: list[str] = []
         self.warnings: list[str] = []
         self.notifier = Notifier(self.state_dir)
+
+    @staticmethod
+    def _make_broker(account: str) -> PaperBroker:
+        if account == "paper":
+            return PaperBroker()
+        if account != "live":
+            raise ValueError(f"unknown daily account {account!r} (paper|live)")
+        k, s = get_env("ALPACA_LIVE_API_KEY"), get_env("ALPACA_LIVE_SECRET_KEY")
+        if not (k and s):
+            raise RuntimeError("daily.accounts includes 'live' but ALPACA_LIVE_API_KEY / "
+                               "ALPACA_LIVE_SECRET_KEY are not in .env")
+        return PaperBroker(paper=False, key=k, secret=s)
 
     # ------------------------------------------------------------- logging
     def log(self, msg: str) -> None:
@@ -108,10 +125,25 @@ class DailyExecutor:
         today = now.date().isoformat()
         phase = phase or phase_for(now)
         clock = self.broker.clock()
-        book = DailyBook.load(self.state_dir, self.d.start_equity)
-        self.log(f"=== daily book | phase {phase} | {now:%Y-%m-%d %H:%M} ET | "
+        acct = self.broker.account()
+        # live: a dedicated account, so the book starts at its real balance
+        start = float(acct.equity) if self.live else self.d.start_equity
+        book = DailyBook.load(self.state_dir, start, self.fname)
+        self.acct_equity = float(acct.equity)
+        self.log(f"=== daily book [{self.account.upper()}] | phase {phase} | {now:%Y-%m-%d %H:%M} ET | "
                  f"market {'OPEN' if clock.is_open else 'closed'} ===")
 
+        if self.live:
+            if getattr(acct, "trading_blocked", False) or getattr(acct, "account_blocked", False):
+                self.warn("LIVE account is blocked from trading - nothing submitted")
+                return 1
+            if float(getattr(acct, "multiplier", 1) or 1) < 2:
+                # cash account: selling at the open and re-buying at the close
+                # with the same unsettled proceeds is a good-faith violation
+                self.warn("LIVE account is not a margin account (multiplier < 2). This book "
+                          "re-uses same-day sale proceeds; in a cash account that is a "
+                          "good-faith violation. Enable margin at Alpaca before trading.")
+                return 1
         trading_day = clock.is_open or (
             pd.Timestamp(clock.next_open).tz_convert(ET).date() == now.date())
         self.reconcile(book, today)
@@ -130,13 +162,15 @@ class DailyExecutor:
         book.log_equity(today, eq)
         book.last_run = now.isoformat(timespec="seconds")
         if not self.dry_run:
-            book.save(self.state_dir)
+            book.save(self.state_dir, self.fname)
         self.log(f"book equity ${eq:,.2f} (start ${book.start_equity:,.0f}, "
                  f"{(eq / book.start_equity - 1) * 100:+.1f}%) | cash ${book.cash:,.2f} | "
-                 f"{len(book.positions)} positions | day-trade leg "
+                 f"{len(book.positions)} positions"
+                 + (f" | account ${float(self.broker.account().equity):,.2f}" if self.live else "")
+                 + " | day-trade leg "
                  f"{'LIVE' if book.daytrade_live else 'shadow'}")
         self._notify(book, eq, today)
-        with open(self.log_dir / f"daily-{today}.log", "a") as fh:
+        with open(self.log_dir / f"daily{self.tag}-{today}.log", "a") as fh:
             fh.write("\n".join(self.lines) + "\n")
         return 0
 
@@ -159,7 +193,7 @@ class DailyExecutor:
                 bps = (px / ref - 1) * 1e4 * (1 if o["side"] == "buy" else -1) if ref else 0.0
                 self.log(f"  FILL {o['leg']:5} {o['side']:4} {new:g} {o['sym']} @ {px:.4f} "
                          f"(ref {ref:.4f}, {bps:+.1f} bps)")
-                with open(self.log_dir / "daily-fills.jsonl", "a") as fh:
+                with open(self.log_dir / f"daily-fills{self.tag}.jsonl", "a") as fh:
                     fh.write(json.dumps({"coid": coid, "sym": o["sym"], "leg": o["leg"],
                                          "side": o["side"], "qty": new, "fill_px": px,
                                          "ref_px": ref, "slippage_bps": bps,
@@ -177,7 +211,7 @@ class DailyExecutor:
     # ---------------------------------------------------------------- open
     def phase_open(self, book: DailyBook, today: str) -> None:
         marks = self._marks(book)
-        equity = book.equity(marks)
+        equity = self._sizing_equity(book)
         self._settle_noise(book, today)
         self._gate(book, equity)
 
@@ -245,7 +279,7 @@ class DailyExecutor:
         self.log(f"[night] scanned {len(rows)} live names -> {len(picks)} signal(s)")
         if picks.empty:
             return
-        equity = book.equity(self._marks(book))
+        equity = self._sizing_equity(book)
         leg = self.d.night_weight * equity
         per = leg * min(1.0 / len(picks), self.d.night_max_name_pct)
         # never let this book borrow beyond the gross its weights allow
@@ -358,7 +392,8 @@ class DailyExecutor:
         """Latch the day-trading leg on for the day, or keep it in shadow."""
         acct = float(self.broker.account().equity)
         was = book.daytrade_live
-        book.daytrade_live = (equity >= self.d.daytrade_min_equity and acct >= 25_000)
+        book.daytrade_live = (self.d.daytrade_mode == "auto"
+                              and equity >= self.d.daytrade_min_equity and acct >= 25_000)
         if book.daytrade_live and not was:
             self.act(f"DAY-TRADE LEG SWITCHED ON: book equity ${equity:,.0f} >= "
                      f"${self.d.daytrade_min_equity:,.0f}")
@@ -368,7 +403,7 @@ class DailyExecutor:
     def _sync_noise_live(self, book: DailyBook, today: str, px: float) -> None:
         sym = self.d.noise_symbol
         n = book.noise
-        equity = book.equity(self._marks(book))
+        equity = self._sizing_equity(book)
         want = int(n["pos"]) * math.floor(n["lev"] * equity / px)
         have = float(book.positions.get(sym, {}).get("qty", 0.0))
         pend = [o for o in book.open_orders().values() if o["sym"] == sym]
@@ -394,7 +429,7 @@ class DailyExecutor:
                notional: float | None = None) -> None:
         from alpaca.trading.enums import OrderSide, TimeInForce
         from alpaca.trading.requests import MarketOrderRequest
-        coid = PaperBroker.coid("dly", sym, today, f"{leg}-{side}-{kind}")
+        coid = PaperBroker.coid("dlv" if self.live else "dly", sym, today, f"{leg}-{side}-{kind}")
         if coid in book.orders:
             self.log(f"  {sym}: {leg} {side} already submitted today (idempotent skip)"); return
         desc = f"{leg} {side} {sym} " + (f"${notional:,.2f}" if notional else f"{qty:g} sh") + \
@@ -429,6 +464,13 @@ class DailyExecutor:
         self.act(f"submitted {desc}")
 
     # ---------------------------------------------------------------- utils
+    def _sizing_equity(self, book: DailyBook) -> float:
+        """Paper: the virtual book. Live: the real account, which this book
+        owns outright -- deposits and withdrawals size in immediately."""
+        if self.live:
+            return float(self.broker.account().equity)
+        return book.equity(self._marks(book))
+
     def _marks(self, book: DailyBook) -> dict[str, float]:
         held = self.broker.positions()
         return {s: float(held[s].current_price) for s in book.positions
@@ -439,7 +481,7 @@ class DailyExecutor:
         but this book. Never trade these -- Alpaca nets positions per symbol."""
         out = set(self.broker.positions()) - set(book.positions)
         p = self.state_dir / "book-reversion.json"
-        if p.exists():
+        if not self.live and p.exists():     # the swing book trades the paper account only
             try:
                 d = json.loads(p.read_text())
                 out |= set(d.get("positions", {})) | set(d.get("pending", {}))
@@ -455,7 +497,7 @@ class DailyExecutor:
             ("<h4>actions</h4><ul>" + "".join(f"<li>{a}</li>" for a in self.actions) + "</ul>" if self.actions else "") + \
             ("<h4>warnings</h4><ul>" + "".join(f"<li>{w}</li>" for w in self.warnings) + "</ul>" if self.warnings else "") + \
             "<pre>" + "\n".join(self.lines[-40:]) + "</pre>"
-        subj = f"[daily] {'WARN ' if self.warnings else ''}{len(self.actions)} action(s), equity ${equity:,.0f}"
+        subj = f"[daily{' LIVE $' if self.live else ''}] {'WARN ' if self.warnings else ''}{len(self.actions)} action(s), equity ${equity:,.0f}"
         try:
             self.log(self.notifier.send(subj, body,
                                         dedupe_key=f"daily:{today}:{len(self.lines)}:{len(self.actions)}"))

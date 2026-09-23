@@ -36,12 +36,18 @@ class Fill:
 
 
 class PaperBroker:
-    def __init__(self, paper: bool = True):
+    def __init__(self, paper: bool = True, key: str | None = None,
+                 secret: str | None = None):
         from alpaca.trading.client import TradingClient
-        key, secret = require_alpaca_keys()
+        if key is None or secret is None:
+            key, secret = require_alpaca_keys()
         if paper and not key.startswith("PK"):
             raise RuntimeError(
                 f"key {key[:4]}... is not a paper key; refusing to run live")
+        if not paper and key.startswith("PK"):
+            raise RuntimeError(
+                "live mode was given a PAPER key (PK...); set ALPACA_LIVE_API_KEY "
+                "to the real-money key")
         self.client = TradingClient(key, secret, paper=paper)
         self.key = key
         self.secret = secret

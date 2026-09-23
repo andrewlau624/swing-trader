@@ -115,6 +115,31 @@ but "should" is not "did".
 
 ## 4. Daily-cadence book — RUNNING (paper), $3k virtual equity
 
+**The plan:** paper-test now. Then real money starting at $3k, with the
+same two overnight legs. When the real account reaches $25k, the QQQ
+intraday leg switches on by itself (`daytrade_mode: auto`).
+
+**Going real-money** (paper keeps running beside it, for comparison):
+```bash
+# 1. Alpaca dashboard: open the LIVE account, make sure it is a MARGIN
+#    account (a cash account causes good-faith violations with this book),
+#    fund it, create live API keys (they start with AK)
+# 2. on the server, add to .env:
+#      ALPACA_LIVE_API_KEY=AK...
+#      ALPACA_LIVE_SECRET_KEY=...
+make daily-live-check    # connects, shows balance + margin, changes nothing
+make daily-live-on       # type REAL MONEY; sets DAILY_LIVE=on in .env
+make daily-status        # PAPER and LIVE side by side
+make daily-live-off      # back to paper only (warns if it still holds positions)
+```
+The switch is stored in `.env` on purpose. `make pull` does `git reset
+--hard`, so a switch kept in config.yaml would be silently undone on the next pull.
+
+**Honest timeline:** 3k -> 25k at the backtest's 21.8%/yr is ~11 years. At the
+2x setting (44.5%/yr, -22% DD) it's ~6 years. Deposits count: the live book
+sizes from the real balance.
+
+
 **Status:** built 2026-09-22 (`scripts/daily.py`, `swingtrader/daily/`),
 research in RESULTS.md addendum 6.
 

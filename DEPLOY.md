@@ -203,6 +203,9 @@ anything the swing book holds or has pending. The swing executor ignores
 anything listed in the daily book: it won't adopt it, stop it, or trade it.
 Daily positions carry no stop by design; `make positions` labels them.
 
+Real money: see NEXT.md item 4 (`make daily-live-check`, then `make daily-live-on`).
+The switch lives in `.env` as `DAILY_LIVE=on`, so `make pull` cannot undo it.
+
 ## Stopping it
 
 ```bash

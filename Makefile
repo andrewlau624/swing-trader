@@ -12,7 +12,7 @@ UNAME := $(shell uname -s)
 .DEFAULT_GOAL := help
 
 .PHONY: help setup env test lint kill-old persist unpersist persist-status \
-        daily-status daily-dry daily-once daily-logs \
+        daily-status daily-dry daily-once daily-logs daily-live-check daily-live-on daily-live-off \
         results status positions slippage logs once dry digest notify-test \
         notify-setup doctor pull scan backtest clean stop persist-stop linger _lastlog pending
 
@@ -47,6 +47,9 @@ help:
 	@echo "  daily-dry      run the daily book's current phase, submit nothing"
 	@echo "  daily-once     run the daily book's current phase now (paper orders)"
 	@echo "  daily-logs     tail the daily book log"
+	@echo "  daily-live-check  connect to the REAL-money account, change nothing"
+	@echo "  daily-live-on     start trading real money too (asks you to type REAL MONEY)"
+	@echo "  daily-live-off    stop trading real money (paper keeps running)"
 	@echo ""
 	@echo "  scan           what looks tradable today"
 	@echo "  backtest       full walk-forward (slow; writes out/)"
@@ -212,6 +215,15 @@ daily-dry:
 
 daily-once:
 	@$(PY) scripts/daily.py
+
+daily-live-check:
+	@$(PY) scripts/daily_switch.py check
+
+daily-live-on:
+	@$(PY) scripts/daily_switch.py on
+
+daily-live-off:
+	@$(PY) scripts/daily_switch.py off
 
 daily-logs:
 	@LOG=$$(ls -t logs/daily-2*.log 2>/dev/null | head -1); \

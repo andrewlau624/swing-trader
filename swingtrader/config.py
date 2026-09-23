@@ -111,6 +111,18 @@ class DailyCfg:
     book on the same account but owns disjoint symbols and tracks its own
     virtual equity, so the experiment compounds from its own fills only."""
     enabled: bool = True
+    # Which accounts run this book. "paper" shares the swing book's paper
+    # account with a virtual start_equity; "live" is a dedicated real-money
+    # account (ALPACA_LIVE_API_KEY) sized from its actual equity. Both may run
+    # side by side: `make daily-live-on` / `make daily-live-off`.
+    accounts: list = field(default_factory=lambda: ["paper"])
+    # NOTE: the real-money switch itself lives in .env (DAILY_LIVE=on), not
+    # here -- `make pull` does `git reset --hard`, which would silently revert
+    # a switch stored in this tracked file. See resolved_accounts().
+    # auto: the intraday leg places orders once equity >= daytrade_min_equity
+    #       (and the broker account is >= $25k, the PDT floor)
+    # off:  intraday leg stays shadow forever
+    daytrade_mode: str = "auto"
     start_equity: float = 3_000.0
     # Day-trading leg (QQQ intraday) is SHADOW until book equity reaches this.
     # 25k is the FINRA pattern-day-trader floor for a margin account.
@@ -134,6 +146,13 @@ class DailyCfg:
     noise_lookback: int = 14
     noise_target_vol: float = 0.02
     noise_max_lev: float = 3.5       # 4x intraday limit minus the IBS leg
+
+    def resolved_accounts(self) -> list[str]:
+        """config accounts, plus "live" when .env says DAILY_LIVE=on."""
+        acc = [a for a in self.accounts if a != "live"]
+        if (get_env("DAILY_LIVE", "off") or "off").strip().lower() == "on":
+            acc.append("live")
+        return acc
 
 
 @dataclass
