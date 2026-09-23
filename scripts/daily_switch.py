@@ -58,7 +58,9 @@ def check_schwab() -> bool:
     own = set(DailyBook.load(ROOT / "state", 0.0, book_file("live")).positions)
     foreign = sum(abs(float(p.qty) * float(p.current_price or 0)) for s, p in pos.items() if s not in own)
     free = a.equity - foreign
-    cap = Config.load().daily.live_capital
+    env_cap = (get_env("DAILY_LIVE_CAPITAL") or "").strip()
+    cap = float(env_cap) if env_cap and env_cap.lower() not in ("none", "null", "off") \
+        else Config.load().daily.live_capital
     use = min(free, cap) if cap else free
     print(f"  your other holdings ${foreign:,.2f}  ->  FREE for the bot ${free:,.2f}"
           + (f" (capped at ${cap:,.0f})" if cap else "") + f"  ->  bot sizes from ${max(use,0):,.2f}")

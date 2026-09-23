@@ -462,8 +462,8 @@ class DailyExecutor:
 
     def _live_start(self) -> float:
         free = self.free_equity()
-        cap = self.d.live_capital
-        return max(0.0, min(free, float(cap)) if cap else free)
+        cap = self.live_cap()
+        return max(0.0, min(free, cap) if cap else free)
 
     def _noise_instrument(self, book: DailyBook) -> str:
         """QQQ, unless another leg holds it today -- then QQQM (same index)."""
@@ -565,12 +565,20 @@ class DailyExecutor:
                       for s, p in self.broker.positions().items() if s not in book_syms)
         return eq - foreign
 
+    def live_cap(self) -> float | None:
+        """DAILY_LIVE_CAPITAL in .env wins over config.yaml: `make pull` resets
+        tracked files, and a cap that silently vanished would size the bot up."""
+        env = (get_env("DAILY_LIVE_CAPITAL") or "").strip()
+        if env and env.lower() not in ("none", "null", "off"):
+            return float(env)
+        return float(self.d.live_capital) if self.d.live_capital else None
+
     def _sizing_equity(self, book: DailyBook) -> float:
         """Paper: the virtual book. Live: free equity, optionally capped."""
         if self.live:
             free = self.free_equity()
-            cap = self.d.live_capital
-            return max(0.0, min(free, float(cap)) if cap else free)
+            cap = self.live_cap()
+            return max(0.0, min(free, cap) if cap else free)
         return book.equity(self._marks(book))
 
     def _marks(self, book: DailyBook) -> dict[str, float]:

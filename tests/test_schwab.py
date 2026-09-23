@@ -19,6 +19,7 @@ def _isolate_from_real_env(monkeypatch):
     # get_env() back-fills os.environ from the real .env with setdefault, so an
     # empty value here keeps a developer's real account number out of the tests
     monkeypatch.setenv("SCHWAB_ACCOUNT_NUMBER", "")
+    monkeypatch.setenv("DAILY_LIVE_CAPITAL", "")
 
 
 class Resp:
@@ -195,6 +196,8 @@ def test_live_sizes_from_free_equity_not_your_holdings(tmp_path, monkeypatch):
     assert ex2._sizing_equity(book) == pytest.approx(3514.60 - 1512.0)
     ex2.d.live_capital = 1500
     assert ex2._sizing_equity(book) == 1500
+    monkeypatch.setenv("DAILY_LIVE_CAPITAL", "1000")
+    assert ex2._sizing_equity(book) == 1000, ".env cap wins (survives make pull)"
 
 
 
