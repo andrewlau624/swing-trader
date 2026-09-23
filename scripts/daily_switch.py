@@ -110,8 +110,17 @@ def main():
         if not check():
             sys.exit("\nnot switching on.")
         print(f"\nThis places REAL orders with REAL money via {cfg.daily.live_broker.upper()} from the next scheduled run:")
-        print(f"  IBS leg {cfg.daily.ibs_weight:.0%} + overnight leg {cfg.daily.night_weight:.0%} of the account,")
-        print(f"  intraday QQQ leg {'live (equity >= $' + format(cfg.daily.daytrade_min_equity, ',.0f') + ')' if cfg.daily.daytrade_mode == 'auto' else 'OFF'}.")
+        env_cap = (get_env("DAILY_LIVE_CAPITAL") or "").strip()
+        cap = float(env_cap) if env_cap and env_cap.lower() not in ("none", "null", "off") else cfg.daily.live_capital
+        cap_txt = f"${cap:,.0f} cap" if cap else "all FREE capital"
+        print(f"  IBS leg {cfg.daily.ibs_weight:.0%} + overnight leg {cfg.daily.night_weight:.0%} of the bot's capital ({cap_txt}),")
+        floor = cfg.daily.daytrade_min_equity
+        if cfg.daily.daytrade_mode != "auto":
+            print("  intraday QQQ leg OFF.")
+        elif cap and cap < floor:
+            print(f"  intraday QQQ leg stays SHADOW (bot capital ${cap:,.0f} < ${floor:,.0f} floor).")
+        else:
+            print(f"  intraday QQQ leg live once bot capital >= ${floor:,.0f}.")
         if input('Type REAL MONEY to confirm: ').strip() != "REAL MONEY":
             sys.exit("not confirmed; nothing changed.")
         set_live(True)

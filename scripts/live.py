@@ -29,8 +29,12 @@ def status():
               f"mkt {float(p.market_value):10.2f}  P&L {float(p.unrealized_pl):+9.2f} "
               f"({float(p.unrealized_plpc)*100:+.1f}%)")
     stops = b.stops_by_symbol()
-    unprot = [s for s in pos if s not in stops]
-    print(f"stops     {len(stops)} armed" + (f"  UNPROTECTED: {unprot}" if unprot else ""))
+    from swingtrader.daily.book import owned_by_daily
+    daily = owned_by_daily(ROOT / "state")
+    unprot = [s for s in pos if s not in stops and s not in daily]
+    print(f"stops     {len(stops)} armed" + (f"  UNPROTECTED: {unprot}" if unprot else "")
+          + (f"  (daily book, no stop by design: {sorted(s for s in pos if s in daily)})"
+             if any(s in daily for s in pos) else ""))
     for name in ("reversion", "momentum"):
         p = ROOT / "state" / f"book-{name}.json"
         if p.exists():
