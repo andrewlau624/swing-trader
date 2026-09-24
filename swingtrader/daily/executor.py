@@ -307,7 +307,39 @@ class DailyExecutor:
                             ref_px=float(last[sym]["close"]), kind="entry")
 
     # --------------------------------------------------------------- close
+    EXIT_COST_WARN_BPS = 15.0     # night edge is gone near 28bp/side (RESULTS.md addendum 14)
+    EXIT_COST_MIN_N = 10
+
+    def _check_exit_cost(self) -> None:
+        """This morning's open sells are booked by now; score the recent ones
+        against the official open (SIP, >15 min old by 15:40)."""
+        path = self.log_dir / f"daily-fills{self.tag}.jsonl"
+        if not path.exists():
+            return
+        try:
+            fills = [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
+            sells = [f for f in fills if f.get("leg") == "night" and f.get("side") == "sell"][-30:]
+            if not sells:
+                return
+            days = sorted({str(f.get("filled_at", ""))[:10] for f in sells})
+            bars = md.sip_daily(sorted({f["sym"] for f in sells}),
+                                pd.Timestamp(days[0]) - pd.Timedelta(days=3), None)
+            opens = {(sym, str(d.date())): float(b.loc[d, "open"])
+                     for sym, b in bars.items() for d in b.index}
+            n, bps = sg.night_exit_cost(sells, opens)
+        except Exception as exc:
+            self.log(f"[night] exit-cost check skipped ({type(exc).__name__}: {str(exc)[:80]})")
+            return
+        if not n:
+            return
+        self.log(f"[night] open-sell cost vs official open, last {n}: {bps:+.1f} bps/side")
+        if n >= self.EXIT_COST_MIN_N and bps > self.EXIT_COST_WARN_BPS:
+            self.warn(f"night-leg open sells average {bps:+.1f} bps/side worse than the official open "
+                      f"over {n} exits (backtest assumes 7.5; the edge is gone near 28). "
+                      "Consider a broker with real market-on-open orders.")
+
     def phase_close(self, book: DailyBook, today: str, now, clock) -> None:
+        self._check_exit_cost()
         close_et = pd.Timestamp(clock.next_close).tz_convert(ET)
         if close_et.date() != now.date() or close_et.hour != 16:
             self.log("early close today - night leg skipped (research excludes half days)")

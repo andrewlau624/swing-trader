@@ -460,3 +460,17 @@ def test_prev_close_mismatch_catches_an_unabsorbed_split():
     bad = sg.prev_close_mismatch(rows)
     assert bad.to_dict() == {"SPLT": True, "OK": False, "NOFEED": False}
     assert not sg.prev_close_mismatch(rows.drop(columns="feed_prev_close")).any()
+
+
+def test_night_exit_cost_scores_sells_against_the_official_open():
+    fills = [
+        {"sym": "AAA", "leg": "night", "side": "buy", "fill_px": 10.0, "filled_at": "2026-09-23T20:00"},
+        {"sym": "AAA", "leg": "night", "side": "sell", "fill_px": 9.98, "filled_at": "2026-09-24T13:30"},
+        {"sym": "BBB", "leg": "night", "side": "sell", "fill_px": 20.02, "filled_at": "2026-09-24"},
+        {"sym": "CCC", "leg": "ibs", "side": "sell", "fill_px": 1.0, "filled_at": "2026-09-24"},
+        {"sym": "DDD", "leg": "night", "side": "sell", "fill_px": 5.0, "filled_at": "2026-09-24"},
+    ]
+    opens = {("AAA", "2026-09-24"): 10.0, ("BBB", "2026-09-24"): 20.0}
+    n, bps = sg.night_exit_cost(fills, opens)
+    assert n == 2                                  # DDD has no open; buys and IBS ignored
+    assert bps == pytest.approx((20.0 + -10.0) / 2)

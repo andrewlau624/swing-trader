@@ -1095,3 +1095,48 @@ reported as the mean over fold offsets, not one alignment.
   Schwab. Alpaca live supports real OPG orders if it does not.
 - Research data now lives in `data/research/` (gitignored, ~3 GB) instead of
   `/private/tmp`, and the research scripts point there.
+
+---
+
+# Addendum 15 — what a $3k + $1k/month account can expect (2026-09-23)
+
+Dollar-level simulation of the live daily book (`research/daily-strategies/grow*.py`):
+whole shares, the live sizing rules, intraday leg capped at 1.5x (Schwab's 2x
+multiplier minus the IBS half), corrected night trades (addendum 14), $1,000
+added every 21 sessions. Pre-tax.
+
+**Historical replay, Feb 2021 → Sep 2026** ($70k deposited): $194k end,
+time-weighted 33.5%/yr, Sharpe 1.68, maxDD −12.6%. SPY with the same deposits: $114k.
+
+What moves the result, TWR per year:
+
+| lever | TWR |
+|---|---|
+| as live (whole shares) | 33.5% |
+| fractional shares (ideal) | 34.1% — rounding costs ~0.6pp; re-splitting / ETF twins buy nothing |
+| intraday leg OFF (what a bot capped under $2k runs) | 19.9% |
+| night cost 7.5 → 12.5 → 17.5 → 27.5 bp/side | 33.5 → 25.2 → 17.0 → 1.7 |
+| intraday cost 0.5 → 1.0 → 1.5 → 2.0 bp/side | 33.5 → 29.7 → 25.7 → 22.0 |
+
+The two things that matter: **run the intraday leg** (it only turns on when
+the bot has ≥ $2k) and **night-leg exit fills at the auction price**. The
+intraday leg alone is fading (2025 +2.4%, 2026 +1.6%); it earns its place by
+diversifying 2022-type years. The 15:40 run now warns if night open sells
+average > 15bp/side worse than the official open over ≥ 10 exits.
+
+**Monte Carlo** (400 paths, 21-session blocks resampled from 2021–26, SPY on
+the same days), account value:
+
+| scenario | 1 yr | 3 yr | 5 yr | 10 yr | P(behind SPY) at 5 yr |
+|---|---|---|---|---|---|
+| deposited | 14,000 | 38,000 | 62,000 | 122,000 | |
+| A backtest costs — median (p10–p90) | 16.7k (14.6–19.2) | 62.5k (48–79) | 148k (104–207) | 804k (472k–1.4M) | 6% |
+| B +5bp night, 1bp intraday | 15.8k | 52.3k | 107k | 396k | 30% |
+| C +10bp night, 1.5bp intraday | 14.8k | 43.7k | 79.8k | 205k | 69% |
+| D backtest costs, intraday off | 15.7k | 51.6k | 103k | 362k | 30% |
+| SPY, same deposits — median | 15.3k | 47.7k | 91.2k | 271k | |
+
+Read it as a range, not a forecast: the paths resample 2021–26, the period the
+rules were built on, and the night leg's return is concentrated in 2024+.
+Every trade is short-term: in a taxable account, taxes at ordinary rates take
+a large bite out of A–D and less out of buy-and-hold SPY.

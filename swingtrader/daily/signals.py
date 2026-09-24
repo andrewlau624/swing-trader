@@ -105,6 +105,21 @@ def prev_close_mismatch(rows: pd.DataFrame, tol: float = 0.03) -> pd.Series:
     return bad & np.isfinite(fp) & (fp > 0)
 
 
+def night_exit_cost(fills: list[dict], opens: dict, window: int = 30) -> tuple[int, float]:
+    """Mean cost of the last `window` night-leg SELLS against the official
+    opening print, in bps per side (+ = sold below the open). The whole night
+    edge is in the open auction (RESULTS.md addendum 10), and every 5bp/side
+    here costs ~8pp/yr; it is gone near 28bp (addendum 14). `opens` maps
+    (sym, 'YYYY-MM-DD') -> official open. Returns (n measured, mean bps)."""
+    sells = [f for f in fills if f.get("leg") == "night" and f.get("side") == "sell"]
+    costs = []
+    for f in sells[-window:]:
+        o = opens.get((f["sym"], str(f.get("filled_at", ""))[:10]))
+        if o and o > 0 and f.get("fill_px"):
+            costs.append(-(float(f["fill_px"]) / o - 1.0) * 1e4)
+    return len(costs), (float(np.mean(costs)) if costs else float("nan"))
+
+
 def dedupe_correlated(picks: pd.DataFrame, rets: dict, max_corr: float = 0.9) -> tuple[pd.DataFrame, list]:
     """One position per underlying bet. Walk the picks most-beaten first and
     drop any whose last-20-day returns correlate above max_corr with one
