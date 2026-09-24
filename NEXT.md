@@ -5,6 +5,12 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Addendum 18 (2026-09-24): crash guards shipped
+
+`night_max_corr` 0.9 → 0.7 and `night_weekend_scale` 0.5. COVID crash on the
+book −17% → −4%; 2021–26 Sharpe 1.81 → 1.98. Weak spot left: the intraday
+leg is the only short side, and it is fading. If it dies, a slow bear is unhedged.
+
 ## Addendum 16 (2026-09-24): what changed, what is waiting
 
 - **Shipped:** night sizing tilt, QQQ + SMH intraday split, Schwab open sells

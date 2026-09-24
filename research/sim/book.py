@@ -181,6 +181,7 @@ class Params:
     margin_rate: float = 0.12             # Schwab debit rate, small balances (annual)
     min_edge_bps: float | None = None     # skip night names whose round-trip cost exceeds this
     name_cap: float | None = None         # hard cap per night name AFTER the tilt, fraction of the leg
+    weekend_scale: float = 1.0            # night exposure x this when held over a weekend/holiday
 
 
 class Sim:
@@ -215,6 +216,8 @@ class Sim:
             if p.min_edge_bps is not None:
                 ok = 2 * c <= p.min_edge_bps
             per = leg * nd.frac * w
+            if p.weekend_scale != 1.0 and self._gap(d) > 1:
+                per = per * p.weekend_scale
             if p.name_cap is not None:
                 per = np.minimum(per, leg * p.name_cap)
             sh = np.floor(per / nd.price) if p.whole else per / nd.price
@@ -260,6 +263,12 @@ class Sim:
                     x = E * lev * float(z.at[d, "ret"])
                     pnl += x; info["noise"] += x
         return pnl, info
+
+    def _gap(self, d) -> int:
+        if not hasattr(self, "_gaps"):
+            ix = self.C.index
+            self._gaps = {a: (b - a).days for a, b in zip(ix[:-1], ix[1:])}
+        return self._gaps.get(d, 1)
 
     def _idle_ret(self, d, how: str) -> float:
         if how == "cash":

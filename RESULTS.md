@@ -1296,3 +1296,76 @@ years: the tilt helps in 5 of 6, the SMH split in 2 of 6.
 These resample 2021–26, the period the rules were fitted on, so treat even
 "edge halves" as optimistic. Before tax. First checkpoint: kill-rule verdicts
 at ~100 night round trips (about 4–6 weeks in).
+
+---
+
+# Addendum 18 — crashes: where the book breaks, and two guards (2026-09-24)
+
+Question: does the book still work through a real drop (a Minsky moment),
+not just the 2021–26 boom? Scripts: `research/sim/crash.py`. IBS and intraday
+legs go back to 2016. The night leg's 15:50 data starts in 2020-11, so
+**2020 was rebuilt from daily bars** (`panel2020.pkl`, 7,645 symbols) through
+the same live picking code. That version reads the close (+9.1bp/day
+lookahead on the overlap, correlation 0.76 with the honest leg) and is
+bias-corrected.
+
+## Each leg in a crash (unit weight, % over the episode)
+
+| episode | SPY | IBS | night | intraday QQQ/SMH |
+|---|---|---|---|---|
+| 2018 Q4 selloff | −18.9 | −0.6 | n/a | **+11.8** |
+| COVID crash 02-19 → 03-23 | −33.5 | +0.6 | **−35.9** (rebuilt) | +0.9 |
+| 2022 bear | −24.1 | −10.3 | −0.8 | **+15.8** |
+| Aug 2024 unwind | −7.9 | −9.2 | −3.1 | +3.4 |
+| Apr 2025 tariffs | −18.6 | +6.7 | +8.5 | +5.8 |
+
+On SPY −3% days the intraday leg averages **+114bp** (it is trend-following
+and shorts), IBS +7bp and the night leg −42bp. The intraday leg is the
+book's crash hedge, and the night leg is its crash risk.
+
+## The failure: 2020-03-06
+
+Nine names were held into Monday 03-09 (OPEC's price war, SPY −7.6% at the
+open). **Five were oil producers** (NBR, MTDR, VET, OVV, OII), gapping
+−33% to −53%: **−26% on the leg in one night**. Three things lined up:
+- one theme counted as five bets: 0.9 correlation only catches near-twins
+- only 19 signals, so the crowding rule did not fire
+- the loss came over a weekend
+
+## Two guards, adopted
+
+- **`night_max_corr: 0.9 → 0.7`**: correlated names (a sector moving together)
+  count as one bet.
+- **`night_weekend_scale: 0.5`**: half size when held over a weekend or
+  holiday. Per-trade weekend returns equal weekday ones (t = 0.04), but they
+  swing harder (std 6.2% vs 5.5%), so this is risk parity across nights, not
+  a return forecast.
+
+Whole book (0.5 IBS + 0.5 night + QQQ/SMH intraday; before 2020 the night half
+sits in T-bills):
+
+| | COVID crash | 2022 bear | Apr 2025 | 2016–26 CAGR / Sharpe / maxDD | 2021–26 (honest data) |
+|---|---|---|---|---|---|
+| SPY | −33.5 | −24.1 | −18.6 | 15.7% / 0.92 / −34% | 15.3% / 0.94 / −24% |
+| V3 as shipped | −17.3 | +10.6 | +14.6 | 27.2% / 1.46 / −24% | 37.5% / 1.71 / −15% |
+| **V5 = V3 + both guards** | **−3.7** | **+19.1** | +14.8 | **29.7% / 1.69 / −13%** | **39.8% / 1.90 / −12%** |
+
+The guards were designed after seeing 2020-03-06, so the COVID row is
+in-sample for them. The 2021–26 column is not, and it improves. Rejected:
+"stress memory" (crowding over 5 days; lower in every period), halving at
+SPY 20d vol > 30% (−36% → −22% in the crash, but it gives back the rebound,
+15% → 5%), and a leverage floor on the intraday leg (+0.5pp, more risk).
+
+In dollars ($3k 2021-07-06 + $1k/21 sessions, tiered costs): V5 ends at
+**$192,880** on 2026-09-18 vs V3's $192,653. Worst month −8.8% vs −11.1%,
+maxDD −13.1% vs −15.2%, Sharpe 1.98 vs 1.81. It is insurance: behind V3 in
+2024 (23 vs 30%) and 2025 (73 vs 85%), ahead in 2022 (43 vs 33%) and 2026.
+
+## What still breaks it
+
+- A crash that gaps on a weekday night: the night leg is still at full size.
+- A slow bear market: IBS lost 10% in 2022, carried by the intraday leg.
+  **That hedge is the leg that has been fading** (2025–26 ≈ 0). If it stops
+  working, the book has no short side left.
+- 2008-length bears and a 1987-style single day are not in any data here.
+  The −25% realised-drawdown kill rule is the backstop.

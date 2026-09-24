@@ -163,6 +163,19 @@ def dedupe_correlated(picks: pd.DataFrame, rets: dict, max_corr: float = 0.9) ->
     return picks.loc[kept], dropped
 
 
+def gap_scale(today, next_open, scale: float) -> float:
+    """Night-leg exposure multiplier: `scale` when the position is held over
+    more than one calendar night (weekend, holiday), else 1. Weekend nights
+    earn the same per trade but swing harder (std 6.2% vs 5.5%, fatter left
+    tail), and a crash's worst gaps land there: 2020-03-06 -> 03-09, five oil
+    producers at -33..-53% after OPEC broke over the weekend (addendum 18)."""
+    try:
+        gap = (pd.Timestamp(next_open).date() - pd.Timestamp(today).date()).days
+    except Exception:
+        return 1.0
+    return float(scale) if gap > 1 else 1.0
+
+
 def night_sizing(picks: pd.DataFrame, *, vol_min: float, crowd_n: int,
                  max_name_pct: float) -> tuple[pd.DataFrame, float]:
     """Filter and size the night leg (research: h1.py / h1port.py, rule R6).

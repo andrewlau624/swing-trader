@@ -106,7 +106,10 @@ daily:
   night_adv_min: 10000000.0
   night_vol_min: 0.60            # skip quiet names (a -8% day there is news, not overreaction)
   night_crowd_n: 30              # >30 signals = market-wide selloff: exposure x 30/n
-  night_max_corr: 0.9            # 20d-return correlation above this = same bet: keep the most beaten one
+  night_max_corr: 0.7            # 20d-return correlation above this = same bet: keep the most beaten one.
+                                 # 0.9 -> 0.7 (addendum 18): five oil producers were one bet on 2020-03-06
+  night_weekend_scale: 0.5       # half size when held over a weekend/holiday (addendum 18: COVID crash
+                                 # book -17% -> -4% with the dedupe; 2021-26 Sharpe up, not down)
   night_tilt_k: 0.25             # weight deeper drops more (addendum 16; fitted 2021-23, held out 2024-26). 0 = equal
   noise_symbol: QQQ
   noise_alt_symbol: QQQM         # used on days the IBS leg holds QQQ

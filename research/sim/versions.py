@@ -31,6 +31,11 @@ VERSIONS = {  # label: (first live date, Params kwargs)
     "V4 V3 + 1.3x overnight (gated)": ("when 50 exits prove costs",
                                        dict(tilt="live", noise=S2, night_w=0.65, ibs_w=0.65,
                                             noise_cap=1.35)),
+    "V5 V3 + crash guards (09-24)": ("2026-09-24", dict(tilt="live", noise=S2, weekend_scale=0.5,
+                                                         _corr=0.7)),
+    "V6 V5 + 1.3x overnight (gated)": ("when 50 exits prove costs",
+                                       dict(tilt="live", noise=S2, weekend_scale=0.5, _corr=0.7,
+                                            night_w=0.65, ibs_w=0.65, noise_cap=1.35)),
 }
 
 
@@ -50,8 +55,11 @@ def history(s, cost="tier"):
     sw = pd.read_pickle(DATA / "swing_eq.pkl")["swing_1d"].pct_change().reindex(days).fillna(0)
     out["V0 swing book (paper, live cadence)"] = sw
     comps = {}
+    import copy
+    s07 = copy.copy(s); s07.N = B.night_days(max_corr=0.7)
     for lab, (_, kw) in VERSIONS.items():
-        df = s.replay(B.Params(night_cost=cost, **kw), dates=days)
+        kw = dict(kw); sim = s07 if kw.pop("_corr", None) == 0.7 else s
+        df = sim.replay(B.Params(night_cost=cost, **kw), dates=days)
         out[lab] = df.r
         comps[lab] = df
     out["SPY buy & hold"] = s.spy.reindex(days).fillna(0)

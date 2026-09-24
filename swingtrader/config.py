@@ -183,6 +183,8 @@ class DailyCfg:
     night_vol_min: float = 0.60      # 20-day annualised vol floor
     night_crowd_n: int = 30          # more raw signals than this = market-wide selloff: scale down
     night_max_corr: float = 0.9      # one position per underlying (e.g. seven 2x SpaceX ETFs = one bet)
+    # night exposure multiplier when held over a weekend/holiday (addendum 18)
+    night_weekend_scale: float = 0.5
     # size night names by predicted edge (signals.night_tilt, addendum 16); 0 = equal weight
     night_tilt_k: float = 0.25
     # leg 3: QQQ noise-area intraday momentum (shadow until the gate trips)

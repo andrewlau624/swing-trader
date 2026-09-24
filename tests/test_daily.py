@@ -588,3 +588,31 @@ def test_levered_book_sizes_both_overnight_legs_up(tmp_path, monkeypatch):
     assert ex._w_night(b) == 0.65 and ex._w_ibs(b) == 0.65
     ex.d.lever_weight = None
     assert ex._w_night(b) == 0.5
+
+
+def test_gap_scale_halves_weekend_and_holiday_nights():
+    assert sg.gap_scale("2026-09-25", pd.Timestamp("2026-09-28 09:30", tz=ET), 0.5) == 0.5   # Fri -> Mon
+    assert sg.gap_scale("2026-09-24", pd.Timestamp("2026-09-25 09:30", tz=ET), 0.5) == 1.0   # Thu -> Fri
+    assert sg.gap_scale("2026-11-25", pd.Timestamp("2026-11-27 09:30", tz=ET), 0.5) == 0.5   # Thanksgiving
+    assert sg.gap_scale("2026-09-25", pd.Timestamp("2026-09-28 09:30", tz=ET), 1.0) == 1.0
+
+
+def test_friday_close_buys_half_size(tmp_path, monkeypatch):
+    from swingtrader.daily import executor as E
+    monkeypatch.setattr(E.md, "eligibility", lambda *a, **k: pd.DataFrame(
+        {"prev_close": [10.0], "vol20": [0.9]}, index=["LOSER"]))
+    monkeypatch.setattr(E.md, "live_rows", lambda syms, *a, **k: pd.DataFrame(
+        {"price": [9.0], "high": [10.0], "low": [8.99]}, index=["LOSER"]))
+    monkeypatch.setattr(E, "all_assets", lambda: SimpleNamespace(symbols=["LOSER"]))
+    ex = _executor(tmp_path, monkeypatch)
+    monkeypatch.setattr(ex, "_check_exit_cost", lambda *a: None)
+    qty = {}
+    for day, nxt in (("2026-09-24", "2026-09-25 09:30"), ("2026-09-25", "2026-09-28 09:30")):
+        ex.broker.client.submitted.clear()
+        clock = SimpleNamespace(is_open=True, next_open=pd.Timestamp(nxt, tz=ET),
+                                next_close=pd.Timestamp(f"{day} 16:00", tz=ET))
+        book = DailyBook(cash=3000, start_equity=3000)
+        ex.phase_close(book, day, dt.datetime.fromisoformat(f"{day}T15:40").replace(tzinfo=ET), clock)
+        qty[day] = float(ex.broker.client.submitted[0].qty)
+    assert qty["2026-09-25"] == math.floor(3000 * 0.5 * 0.10 * 0.5 / 9.0)
+    assert qty["2026-09-24"] == math.floor(3000 * 0.5 * 0.10 / 9.0)

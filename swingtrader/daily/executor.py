@@ -512,7 +512,11 @@ class DailyExecutor:
             return
         equity = self._sizing_equity(book)
         leg = self._w_night(book) * equity
-        per = leg * frac
+        gs = sg.gap_scale(today, pd.Timestamp(clock.next_open).tz_convert(ET), self.d.night_weekend_scale)
+        if gs != 1.0:
+            self.log(f"[night] held over {pd.Timestamp(clock.next_open).tz_convert(ET):%a %m-%d}: "
+                     f"exposure x {gs:g} (weekend/holiday gap)")
+        per = leg * frac * gs
         # never let this book borrow beyond the gross its weights allow
         floor = -(max(1.0, self._w_ibs(book) + self._w_night(book)) - 1.0) * equity
         cash = book.cash
