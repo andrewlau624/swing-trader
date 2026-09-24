@@ -113,6 +113,7 @@ daily:
   night_weekend_scale: 0.5       # half size when held over a weekend/holiday (addendum 18: COVID crash
                                  # book -17% -> -4% with the dedupe; 2021-26 Sharpe up, not down)
   night_tilt_k: 0.25             # weight deeper drops more (addendum 16; fitted 2021-23, held out 2024-26). 0 = equal
+  night_tilt_model: v1           # v2 adds yesterday's return: replay +$23k, but borderline (addendum 23)
   noise_symbol: QQQ
   noise_alt_symbol: QQQM         # used on days the IBS leg holds QQQ
   # QQQ + SMH split the intraday budget equally (RESULTS.md addendum 16:

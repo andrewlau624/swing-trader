@@ -218,6 +218,32 @@ def night_tilt(vol20, day_ret, k: float = 0.25) -> np.ndarray:
     return w / w.mean()
 
 
+# Tilt v2 (RESULTS.md addendum 23): adds YESTERDAY's return. A name that rose
+# hard yesterday and crashed today bounces more (+31bp per sd; t 2.0 / 2.6 per
+# half). Fitted on 2021-23 only, frozen, judged on 2024-26. OFF by default
+# (daily.night_tilt_model: v1): it was the best of 9 screened features and
+# its sign was the opposite of the prior written down before testing.
+NIGHT_TILT_V2 = {"mu": (0.1706, -0.1298, 0.0096), "sd": (0.5344, 0.0602, 0.1097),
+                 "lo": (-0.4912, -0.4212, -0.2612), "hi": (1.8496, -0.0804, 0.6134),
+                 "beta_bp": (6.60, -17.49, 31.43), "pred_sd_bp": 41.04}
+
+
+def night_tilt_v2(vol20, day_ret, prev_ret, k: float = 0.25) -> np.ndarray:
+    """night_tilt with a third input, yesterday's return (close t-1 / close t-2 - 1).
+    Inputs are winsorised to the fit's 1st-99th percentiles, then z-scored."""
+    vol20 = np.asarray(vol20, float); n = len(vol20)
+    if k == 0 or n == 0:
+        return np.ones(n)
+    t = NIGHT_TILT_V2
+    x = np.column_stack([np.log(np.maximum(vol20, 1e-3)), np.asarray(day_ret, float),
+                         np.asarray(prev_ret, float)])
+    x = np.where(np.isfinite(x), x, np.array(t["mu"]))      # unknown input -> no tilt from it
+    x = np.clip(x, t["lo"], t["hi"])
+    z = (x - np.array(t["mu"])) / np.array(t["sd"])
+    w = np.clip(1 + k * (z @ np.array(t["beta_bp"])) / t["pred_sd_bp"], 0.25, 2.0)
+    return w / w.mean()
+
+
 # ------------------------------------------------------------ kill rules
 # Pre-registered 2026-09-24, BEFORE any live results (RESULTS.md addendum 16).
 # Written down now so that a losing leg is switched off by a rule, not kept

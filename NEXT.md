@@ -5,6 +5,12 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Addendum 23 (2026-09-24): tilt v2 built, OFF
+
+`daily.night_tilt_model: v2` adds yesterday's return to night sizing: replay +$23k
+($260.6k → $283.7k), every year better, but borderline (sign opposite the prior, best of 9).
+The 15:40 log shows what v2 would weight. Decide after the fill-cost checkpoint.
+
 ## Addendum 22 (2026-09-24): experimental growth profile, OFF by default
 
 `DAILY_LIVE_PROFILE=aggressive` in `.env` runs the brokerage book at 1.3x overnight

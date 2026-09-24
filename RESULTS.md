@@ -1528,3 +1528,30 @@ COVID rebuild: V7 −17.5% maxDD, aggressive −23%. Schwab can raise house marg
 Built: `daily.profiles.aggressive` in config.yaml, applied to the real-money brokerage book only
 when `.env` has `DAILY_LIVE_PROFILE=aggressive` (never paper, so paper stays the control; never
 the Roth, which is also capped at 1.0x overnight whatever the weights).
+
+---
+
+# Addendum 23 — better picking signals for the night leg (2026-09-24)
+
+`research/sim/features.py`. Nine features computable at 15:50, a prior written for each
+before testing; quintiles of next-open net return per half, then each added to the tilt
+OLS (fit 2021–23, judged 2024–26 and reversed) against within-day shuffles and random-noise
+features. Baseline V7 at the honest 3x-ETF margin: $260.6k (tier) / $207.8k (tier_hi).
+
+**Accuracy does not move.** Win rate is 42–55% in every bucket of every feature; buckets
+differ through the size of wins and losses. Late selling, relative volume, gap share, SPY
+context, idiosyncratic move, distance from 20d/52w low, price: none monotone, most flip
+between halves. Each adds −$3k to +$3k: dead.
+
+**Yesterday's return: borderline, built OFF.** Names up hard yesterday and down ≥8% today
+bounce more (top decile: +92bp net, 52% wins, avg win +589 / loss −449bp). As a third tilt
+input (+31bp per sd; day-clustered t 2.0 / 2.6 per half, 3.2 pooled): 47.5 → 50.5%/yr,
+Sharpe 1.99 → 2.11, **$260.6k → $283.7k** (tier_hi $207.8k → $226.8k); better in every year
+2021–26; the reverse fit holds; beats every shuffle and noise-feature seed. Against it: the
+prior predicted the opposite sign, it is the best of 9 on top of ~90 earlier variants, and the
+effect is concentrated in the top decile. `daily.night_tilt_model: v2` switches it on; under
+v1 the 15:40 log prints the v2 weights.
+
+**IBS up-weighted below SPY's 200d SMA: dead as sizing.** The per-trade edge is real (2016–23
++50bp, t 3.5 vs +18bp) but sizing up takes daytime room from the intraday leg: 2021–23
+falls at both cost tiers (×1.5: 48.6 → 48.0; ×2: 46.8).

@@ -915,3 +915,13 @@ def test_roth_never_goes_above_1x_overnight_whatever_the_weights(tmp_path, monke
     roth.d = dataclasses.replace(roth.d, night_weight=0.65, ibs_weight=0.65)
     book = DailyBook(cash=5000, start_equity=5000)
     assert roth._w_night(book) + roth._w_ibs(book) == pytest.approx(1.0)
+
+
+# ------------------------------------------------- addendum 23: tilt v2
+def test_night_tilt_v2_weights_yesterdays_winners_up_and_keeps_gross():
+    w = sg.night_tilt_v2([1.0, 1.0, 1.0], [-0.12, -0.12, -0.12], [0.30, 0.0096, np.nan])
+    assert w.mean() == pytest.approx(1.0)
+    assert w[0] > w[1] == pytest.approx(w[2]), "up yesterday -> bigger; unknown -> the fit mean"
+    assert np.all(sg.night_tilt_v2([1, 1], [-0.1, -0.2], [0, 0], k=0) == 1)
+    extreme = sg.night_tilt_v2([1.0, 1.0], [-0.12, -0.12], [5.0, 0.61])
+    assert extreme[0] == pytest.approx(extreme[1]), "winsorised at the fit's 99th percentile"

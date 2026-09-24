@@ -197,6 +197,9 @@ class DailyCfg:
     night_weekend_scale: float = 0.5
     # size night names by predicted edge (signals.night_tilt, addendum 16); 0 = equal weight
     night_tilt_k: float = 0.25
+    # v1 = depth + vol20 (shipped); v2 adds yesterday's return (addendum 23).
+    # Under v1 the 15:40 log still prints the v2 weights for comparison.
+    night_tilt_model: str = "v1"
     # leg 3: QQQ noise-area intraday momentum (shadow until the gate trips)
     noise_symbol: str = "QQQ"
     # traded instead when another leg (IBS) already holds noise_symbol --

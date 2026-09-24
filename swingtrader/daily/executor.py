@@ -563,8 +563,18 @@ class DailyExecutor:
         # never let this book borrow beyond the gross its weights allow
         floor = -(max(1.0, self._w_ibs(book) + self._w_night(book)) - 1.0) * equity
         cash = book.cash
-        w = sg.night_tilt(picks["vol20"].values if "vol20" in picks else np.full(len(picks), np.nan),
-                          picks["day_ret"].values, self.d.night_tilt_k)
+        v20 = picks["vol20"].values if "vol20" in picks else np.full(len(picks), np.nan)
+        w = sg.night_tilt(v20, picks["day_ret"].values, self.d.night_tilt_k)
+        prev = np.array([np.expm1(r[-1]) if isinstance(r, list) and r else np.nan
+                         for r in (elig["rets"].reindex(picks.index) if "rets" in elig.columns
+                                   else pd.Series([None] * len(picks), index=picks.index))])
+        w2 = sg.night_tilt_v2(v20, picks["day_ret"].values, prev, self.d.night_tilt_k)
+        if self.d.night_tilt_model == "v2":
+            w, w_other, other = w2, w, "v1"
+        else:
+            w_other, other = w2, "v2"
+        self.log(f"[night] tilt {self.d.night_tilt_model} (would be {other}: "
+                 + ", ".join(f"{s} {a:.2f}" for s, a in zip(picks.index[:8], w_other)) + ")")
         probe_usd = self.d.night_probe_max_usd if self.live else None
         for (sym, r), wi in zip(picks.iterrows(), w):
             qty = math.floor(per * wi / r.price)   # auction orders are whole shares
