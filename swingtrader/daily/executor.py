@@ -22,6 +22,7 @@ the swing executor skips anything listed in state/book-daily.json.
 """
 from __future__ import annotations
 
+import dataclasses
 import datetime as dt
 import json
 import math
@@ -68,6 +69,15 @@ class DailyExecutor:
                  dry_run: bool = False):
         self.cfg, self.d = cfg, cfg.daily
         self.account = account
+        self.profile = ""
+        if account == "live":
+            self.profile = (get_env("DAILY_LIVE_PROFILE") or "").strip()
+            if self.profile:
+                over = (cfg.daily.profiles or {}).get(self.profile)
+                if over is None:
+                    raise ValueError(f"DAILY_LIVE_PROFILE={self.profile!r} is not in "
+                                     f"daily.profiles ({sorted(cfg.daily.profiles or {})})")
+                self.d = dataclasses.replace(cfg.daily, **over)
         self.live = account in REAL_ACCOUNTS      # real money
         # Roth IRA: a cash account. No margin (so no overnight leverage and no
         # intraday leg, which shorts), and every buy is paid for in full.
@@ -128,7 +138,7 @@ class DailyExecutor:
         start = self._live_start() if self.live else self.d.start_equity
         book = DailyBook.load(self.state_dir, start, self.fname)
         self.acct_equity = float(acct.equity)
-        self.log(f"=== daily book [{self.account.upper()}] | phase {phase} | {now:%Y-%m-%d %H:%M} ET | "
+        self.log(f"=== daily book [{self.account.upper()}{' profile ' + self.profile if self.profile else ''}] | phase {phase} | {now:%Y-%m-%d %H:%M} ET | "
                  f"market {'OPEN' if clock.is_open else 'closed'} ===")
 
         if self.live and isinstance(self.broker, SchwabAdapter):
@@ -307,13 +317,20 @@ class DailyExecutor:
             self.log("killed legs: " + ", ".join(f"{k} (since {v['date']})" for k, v in book.killed.items()))
 
     # ------------------------------------------------- overnight leverage
+    def _cash_scale(self) -> float:
+        """An IRA never borrows: scale both overnight legs to <= 1.0x in total."""
+        tot = self.d.night_weight + self.d.ibs_weight
+        return min(1.0, 1.0 / tot) if (self.cash_account and tot > 0) else 1.0
+
     def _w_night(self, book: DailyBook) -> float:
         lw = self.d.lever_weight
-        return max(self.d.night_weight, lw) if (book.levered and lw) else self.d.night_weight
+        w = max(self.d.night_weight, lw) if (book.levered and lw) else self.d.night_weight
+        return w * self._cash_scale()
 
     def _w_ibs(self, book: DailyBook) -> float:
         lw = self.d.lever_weight
-        return max(self.d.ibs_weight, lw) if (book.levered and lw) else self.d.ibs_weight
+        w = max(self.d.ibs_weight, lw) if (book.levered and lw) else self.d.ibs_weight
+        return w * self._cash_scale()
 
     def _lever_gate(self, book: DailyBook) -> None:
         """Open or close the overnight leverage gate from live evidence."""
@@ -837,7 +854,10 @@ class DailyExecutor:
             # no borrowing: only the cash the night leg's open sells free up, held
             # in 3x ETFs, so the cap in underlying terms is 3 x that cash
             mult = 1.0 + (1.0 - self._w_ibs(book)) * (self.d.roth_etf_lev - 1.0)
-        book.noise_lev_cap = max(0.0, min(self.d.noise_max_lev, mult - self._w_ibs(book) - conv))
+        # every dollar of standard stock uses 1/mult of equity; a 3x ETF uses
+        # conviction_margin (75%) per dollar, so conviction eats more room
+        room = mult * max(0.0, 1.0 - conv * self.d.conviction_margin) if conv else mult
+        book.noise_lev_cap = max(0.0, min(self.d.noise_max_lev, room - self._w_ibs(book)))
         if book.daytrade_live and not was:
             self.act(f"DAY-TRADE LEG SWITCHED ON: book equity ${equity:,.0f} >= "
                      f"${self.d.daytrade_min_equity:,.0f}")

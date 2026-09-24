@@ -125,6 +125,20 @@ daily:
   # intraday leg has a week of clean live fills.
   conviction_weight: 0.5
   conviction_mode: shadow
+  conviction_margin: 0.75        # house margin on TQQQ/SQQQ (3 x 25%); shrinks the intraday cap
   noise_lookback: 14
   noise_target_vol: 0.02
   noise_max_lev: 3.5
+  # Experimental growth profile (RESULTS.md addendum 22). Opt-in, real-money
+  # brokerage book only: DAILY_LIVE_PROFILE=aggressive in .env. History ~71%/yr,
+  # maxDD -21%; if the edge halves at pessimistic costs ~22%/yr (shipped ~18%)
+  # with a 68% chance of a >30% drawdown and 9% of >50% within 5 years.
+  profiles:
+    aggressive:
+      ibs_weight: 0.65           # 1.3x overnight, ungated
+      night_weight: 0.65
+      lever_weight: null
+      night_max_name_pct: 0.20
+      conviction_weight: 0.5
+      conviction_mode: auto
+      noise_max_lev: 0.6         # the tested cap (2x account: 2 x (1 - 0.5 x 0.75) - 0.65)

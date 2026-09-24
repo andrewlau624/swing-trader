@@ -1494,3 +1494,37 @@ Lead, untested: IBS trades earn more with SPY below its 200d SMA (2016–23
 Across addenda 17, 20 and 21, ~80 variants have now been run on the rules. The
 remaining upside is execution (open-sell cost, ~0.85pp/yr per bp) and the two
 gated switches (conviction, 1.3x), not rule changes.
+
+---
+
+# Addendum 22 — maximum growth: faster cadence (dead), growth-optimal sizing, a 3x-ETF margin fix (2026-09-24)
+
+**Cadence** (`research/sim/cadence.py`): deciding the intraday leg every 5 / 10 / 15 / 60 min
+instead of 30 cuts edge per trip (5bp → 1.5bp at 5 min) faster than it adds trips; book
+44.3 / 49.9 / 45.9 / 47.5 vs 50.0. A 09:45 start is worse everywhere. A second conviction trade
+per day: +1.2pp/yr on ~12 trades/yr, holdout t 0.37 — not adopted. The VWAP exit is inert at
+30-min checks. Hold-to-close is the best 2024–26 variant but fails 2016–23: watch, don't adopt.
+
+**Margin fix (shipped):** a 3x ETF carries 75% house margin (3 × 25%), so TQQQ/SQQQ at 0.5 of
+equity uses 0.375 of the account, not 0.25. The intraday cap is now
+`mult × (1 − conviction × conviction_margin) − ibs` (2x account: 0.75, was 1.0). V7 at the
+honest cap: **47.5% / 1.99 / −13%** (was reported 49.8%); tier_hi 39.6%.
+
+**Growth-optimal sizing** (`research/sim/growth.py`, 208 configs, $3k + $1k/21 sessions):
+
+| | history, tier | tier_hi | edge halves at tier_hi | MC 5y P(DD>30%) / P(DD>50%) under EH |
+|---|---|---|---|---|
+| V7 (shipped) | 47.5 / 1.99 / −13 | 39.6 / 1.73 | 18.5 / −21 | 23% / 0% |
+| **aggressive profile: 1.3x overnight, 20% name cap, conviction 0.5, intraday 0.6** | **71.1 / 1.97 / −21** | 54.6 / 1.63 | 22.2 / −31 | 68% / 9% |
+| 4x daytime version (not available: account multiplier 2.48) | 89.9 / 2.00 / −25 | 70.0 | 26.7 / −34 | 84% / 18% |
+| max historical growth (2.0x overnight, 4x day) | 109.5 / 1.89 / −31 | 81.1 | 27.7 / −46 | 98% / 45% |
+
+Scaling every leg by L: history keeps rewarding leverage up to 6x, but with the edge halved at
+tier_hi growth peaks at L ≈ 3 (29.9%, maxDD −48%) and falls to 9.8% at 6x. Optimizing on the
+historical frontier is how accounts blow up. The aggressive profile is roughly half-Kelly under
+edge-halves: +3.7pp/yr there over V7 for ~3x the drawdown odds, and +24pp/yr if history holds.
+COVID rebuild: V7 −17.5% maxDD, aggressive −23%. Schwab can raise house margin in a crash.
+
+Built: `daily.profiles.aggressive` in config.yaml, applied to the real-money brokerage book only
+when `.env` has `DAILY_LIVE_PROFILE=aggressive` (never paper, so paper stays the control; never
+the Roth, which is also capped at 1.0x overnight whatever the weights).

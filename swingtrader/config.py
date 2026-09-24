@@ -219,6 +219,14 @@ class DailyCfg:
     roth_etfs: dict = field(default_factory=lambda: {"QQQ": ["TQQQ", "SQQQ"],
                                                      "SMH": ["SOXL", "SOXS"]})
     roth_etf_lev: float = 3.0
+    # House margin on a 3x ETF (FINRA/Cboe: 3 x 25% = 75%; brokers may ask
+    # more). The conviction trade's TQQQ/SQQQ uses this much of equity per
+    # dollar instead of 1/multiplier, which shrinks the intraday leg's room.
+    conviction_margin: float = 0.75
+    # Named overrides of the fields above. DAILY_LIVE_PROFILE=<name> in .env
+    # applies one to the real-money brokerage book only (never paper, never
+    # the Roth), so an experiment survives `make pull`. RESULTS.md addendum 22.
+    profiles: dict = field(default_factory=dict)
     noise_lookback: int = 14
     noise_target_vol: float = 0.02
     noise_max_lev: float = 3.5       # 4x intraday limit minus the IBS leg

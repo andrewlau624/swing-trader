@@ -5,6 +5,14 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Addendum 22 (2026-09-24): experimental growth profile, OFF by default
+
+`DAILY_LIVE_PROFILE=aggressive` in `.env` runs the brokerage book at 1.3x overnight
+(ungated), 20% per name, conviction live, intraday 0.6x. Remove the line to go back.
+Recommended only AFTER ~50 night exits confirm open-sell cost ≤ 10bp/side: if the
+edge is half what history says, it earns ~22%/yr vs ~18% for a 68% chance of a >30% drop.
+Also shipped: the intraday cap now charges TQQQ/SQQQ 75% margin (cap 1.0 → 0.75 once conviction is live).
+
 ## Addendum 21 (2026-09-24): nothing adopted
 
 SOXL conviction, bear-hedge overlays and thin-volume night names: dead. One

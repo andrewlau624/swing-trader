@@ -1,4 +1,5 @@
 """Daily-book tests. Nothing here touches the network."""
+import dataclasses
 import datetime as dt
 import math
 import json
@@ -685,7 +686,9 @@ def test_conviction_shares_the_daytime_budget(tmp_path, monkeypatch):
     assert book.noise_lev_cap == pytest.approx(1.5), "shadow: the regular leg keeps the whole budget"
     ex.d.conviction_mode = "auto"
     ex._gate(book, 3000)
-    assert book.noise_lev_cap == pytest.approx(1.0), "live: 2x account - 0.5 IBS - 0.5 conviction"
+    # TQQQ is a 3x ETF: 75% house margin, so 0.5 of equity in it uses 0.375 of
+    # the account, leaving 2 x 0.625 = 1.25 of buying power, minus 0.5 IBS
+    assert book.noise_lev_cap == pytest.approx(0.75), "3x-ETF margin shrinks the intraday room"
 
 
 # ------------------------------------- hostile review: probes, cap, Roth IRA
@@ -882,3 +885,33 @@ def test_schwab_roth_adapter_never_guesses_the_account(monkeypatch):
     monkeypatch.setenv("SCHWAB_ROTH_ACCOUNT_NUMBER", "")
     with pytest.raises(RuntimeError, match="SCHWAB_ROTH_ACCOUNT_NUMBER"):
         SchwabAdapter(client=C(), account_env="SCHWAB_ROTH_ACCOUNT_NUMBER")
+
+
+# ------------------------------------------ addendum 22: experimental profile
+def test_live_profile_overrides_only_the_brokerage_book(tmp_path, monkeypatch):
+    monkeypatch.setenv("DAILY_LIVE_PROFILE", "aggressive")
+    cfg = Config.load()
+    live = DailyExecutor(cfg, account="live", broker=LiveMarginBroker("5000"),
+                         state_dir=tmp_path, log_dir=tmp_path)
+    paper = _executor(tmp_path, monkeypatch)
+    roth = DailyExecutor(cfg, account="roth", broker=RothBroker("5000"),
+                         state_dir=tmp_path, log_dir=tmp_path)
+    assert live.d.night_weight == 0.65 and live.d.night_max_name_pct == 0.20
+    assert live.d.conviction_mode == "auto" and live.d.lever_weight is None
+    assert paper.d.night_weight == 0.5 and roth.d.night_weight == 0.5
+    assert cfg.daily.night_weight == 0.5, "the shared config is not mutated"
+    book = DailyBook(cash=5000, start_equity=5000)
+    live._gate(book, 5000)
+    assert book.noise_lev_cap == pytest.approx(0.6)
+    monkeypatch.setenv("DAILY_LIVE_PROFILE", "nope")
+    with pytest.raises(ValueError, match="nope"):
+        DailyExecutor(Config.load(), account="live", broker=LiveMarginBroker("5000"),
+                      state_dir=tmp_path, log_dir=tmp_path)
+
+
+def test_roth_never_goes_above_1x_overnight_whatever_the_weights(tmp_path, monkeypatch):
+    roth = DailyExecutor(Config.load(), account="roth", broker=RothBroker("5000"),
+                         state_dir=tmp_path, log_dir=tmp_path)
+    roth.d = dataclasses.replace(roth.d, night_weight=0.65, ibs_weight=0.65)
+    book = DailyBook(cash=5000, start_equity=5000)
+    assert roth._w_night(book) + roth._w_ibs(book) == pytest.approx(1.0)
