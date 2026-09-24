@@ -5,6 +5,7 @@
   python scripts/daily.py --phase close   # force a phase (open|reconcile|intraday|close)
   python scripts/daily.py --status        # book equity, positions, legs, history
   python scripts/daily.py --account live  # only one account (default: all in config)
+  python scripts/daily.py --unkill night --account live   # undo a kill rule, on purpose
 
 Paper always runs. Real money runs too when .env has DAILY_LIVE=on; switch
 with `make daily-live-on` / `make daily-live-off`.
@@ -43,11 +44,18 @@ def status(account: str):
         if r:
             print(f"{leg:6} trades {len(r):4}  win {100*np.mean(np.array(r)>0):4.0f}%  "
                   f"avg {np.mean(r)*100:+.2f}%  P&L ${pnl:+,.2f}")
-    n = b.noise
-    if n.get("history"):
-        h = [x["ret"] for x in n["history"]]
-        print(f"noise (shadow) days {len(h)}  equity ${n.get('shadow_equity', 0):,.2f}  "
-              f"avg/day {np.mean(h)*100:+.3f}%  up-days {100*np.mean(np.array(h)>0):.0f}%")
+    for leg, k in b.killed.items():
+        print(f"KILLED  {leg}: since {k['date']} - {k['reason']}")
+    lw = cfg.daily.lever_weight
+    print(f"overnight leverage {'ON (' + format(lw, '.2f') + ' per leg)' if b.levered and lw else 'off'}"
+          f"; open-sell route {'Schwab default (directed refused ' + b.route_refused + ')' if b.route_refused else 'listing exchange'}"
+          if account == "live" else
+          f"overnight leverage {'ON (' + format(lw, '.2f') + ' per leg)' if b.levered and lw else 'off'}")
+    for sig, n in [(cfg.daily.noise_symbol, b.noise)] + sorted(b.noise_more.items()):
+        if n.get("history"):
+            h = [x["ret"] for x in n["history"]]
+            print(f"noise {sig} (shadow) days {len(h)}  equity ${n.get('shadow_equity', 0):,.2f}  "
+                  f"avg/day {np.mean(h)*100:+.3f}%  up-days {100*np.mean(np.array(h)>0):.0f}%")
     f = ROOT / "logs" / ("daily-fills-live.jsonl" if account == "live" else "daily-fills.jsonl")
     if f.exists():
         rows = [json.loads(l) for l in f.read_text().splitlines() if l.strip()]
@@ -65,8 +73,21 @@ def main(argv=None):
     ap.add_argument("--status", action="store_true")
     ap.add_argument("--phase", choices=["open", "reconcile", "intraday", "close", "flatten"])
     ap.add_argument("--account", choices=["paper", "live"])
+    ap.add_argument("--unkill", metavar="LEG", help="re-enable a leg a kill rule switched off "
+                    "(night|ibs|noise|all); needs --account")
     a = ap.parse_args(argv)
     cfg = Config.load()
+    if a.unkill:
+        if not a.account:
+            ap.error("--unkill needs --account paper|live")
+        b = DailyBook.load(ROOT / "state", cfg.daily.start_equity, book_file(a.account))
+        k = b.killed.pop(a.unkill, None)
+        if k is None:
+            print(f"{a.unkill} is not killed on {a.account}"); return 1
+        b.save(ROOT / "state", book_file(a.account))
+        print(f"{a.account}: {a.unkill} re-enabled (was killed {k['date']}: {k['reason']}).\n"
+              "The rule will kill it again on the next run if the numbers still say so.")
+        return 0
     accounts = [a.account] if a.account else cfg.daily.resolved_accounts()
     if a.status:
         for acc in dict.fromkeys(accounts + (["live"] if "live" not in accounts else [])):

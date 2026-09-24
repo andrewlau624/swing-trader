@@ -120,6 +120,25 @@ def night_exit_cost(fills: list[dict], opens: dict, window: int = 30) -> tuple[i
     return len(costs), (float(np.mean(costs)) if costs else float("nan"))
 
 
+def exit_cost_by_route(fills: list[dict], opens: dict, window: int = 60) -> dict:
+    """Open-sell quality per route (NASDAQ/NYSE/... = directed to the listing
+    exchange's auction, AUTO = Schwab's routing, "" = broker OPG orders).
+    Returns {route: (n, mean bps/side, auction hit rate)}. A fill within half
+    a cent of the official open counts as an auction fill: that is the direct
+    evidence the emulated market-on-open is reaching the auction."""
+    sells = [f for f in fills if f.get("leg") == "night" and f.get("side") == "sell"][-window:]
+    by: dict[str, list] = {}
+    for f in sells:
+        o = opens.get((f["sym"], str(f.get("filled_at", ""))[:10]))
+        if not (o and o > 0 and f.get("fill_px")):
+            continue
+        px = float(f["fill_px"])
+        by.setdefault(str(f.get("route") or ""), []).append(
+            (-(px / o - 1.0) * 1e4, abs(px - o) <= 0.005))
+    return {r: (len(v), float(np.mean([c for c, _ in v])), float(np.mean([h for _, h in v])))
+            for r, v in by.items()}
+
+
 def dedupe_correlated(picks: pd.DataFrame, rets: dict, max_corr: float = 0.9) -> tuple[pd.DataFrame, list]:
     """One position per underlying bet. Walk the picks most-beaten first and
     drop any whose last-20-day returns correlate above max_corr with one
@@ -160,6 +179,95 @@ def night_sizing(picks: pd.DataFrame, *, vol_min: float, crowd_n: int,
         return kept, 0.0
     per = min(1.0 / len(kept), max_name_pct) * min(1.0, crowd_n / max(n_raw, 1))
     return kept, per
+
+
+# Night sizing tilt (RESULTS.md addendum 16). OLS of the next-open return on
+# (log vol20, day return), fitted on 2021-23 ONLY and judged on 2024-26: live
+# book 41.3% -> 46.8% there, beating a shuffled-weight placebo (42.9%). The
+# deeper the day's drop, the bigger the bounce; vol20 adds a little. These
+# numbers are frozen: refitting on data that includes the holdout would
+# erase the evidence that justified them.
+NIGHT_TILT = {"mu": (0.0959, -0.1232), "sd": (0.4992, 0.0610),
+              "beta_bp": (1.14, -11.54), "pred_sd_bp": 12.07}
+
+
+def night_tilt(vol20, day_ret, k: float = 0.25) -> np.ndarray:
+    """Per-name weights with mean 1 (so the leg's gross is unchanged):
+    1 + k * predicted edge / its spread, clipped to [0.25, 2]. k = 0 -> equal."""
+    vol20 = np.asarray(vol20, float); day_ret = np.asarray(day_ret, float)
+    if k == 0 or len(vol20) == 0:
+        return np.ones(len(vol20))
+    t = NIGHT_TILT
+    x = np.column_stack([np.log(np.maximum(vol20, 1e-3)), day_ret])
+    x = np.nan_to_num(x, nan=0.0, posinf=0.0, neginf=0.0)
+    z = (x - np.array(t["mu"])) / np.array(t["sd"])
+    w = np.clip(1 + k * (z @ (np.array(t["beta_bp"]) / 1e4)) / (t["pred_sd_bp"] / 1e4), 0.25, 2.0)
+    return w / w.mean()
+
+
+# ------------------------------------------------------------ kill rules
+# Pre-registered 2026-09-24, BEFORE any live results (RESULTS.md addendum 16).
+# Written down now so that a losing leg is switched off by a rule, not kept
+# alive by hope. Do not loosen these after seeing live numbers.
+#   leg: (min round trips before judging, t-stat below which a losing leg dies)
+KILL_MIN_TRADES = {"night": 100, "noise": 120, "ibs": 60}
+KILL_T = -1.0
+KILL_EXIT_COST_BPS = 25.0     # night open sells this far below the official open: edge gone (~28bp)
+KILL_EXIT_COST_MIN_N = 30
+HALT_DRAWDOWN = 0.25          # realised-P&L drawdown / equity; backtest worst is ~-20%
+
+
+def kill_check(closed: list[dict], min_trades: dict = KILL_MIN_TRADES,
+               t_max: float = KILL_T) -> dict[str, str]:
+    """{leg: reason} for every leg whose live round trips (net of real fills)
+    lose money with t < t_max once it has min_trades of them. Round trips
+    booked out at an unknown price (`note`) are left out."""
+    out = {}
+    for leg, n_min in min_trades.items():
+        r = np.array([c["ret"] for c in closed if c.get("leg") == leg and not c.get("note")], float)
+        if len(r) < n_min:
+            continue
+        m, sd = float(r.mean()), float(r.std(ddof=1))
+        t = m / (sd / np.sqrt(len(r))) if sd > 0 else 0.0
+        if m < 0 and t < t_max:
+            out[leg] = f"{len(r)} live round trips average {m*1e4:+.1f}bp (t {t:.2f} < {t_max})"
+    return out
+
+
+def realised_drawdown(closed: list[dict], equity: float) -> float:
+    """Worst peak-to-trough of cumulative realised P&L, as a fraction of
+    current equity. Built from P&L, not the equity log, so $1k deposits
+    cannot hide a losing streak."""
+    if not closed or equity <= 0:
+        return 0.0
+    cum = np.cumsum([float(c.get("pnl") or 0.0) for c in sorted(
+        closed, key=lambda c: str(c.get("exit_date", "")))])
+    return float(min(0.0, (cum - np.maximum.accumulate(np.r_[0.0, cum])[1:]).min()) / equity)
+
+
+# Overnight leverage gate (addendum 16). 1.3x overnight gross adds ~+7pp/yr
+# in both halves at backtest costs, and nearly nothing at pessimistic costs.
+# So it switches on only once live fills PROVE the costs, and off again the
+# moment they stop doing so.
+LEVER_MIN_EXITS = 50          # night open sells scored against the official open
+LEVER_MAX_EXIT_BPS = 10.0     # mean cost per side over those exits (backtest assumes 7.5)
+LEVER_MAX_DD = 0.10           # no leverage while realised drawdown is deeper than this
+
+
+def lever_ok(n_exits: int, exit_bps: float, killed: dict, drawdown: float,
+             multiplier: float) -> tuple[bool, str]:
+    """(on?, why). Every condition must hold on every check."""
+    if killed:
+        return False, f"a kill rule is active ({', '.join(killed)})"
+    if multiplier < 2:
+        return False, "not a margin account"
+    if n_exits < LEVER_MIN_EXITS:
+        return False, f"{n_exits}/{LEVER_MIN_EXITS} night exits measured"
+    if not np.isfinite(exit_bps) or exit_bps > LEVER_MAX_EXIT_BPS:
+        return False, f"night exits cost {exit_bps:+.1f}bp/side (need <= {LEVER_MAX_EXIT_BPS:g})"
+    if drawdown < -LEVER_MAX_DD:
+        return False, f"realised drawdown {drawdown:.0%} (limit -{LEVER_MAX_DD:.0%})"
+    return True, f"{n_exits} exits at {exit_bps:+.1f}bp/side, drawdown {drawdown:.0%}"
 
 
 # ---------------------------------------------------------------- noise leg

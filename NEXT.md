@@ -5,6 +5,28 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Addendum 16 (2026-09-24): what changed, what is waiting
+
+- **Shipped:** night sizing tilt, QQQ + SMH intraday split, Schwab open sells
+  directed to the listing exchange's opening auction, pre-registered kill
+  rules, swing book off the schedule. Simulator: 35.2% / 1.76 → **41.3% /
+  1.89** (tiered costs 33.0 → 39.2).
+- **Waiting on live fills, and automatic:** overnight leverage (0.65 + 0.65)
+  opens only after 50 night exits average ≤ 10bp/side vs the official open.
+- **Watch first:** the 15:40 log line `route NASDAQ/NYSE/...: n, bps, % filled at
+  the auction print`. If directed orders are refused, the log says so and
+  the bot falls back to Schwab routing. If they are accepted but the hit rate is
+  low, set `daily.schwab_open_route: auto` and compare the two.
+- **Kill rules are live** (`signals.KILL_*`). Do not loosen them after seeing
+  results. Status: `make daily-status`. Undo: `python scripts/daily.py
+  --unkill LEG --account live`.
+- **On the server:** `make pull && make persist` (reinstalls the schedule
+  without the swing timer). The swing paper book's open positions keep their
+  broker stops; flatten them in the Alpaca paper dashboard if you want it clean.
+- **Next research:** after ~2 months, fit a per-name cost model on
+  `logs/daily-decisions-live.jsonl` (quoted spreads) + `daily-fills-live.jsonl`,
+  and replace the assumed tiers in `research/sim/book.py`.
+
 ## ⚠ Read addendum 14 first (2026-09-23)
 
 - The daily book's published numbers were inflated by a research lookahead
@@ -157,7 +179,11 @@ but "should" is not "did".
 | Regime gates (SPY 5d return, VIXY fear proxy) | **dead** | unstable across halves; SPY>200dma only buys Sharpe for return |
 | Fixed take-profit exit | **dead** | worse at every level (cutting winners, same as trailing) |
 | Inverse-vol / overnight-share position sizing | **weak** | top8 +5pp CAGR at best, no gain on the uncapped book |
-| Correlation cap on new entries (`max_corr`) | **FOUND, pending** | uncapped Sharpe 1.16→1.33, DD −15.3→−10.3%; beats random-drop control (add. 13) |
+| Correlation cap on new entries (`max_corr`) | **dead at live cadence** | uncapped Sharpe 1.16→1.33 at 42d refresh; 8.5%/0.58 at the live 1d refresh (add. 14) |
+| Night leg: index filler for unused capital | **dead** | helps 2024–26 only (add. 16) |
+| IBS idle half in SPY/QQQ/overnight index | **dead** | helps 2024–26 only; BIL stays (add. 16) |
+| Night leg: skip high-cost names | **dead** | cheap thin names are the best bounces (add. 16) |
+| Daily-bar spread estimators as cost model | **dead** | measure volatility, not spread, on these names (add. 16) |
 
 ## Ideas not yet tested
 
@@ -185,7 +211,7 @@ Daily-refresh swing backtest (matches live): 12.3% CAGR, Sharpe 0.87. As a
 sleeve it only trades return for drawdown (addendum 10). Keep it as its own
 paper book.
 
-## 7. Add SMH to the intraday leg — READY after QQQ has live fills
+## 7. Add SMH to the intraday leg — DONE (addendum 16, `daily.noise_extra`)
 
 Split the 3.5x intraday budget QQQ/SMH: Sharpe 1.70 -> 1.78, max drop -20%
 -> -16%, same return. Needs the noise leg generalised to several

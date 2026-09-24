@@ -133,9 +133,14 @@ def schwab_rows(symbols: list[str], max_age_min: float = 10.0, client=None) -> p
             age = (now_ms - float(t)) / 60000
             if age > max_age_min:
                 continue
+            bid, ask = q.get("bidPrice"), q.get("askPrice")
             rows[sym] = {"price": float(px), "high": float(hi), "low": float(lo),
                          "open": float(op) if op else float("nan"),
                          "feed_prev_close": float(pc) if pc else float("nan"),
+                         # quoted spread at decision time: the data a per-name
+                         # cost model needs (daily-bar estimators confuse it with vol)
+                         "bid": float(bid) if bid else float("nan"),
+                         "ask": float(ask) if ask else float("nan"),
                          "trade_age_min": age}
     return pd.DataFrame.from_dict(rows, orient="index")
 

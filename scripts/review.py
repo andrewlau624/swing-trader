@@ -219,6 +219,19 @@ def main(argv=None):
                 f"Gap {(g.ret.mean()-g.bt_ret.mean())*1e4:+.0f}bp/trade = buy cost {g.buy_cost_bps.mean():+.0f}bp "
                 f"+ sell cost {g.sell_cost_bps.mean():+.0f}bp vs the {2*NIGHT_COST_BPS:.0f}bp assumed")
 
+    say("\n## 5. Pre-registered kill rules (signals.KILL_*, fixed 2026-09-24)")
+    say(f"Night leg dies at >= {sg.KILL_MIN_TRADES['night']} round trips with a losing mean and "
+        f"t < {sg.KILL_T}, or open sells > {sg.KILL_EXIT_COST_BPS:g}bp/side over "
+        f"{sg.KILL_EXIT_COST_MIN_N}. The bot applies these itself every run.")
+    if not rt.empty:
+        for book, g in rt.groupby("book"):
+            r = g.ret.to_numpy()
+            t = r.mean() / (r.std(ddof=1) / np.sqrt(len(r))) if len(r) > 1 and r.std() > 0 else float("nan")
+            v = sg.kill_check([{"leg": "night", "ret": x} for x in r])
+            need = sg.KILL_MIN_TRADES["night"] - len(r)
+            say(f"- {book:5s} night: n {len(r)}, mean {r.mean()*1e4:+.1f}bp, t {t:+.2f} -> "
+                + ("KILL" if v else (f"no verdict yet ({need} more round trips)" if need > 0 else "keep")))
+
     say("\n## 3. Paper vs live on the same days")
     if {"paper", "live"} <= set(f.book):
         for leg in ("night", "ibs", "noise"):

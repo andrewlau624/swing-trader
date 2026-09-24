@@ -129,6 +129,12 @@ class DailyCfg:
     # side by side: `make daily-live-on` / `make daily-live-off`.
     accounts: list = field(default_factory=lambda: ["paper"])
     live_broker: str = "schwab"      # broker for the "live" account: schwab | alpaca
+    # Schwab has no market-on-open order. "primary" directs the night leg's
+    # open sells to each stock's listing exchange, so they join its opening
+    # auction; "auto" leaves routing to Schwab (a wholesaler fills "at the
+    # open", not necessarily at the auction print). A refused route falls back
+    # to "auto" for that order and is retried after a few days.
+    schwab_open_route: str = "primary"
     # Real-money capital. The live book sizes from the account's FREE equity:
     # equity minus the market value of positions it does not own (your own
     # holdings), so it never borrows against them. live_capital (dollars)
@@ -163,6 +169,11 @@ class DailyCfg:
     # leg 2: overnight loser bounce. Scan ~15:40 ET, buy at the close auction,
     # sell at the next open auction.
     night_weight: float = 0.5
+    # Overnight leverage: BOTH overnight legs move to this weight once
+    # signals.lever_ok passes on live fills (50 night exits at <= 10bp/side,
+    # no kill, drawdown within 10%), and back when it stops passing.
+    # 0.65 + 0.65 = 1.3x overnight gross. None = never lever.
+    lever_weight: float | None = 0.65
     night_max_name_pct: float = 0.10 # of the leg, per name
     night_day_ret_max: float = -0.08
     night_ibs_max: float = 0.10
@@ -172,11 +183,16 @@ class DailyCfg:
     night_vol_min: float = 0.60      # 20-day annualised vol floor
     night_crowd_n: int = 30          # more raw signals than this = market-wide selloff: scale down
     night_max_corr: float = 0.9      # one position per underlying (e.g. seven 2x SpaceX ETFs = one bet)
+    # size night names by predicted edge (signals.night_tilt, addendum 16); 0 = equal weight
+    night_tilt_k: float = 0.25
     # leg 3: QQQ noise-area intraday momentum (shadow until the gate trips)
     noise_symbol: str = "QQQ"
     # traded instead when another leg (IBS) already holds noise_symbol --
     # Alpaca nets positions per symbol, so two legs cannot share one
     noise_alt_symbol: str = "QQQM"
+    # further instruments sharing the intraday budget equally, signal symbol ->
+    # stand-in traded when another leg holds it. {} = QQQ alone.
+    noise_extra: dict = field(default_factory=dict)
     noise_lookback: int = 14
     noise_target_vol: float = 0.02
     noise_max_lev: float = 3.5       # 4x intraday limit minus the IBS leg

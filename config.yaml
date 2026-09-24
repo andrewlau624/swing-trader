@@ -96,6 +96,8 @@ daily:
   ibs_cash_symbol: SGOV          # idle IBS half parks in T-bills (+~1.3%/yr)
   ibs_weight: 0.5                # 0.5 + 0.5 = 1x, no margin. 1.0 + 1.0 = 2x overnight:
   night_weight: 0.5              #   backtest 21.8% CAGR/-11% DD -> 44.5%/-22%
+  lever_weight: 0.65             # both legs -> 0.65 (1.3x overnight) ONLY after live fills prove costs
+                                 # (signals.lever_ok: 50 night exits <= 10bp/side). null = never
   night_max_name_pct: 0.10
   night_day_ret_max: -0.08
   night_ibs_max: 0.10
@@ -105,8 +107,13 @@ daily:
   night_vol_min: 0.60            # skip quiet names (a -8% day there is news, not overreaction)
   night_crowd_n: 30              # >30 signals = market-wide selloff: exposure x 30/n
   night_max_corr: 0.9            # 20d-return correlation above this = same bet: keep the most beaten one
+  night_tilt_k: 0.25             # weight deeper drops more (addendum 16; fitted 2021-23, held out 2024-26). 0 = equal
   noise_symbol: QQQ
   noise_alt_symbol: QQQM         # used on days the IBS leg holds QQQ
+  # QQQ + SMH split the intraday budget equally (RESULTS.md addendum 16:
+  # Sharpe 1.76 -> 1.89 on the live-code simulator, both halves). SMH trades
+  # SOXX on days the IBS leg holds SMH.
+  noise_extra: {SMH: SOXX}
   noise_lookback: 14
   noise_target_vol: 0.02
   noise_max_lev: 3.5

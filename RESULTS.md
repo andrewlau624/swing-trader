@@ -1140,3 +1140,92 @@ Read it as a range, not a forecast: the paths resample 2021–26, the period the
 rules were built on, and the night leg's return is concentrated in 2024+.
 Every trade is short-term: in a taxable account, taxes at ordinary rates take
 a large bite out of A–D and less out of buy-and-hold SPY.
+
+---
+
+# Addendum 16 — the hostile review, acted on (2026-09-24)
+
+A second strategy review ranked ten fixes. All ten were done or tested here.
+Everything below runs on **one simulator that calls the live code**
+(`research/sim/`): `loser_picks`, `dedupe_correlated`, `night_sizing`,
+`momentum_top`, `ibs_targets` and the `noise_*` functions from
+`swingtrader/daily/signals.py`. Its intraday leg matches `noise.py` at
+ρ = 0.9999; the full book comes out at 35.2% vs grow.py's 33.5%, because the
+old research copy skipped two live rules (the duplicate-bet filter and the $5
+floor at decision time). All numbers are the $3k + $1k/21-session replay,
+whole shares, time-weighted: **2021–23 / 2024–26 / full**, CAGR/Sharpe/maxDD.
+About 40 variants were run; rule set in advance: both halves must improve,
+and a filter or tilt must beat a matched placebo.
+
+## Adopted
+
+| change | 2021–23 | 2024–26 | full |
+|---|---|---|---|
+| before (live 2026-09-23) | 29.8 / 1.75 / −12 | 41.3 / 1.80 / −13 | 35.2 / 1.76 / −13 |
+| **+ night sizing tilt + QQQ/SMH intraday split (shipped)** | **33.7 / 1.93 / −10** | **49.9 / 1.91 / −15** | **41.3 / 1.89 / −15** |
+| + 1.3x overnight, when the gate opens | 37.6 / 1.79 / −13 | 63.1 / 1.90 / −19 | 49.3 / 1.82 / −19 |
+
+Same comparison at pessimistic costs (`tier_hi`: 7.5–25bp/side by price and
+volume): before 25.0 / 1.33, shipped **31.0 / 1.50**, levered 33.7 / 1.36,
+where leverage *loses* in 2021–23 (26.4 → 25.6). That is why it is gated.
+
+- **Night sizing tilt** (`signals.night_tilt`, `daily.night_tilt_k: 0.25`).
+  OLS of next-open return on (log vol20, day return), **fitted on 2021–23
+  only**. Judged on 2024–26: 41.3 → 46.8%. A placebo with the same weights
+  shuffled within each day: 42.9%. Fitted the other way round, 2021–23 goes
+  29.8 → 35.0%, placebo 24.9%. The stable driver is depth (−11.5 / −14.7bp per
+  sd in the two halves); prior 20-day return flips sign and was dropped. At
+  $100k fractional the night leg alone goes 10.4 → 13.2%, Sharpe 0.83 → 0.86:
+  it is mostly more return at the same gross, not better risk. Coefficients
+  are frozen in the code.
+- **QQQ + SMH intraday** (`daily.noise_extra: {SMH: SOXX}`): the budget splits
+  equally, and SMH trades SOXX on days the IBS leg holds SMH. Sharpe 1.76 →
+  1.89 with better return in both halves; 2024–26 drawdown −13 → −15.
+- **Overnight leverage gate** (`daily.lever_weight: 0.65`, `signals.lever_ok`):
+  both overnight legs go to 0.65 only after **50 night exits average ≤ 10bp/side
+  against the official open**, no kill rule is active and realised drawdown
+  is within 10%. It switches off as soon as any of those fails. Margin interest
+  (12%/yr on the debit) is in the simulation.
+- **Schwab open sells go to the listing exchange** (`daily.schwab_open_route:
+  primary`). Schwab has no market-on-open order. A market DAY order sent before
+  09:30 with `requestedDestination` set to the stock's listing exchange
+  (NASDAQ, NYSE, ECN_ARCA, AMEX, BATS, from Alpaca's asset record) joins that
+  exchange's opening auction, which is what MOO does. A refused route is resent
+  with Schwab's routing within seconds and directed routing pauses for 5 days.
+  Every fill logs its route, and the 15:40 run prints each route's cost and
+  **auction hit rate** (fill within half a cent of the official open). That
+  hit rate is the direct test of whether the emulation works.
+- **Pre-registered kill rules** (`signals.KILL_*`, applied by the bot every
+  run, shown in `make review`), fixed before any live result:
+  - night leg: ≥ 100 round trips with a losing mean and t < −1, or open
+    sells > 25bp/side over ≥ 30 exits
+  - intraday leg: ≥ 120 round trips, losing, t < −1
+  - IBS leg: ≥ 60 round trips, losing, t < −1
+  - everything: realised-P&L drawdown worse than −25% of equity (built from
+    P&L, so deposits cannot hide it)
+
+  A killed leg opens nothing new; its exits continue.
+  `python scripts/daily.py --unkill LEG --account live` undoes it, on purpose.
+- **Swing book quarantined**: it is not scheduled unless `.env` has
+  `SWING_BOOK=on`. Its 09:05 run held the account lock the 09:15 open needs.
+- **Quoted spreads are now logged**: each 15:40 night pick writes its Schwab
+  bid/ask spread to `logs/daily-decisions-live.jsonl`. That is the dataset a
+  real per-name cost model needs.
+
+## Dead (do not redo)
+
+| idea | result |
+|---|---|
+| fill the night leg's unused money with SPY/QQQ close → open | 2021–23 29.8 → 27.5 / 26.6, 2024–26 up: one half only |
+| idle IBS half in SPY / QQQ / overnight-only index instead of BIL | every variant lower in 2021–23 (best 29.0 vs 29.8); 2024–26 up: one half only |
+| skip night names whose tier cost exceeds 20 / 30bp | 33.0 → 30.3 / 33.0: the cheap, costly names are the best bounces |
+| Abdi–Ranaldo spread from daily bars as a cost model | on 60–120%-vol names it measures volatility (median 369bp), not spread; its buckets do not order the edge |
+
+## Not code
+
+- **Tax.** Every trade here is short-term. At a larger balance, micro Nasdaq
+  futures (MNQ, 60/40 tax treatment under §1256, ~23 hours a day) are the
+  natural home for the intraday leg. At $3k, one MNQ contract (~$50k notional)
+  is far too big.
+- The Monte Carlo in addendum 15 resamples the fitting period. Treat it as
+  the optimistic end of a range, not a forecast.

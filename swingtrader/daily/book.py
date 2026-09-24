@@ -29,9 +29,13 @@ class DailyBook:
     orders: dict = field(default_factory=dict)      # coid -> {sym, side, leg, ref_px, status, ...}
     closed: list = field(default_factory=list)      # round trips
     equity_log: list = field(default_factory=list)  # [{date, equity}]
-    noise: dict = field(default_factory=dict)       # shadow/live intraday leg state
+    noise: dict = field(default_factory=dict)       # shadow/live intraday leg state (primary: QQQ)
+    noise_more: dict = field(default_factory=dict)  # further intraday instruments: signal sym -> state
     daytrade_live: bool = False
     noise_lev_cap: float = 0.0                      # set each morning from the broker's multiplier
+    route_refused: str = ""                         # date Schwab last refused a directed open sell
+    killed: dict = field(default_factory=dict)      # leg (or "all") -> {date, reason}: no new entries
+    levered: bool = False                           # overnight leverage gate (signals.lever_ok) is open
     last_run: str = ""
 
     # ------------------------------------------------------------ persist
@@ -108,6 +112,9 @@ class DailyBook:
         else:
             p["qty"] = q
         return new
+
+    def is_killed(self, leg: str) -> bool:
+        return leg in self.killed or "all" in self.killed
 
     def log_equity(self, day: str, equity: float) -> None:
         if self.equity_log and self.equity_log[-1]["date"] == day:

@@ -69,7 +69,7 @@ keeps running and the 15:40 scan falls back to Alpaca data.
 | | Alpaca (paper) | Schwab (live) |
 |---|---|---|
 | overnight buy at the close | MOC (`cls`) | `MARKET_ON_CLOSE` — same |
-| overnight sell at the open | market-on-open auction (`opg`) | **no MOO type**: a market DAY order placed at 09:15 fills at the open, but may not be the auction price |
+| overnight sell at the open | market-on-open auction (`opg`) | **no MOO type**: a market DAY order placed at 09:15 and **directed to the stock's listing exchange** (`requestedDestination`), so it joins that exchange's opening auction. If Schwab refuses the route, the bot resends it with Schwab's routing (a wholesaler "at the open") and pauses directed routing for 5 days. `daily.schwab_open_route: auto` turns directing off |
 | IBS ETFs | fractional, by dollar amount | **whole shares** (QQQ at ~$750 = 2 shares of a $1,500 slot) |
 | duplicate protection | client order id | the book is saved after every order; before placing, today's Schwab orders are checked for an identical one |
 | shorts (intraday leg) | automatic | explicit SELL_SHORT / BUY_TO_COVER |
@@ -77,5 +77,15 @@ keeps running and the 15:40 scan falls back to Alpaca data.
 
 **Watch the open fills.** Research (addendum 10) found the overnight leg's
 entire edge is in the opening auction: +20bp at the open, gone by 09:35.
-`make daily-status` reports live slippage per leg. If Schwab's open fills
-run much worse than paper's, that leg's edge is at risk.
+`make daily-status` reports live slippage per leg, and every 15:40 run logs
+each route's cost and **auction hit rate** (fills within half a cent of the
+official open). A high hit rate on NASDAQ/NYSE/ECN_ARCA routes means the
+emulated market-on-open works. The bot kills the night leg by itself if open
+sells average > 25bp/side over 30 exits, and only turns overnight leverage
+on after 50 exits at ≤ 10bp/side (RESULTS.md addendum 16).
+
+Directed routing is standard on thinkorswim for equities, but whether the
+Trader API honours `requestedDestination` for this account, and whether any
+exchange fee is passed through, is unverified until the first live open.
+Check the first morning's log for `-> NASDAQ` on the submits and for any
+"directed ... ended rejected" warnings.

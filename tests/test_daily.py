@@ -368,6 +368,7 @@ def _live_noise_book(pos=1, lev=3.0, cap=3.5):
 
 def test_live_noise_sizes_by_capped_leverage(tmp_path, monkeypatch):
     ex = _executor(tmp_path, monkeypatch)
+    ex.d.noise_extra = {}                 # QQQ alone: the whole budget
     b = _live_noise_book(lev=3.0, cap=1.5)
     ex._sync_noise_live(b, "2026-09-24", 500.0)
     r = ex.broker.client.submitted[0]
@@ -382,12 +383,33 @@ def test_live_noise_uses_qqqm_when_ibs_holds_qqq(tmp_path, monkeypatch):
         {"price": [200.0], "high": [201.0], "low": [199.0]}, index=syms))
     held = {"QQQ": SimpleNamespace(current_price="500", qty="3")}
     ex = _executor(tmp_path, monkeypatch, held=held)
+    ex.d.noise_extra = {}
     b = _live_noise_book(pos=-1, lev=2.0)
     b.positions["QQQ"] = {"qty": 3, "avg_px": 500.0, "leg": "ibs", "entry_date": "2026-09-23"}
     ex._sync_noise_live(b, "2026-09-24", 500.0)
     r = ex.broker.client.submitted[0]
     assert r.symbol == "QQQM", "two legs must never share a symbol: Alpaca nets per symbol"
     assert r.side.value == "sell" and r.qty == math.floor(2.0 * b.equity({"QQQ": 500}) / 200.0)
+
+
+def test_two_instruments_split_the_intraday_budget(tmp_path, monkeypatch):
+    """QQQ + SMH share the 1.5x cap: 0.75x each (addendum 16). SMH trades
+    SOXX on a day the IBS leg holds SMH."""
+    from swingtrader.daily import executor as E
+    monkeypatch.setattr(E.md, "live_rows", lambda syms, **k: pd.DataFrame(
+        {"price": [250.0], "high": [251.0], "low": [249.0]}, index=syms))
+    ex = _executor(tmp_path, monkeypatch, held={"SMH": SimpleNamespace(current_price="300", qty="2")})
+    ex.d.noise_extra = {"SMH": "SOXX"}
+    b = _live_noise_book(lev=3.0, cap=1.5)
+    b.positions["SMH"] = {"qty": 2, "avg_px": 300.0, "leg": "ibs", "entry_date": "2026-09-23"}
+    b.noise_more["SMH"] = {"day": "2026-09-24", "pos": -1, "lev": 3.0, "last_m": 30, "entry": 300.0}
+    eq = b.equity({"SMH": 300})
+    ex._sync_noise_live(b, "2026-09-24", 500.0)                   # QQQ
+    ex._sync_noise_live(b, "2026-09-24", 300.0, "SMH")            # SMH -> SOXX
+    q, x = ex.broker.client.submitted
+    assert q.symbol == "QQQ" and q.qty == math.floor(0.75 * eq / 500.0) and q.side.value == "buy"
+    assert x.symbol == "SOXX" and x.qty == math.floor(0.75 * eq / 250.0) and x.side.value == "sell"
+    assert ex._noise_signals() == ["QQQ", "SMH"]
 
 
 def test_live_noise_flattens_with_a_market_order_at_1557(tmp_path, monkeypatch):
@@ -474,3 +496,95 @@ def test_night_exit_cost_scores_sells_against_the_official_open():
     n, bps = sg.night_exit_cost(fills, opens)
     assert n == 2                                  # DDD has no open; buys and IBS ignored
     assert bps == pytest.approx((20.0 + -10.0) / 2)
+
+
+def test_exit_cost_by_route_scores_auction_hits():
+    from swingtrader.daily.signals import exit_cost_by_route
+    opens = {("A", "2026-09-24"): 10.00, ("B", "2026-09-24"): 20.00}
+    fills = [
+        {"leg": "night", "side": "sell", "sym": "A", "fill_px": 10.00, "route": "NASDAQ",
+         "filled_at": "2026-09-24T13:30:01+0000"},
+        {"leg": "night", "side": "sell", "sym": "B", "fill_px": 19.96, "route": "AUTO",
+         "filled_at": "2026-09-24T13:30:02+0000"},
+        {"leg": "night", "side": "buy", "sym": "B", "fill_px": 1.0, "filled_at": "2026-09-24"},
+    ]
+    r = exit_cost_by_route(fills, opens)
+    assert r["NASDAQ"] == (1, 0.0, 1.0)
+    n, bps, hit = r["AUTO"]
+    assert n == 1 and abs(bps - 20.0) < 1e-6 and hit == 0.0
+
+
+def test_kill_rule_needs_enough_trades_and_a_real_loss():
+    from swingtrader.daily.signals import kill_check
+    rng = np.random.default_rng(0)
+    lose = [{"leg": "night", "ret": x} for x in rng.normal(-0.008, 0.03, 150)]
+    assert "night" in kill_check(lose)
+    assert kill_check(lose[:99]) == {}, "fewer than 100 round trips: no verdict"
+    flat = [{"leg": "night", "ret": x} for x in rng.normal(0.002, 0.03, 150)]
+    assert kill_check(flat) == {}
+    unknown = [dict(c, note="broker no longer holds") for c in lose]
+    assert kill_check(unknown) == {}, "unknown-price exits are not evidence"
+
+
+def test_realised_drawdown_ignores_deposits():
+    from swingtrader.daily.signals import realised_drawdown
+    closed = [{"pnl": 100, "exit_date": "2026-10-01"}, {"pnl": -900, "exit_date": "2026-10-02"},
+              {"pnl": 50, "exit_date": "2026-10-03"}]
+    assert abs(realised_drawdown(closed, 3000) - (-0.30)) < 1e-9
+    assert realised_drawdown(closed, 30000) > -0.25, "same loss on a bigger account is smaller"
+
+
+def test_killed_night_leg_places_no_buys(tmp_path, monkeypatch):
+    import datetime as dt
+    from types import SimpleNamespace
+    from zoneinfo import ZoneInfo
+    from swingtrader.config import Config
+    from swingtrader.daily import executor as E
+    from swingtrader.daily.book import DailyBook
+    ex = E.DailyExecutor(Config.load(), account="paper", broker=FakeBroker(), state_dir=tmp_path,
+                         log_dir=tmp_path)
+    book = DailyBook(cash=3000, start_equity=3000, killed={"night": {"date": "x", "reason": "t"}})
+    now = dt.datetime(2026, 9, 24, 15, 40, tzinfo=ZoneInfo("America/New_York"))
+    clock = SimpleNamespace(next_close=pd.Timestamp("2026-09-24 16:00", tz="America/New_York"))
+    monkeypatch.setattr(ex, "_check_exit_cost", lambda *a: None)
+    ex.phase_close(book, "2026-09-24", now, clock)
+    assert not book.orders and any("killed" in l for l in ex.lines)
+
+
+def test_night_tilt_weights_deeper_drops_and_keeps_gross():
+    w = sg.night_tilt([0.9, 0.9, 0.9], [-0.08, -0.12, -0.25])
+    assert abs(w.mean() - 1) < 1e-12 and w[0] < w[1] < w[2]
+    assert (sg.night_tilt([0.9, 0.9], [-0.1, -0.2], k=0) == 1).all()
+    assert np.isfinite(sg.night_tilt([np.nan, 1.2], [-0.1, -0.09])).all()
+
+
+def test_night_tilt_matches_the_research_simulator():
+    """research/sim/experiments.py fitted these on 2021-23; the live function
+    must give the same weights the addendum-16 numbers were produced with."""
+    vol, day = np.array([0.7, 1.4, 2.5]), np.array([-0.09, -0.15, -0.30])
+    mu, sd = np.array([0.0959, -0.1232]), np.array([0.4992, 0.061])
+    z = (np.column_stack([np.log(vol), day]) - mu) / sd
+    ref = np.clip(1 + 0.25 * (z @ np.array([1.14, -11.54])) / 12.07, 0.25, 2.0)
+    assert np.allclose(sg.night_tilt(vol, day), ref / ref.mean())
+
+
+def test_leverage_gate_needs_proven_costs():
+    ok = lambda **kw: sg.lever_ok(**{**dict(n_exits=60, exit_bps=6.0, killed={}, drawdown=-0.03,
+                                          multiplier=2.0), **kw})[0]
+    assert ok()
+    assert not ok(n_exits=49), "not enough evidence yet"
+    assert not ok(exit_bps=12.0), "fills worse than the gate"
+    assert not ok(exit_bps=float("nan"))
+    assert not ok(killed={"noise": {}}), "any kill closes the gate"
+    assert not ok(drawdown=-0.12)
+    assert not ok(multiplier=1.0), "cash account"
+
+
+def test_levered_book_sizes_both_overnight_legs_up(tmp_path, monkeypatch):
+    ex = _executor(tmp_path, monkeypatch)
+    b = DailyBook(cash=3000, start_equity=3000)
+    assert ex._w_night(b) == 0.5 and ex._w_ibs(b) == 0.5
+    b.levered = True
+    assert ex._w_night(b) == 0.65 and ex._w_ibs(b) == 0.65
+    ex.d.lever_weight = None
+    assert ex._w_night(b) == 0.5

@@ -15,8 +15,12 @@ Differences the adapters absorb:
           fractional DAY orders by notional.
   Schwab: no client order id -- idempotency is "look for today's matching
           order before placing"; MARKET_ON_CLOSE exists but there is NO
-          market-on-open type (a market DAY order placed pre-market fills at
-          the open instead); no fractional shares via the API; shorting needs
+          market-on-open type. The open sell is emulated by DIRECTING a market
+          DAY order to the stock's listing exchange before 09:30, where it
+          joins that exchange's opening auction (see OPEN_ROUTE); if Schwab
+          refuses the route it falls back to Schwab's own routing (a
+          wholesaler, which may not fill at the auction print). No fractional
+          shares via the API; shorting needs
           explicit SELL_SHORT / BUY_TO_COVER; tokens expire after 7 days.
 """
 from __future__ import annotations
@@ -138,10 +142,29 @@ def schwab_client():
     return client_from_token_file(str(schwab_token_path()), k, s)
 
 
+# Alpaca's asset.exchange -> Schwab's requestedDestination. A market order
+# that reaches the LISTING exchange before 09:30 is matched in that exchange's
+# opening auction (Nasdaq Opening Cross, NYSE / NYSE Arca / NYSE American /
+# Cboe BZX opening auctions) -- the market-on-open order Schwab's order types
+# lack. The night leg's whole edge is in that print (RESULTS.md addendum 10).
+# Anything unmapped (OTC, unknown) keeps Schwab's default routing.
+OPEN_ROUTE = {"NASDAQ": "NASDAQ", "NYSE": "NYSE", "ARCA": "ECN_ARCA",
+              "AMEX": "AMEX", "BATS": "BATS"}
+
+
+def _alpaca_exchange(sym: str) -> str | None:
+    """Listing exchange from Alpaca's asset record (free, already trusted)."""
+    from alpaca.trading.client import TradingClient
+    k, s = require_alpaca_keys()
+    a = TradingClient(k, s, paper=True).get_asset(sym)
+    return str(getattr(a, "exchange", "")).split(".")[-1] or None
+
+
 class SchwabAdapter:
     fractional = False
 
-    def __init__(self, client=None, account_hash: str | None = None, clock_source=None):
+    def __init__(self, client=None, account_hash: str | None = None, clock_source=None,
+                 open_route: str = "primary", exchange_of=None):
         k, s, _ = schwab_credentials() if client is None else ("test", "test", "")
         if client is None:
             client = schwab_client()
@@ -149,6 +172,23 @@ class SchwabAdapter:
         self.hash = account_hash or self._pick_account()
         self.key, self.secret = f"schwab:{k}", self.hash
         self._clock = clock_source
+        # "primary": direct open sells to the listing exchange; "auto": Schwab routes
+        self.open_route = open_route
+        self._exchange_of = exchange_of or _alpaca_exchange
+        self._exchanges: dict[str, str | None] = {}
+        self.route_refused = False       # set once Schwab refuses a directed order
+        self.last_route = ""             # route of the most recent submit, for the fill log
+
+    def open_destination(self, sym: str) -> str | None:
+        """Schwab destination for an open sell of `sym`, or None = default routing."""
+        if self.open_route != "primary" or self.route_refused:
+            return None
+        if sym not in self._exchanges:
+            try:
+                self._exchanges[sym] = self._exchange_of(sym)
+            except Exception:
+                self._exchanges[sym] = None
+        return OPEN_ROUTE.get(self._exchanges[sym] or "")
 
     # ------------------------------------------------------------- state
     def _pick_account(self) -> str:
@@ -275,11 +315,25 @@ class SchwabAdapter:
             b = make(sym, n).set_duration(Duration.DAY).set_session(Session.NORMAL)
             if tif == "cls":
                 b = b.set_order_type(OrderType.MARKET_ON_CLOSE)
-            # tif "opg": no market-on-open type at Schwab; a market DAY order
-            # placed before 09:30 executes at the open
-            r = self.c.place_order(self.hash, b.build())
+            order = b.build()
+            # tif "opg": no market-on-open type at Schwab. A market DAY order
+            # placed before 09:30 and DIRECTED to the listing exchange joins
+            # its opening auction; undirected, a wholesaler fills it "at the open"
+            dest = self.open_destination(sym) if tif == "opg" else None
+            if dest:
+                order["requestedDestination"] = dest
+            r = self.c.place_order(self.hash, order)
+            if dest and r.status_code not in (200, 201):
+                # route refused (account not enabled for direct routing, or the
+                # venue): take Schwab's routing rather than stay in the position,
+                # and stop trying for the rest of this run
+                self.route_refused = True
+                order.pop("requestedDestination", None)
+                dest = None
+                r = self.c.place_order(self.hash, order)
             if r.status_code not in (200, 201):
                 raise RuntimeError(f"Schwab rejected {ins} {n} {sym}: {r.status_code} {r.text[:160]}")
+            self.last_route = dest or "AUTO"
             loc = r.headers.get("Location", "")
             ids.append(loc.rstrip("/").split("/")[-1])
         return ",".join(ids)
@@ -309,7 +363,7 @@ class SchwabAdapter:
         return (status, fq, avg, when)
 
 
-def make_adapter(account: str, live_broker: str = "schwab"):
+def make_adapter(account: str, live_broker: str = "schwab", open_route: str = "primary"):
     """paper -> Alpaca paper; live -> Schwab (default) or Alpaca live."""
     from ..live.broker import PaperBroker
     if account == "paper":
@@ -317,7 +371,7 @@ def make_adapter(account: str, live_broker: str = "schwab"):
     if account != "live":
         raise ValueError(f"unknown daily account {account!r} (paper|live)")
     if live_broker == "schwab":
-        return SchwabAdapter()
+        return SchwabAdapter(open_route=open_route)
     k, s = get_env("ALPACA_LIVE_API_KEY"), get_env("ALPACA_LIVE_SECRET_KEY")
     if not (k and s):
         raise RuntimeError("live_broker=alpaca but ALPACA_LIVE_API_KEY / _SECRET_KEY missing")

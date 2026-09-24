@@ -70,7 +70,8 @@ class DailyExecutor:
         self.account = account
         self.live = account == "live"
         self.dry_run = dry_run
-        b = broker or make_adapter(account, getattr(cfg.daily, "live_broker", "schwab"))
+        b = broker or make_adapter(account, getattr(cfg.daily, "live_broker", "schwab"),
+                                   getattr(cfg.daily, "schwab_open_route", "primary"))
         # a raw PaperBroker (or test double) gets the Alpaca adapter
         self.broker = b if hasattr(b, "submit") else AlpacaAdapter(b)
         self.fname = book_file(account)
@@ -152,6 +153,8 @@ class DailyExecutor:
             # are subtracted as "your holdings" and then again as spent cash
             self._sync_live_cash(book)
 
+        if trading_day:
+            self._apply_kills(book, today)
         if not trading_day:
             self.log("not a trading day - reconcile only")
         elif phase == "open":
@@ -200,9 +203,11 @@ class DailyExecutor:
                     fh.write(json.dumps({"coid": coid, "sym": o["sym"], "leg": o["leg"],
                                          "side": o["side"], "qty": new, "fill_px": px,
                                          "ref_px": ref, "slippage_bps": bps,
+                                         "route": o.get("route", ""),
                                          "filled_at": when}) + "\n")
             elif status in ("canceled", "expired", "rejected"):
                 self.log(f"  order {coid} ended {status} unfilled")
+                self._reroute_open_sell(book, today, coid, o, status)
         # anything the broker no longer holds cannot still be ours
         held = self.broker.positions()
         for sym in list(book.positions):
@@ -245,9 +250,11 @@ class DailyExecutor:
         self._gate(book, equity)
 
         # night leg: everything bought at yesterday's close goes at the open
+        self._prepare_open_route(book, today)
         for sym, p in book.leg_positions("night").items():
             self._order(book, today, sym, "sell", "night", qty=float(p["qty"]),
                         tif="opg", ref_px=marks.get(sym, p["avg_px"]), kind="exit")
+        self._confirm_open_routes(book, today)
 
         # IBS leg: rank the universe by 12-1 momentum (month-end, bars before
         # today), then IBS < ibs_max on the last complete SIP bar of the top-k
@@ -259,6 +266,106 @@ class DailyExecutor:
                               adv_min=self.d.night_adv_min, cache_dir=self.state_dir)
         self.log(f"[night] {len(elig)} names eligible today "
                  f"(close >= ${self.d.night_price_min:.0f}, 20d SIP $vol >= ${self.d.night_adv_min/1e6:.0f}M)")
+
+    # ------------------------------------------------------ kill rules
+    def _kill(self, book: DailyBook, leg: str, today: str, reason: str) -> None:
+        if leg in book.killed:
+            return
+        book.killed[leg] = {"date": today, "reason": reason}
+        what = "ALL legs" if leg == "all" else f"the {leg} leg"
+        self.warn(f"KILL RULE: {what} stops opening positions - {reason}. Exits continue. "
+                  f"Undo only on purpose: python scripts/daily.py --unkill {leg} --account {self.account}")
+
+    def _apply_kills(self, book: DailyBook, today: str) -> None:
+        """Pre-registered kill rules (signals.KILL_*): a leg losing money with
+        t < -1 over enough live round trips stops opening positions, and a
+        realised drawdown past HALT_DRAWDOWN halts every leg."""
+        for leg, why in sg.kill_check(book.closed).items():
+            self._kill(book, leg, today, why)
+        eq = book.equity(self._marks(book))
+        dd = sg.realised_drawdown(book.closed, eq)
+        if dd < -sg.HALT_DRAWDOWN:
+            self._kill(book, "all", today, f"realised drawdown {dd:.0%} of equity "
+                                            f"(limit -{sg.HALT_DRAWDOWN:.0%}; backtest worst ~-20%)")
+        if book.killed:
+            self.log("killed legs: " + ", ".join(f"{k} (since {v['date']})" for k, v in book.killed.items()))
+
+    # ------------------------------------------------- overnight leverage
+    def _w_night(self, book: DailyBook) -> float:
+        lw = self.d.lever_weight
+        return max(self.d.night_weight, lw) if (book.levered and lw) else self.d.night_weight
+
+    def _w_ibs(self, book: DailyBook) -> float:
+        lw = self.d.lever_weight
+        return max(self.d.ibs_weight, lw) if (book.levered and lw) else self.d.ibs_weight
+
+    def _lever_gate(self, book: DailyBook) -> None:
+        """Open or close the overnight leverage gate from live evidence."""
+        if not self.d.lever_weight:
+            book.levered = False; return
+        n, bps = getattr(self, "_exit_stats", (0, float("nan")))
+        try:
+            mult = float(getattr(self.broker.account(), "multiplier", 1) or 1)
+        except Exception:
+            mult = 1.0
+        dd = sg.realised_drawdown(book.closed, book.equity(self._marks(book)))
+        ok, why = sg.lever_ok(n, bps, book.killed, dd, mult)
+        if ok != book.levered:
+            (self.act if ok else self.warn)(
+                f"overnight leverage {'ON' if ok else 'OFF'}: legs at "
+                f"{self.d.lever_weight if ok else self.d.night_weight:.2f} each - {why}")
+        else:
+            self.log(f"[lever] {'on' if ok else 'off'} - {why}")
+        book.levered = ok
+
+    # ------------------------------------------------------ open routing
+    ROUTE_RETRY_DAYS = 5
+
+    def _prepare_open_route(self, book: DailyBook, today: str) -> None:
+        """Schwab only: skip directed routing for a few days after a refusal,
+        so a refused route costs one fallback, not one every morning."""
+        if not hasattr(self.broker, "route_refused") or not book.route_refused:
+            return
+        age = (dt.date.fromisoformat(today) - dt.date.fromisoformat(book.route_refused)).days
+        if age < self.ROUTE_RETRY_DAYS:
+            self.broker.route_refused = True
+            self.log(f"[night] open sells use Schwab routing (directed route refused {book.route_refused})")
+
+    def _confirm_open_routes(self, book: DailyBook, today: str, wait_s: float = 8.0) -> None:
+        """A directed order can be accepted by the API and rejected by Schwab a
+        moment later. Check the directed open sells now, while there is still
+        time before 09:30 to resend them with Schwab's own routing."""
+        directed = {k: o for k, o in book.open_orders().items()
+                    if o.get("tif") == "opg" and o.get("route") not in ("", "AUTO", None)}
+        if self.dry_run or not directed:
+            return
+        time.sleep(wait_s)
+        for coid, o in directed.items():
+            try:
+                status, fq, *_ = self.broker.order_status(coid, o)
+            except Exception as exc:
+                self.log(f"  cannot check route of {o['sym']}: {str(exc)[:80]}"); continue
+            if status in ("canceled", "expired", "rejected") and fq <= 0:
+                o["status"] = status
+                self._reroute_open_sell(book, today, coid, o, status)
+
+    def _reroute_open_sell(self, book: DailyBook, today: str, coid: str, o: dict, status: str) -> None:
+        """A directed open sell that died unfilled: sell with Schwab's routing
+        instead of carrying the night position into another day."""
+        if o.get("side") != "sell" or o.get("tif") != "opg" or o.get("route") in ("", "AUTO", None):
+            return
+        p = book.positions.get(o["sym"])
+        if not p or o.get("rerouted"):
+            return
+        o["rerouted"] = True
+        book.route_refused = today
+        if hasattr(self.broker, "route_refused"):
+            self.broker.route_refused = True
+        self.warn(f"{o['sym']}: open sell directed to {o['route']} ended {status}; "
+                  "resending with Schwab routing (directed routing paused "
+                  f"{self.ROUTE_RETRY_DAYS} days; set daily.schwab_open_route: auto to stop trying)")
+        self._order(book, today, o["sym"], "sell", o["leg"], qty=float(p["qty"]),
+                    tif="opg", ref_px=float(o.get("ref_px") or p["avg_px"]), kind="exit-auto")
 
     def _ibs_open(self, book: DailyBook, today: str, equity: float) -> None:
         t = pd.Timestamp(today)
@@ -276,6 +383,9 @@ class DailyExecutor:
         last = {s: bars[s].iloc[-1].to_dict() for s in universe if s in bars}
         foreign = self._foreign_symbols(book)
         targets = [s for s in sg.ibs_targets(last, self.d.ibs_max) if s not in foreign]
+        if book.is_killed("ibs") and targets:
+            self.log(f"[ibs] leg killed - not buying {targets}")
+            targets = []
         self.log("[ibs] IBS last bar: " + ", ".join(
             f"{s} {sg.ibs(b['high'], b['low'], b['close']):.2f}" for s, b in sorted(last.items()))
             + f" -> hold {targets or ('T-bills (' + cash_sym + ')' if cash_sym else 'cash')}")
@@ -285,7 +395,7 @@ class DailyExecutor:
                 ref = bars.get(sym, pd.DataFrame({"close": [p["avg_px"]]}))["close"].iloc[-1]
                 self._order(book, today, sym, "sell", "ibs", qty=float(p["qty"]),
                             tif="day", ref_px=float(ref), kind="exit")
-        leg = self.d.ibs_weight * equity
+        leg = self._w_ibs(book) * equity
         # T-bills hold the leg's money whenever it has nothing to own
         tb = book.leg_positions("tbill")
         if cash_sym:
@@ -310,7 +420,7 @@ class DailyExecutor:
     EXIT_COST_WARN_BPS = 15.0     # night edge is gone near 28bp/side (RESULTS.md addendum 14)
     EXIT_COST_MIN_N = 10
 
-    def _check_exit_cost(self) -> None:
+    def _check_exit_cost(self, book: DailyBook | None = None, today: str = "") -> None:
         """This morning's open sells are booked by now; score the recent ones
         against the official open (SIP, >15 min old by 15:40)."""
         path = self.log_dir / f"daily-fills{self.tag}.jsonl"
@@ -318,7 +428,7 @@ class DailyExecutor:
             return
         try:
             fills = [json.loads(l) for l in path.read_text().splitlines() if l.strip()]
-            sells = [f for f in fills if f.get("leg") == "night" and f.get("side") == "sell"][-30:]
+            sells = [f for f in fills if f.get("leg") == "night" and f.get("side") == "sell"][-sg.LEVER_MIN_EXITS:]
             if not sells:
                 return
             days = sorted({str(f.get("filled_at", ""))[:10] for f in sells})
@@ -327,19 +437,30 @@ class DailyExecutor:
             opens = {(sym, str(d.date())): float(b.loc[d, "open"])
                      for sym, b in bars.items() for d in b.index}
             n, bps = sg.night_exit_cost(sells, opens)
+            routes = sg.exit_cost_by_route(sells, opens)
+            self._exit_stats = sg.night_exit_cost(sells, opens, window=sg.LEVER_MIN_EXITS)
         except Exception as exc:
             self.log(f"[night] exit-cost check skipped ({type(exc).__name__}: {str(exc)[:80]})")
             return
         if not n:
             return
         self.log(f"[night] open-sell cost vs official open, last {n}: {bps:+.1f} bps/side")
-        if n >= self.EXIT_COST_MIN_N and bps > self.EXIT_COST_WARN_BPS:
+        for r, (k, c, hit) in sorted(routes.items()):
+            self.log(f"[night]   route {r or 'OPG'}: n {k}, {c:+.1f} bps/side, "
+                     f"{hit:.0%} filled at the auction print")
+        if book is not None and n >= sg.KILL_EXIT_COST_MIN_N and bps > sg.KILL_EXIT_COST_BPS:
+            self._kill(book, "night", today, f"open sells average {bps:+.1f}bp/side worse than the "
+                                             f"official open over {n} exits (kill at {sg.KILL_EXIT_COST_BPS:g})")
+        elif n >= self.EXIT_COST_MIN_N and bps > self.EXIT_COST_WARN_BPS:
             self.warn(f"night-leg open sells average {bps:+.1f} bps/side worse than the official open "
                       f"over {n} exits (backtest assumes 7.5; the edge is gone near 28). "
                       "Consider a broker with real market-on-open orders.")
 
     def phase_close(self, book: DailyBook, today: str, now, clock) -> None:
-        self._check_exit_cost()
+        self._check_exit_cost(book, today)
+        self._lever_gate(book)
+        if book.is_killed("night"):
+            self.log("[night] leg killed - no new buys"); return
         close_et = pd.Timestamp(clock.next_close).tz_convert(ET)
         if close_et.date() != now.date() or close_et.hour != 16:
             self.log("early close today - night leg skipped (research excludes half days)")
@@ -390,38 +511,80 @@ class DailyExecutor:
         if picks.empty:
             return
         equity = self._sizing_equity(book)
-        leg = self.d.night_weight * equity
+        leg = self._w_night(book) * equity
         per = leg * frac
         # never let this book borrow beyond the gross its weights allow
-        floor = -(max(1.0, self.d.ibs_weight + self.d.night_weight) - 1.0) * equity
+        floor = -(max(1.0, self._w_ibs(book) + self._w_night(book)) - 1.0) * equity
         cash = book.cash
-        for sym, r in picks.iterrows():
-            qty = math.floor(per / r.price)        # auction orders are whole shares
+        w = sg.night_tilt(picks["vol20"].values if "vol20" in picks else np.full(len(picks), np.nan),
+                          picks["day_ret"].values, self.d.night_tilt_k)
+        for (sym, r), wi in zip(picks.iterrows(), w):
+            qty = math.floor(per * wi / r.price)   # auction orders are whole shares
             if qty < 1:
-                self.log(f"  skip {sym}: ${per:.0f} buys 0 shares at {r.price:.2f}")
+                self.log(f"  skip {sym}: ${per * wi:.0f} buys 0 shares at {r.price:.2f}")
                 continue
             if cash - qty * r.price < floor:
                 self.log(f"  skip {sym}: book cash exhausted"); continue
             cash -= qty * r.price
-            self.log(f"  {sym}: day {r.day_ret*100:+.1f}%  ibs {r.ibs:.2f}  px {r.price:.2f}")
+            spread = (r.ask - r.bid) / ((r.ask + r.bid) / 2) * 1e4 if (
+                "bid" in r and np.isfinite(r.get("bid", np.nan)) and np.isfinite(r.get("ask", np.nan))
+                and r.ask >= r.bid > 0) else float("nan")
+            self.log(f"  {sym}: day {r.day_ret*100:+.1f}%  ibs {r.ibs:.2f}  px {r.price:.2f}  w {wi:.2f}"
+                     + (f"  spread {spread:.0f}bp" if np.isfinite(spread) else ""))
+            self._log_decision(today, sym, r, spread, qty)
             self._order(book, today, sym, "buy", "night", qty=qty, tif="cls",
                         ref_px=float(r.price), kind="entry")
+
+    def _log_decision(self, today: str, sym: str, r, spread_bps: float, qty: int) -> None:
+        """One line per night pick with what was known at 15:40, including the
+        quoted spread. This is the dataset a per-name cost model will be fitted
+        on once fills accumulate (research/sim uses a price/volume tier until then)."""
+        if self.dry_run:
+            return
+        rec = {"date": today, "sym": sym, "price": float(r.price), "day_ret": float(r.day_ret),
+               "ibs": float(r.ibs), "vol20": float(r.get("vol20", np.nan)),
+               "spread_bps": None if not np.isfinite(spread_bps) else round(spread_bps, 1),
+               "qty": int(qty)}
+        with open(self.log_dir / f"daily-decisions{self.tag}.jsonl", "a") as fh:
+            fh.write(json.dumps(rec) + "\n")
 
     # ------------------------------------------------------------ intraday
     def phase_intraday(self, book: DailyBook, today: str, now, clock) -> None:
         close_et = pd.Timestamp(clock.next_close).tz_convert(ET)
         if not clock.is_open or close_et.hour != 16:
             self.log("[noise] market shut or early close - no intraday decision"); return
-        n = book.noise
+        for sig in self._noise_signals():
+            self._intraday_one(book, today, sig)
+
+    # ------------------------------------------------ intraday instruments
+    def _noise_signals(self) -> list[str]:
+        """Signal symbols of the intraday leg. They split its leverage budget
+        equally (RESULTS.md addendum 16: QQQ + SMH, same 1.5x budget)."""
+        return [self.d.noise_symbol] + [s for s in (self.d.noise_extra or {}) if s != self.d.noise_symbol]
+
+    def _noise_state(self, book: DailyBook, sig: str | None = None) -> dict:
+        sig = sig or self.d.noise_symbol
+        if sig == self.d.noise_symbol:
+            return book.noise                    # primary: the original state (and its history)
+        return book.noise_more.setdefault(sig, {})
+
+    def _set_noise_state(self, book: DailyBook, sig: str, st: dict) -> None:
+        if sig == self.d.noise_symbol:
+            book.noise = st
+        else:
+            book.noise_more[sig] = st
+
+    def _intraday_one(self, book: DailyBook, today: str, sig: str) -> None:
+        n = self._noise_state(book, sig)
         if n.get("day") != today:
-            self._settle_noise(book, today)     # in case the 09:15 run was missed
-            self._init_noise(book, today)
-            n = book.noise
+            self._settle_noise(book, today, sig)     # in case the 09:15 run was missed
+            self._init_noise(book, today, sig)
+            n = self._noise_state(book, sig)
             if not n:
                 return
-        mins = md.minute_today(self.d.noise_symbol).get(pd.Timestamp(today))
+        mins = md.minute_today(sig).get(pd.Timestamp(today))
         if not mins:
-            self.warn("[noise] no minute bars for today"); return
+            self.warn(f"[noise] no minute bars for {sig} today"); return
         c, v = mins["close"], mins["volume"]
         last_done = mins["last_minute"] - 1          # the current minute is still forming
         ub, lb = np.array(n["ub"]), np.array(n["lb"])
@@ -441,25 +604,26 @@ class DailyExecutor:
                     n["entry"] = px
                     n["trades"] += 1
                 hh, mm = divmod(570 + m, 60)
-                self.log(f"[noise] {hh:02d}:{mm:02d} "
+                self.log(f"[noise {sig}] {hh:02d}:{mm:02d} "
                          f"px {px:.2f} ub {ub[m]:.2f} lb {lb[m]:.2f} vwap {vwap[m]:.2f}: "
                          f"{pos:+d} -> {new:+d}")
                 pos = new
             n["last_m"] = m
         n["pos"] = pos
         if book.daytrade_live:
-            self._sync_noise_live(book, today, float(c[max(0, last_done)]))
+            self._sync_noise_live(book, today, float(c[max(0, last_done)]), sig)
         else:
-            self.log(f"[noise:SHADOW] position {pos:+d}, lev {n['lev']:.2f}, "
+            self.log(f"[noise:SHADOW {sig}] position {pos:+d}, lev {n['lev']:.2f}, "
                      f"trades today {n['trades']}")
 
-    def _init_noise(self, book: DailyBook, today: str) -> None:
-        sym = self.d.noise_symbol
+    def _init_noise(self, book: DailyBook, today: str, sig: str | None = None) -> None:
+        sym = sig or self.d.noise_symbol
+        prior = self._noise_state(book, sym)
         hist = md.minute_history(sym, self.d.noise_lookback + 3)
         days = sorted(d for d in hist if d < pd.Timestamp(today))[-self.d.noise_lookback:]
         if len(days) < self.d.noise_lookback:
-            self.warn(f"[noise] only {len(days)} sessions of history - no trading today")
-            book.noise = {}; return
+            self.warn(f"[noise] {sym}: only {len(days)} sessions of history - no trading today")
+            self._set_noise_state(book, sym, {}); return
         moves = np.vstack([np.abs(hist[d]["close"] / hist[d]["open"] - 1) for d in days])
         sigma = sg.noise_sigma(moves)
         daily = md.sip_daily([sym], pd.Timestamp(today) - pd.Timedelta(days=40), pd.Timestamp(today))[sym]
@@ -467,7 +631,7 @@ class DailyExecutor:
         prev_close = float(daily["close"].iloc[-1])
         today_m = md.minute_today(sym).get(pd.Timestamp(today))
         if not today_m:
-            self.warn("[noise] no open print yet"); book.noise = {}; return
+            self.warn(f"[noise] {sym}: no open print yet"); self._set_noise_state(book, sym, {}); return
         day_open = today_m["open"]
         # IEX's first-minute open is unreliable (research: wrong opens, ~5% of
         # volume). Prefer Schwab's official consolidated open when logged in.
@@ -485,32 +649,37 @@ class DailyExecutor:
                       "can be wrong on IEX; bounds may be off")
         ub, lb = sg.noise_bounds(day_open, prev_close, sigma)
         lev = sg.noise_leverage(daily["close"], self.d.noise_target_vol, self.d.noise_max_lev)
-        shadow_eq = float(book.noise.get("shadow_equity", book.start_equity))
-        hist_log = book.noise.get("history", [])
-        book.noise = {"day": today, "pos": 0, "entry": None, "realized": 0.0, "trades": 0,
+        shadow_eq = float(prior.get("shadow_equity", book.start_equity))
+        hist_log = prior.get("history", [])
+        self._set_noise_state(book, sym, {"day": today, "pos": 0, "entry": None, "realized": 0.0, "trades": 0,
                       "last_m": -1, "lev": lev, "open": day_open, "prev_close": prev_close,
                       "ub": ub.round(4).tolist(), "lb": lb.round(4).tolist(),
                       "shadow_equity": shadow_eq, "history": hist_log, "settled": False,
-                      "src": src}
+                      "src": src})
         self.log(f"[noise] {sym} open {day_open:.2f} (src {src}) prev close {prev_close:.2f} "
                  f"lev {lev:.2f}  band at 10:00 [{lb[30]:.2f}, {ub[30]:.2f}]")
 
-    def _settle_noise(self, book: DailyBook, today: str) -> None:
-        """Close yesterday's shadow position at its SIP close and compound."""
-        n = book.noise
+    def _settle_noise(self, book: DailyBook, today: str, sig: str | None = None) -> None:
+        """Close yesterday's shadow position at its SIP close and compound.
+        With several instruments each books its share of the budget."""
+        if sig is None:
+            for s in self._noise_signals():
+                self._settle_noise(book, today, s)
+            return
+        n = self._noise_state(book, sig)
         if not n or n.get("settled") or n.get("day") == today:
             return
         day = n["day"]
         if n.get("pos", 0) != 0:
-            b = md.sip_daily([self.d.noise_symbol], pd.Timestamp(day), pd.Timestamp(day) + pd.Timedelta(days=1))
-            px = float(b[self.d.noise_symbol]["close"].iloc[0])
+            b = md.sip_daily([sig], pd.Timestamp(day), pd.Timestamp(day) + pd.Timedelta(days=1))
+            px = float(b[sig]["close"].iloc[0])
             n["realized"] += n["pos"] * (px / n["entry"] - 1.0)
             n["trades"] += 1
-        r = n["lev"] * (n["realized"] - n["trades"] * NOISE_COST_BPS / 1e4)
+        r = n["lev"] * self._noise_share() * (n["realized"] - n["trades"] * NOISE_COST_BPS / 1e4)
         n["shadow_equity"] = float(n.get("shadow_equity", book.start_equity)) * (1 + r)
         n.setdefault("history", []).append({"date": day, "ret": round(r, 6)})
         n["settled"] = True
-        self.log(f"[noise:{'LIVE' if book.daytrade_live else 'SHADOW'}] {day} settled "
+        self.log(f"[noise:{'LIVE' if book.daytrade_live else 'SHADOW'} {sig}] {day} settled "
                  f"{r*100:+.2f}% ({n['trades']} fills) -> shadow equity ${n['shadow_equity']:,.2f}")
 
     def _gate(self, book: DailyBook, equity: float) -> None:
@@ -519,12 +688,13 @@ class DailyExecutor:
         acct = float(a.equity)
         was = book.daytrade_live
         book.daytrade_live = (self.d.daytrade_mode == "auto"
+                              and not book.is_killed("noise")
                               and equity >= self.d.daytrade_min_equity
                               and acct >= self.d.daytrade_min_equity)
         # intraday leverage the broker actually grants (4 = leverage-enabled
         # margin, 2 = standard, 1 = cash); the IBS half stays invested intraday
         mult = float(getattr(a, "multiplier", 1) or 1)
-        book.noise_lev_cap = max(0.0, min(self.d.noise_max_lev, mult - self.d.ibs_weight))
+        book.noise_lev_cap = max(0.0, min(self.d.noise_max_lev, mult - self._w_ibs(book)))
         if book.daytrade_live and not was:
             self.act(f"DAY-TRADE LEG SWITCHED ON: book equity ${equity:,.0f} >= "
                      f"${self.d.daytrade_min_equity:,.0f}")
@@ -568,30 +738,38 @@ class DailyExecutor:
         cap = self.live_cap()
         return max(0.0, min(free, cap) if cap else free)
 
-    def _noise_instrument(self, book: DailyBook) -> str:
-        """QQQ, unless another leg holds it today -- then QQQM (same index)."""
-        n = book.noise
+    def _noise_share(self) -> float:
+        return 1.0 / len(self._noise_signals())
+
+    def _noise_instrument(self, book: DailyBook, sig: str | None = None) -> str:
+        """The signal symbol, unless another leg holds it today -- then its
+        stand-in: QQQ -> QQQM (same index), SMH -> SOXX (semis, rho ~0.98)."""
+        sig = sig or self.d.noise_symbol
+        n = self._noise_state(book, sig)
         if n.get("instrument"):
             return n["instrument"]
-        sym = self.d.noise_symbol
+        sym = sig
         other = {s for s, p in book.positions.items() if p.get("leg") != "noise"}
         other |= {o["sym"] for o in book.open_orders().values() if o["leg"] != "noise"}
         if sym in other or sym in self._foreign_symbols(book):
-            sym = self.d.noise_alt_symbol
+            sym = (self.d.noise_alt_symbol if sig == self.d.noise_symbol
+                   else (self.d.noise_extra or {}).get(sig) or sig)
         n["instrument"] = sym
         return sym
 
-    def _sync_noise_live(self, book: DailyBook, today: str, px_signal: float) -> None:
-        n = book.noise
-        sym = self._noise_instrument(book)
+    def _sync_noise_live(self, book: DailyBook, today: str, px_signal: float,
+                         sig: str | None = None) -> None:
+        sig = sig or self.d.noise_symbol
+        n = self._noise_state(book, sig)
+        sym = self._noise_instrument(book, sig)
         px = px_signal
-        if sym != self.d.noise_symbol:
+        if sym != sig:
             rows = md.live_rows([sym], max_age_min=5)
             if rows.empty:
                 self.warn(f"[noise:LIVE] no live price for {sym} - skipping"); return
             px = float(rows.price.iloc[0])
         equity = self._sizing_equity(book)
-        lev = min(float(n["lev"]), float(getattr(book, "noise_lev_cap", n["lev"]) or 0))
+        lev = min(float(n["lev"]), float(getattr(book, "noise_lev_cap", n["lev"]) or 0)) * self._noise_share()
         want = int(n["pos"]) * math.floor(lev * equity / px)
         have = float(book.positions.get(sym, {}).get("qty", 0.0))
         pend = [o for o in book.open_orders().values() if o["sym"] == sym]
@@ -622,8 +800,15 @@ class DailyExecutor:
                 self.log(f"[noise] {sym}: an order is still working - not stacking a flatten"); continue
             self.log(f"[noise] flattening {have:+g} {sym} ({kind})")
             self._order(book, today, sym, "sell" if have > 0 else "buy", "noise",
-                        qty=abs(have), tif=tif, ref_px=float(book.noise.get("entry") or p["avg_px"]),
+                        qty=abs(have), tif=tif, ref_px=self._noise_ref(book, sym, p),
                         kind=kind)
+
+    def _noise_ref(self, book: DailyBook, sym: str, p: dict) -> float:
+        for sig in self._noise_signals():
+            n = self._noise_state(book, sig)
+            if n.get("instrument", sig) == sym and n.get("entry"):
+                return float(n["entry"])
+        return float(p["avg_px"])
 
     # --------------------------------------------------------------- orders
     def _order(self, book: DailyBook, today: str, sym: str, side: str, leg: str, *,
@@ -658,8 +843,12 @@ class DailyExecutor:
                             kind=kind + "-day", qty=qty)
                 return
             self.warn(f"{desc} REJECTED: {msg[:140]}"); return
+        route = str(getattr(self.broker, "last_route", "") or "")
         book.register(coid, sym=sym, side=side, leg=leg, ref_px=ref_px, tif=tif,
-                      broker_id=broker_id, submitted=dt.datetime.now().isoformat(timespec="seconds"))
+                      broker_id=broker_id, route=route,
+                      submitted=dt.datetime.now().isoformat(timespec="seconds"))
+        if route and route != "AUTO":
+            desc += f" -> {route}"
         # persist immediately: Schwab has no client order id, so the book is
         # the idempotency record -- a crash here must not lose the order
         book.save(self.state_dir, self.fname)

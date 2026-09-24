@@ -10,6 +10,14 @@ APP="$(cd "$(dirname "$0")/.." && pwd)"
 USER_="$(whoami)"
 UID_="$(id -u)"
 
+# The swing book is quarantined (RESULTS.md addendum 14: at the live cadence
+# it does 11.2% / Sharpe 0.67, behind SPY). Its 09:05 run also held the
+# account lock the daily book needs before the 09:28 open cutoff. It is only
+# scheduled when .env says SWING_BOOK=on.
+swing_on() {
+  grep -qE '^[[:space:]]*SWING_BOOK[[:space:]]*=[[:space:]]*"?on"?[[:space:]]*$' "$APP/.env" 2>/dev/null
+}
+
 have_systemd_user() {
   command -v systemctl >/dev/null 2>&1 || return 1
   "$APP/scripts/sysd.sh" show-environment >/dev/null 2>&1
@@ -28,7 +36,12 @@ install_systemd() {
       "$APP/deploy/schwab-reminder.service.in" > "$HOME/.config/systemd/user/schwab-reminder.service"
   cp "$APP/deploy/schwab-reminder.timer.in" "$HOME/.config/systemd/user/schwab-reminder.timer"
   "$APP/scripts/sysd.sh" daemon-reload
-  "$APP/scripts/sysd.sh" enable --now swing-trader.timer
+  if swing_on; then
+    "$APP/scripts/sysd.sh" enable --now swing-trader.timer
+  else
+    "$APP/scripts/sysd.sh" disable --now swing-trader.timer 2>/dev/null || true
+    echo "swing book NOT scheduled (quarantined; set SWING_BOOK=on in .env to schedule it)"
+  fi
   "$APP/scripts/sysd.sh" enable --now daily-trader.timer
   "$APP/scripts/sysd.sh" enable --now schwab-reminder.timer
   if ! loginctl show-user "$USER_" -p Linger 2>/dev/null | grep -q "Linger=yes"; then
@@ -58,7 +71,7 @@ install_cron() {
     # local clock times or the runs fire hours off. Compute the offset rather
     # than hardcoding it, so this stays correct across DST and machines.
     echo "# swing-trader - macOS cron ignores CRON_TZ, so these are LOCAL times" >> "$tmp"
-    python3 - "$APP" >> "$tmp" <<'PYEOF'
+    SWING_ON=$(swing_on && echo 1 || echo 0) python3 - "$APP" >> "$tmp" <<'PYEOF'
 import sys, datetime as dt
 from zoneinfo import ZoneInfo
 app = sys.argv[1]
@@ -67,7 +80,8 @@ today = dt.date.today()
 notes = {(9,5):"decide + submit market-on-open",
          (9,47):"reconcile fills, arm stops",
          (15,52):"pre-close sweep"}
-for (h, m), note in notes.items():
+import os
+for (h, m), note in (notes.items() if os.environ.get("SWING_ON") == "1" else []):
     t = dt.datetime.combine(today, dt.time(h, m), tzinfo=et).astimezone(local)
     print(f"{t.minute:2d} {t.hour} * * 1-5 {app}/scripts/run-live.sh  # {h:02d}:{m:02d} ET - {note}")
 daily = [(9,15),(9,50)] + [(h,m) for h in range(10,16) for m in (1,31)] + [(15,40),(15,57),(16,10)]
@@ -80,9 +94,11 @@ PYEOF
     echo "# swing-trader - times below are US/Eastern via CRON_TZ" >> "$tmp"
     echo "CRON_TZ=America/New_York" >> "$tmp"
     {
-      echo " 5 9 * * 1-5 $APP/scripts/run-live.sh   # decide + submit market-on-open"
-      echo "47 9 * * 1-5 $APP/scripts/run-live.sh   # reconcile fills, arm stops"
-      echo "52 15 * * 1-5 $APP/scripts/run-live.sh  # pre-close sweep"
+      if swing_on; then
+        echo " 5 9 * * 1-5 $APP/scripts/run-live.sh   # decide + submit market-on-open"
+        echo "47 9 * * 1-5 $APP/scripts/run-live.sh   # reconcile fills, arm stops"
+        echo "52 15 * * 1-5 $APP/scripts/run-live.sh  # pre-close sweep"
+      fi
       echo "15 9 * * 1-5 $APP/scripts/run-daily.sh  # daily book: open auction"
       echo "50 9 * * 1-5 $APP/scripts/run-daily.sh  # daily book: reconcile"
       echo "1,31 10-15 * * 1-5 $APP/scripts/run-daily.sh  # daily book: intraday leg"

@@ -55,16 +55,21 @@ class FakeSchwab:
     def get_orders_for_account(self, h, from_entered_datetime=None, to_entered_datetime=None):
         return Resp(self._orders)
 
+    refuse_routes = False
+
     def place_order(self, h, order):
-        self.placed.append(order)
+        self.placed.append(dict(order))
+        if self.refuse_routes and "requestedDestination" in order:
+            return Resp(None, 400)
         return Resp(None, 201, {"Location": f"https://api.schwabapi.com/trader/v1/accounts/HASH/orders/{1000 + len(self.placed)}"})
 
     def get_order(self, oid, h):
         return Resp(self.order_detail[oid])
 
 
-def adapter(**kw):
-    return SchwabAdapter(client=FakeSchwab(**kw), clock_source=lambda: SimpleNamespace(
+def adapter(exchanges=None, **kw):
+    ex = exchanges or {}
+    return SchwabAdapter(client=FakeSchwab(**kw), exchange_of=ex.get, clock_source=lambda: SimpleNamespace(
         is_open=True, next_open=pd.Timestamp("2026-09-25 09:30", tz=ET),
         next_close=pd.Timestamp("2026-09-24 16:00", tz=ET)))
 
@@ -88,6 +93,45 @@ def test_open_exit_is_a_premarket_market_day_order():
     a.submit("LOSER", "sell", "opg", "c", qty=16)
     o = a.c.placed[0]
     assert o["orderType"] == "MARKET" and o["duration"] == "DAY" and leg(o)["instruction"] == "SELL"
+
+
+def test_open_exit_is_directed_to_the_listing_exchange():
+    # the emulated market-on-open: a pre-market market order sent to the
+    # listing exchange joins its opening auction
+    a = adapter(exchanges={"LOSER": "NASDAQ", "ARCAETF": "ARCA", "PINK": "OTC"},
+                positions=[("LOSER", 16, 9.5), ("ARCAETF", 5, 20.0), ("PINK", 3, 6.0)])
+    a.submit("LOSER", "sell", "opg", "c1", qty=16)
+    assert a.c.placed[-1]["requestedDestination"] == "NASDAQ" and a.last_route == "NASDAQ"
+    a.submit("ARCAETF", "sell", "opg", "c2", qty=5)
+    assert a.c.placed[-1]["requestedDestination"] == "ECN_ARCA"
+    a.submit("PINK", "sell", "opg", "c3", qty=3)          # unmapped venue: Schwab routes
+    assert "requestedDestination" not in a.c.placed[-1] and a.last_route == "AUTO"
+
+
+def test_close_and_day_orders_are_never_directed():
+    a = adapter(exchanges={"LOSER": "NASDAQ"}, positions=[("LOSER", 16, 9.5)])
+    a.submit("LOSER", "buy", "cls", "c1", qty=4)
+    a.submit("LOSER", "sell", "day", "c2", qty=16)
+    assert all("requestedDestination" not in o for o in a.c.placed)
+
+
+def test_refused_route_falls_back_to_schwab_routing():
+    a = adapter(exchanges={"LOSER": "NYSE", "OTHER": "NYSE"},
+                positions=[("LOSER", 16, 9.5), ("OTHER", 2, 8.0)])
+    a.c.refuse_routes = True
+    a.submit("LOSER", "sell", "opg", "c1", qty=16)
+    assert a.c.placed[0]["requestedDestination"] == "NYSE"
+    assert "requestedDestination" not in a.c.placed[1] and a.last_route == "AUTO"
+    assert a.route_refused
+    a.submit("OTHER", "sell", "opg", "c2", qty=2)          # no second attempt this run
+    assert len(a.c.placed) == 3 and "requestedDestination" not in a.c.placed[2]
+
+
+def test_auto_route_setting_never_directs():
+    a = adapter(exchanges={"LOSER": "NASDAQ"}, positions=[("LOSER", 16, 9.5)])
+    a.open_route = "auto"
+    a.submit("LOSER", "sell", "opg", "c1", qty=16)
+    assert "requestedDestination" not in a.c.placed[0]
 
 
 def test_notional_becomes_whole_shares():
@@ -335,3 +379,36 @@ def test_fresh_fills_are_not_counted_as_your_holdings(tmp_path, monkeypatch):
     book = DailyBook(cash=1000, start_equity=1000)
     book.register("dlv.JAGX.x", sym="JAGX", side="buy", leg="night", ref_px=9.0, tif="cls")
     assert ex.free_equity(book) == pytest.approx(1227.14), "JAGX is the bot's (pending order), AAPL is yours"
+
+
+def test_directed_open_sell_rejected_later_is_resent_with_schwab_routing(tmp_path, monkeypatch):
+    """Schwab can accept a directed order and reject it a moment later. The
+    09:15 run checks, and resends the sell undirected before the open."""
+    from swingtrader.daily import executor as E
+    a = adapter(exchanges={"LOSER": "NASDAQ"}, positions=[("LOSER", 16, 9.5)])
+    ex = E.DailyExecutor(Config.load(), account="live", broker=a, state_dir=tmp_path, log_dir=tmp_path)
+    ex.notifier.send = lambda *x, **k: "skipped"
+    monkeypatch.setattr(E.time, "sleep", lambda s: None)
+    book = DailyBook(cash=0, start_equity=152)
+    book.positions["LOSER"] = {"qty": 16, "avg_px": 9.5, "leg": "night", "entry_date": "2026-09-23"}
+    ex._order(book, "2026-09-24", "LOSER", "sell", "night", qty=16, tif="opg", ref_px=9.5, kind="exit")
+    (coid, o), = book.orders.items()
+    assert o["route"] == "NASDAQ"
+    a.c.order_detail[int(o["broker_id"])] = {"status": "REJECTED", "orderActivityCollection": []}
+    ex._confirm_open_routes(book, "2026-09-24")
+    assert len(a.c.placed) == 2 and "requestedDestination" not in a.c.placed[1]
+    assert leg(a.c.placed[1])["instruction"] == "SELL" and book.route_refused == "2026-09-24"
+    ex._confirm_open_routes(book, "2026-09-24")          # nothing directed left: no third order
+    assert len(a.c.placed) == 2
+
+
+def test_refused_route_pauses_directed_routing_for_a_few_days(tmp_path):
+    from swingtrader.daily import executor as E
+    a = adapter(exchanges={"LOSER": "NASDAQ"}, positions=[("LOSER", 16, 9.5)])
+    ex = E.DailyExecutor(Config.load(), account="live", broker=a, state_dir=tmp_path, log_dir=tmp_path)
+    book = DailyBook(cash=0, start_equity=152, route_refused="2026-09-22")
+    ex._prepare_open_route(book, "2026-09-24")
+    assert a.open_destination("LOSER") is None
+    a.route_refused = False
+    ex._prepare_open_route(book, "2026-10-05")
+    assert a.open_destination("LOSER") == "NASDAQ"
