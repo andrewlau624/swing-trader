@@ -619,3 +619,70 @@ def test_friday_close_buys_half_size(tmp_path, monkeypatch):
         qty[day] = float(ex.broker.client.submitted[0].qty)
     assert qty["2026-09-25"] == math.floor(3000 * 0.5 * 0.10 * 0.5 / 9.0)
     assert qty["2026-09-24"] == math.floor(3000 * 0.5 * 0.10 / 9.0)
+
+
+# --------------------------------------- conviction day trade (addendum 19)
+def test_breakout_strength():
+    assert sg.breakout_strength(101.0, 100.0, 98.0, 0.01) == (1, pytest.approx(1.0))
+    d, st = sg.breakout_strength(97.0, 100.0, 98.0, 0.01)
+    assert d == -1 and st == pytest.approx((1 - 97 / 98) / 0.01)
+    assert sg.breakout_strength(99.0, 100.0, 98.0, 0.01) == (0, 0.0)
+
+
+def _conv_minutes(path):
+    """Minute bars where close[m] follows `path` {minute: price}, flat volume."""
+    c = np.full(390, 100.0)
+    for m, px in sorted(path.items()):
+        c[m:] = px
+    return {pd.Timestamp("2026-09-24"): {"close": c, "volume": np.ones(390), "last_minute": 389, "open": 100.0}}
+
+
+def _conv_exec(tmp_path, monkeypatch, path, live=False):
+    from swingtrader.daily import executor as E
+    ex = _executor(tmp_path, monkeypatch)
+    monkeypatch.setattr(E.md, "minute_today", lambda sym: _conv_minutes(path))
+    monkeypatch.setattr(E.md, "live_rows", lambda syms, **k: pd.DataFrame(
+        {"price": [50.0], "high": [51.0], "low": [49.0]}, index=syms))
+    band = {"sigma": np.full(390, 0.01), "ub": np.full(390, 101.0), "lb": np.full(390, 99.0),
+            "open": 100.0, "prev_close": 100.0, "daily": None, "src": "test"}
+    monkeypatch.setattr(ex, "_day_bands", lambda sym, today: band)
+    ex.d.conviction_mode = "auto" if live else "shadow"
+    b = DailyBook(cash=3000, start_equity=3000)
+    b.daytrade_live = live
+    return ex, b
+
+
+def test_conviction_takes_only_a_strong_first_breakout(tmp_path, monkeypatch):
+    # 10:00 +1.5% vs band 101 at sigma 1%: strength 0.49 -> long; out at 11:00 back inside
+    ex, b = _conv_exec(tmp_path, monkeypatch, {30: 101.5, 60: 102.0, 90: 100.5})
+    ex._conviction_one(b, "2026-09-24")
+    h = b.conviction["history"]
+    assert len(h) == 1 and h[0]["dir"] == 1 and h[0]["ret"] == pytest.approx(100.5 / 101.5 - 1, abs=1e-5)
+    assert not ex.broker.client.submitted, "shadow mode places nothing"
+
+
+def test_conviction_skips_the_day_when_the_first_breakout_is_weak(tmp_path, monkeypatch):
+    # first breakout at 10:00 is weak (0.1 sigma); a later strong one must NOT be taken
+    ex, b = _conv_exec(tmp_path, monkeypatch, {30: 101.1, 60: 100.0, 90: 104.0})
+    ex._conviction_one(b, "2026-09-24")
+    assert b.conviction["done"] and b.conviction["pos"] == 0 and not b.conviction["history"]
+
+
+def test_conviction_live_buys_sqqq_for_a_down_breakout(tmp_path, monkeypatch):
+    ex, b = _conv_exec(tmp_path, monkeypatch, {30: 98.0}, live=True)
+    ex._conviction_one(b, "2026-09-24")
+    r = ex.broker.client.submitted[0]
+    assert r.symbol == "SQQQ" and r.side.value == "buy"
+    assert float(r.qty) == math.floor(0.5 * 3000 / 50.0)
+
+
+def test_conviction_shares_the_daytime_budget(tmp_path, monkeypatch):
+    ex = _executor(tmp_path, monkeypatch)
+    ex.broker.account = lambda: SimpleNamespace(equity="3000", multiplier="2")
+    book = DailyBook(cash=3000, start_equity=3000)
+    ex.d.conviction_mode = "shadow"
+    ex._gate(book, 3000)
+    assert book.noise_lev_cap == pytest.approx(1.5), "shadow: the regular leg keeps the whole budget"
+    ex.d.conviction_mode = "auto"
+    ex._gate(book, 3000)
+    assert book.noise_lev_cap == pytest.approx(1.0), "live: 2x account - 0.5 IBS - 0.5 conviction"

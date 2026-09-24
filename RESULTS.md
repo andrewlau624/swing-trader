@@ -1369,3 +1369,41 @@ maxDD −13.1% vs −15.2%, Sharpe 1.98 vs 1.81. It is insurance: behind V3 in
   working, the book has no short side left.
 - 2008-length bears and a 1987-style single day are not in any data here.
   The −25% realised-drawdown kill rule is the backstop.
+
+---
+
+# Addendum 19 — a conviction trade: bet big only when the signal is strong (2026-09-24)
+
+Ask: something that does not trade every day, puts more money in when the
+signal is confident, and so speeds up a small account.
+
+Tested on the live-code simulator (V5 = shipped with crash guards, tiered costs):
+
+| | 2021–23 | 2024–26 | full | maxDD |
+|---|---|---|---|---|
+| V5 | 37.9 / 2.23 | 43.8 / 1.84 | 40.7 / 1.98 | −13 |
+| spare night cash → names with tilt ≥ 1.2 (cap 20%) | 39.7 / 2.08 | 46.2 / 1.72 | 42.8 / 1.84 | −15 |
+| **intraday 1.0x + TQQQ conviction 0.5 of equity (same daytime margin)** | **51.2 / 2.21** | **48.3 / 1.79** | **49.8 / 1.98** | −14 |
+| intraday 0.5x + TQQQ 1.0 | 61.8 / 2.06 | 50.5 / 1.66 | 56.3 / 1.86 | −17 |
+| intraday 1.5x + TQQQ 0.5 (needs a 4x day-trading account) | 56.0 / 2.25 | 50.6 / 1.77 | 53.4 / 1.99 | −14 |
+
+- **Night-cash overflow: not adopted.** More return, less Sharpe: concentration, not conviction.
+- **TQQQ conviction trade: built** (`daily.conviction_*`, **shadow by default**).
+  Only the day's FIRST noise-area breakout in TQQQ, and only when it clears the
+  band by ≥ 0.341σ (the 2016–23 median, fixed in addendum 8). Long TQQQ for
+  up-breakouts, SQQQ bought for down-breakouts. Out when the price falls back
+  inside the band or through VWAP, else at 15:57. ~70 trades/yr (about one day
+  in four), wins 39%, positive in 8 of 11 years (2016–26: +10, +8, +61, −1,
+  −28, +26, +56, +10, +30, −7, +33 bp/trade). It takes 0.5 of the daytime
+  buying power, and the regular intraday leg shrinks from 1.5x to 1.0x, so the
+  account's margin use is unchanged. Own kill rule: 60 round trips.
+
+In dollars ($3k 2021-07-06 + $1k/21 sessions): V5 **$192,880** → V7
+**$228,433** (51.5%/yr, Sharpe 2.01, maxDD −14%). Years: 34 / 76 / 26 / 33 /
+65 / 32% vs V5's 24 / 43 / 27 / 23 / 73 / 26%. It adds most in trending,
+falling years (2022), so it also strengthens the crash hedge. Forward,
+edge-halves case, $3k + $1k/month: $117k → **$133k** by 2031-09; $10k lump:
+$30k → **$36k**.
+
+Turn it on (`conviction_mode: auto`) once the regular intraday leg has about a
+week of clean live fills.

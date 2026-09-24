@@ -162,6 +162,46 @@ def noise_days(sym: str, lookback: int = 14, cost: float = 0.5,
     return pd.DataFrame(rows, columns=["date", "ret", "lev", "trades"]).set_index("date")
 
 
+# ------------------------------------------------ conviction day trade
+STRENGTH_MIN = 0.341     # in-sample (2016-23) median breakout strength, fixed in addendum 8
+
+
+def breakout_days(sym: str = "TQQQ", cost: float = 1.5, lookback: int = 14,
+                  strength_min: float = STRENGTH_MIN) -> pd.Series:
+    """Only the day's FIRST noise-area breakout, and only a strong one
+    (distance past the band / sigma >= strength_min). Long above, short below
+    (live: short = buy the inverse ETF). Held until the price falls back
+    inside the band or through VWAP, else to the close. One round trip at
+    most; most days nothing. research/daily-strategies/dt3.py, same rule,
+    through the live band functions."""
+    M = D.minutes(sym)
+    C, V = M["close"].values, M["volume"].values
+    O = M["open"].values[:, 0]
+    days = M["close"].index
+    move = np.abs(C / O[:, None] - 1)
+    prevc = np.r_[np.nan, C[:-1, -1]]
+    vwap = np.cumsum(C * V, axis=1) / np.maximum(np.cumsum(V, axis=1), 1)
+    out = {}
+    for i in range(lookback + 1, len(days)):
+        sig = sg.noise_sigma(move[i - lookback:i])
+        ub, lb = sg.noise_bounds(O[i], prevc[i], sig)
+        pos, e, strength, x = 0, None, 0.0, None
+        for m in range(sg.NOISE_FIRST, 390, sg.NOISE_STEP):
+            p = C[i, m]
+            if pos == 0:
+                pos, strength = sg.breakout_strength(p, ub[m], lb[m], sig[m])
+                e = p
+                if pos and strength < strength_min:
+                    break                                  # first breakout too weak: no trade today
+            elif (pos == 1 and p < max(ub[m], vwap[i, m])) or (pos == -1 and p > min(lb[m], vwap[i, m])):
+                x = p; break
+        if pos == 0 or strength < strength_min:
+            continue
+        x = C[i, 389] if x is None else x
+        out[days[i]] = pos * (x / e - 1) - 2 * cost / 1e4
+    return pd.Series(out)
+
+
 # --------------------------------------------------------------- replay
 @dataclass
 class Params:
@@ -182,6 +222,9 @@ class Params:
     min_edge_bps: float | None = None     # skip night names whose round-trip cost exceeds this
     name_cap: float | None = None         # hard cap per night name AFTER the tilt, fraction of the leg
     weekend_scale: float = 1.0            # night exposure x this when held over a weekend/holiday
+    overflow_w: float | None = None       # spare night cash goes to names with tilt weight >= this
+    overflow_cap: float = 0.25            # ... up to this fraction of the leg per name
+    conviction_w: float = 0.0             # TQQQ strong-first-breakout trade, fraction of equity
 
 
 class Sim:
@@ -220,6 +263,12 @@ class Sim:
                 per = per * p.weekend_scale
             if p.name_cap is not None:
                 per = np.minimum(per, leg * p.name_cap)
+            if p.overflow_w is not None:
+                spare = max(0.0, leg * (p.weekend_scale if self._gap(d) > 1 else 1.0) - per.sum())
+                hi = w >= p.overflow_w
+                if spare > 0 and hi.any():
+                    add = np.where(hi, w, 0.0); add = spare * add / add.sum()
+                    per = np.minimum(per + add, np.maximum(per, leg * p.overflow_cap))
             sh = np.floor(per / nd.price) if p.whole else per / nd.price
             sh = np.where(ok, sh, 0.0)
             v = sh * nd.close
@@ -254,6 +303,13 @@ class Sim:
         if debit > 0:
             pnl -= debit * p.margin_rate / 252
             info["margin"] -= debit * p.margin_rate / 252
+        # --- conviction day trade (TQQQ), uses daytime buying power only
+        if p.conviction_w:
+            if not hasattr(self, "BO"):
+                self.BO = breakout_days()
+            if d in self.BO.index:
+                x = E * p.conviction_w * float(self.BO.at[d])
+                pnl += x; info["noise"] += x
         # --- intraday leg
         if p.noise_on:
             for s, share in p.noise.items():

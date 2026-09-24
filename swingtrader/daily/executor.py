@@ -246,8 +246,9 @@ class DailyExecutor:
     def phase_open(self, book: DailyBook, today: str) -> None:
         marks = self._marks(book)
         equity = self._sizing_equity(book)
-        if book.leg_positions("noise"):
-            self.warn(f"intraday-leg position left over from yesterday: {list(book.leg_positions('noise'))} "
+        left = {**book.leg_positions("noise"), **book.leg_positions("conv")}
+        if left:
+            self.warn(f"intraday-leg position left over from yesterday: {list(left)} "
                       "- closing it at the open")
             self._flatten_noise(book, today, tif="day", kind="leftover")
         self._settle_noise(book, today)
@@ -573,6 +574,90 @@ class DailyExecutor:
             self.log("[noise] market shut or early close - no intraday decision"); return
         for sig in self._noise_signals():
             self._intraday_one(book, today, sig)
+        self._conviction_one(book, today)
+
+    # ------------------------------------------ conviction day trade (TQQQ)
+    def _conviction_live(self, book: DailyBook) -> bool:
+        return (bool(self.d.conviction_weight) and self.d.conviction_mode == "auto"
+                and book.daytrade_live and not book.is_killed("conv"))
+
+    def _conviction_one(self, book: DailyBook, today: str) -> None:
+        """At most one trade a day, and most days none: the day's FIRST
+        noise-area breakout in TQQQ, taken only if it is strong
+        (sg.breakout_strength >= conviction_strength). Long = TQQQ, short =
+        SQQQ bought (no shorting). Out when the price falls back inside the band
+        or through VWAP, else at the 15:57 flatten. RESULTS.md addendum 19."""
+        if not self.d.conviction_weight:
+            return
+        sym = self.d.conviction_symbol
+        c = book.conviction
+        if c.get("day") != today:
+            hist_log = c.get("history", [])
+            b = self._day_bands(sym, today)
+            if b is None:
+                book.conviction = {"day": today, "done": True, "history": hist_log}; return
+            book.conviction = c = {"day": today, "pos": 0, "done": False, "entry": None, "last_m": -1,
+                                   "ub": b["ub"].round(4).tolist(), "lb": b["lb"].round(4).tolist(),
+                                   "sigma": np.round(b["sigma"], 6).tolist(), "history": hist_log}
+        mins = md.minute_today(sym).get(pd.Timestamp(today))
+        if not mins:
+            return
+        px_c, v = mins["close"], mins["volume"]
+        last_done = mins["last_minute"] - 1
+        vwap = np.cumsum(px_c * v) / np.maximum(np.cumsum(v), 1)
+        ub, lb, sig = np.array(c["ub"]), np.array(c["lb"]), np.array(c["sigma"])
+        for m in range(sg.NOISE_FIRST, 390, sg.NOISE_STEP):
+            if m <= c.get("last_m", -1) or m > last_done:
+                continue
+            c["last_m"] = m
+            if c["done"] and c["pos"] == 0:
+                break
+            p = float(px_c[m])
+            hh, mm = divmod(570 + m, 60)
+            if c["pos"] == 0:
+                d, strength = sg.breakout_strength(p, float(ub[m]), float(lb[m]), float(sig[m]))
+                if d == 0:
+                    continue
+                if strength < self.d.conviction_strength:
+                    c["done"] = True
+                    self.log(f"[conv] {hh:02d}:{mm:02d} first breakout {d:+d} too weak "
+                             f"({strength:.2f} < {self.d.conviction_strength}) - no trade today")
+                    continue
+                c.update(pos=d, entry=p, strength=round(strength, 3), entry_m=m)
+                self.log(f"[conv] {hh:02d}:{mm:02d} STRONG breakout {d:+d} (strength {strength:.2f}) "
+                         f"@ {p:.2f} -> {'long TQQQ' if d > 0 else 'long SQQQ'}")
+            elif (c["pos"] == 1 and p < max(ub[m], vwap[m])) or (c["pos"] == -1 and p > min(lb[m], vwap[m])):
+                r = c["pos"] * (p / c["entry"] - 1)
+                c["history"].append({"date": today, "dir": c["pos"], "ret": round(r, 5)})
+                self.log(f"[conv] {hh:02d}:{mm:02d} back inside the band @ {p:.2f}: out, {r*100:+.2f}% on TQQQ")
+                c.update(pos=0, done=True)
+        if self._conviction_live(book):
+            self._sync_conviction_live(book, today)
+        elif c.get("pos"):
+            self.log(f"[conv:SHADOW] holding {c['pos']:+d} (would be {self.d.conviction_weight:.0%} of equity)")
+
+    def _sync_conviction_live(self, book: DailyBook, today: str) -> None:
+        c = book.conviction
+        want_sym = {1: self.d.conviction_symbol, -1: self.d.conviction_inverse}.get(int(c.get("pos", 0)))
+        for sym, p in list(book.leg_positions("conv").items()):
+            if sym != want_sym and not any(o["sym"] == sym for o in book.open_orders().values()):
+                self._order(book, today, sym, "sell", "conv", qty=float(p["qty"]), tif="day",
+                            ref_px=float(p["avg_px"]), kind=f"x{c.get('last_m')}")
+        if want_sym is None or want_sym in book.leg_positions("conv"):
+            return
+        if want_sym in self._foreign_symbols(book) or want_sym in {
+                s for s, p in book.positions.items() if p.get("leg") != "conv"}:
+            self.log(f"[conv] {want_sym} is held by another leg - skipping today"); return
+        if any(o["sym"] == want_sym for o in book.open_orders().values()):
+            return
+        rows = md.live_rows([want_sym], max_age_min=5)
+        if rows.empty:
+            self.warn(f"[conv] no live price for {want_sym} - skipping"); return
+        px = float(rows.price.iloc[0])
+        qty = math.floor(self.d.conviction_weight * self._sizing_equity(book) / px)
+        if qty >= 1:
+            self._order(book, today, want_sym, "buy", "conv", qty=qty, tif="day", ref_px=px,
+                        kind=f"e{c.get('entry_m')}")
 
     # ------------------------------------------------ intraday instruments
     def _noise_signals(self) -> list[str]:
@@ -634,14 +719,14 @@ class DailyExecutor:
             self.log(f"[noise:SHADOW {sig}] position {pos:+d}, lev {n['lev']:.2f}, "
                      f"trades today {n['trades']}")
 
-    def _init_noise(self, book: DailyBook, today: str, sig: str | None = None) -> None:
-        sym = sig or self.d.noise_symbol
-        prior = self._noise_state(book, sym)
+    def _day_bands(self, sym: str, today: str) -> dict | None:
+        """Today's noise-area band for `sym` (sigma from the last noise_lookback
+        sessions, official open when Schwab is available). None = cannot trade it."""
         hist = md.minute_history(sym, self.d.noise_lookback + 3)
         days = sorted(d for d in hist if d < pd.Timestamp(today))[-self.d.noise_lookback:]
         if len(days) < self.d.noise_lookback:
-            self.warn(f"[noise] {sym}: only {len(days)} sessions of history - no trading today")
-            self._set_noise_state(book, sym, {}); return
+            self.warn(f"[intraday] {sym}: only {len(days)} sessions of history - no trading today")
+            return None
         moves = np.vstack([np.abs(hist[d]["close"] / hist[d]["open"] - 1) for d in days])
         sigma = sg.noise_sigma(moves)
         daily = md.sip_daily([sym], pd.Timestamp(today) - pd.Timedelta(days=40), pd.Timestamp(today))[sym]
@@ -649,7 +734,7 @@ class DailyExecutor:
         prev_close = float(daily["close"].iloc[-1])
         today_m = md.minute_today(sym).get(pd.Timestamp(today))
         if not today_m:
-            self.warn(f"[noise] {sym}: no open print yet"); self._set_noise_state(book, sym, {}); return
+            self.warn(f"[intraday] {sym}: no open print yet"); return None
         day_open = today_m["open"]
         # IEX's first-minute open is unreliable (research: wrong opens, ~5% of
         # volume). Prefer Schwab's official consolidated open when logged in.
@@ -663,9 +748,20 @@ class DailyExecutor:
             except Exception:
                 pass
         if src == "iex":
-            self.warn("[noise] using IEX open (Schwab not available) - the open "
+            self.warn(f"[intraday] {sym}: using IEX open (Schwab not available) - the open "
                       "can be wrong on IEX; bounds may be off")
         ub, lb = sg.noise_bounds(day_open, prev_close, sigma)
+        return {"sigma": sigma, "ub": ub, "lb": lb, "open": day_open, "prev_close": prev_close,
+                "daily": daily, "src": src}
+
+    def _init_noise(self, book: DailyBook, today: str, sig: str | None = None) -> None:
+        sym = sig or self.d.noise_symbol
+        prior = self._noise_state(book, sym)
+        b = self._day_bands(sym, today)
+        if b is None:
+            self._set_noise_state(book, sym, {}); return
+        sigma, ub, lb, daily = b["sigma"], b["ub"], b["lb"], b["daily"]
+        day_open, prev_close, src = b["open"], b["prev_close"], b["src"]
         lev = sg.noise_leverage(daily["close"], self.d.noise_target_vol, self.d.noise_max_lev)
         shadow_eq = float(prior.get("shadow_equity", book.start_equity))
         hist_log = prior.get("history", [])
@@ -712,7 +808,8 @@ class DailyExecutor:
         # intraday leverage the broker actually grants (4 = leverage-enabled
         # margin, 2 = standard, 1 = cash); the IBS half stays invested intraday
         mult = float(getattr(a, "multiplier", 1) or 1)
-        book.noise_lev_cap = max(0.0, min(self.d.noise_max_lev, mult - self._w_ibs(book)))
+        conv = self.d.conviction_weight if self._conviction_live(book) else 0.0
+        book.noise_lev_cap = max(0.0, min(self.d.noise_max_lev, mult - self._w_ibs(book) - conv))
         if book.daytrade_live and not was:
             self.act(f"DAY-TRADE LEG SWITCHED ON: book equity ${equity:,.0f} >= "
                      f"${self.d.daytrade_min_equity:,.0f}")
@@ -810,14 +907,15 @@ class DailyExecutor:
         (Alpaca paper expires close-auction orders unpredictably -- on the first
         live day a CLS flatten of QQQ filled 0 of 7), and again at the next
         open as a safety net for anything left over."""
-        for sym, p in list(book.leg_positions("noise").items()):
+        for sym, p in list({**book.leg_positions("noise"), **book.leg_positions("conv")}.items()):
+            leg = p.get("leg", "noise")
             have = float(p["qty"])
             if abs(have) < 1e-9:
                 continue
             if any(o["sym"] == sym for o in book.open_orders().values()):
                 self.log(f"[noise] {sym}: an order is still working - not stacking a flatten"); continue
             self.log(f"[noise] flattening {have:+g} {sym} ({kind})")
-            self._order(book, today, sym, "sell" if have > 0 else "buy", "noise",
+            self._order(book, today, sym, "sell" if have > 0 else "buy", leg,
                         qty=abs(have), tif=tif, ref_px=self._noise_ref(book, sym, p),
                         kind=kind)
 

@@ -223,7 +223,7 @@ def night_tilt(vol20, day_ret, k: float = 0.25) -> np.ndarray:
 # Written down now so that a losing leg is switched off by a rule, not kept
 # alive by hope. Do not loosen these after seeing live numbers.
 #   leg: (min round trips before judging, t-stat below which a losing leg dies)
-KILL_MIN_TRADES = {"night": 100, "noise": 120, "ibs": 60}
+KILL_MIN_TRADES = {"night": 100, "noise": 120, "ibs": 60, "conv": 60}
 KILL_T = -1.0
 KILL_EXIT_COST_BPS = 25.0     # night open sells this far below the official open: edge gone (~28bp)
 KILL_EXIT_COST_MIN_N = 30
@@ -316,6 +316,19 @@ def noise_decide(pos: int, price: float, ub: float, lb: float,
         elif price < lb:
             pos = -1
     return pos
+
+
+def breakout_strength(price: float, ub: float, lb: float, sigma: float) -> tuple[int, float]:
+    """(direction, strength) of a noise-area breakout: +1 above the band, -1
+    below, 0 inside. Strength = distance past the band in units of that
+    minute's sigma (research/daily-strategies/dt3.py)."""
+    if not (np.isfinite(price) and sigma > 0):
+        return 0, 0.0
+    if price > ub:
+        return 1, (price / ub - 1) / sigma
+    if price < lb:
+        return -1, (1 - price / lb) / sigma
+    return 0, 0.0
 
 
 def noise_leverage(daily_closes: pd.Series, target_vol: float,

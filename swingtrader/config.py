@@ -195,6 +195,15 @@ class DailyCfg:
     # further instruments sharing the intraday budget equally, signal symbol ->
     # stand-in traded when another leg holds it. {} = QQQ alone.
     noise_extra: dict = field(default_factory=dict)
+    # Conviction day trade (addendum 19): only the day's FIRST noise-area
+    # breakout in TQQQ, only if strong. ~70 trades/yr, wins ~40%, wins bigger.
+    # It takes conviction_weight of the daytime buying power (the regular
+    # intraday leg's cap shrinks by the same amount). shadow = log only.
+    conviction_weight: float = 0.5
+    conviction_mode: str = "shadow"        # shadow | auto
+    conviction_symbol: str = "TQQQ"
+    conviction_inverse: str = "SQQQ"       # bought for down-breakouts (no shorting)
+    conviction_strength: float = 0.341     # 2016-23 median strength, fixed in addendum 8
     noise_lookback: int = 14
     noise_target_vol: float = 0.02
     noise_max_lev: float = 3.5       # 4x intraday limit minus the IBS leg

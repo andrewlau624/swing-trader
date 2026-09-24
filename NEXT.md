@@ -5,6 +5,14 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Addendum 19 (2026-09-24): conviction trade built, SHADOW
+
+TQQQ strong-first-breakout trade, ~70 days/yr, 0.5 of equity inside the same
+daytime margin. Simulator: 40.7% → 49.8%/yr at the same Sharpe. It logs as
+`[conv]` and places nothing until `daily.conviction_mode: auto`. Switch it on
+after the regular intraday leg has about a week of clean live fills (entries at
+:01/:31, flat by 15:57). `make daily-status` shows its shadow record.
+
 ## Addendum 18 (2026-09-24): crash guards shipped
 
 `night_max_corr` 0.9 → 0.7 and `night_weekend_scale` 0.5. COVID crash on the

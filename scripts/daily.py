@@ -56,6 +56,13 @@ def status(account: str):
             h = [x["ret"] for x in n["history"]]
             print(f"noise {sig} (shadow) days {len(h)}  equity ${n.get('shadow_equity', 0):,.2f}  "
                   f"avg/day {np.mean(h)*100:+.3f}%  up-days {100*np.mean(np.array(h)>0):.0f}%")
+    ch = b.conviction.get("history", [])
+    if ch or b.conviction:
+        r = [x["ret"] for x in ch]
+        print(f"conviction TQQQ ({cfg.daily.conviction_mode}) trades {len(r)}"
+              + (f"  win {100*np.mean(np.array(r)>0):.0f}%  avg {np.mean(r)*100:+.2f}% on TQQQ" if r else "")
+              + (f"  today: {'holding ' + format(b.conviction['pos'], '+d') if b.conviction.get('pos') else ('done' if b.conviction.get('done') else 'waiting')}"
+                 if b.conviction.get("day") else ""))
     f = ROOT / "logs" / ("daily-fills-live.jsonl" if account == "live" else "daily-fills.jsonl")
     if f.exists():
         rows = [json.loads(l) for l in f.read_text().splitlines() if l.strip()]
