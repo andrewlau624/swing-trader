@@ -5,6 +5,12 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Addendum 21 (2026-09-24): nothing adopted
+
+SOXL conviction, bear-hedge overlays and thin-volume night names: dead. One
+conditional: once ~50 live night exits exist, check the cost of names under
+$10 in `make review`; if ≤ ~20bp/side, set `daily.night_price_min: 3.0`.
+
 ## Addendum 20 (2026-09-24): review fixes + Roth IRA book
 
 - **Live now (on `make pull`):** one-share probes for night picks that round

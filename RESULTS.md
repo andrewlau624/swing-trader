@@ -1470,3 +1470,27 @@ after tax. Same caveat as every table here: this replays the fitting period.
   long-only in 3x ETFs (`daily.roth_etfs`).
 - **Wash-sale guard**: each real-money book skips any symbol the other held or
   closed in the last 31 days (SGOV excepted).
+
+---
+
+# Addendum 21 — three more optimizations tested, none adopted (2026-09-24)
+
+V7 base, $3k + $1k/21 sessions, 2021–23 / 2024–26 / full CAGR/Sharpe/maxDD.
+
+| idea | best variant | verdict |
+|---|---|---|
+| conviction trade on SOXL/SOXS (`research/sim/conv2.py`) | TQQQ 0.25 + SOXL 0.25: 47.7/2.02 · 49.0/1.73 · 48.3/1.85 vs V7 51.2/2.21 · 48.3/1.79 · 49.8/1.98 | **dead**: SOXL 2016–23 t 0.93 (TQQQ 2.31), same direction as TQQQ 95% of shared days, twice the vol |
+| slow-bear hedge (`research/sim/hedge.py`): IBS off / night ×0.5 below SPY 200d, SH or SQQQ sleeve below 200d | SQQQ from idle cash: +0.2–1.6pp, inside placebo; sleeve alone −0.8%/yr 2016–23, −0.7% in COVID | **dead**; premise overstated: without the intraday leg 2022 was still +6.3% (with it +45.8%) |
+| night names the filters exclude (`research/sim/thin.py`) | price $3–5 at 15bp/side: 52.8/2.26 · 51.6/1.87 · 52.2/2.05; at 30bp: 51.1 · 47.8 · 49.5 | adv $5–10M **dead** (2024–26 falls, maxDD −20%); price $3–5 **conditional** on real cost |
+
+Price $3–5: a 1¢ tick is 25bp of spread on a $4 stock, and break-even is
+~25–30bp/side, so the existing 15bp "<$10" tier is not safely conservative
+there. Adopt `night_price_min: 3.0` only if live fills show names under $10
+cost ≤ ~20bp/side vs the official open (+1–2pp/yr if so).
+
+Lead, untested: IBS trades earn more with SPY below its 200d SMA (2016–23
++37bp n 109 vs +17bp; 2024–26 +138bp n 17 vs +16bp). Too few holdout trades to act on.
+
+Across addenda 17, 20 and 21, ~80 variants have now been run on the rules. The
+remaining upside is execution (open-sell cost, ~0.85pp/yr per bp) and the two
+gated switches (conviction, 1.3x), not rule changes.
