@@ -205,8 +205,12 @@ class DailyExecutor:
                                          "ref_px": ref, "slippage_bps": bps,
                                          "route": o.get("route", ""),
                                          "filled_at": when}) + "\n")
-            elif status in ("canceled", "expired", "rejected"):
-                self.log(f"  order {coid} ended {status} unfilled")
+            if status in ("canceled", "expired", "rejected"):
+                if not new and float(o.get("filled_qty", 0) or 0) <= 0:
+                    self.log(f"  order {coid} ended {status} unfilled")
+                # an open sell that died with shares left must not carry the
+                # night position into another day (Alpaca paper expired 9 of 10
+                # OPG sells on 2026-09-24, several after partial fills)
                 self._reroute_open_sell(book, today, coid, o, status)
         # anything the broker no longer holds cannot still be ours
         held = self.broker.positions()
@@ -350,14 +354,24 @@ class DailyExecutor:
                 self._reroute_open_sell(book, today, coid, o, status)
 
     def _reroute_open_sell(self, book: DailyBook, today: str, coid: str, o: dict, status: str) -> None:
-        """A directed open sell that died unfilled: sell with Schwab's routing
-        instead of carrying the night position into another day."""
-        if o.get("side") != "sell" or o.get("tif") != "opg" or o.get("route") in ("", "AUTO", None):
+        """An open sell that ended (expired / canceled / rejected) with shares
+        still held: sell the rest now rather than carry the night position into
+        another day. A DIRECTED Schwab sell refused outright is resent with
+        Schwab's routing and pauses directed routing; anything else (a partial
+        auction fill, an expired OPG) sells the remainder at market."""
+        if o.get("side") != "sell" or o.get("tif") != "opg":
             return
         p = book.positions.get(o["sym"])
-        if not p or o.get("rerouted"):
+        if not p or o.get("rerouted") or float(p["qty"]) <= 0:
             return
         o["rerouted"] = True
+        directed = o.get("route") not in ("", "AUTO", None)
+        if not directed or float(o.get("filled_qty", 0) or 0) > 0:
+            self.warn(f"{o['sym']}: open sell ended {status} with {float(p['qty']):g} sh still held - "
+                      "selling the rest at market")
+            self._order(book, today, o["sym"], "sell", o["leg"], qty=float(p["qty"]),
+                        tif="day", ref_px=float(o.get("ref_px") or p["avg_px"]), kind="exit-rest")
+            return
         book.route_refused = today
         if hasattr(self.broker, "route_refused"):
             self.broker.route_refused = True

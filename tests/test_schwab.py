@@ -412,3 +412,28 @@ def test_refused_route_pauses_directed_routing_for_a_few_days(tmp_path):
     a.route_refused = False
     ex._prepare_open_route(book, "2026-10-05")
     assert a.open_destination("LOSER") == "NASDAQ"
+
+
+
+def test_open_sell_that_expires_part_filled_sells_the_rest(tmp_path):
+    """Seen on Alpaca paper 2026-09-24: OPG sells expired after partial fills
+    and the rest of the night position sat there all day."""
+    from swingtrader.daily import executor as E
+    a = adapter(positions=[("LOSER", 16, 9.5)])                 # unmapped venue: route AUTO
+    ex = E.DailyExecutor(Config.load(), account="live", broker=a, state_dir=tmp_path, log_dir=tmp_path)
+    ex.notifier.send = lambda *x, **k: "skipped"
+    book = DailyBook(cash=0, start_equity=152)
+    book.positions["LOSER"] = {"qty": 16, "avg_px": 9.5, "leg": "night", "entry_date": "2026-09-23"}
+    ex._order(book, "2026-09-24", "LOSER", "sell", "night", qty=16, tif="opg", ref_px=9.5, kind="exit")
+    (coid, o), = book.orders.items()
+    a.c.order_detail[int(o["broker_id"])] = {"status": "EXPIRED", "orderActivityCollection": [
+        {"executionLegs": [{"quantity": 6, "price": 9.4, "time": "2026-09-24T13:30:01+0000"}]}]}
+    a.c._pos = [("LOSER", 10, 9.4)]
+    ex.reconcile(book, "2026-09-24")
+    assert book.positions["LOSER"]["qty"] == 10
+    rest = a.c.placed[-1]
+    assert leg(rest)["instruction"] == "SELL" and leg(rest)["quantity"] == 10
+    assert rest["orderType"] == "MARKET" and "requestedDestination" not in rest
+    assert book.route_refused == "", "a partial auction fill is not a refused route"
+    ex.reconcile(book, "2026-09-24")                            # no second resend
+    assert sum(1 for x in a.c.placed if leg(x)["quantity"] == 10) == 1

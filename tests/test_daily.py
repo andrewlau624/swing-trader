@@ -473,7 +473,10 @@ def test_fallback_clock_is_a_weekday_rth_guess():
     from swingtrader.daily.brokers import _fallback_clock
     c = _fallback_clock()
     assert isinstance(c.is_open, bool)
-    assert c.next_open.weekday() < 5 and c.next_close > c.next_open
+    assert c.next_open.weekday() < 5 and c.next_close.hour == 16
+    # like Alpaca's clock: during the session the next close (today) comes
+    # before the next open (tomorrow); outside it, the open comes first
+    assert (c.next_close < c.next_open) == c.is_open
 
 
 def test_prev_close_mismatch_catches_an_unabsorbed_split():

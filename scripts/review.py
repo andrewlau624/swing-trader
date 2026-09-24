@@ -80,7 +80,9 @@ def live_fills(since: dt.date, cfg) -> pd.DataFrame:
             continue
         entered = pd.Timestamp(o["enteredTime"]).tz_convert(ET)
         hm = entered.hour * 60 + entered.minute
-        bot_time = (9 * 60 + 14 <= hm <= 9 * 60 + 29 or 15 * 60 + 39 <= hm <= 15 * 60 + 49
+        # 09:14-09:59: the open run can wait on the account lock, and unfilled
+        # open sells are resent at the 09:50 reconcile
+        bot_time = (9 * 60 + 14 <= hm <= 9 * 60 + 59 or 15 * 60 + 39 <= hm <= 15 * 60 + 49
                     or (10 * 60 <= hm <= 15 * 60 + 35 and entered.minute in (1, 2, 3, 31, 32, 33)))
         if not bot_time:
             continue
