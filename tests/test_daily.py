@@ -686,3 +686,199 @@ def test_conviction_shares_the_daytime_budget(tmp_path, monkeypatch):
     ex.d.conviction_mode = "auto"
     ex._gate(book, 3000)
     assert book.noise_lev_cap == pytest.approx(1.0), "live: 2x account - 0.5 IBS - 0.5 conviction"
+
+
+# ------------------------------------- hostile review: probes, cap, Roth IRA
+class LiveMarginBroker(FakeBroker):
+    key, secret = "AKTEST", "SEC"
+
+    def __init__(self, equity="1000", held=None):
+        super().__init__(held)
+        self.eq = equity
+
+    def account(self):
+        return SimpleNamespace(equity=self.eq, multiplier="2", trading_blocked=False,
+                               account_blocked=False, account_type="MARGIN")
+
+
+def _night_rows(monkeypatch, prices: dict):
+    from swingtrader.daily import executor as E
+    syms = list(prices)
+    elig = pd.DataFrame({"prev_close": [p / 0.9 for p in prices.values()]}, index=syms)
+    live = pd.DataFrame({"price": list(prices.values()),
+                         "high": [p / 0.9 for p in prices.values()],
+                         "low": [p * 0.999 for p in prices.values()]}, index=syms)
+    monkeypatch.setattr(E.md, "eligibility", lambda *a, **k: elig)
+    monkeypatch.setattr(E.md, "live_rows", lambda s, *a, **k: live.loc[[x for x in s if x in live.index]])
+    monkeypatch.setattr(E, "all_assets", lambda: SimpleNamespace(symbols=syms))
+
+
+def test_live_night_probe_buys_one_share_of_a_name_that_rounds_to_zero(tmp_path, monkeypatch):
+    _night_rows(monkeypatch, {"CHEAP": 9.0, "MID": 80.0, "DEAR": 400.0})
+    ex = DailyExecutor(Config.load(), account="live", broker=LiveMarginBroker("1000"),
+                       state_dir=tmp_path, log_dir=tmp_path)
+    ex.notifier.send = lambda *a, **k: "skipped"
+    ex.d.quote_source = "alpaca"
+    ex.d.night_probe_max_usd = 150.0
+    ex.d.night_tilt_k = 0
+    monkeypatch.delenv("DAILY_LIVE_CAPITAL", raising=False)
+    book = DailyBook(cash=1000, start_equity=1000)
+    ex.phase_close(book, "2026-09-23", dt.datetime(2026, 9, 23, 15, 40, tzinfo=ET), ex.broker.clock())
+    reqs = {r.symbol: r for r in ex.broker.client.submitted}
+    # $1000 * 0.5 * 10% = $50 a name
+    assert reqs["CHEAP"].qty == 5
+    assert reqs["MID"].qty == 1, "rounds to 0 -> one-share probe (<= $150)"
+    assert "DEAR" not in reqs, "a probe never costs more than night_probe_max_usd"
+    ex.d.night_probe_max_usd = None
+    ex.broker.client.submitted.clear(); book = DailyBook(cash=1000, start_equity=1000)
+    ex.phase_close(book, "2026-09-24", dt.datetime(2026, 9, 24, 15, 40, tzinfo=ET), ex.broker.clock())
+    assert "MID" not in {r.symbol for r in ex.broker.client.submitted}
+
+
+def test_paper_book_never_probes(tmp_path, monkeypatch):
+    _night_rows(monkeypatch, {"MID": 400.0})
+    ex = _executor(tmp_path, monkeypatch)
+    ex.d.night_probe_max_usd = 1000.0
+    book = DailyBook(cash=3000, start_equity=3000)
+    ex.phase_close(book, "2026-09-23", dt.datetime(2026, 9, 23, 15, 40, tzinfo=ET), ex.broker.clock())
+    assert ex.broker.client.submitted == []
+
+
+def test_live_cap_below_2k_does_not_keep_the_intraday_leg_shadow(tmp_path, monkeypatch):
+    ex = DailyExecutor(Config.load(), account="live", broker=LiveMarginBroker("5000"),
+                       state_dir=tmp_path, log_dir=tmp_path)
+    book = DailyBook(cash=1000, start_equity=1000)
+    ex._gate(book, 1000)                  # $1,000 cap on a $5,000 margin account
+    assert book.daytrade_live, "Reg T's $2,000 is an account minimum, not a bot-capital minimum"
+    ex.broker.b.eq = "1500"
+    ex._gate(book, 1000)
+    assert not book.daytrade_live, "the account itself is under $2,000"
+    ex.broker.b.eq = "5000"
+    ex._gate(book, 300)
+    assert not book.daytrade_live, "under live_min_capital the bot trades nothing"
+
+
+class RothBroker(LiveMarginBroker):
+    def account(self):
+        return SimpleNamespace(equity=self.eq, multiplier="1", trading_blocked=False,
+                               account_blocked=False, account_type="CASH")
+
+
+def test_roth_book_is_its_own_account_and_never_levers(tmp_path, monkeypatch):
+    from swingtrader.daily.book import book_file
+    assert len({book_file("paper"), book_file("live"), book_file("roth")}) == 3
+    ex = DailyExecutor(Config.load(), account="roth", broker=RothBroker("5000"),
+                       state_dir=tmp_path, log_dir=tmp_path)
+    assert ex.live and ex.cash_account and ex.tag == "-roth"
+    book = DailyBook(cash=5000, start_equity=5000)
+    book.levered = True
+    ex._lever_gate(book)
+    assert not book.levered, "never lever an IRA"
+    assert ex._w_night(book) == ex.d.night_weight
+    ex.d.conviction_mode = "auto"
+    ex._gate(book, 5000)
+    assert book.daytrade_live
+    assert not ex._conviction_live(book), "conviction's TQQQ/SQQQ are the Roth's intraday ETFs"
+    # daytime cash = the night half (0.5) held in 3x ETFs -> 1.5x underlying
+    assert book.noise_lev_cap == pytest.approx(1.5)
+
+
+def test_roth_refuses_to_trade_without_limited_margin(tmp_path, monkeypatch):
+    from swingtrader.daily import executor as E
+    monkeypatch.setattr(E.md, "eligibility", lambda *a, **k: pd.DataFrame())
+    monkeypatch.setattr(E, "all_assets", lambda: SimpleNamespace(symbols=[]))
+    for flag, rc in (("no", 1), ("yes", 0)):
+        monkeypatch.setenv("ROTH_LIMITED_MARGIN", flag)
+        ex = DailyExecutor(Config.load(), account="roth", broker=RothBroker("5000"),
+                           state_dir=tmp_path, log_dir=tmp_path, dry_run=True)
+        ex.notifier.send = lambda *a, **k: "skipped"
+        ex.d.quote_source = "alpaca"
+        assert ex.run(phase="reconcile") == rc
+    monkeypatch.setenv("ROTH_LIMITED_MARGIN", "no")
+    live = DailyExecutor(Config.load(), account="live", broker=LiveMarginBroker("5000"),
+                         state_dir=tmp_path, log_dir=tmp_path, dry_run=True)
+    live.notifier.send = lambda *a, **k: "skipped"
+    assert live.run(phase="reconcile") == 0, "the flag is a Roth-only requirement"
+
+
+def test_roth_intraday_is_long_only_in_3x_etfs(tmp_path, monkeypatch):
+    from swingtrader.daily import executor as E
+    px = {"TQQQ": 100.0, "SQQQ": 20.0}
+    monkeypatch.setattr(E.md, "live_rows", lambda syms, *a, **k: pd.DataFrame(
+        {"price": [px[s] for s in syms]}, index=syms))
+    ex = DailyExecutor(Config.load(), account="roth", broker=RothBroker("6000"),
+                       state_dir=tmp_path, log_dir=tmp_path)
+    monkeypatch.delenv("DAILY_ROTH_CAPITAL", raising=False)
+    monkeypatch.setattr(ex, "_noise_signals", lambda: ["QQQ"])
+    book = DailyBook(cash=6000, start_equity=6000)
+    book.noise_lev_cap = 1.5
+    book.noise = {"day": "2026-09-23", "pos": -1, "lev": 3.0, "last_m": 60, "entry": 500.0}
+    ex._sync_noise_live(book, "2026-09-23", 500.0, "QQQ")
+    r = ex.broker.client.submitted[-1]
+    # 1.5x underlying / 3 = 0.5 of $6,000 in SQQQ at $20 -> 150 shares, BOUGHT
+    assert (r.symbol, r.side.value, r.qty) == ("SQQQ", "buy", 150)
+    book.positions["SQQQ"] = {"qty": 150, "avg_px": 20.0, "leg": "noise", "entry_date": "2026-09-23"}
+    book.orders.clear()
+    book.noise["pos"], book.noise["last_m"] = 1, 90
+    ex._sync_noise_live(book, "2026-09-23", 510.0, "QQQ")
+    sent = [(r.symbol, r.side.value, r.qty) for r in ex.broker.client.submitted[1:]]
+    assert ("SQQQ", "sell", 150) in sent and ("TQQQ", "buy", 30) in sent
+    assert all(r.side.value in ("buy", "sell") for r in ex.broker.client.submitted), "never shorts"
+
+
+def test_real_money_books_stay_out_of_each_others_wash_sale_window(tmp_path, monkeypatch):
+    live = DailyBook(cash=1000, start_equity=1000)
+    live.positions["ABC"] = {"qty": 3, "avg_px": 10.0, "leg": "night", "entry_date": "2026-09-22"}
+    live.closed = [{"sym": "OLD", "leg": "night", "exit_date": "2026-08-01", "ret": -0.01, "pnl": -1},
+                   {"sym": "NEW", "leg": "night", "exit_date": "2026-09-10", "ret": -0.01, "pnl": -1},
+                   {"sym": "SGOV", "leg": "tbill", "exit_date": "2026-09-10", "ret": 0, "pnl": 0}]
+    live.save(tmp_path, "book-daily-live.json")
+    roth = DailyExecutor(Config.load(), account="roth", broker=RothBroker("5000"),
+                         state_dir=tmp_path, log_dir=tmp_path)
+    w = roth._wash_symbols("2026-09-23")
+    assert {"ABC", "NEW"} <= w and "OLD" not in w and "SGOV" not in w
+    assert "NEW" in roth._foreign_symbols(DailyBook(cash=5000, start_equity=5000))
+    assert _executor(tmp_path, monkeypatch)._wash_symbols("2026-09-23") == set(), "paper is not real money"
+
+
+def test_roth_capital_cap_is_its_own_env_var(tmp_path, monkeypatch):
+    monkeypatch.setenv("DAILY_LIVE_CAPITAL", "1000")
+    monkeypatch.setenv("DAILY_ROTH_CAPITAL", "4000")
+    roth = DailyExecutor(Config.load(), account="roth", broker=RothBroker("9000"),
+                         state_dir=tmp_path, log_dir=tmp_path)
+    live = DailyExecutor(Config.load(), account="live", broker=LiveMarginBroker("9000"),
+                         state_dir=tmp_path, log_dir=tmp_path)
+    assert roth.live_cap() == 4000 and live.live_cap() == 1000
+
+
+def test_roth_switch_and_accounts(tmp_path, monkeypatch):
+    import importlib, sys as _s
+    _s.path.insert(0, "scripts")
+    sw = importlib.import_module("daily_switch")
+    env = tmp_path / ".env"
+    env.write_text("DAILY_LIVE=on\n")
+    monkeypatch.setattr(sw, "ENV", env)
+    sw.set_live(True, "roth")
+    assert env.read_text() == "DAILY_LIVE=on\nDAILY_ROTH=on\n"
+    monkeypatch.setenv("DAILY_LIVE", "off")
+    assert Config.load().daily.resolved_accounts() == ["paper", "roth"]
+    sw.set_live(False, "roth")
+    assert "DAILY_ROTH=off" in env.read_text() and "DAILY_LIVE=on" in env.read_text()
+
+
+def test_schwab_roth_adapter_never_guesses_the_account(monkeypatch):
+    from swingtrader.daily.brokers import SchwabAdapter
+
+    class C:
+        def get_account_numbers(self):
+            return SimpleNamespace(raise_for_status=lambda: None, json=lambda: [
+                {"accountNumber": "11111234", "hashValue": "HBROK"},
+                {"accountNumber": "22225678", "hashValue": "HROTH"}])
+
+    monkeypatch.setenv("SCHWAB_ACCOUNT_NUMBER", "1234")
+    monkeypatch.setenv("SCHWAB_ROTH_ACCOUNT_NUMBER", "5678")
+    assert SchwabAdapter(client=C()).hash == "HBROK"
+    assert SchwabAdapter(client=C(), account_env="SCHWAB_ROTH_ACCOUNT_NUMBER").hash == "HROTH"
+    monkeypatch.setenv("SCHWAB_ROTH_ACCOUNT_NUMBER", "")
+    with pytest.raises(RuntimeError, match="SCHWAB_ROTH_ACCOUNT_NUMBER"):
+        SchwabAdapter(client=C(), account_env="SCHWAB_ROTH_ACCOUNT_NUMBER")

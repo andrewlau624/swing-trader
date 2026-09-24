@@ -164,11 +164,13 @@ class SchwabAdapter:
     fractional = False
 
     def __init__(self, client=None, account_hash: str | None = None, clock_source=None,
-                 open_route: str = "primary", exchange_of=None):
+                 open_route: str = "primary", exchange_of=None,
+                 account_env: str = "SCHWAB_ACCOUNT_NUMBER"):
         k, s, _ = schwab_credentials() if client is None else ("test", "test", "")
         if client is None:
             client = schwab_client()
         self.c = client
+        self.account_env = account_env
         self.hash = account_hash or self._pick_account()
         self.key, self.secret = f"schwab:{k}", self.hash
         self._clock = clock_source
@@ -195,7 +197,8 @@ class SchwabAdapter:
         r = self.c.get_account_numbers(); r.raise_for_status()
         rows = r.json()
         # digits only: tolerate "...1234", quotes, spaces, a stray \r from Windows editors
-        want = "".join(ch for ch in (get_env("SCHWAB_ACCOUNT_NUMBER") or "") if ch.isdigit())
+        env = self.account_env
+        want = "".join(ch for ch in (get_env(env) or "") if ch.isdigit())
         if want:
             # full number, or just the last digits (what `make schwab-login` shows)
             hits = [x for x in rows if x["accountNumber"] == want
@@ -203,8 +206,11 @@ class SchwabAdapter:
             if len(hits) == 1:
                 return hits[0]["hashValue"]
             linked = ", ".join("..." + x["accountNumber"][-4:] for x in rows)
-            raise RuntimeError(f"SCHWAB_ACCOUNT_NUMBER ...{want[-4:]} matches {len(hits)} of the "
+            raise RuntimeError(f"{env} ...{want[-4:]} matches {len(hits)} of the "
                                f"linked accounts ({linked})")
+        if env != "SCHWAB_ACCOUNT_NUMBER":
+            # never guess which account a second book trades
+            raise RuntimeError(f"set {env} in .env (last 4 digits are enough)")
         if len(rows) != 1:
             raise RuntimeError(f"{len(rows)} Schwab accounts linked - set SCHWAB_ACCOUNT_NUMBER in .env")
         return rows[0]["hashValue"]
@@ -364,12 +370,15 @@ class SchwabAdapter:
 
 
 def make_adapter(account: str, live_broker: str = "schwab", open_route: str = "primary"):
-    """paper -> Alpaca paper; live -> Schwab (default) or Alpaca live."""
+    """paper -> Alpaca paper; live -> Schwab (default) or Alpaca live;
+    roth -> the Schwab Roth IRA named by SCHWAB_ROTH_ACCOUNT_NUMBER."""
     from ..live.broker import PaperBroker
     if account == "paper":
         return AlpacaAdapter(PaperBroker())
+    if account == "roth":
+        return SchwabAdapter(open_route=open_route, account_env="SCHWAB_ROTH_ACCOUNT_NUMBER")
     if account != "live":
-        raise ValueError(f"unknown daily account {account!r} (paper|live)")
+        raise ValueError(f"unknown daily account {account!r} (paper|live|roth)")
     if live_broker == "schwab":
         return SchwabAdapter(open_route=open_route)
     k, s = get_env("ALPACA_LIVE_API_KEY"), get_env("ALPACA_LIVE_SECRET_KEY")

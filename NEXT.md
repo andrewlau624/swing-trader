@@ -5,6 +5,24 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Addendum 20 (2026-09-24): review fixes + Roth IRA book
+
+- **Live now (on `make pull`):** one-share probes for night picks that round
+  to 0 shares (≤ $150), and the intraday leg goes live on a capped book when the
+  ACCOUNT is ≥ $2,000. With the $1k cap that means real QQQ/SMH day trades
+  (small: whole shares). Keep watching `route ...: bps, % at the auction print`.
+- **Decision rule for the broker:** if Schwab's open sells average > ~10bp/side
+  after ~50 exits, move the brokerage book to Alpaca live (real OPG orders):
+  each bp/side is ~0.85pp/yr.
+- **Roth, to switch on:** (1) apply for limited margin on the Roth at Schwab;
+  (2) set `SCHWAB_ACCOUNT_NUMBER` (brokerage) and `SCHWAB_ROTH_ACCOUNT_NUMBER`
+  in `.env` BEFORE re-running `make schwab-login` with the Roth ticked, or the
+  brokerage book stops (two accounts linked, it refuses to guess); (3)
+  `ROTH_LIMITED_MARGIN=yes`; (4) sell the Roth's ETFs yourself (the bot never
+  touches your holdings); (5) `make daily-roth-check`, then `make daily-roth-on`.
+- **Dead:** cheaper margin as the lever, SGOV for night cash, −6..−8% night
+  names, intraday diversification into bonds/gold/oil/SPY.
+
 ## Addendum 19 (2026-09-24): conviction trade built, SHADOW
 
 TQQQ strong-first-breakout trade, ~70 days/yr, 0.5 of equity inside the same

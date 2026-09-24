@@ -1407,3 +1407,66 @@ $30k → **$36k**.
 
 Turn it on (`conviction_mode: auto`) once the regular intraday leg has about a
 week of clean live fills.
+
+---
+
+# Addendum 20 — hostile review: what survived, and a Roth IRA book (2026-09-24)
+
+A "leave no money idle" review made seven charges. Each was tested on the
+live-code simulator (V7 = shipped + conviction; $3k + $1k/21 sessions, whole
+shares; 2021–23 / 2024–26 / full, CAGR/Sharpe/maxDD). **Most of them were wrong.**
+
+| charge | verdict | evidence |
+|---|---|---|
+| the $1k live test can't measure what it gates on | **true, fixed** | $50/name means every pick above ~$50 rounds to 0 shares, so the exit-cost sample is only cheap names; the capped equity ($1,000) was checked against Reg T's $2,000 *account* minimum, so the intraday leg (and therefore conviction) could never go live |
+| cheaper margin (IBKR ~6%) unlocks leverage | **wrong** | the book rarely borrows: mean overnight gross 0.37 at "1.0x". 12% → 6% is worth 0.15–0.35pp/yr. On V7, 1.3x passes the adoption rule at both cost tiers anyway (tier 49.8 → 57.5, Sharpe 1.98 → 1.97; tier_hi 42.2 → 46.6); 1.5x fails at tier_hi, 1.8x everywhere. The gate stays on measured exit cost |
+| the auction fill is the money | **true** | each bp/side on the open sell ≈ 0.85pp/yr: 3bp (real MOO) 55.4%, 7.5bp 51.1%, 15bp 45.2%, 25bp 36.9%. Alpaca live has real OPG/CLS; if Schwab's emulated open lands above ~10bp, move the brokerage book to Alpaca |
+| idle cash in SGOV | **not worth it** | 26.5% of the book is idle overnight, but T-bill ETFs accrue per night held and a MOC→open cycle costs ~1bp/side: best hysteresis version +0.25pp/yr |
+| fill night capacity with −6..−8% losers | **dead** | the band has no gross overnight edge (−8.2bp t −2.3 / −4.9bp t −0.9); the edge model flips sign between halves; −7%/−6% for all lower 2024–26; fill = placebo. `research/sim/depth.py` |
+| diversify the intraday leg (TLT, GLD, IWM, XLE, USO, EEM, SPY) | **dead** | no gross edge on non-equity-index instruments; SPY passes 2016–23 but loses 2024–26; every split lowers both halves. The fading hedge is real and still open. `research/sim/intraday_div.py` |
+| tax: use the Roth | **true, built** | below |
+
+Not tested yet: ≤−8% names live excludes for volume $5–10M or price $3–5
+averaged +38bp gross (vs +10bp traded); costs unmeasured.
+
+## Roth IRA (`research/sim/roth.py`)
+
+Rules (sources in the research log): Schwab offers **limited margin** in an
+IRA (no borrowing, no shorting, but unsettled proceeds can be reused without
+good-faith violations). Without it, whether sell-open → buy-close → sell-next-open
+is a violation is disputed under T+1; intraday round trips certainly are.
+Inverse ETFs are allowed. 2026 limit $7,500. A loss sold in a taxable account
+and bought back in an IRA within 30 days is a wash sale and the loss is lost for good.
+
+$10k on 2021-02-01 + $583/month ($49k deposited):
+
+| | 2021–23 | 2024–26 | full | worst yr | end $ | tier_hi end $ |
+|---|---|---|---|---|---|---|
+| **Roth b1: IBS + night 1.0x + intraday via 3x ETFs (limited margin)** | 36.3/2.07 | 42.0/1.77 | **39.0/1.88/−13** | **+21.6%** | **$179k** | $140k |
+| Roth a: IBS + night only (limited margin) | 15.6/1.23 | 32.5/1.65 | 23.5/1.44/−11 | +10.4% | $118k | $95k |
+| Roth strict cash (legs halved, no intraday) | 7.6 | 15.8 | 11.4/1.47/−6 | +5.4% | $76k | $69k |
+| SPY (≈ VTI) | 10.6 | 20.5 | 15.3/0.94/−24 | −18.2% | $85k | |
+| QQQ | 10.3 | 23.9 | 16.6/0.80/−35 | −32.5% | $94k | |
+
+2022 bear: b1 +19% vs SPY −24%. Intraday in the Roth: QQQ long → TQQQ, short →
+SQQQ; SMH → SOXL/SOXS; notional = underlying leverage / 3 from the cash the
+open sells free up (≤ 0.5 of equity = 1.5x underlying); flat by 15:57. At
++1bp/side extra ETF cost b1 is still 34.1%. Tax size: V7 taxed at 32% each
+year ends at $149k vs $244k untaxed; b1 in the Roth ($179k) beats taxable V7
+after tax. Same caveat as every table here: this replays the fitting period.
+
+## Built
+
+- `daily.night_probe_max_usd: 150` (real money): a pick that rounds to 0 shares
+  is bought as 1 share if it costs ≤ $150, so exit costs are measured across the
+  backtest's price mix. Logged as `PROBE`.
+- Reg T's $2,000 is checked against the **account**; the bot's cap only has to
+  clear `live_min_capital`. With a $1,000 cap on a ≥$2k account the intraday leg
+  (and later conviction) now goes live.
+- **Roth book** (`account: roth`): own Schwab account (`SCHWAB_ROTH_ACCOUNT_NUMBER`,
+  never guessed), book file, fills log, cap (`DAILY_ROTH_CAPITAL`), switch
+  (`DAILY_ROTH`, `make daily-roth-check/on/off`). Refuses to trade unless
+  `ROTH_LIMITED_MARGIN=yes`. Never levers, no conviction trade, intraday
+  long-only in 3x ETFs (`daily.roth_etfs`).
+- **Wash-sale guard**: each real-money book skips any symbol the other held or
+  closed in the last 31 days (SGOV excepted).

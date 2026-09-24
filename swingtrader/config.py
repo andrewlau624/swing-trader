@@ -117,6 +117,11 @@ class PortfolioCfg:
     cash_yield_annual: float = 0.0       # idle cash parked in T-bills
 
 
+# real-money daily-book accounts: "live" = the margin brokerage account,
+# "roth" = a Roth IRA (cash account: no margin, no shorting, settled funds)
+REAL_ACCOUNTS = ("live", "roth")
+
+
 @dataclass
 class DailyCfg:
     """The daily-cadence book (RESULTS.md addendum 6). Runs beside the swing
@@ -141,6 +146,11 @@ class DailyCfg:
     # optionally caps it further; None = all free equity.
     live_capital: float | None = None
     live_min_capital: float = 500.0  # below this the live book places no new buys
+    # Night-leg measurement probe (real money only). A small book rounds every
+    # name above ~$50 to zero shares, so the open-sell cost sample would be the
+    # cheap, wide-spread names only. A name that rounds to zero is bought as
+    # ONE share if it costs at most this. None = off.
+    night_probe_max_usd: float | None = None
     # 15:40 scan prices: auto = Schwab real-time consolidated quotes when a
     # login exists (both books, so paper vs live differ only in execution),
     # else Alpaca IEX. alpaca | schwab force one.
@@ -204,15 +214,22 @@ class DailyCfg:
     conviction_symbol: str = "TQQQ"
     conviction_inverse: str = "SQQQ"       # bought for down-breakouts (no shorting)
     conviction_strength: float = 0.341     # 2016-23 median strength, fixed in addendum 8
+    # Roth IRA intraday leg (limited margin: no borrowing, no shorting): the
+    # signal's position is held in these 3x ETFs, [bull, bear], never overnight.
+    roth_etfs: dict = field(default_factory=lambda: {"QQQ": ["TQQQ", "SQQQ"],
+                                                     "SMH": ["SOXL", "SOXS"]})
+    roth_etf_lev: float = 3.0
     noise_lookback: int = 14
     noise_target_vol: float = 0.02
     noise_max_lev: float = 3.5       # 4x intraday limit minus the IBS leg
 
     def resolved_accounts(self) -> list[str]:
-        """config accounts, plus "live" when .env says DAILY_LIVE=on."""
-        acc = [a for a in self.accounts if a != "live"]
-        if (get_env("DAILY_LIVE", "off") or "off").strip().lower() == "on":
-            acc.append("live")
+        """config accounts, plus "live" when .env says DAILY_LIVE=on and
+        "roth" when DAILY_ROTH=on. Both switches live in .env only."""
+        acc = [a for a in self.accounts if a not in REAL_ACCOUNTS]
+        for a, var in (("live", "DAILY_LIVE"), ("roth", "DAILY_ROTH")):
+            if (get_env(var, "off") or "off").strip().lower() == "on":
+                acc.append(a)
         return acc
 
 

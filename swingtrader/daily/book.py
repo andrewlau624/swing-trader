@@ -14,10 +14,11 @@ from pathlib import Path
 
 BOOK_FILE = "book-daily.json"          # paper account (shared with the swing book)
 LIVE_BOOK_FILE = "book-daily-live.json"  # real-money account (dedicated)
+ROTH_BOOK_FILE = "book-daily-roth.json"  # real-money Roth IRA (cash account, no margin)
 
 
 def book_file(account: str) -> str:
-    return LIVE_BOOK_FILE if account == "live" else BOOK_FILE
+    return {"live": LIVE_BOOK_FILE, "roth": ROTH_BOOK_FILE}.get(account, BOOK_FILE)
 TERMINAL = {"filled", "canceled", "expired", "rejected", "done_for_day", "replaced"}
 
 

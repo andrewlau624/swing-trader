@@ -12,7 +12,7 @@ UNAME := $(shell uname -s)
 .DEFAULT_GOAL := help
 
 .PHONY: help setup env test lint kill-old persist unpersist persist-status \
-        daily-status daily-dry daily-once daily-logs daily-live-check daily-live-on daily-live-off schwab-login schwab-quote-check schwab-reminder review support errors \
+        daily-status daily-dry daily-once daily-logs daily-live-check daily-live-on daily-live-off daily-roth-check daily-roth-on daily-roth-off schwab-login schwab-quote-check schwab-reminder review support errors \
         results status positions slippage logs once dry digest notify-test \
         notify-setup doctor pull scan backtest clean stop persist-stop linger _lastlog pending
 
@@ -54,6 +54,7 @@ help:
 	@echo "  daily-live-check  connect to the REAL-money account, change nothing"
 	@echo "  daily-live-on     start trading real money too (asks you to type REAL MONEY)"
 	@echo "  daily-live-off    stop trading real money (paper keeps running)"
+	@echo "  daily-roth-check / daily-roth-on / daily-roth-off   the same for the Roth IRA book"
 	@echo ""
 	@echo "  scan           what looks tradable today"
 	@echo "  backtest       full walk-forward (slow; writes out/)"
@@ -250,6 +251,15 @@ daily-live-on:
 
 daily-live-off:
 	@$(PY) scripts/daily_switch.py off
+
+daily-roth-check:
+	@$(PY) scripts/daily_switch.py check roth
+
+daily-roth-on:
+	@$(PY) scripts/daily_switch.py on roth
+
+daily-roth-off:
+	@$(PY) scripts/daily_switch.py off roth
 
 daily-logs:
 	@LOG=$$(ls -t logs/daily-2*.log 2>/dev/null | head -1); \

@@ -32,7 +32,7 @@ from zoneinfo import ZoneInfo
 import numpy as np
 import pandas as pd
 
-from ..config import Config, ROOT, get_env
+from ..config import REAL_ACCOUNTS, Config, ROOT, get_env
 from ..live.broker import PaperBroker
 from .brokers import AlpacaAdapter, SchwabAdapter, make_adapter
 from ..live.lock import AccountLock, account_fingerprint
@@ -40,7 +40,7 @@ from ..live.notify import Notifier
 from ..universe import all_assets, valid_symbol
 from . import marketdata as md
 from . import signals as sg
-from .book import DailyBook, book_file
+from .book import TERMINAL, DailyBook, book_file
 
 ET = "America/New_York"
 NOISE_COST_BPS = 0.5          # per side, shadow accounting (research: noise.py)
@@ -68,14 +68,17 @@ class DailyExecutor:
                  dry_run: bool = False):
         self.cfg, self.d = cfg, cfg.daily
         self.account = account
-        self.live = account == "live"
+        self.live = account in REAL_ACCOUNTS      # real money
+        # Roth IRA: a cash account. No margin (so no overnight leverage and no
+        # intraday leg, which shorts), and every buy is paid for in full.
+        self.cash_account = account == "roth"
         self.dry_run = dry_run
         b = broker or make_adapter(account, getattr(cfg.daily, "live_broker", "schwab"),
                                    getattr(cfg.daily, "schwab_open_route", "primary"))
         # a raw PaperBroker (or test double) gets the Alpaca adapter
         self.broker = b if hasattr(b, "submit") else AlpacaAdapter(b)
         self.fname = book_file(account)
-        self.tag = "" if not self.live else "-live"
+        self.tag = f"-{account}" if self.live else ""
         self.state_dir = state_dir or ROOT / "state"
         self.log_dir = log_dir or ROOT / "logs"
         self.log_dir.mkdir(parents=True, exist_ok=True)
@@ -138,7 +141,15 @@ class DailyExecutor:
             if getattr(acct, "trading_blocked", False) or getattr(acct, "account_blocked", False):
                 self.warn("LIVE account is blocked from trading - nothing submitted")
                 return 1
-            if float(getattr(acct, "multiplier", 1) or 1) < 2:
+            if self.cash_account:
+                if not self.roth_limited_margin():
+                    # a plain cash IRA must not reuse same-day sale proceeds (good-faith
+                    # violations), and the settled-cash version trails SPY (addendum 20)
+                    self.warn("Roth book needs Schwab LIMITED MARGIN on the IRA (Schwab form: "
+                              "margin in IRA). Once approved set ROTH_LIMITED_MARGIN=yes in "
+                              ".env. Nothing traded.")
+                    return 1
+            elif float(getattr(acct, "multiplier", 1) or 1) < 2:
                 # cash account: selling at the open and re-buying at the close
                 # with the same unsettled proceeds is a good-faith violation
                 self.warn("LIVE account is not a margin account (multiplier < 2). This book "
@@ -306,7 +317,7 @@ class DailyExecutor:
 
     def _lever_gate(self, book: DailyBook) -> None:
         """Open or close the overnight leverage gate from live evidence."""
-        if not self.d.lever_weight:
+        if not self.d.lever_weight or self.cash_account:
             book.levered = False; return
         n, bps = getattr(self, "_exit_stats", (0, float("nan")))
         try:
@@ -537,8 +548,15 @@ class DailyExecutor:
         cash = book.cash
         w = sg.night_tilt(picks["vol20"].values if "vol20" in picks else np.full(len(picks), np.nan),
                           picks["day_ret"].values, self.d.night_tilt_k)
+        probe_usd = self.d.night_probe_max_usd if self.live else None
         for (sym, r), wi in zip(picks.iterrows(), w):
             qty = math.floor(per * wi / r.price)   # auction orders are whole shares
+            probe = False
+            if qty < 1 and probe_usd and r.price <= probe_usd:
+                # a small account rounds every name above ~$50 to zero shares, so
+                # the open-sell cost sample would be cheap, wide-spread names
+                # only. One share measures the auction fill just as well.
+                qty, probe = 1, True
             if qty < 1:
                 self.log(f"  skip {sym}: ${per * wi:.0f} buys 0 shares at {r.price:.2f}")
                 continue
@@ -549,7 +567,8 @@ class DailyExecutor:
                 "bid" in r and np.isfinite(r.get("bid", np.nan)) and np.isfinite(r.get("ask", np.nan))
                 and r.ask >= r.bid > 0) else float("nan")
             self.log(f"  {sym}: day {r.day_ret*100:+.1f}%  ibs {r.ibs:.2f}  px {r.price:.2f}  w {wi:.2f}"
-                     + (f"  spread {spread:.0f}bp" if np.isfinite(spread) else ""))
+                     + (f"  spread {spread:.0f}bp" if np.isfinite(spread) else "")
+                     + (f"  PROBE 1 sh (target ${per * wi:.0f})" if probe else ""))
             self._log_decision(today, sym, r, spread, qty)
             self._order(book, today, sym, "buy", "night", qty=qty, tif="cls",
                         ref_px=float(r.price), kind="entry")
@@ -579,6 +598,7 @@ class DailyExecutor:
     # ------------------------------------------ conviction day trade (TQQQ)
     def _conviction_live(self, book: DailyBook) -> bool:
         return (bool(self.d.conviction_weight) and self.d.conviction_mode == "auto"
+                and not self.cash_account
                 and book.daytrade_live and not book.is_killed("conv"))
 
     def _conviction_one(self, book: DailyBook, today: str) -> None:
@@ -801,14 +821,22 @@ class DailyExecutor:
         a = self.broker.account()
         acct = float(a.equity)
         was = book.daytrade_live
+        # Reg T's $2,000 is an ACCOUNT minimum. Live, the bot's cap
+        # (DAILY_LIVE_CAPITAL) only sizes it: a $1,000 cap on a $5,000 account
+        # must not keep the leg in shadow, or its fills never get measured.
+        book_min = self.d.live_min_capital if self.live else self.d.daytrade_min_equity
         book.daytrade_live = (self.d.daytrade_mode == "auto"
                               and not book.is_killed("noise")
-                              and equity >= self.d.daytrade_min_equity
+                              and equity >= book_min
                               and acct >= self.d.daytrade_min_equity)
         # intraday leverage the broker actually grants (4 = leverage-enabled
         # margin, 2 = standard, 1 = cash); the IBS half stays invested intraday
         mult = float(getattr(a, "multiplier", 1) or 1)
         conv = self.d.conviction_weight if self._conviction_live(book) else 0.0
+        if self.cash_account:
+            # no borrowing: only the cash the night leg's open sells free up, held
+            # in 3x ETFs, so the cap in underlying terms is 3 x that cash
+            mult = 1.0 + (1.0 - self._w_ibs(book)) * (self.d.roth_etf_lev - 1.0)
         book.noise_lev_cap = max(0.0, min(self.d.noise_max_lev, mult - self._w_ibs(book) - conv))
         if book.daytrade_live and not was:
             self.act(f"DAY-TRADE LEG SWITCHED ON: book equity ${equity:,.0f} >= "
@@ -875,6 +903,8 @@ class DailyExecutor:
     def _sync_noise_live(self, book: DailyBook, today: str, px_signal: float,
                          sig: str | None = None) -> None:
         sig = sig or self.d.noise_symbol
+        if self.cash_account:
+            return self._sync_noise_roth(book, today, sig)
         n = self._noise_state(book, sig)
         sym = self._noise_instrument(book, sig)
         px = px_signal
@@ -900,6 +930,38 @@ class DailyExecutor:
             self._order(book, today, sym, "buy" if delta > 0 else "sell", "noise",
                         qty=abs(delta), tif="day", ref_px=px,
                         kind=f"m{n['last_m']}")
+
+    def _sync_noise_roth(self, book: DailyBook, today: str, sig: str) -> None:
+        """Roth IRA: no shorting and no borrowing. The signal's position is held
+        long-only in 3x ETFs, long = bull ETF, short = bear ETF, at 1/3 of the
+        underlying leverage (RESULTS.md addendum 20, research/sim/roth.py b1)."""
+        n = self._noise_state(book, sig)
+        pair = (self.d.roth_etfs or {}).get(sig)
+        if not pair:
+            return
+        pos = int(n.get("pos", 0))
+        want_sym = {1: pair[0], -1: pair[1]}.get(pos)
+        held = book.leg_positions("noise")
+        pend = {o["sym"] for o in book.open_orders().values()}
+        for sym, p in held.items():
+            if sym in pair and sym != want_sym and sym not in pend:
+                self._order(book, today, sym, "sell", "noise", qty=float(p["qty"]), tif="day",
+                            ref_px=self._noise_ref(book, sym, p), kind=f"m{n['last_m']}")
+        if want_sym is None or want_sym in pend:
+            return
+        if want_sym in self._foreign_symbols(book):
+            self.log(f"[noise:ROTH] {want_sym} is held outside this book - skipping"); return
+        rows = md.live_rows([want_sym], max_age_min=5)
+        if rows.empty:
+            self.warn(f"[noise:ROTH] no live price for {want_sym} - skipping"); return
+        px = float(rows.price.iloc[0])
+        lev = min(float(n["lev"]), float(getattr(book, "noise_lev_cap", n["lev"]) or 0)) * self._noise_share()
+        want = math.floor(lev / self.d.roth_etf_lev * self._sizing_equity(book) / px)
+        have = float(held.get(want_sym, {}).get("qty", 0.0))
+        delta = want - have
+        if abs(delta) >= 1:
+            self._order(book, today, want_sym, "buy" if delta > 0 else "sell", "noise",
+                        qty=abs(delta), tif="day", ref_px=px, kind=f"m{n['last_m']}")
 
     def _flatten_noise(self, book: DailyBook, today: str, tif: str = "day",
                        kind: str = "flat") -> None:
@@ -930,7 +992,8 @@ class DailyExecutor:
     def _order(self, book: DailyBook, today: str, sym: str, side: str, leg: str, *,
                tif: str, ref_px: float, kind: str, qty: float | None = None,
                notional: float | None = None) -> None:
-        coid = PaperBroker.coid("dlv" if self.live else "dly", sym, today, f"{leg}-{side}-{kind}")
+        coid = PaperBroker.coid({"live": "dlv", "roth": "dlr"}.get(self.account, "dly"),
+                                sym, today, f"{leg}-{side}-{kind}")
         if coid in book.orders:
             self.log(f"  {sym}: {leg} {side} already submitted today (idempotent skip)"); return
         desc = f"{leg} {side} {sym} " + (f"${notional:,.2f}" if notional else f"{qty:g} sh") + \
@@ -986,7 +1049,7 @@ class DailyExecutor:
     def live_cap(self) -> float | None:
         """DAILY_LIVE_CAPITAL in .env wins over config.yaml: `make pull` resets
         tracked files, and a cap that silently vanished would size the bot up."""
-        env = (get_env("DAILY_LIVE_CAPITAL") or "").strip()
+        env = (get_env("DAILY_ROTH_CAPITAL" if self.cash_account else "DAILY_LIVE_CAPITAL") or "").strip()
         if env and env.lower() not in ("none", "null", "off"):
             return float(env)
         return float(self.d.live_capital) if self.d.live_capital else None
@@ -1004,10 +1067,41 @@ class DailyExecutor:
         return {s: float(held[s].current_price) for s in book.positions
                 if s in held and held[s].current_price is not None}
 
+    def roth_limited_margin(self) -> bool:
+        return (get_env("ROTH_LIMITED_MARGIN") or "").strip().lower() in ("yes", "on", "true", "1")
+
+    WASH_DAYS = 31
+
+    def _wash_symbols(self, today: str | None = None) -> set[str]:
+        """Symbols the OTHER real-money book has held or traded in the last 31
+        days. A loss sold in the brokerage account and bought back in the IRA
+        within 30 days is a wash sale, and against an IRA the loss is gone for
+        good, not deferred. So the two books never share a name inside that
+        window (the T-bill ETF excepted: its losses are pennies)."""
+        if not self.live:
+            return set()
+        other = "roth" if self.account == "live" else "live"
+        p = self.state_dir / book_file(other)
+        if not p.exists():
+            return set()
+        try:
+            b = json.loads(p.read_text())
+        except Exception:
+            return set()
+        cut = (pd.Timestamp(today or dt.date.today()) - pd.Timedelta(days=self.WASH_DAYS)).date().isoformat()
+        out = set(b.get("positions", {}))
+        out |= {o.get("sym") for o in (b.get("orders") or {}).values()
+                if o.get("sym") and o.get("status") not in TERMINAL}
+        out |= {c["sym"] for c in b.get("closed", []) if str(c.get("exit_date", "")) >= cut}
+        out.discard(self.d.ibs_cash_symbol)
+        return out
+
     def _foreign_symbols(self, book: DailyBook) -> set[str]:
         """Held or pending by the swing book, or held at the broker by anyone
-        but this book. Never trade these -- Alpaca nets positions per symbol."""
+        but this book, or inside the other real-money book's wash-sale window.
+        Never trade these -- Alpaca nets positions per symbol."""
         out = set(self.broker.positions()) - set(book.positions)
+        out |= self._wash_symbols() - set(book.positions)
         p = self.state_dir / "book-reversion.json"
         if not self.live and p.exists():     # the swing book trades the paper account only
             try:
@@ -1025,7 +1119,7 @@ class DailyExecutor:
             ("<h4>actions</h4><ul>" + "".join(f"<li>{a}</li>" for a in self.actions) + "</ul>" if self.actions else "") + \
             ("<h4>warnings</h4><ul>" + "".join(f"<li>{w}</li>" for w in self.warnings) + "</ul>" if self.warnings else "") + \
             "<pre>" + "\n".join(self.lines[-40:]) + "</pre>"
-        subj = f"[daily{' LIVE $' if self.live else ''}] {'WARN ' if self.warnings else ''}{len(self.actions)} action(s), equity ${equity:,.0f}"
+        subj = f"[daily{(' ' + self.account.upper() + ' $') if self.live else ''}] {'WARN ' if self.warnings else ''}{len(self.actions)} action(s), equity ${equity:,.0f}"
         try:
             self.log(self.notifier.send(subj, body,
                                         dedupe_key=f"daily:{today}:{len(self.lines)}:{len(self.actions)}"))

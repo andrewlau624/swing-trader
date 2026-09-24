@@ -21,11 +21,11 @@ from swingtrader.daily.book import DailyBook, book_file
 
 def status(account: str):
     cfg = Config.load()
-    if not (ROOT / "state" / book_file(account)).exists() and account == "live":
-        print("=== LIVE (real money): not started yet ==="); return
+    if not (ROOT / "state" / book_file(account)).exists() and account in ("live", "roth"):
+        print(f"=== {account.upper()} (real money): not started yet ==="); return
     b = DailyBook.load(ROOT / "state", cfg.daily.start_equity, book_file(account))
     eq = b.equity_log[-1]["equity"] if b.equity_log else b.cash
-    print(f"=== {account.upper()}{' (real money)' if account == 'live' else ' (virtual $' + format(b.start_equity, ',.0f') + ')'} ===")
+    print(f"=== {account.upper()}{' (real money)' if account in ('live', 'roth') else ' (virtual $' + format(b.start_equity, ',.0f') + ')'} ===")
     print(f"daily book  equity ${eq:,.2f}  start ${b.start_equity:,.0f}  "
           f"({(eq/b.start_equity-1)*100:+.1f}%)  cash ${b.cash:,.2f}  last run {b.last_run or '-'}")
     print(f"day-trade leg {'LIVE' if b.daytrade_live else 'shadow'} "
@@ -49,7 +49,7 @@ def status(account: str):
     lw = cfg.daily.lever_weight
     print(f"overnight leverage {'ON (' + format(lw, '.2f') + ' per leg)' if b.levered and lw else 'off'}"
           f"; open-sell route {'Schwab default (directed refused ' + b.route_refused + ')' if b.route_refused else 'listing exchange'}"
-          if account == "live" else
+          if account in ("live", "roth") else
           f"overnight leverage {'ON (' + format(lw, '.2f') + ' per leg)' if b.levered and lw else 'off'}")
     for sig, n in [(cfg.daily.noise_symbol, b.noise)] + sorted(b.noise_more.items()):
         if n.get("history"):
@@ -63,7 +63,7 @@ def status(account: str):
               + (f"  win {100*np.mean(np.array(r)>0):.0f}%  avg {np.mean(r)*100:+.2f}% on TQQQ" if r else "")
               + (f"  today: {'holding ' + format(b.conviction['pos'], '+d') if b.conviction.get('pos') else ('done' if b.conviction.get('done') else 'waiting')}"
                  if b.conviction.get("day") else ""))
-    f = ROOT / "logs" / ("daily-fills-live.jsonl" if account == "live" else "daily-fills.jsonl")
+    f = ROOT / "logs" / (f"daily-fills-{account}.jsonl" if account in ("live", "roth") else "daily-fills.jsonl")
     if f.exists():
         rows = [json.loads(l) for l in f.read_text().splitlines() if l.strip()]
         for leg in ("ibs", "night"):
@@ -79,14 +79,14 @@ def main(argv=None):
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--status", action="store_true")
     ap.add_argument("--phase", choices=["open", "reconcile", "intraday", "close", "flatten"])
-    ap.add_argument("--account", choices=["paper", "live"])
+    ap.add_argument("--account", choices=["paper", "live", "roth"])
     ap.add_argument("--unkill", metavar="LEG", help="re-enable a leg a kill rule switched off "
                     "(night|ibs|noise|all); needs --account")
     a = ap.parse_args(argv)
     cfg = Config.load()
     if a.unkill:
         if not a.account:
-            ap.error("--unkill needs --account paper|live")
+            ap.error("--unkill needs --account paper|live|roth")
         b = DailyBook.load(ROOT / "state", cfg.daily.start_equity, book_file(a.account))
         k = b.killed.pop(a.unkill, None)
         if k is None:
@@ -97,10 +97,11 @@ def main(argv=None):
         return 0
     accounts = [a.account] if a.account else cfg.daily.resolved_accounts()
     if a.status:
-        for acc in dict.fromkeys(accounts + (["live"] if "live" not in accounts else [])):
+        for acc in dict.fromkeys(accounts + [x for x in ("live", "roth") if x not in accounts]):
             status(acc); print()
-        print(f"accounts trading: {cfg.daily.resolved_accounts()}  "
-              f"(real money is {'ON' if 'live' in cfg.daily.resolved_accounts() else 'OFF'}; DAILY_LIVE in .env)")
+        ra = cfg.daily.resolved_accounts()
+        print(f"accounts trading: {ra}  (real money: brokerage {'ON' if 'live' in ra else 'OFF'} "
+              f"[DAILY_LIVE], Roth {'ON' if 'roth' in ra else 'OFF'} [DAILY_ROTH] in .env)")
         return 0
     from swingtrader.daily.executor import DailyExecutor
     rc = 0
@@ -116,10 +117,10 @@ def main(argv=None):
                 import datetime as _dt
                 from swingtrader.live.notify import Notifier
                 print(Notifier(ROOT / "state").send(
-                    f"[daily{' LIVE $' if acc == 'live' else ''}] run FAILED: {type(exc).__name__}",
+                    f"[daily{(' ' + acc.upper() + ' $') if acc in ('live', 'roth') else ''}] run FAILED: {type(exc).__name__}",
                     f"<p>The {acc} daily book could not run.</p><pre>{exc}</pre>"
                     + ("<p>If this mentions invalid_grant or revoked: run "
-                       "<code>make schwab-login</code> on the server.</p>" if acc == "live" else ""),
+                       "<code>make schwab-login</code> on the server.</p>" if acc in ("live", "roth") else ""),
                     dedupe_key=f"daily-fail:{acc}:{_dt.date.today()}:{type(exc).__name__}"))
             except Exception:
                 pass
