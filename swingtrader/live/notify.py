@@ -38,18 +38,20 @@ class Notifier:
         elif not self.to:
             self.reason = "NOTIFY_EMAIL not set"
         try:
-            self._seen = set(json.loads(self.seen_path.read_text()))
+            # insertion-ordered, not a set: set ordering is arbitrary, so
+            # truncating it could drop RECENT dedupe keys and keep stale ones
+            self._seen = list(dict.fromkeys(json.loads(self.seen_path.read_text())))
         except Exception:
-            self._seen = set()
+            self._seen = []
 
     def _remember(self, key: str) -> None:
-        self._seen.add(key)
+        if key not in self._seen:
+            self._seen.append(key)
         # keep the file small; only recent keys matter for dedupe
-        keep = list(self._seen)[-500:]
-        self._seen = set(keep)
+        self._seen = self._seen[-500:]
         try:
             self.seen_path.parent.mkdir(parents=True, exist_ok=True)
-            self.seen_path.write_text(json.dumps(keep))
+            self.seen_path.write_text(json.dumps(self._seen))
         except Exception:
             pass
 

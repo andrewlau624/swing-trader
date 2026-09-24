@@ -92,6 +92,18 @@ class StrategyCfg:
     stop_pct: float | None = None
     min_overnight_share: float | None = None
     overnight_window: int = 5
+    # Duplicate-bet filter (RESULTS.md addendum 13). Walk candidates best-ranked
+    # first and drop any whose trailing returns correlate above max_corr with an
+    # already-held (or same-bar pending) name. Same rule the night leg uses
+    # (daily.night_max_corr, addendum 11): eight slots should be eight bets.
+    # null = off. Backtest on the uncapped config: 0.7 lifts Sharpe 1.16 -> 1.33
+    # and cuts maxDD -15.3% -> -10.3%; a matched random-drop control reaches
+    # only 12 risk-matched vs the cap's 28.
+    max_corr: float | None = None
+    corr_window: int = 20
+    # which cohort the live swing executor selects from (backtest scripts use
+    # "highvol"; kept configurable so live and backtest cannot silently drift)
+    live_cohort: str = "highvol"
 
 
 @dataclass

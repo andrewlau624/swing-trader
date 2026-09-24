@@ -29,6 +29,15 @@ from .strategy import (LONG, SHORT, Signal, apply_control, entry_signal,
                        exit_on_reversion)
 
 
+# A held name whose bars simply stop has been delisted (or its data has). The
+# last print is not an exit: a bankruptcy delisting trades on at a fraction of
+# it, and without this rule the position also never closes, because every exit
+# needs a bar. Bars cannot tell a failure from a cash takeover, so book the
+# average performance-delisting return (Shumway 1997: about -30%). On the
+# 2021-26 run no trade hits this; it is a guard, not a result.
+DELIST_RET = -0.30
+
+
 class LookaheadError(AssertionError):
     """Raised when a decision would read a bar at or after the bar it trades."""
 
@@ -91,6 +100,8 @@ def run(
     min_overnight_share: float | None = None,
     residual: bool = False,
     overnight_window: int = 5,
+    max_corr: float | None = None,
+    corr_window: int = 20,
     seed: int = 7,
     verbose: bool = True,
 ) -> Result:
@@ -99,11 +110,20 @@ def run(
     tstop = strat.time_stop_days if time_stop_days is None else time_stop_days
     if exit_mode not in ("reversion", "trail", "hybrid"):
         raise ValueError(f"unknown exit_mode {exit_mode!r}")
+    if max_corr is None:
+        max_corr = strat.max_corr
+    if corr_window is None:
+        corr_window = strat.corr_window
     rng = np.random.default_rng(seed)
 
-    # union of all dates present in the data, used as the master calendar
-    all_dates = sorted({d for f in bars.values() for d in f.index})
-    dates = pd.DatetimeIndex(all_dates)
+    # master calendar: SPY's own session index, not the union of every symbol's
+    # bar dates. A union shifts the fold boundaries when the universe changes
+    # (and can pick up a stray bad bar), which makes results incomparable across
+    # runs. SPY is the real NYSE session set; fall back to the union for tests.
+    if "SPY" in bars and len(bars["SPY"]):
+        dates = pd.DatetimeIndex(sorted(bars["SPY"].index))
+    else:
+        dates = pd.DatetimeIndex(sorted({d for f in bars.values() for d in f.index}))
     folds = make_folds(dates, cfg)
     if not folds:
         raise ValueError("not enough history for a single fold")
@@ -127,6 +147,12 @@ def run(
     if regime_filter and "SPY" in bars:
         spy = bars["SPY"]["close"]
         regime_ok = (spy > spy.rolling(200).mean())
+
+    # trailing log-returns, built lazily only when the duplicate-bet filter is on
+    retcache: dict[str, pd.Series] = {}
+    if max_corr is not None:
+        retcache = {s: np.log(d["close"].astype(float)).diff()
+                    for s, d in bars.items()}
     cand_rows: list[pd.DataFrame] = []
     active: set[str] = set()
     zcache: dict[str, pd.Series] = {}
@@ -134,6 +160,32 @@ def run(
     atrcache: dict[str, pd.Series] = {}
     pending_entries: dict[str, int] = {}
     pending_exits: dict[str, str] = {}
+
+    def corr_ok(sym: str, t) -> bool:
+        """False if `sym` is a duplicate bet of a held/pending name.
+
+        Uses returns only through the decision bar t (the fill is at t+1), and
+        keeps the best-ranked candidate: `active` is walked best-first, so the
+        first of a correlated cluster is the one retained.
+        """
+        if max_corr is None or sym not in retcache:
+            return True
+        held = [h for h in list(pf.positions) + list(pending_entries)
+                if h != sym and h in retcache]
+        if not held:
+            return True
+        rc = retcache[sym].loc[:t].iloc[-corr_window:].dropna()
+        for h in held:
+            rh = retcache[h].loc[:t].iloc[-corr_window:].dropna()
+            j = rc.index.intersection(rh.index)
+            if len(j) < 10:
+                continue
+            a, c = rc.loc[j].values, rh.loc[j].values
+            if a.std() > 0 and c.std() > 0:
+                rho = float(np.corrcoef(a, c)[0, 1])
+                if np.isfinite(rho) and rho > max_corr:
+                    return False
+        return True
 
     for fold in folds:
         # ---- selection: formation window ONLY -------------------------
@@ -196,6 +248,14 @@ def run(
         # ---- trading window -------------------------------------------
         for t in tdates:
             marks: dict[str, float] = {}
+
+            # PHASE 0: positions whose data ended before today were delisted
+            for sym in list(pf.positions):
+                d = bars[sym]
+                if len(d) and d.index[-1] < t:
+                    px = float(d["close"].iloc[-1]) * (1.0 + DELIST_RET)
+                    pf.close(sym, px, t, "delisted", fold.index)
+                    pending_exits.pop(sym, None)
 
             # PHASE 1: execute yesterday's decisions at today's OPEN
             for sym, reason in list(pending_exits.items()):
@@ -319,6 +379,8 @@ def run(
                 else:
                     sig = apply_control(entry_signal(zt, strat, allow_short), control, rng)
                 if sig is not None and len(pf.positions) + len(pending_entries) < pcfg.max_positions:
+                    if not corr_ok(sym, t):
+                        continue
                     pending_entries[sym] = sig.side
 
             # PHASE 4: accrue on idle cash, then mark to market on today's close
@@ -348,6 +410,7 @@ def run(
             "slippage_bps": pcfg.slippage_bps, "max_positions": pcfg.max_positions,
             "z_entry": strat.z_entry, "z_exit": strat.z_exit,
             "residual": residual, "min_overnight_share": min_overnight_share, "exit_mode": exit_mode, "trail_pct": trail_pct, "trail_atr": trail_atr,
+            "max_corr": max_corr, "corr_window": corr_window,
             "trail_after_pct": trail_after_pct, "time_stop_days": tstop,
             "position_pct": pf.position_pct, "max_gross_pct": pcfg.max_gross_pct,
             "cash_yield": cash_symbol or pcfg.cash_yield_annual, "regime_filter": regime_filter,

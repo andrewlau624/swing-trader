@@ -45,6 +45,14 @@ strategy:
   # measurement the live run exists to produce. See RESULTS.md addendum 4.
   min_overnight_share: null   # 0.3 in backtest: Sharpe 0.95 -> 1.34
   overnight_window: 5
+  # Duplicate-bet filter (RESULTS.md addendum 13). Drop a candidate whose 20d
+  # returns correlate above this with a name already held / pending. Same rule
+  # the night leg uses. null = off. On the uncapped book 0.7 gives Sharpe
+  # 1.16 -> 1.33, maxDD -15.3% -> -10.3%, and beats a matched random-drop
+  # control (rm 28 vs 12). Applies to BOTH the backtest and the live swing
+  # executor (live/executor.decide), so setting it changes what trades.
+  max_corr: null
+  corr_window: 20
 
 portfolio:
   equity: 100000.0

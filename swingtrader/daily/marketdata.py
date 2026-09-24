@@ -126,12 +126,16 @@ def schwab_rows(symbols: list[str], max_age_min: float = 10.0, client=None) -> p
             px = reg.get("regularMarketLastPrice") or q.get("lastPrice")
             t = reg.get("regularMarketTradeTime") or q.get("tradeTime")
             hi, lo = q.get("highPrice"), q.get("lowPrice")
+            op = q.get("openPrice")
+            pc = q.get("closePrice")          # previous session close, as the feed adjusts it
             if not (px and t and hi and lo):
                 continue
             age = (now_ms - float(t)) / 60000
             if age > max_age_min:
                 continue
             rows[sym] = {"price": float(px), "high": float(hi), "low": float(lo),
+                         "open": float(op) if op else float("nan"),
+                         "feed_prev_close": float(pc) if pc else float("nan"),
                          "trade_age_min": age}
     return pd.DataFrame.from_dict(rows, orient="index")
 

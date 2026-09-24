@@ -338,3 +338,119 @@ def test_controls_are_wired_into_every_selection_mode():
         sides_flip = {t.side for t in flip.trades}
         assert sides_flip != sides_base or not flip.trades, (
             f"control='flip' had no effect in select_mode={mode!r}")
+
+
+# ------------------------------------------------- duplicate-bet filter
+def _overlaps(trades, a, b):
+    """Pairs of trades in symbols a and b whose holding periods overlap."""
+    ta = [t for t in trades if t.symbol == a]
+    tb = [t for t in trades if t.symbol == b]
+    n = 0
+    for x in ta:
+        for y in tb:
+            if x.entry_date < y.exit_date and y.entry_date < x.exit_date:
+                n += 1
+    return n
+
+
+def test_max_corr_drops_duplicate_bets():
+    """Two perfectly correlated names must not be held at the same time.
+
+    Mirrors the night-leg finding (RESULTS.md addendum 11): seven issuers'
+    2x SpaceX ETFs are one bet, not seven.
+    """
+    cfg = _cfg_for_toy()
+    cfg.selection.top_n = 3
+    cfg.portfolio.max_positions = 3
+    cfg.portfolio.slippage_bps = 0.0
+    rng = np.random.default_rng(4)
+    shared = 20.0 * (1 + 0.004 * rng.standard_normal(200))
+    shared[150] = 14.0                       # the dip both correlated names share
+    other = 20.0 * (1 + 0.004 * rng.standard_normal(200))
+    other[150] = 14.0
+    bars = {"AAA": bars_from_close(shared), "BBB": bars_from_close(shared),
+            "CCC": bars_from_close(other)}
+
+    off = run(bars, cfg, "toy", verbose=False)
+    on = run(bars, cfg, "toy", max_corr=0.9, verbose=False)
+
+    assert _overlaps(off.trades, "AAA", "BBB") > 0, (
+        "fixture did not hold the identical pair together even with the cap off")
+    assert _overlaps(on.trades, "AAA", "BBB") == 0, (
+        "max_corr failed to drop the duplicate bet")
+
+
+def test_max_corr_off_is_byte_identical():
+    """The option must not perturb the engine when it is not requested."""
+    cfg = _cfg_for_toy()
+    df = bars_from_close(_oscillator(400))
+    base = run({"FOO": df}, cfg, "toy", verbose=False)
+    same = run({"FOO": df}, cfg, "toy", max_corr=None, corr_window=20, verbose=False)
+    assert base.equity.round(6).equals(same.equity.round(6))
+    assert [t.to_dict() for t in base.trades] == [t.to_dict() for t in same.trades]
+
+
+def test_max_corr_reads_from_config_when_param_is_none():
+    """config.yaml must be able to drive it (strategy.max_corr)."""
+    cfg = _cfg_for_toy()
+    cfg.strategy.max_corr = 0.9
+    df = bars_from_close(_oscillator(400))
+    via_cfg = run({"FOO": df}, cfg, "toy", verbose=False)
+    assert via_cfg.config["max_corr"] == 0.9
+
+
+# ---------------------------------------------- marks and calendar fixes
+def test_equity_uses_last_mark_not_entry_when_a_bar_is_missing():
+    """A halted symbol with no bar today must not freeze its P&L at cost."""
+    pf = Portfolio(100_000, 4, slippage_bps=0.0)
+    d0 = pd.Timestamp("2024-01-02")
+    pf.open("FOO", LONG, 50.0, d0, 100_000, None)
+    assert pf.equity({"FOO": 60.0}) == pytest.approx(100_000 + 25_000 * 0.20)
+    # next session FOO has no bar: value stays at the last observed mark (60)
+    assert pf.equity({}) == pytest.approx(100_000 + 25_000 * 0.20), (
+        "equity fell back to the entry price instead of the last mark")
+
+
+def test_master_calendar_is_spy_sessions_not_the_symbol_union():
+    """A stray bad bar in any symbol must not shift the fold calendar."""
+    cfg = _cfg_for_toy()
+    df = bars_from_close(_oscillator(400))
+    # SPY is missing the last 5 sessions the other symbols have
+    spy = bars_from_close(_oscillator(400)).iloc[:-5]
+    res = run({"FOO": df, "SPY": spy}, cfg, "toy", verbose=False)
+    assert set(res.equity.index) <= set(spy.index), (
+        "backtest used the symbol union instead of SPY's session index")
+
+
+def test_delisted_position_closes_at_a_haircut_not_the_last_print():
+    """A held name whose bars stop must exit (it used to stay open until
+    end_of_test, since every exit needs a bar) and must not exit at its last
+    print: a delisting is booked at DELIST_RET below it."""
+    from swingtrader.backtest import DELIST_RET
+    cfg = _cfg_for_toy()
+    a = bars_from_close(_oscillator(400, period=21, amp=0.25, seed=1))
+    b = bars_from_close(_oscillator(400, period=34, amp=0.25, seed=2))
+    full = run({"AAA": a, "BBB": b}, cfg, "toy", verbose=False)
+    held = [t for t in full.trades if t.symbol == "BBB" and t.bars_held >= 3]
+    assert held, "expected a multi-day AAA trade to cut into"
+    cut = b.index.get_loc(held[0].entry_date) + 1      # BBB stops trading mid-trade
+    res = run({"AAA": a, "BBB": b.iloc[:cut + 1]}, cfg, "toy", verbose=False)
+    d = [t for t in res.trades if t.exit_reason == "delisted"]
+    assert len(d) == 1 and d[0].symbol == "BBB"
+    last = float(b["close"].iloc[cut])
+    assert d[0].exit_px < last * (1 + DELIST_RET) * 1.0001   # haircut, then slippage
+    assert d[0].exit_date > b.index[cut]
+    assert not [t for t in res.trades if t.symbol == "BBB" and t.exit_reason == "end_of_test"]
+
+
+def test_daily_bootstrap_and_deflated_sharpe_behave():
+    from swingtrader.report import bootstrap_daily, deflated_sharpe
+    idx = pd.bdate_range("2021-01-01", periods=1000)
+    rng = np.random.default_rng(3)
+    good = pd.Series(100 * np.cumprod(1 + 0.001 + 0.01 * rng.standard_normal(1000)), idx)
+    noise = pd.Series(100 * np.cumprod(1 + 0.01 * rng.standard_normal(1000)), idx)
+    assert bootstrap_daily(good)["p_mean_le_0_daily"] < 0.05
+    assert bootstrap_daily(noise)["p_mean_le_0_daily"] > 0.05
+    one, many = deflated_sharpe(good, 1), deflated_sharpe(good, 200)
+    assert many["sharpe_hurdle_ann"] > 0 == one["sharpe_hurdle_ann"]
+    assert many["deflated_sharpe_prob"] < one["deflated_sharpe_prob"]

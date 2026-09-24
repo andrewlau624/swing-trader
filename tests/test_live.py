@@ -2,6 +2,8 @@
 import json
 from pathlib import Path
 
+import numpy as np
+import pandas as pd
 import pytest
 
 from swingtrader.live.broker import PaperBroker
@@ -174,3 +176,120 @@ def test_refresh_is_skipped_while_the_market_is_open(monkeypatch, tmp_path):
     except ValueError:
         pass                      # empty bar dict is fine; we only count calls
     assert calls == [], "a management run triggered the slow refresh"
+
+
+# --------------------------------------------------------------- fixed bugs
+def test_measure_fills_does_not_re_emit_recorded_fills():
+    """The sample the whole live run exists to produce must not be inflated by
+    re-reporting the same fill on every run for five days."""
+    class O:
+        client_order_id = "rev.X.2026-09-22.entry"
+        filled_at, filled_avg_price = "now", 101.0
+        side, symbol, filled_qty, id = "buy", "X", 10, "42"
+    b = PaperBroker.__new__(PaperBroker)
+    b.recent_orders = lambda days=5: [O()]
+    refs = {"rev.X.2026-09-22.entry": {"ref_px": 100.0}}
+    assert len(b.measure_fills(refs)) == 1
+    assert len(b.measure_fills(refs, {"42"})) == 0, "a recorded fill was counted twice"
+
+
+def test_submit_exit_does_not_cancel_stops_when_exit_already_working():
+    """Cancelling the stop and THEN hitting the duplicate id is how a position
+    ends up naked with a live sell order out."""
+    b = PaperBroker.__new__(PaperBroker)
+    cancelled = []
+
+    class O:
+        client_order_id = "rev.X.2026-09-22.exit-reversion"
+    b.open_orders = lambda: [O()]
+    b.cancel_stops = lambda sym: cancelled.append(sym)
+    o, note, rejected = b.submit_exit("rev", "X", 10, "2026-09-22", "reversion")
+    assert o is None and not rejected
+    assert cancelled == [], "must not cancel the stop when the exit is already working"
+
+
+def test_ensure_protection_rearms_a_stale_stop():
+    """A stop at the wrong price (e.g. after a split) is as dangerous as none."""
+    b = PaperBroker.__new__(PaperBroker)
+    submitted = []
+
+    class Stop:
+        id, stop_price, qty = "s1", 100.0, 10
+    b.stops_by_symbol = lambda: {"X": Stop()}
+    b.client = type("C", (), {
+        "cancel_order_by_id": lambda self, i: None,
+        "submit_order": lambda self, r: submitted.append(r)})()
+
+    ok, note = b.ensure_protection("X", 50.0, 10)      # split halved the price
+    assert ok and "re-armed" in note and submitted
+
+
+def test_corrupt_state_is_backed_up_and_flagged(tmp_path):
+    p = tmp_path / "book.json"
+    p.write_text("{ not json")
+    s = BookState.load(p, "reversion", True, 100_000.0)
+    assert s.load_error and s.positions == {}
+    assert list(tmp_path.glob("book.json.corrupt-*")), "corrupt state must be kept, not lost"
+
+
+def test_notifier_dedupe_keys_keep_insertion_order(tmp_path):
+    from swingtrader.live.notify import Notifier
+    n = Notifier(tmp_path)
+    n._remember("a"); n._remember("b"); n._remember("a")
+    assert n._seen == ["a", "b"], "recent keys must not be dropped by set ordering"
+    assert Notifier(tmp_path)._seen == ["a", "b"]
+
+
+def test_corr_above_detects_duplicate_bet():
+    from swingtrader.live.executor import _corr_above
+    idx = pd.bdate_range("2024-01-02", periods=30)
+    a = pd.Series(np.arange(30.0), index=idx)
+    b = pd.Series(np.arange(30.0) * 2, index=idx)          # perfectly correlated
+    c = pd.Series(np.sin(np.arange(30.0)), index=idx)
+    assert _corr_above(a, {"b": b}, 0.9)
+    assert not _corr_above(a, {"c": c}, 0.9)
+
+
+def test_live_decide_honours_overnight_and_corr_filters():
+    """Live must apply the same entry gates the backtest was validated with."""
+    from swingtrader.live.executor import Executor
+    from swingtrader.config import Config
+    cfg = Config.load()
+    cfg.walkforward.formation_days = 60
+    cfg.selection.top_n = 99
+    cfg.selection.min_amplitude_pct = 0.0
+    cfg.selection.max_abs_drift_t = 99.0
+    cfg.selection.halflife_min = 0.1
+    cfg.selection.halflife_max = 999.0
+    cfg.selection.hurst_max = 2.0
+    cfg.selection.max_efficiency_ratio = 1.0
+    cfg.cohorts["toy"] = cfg.cohorts["broad"]
+    cfg.cohorts["toy"].min_iex_dollar_vol = 0.0
+    cfg.strategy.live_cohort = "toy"
+    n = 160
+    t = np.arange(n)
+    base = 20.0 * (1 + 0.12 * np.sin(2 * np.pi * t / 20))
+
+    def mk(shift):
+        c = np.roll(base, shift).copy()
+        c[-1] = c[-1] * 0.85          # force z < -1 on the decision bar
+        return pd.DataFrame({"open": c, "high": c * 1.01, "low": c * 0.99,
+                             "close": c, "volume": np.full(n, 1e6)},
+                            index=pd.bdate_range("2021-01-04", periods=n))
+    bars = {"AAA": mk(0), "BBB": mk(0), "CCC": mk(7)}
+    asof = bars["AAA"].index[-1]
+    ex = Executor.__new__(Executor)
+    ex.cfg, ex.daily_owned = cfg, set()
+    st = type("S", (), {"positions": {}, "pending": {}})()
+
+    ent, _ = ex.decide(bars, asof, "reversion", -1.0, st)
+    assert {"AAA", "BBB"} <= {e[0] for e in ent}, "fixture: correlated pair should enter unfiltered"
+
+    cfg.strategy.max_corr = 0.9
+    ent2, _ = ex.decide(bars, asof, "reversion", -1.0, st)
+    assert not ({"AAA", "BBB"} <= {e[0] for e in ent2}), "duplicate bet not filtered live"
+
+    cfg.strategy.max_corr = None
+    cfg.strategy.min_overnight_share = 5.0        # impossible -> blocks everything
+    ent3, _ = ex.decide(bars, asof, "reversion", -1.0, st)
+    assert ent3 == [], "overnight filter not applied live"

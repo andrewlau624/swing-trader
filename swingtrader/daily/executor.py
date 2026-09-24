@@ -207,9 +207,31 @@ class DailyExecutor:
         held = self.broker.positions()
         for sym in list(book.positions):
             if sym not in held and not any(o["sym"] == sym for o in book.open_orders().values()):
-                self.warn(f"{sym} in daily book but not held at broker - dropping at book price")
                 p = book.positions.pop(sym)
-                book.cash += float(p["qty"]) * float(p["avg_px"])
+                qty, avg = float(p["qty"]), float(p["avg_px"])
+                # We do not know the real exit price (delisting, buy-in, manual
+                # sale). Booking the ENTRY price invented cash and threw away the
+                # P&L; use the last known market price and record the round trip.
+                px = self._last_price(sym, fallback=avg)
+                book.cash += qty * px
+                book.closed.append({"sym": sym, "leg": p.get("leg"), "qty": qty,
+                                    "entry_px": avg, "exit_px": px,
+                                    "entry_date": p.get("entry_date"), "exit_date": today,
+                                    "pnl": qty * (px - avg),
+                                    "ret": (px / avg - 1.0) if avg else 0.0,
+                                    "note": "broker no longer holds; exit price unknown"})
+                self.warn(f"{sym}: in daily book but not held at broker - booked out at "
+                          f"{px:.2f} (last known), not the {avg:.2f} entry price")
+
+    def _last_price(self, sym: str, fallback: float) -> float:
+        try:
+            b = md.sip_daily([sym], pd.Timestamp.now(tz=ET) - pd.Timedelta(days=10), None)
+            d = b.get(sym)
+            if d is not None and len(d):
+                return float(d["close"].iloc[-1])
+        except Exception:
+            pass
+        return float(fallback)
 
     # ---------------------------------------------------------------- open
     def phase_open(self, book: DailyBook, today: str) -> None:
@@ -306,6 +328,11 @@ class DailyExecutor:
         self.log(f"[night] prices from {src.upper()} ({len(rows)} fresh quotes)")
         cols = [c for c in ("prev_close", "vol20") if c in elig.columns]
         rows = rows.join(elig[cols], how="inner")
+        bad = sg.prev_close_mismatch(rows)
+        if bad.any():
+            self.warn(f"[night] skipping {int(bad.sum())} name(s) whose previous close disagrees with "
+                      f"the quote feed (split/corporate action?): {sorted(rows.index[bad])[:10]}")
+            rows = rows[~bad]
         picks = sg.loser_picks(rows, day_ret_max=self.d.night_day_ret_max,
                                ibs_max=self.d.night_ibs_max, price_min=self.d.night_price_min,
                                price_max=self.d.night_price_max)
@@ -410,6 +437,20 @@ class DailyExecutor:
         if not today_m:
             self.warn("[noise] no open print yet"); book.noise = {}; return
         day_open = today_m["open"]
+        # IEX's first-minute open is unreliable (research: wrong opens, ~5% of
+        # volume). Prefer Schwab's official consolidated open when logged in.
+        src = "iex"
+        if self.d.quote_source in ("auto", "schwab"):
+            try:
+                q = md.schwab_rows([sym], max_age_min=10)
+                if not q.empty and "open" in q.columns and np.isfinite(q["open"].iloc[0]):
+                    day_open = float(q["open"].iloc[0])
+                    src = "schwab"
+            except Exception:
+                pass
+        if src == "iex":
+            self.warn("[noise] using IEX open (Schwab not available) - the open "
+                      "can be wrong on IEX; bounds may be off")
         ub, lb = sg.noise_bounds(day_open, prev_close, sigma)
         lev = sg.noise_leverage(daily["close"], self.d.noise_target_vol, self.d.noise_max_lev)
         shadow_eq = float(book.noise.get("shadow_equity", book.start_equity))
@@ -417,8 +458,9 @@ class DailyExecutor:
         book.noise = {"day": today, "pos": 0, "entry": None, "realized": 0.0, "trades": 0,
                       "last_m": -1, "lev": lev, "open": day_open, "prev_close": prev_close,
                       "ub": ub.round(4).tolist(), "lb": lb.round(4).tolist(),
-                      "shadow_equity": shadow_eq, "history": hist_log, "settled": False}
-        self.log(f"[noise] {sym} open {day_open:.2f} prev close {prev_close:.2f} "
+                      "shadow_equity": shadow_eq, "history": hist_log, "settled": False,
+                      "src": src}
+        self.log(f"[noise] {sym} open {day_open:.2f} (src {src}) prev close {prev_close:.2f} "
                  f"lev {lev:.2f}  band at 10:00 [{lb[30]:.2f}, {ub[30]:.2f}]")
 
     def _settle_noise(self, book: DailyBook, today: str) -> None:

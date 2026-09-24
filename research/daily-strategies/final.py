@@ -1,9 +1,9 @@
-import sys,pickle; sys.path.insert(0,"/private/tmp/claude-501/-Users-andrewlau-Documents-Code-Projects-swing-trader/a8c2ed99-2407-460f-90bd-79c42fa36e6e/scratchpad"); sys.path.insert(0,"/private/tmp/claude-501/-Users-andrewlau-Documents-Code-Projects-swing-trader/b545e432-8693-429a-8b21-0970cd88b5e7/scratchpad")
-__file__="/private/tmp/claude-501/-Users-andrewlau-Documents-Code-Projects-swing-trader/b545e432-8693-429a-8b21-0970cd88b5e7/scratchpad/t1550.py"; exec(open("/private/tmp/claude-501/-Users-andrewlau-Documents-Code-Projects-swing-trader/b545e432-8693-429a-8b21-0970cd88b5e7/scratchpad/t1550.py").read().split("for lab,sig,sc in")[0])
+import sys,pickle; sys.path.insert(0,"/Users/andrewlau/documents/code/projects/swing-trader/data/research/swing"); sys.path.insert(0,"/Users/andrewlau/documents/code/projects/swing-trader/data/research/night")
+__file__="/Users/andrewlau/documents/code/projects/swing-trader/data/research/night/t1550.py"; exec(open("/Users/andrewlau/documents/code/projects/swing-trader/data/research/night/t1550.py").read().split("for lab,sig,sc in")[0])
 from noise import noise
 night,_=port(S50,SC,maxw=0.1,cost=7.5)            # honest 15:50 signal, MOC in / MOO out, 7.5bp/side
 qn,_=noise('QQQ',cost_bps=0.5)
-e=pd.read_parquet("/private/tmp/claude-501/-Users-andrewlau-Documents-Code-Projects-swing-trader/b545e432-8693-429a-8b21-0970cd88b5e7/scratchpad/etf_daily.parquet"); e['date']=e.timestamp.dt.tz_convert('America/New_York').dt.normalize().dt.tz_localize(None)
+e=pd.read_parquet("/Users/andrewlau/documents/code/projects/swing-trader/data/research/night/etf_daily.parquet"); e['date']=e.timestamp.dt.tz_convert('America/New_York').dt.normalize().dt.tz_localize(None)
 EP={f:e.pivot(index='date',columns='symbol',values=f) for f in ['open','high','low','close']}
 U=['QQQ','SMH','XLK']; I=(EP['close']-EP['low'])/(EP['high']-EP['low']); sg=I[U]<0.2; nn=sg.sum(axis=1); w=sg.div(nn.where(nn>0),axis=0).fillna(0)
 oo=EP['open'].shift(-2)/EP['open'].shift(-1)-1
@@ -11,7 +11,7 @@ ibs=((w*oo[U]).sum(axis=1)-(w-w.shift(1).fillna(0)).abs().sum(axis=1)*1e-4).shif
 sw={}
 for nm in ['res_base','res_all+ovn']:
     try:
-        r=pickle.load(open(f"/private/tmp/claude-501/-Users-andrewlau-Documents-Code-Projects-swing-trader/a8c2ed99-2407-460f-90bd-79c42fa36e6e/scratchpad/{nm}.pkl","rb")); eq=r.equity if hasattr(r,'equity') else r[1].equity; sw[nm]=eq.pct_change()
+        r=pickle.load(open(f"/Users/andrewlau/documents/code/projects/swing-trader/data/research/swing/{nm}.pkl","rb")); eq=r.equity if hasattr(r,'equity') else r[1].equity; sw[nm]=eq.pct_change()
     except Exception as ex: print('load',nm,ex)
 df=pd.concat([night.rename('NIGHT losers@15:50'),qn.rename('DAY QQQ noise'),ibs.rename('IBS tech3 @open')]+[v.rename('SWING '+k) for k,v in sw.items()],axis=1,sort=True).loc['2021-02-01':'2026-09-18'].fillna(0)
 df['COMBO day+0.5night']=df['DAY QQQ noise']+0.5*df['NIGHT losers@15:50']

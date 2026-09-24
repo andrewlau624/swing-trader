@@ -18,8 +18,11 @@ def account_fingerprint(api_key: str, secret_key: str = "") -> str:
 
 
 class AccountLock:
-    """flock-based. The kernel releases it on crash, so a hung process cannot
-    wedge the account permanently."""
+    """flock-based, so it only excludes writers on THIS host: flock is local to
+    a filesystem and does NOT coordinate across machines. Two hosts trading the
+    same account are not prevented here -- run one host, or add an external lock
+    (broker-side, DB, or cloud lock). The kernel releases it on crash, so a hung
+    process cannot wedge the account permanently."""
 
     def __init__(self, fingerprint: str, state_dir: Path):
         state_dir.mkdir(parents=True, exist_ok=True)
@@ -28,6 +31,7 @@ class AccountLock:
 
     def acquire(self) -> bool:
         import fcntl
+        import socket
         self._fh = open(self.path, "w")
         try:
             fcntl.flock(self._fh.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -35,7 +39,7 @@ class AccountLock:
             self._fh.close()
             self._fh = None
             return False
-        self._fh.write(str(os.getpid()))
+        self._fh.write(f"{socket.gethostname()}:{os.getpid()}")
         self._fh.flush()
         return True
 

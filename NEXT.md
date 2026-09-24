@@ -5,7 +5,21 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
-## 0. Uncap the candidate list — READY, YOUR CALL
+## ⚠ Read addendum 14 first (2026-09-23)
+
+- The daily book's published numbers were inflated by a research lookahead
+  and a few bad bars. Corrected live book (no intraday leg): **20.1% / Sharpe
+  1.27 / −14%**, was 23.8% / 1.46. Full book 36.5% / 1.57 (was 40.7% / 1.70).
+- The swing headline (15.1% / 0.95) is one lucky fold alignment; over six
+  offsets it averages ~12% / 0.72, about SPY. At the live cadence (daily
+  re-selection) it is 11.2% / 0.67 / −27.7%. **Items 0 and 0b below do not
+  help at that cadence and stay OFF.** The swing book stays on paper.
+- The first real test of the night leg is the Schwab open sells (no
+  market-on-open order at Schwab). `make review` after ~50 round trips.
+
+---
+
+## 0. Uncap the candidate list — DEAD at the live cadence (addendum 14)
 
 **Status:** found 2026-09-22, validated (RESULTS.md addendum 5), **not enabled.**
 
@@ -21,6 +35,43 @@ accumulate costs the experiment nothing.
 **Open question before trusting live numbers:** live re-selects daily; the
 backtest re-selects every 42 days, and an honest 21-day refresh scored far
 worse (9.5%). Build a short-refresh backtest that matches the executor.
+
+**Pair it with the correlation cap below** — on the uncapped book the cap is
+where most of the risk-adjusted gain comes from.
+
+---
+
+## 0b. Correlation cap on new entries — DEAD at the live cadence (addendum 14: 1d uncapped + 0.7 = 8.5% / 0.58)
+
+**Status:** researched and validated (RESULTS.md addendum 13); implemented in
+`swingtrader/backtest.py`, `swingtrader/live/executor.py` (the live swing loop)
+and `config.yaml` as `strategy.max_corr` (**null = off**). Setting it now governs
+live as well as backtest.
+
+**What it is:** walk candidates best-ranked first, drop any whose trailing
+20-day returns correlate above `max_corr` with an already-held (or same-bar
+pending) name. The same duplicate-bet rule the night leg already uses
+(`daily.night_max_corr`, addendum 11). Eight slots should be eight bets.
+
+**What it buys** (deployable uncapped config, −10% stop, cash BIL):
+
+| | uncapped | + max_corr 0.7 | + max_corr 0.6 |
+|---|---|---|---|
+| Sharpe | 1.16 | **1.33** | **1.47** |
+| max drawdown | −15.3% | **−10.3%** | **−8.0%** |
+| CAGR | 22.3% | 20.2% | 20.5% |
+| risk-matched | 21.0 | 28.4 | 37.2 |
+
+Robust to the correlation window (10–40d), passes flip/shuffle, bootstrap
+P(mean ≤ 0) = 0.0004, survives +10bps/side. Crucially it **beats a matched
+random-drop control** (keep 67% at random → risk-matched 12.0), so the gain is
+the correlation, not the reduced trade count. On the *live top8* config the
+gain is small (15.1/0.95 → 13.8/1.02 at 0.7); its value is on the uncapped book.
+
+**To enable:** set `strategy.max_corr: 0.7` in `config.yaml`. Do it in the same
+change as the uncap (item 0) — that is where the benefit lives. (The live
+executor applies it now; `live/executor.decide` shares the backtest's formation
+length, overnight gate and correlation cap.)
 
 ---
 
@@ -99,17 +150,23 @@ but "should" is not "did".
 | Uncapped candidates (top_n 999) | **found, pending** | risk-matched 15.1 -> 21.0%, controls pass (addendum 5) |
 | z_window 10 / 40, formation 63 / 252 | **dead** | all 4-9% risk-matched vs 15.1% |
 | −10% stop vs no stop | **ADOPTED** | 11.8% vs 8.6% CAGR, and lower drawdown |
+| Shock-share filter (dip = one big down day) | **dead** | rm 27.7 but threshold is a spike (0.5), non-monotone per-trade — overfit (add. 13) |
+| Volume-z dip filter | **weak** | rm 18–23, at or below the matched random-drop control (~20) |
+| IBS / close-at-low as an entry gate | **dead** | closing at lows is a falling knife — worst bucket (+0.56%/trade) |
+| z-turn-up, z-depth band, 52w-high distance | **dead** | no robust effect, unstable across halves |
+| Regime gates (SPY 5d return, VIXY fear proxy) | **dead** | unstable across halves; SPY>200dma only buys Sharpe for return |
+| Fixed take-profit exit | **dead** | worse at every level (cutting winners, same as trailing) |
+| Inverse-vol / overnight-share position sizing | **weak** | top8 +5pp CAGR at best, no gain on the uncapped book |
+| Correlation cap on new entries (`max_corr`) | **FOUND, pending** | uncapped Sharpe 1.16→1.33, DD −15.3→−10.3%; beats random-drop control (add. 13) |
 
 ## Ideas not yet tested
-
-- Backtest with the executor's daily re-selection (see item 0)
 
 - Multiple formation horizons (5/10/20d) simultaneously — the one remaining
   structural fix for 14% capital utilisation
 - Cross-sectional ranking instead of a binary z-threshold (always deployed)
 - Crypto sleeve (24/7, AVAX/DOT/LTC screen as tradable)
-- Limit orders at the bid instead of market-on-open — this strategy *supplies*
-  liquidity, so it may earn the spread rather than pay it
+- Limit orders at the bid instead of market-on-open — bounded by addendum 13:
+  paying 0 vs 20bps is worth ~+2pp CAGR, so the upside is real but modest
 
 ---
 

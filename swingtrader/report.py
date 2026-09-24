@@ -51,6 +51,11 @@ def curve_stats(equity: pd.Series, rf: float = 0.0) -> dict:
         "max_drawdown_pct": maxdd * 100,
         "calmar": (cagr / abs(maxdd)) if maxdd < 0 else np.nan,
         "pct_time_underwater": underwater * 100, "years": years,
+        # the tail describes a dip-buyer better than any ratio does
+        "skew_daily": float(ret.skew()),
+        "cvar5_daily_pct": float(ret[ret <= ret.quantile(0.05)].mean() * 100),
+        "worst_month_pct": float((eq.resample("ME").last().pct_change().dropna().min()
+                                  if len(eq) > 40 else np.nan) * 100),
     }
 
 
@@ -140,6 +145,65 @@ def bootstrap_edge(trades: list, n_paths: int = 5000, seed: int = 11) -> dict:
         [stat_path().mean() for _ in range(n_paths // 2)]
     )
     return out
+
+
+def bootstrap_daily(equity: pd.Series, n_paths: int = 2000, mean_block: int = 20,
+                    seed: int = 11) -> dict:
+    """P(mean daily return <= 0) from a stationary bootstrap of the PORTFOLIO's
+    daily returns. Trade-level resampling treats trades open in the same week
+    as independent, but they share the market; daily portfolio returns already
+    net that out, and 20-day blocks keep volatility clustering intact."""
+    r = equity.pct_change().dropna().to_numpy(dtype=float)
+    n = len(r)
+    if n < 60:
+        return {"n_days": n, "note": "too few days to bootstrap"}
+    rng = np.random.default_rng(seed)
+    p = 1.0 / mean_block
+    means, sharpes = np.empty(n_paths), np.empty(n_paths)
+    for k in range(n_paths):
+        starts = rng.integers(0, n, n)
+        new = rng.random(n) < p
+        new[0] = True
+        # index = start of the current block + offset into it, wrapped
+        blk = np.cumsum(new) - 1
+        first = np.flatnonzero(new)
+        off = np.arange(n) - first[blk]
+        idx = (starts[first][blk] + off) % n
+        x = r[idx]
+        means[k] = x.mean()
+        sd = x.std(ddof=1)
+        sharpes[k] = x.mean() / sd * np.sqrt(TRADING_DAYS) if sd > 0 else 0.0
+    return {"n_days": n, "p_mean_le_0_daily": float((means <= 0).mean()),
+            "sharpe_p05": float(np.percentile(sharpes, 5)),
+            "sharpe_p50": float(np.percentile(sharpes, 50))}
+
+
+def deflated_sharpe(equity: pd.Series, n_trials: int) -> dict:
+    """Deflated Sharpe ratio (Bailey & Lopez de Prado 2014): the probability
+    that the true Sharpe is above zero AFTER allowing for having kept the best
+    of `n_trials` configurations. Trials are treated as independent, which
+    over-penalises correlated variants of one idea -- read it as a floor.
+    n_trials = 1 gives the plain probabilistic Sharpe ratio."""
+    from statistics import NormalDist
+    nd = NormalDist()
+    r = equity.pct_change().dropna().to_numpy(dtype=float)
+    t = len(r)
+    if t < 60 or r.std(ddof=1) <= 0:
+        return {}
+    sr = r.mean() / r.std(ddof=1)                      # per day
+    g3 = float(pd.Series(r).skew())
+    g4 = float(pd.Series(r).kurt()) + 3.0              # pandas reports excess
+    n = max(int(n_trials), 1)
+    if n > 1:
+        em = 0.5772156649
+        z = (1 - em) * nd.inv_cdf(1 - 1.0 / n) + em * nd.inv_cdf(1 - 1.0 / (n * np.e))
+        sr0 = z / np.sqrt(t)                          # expected max of n null Sharpes
+    else:
+        sr0 = 0.0
+    den = np.sqrt(max(1 - g3 * sr + (g4 - 1) / 4 * sr * sr, 1e-12))
+    dsr = float(nd.cdf((sr - sr0) * np.sqrt(t - 1) / den))
+    return {"n_trials": n, "sharpe_ann": sr * np.sqrt(TRADING_DAYS),
+            "sharpe_hurdle_ann": sr0 * np.sqrt(TRADING_DAYS), "deflated_sharpe_prob": dsr}
 
 
 def cost_shock(trades: list, extra_bps_list=(0, 2, 4, 6, 10)) -> pd.DataFrame:
@@ -248,7 +312,9 @@ def _fmt(d: dict, keys=None) -> str:
     return "\n".join(out)
 
 
-def render(result, bars: dict, title: str = "run") -> str:
+def render(result, bars: dict, title: str = "run", n_trials: int | None = None) -> str:
+    """n_trials: how many configurations were tried before this one was
+    picked. Pass it and the report adds the deflated Sharpe ratio."""
     L = [f"{'='*72}", f" {title}", f"{'='*72}"]
     L.append(" config: " + ", ".join(f"{k}={v}" for k, v in result.config.items()))
     L.append("")
@@ -257,7 +323,8 @@ def render(result, bars: dict, title: str = "run") -> str:
     L.append("-- portfolio " + "-" * 59)
     L.append(_fmt(cs, ["start_equity", "end_equity", "total_return_pct", "cagr_pct",
                        "ann_vol_pct", "sharpe", "sortino", "max_drawdown_pct",
-                       "calmar", "pct_time_underwater", "years"]))
+                       "calmar", "pct_time_underwater", "years",
+                       "skew_daily", "cvar5_daily_pct", "worst_month_pct"]))
     L.append("")
 
     ts = trade_stats(result.trades)
@@ -307,6 +374,9 @@ def render(result, bars: dict, title: str = "run") -> str:
     yrs = cs.get("years", 1.0) or 1.0
     m2s = months_to_significance(result.trades, years=yrs)
     L.append(f"  {'months_to_significance':26} {m2s:>12.1f}")
+    L.append(_fmt(bootstrap_daily(result.equity)))
+    if n_trials:
+        L.append(_fmt(deflated_sharpe(result.equity, n_trials)))
     L.append("")
 
     csk = cost_shock(result.trades)

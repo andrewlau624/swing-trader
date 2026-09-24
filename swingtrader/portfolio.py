@@ -26,6 +26,7 @@ class Position:
     bars_held: int = 0
     mfe: float = 0.0         # max favourable excursion, %
     mae: float = 0.0         # max adverse excursion, %
+    last_px: float = 0.0     # last observed mark; avoids freezing at entry_px
 
     def unrealized(self, px: float) -> float:
         return (px - self.entry_px) * self.qty * self.side
@@ -114,7 +115,11 @@ class Portfolio:
         """
         eq = self.cash
         for sym, p in self.positions.items():
-            px = marks.get(sym, p.entry_px)
+            if sym in marks:
+                p.last_px = float(marks[sym])
+            # fall back to the LAST observed mark, not the entry price: a halted
+            # symbol with no bar today must not freeze its P&L at cost
+            px = p.last_px or p.entry_px
             eq += p.qty * px * p.side
         return eq
 
@@ -169,7 +174,7 @@ class Portfolio:
         stop = None
         if stop_pct is not None:
             stop = px * (1 - stop_pct / 100.0) if side > 0 else px * (1 + stop_pct / 100.0)
-        pos = Position(symbol, side, qty, px, date, stop, peak=px)
+        pos = Position(symbol, side, qty, px, date, stop, peak=px, last_px=px)
         self.positions[symbol] = pos
         return pos
 

@@ -101,27 +101,39 @@ class PaperBroker:
             return None, f"{symbol}: entry rejected - {type(exc).__name__}: {msg[:120]}"
 
     def submit_exit(self, book: str, symbol: str, qty: float, day: str,
-                    reason: str) -> tuple[object | None, str]:
+                    reason: str) -> tuple[object | None, str, bool]:
         """Close at the open. Cancels the protective stop first -- leaving it
         live alongside a sell would risk selling the same shares twice and
-        flipping the account short."""
+        flipping the account short.
+
+        Returns (order, note, rejected). `rejected` means the stop was cancelled
+        and the sell did NOT go through, so the caller MUST re-arm protection
+        immediately rather than leave the position naked until the next run.
+        """
         from alpaca.trading.enums import OrderSide, TimeInForce
         from alpaca.trading.requests import MarketOrderRequest
-        self.cancel_stops(symbol)
+        coid = self.coid(book, symbol, day, f"exit-{reason}")
         q = int(qty)
         if q < 1:
-            return None, f"{symbol}: nothing to sell"
+            return None, f"{symbol}: nothing to sell", False
+        # an exit already working today: leave the stop alone and do nothing.
+        # (Cancelling the stop first, then hitting the duplicate id, is exactly
+        # how a position ends up unprotected with a live sell order out.)
+        for o in self.open_orders():
+            if o.client_order_id == coid:
+                return None, f"{symbol}: exit already working today", False
+        self.cancel_stops(symbol)
         try:
             o = self.client.submit_order(MarketOrderRequest(
                 symbol=symbol, qty=q, side=OrderSide.SELL,
                 time_in_force=TimeInForce.OPG,
-                client_order_id=self.coid(book, symbol, day, f"exit-{reason}")))
-            return o, f"submitted MOO sell {q} {symbol} ({reason})"
+                client_order_id=coid))
+            return o, f"submitted MOO sell {q} {symbol} ({reason})", False
         except Exception as exc:
             msg = str(exc)
             if "client_order_id" in msg or "duplicate" in msg.lower():
-                return None, f"{symbol}: exit already submitted today"
-            return None, f"{symbol}: exit rejected - {type(exc).__name__}: {msg[:120]}"
+                return None, f"{symbol}: exit already submitted today", False
+            return None, f"{symbol}: exit rejected - {type(exc).__name__}: {msg[:120]}", True
 
     def cancel_stops(self, symbol: str) -> int:
         n = 0
@@ -143,23 +155,43 @@ class PaperBroker:
 
     def ensure_protection(self, symbol: str, stop_px: float,
                           qty: float) -> tuple[bool, str]:
-        """Guarantee a working GTC stop. Swing positions hold overnight, so an
-        unprotected position is exposed to exactly the gap risk the -10% stop
-        exists to bound."""
+        """Guarantee a working GTC stop AT THE RIGHT PRICE. Swing positions hold
+        overnight, so an unprotected position is exposed to exactly the gap risk
+        the -10% stop exists to bound.
+
+        A stop that exists but sits at the wrong price is just as dangerous: a
+        split the broker did not adjust leaves it far from the market. So a
+        stale stop is cancelled and re-armed rather than trusted.
+        """
         from alpaca.trading.enums import OrderSide, TimeInForce
         from alpaca.trading.requests import StopOrderRequest
-        existing = self.stops_by_symbol().get(symbol)
-        if existing is not None:
-            return False, ""
         q = int(qty)
         if q < 1:
             return False, f"{symbol}: no shares to protect"
+        existing = self.stops_by_symbol().get(symbol)
+        rearm_note = ""
+        if existing is not None:
+            try:
+                ex_px = float(existing.stop_price)
+                ex_q = int(float(existing.qty))
+            except (TypeError, ValueError):
+                ex_px, ex_q = None, None
+            tol = max(0.01, 0.005 * abs(float(stop_px)))
+            if ex_px is not None and abs(ex_px - float(stop_px)) <= tol \
+                    and (ex_q is None or ex_q == q):
+                return False, ""
+            try:
+                self.client.cancel_order_by_id(existing.id)
+            except Exception:
+                pass
+            rearm_note = (f"stop {symbol} re-armed {ex_px:.2f} -> {stop_px:.2f} "
+                          "(stale price; split or book drift)")
         try:
             self.client.submit_order(StopOrderRequest(
                 symbol=symbol, qty=q, side=OrderSide.SELL,
                 stop_price=round(float(stop_px), 2),
                 time_in_force=TimeInForce.GTC))
-            return True, f"armed stop {symbol} @ {stop_px:.2f} ({q} sh)"
+            return True, (rearm_note or f"armed stop {symbol} @ {stop_px:.2f} ({q} sh)")
         except Exception as exc:
             return False, f"{symbol}: STOP FAILED - {type(exc).__name__}: {str(exc)[:110]}"
 
@@ -168,13 +200,20 @@ class PaperBroker:
         return [s for s in held if s in expected_stops and s not in stops]
 
     # ------------------------------------------------------------ slippage
-    def measure_fills(self, refs: dict[str, dict]) -> list[Fill]:
+    def measure_fills(self, refs: dict[str, dict],
+                      already: set[str] | None = None) -> list[Fill]:
         """Compare each filled order to the price its signal was computed on.
 
         This is the single number the whole live exercise exists to produce:
         the backtest assumed 20bps per side, and only real fills can say
         whether that was optimistic.
+
+        `already` is the set of order ids whose fills have been recorded before.
+        Without it, `recent_orders(days=5)` re-reports the same fill on every
+        run for five days -- inflating the sample ~10-15x and tripping the
+        "n >= 20 fills, slippage has converged" trigger on two real fills.
         """
+        already = already or set()
         out = []
         for o in self.recent_orders(days=5):
             if not o.filled_at or not o.filled_avg_price:
@@ -182,6 +221,8 @@ class PaperBroker:
             coid = o.client_order_id or ""
             ref = refs.get(coid)
             if ref is None:
+                continue
+            if str(o.id) in already:
                 continue
             fill = float(o.filled_avg_price)
             rp = float(ref["ref_px"])

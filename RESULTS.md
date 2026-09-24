@@ -6,6 +6,14 @@ per side, 8 concurrent positions, $100k start, no leverage.
 
 ## Headline
 
+> **Read this first — the table below is the ORIGINAL run, not the current
+> strategy.** It leaves idle cash earning nothing (the book is in cash 86% of
+> the time). With idle cash in T-bills (Lever 1, below) the same rules give
+> **15.1% CAGR / Sharpe 0.95 / maxDD −14.4%** against SPY's **12.9% / 0.81 /
+> −24.5%**: ahead on return, Sharpe and drawdown. The version that matches the
+> live executor (re-selects daily instead of every 42 days) is weaker: see
+> addendum 14. The real-money book is the daily book (addenda 6–14), not this.
+
 | run | CAGR | Sharpe | maxDD | Calmar | trades | win% | avg/trade |
 |---|---|---|---|---|---|---|---|
 | **highvol, long, −10% stop** | **11.77%** | **0.77** | **−14.6%** | **0.81** | 207 | 51.7% | +2.46% |
@@ -819,3 +827,271 @@ toward its offering price) and is not significant. The leg buys *after* the
 market has priced the news; its edge is whether the selling overshot, which
 headlines do not measure. Same verdict as the swing strategy's news test.
 Binary-event risk is handled by sizing (10% per name, duplicate-bet filter).
+
+---
+
+# Addendum 13 — signal sweep round 2: one robust finding, a pile of dead ends
+(2026-09-23)
+
+A second, broader signal sweep. Method: the validated engine, unmodified for
+entry gates (the same monkeypatched `overnight_share` hook prior research used)
+and a byte-identical research copy for portfolio-level hooks. The research copy
+reproduces the package baseline exactly (15.11% / 0.95 / −14.4 / 207 trades),
+and every gate window is pinned (the engine passes `overnight_window`=5 as the
+gate's second argument, which silently mis-windows any feature with a different
+natural window — a trap that produced one round of garbage before it was caught).
+
+**The control that matters here is not shuffle/flip.** Every filter below works
+by discarding trades, and discarding trades lowers drawdown mechanically. A
+random gate that keeps the same *number* of trades reaches **risk-matched CAGR
+~20** on its own:
+
+| top8, random gate | n | CAGR | Sharpe | DD | risk-matched |
+|---|---|---|---|---|---|
+| keep 55% | 138 | 8.0% | 0.85 | −15.8 | 7.3 |
+| keep 40% | 105 | 11.6% | 1.03 | −8.0 | **20.7** |
+| keep 25% | 78 | 8.3% | 1.23 | −8.3 | 14.6 |
+
+So a filter only has information if it beats ~20 at matched trade count. The
+published overnight filter (22.3) barely does. Most of what follows does not.
+
+## Feature audit — what actually separates winners from losers
+
+207 baseline trades, Spearman(feature, P&L) on the decision bar, both halves:
+
+| feature | rho | p | 21–23 | 24–26 | monotone in buckets? |
+|---|---|---|---|---|---|
+| **overnight share (5d)** | **+0.158** | **0.023** | +0.144 | +0.233 | **yes** |
+| 20d volume z | +0.120 | 0.086 | +0.133 | +0.104 | ~ |
+| 5d volume z | +0.066 | 0.348 | +0.053 | +0.079 | no |
+| 5d close location | +0.079 | 0.255 | +0.007 | +0.201 | — |
+| shock share (5d) | +0.047 | 0.504 | +0.094 | +0.011 | **no** |
+| 52w-high distance | −0.055 | 0.432 | −0.029 | −0.109 | — |
+| z-depth (20d) | −0.095 | 0.175 | −0.006 | −0.176 | — |
+| down-day count (5d) | −0.121 | 0.083 | −0.094 | −0.208 | ~ |
+| IBS of the last bar | +0.008 | 0.910 | −0.034 | +0.054 | — |
+
+Overnight-share buckets are monotone, which is why it is the one feature worth
+believing: `<0` → −0.11% (n 38), `0–0.3` → +0.16 (75), `0.3–0.6` → +3.60 (49),
+`>0.6` → **+7.21** (45). That independently re-confirms addendum 4.
+
+## Entry gates (top8, −10% stop, cash BIL; baseline 15.1 / 0.95 / −14.4 / rm 15.1)
+
+| gate | n | CAGR | Sharpe | DD | risk-matched | avg/trade | 21–23 / 24–26 |
+|---|---|---|---|---|---|---|---|
+| overnight ≥ 0.3 *(known)* | 111 | 17.2 | 1.34 | −11.1 | **22.3** | +5.00 | 15.5 / 18.7 |
+| vol z (5d) ≥ 1 | 127 | 15.4 | 1.14 | −12.0 | 18.5 | +3.94 | 12.6 / 18.2 |
+| vol z (20d) ≥ 1 | 112 | 15.6 | 1.16 | −11.0 | 20.4 | +4.47 | 15.0 / 16.2 |
+| vol z (20d) ≥ 2 | 65 | 12.8 | 1.39 | −7.9 | 23.4 | +5.84 | 13.3 / 12.4 |
+| shock share ≥ 0.5 | 144 | 16.9 | 1.28 | −8.8 | 27.7 | +3.81 | 18.4 / 15.5 |
+| 5d close loc ≤ 0.3 | 81 | 11.0 | 1.23 | −8.2 | 19.4 | +3.84 | 12.6 / 9.5 |
+| z rising (turn up) | 70 | 9.7 | 1.18 | −6.7 | 20.7 | +3.73 | 12.7 / 7.1 |
+| 52w dist ≤ −0.5 | 95 | 11.4 | 0.91 | −9.7 | 16.9 | +3.61 | 8.0 / 14.7 |
+| IBS ≤ 0.10 (closed at the low) | 99 | 4.4 | 0.56 | −11.5 | 5.4 | +0.56 | — |
+
+**shock share looked like the discovery, then failed.** `max daily drop ÷ total
+5-day drop` ≥ 0.5 scored rm 27.7 (better than the overnight filter) and is
+economically clean — one idiosyncratic down day should overreact, a multi-day
+grind is informed selling. But the threshold surface is a **spike, not a
+plateau**: 0.3→16.0, 0.4→17.9, **0.5→27.7**, 0.6→18.0, 0.7→6.7. The per-trade
+buckets are non-monotone (`0.3–0.5` +0.20, `0.5–0.7` +6.47, `>0.7` +0.87) and
+the continuous Spearman is 0.05 (p 0.50). Its portfolio result is a drawdown
+artifact of one lucky threshold. **Rejected.**
+
+**Everything else is at or below the random-gate bar.** 20d volume z (20.4) and
+overnight (22.3) are barely distinguishable from a random 40% drop (20.7);
+volume-5d, close-location, z-shape, 52w and IBS are weaker still. IBS has one
+useful *negative* reading: buying when the decision bar closed at its low is the
+worst bucket (+0.56%/trade), i.e. closing at lows is a falling-knife signal, not
+a reversal signal — but the complement is nearly all trades, so it filters
+nothing.
+
+**Regime gates** re-confirmed as unhelpful: SPY>200dma buys Sharpe for return
+(9.3 / 1.06 / −7.8, known); SPY 5d-return filters and a VIXY fear proxy are
+unstable across halves (e.g. "only crash days" 3.0% in 21–23 vs 17.5% in 24–26).
+
+## Structural knobs
+
+| knob | verdict |
+|---|---|
+| **time stop** | 20d is optimal: 5d→11.2, 10d→11.9, 15d→15.0, 20d→15.1; ≥25d never binds (reversion exits first) |
+| **fixed take-profit** | worse at every level: +5%→6.6, +8%→8.2, +10%→10.6, +15%→12.6 vs 15.1. Cutting winners is the same mistake as trailing |
+| **slippage** | 0bps→16.9, 5→16.4, 20→15.1. Earning the bid instead of paying the ask is worth ~+2pp CAGR — real but modest, and not modelable without spread data |
+| **inverse-vol sizing** | uncapped 22.3/1.16 → 22.9/1.24: a small Sharpe gain, no clean plateau |
+| **size by overnight share** | top8 15.1 → 20.0 at tilt 4, but Sharpe only 0.95→1.07 and *no* gain on the uncapped config. Not worth adopting |
+
+## The one robust finding — a correlation cap on new entries
+
+Eight slots can be eight copies of one bet. Addendum 11 found seven different
+issuers' 2× SpaceX ETFs in one night leg; the same happens in the swing book
+(three uranium names, a stock and its own leveraged ETF). The fix is the
+night-leg rule ported to the swing engine: walk candidates best-ranked first,
+drop any whose trailing 20-day returns correlate above `max_corr` with an
+already-held (or same-bar pending) name.
+
+Deployable config (`top_n 999`, `position_pct 0.10`), cash BIL, −10% stop:
+
+| config | n | CAGR | Sharpe | DD | risk-matched | 21–23 / 24–26 |
+|---|---|---|---|---|---|---|
+| uncapped baseline | 370 | 22.3 | 1.16 | −15.3 | 21.0 | 18.5 / 26.1 |
+| **+ max_corr 0.7** | 311 | 20.2 | **1.33** | **−10.3** | 28.4 | 17.0 / 23.4 |
+| + max_corr 0.6 | 281 | 20.5 | **1.47** | **−8.0** | **37.2** | 17.4 / 23.6 |
+| + max_corr 0.5 | 246 | 16.1 | 1.33 | −7.8 | 29.5 | 12.9 / 19.2 |
+| + max_corr 0.9 / 0.8 | 358 / 344 | 20.7 / 21.3 | 1.10 / 1.21 | −13.8 / −15.8 | 21.6 / 19.4 | — |
+| top8 + max_corr 0.7 | 183 | 13.8 | 1.02 | −11.5 | 17.2 | 12.5 / 15.0 |
+
+**Why it is believable**
+
+- **It beats the matched random-drop control decisively.** Uncapped random keep
+  67% (n 303) → rm 12.0; keep 50% (n 265) → rm 15.6. max_corr 0.6 (n 281) → 37.2.
+  The gain is the *correlation*, not the trade count.
+- **Plateau in the threshold** over 0.6–0.7 (Sharpe 1.33–1.47); 0.8 is the one
+  soft point. **Plateau in the window**: at 0.7, win 10/30/40 → rm 28.9 / 27.5 /
+  26.9.
+- **Controls falsify:** flip → −4.2% CAGR / −0.72 Sharpe; shuffle → +1.4% / 0.21.
+- **Survives costs:** mean trade +2.74% → +2.54% at +10bps/side extra.
+- **Bootstrap** P(mean trade ≤ 0) = 0.000 (iid/block), 0.0004 (stationary), n 311.
+- **Mechanism is a risk control, not a return forecast** — it lowers drawdown by
+  making the 8 slots more independent, exactly as the night-leg duplicate filter
+  does. It does not raise avg/trade much (+2.63 → +2.74).
+
+**What is weak about it**
+
+- **The broad cohort only half-replicates:** 4.5/0.36/−29.1 → 4.3/0.38/−22.9.
+  Drawdown improves, Sharpe barely moves — consistent with "the edge needs high
+  volatility", but it is a partial replication.
+- **0.8 is off-trend** (rm 19.4, worse than 0.9's 21.6), so the surface is not
+  perfectly smooth; 0.6–0.7 is the defensible range, not a single point.
+- It trades CAGR for Sharpe/DD. On the *live top8* config the gain is small
+  (15.1/0.95 → 13.8/1.02 at 0.7). Its value is on the uncapped config.
+
+**Stacking with the overnight filter** (both robust): uncapped `ovn ≥ 0.3` →
+16.8/1.22/−9.7/rm 25.0; adding max_corr 0.7 → 15.4/**1.36**/−8.5/rm 26.0. The
+two are complementary but not additive on return.
+
+## Verdict
+
+One adoptable finding: **`max_corr` (~0.7) on the uncapped swing book** —
+Sharpe 1.16 → 1.33, drawdown −15.3% → −10.3%, and it clears a control
+(random-drop) that the previously-published overnight filter only barely clears.
+It needs implementing in `live/executor.py` (the backtest hook alone does not
+trade it live). Do **not** adopt shock-share: it is a threshold spike. The
+overnight filter remains the best *entry-quality* improvement and still waits
+for live fills, as planned.
+
+Research scripts: `research/signals/` (`h.py` harness + `engine.py` validated
+copy + `battery_a…m.py` + `feature_audit.py`).
+
+---
+
+# Addendum 14 — external review: what held up, what did not (2026-09-23)
+
+A hostile strategy review (plus a second opinion from another model) was checked
+claim by claim against the code and the cached research data. Fixes are in
+the code; numbers below replace earlier ones where they differ.
+
+## 1. The night leg was overstated: 26.0% → 18.7% CAGR
+
+Two independent problems, both in the research data, neither in the live code.
+
+- **Candidate lookahead.** `fetch_late.py` pulled 15:30–16:00 minute bars only
+  for names whose *final close* was ≤ −6%. A name at ≤ −8% at 15:50 that bounced
+  into the close was never considered. ~2.8% of candidates rally ≥ 2.2% in the
+  last 10 minutes. Fixed: candidates are now chosen on the day's LOW (≤ −8%),
+  a superset with no lookahead; the minute store was topped up (v1 kept as
+  `lm1.v1/`). It added 129 trades: **median −94bp overnight**, winsorised mean
+  −175bp. Small in count, all on the wrong side.
+- **Bad bars.** A handful of split artifacts and renamed-ticker duplicates in
+  the SIP daily panel: HIMZ −94% "day" then **+1,250% "overnight"** (2026-03-18),
+  RGTX +274% the same night, BYAH/PHH and SWIN/AXG as identical twins. At 10%
+  per name one such night adds +125% to the leg. Removed: any overnight move
+  beyond ±100%, and same-day twins with identical returns.
+
+Live rules (R6: vol20 ≥ 60%, crowd scaling 30/n, 10% cap), 7.5bp/side:
+
+| | 2021–23 | 2024–26 | full |
+|---|---|---|---|
+| night leg, published | 5.8% / 0.37 | 52.1% / 1.48 | **26.0% / 0.99 / −25** |
+| night leg, corrected | 4.9% / 0.33 | 35.6% / 1.13 | **18.7% / 0.77 / −26** |
+| no-daytrade book (live), published | 11.6% / 0.93 | 38.4% / 1.91 | **23.8% / 1.46 / −14** |
+| no-daytrade book (live), corrected | 11.2% / 0.89 | 30.6% / 1.60 | **20.1% / 1.27 / −14** |
+| full book (+QQQ intraday), corrected | 33.6% / 1.68 | 39.8% / 1.50 | **36.5% / 1.57 / −20** |
+
+The rebuilt v1 series matches the published one exactly (ρ = 1.00), so the
+difference is the fixes, not a different pipeline. The book still works; it
+works less, and the night leg is still mostly a 2024+ phenomenon.
+
+**Live guard added.** The same split artifact can reach the live scan if our
+daily bars have not absorbed a same-day corporate action. The 15:40 scan now
+drops any name whose previous close disagrees with the quote feed's own
+previous close by > 3% (`signals.prev_close_mismatch`).
+
+## 2. How much of this survives the search
+
+Deflated Sharpe (Bailey & López de Prado; trials treated as independent, so a
+floor) and a stationary bootstrap of daily portfolio returns (20-day blocks),
+corrected series, 2021-02 → 2026-09:
+
+| | bootstrap P(mean ≤ 0) | DSR, 1 trial | 50 trials | 200 trials |
+|---|---|---|---|---|
+| no-daytrade book (live) | 0.0005 | 0.998 | **0.75** | 0.58 |
+| full book | 0.0000 | 1.000 | **0.93** | 0.82 |
+| IBS leg alone | 0.004 | 0.993 | 0.57 | 0.38 |
+| night leg alone | 0.021 | 0.965 | **0.33** | 0.18 |
+
+The combined book is robust; the night leg alone is not distinguishable from
+a lucky pick out of the variants tried. Its value is diversification.
+`report.render` now prints the daily bootstrap, skew, CVaR(5%) and worst month,
+and the deflated Sharpe when given `n_trials`.
+
+## 3. The swing book's headline depends on the calendar
+
+Same rules (top8, −10% stop, cash in BIL), fold boundaries shifted by k
+trading days — nothing else changes:
+
+| offset | 0 | 7 | 14 | 21 | 28 | 35 |
+|---|---|---|---|---|---|---|
+| CAGR | **15.1** | 16.3 | 18.9 | 7.7 | 8.3 | 5.4 |
+| Sharpe | **0.95** | 0.85 | 1.01 | 0.56 | 0.58 | 0.39 |
+| maxDD | −14.4 | −19.0 | −19.8 | −24.3 | −28.4 | −24.5 |
+
+Mean over offsets ≈ **12% / 0.72**; SPY is 12.9% / 0.81 / −24.5%. The published
+15.1% / 0.95 was a favourable alignment of the 42-day windows, which is also why
+addendum 10's refresh cadences were non-monotone (42d 16.8 · 21d 10.8 · 5d 16.1).
+The version that matches the live executor (re-selects every day) is:
+
+| daily re-selection | CAGR | Sharpe | maxDD | trades |
+|---|---|---|---|---|
+| top8 (live config) | 11.2% | 0.67 | −27.7% | 240 |
+| uncapped (`top_n` 999, 10%) | 11.1% | 0.64 | −22.9% | 401 |
+| uncapped + `max_corr` 0.7 | 8.5% | 0.58 | −18.3% | 341 |
+
+So: **the swing book does not reliably beat SPY**, and neither NEXT.md item 0
+(uncap) nor 0b (`max_corr`) helps at the cadence live actually trades. Both
+stay off. The swing book stays paper-only. Any future swing number must be
+reported as the mean over fold offsets, not one alignment.
+
+## 4. Claims checked and found not to matter here
+
+- **Delisting returns.** 0 of 207 trades (0 of 370 uncapped) were held when a
+  name stopped trading — the −10% stop and 20-day time stop exit first. But a
+  position in a name whose bars end would never have closed (every exit needs a
+  bar), so the backtest now books it at the last close −30% (Shumway 1997).
+- **Halts in the night leg.** 14 of 18,616 signals lack a next-day open (scored
+  flat); nearly all are the last date of the data. Negligible.
+- **Duplicate-bet filter and new listings.** The night universe needs 20 days
+  of bars, so a new leveraged ETF is not eligible before it has a full return
+  series; the filter's `len(r) >= 10` guard is never the binding one.
+- **Gross cap at entry prices.** Longs cannot spend cash they do not have, so
+  the cap cannot be breached by a winner. No fix needed.
+
+## 5. Open, not fixable in code
+
+- **Schwab has no market-on-open order.** The night leg's edge is in the open
+  auction (+20.1bp at the auction vs +1.9bp at 09:35, addendum 10); Schwab gets
+  a pre-market market DAY order, which a wholesaler may fill off the auction
+  print. `make review` compares every open sell with the official open — that
+  number, over the first ~50 round trips, decides whether the leg stays on
+  Schwab. Alpaca live supports real OPG orders if it does not.
+- Research data now lives in `data/research/` (gitignored, ~3 GB) instead of
+  `/private/tmp`, and the research scripts point there.

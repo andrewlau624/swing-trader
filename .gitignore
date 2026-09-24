@@ -8,3 +8,10 @@ logs/
 state/
 *.egg-info/
 .pytest_cache/
+
+# research/signals scratch (harness bar cache + run logs)
+research/signals/*.pkl
+research/signals/*.log
+
+# research datasets (SIP bars, minute bars, pickles) - ~3 GB, rebuilt by research/*/fetch_*.py
+data/research/

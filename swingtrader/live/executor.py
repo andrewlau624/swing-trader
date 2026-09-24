@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import json
 import datetime as dt
+import hashlib
 from dataclasses import dataclass, asdict, field
 from pathlib import Path
 
@@ -26,7 +27,7 @@ import pandas as pd
 
 from ..config import Config, ROOT
 from ..data import fetch_bars, refresh_bars
-from ..metrics import zscore
+from ..metrics import overnight_share, zscore
 from ..scan import scan_window
 from ..universe import all_assets
 from ..daily.book import owned_by_daily
@@ -35,6 +36,18 @@ from .lock import AccountLock, account_fingerprint
 from .notify import Notifier
 
 ET = "America/New_York"
+
+
+def _corr_above(a: "pd.Series", others: dict, max_corr: float) -> bool:
+    """True if `a` correlates above max_corr with any series in `others`."""
+    for b in others.values():
+        j = a.index.intersection(b.index)
+        if len(j) < 10:
+            continue
+        x, y = a.loc[j].values, b.loc[j].values
+        if x.std() > 0 and y.std() > 0 and float(np.corrcoef(x, y)[0, 1]) > max_corr:
+            return True
+    return False
 
 
 @dataclass
@@ -58,14 +71,29 @@ class BookState:
     equity: float = 100_000.0                          # shadow books track their own
     closed: list = field(default_factory=list)
     last_run: str = ""
+    measured: list = field(default_factory=list)       # order ids whose fills are already recorded
+    load_error: str = ""                               # set when the state file was unreadable
 
     @classmethod
     def load(cls, path: Path, name: str, live: bool, equity: float) -> "BookState":
         if path.exists():
             try:
                 return cls(**json.loads(path.read_text()))
-            except Exception:
-                pass
+            except Exception as exc:
+                # Falling back to a fresh state keeps the bot alive, but silently
+                # forgetting positions resets every time stop and P&L. Quarantine
+                # the file and surface the failure instead of hiding it.
+                stamp = dt.datetime.now().strftime("%Y%m%d%H%M%S")
+                backup = path.with_suffix(path.suffix + f".corrupt-{stamp}")
+                try:
+                    path.replace(backup)
+                except Exception:
+                    backup = None
+                st = cls(name=name, live=live, equity=equity)
+                st.load_error = (f"state {path.name} unreadable ({type(exc).__name__}); "
+                                 f"started fresh"
+                                 + (f", corrupt file kept as {backup.name}" if backup else ""))
+                return st
         return cls(name=name, live=live, equity=equity)
 
     def save(self, path: Path) -> None:
@@ -157,41 +185,65 @@ class Executor:
                           feed=self.cfg.data.feed,
                           adjustment=self.cfg.data.adjustment, verbose=False)
         bars = {s: d for s, d in bars.items() if len(d) > 150}
-        asof = max(d.index.max() for d in bars.values())
+        if "SPY" in bars and len(bars["SPY"]):
+            asof = bars["SPY"].index.max()
+        else:
+            asof = max(d.index.max() for d in bars.values())
         self.log(f"loaded {len(bars)} symbols; last complete bar {asof.date()}")
         return bars, asof
 
     # ------------------------------------------------------------- decisions
     def decide(self, bars: dict, asof: pd.Timestamp, mode: str,
                z_entry: float, state: BookState) -> tuple[list, list]:
-        """Returns (entries, exits) for the NEXT open, using bars <= asof only."""
+        """Returns (entries, exits) for the NEXT open, using bars <= asof only.
+
+        This deliberately mirrors `swingtrader.backtest.run`: the SAME formation
+        length in TRADING bars (not a calendar approximation), the same optional
+        overnight-gap quality gate and duplicate-bet (correlation) filter, and
+        the same exit rules. Any improvement to the backtest must land here too,
+        or live silently trades a strategy that was never validated.
+        """
         sel, strat = self.cfg.selection, self.cfg.strategy
-        form_start = asof - pd.Timedelta(days=int(self.cfg.walkforward.formation_days * 1.5))
-        form = {s: d.loc[(d.index >= form_start) & (d.index <= asof)]
-                for s, d in bars.items()}
-        form = {s: d for s, d in form.items()
-                if len(d) >= self.cfg.walkforward.formation_days * 0.8}
-        picked = scan_window(form, self.cfg.cohort("highvol"), sel, mode=mode)
+        need = self.cfg.walkforward.formation_days
+        form = {}
+        for s, d in bars.items():
+            w = d.loc[d.index <= asof]
+            if len(w) >= need:
+                form[s] = w.iloc[-need:]
+        picked = scan_window(form, self.cfg.cohort(strat.live_cohort), sel, mode=mode)
         watch = list(picked.index)
 
         exits, entries = [], []
         for sym, p in state.positions.items():
             pos = LivePosition(**p) if isinstance(p, dict) else p
-            if sym not in bars or asof not in bars[sym].index:
-                continue
+            # time stop is unconditional: a halted name with no bar must still
+            # be able to exit, or it becomes immortal
             if pos.bars_held >= strat.time_stop_days and mode == "reversion":
                 exits.append((sym, "time_stop"))
+                continue
+            if sym not in bars or asof not in bars[sym].index:
                 continue
             z = zscore(bars[sym]["close"].loc[bars[sym].index <= asof], strat.z_window)
             if asof in z.index and np.isfinite(z.loc[asof]):
                 if mode == "reversion" and float(z.loc[asof]) >= strat.z_exit:
                     exits.append((sym, "reversion"))
 
+        def rets_of(sym):
+            if sym not in bars:
+                return None
+            r = np.log(bars[sym]["close"].loc[bars[sym].index <= asof].astype(float)).diff()
+            r = r.iloc[-strat.corr_window:].dropna()
+            return r if len(r) >= 10 else None
+
         exiting = {s for s, _ in exits}
-        # the daily book shares this account; Alpaca nets per symbol, so a
-        # name it holds or has pending is off-limits here
         busy = set(state.positions) | set(state.pending) | self.daily_owned
         room = self.cfg.portfolio.max_positions - (len(busy) - len(exiting))
+        held_rets: dict = {}
+        if strat.max_corr is not None:
+            for h in busy:
+                rr = rets_of(h)
+                if rr is not None:
+                    held_rets[h] = rr
         for sym in watch:
             if room <= 0:
                 break
@@ -200,10 +252,26 @@ class Executor:
             z = zscore(bars[sym]["close"].loc[bars[sym].index <= asof], strat.z_window)
             if asof not in z.index or not np.isfinite(z.loc[asof]):
                 continue
-            if float(z.loc[asof]) <= z_entry:
-                entries.append((sym, float(bars[sym].loc[asof, "close"]),
-                                float(z.loc[asof])))
-                room -= 1
+            zt = float(z.loc[asof])
+            if zt > z_entry:
+                continue
+            if strat.min_overnight_share is not None:
+                hist = bars[sym].loc[bars[sym].index <= asof]
+                if len(hist) < strat.overnight_window + 2:
+                    continue
+                osh = overnight_share(hist, strat.overnight_window)
+                if not np.isfinite(osh) or osh < strat.min_overnight_share:
+                    continue
+            if strat.max_corr is not None:
+                rc = rets_of(sym)
+                if rc is not None and _corr_above(rc, held_rets, strat.max_corr):
+                    continue
+            entries.append((sym, float(bars[sym].loc[asof, "close"]), zt))
+            room -= 1
+            if strat.max_corr is not None:
+                rc = rets_of(sym)
+                if rc is not None:
+                    held_rets[sym] = rc
         return entries, exits
 
     # ------------------------------------------------------------------- run
@@ -228,6 +296,9 @@ class Executor:
         mom_path = self.state_dir / "book-momentum.json"
         rev = BookState.load(rev_path, "reversion", True, equity)
         mom = BookState.load(mom_path, "momentum", False, self.cfg.portfolio.equity)
+        for _bk in (rev, mom):
+            if _bk.load_error:
+                self.warn(_bk.load_error)
 
         # ---- 1. reconcile the live book against the broker -----------------
         # Broker positions are the only source of truth for what we HOLD.
@@ -264,22 +335,28 @@ class Executor:
                 self.log(f"  reconcile: {sym} no longer held -> closing book entry")
                 rev.closed.append({**p, "exit_date": today, "exit_reason": "broker"})
                 rev.positions.pop(sym)
+        stop_frac = (self.cfg.strategy.stop_pct or 10.0) / 100.0
         for sym, p in held.items():
             px = float(p.avg_entry_price)
             if sym not in rev.positions:
                 self.log(f"  reconcile: adopting position {sym} @ {px:.2f}")
                 rev.positions[sym] = asdict(LivePosition(
                     symbol=sym, qty=float(p.qty), entry_px=px, entry_date=today,
-                    stop_px=px * (1 - 10.0 / 100.0), peak=px))
+                    stop_px=px * (1 - stop_frac), peak=px))
             else:
-                # trust the broker's fill price over our pre-fill estimate
+                prev_q = float(rev.positions[sym].get("qty", 0.0) or 0.0)
+                new_q = float(p.qty)
+                if prev_q and abs(new_q - prev_q) > max(1.0, 0.01 * abs(prev_q)):
+                    self.warn(f"{sym}: broker qty {prev_q:g} -> {new_q:g} with no fill - "
+                              "possible split/corporate action; stop re-armed to the new basis")
+                # trust the broker's fill price over our pre-fill estimate, and
+                # rebuild the stop from the (possibly split-adjusted) basis
                 rev.positions[sym]["entry_px"] = px
-                rev.positions[sym]["qty"] = float(p.qty)
-                rev.positions[sym]["stop_px"] = max(
-                    float(rev.positions[sym].get("stop_px", 0.0)), px * 0.90)
+                rev.positions[sym]["qty"] = new_q
+                rev.positions[sym]["stop_px"] = px * (1 - stop_frac)
 
         # ---- 2. measure slippage on anything that filled --------------------
-        fills = self.broker.measure_fills(rev.order_refs)
+        fills = self.broker.measure_fills(rev.order_refs, set(rev.measured))
         if fills:
             for f in fills:
                 self.log(f"  FILL {f.side} {f.qty:.0f} {f.symbol} @ {f.fill_px:.4f} "
@@ -287,16 +364,26 @@ class Executor:
             with open(self.log_dir / "slippage.jsonl", "a") as fh:
                 for f in fills:
                     fh.write(json.dumps(asdict(f)) + "\n")
+            # record them so the next run (same day, and for 5 days after) does
+            # not re-emit the same fill into the sample
+            rev.measured.extend(f.order_id for f in fills)
+            rev.measured = rev.measured[-2000:]
+            cut = (dt.date.today() - dt.timedelta(days=6)).isoformat()
+            rev.order_refs = {k: v for k, v in rev.order_refs.items()
+                              if str(v.get("day", "")) >= cut}
             avg = np.mean([f.slippage_bps for f in fills])
             self.log(f"  measured slippage this run: {avg:+.1f} bps "
                      f"(backtest assumed +20.0)")
 
         # ---- 3. advance holding clocks and peaks ---------------------------
+        # the clock advances on every new session even for a symbol with no bar
+        # (halted / delisted): otherwise bars_held freezes and the time stop
+        # never fires, leaving an immortal position.
         for sym, p in rev.positions.items():
+            if p.get("last_bar") != str(asof.date()):
+                p["bars_held"] = int(p.get("bars_held", 0)) + 1
+                p["last_bar"] = str(asof.date())
             if sym in bars and asof in bars[sym].index:
-                if p.get("last_bar") != str(asof.date()):
-                    p["bars_held"] = int(p.get("bars_held", 0)) + 1
-                    p["last_bar"] = str(asof.date())
                 p["peak"] = max(float(p.get("peak", p["entry_px"])),
                                 float(bars[sym].loc[asof, "high"]))
 
@@ -331,24 +418,50 @@ class Executor:
                 qty = float(held[sym].qty) if sym in held else 0
                 if self.dry_run:
                     self.log(f"  [dry] would SELL {qty:.0f} {sym} ({reason})"); continue
-                o, note = self.broker.submit_exit("rev", sym, qty, today, reason)
+                o, note, rejected = self.broker.submit_exit("rev", sym, qty, today, reason)
                 (self.act if o is not None else self.warn)(note)
                 if o is not None:
                     rev.order_refs[o.client_order_id] = {
-                        "ref_px": float(bars[sym].loc[asof, "close"]),
+                        "ref_px": float(bars[sym].loc[asof, "close"]) if sym in bars
+                        and asof in bars[sym].index else float(held[sym].avg_entry_price),
                         "symbol": sym, "kind": "exit", "day": today}
                     rev.closed.append({**rev.positions.get(sym, {}),
                                        "exit_date": today, "exit_reason": reason})
                     rev.positions.pop(sym, None)
+                elif rejected:
+                    # submit_exit cancels the stop before selling; if the sell
+                    # was rejected the position is naked until we re-arm it
+                    sp = float(rev.positions.get(sym, {}).get("stop_px", 0.0) or 0.0)
+                    if sp > 0 and qty >= 1:
+                        ok2, note2 = self.broker.ensure_protection(sym, sp, qty)
+                        if ok2:
+                            self.act(f"re-armed stop after failed exit: {note2}")
+                        else:
+                            self.warn(f"{sym}: UNPROTECTED after failed exit - {note2}")
 
             budget = equity * (self.cfg.portfolio.position_pct
                                or 1.0 / self.cfg.portfolio.max_positions)
+            # the paper account is shared with the daily book, which keeps its
+            # own ledger; reserve its cash so the swing book cannot spend it and
+            # make the daily book's orders fail
+            try:
+                from ..daily.book import DailyBook, book_file
+                reserve = float(DailyBook.load(self.state_dir, 0.0, book_file("paper")).cash)
+            except Exception:
+                reserve = 0.0
+            cash_budget = max(0.0, float(acct.cash) - reserve)
             for sym, ref_px, z in rev_entries:
                 qty = budget / ref_px
                 if self.dry_run:
                     self.log(f"  [dry] would BUY {int(qty)} {sym} @ open "
                              f"(z={z:.2f}, ref {ref_px:.2f})"); continue
+                if qty * ref_px > cash_budget:
+                    self.warn(f"{sym}: entry skipped - only ${cash_budget:,.0f} free "
+                              f"after reserving the daily book")
+                    continue
                 o, note = self.broker.submit_entry("rev", sym, qty, today, ref_px)
+                if o is not None:
+                    cash_budget -= qty * ref_px
                 (self.act if o is not None else self.warn)(f"{note} z={z:.2f}")
                 if o is not None:
                     rev.order_refs[o.client_order_id] = {
@@ -383,14 +496,22 @@ class Executor:
 
         # ---- 7. tell the human, but only when something actually happened ---
         if fills or self.actions or self.warnings or self.always_notify:
+            # dedupe on CONTENT, not counts: two different events with the same
+            # number of actions/fills on one day must not silence each other
+            dedupe = hashlib.sha256(json.dumps({
+                "day": today, "actions": sorted(self.actions),
+                "warnings": sorted(self.warnings),
+                "fills": sorted(f.order_id for f in fills),
+                "equity": round(float(equity), 2),
+                "forced": bool(self.always_notify),
+            }, default=str).encode()).hexdigest()[:20]
             status = self.notifier.activity(
                 equity=equity, actions=self.actions, fills=fills,
                 positions=rev.positions, pending=rev.pending,
                 slippage=self._slippage_summary(), warnings=self.warnings,
                 log_tail=self.lines,
                 shadow={"holding": len(mom.positions), "closed": len(mom.closed)},
-                dedupe_key=f"{today}:{len(self.actions)}:{len(fills)}:"
-                           f"{len(self.warnings)}:{int(self.always_notify)}")
+                dedupe_key=dedupe)
             self.log(status)
         else:
             self.log("nothing happened - no email sent")

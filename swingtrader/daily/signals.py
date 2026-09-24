@@ -92,6 +92,19 @@ def loser_picks(rows: pd.DataFrame, *, day_ret_max: float, ibs_max: float,
     return r[m].sort_values("day_ret")
 
 
+def prev_close_mismatch(rows: pd.DataFrame, tol: float = 0.03) -> pd.Series:
+    """True where yesterday's close from our daily bars disagrees with the
+    quote feed's own previous close. That is a split or other corporate action
+    our bars have not absorbed yet, and it fakes the day's move: a 1:10 split
+    reads as -90%. The research data had exactly these (a -94% "day" followed
+    by +1,250% "overnight"). Rows without a feed value are never flagged."""
+    if "feed_prev_close" not in rows:
+        return pd.Series(False, index=rows.index)
+    fp = rows["feed_prev_close"].astype(float)
+    bad = (fp / rows["prev_close"].astype(float) - 1.0).abs() > tol
+    return bad & np.isfinite(fp) & (fp > 0)
+
+
 def dedupe_correlated(picks: pd.DataFrame, rets: dict, max_corr: float = 0.9) -> tuple[pd.DataFrame, list]:
     """One position per underlying bet. Walk the picks most-beaten first and
     drop any whose last-20-day returns correlate above max_corr with one

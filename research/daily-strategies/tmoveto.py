@@ -1,4 +1,4 @@
-import sys; sys.path.insert(0,"/private/tmp/claude-501/-Users-andrewlau-Documents-Code-Projects-swing-trader/a8c2ed99-2407-460f-90bd-79c42fa36e6e/scratchpad"); sys.path.insert(0,"/private/tmp/claude-501/-Users-andrewlau-Documents-Code-Projects-swing-trader/b545e432-8693-429a-8b21-0970cd88b5e7/scratchpad")
+import sys; sys.path.insert(0,"/Users/andrewlau/documents/code/projects/swing-trader/data/research/swing"); sys.path.insert(0,"/Users/andrewlau/documents/code/projects/swing-trader/data/research/night")
 from h import *
 from tos import tmo
 import swingtrader.backtest as bt

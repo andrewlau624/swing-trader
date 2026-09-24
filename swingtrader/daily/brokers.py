@@ -34,6 +34,27 @@ ET = "America/New_York"
 OPEN = "new"   # any non-terminal state; DailyBook only cares about TERMINAL
 
 
+def _fallback_clock():
+    """Best-effort market clock when Alpaca is unreachable. Knows weekdays and
+    RTH hours but NOT holidays, so it is a degradation, not a substitute."""
+    from zoneinfo import ZoneInfo
+    now = dt.datetime.now(ZoneInfo(ET))
+
+    def at(d, h, m):
+        return d.replace(hour=h, minute=m, second=0, microsecond=0)
+
+    today_open, today_close = at(now, 9, 30), at(now, 16, 0)
+    is_open = now.weekday() < 5 and today_open <= now < today_close
+    if now < today_open:
+        nxt_open = today_open
+    else:
+        nxt_open = at(now + dt.timedelta(days=1), 9, 30)
+        while nxt_open.weekday() >= 5:
+            nxt_open += dt.timedelta(days=1)
+    nxt_close = today_close if now < today_close else at(nxt_open, 16, 0)
+    return SimpleNamespace(is_open=is_open, next_open=nxt_open, next_close=nxt_close)
+
+
 class AlpacaAdapter:
     """Thin pass-through over live.broker.PaperBroker (or a test double)."""
 
@@ -150,12 +171,18 @@ class SchwabAdapter:
 
     def clock(self):
         # the exchange calendar is the same everywhere; Alpaca's clock is free
-        # and already trusted by the rest of the code
+        # and already trusted by the rest of the code. If Alpaca is unreachable
+        # we degrade to a weekday/time clock rather than taking the book down.
         if self._clock is not None:
             return self._clock()
-        from alpaca.trading.client import TradingClient
-        k, s = require_alpaca_keys()
-        return TradingClient(k, s, paper=True).get_clock()
+        try:
+            from alpaca.trading.client import TradingClient
+            k, s = require_alpaca_keys()
+            return TradingClient(k, s, paper=True).get_clock()
+        except Exception as exc:
+            print(f"  WARN: Alpaca clock unavailable ({type(exc).__name__}) - using "
+                  "weekday/time fallback (holidays NOT handled)")
+            return _fallback_clock()
 
     def _acct(self) -> dict:
         from schwab.client import Client

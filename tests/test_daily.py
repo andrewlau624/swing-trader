@@ -430,3 +430,33 @@ def test_duplicate_bets_collapse_to_one():
     # no history -> kept (never silently dropped)
     k2, _ = sg.dedupe_correlated(pd.DataFrame(index=["NEW"]), {}, 0.9)
     assert list(k2.index) == ["NEW"]
+
+
+def test_reconcile_books_a_vanished_position_at_last_price(tmp_path, monkeypatch):
+    """A position the broker no longer holds must not be credited at its ENTRY
+    price -- that invents cash and silently discards the P&L."""
+    ex = _executor(tmp_path, monkeypatch, held={})
+    ex._last_price = lambda sym, fallback: 7.0
+    book = DailyBook(cash=1000, start_equity=3000)
+    book.positions["X"] = {"qty": 10, "avg_px": 10.0, "leg": "night",
+                           "entry_date": "2026-09-20"}
+    ex.reconcile(book, "2026-09-23")
+    assert "X" not in book.positions
+    assert book.cash == pytest.approx(1000 + 70.0), "credited the entry price, not the last mark"
+    assert book.closed and book.closed[-1]["exit_px"] == 7.0
+    assert book.closed[-1]["pnl"] == pytest.approx(-30.0)
+
+
+def test_fallback_clock_is_a_weekday_rth_guess():
+    from swingtrader.daily.brokers import _fallback_clock
+    c = _fallback_clock()
+    assert isinstance(c.is_open, bool)
+    assert c.next_open.weekday() < 5 and c.next_close > c.next_open
+
+
+def test_prev_close_mismatch_catches_an_unabsorbed_split():
+    rows = pd.DataFrame({"price": [10.0, 50.0, 9.0], "prev_close": [100.0, 52.0, 10.0],
+                         "feed_prev_close": [10.2, 52.0, np.nan]}, index=["SPLT", "OK", "NOFEED"])
+    bad = sg.prev_close_mismatch(rows)
+    assert bad.to_dict() == {"SPLT": True, "OK": False, "NOFEED": False}
+    assert not sg.prev_close_mismatch(rows.drop(columns="feed_prev_close")).any()

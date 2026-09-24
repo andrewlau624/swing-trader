@@ -61,7 +61,11 @@ def _read_cache(symbol: str) -> pd.DataFrame | None:
 
 
 def _covers(df: pd.DataFrame | None, start: pd.Timestamp, end: pd.Timestamp) -> bool:
-    if df is None or df.empty:
+    # An EMPTY frame with valid range metadata is a real answer ("this symbol
+    # has no bars in this range", e.g. a delisted ticker), not a cache miss.
+    # Treating it as a miss re-requested every dead ticker on every run,
+    # defeating the empty markers fetch_bars writes on purpose.
+    if df is None:
         return False
     # Cached range must reach back far enough and forward far enough. A symbol
     # that IPO'd mid-range legitimately starts late, so allow a start later than

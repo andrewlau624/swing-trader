@@ -1,7 +1,7 @@
-__file__="/private/tmp/claude-501/-Users-andrewlau-Documents-Code-Projects-swing-trader/b545e432-8693-429a-8b21-0970cd88b5e7/scratchpad/t1550.py"
-exec(open("/private/tmp/claude-501/-Users-andrewlau-Documents-Code-Projects-swing-trader/b545e432-8693-429a-8b21-0970cd88b5e7/scratchpad/t1550.py").read().split("S50=pd.DataFrame")[0])
+__file__="/Users/andrewlau/documents/code/projects/swing-trader/data/research/night/t1550.py"
+exec(open("/Users/andrewlau/documents/code/projects/swing-trader/data/research/night/t1550.py").read().split("S50=pd.DataFrame")[0])
 import json, re
-meta=json.load(open("/private/tmp/claude-501/-Users-andrewlau-Documents-Code-Projects-swing-trader/b545e432-8693-429a-8b21-0970cd88b5e7/scratchpad/asset_meta.json"))
+meta=json.load(open("/Users/andrewlau/documents/code/projects/swing-trader/data/research/night/asset_meta.json"))
 def kind(s):
     n=(meta.get(s,{}).get('name') or '')
     if re.search(r'([123](\.5)?|-[123])[xX]\b|Ultra|Leveraged|Inverse|Bull\b|Bear\b|Daily .*(Bull|Bear|Target)|2x|3x', n): return 'levETF'
@@ -23,5 +23,5 @@ x['close_move']=[C.at[d,s]/p-1 for d,s,p in zip(x.date,x.sym,x.p50)]   # 15:50->
 x['kind']=[kind(s) for s in x.sym]
 x['n_day']=x.groupby('date').sym.transform('count')
 x=x[np.isfinite(x.ret)]
-x.to_pickle("/private/tmp/claude-501/-Users-andrewlau-Documents-Code-Projects-swing-trader/b545e432-8693-429a-8b21-0970cd88b5e7/scratchpad/night_trades.pkl")
+x.to_pickle("/Users/andrewlau/documents/code/projects/swing-trader/data/research/night/night_trades.pkl")
 print(len(x), x.kind.value_counts().to_dict(), 'per day', round(len(x)/x.date.nunique(),1))

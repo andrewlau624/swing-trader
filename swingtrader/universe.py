@@ -12,6 +12,7 @@ of the problem actually got fixed.
 """
 from __future__ import annotations
 
+import datetime as dt
 import json
 import re
 from dataclasses import dataclass
@@ -46,13 +47,52 @@ class UniverseInfo:
         return 100.0 * self.n_inactive / tot if tot else 0.0
 
 
-def all_assets(use_cache: bool = True) -> UniverseInfo:
-    """Every US equity Alpaca knows about, live or delisted."""
-    path = CACHE / "assets.json"
-    if use_cache and path.exists():
+def _read_assets_cache(path) -> dict | None:
+    try:
         d = json.loads(path.read_text())
-        return UniverseInfo(d["symbols"], d["n_active"], d["n_inactive"])
+    except Exception:
+        return None
+    return d if d and d.get("symbols") else None
 
+
+def _cache_fresh(d: dict, max_age_days: float) -> bool:
+    fetched = d.get("fetched_at")
+    if not fetched:
+        return False                      # legacy cache: refresh once, then it is dated
+    try:
+        age = dt.datetime.now(dt.timezone.utc) - dt.datetime.fromisoformat(fetched)
+        return age.days < max_age_days
+    except Exception:
+        return False
+
+
+def all_assets(use_cache: bool = True, max_age_days: float = 7) -> UniverseInfo:
+    """Every US equity Alpaca knows about, live or delisted.
+
+    The cache is dated and expires: new listings and delistings must enter the
+    universe on their own. An undated (legacy) cache is refreshed once and then
+    carries a `fetched_at`. If the refresh fails (offline, no keys) a stale
+    universe is used rather than crashing.
+    """
+    path = CACHE / "assets.json"
+    cached = _read_assets_cache(path) if (use_cache and path.exists()) else None
+    if cached is not None and _cache_fresh(cached, max_age_days):
+        return UniverseInfo(cached["symbols"], cached["n_active"], cached["n_inactive"])
+    try:
+        info = _fetch_assets()
+    except Exception:
+        if cached is not None:
+            return UniverseInfo(cached["symbols"], cached["n_active"], cached["n_inactive"])
+        raise
+    CACHE.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps({
+        "symbols": info.symbols, "n_active": info.n_active, "n_inactive": info.n_inactive,
+        "fetched_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+    }))
+    return info
+
+
+def _fetch_assets() -> UniverseInfo:
     from alpaca.trading.client import TradingClient
     from alpaca.trading.enums import AssetClass, AssetStatus
     from alpaca.trading.requests import GetAssetsRequest
@@ -78,13 +118,7 @@ def all_assets(use_cache: bool = True) -> UniverseInfo:
 
     act = sorted({a.symbol for a in active if keep(a)})
     ina = sorted({a.symbol for a in inactive if keep(a)} - set(act))
-    info = UniverseInfo(sorted(set(act) | set(ina)), len(act), len(ina))
-
-    CACHE.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(
-        {"symbols": info.symbols, "n_active": info.n_active, "n_inactive": info.n_inactive}
-    ))
-    return info
+    return UniverseInfo(sorted(set(act) | set(ina)), len(act), len(ina))
 
 
 def passes_cohort(bars: pd.DataFrame, cohort: CohortCfg) -> bool:
