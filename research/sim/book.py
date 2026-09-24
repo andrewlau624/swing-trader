@@ -180,6 +180,7 @@ class Params:
     tilt_k: float = 0.25                  # k for tilt="live"
     margin_rate: float = 0.12             # Schwab debit rate, small balances (annual)
     min_edge_bps: float | None = None     # skip night names whose round-trip cost exceeds this
+    name_cap: float | None = None         # hard cap per night name AFTER the tilt, fraction of the leg
 
 
 class Sim:
@@ -197,7 +198,8 @@ class Sim:
 
     # one day of P&L, in dollars
     def day_pnl(self, E: float, d, p: Params) -> tuple[float, dict]:
-        pnl, info = 0.0, {"night_v": 0.0, "ibs_v": 0.0}
+        pnl, info = 0.0, {"night_v": 0.0, "ibs_v": 0.0, "night": 0.0, "ibs": 0.0,
+                          "noise": 0.0, "idle": 0.0, "margin": 0.0}
         # --- night leg
         leg = p.night_w * E; used = 0.0
         nd = self.N.get(d)
@@ -213,11 +215,14 @@ class Sim:
             if p.min_edge_bps is not None:
                 ok = 2 * c <= p.min_edge_bps
             per = leg * nd.frac * w
+            if p.name_cap is not None:
+                per = np.minimum(per, leg * p.name_cap)
             sh = np.floor(per / nd.price) if p.whole else per / nd.price
             sh = np.where(ok, sh, 0.0)
             v = sh * nd.close
             used = float(v.sum())
-            pnl += float((v * (nd.ret - 2 * c / 1e4)).sum())
+            x = float((v * (nd.ret - 2 * c / 1e4)).sum())
+            pnl += x; info["night"] += x
             info["night_v"] = used
         # --- filler: the night leg's unused money rides the index overnight
         if p.filler:
@@ -226,7 +231,8 @@ class Sim:
             if np.isfinite(r) and spare > 0:
                 px = self.C.at[d, p.filler]
                 sh = np.floor(spare / px) if p.whole else spare / px
-                pnl += sh * px * (r - 2 * p.filler_cost_bps / 1e4)
+                x = sh * px * (r - 2 * p.filler_cost_bps / 1e4)
+                pnl += x; info["night"] += x
                 info["night_v"] += sh * px
         # --- IBS leg
         ibs_leg = p.ibs_w * E; iused = 0.0
@@ -234,21 +240,25 @@ class Sim:
             per = ibs_leg / len(self.I[d])
             sh = np.floor(per / o1) if p.whole else per / o1
             iused += sh * o1
-            pnl += sh * o1 * (r - 2 * p.ibs_cost_bps / 1e4)
+            x = sh * o1 * (r - 2 * p.ibs_cost_bps / 1e4)
+            pnl += x; info["ibs"] += x
         idle = ibs_leg - iused
-        pnl += idle * self._idle_ret(d, p.ibs_idle)
+        x = idle * self._idle_ret(d, p.ibs_idle)
+        pnl += x; info["idle"] += x
         info["ibs_v"] = iused + (idle if p.ibs_idle not in ("bil", "cash") else 0.0)
         # --- margin interest on an overnight debit
         debit = info["night_v"] + info["ibs_v"] - E
         if debit > 0:
             pnl -= debit * p.margin_rate / 252
+            info["margin"] -= debit * p.margin_rate / 252
         # --- intraday leg
         if p.noise_on:
             for s, share in p.noise.items():
                 z = self.NZ[s]
                 if d in z.index:
                     lev = min(float(z.at[d, "lev"]), p.noise_cap) * share
-                    pnl += E * lev * float(z.at[d, "ret"])
+                    x = E * lev * float(z.at[d, "ret"])
+                    pnl += x; info["noise"] += x
         return pnl, info
 
     def _idle_ret(self, d, how: str) -> float:
@@ -275,11 +285,15 @@ class Sim:
             if i and i % 21 == 0:
                 E += monthly; dep += monthly; sp += monthly
             before = E
-            pl, _ = self.day_pnl(E, d, p)
+            pl, info = self.day_pnl(E, d, p)
             E += pl
             s = self.spy.get(d, 0.0); sp *= 1 + (s if np.isfinite(s) else 0.0)
-            rows.append((d, E, dep, sp, pl / before if before else 0.0))
-        return pd.DataFrame(rows, columns=["date", "E", "dep", "spy", "r"]).set_index("date")
+            k = before if before else 1.0
+            rows.append((d, E, dep, sp, pl / k, info["night"] / k, info["ibs"] / k,
+                         info["noise"] / k, (info["idle"] + info["margin"]) / k,
+                         info["night_v"] / (p.night_w * before) if p.night_w and before else 0.0))
+        return pd.DataFrame(rows, columns=["date", "E", "dep", "spy", "r", "r_night", "r_ibs",
+                                           "r_noise", "r_cash", "night_used"]).set_index("date")
 
 
 # ---------------------------------------------------------------- stats

@@ -1181,6 +1181,9 @@ where leverage *loses* in 2021–23 (26.4 → 25.6). That is why it is gated.
 - **QQQ + SMH intraday** (`daily.noise_extra: {SMH: SOXX}`): the budget splits
   equally, and SMH trades SOXX on days the IBS leg holds SMH. Sharpe 1.76 →
   1.89 with better return in both halves; 2024–26 drawdown −13 → −15.
+  **Correction (addendum 17):** year by year it trails QQQ alone in 4 of 6
+  years. Nearly all of the gain is 2025 (+16pp). Keep it as a
+  diversification bet, not a proven gain.
 - **Overnight leverage gate** (`daily.lever_weight: 0.65`, `signals.lever_ok`):
   both overnight legs go to 0.65 only after **50 night exits average ≤ 10bp/side
   against the official open**, no kill rule is active and realised drawdown
@@ -1229,3 +1232,67 @@ where leverage *loses* in 2021–23 (26.4 → 25.6). That is why it is gated.
   is far too big.
 - The Monte Carlo in addendum 15 resamples the fitting period. Treat it as
   the optimistic end of a range, not a forecast.
+
+---
+
+# Addendum 17 — how optimized is it? Versions in dollars (2026-09-24)
+
+Scripts: `research/sim/optimize.py` (sweeps, levers) and `research/sim/versions.py`
+(history, Monte Carlo). Same account throughout: $3,000 on 2021-07-06 plus
+$1,000 every 21 sessions, whole shares, tiered night costs.
+
+## The parameter surface is flat. Tuning is done
+
+One-at-a-time sweeps around the shipped config (full-period CAGR, shipped = 39.2%):
+
+| knob (shipped) | range tested | CAGR range | verdict |
+|---|---|---|---|
+| vol20 floor (0.60) | 0.4–0.8 | 37.9–39.6 | plateau |
+| crowding cutoff (30) | 15–60 | 38.7–39.8 | plateau |
+| duplicate-bet corr (0.9) | 0.7–off | 38.6–39.8 | plateau |
+| tilt k (0.25) | 0–0.6 | 34.9 (off) / 38.0–39.2 | plateau once on |
+| IBS top-k (3) | 2–5 | 38.8–40.1 | plateau |
+| IBS threshold (0.2) | 0.1–0.3 | 36.7–42.5 | 0.25 best cell, within search noise |
+| intraday cap (1.5x) | 1.0–3.5x | 36.1–40.3 | **a 4x day-trading account buys ~1pp** |
+| night per-name cap (0.10) | 0.06–0.20 | 32.0–48.1 | an exposure dial, see below |
+| overnight gross (1.0x) | 1.3–1.8x | 46.3–55.6 | an exposure dial, Sharpe falls 1.82 → 1.56 |
+
+No knob has a whole neighbourhood that beats the shipped value in both
+halves by more than ~2pp. After ~60 variants, the best cell of a sweep is
+mostly luck. **The rules are optimized. What remains is how much risk to take.**
+
+The one structural inefficiency: the night leg deploys only **52% of its 50%
+allocation** on an average day (about 5 names × 10%). Roughly a quarter of the
+book is in cash overnight. A higher per-name cap uses that cash (0.15 →
+45.3%, Sharpe 1.80, −18%), but it is concentration, not an edge. It is not
+adopted, and neither is leverage beyond the gated 1.3x.
+
+## Every version, in dollars ($65k deposited by 2026-09-18)
+
+| version (first live) | 2021-12 | 2022-12 | 2023-12 | 2024-12 | 2025-12 | **2026-09-18** | TWR/yr | Sharpe | maxDD |
+|---|---|---|---|---|---|---|---|---|---|
+| deposited | 8,000 | 20,000 | 32,000 | 44,000 | 56,000 | 65,000 | | | |
+| SPY buy & hold | 8,641 | 18,257 | 36,646 | 59,091 | 83,102 | **103,143** | 13.0% | 0.80 | −24.5% |
+| V0 swing book (paper) | 8,052 | 21,560 | 37,050 | 53,195 | 77,939 | **94,661** | 12.4% | 0.87 | −13.2% |
+| V1 IBS + night (09-22) | 8,961 | 21,594 | 38,104 | 57,540 | 100,739 | **126,343** | 20.2% | 1.35 | −13.9% |
+| V2 + QQQ intraday (09-23) | 9,322 | 25,383 | 49,119 | 78,866 | 136,186 | **170,786** | 35.1% | 1.75 | −13.3% |
+| **V3 shipped (09-24)** | 9,514 | 27,189 | 47,448 | 75,972 | 157,376 | **192,653** | 39.7% | 1.81 | −15.2% |
+| V4 V3 + gated 1.3x | 9,825 | 28,199 | 48,776 | 80,051 | 187,614 | **235,952** | 46.5% | 1.73 | −19.0% |
+
+Calendar years, V3: 22 / 33 / 25 / 30 / **85** / 16%. SPY: 10 / −18 / 26 / 25 / 18 / 13%.
+2025 makes up a large share of every version's dollars. V3 beats V2 in 3 of 6
+years: the tilt helps in 5 of 6, the SMH split in 2 of 6.
+
+## Forward from 2026-09-24 ($3k + $1k/month), median (p10–p90)
+
+| | 2027-09 (dep $14k) | 2029-09 (dep $38k) | 2031-09 (dep $62k) | P(ahead of SPY) 2031 |
+|---|---|---|---|---|
+| SPY | 15.2k (13–17) | 46.8k (38–58) | 87.9k (66–115) | |
+| V3, history repeats | 17.4k (15–20) | 69.0k (54–90) | 172k (122–252) | 98% |
+| V3, pessimistic costs | 16.8k (14–20) | 62.3k (49–81) | 143k (103–209) | 93% |
+| **V3, edge halves** | **16.1k (15–18)** | **55.4k (47–65)** | **117k (95–145)** | **87%** |
+| V4, edge halves | 16.5k (15–19) | 59.3k (49–73) | 133k (100–174) | 92% |
+
+These resample 2021–26, the period the rules were fitted on, so treat even
+"edge halves" as optimistic. Before tax. First checkpoint: kill-rule verdicts
+at ~100 night round trips (about 4–6 weeks in).
