@@ -21,15 +21,17 @@ from swingtrader.daily.book import DailyBook, book_file
 
 def status(account: str):
     cfg = Config.load()
+    d, profile = cfg.daily.for_account(account)
     if not (ROOT / "state" / book_file(account)).exists() and account in ("live", "roth"):
-        print(f"=== {account.upper()} (real money): not started yet ==="); return
-    b = DailyBook.load(ROOT / "state", cfg.daily.start_equity, book_file(account))
+        print(f"=== {account.upper()} (real money){' profile ' + profile if profile else ''}: not started yet ==="); return
+    b = DailyBook.load(ROOT / "state", d.start_equity, book_file(account))
     eq = b.equity_log[-1]["equity"] if b.equity_log else b.cash
-    print(f"=== {account.upper()}{' (real money)' if account in ('live', 'roth') else ' (virtual $' + format(b.start_equity, ',.0f') + ')'} ===")
+    print(f"=== {account.upper()}{' (real money)' if account in ('live', 'roth') else ' (virtual $' + format(b.start_equity, ',.0f') + ')'}"
+          f"{' profile ' + profile if profile else ''} ===")
     print(f"daily book  equity ${eq:,.2f}  start ${b.start_equity:,.0f}  "
           f"({(eq/b.start_equity-1)*100:+.1f}%)  cash ${b.cash:,.2f}  last run {b.last_run or '-'}")
     print(f"day-trade leg {'LIVE' if b.daytrade_live else 'shadow'} "
-          f"(mode {cfg.daily.daytrade_mode}; on at ${cfg.daily.daytrade_min_equity:,.0f}; "
+          f"(mode {d.daytrade_mode}; on at ${d.daytrade_min_equity:,.0f}; "
           f"intraday leverage cap {b.noise_lev_cap:g}x)")
     for s, p in sorted(b.positions.items()):
         print(f"   {p['leg']:6} {s:6} {float(p['qty']):10.4f} @ {float(p['avg_px']):9.2f}  since {p['entry_date']}")
@@ -46,12 +48,17 @@ def status(account: str):
                   f"avg {np.mean(r)*100:+.2f}%  P&L ${pnl:+,.2f}")
     for leg, k in b.killed.items():
         print(f"KILLED  {leg}: since {k['date']} - {k['reason']}")
-    lw = cfg.daily.lever_weight
-    print(f"overnight leverage {'ON (' + format(lw, '.2f') + ' per leg)' if b.levered and lw else 'off'}"
-          f"; open-sell route {'Schwab default (directed refused ' + b.route_refused + ')' if b.route_refused else 'listing exchange'}"
-          if account in ("live", "roth") else
-          f"overnight leverage {'ON (' + format(lw, '.2f') + ' per leg)' if b.levered and lw else 'off'}")
-    for sig, n in [(cfg.daily.noise_symbol, b.noise)] + sorted(b.noise_more.items()):
+    lw = d.lever_weight
+    wi, wn = (max(w, lw) if (b.levered and lw) else w for w in (d.ibs_weight, d.night_weight))
+    if account == "roth":       # an IRA never borrows (executor._cash_scale)
+        k = min(1.0, 1.0 / (wi + wn)) if wi + wn > 0 else 1.0
+        wi, wn = wi * k, wn * k
+    gate = ("gate ON" if b.levered else "gate off") if lw else "no gate"
+    print(f"overnight size {wi + wn:.2f}x (ibs {wi:.2f} + night {wn:.2f}; {gate})"
+          f"  night name cap {d.night_max_name_pct:.0%}"
+          + (f"; open-sell route {'Schwab default (directed refused ' + b.route_refused + ')' if b.route_refused else 'listing exchange'}"
+             if account in ("live", "roth") else ""))
+    for sig, n in [(d.noise_symbol, b.noise)] + sorted(b.noise_more.items()):
         if n.get("history"):
             h = [x["ret"] for x in n["history"]]
             print(f"noise {sig} (shadow) days {len(h)}  equity ${n.get('shadow_equity', 0):,.2f}  "
@@ -59,7 +66,7 @@ def status(account: str):
     ch = b.conviction.get("history", [])
     if ch or b.conviction:
         r = [x["ret"] for x in ch]
-        print(f"conviction TQQQ ({cfg.daily.conviction_mode}) trades {len(r)}"
+        print(f"conviction TQQQ ({d.conviction_mode}) trades {len(r)}"
               + (f"  win {100*np.mean(np.array(r)>0):.0f}%  avg {np.mean(r)*100:+.2f}% on TQQQ" if r else "")
               + (f"  today: {'holding ' + format(b.conviction['pos'], '+d') if b.conviction.get('pos') else ('done' if b.conviction.get('done') else 'waiting')}"
                  if b.conviction.get("day") else ""))

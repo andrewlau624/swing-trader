@@ -15,6 +15,7 @@ The 15:40 log shows what v2 would weight. Decide after the fill-cost checkpoint.
 
 `DAILY_LIVE_PROFILE=aggressive` in `.env` runs the brokerage book at 1.3x overnight
 (ungated), 20% per name, conviction live, intraday 0.6x. Remove the line to go back.
+`make daily-status` names the active profile and its real overnight size (`=== LIVE (real money) profile aggressive ===`, `overnight size 1.30x`).
 Recommended only AFTER ~50 night exits confirm open-sell cost ≤ 10bp/side: if the
 edge is half what history says, it earns ~22%/yr vs ~18% for a 68% chance of a >30% drop.
 Also shipped: the intraday cap now charges TQQQ/SQQQ 75% margin (cap 1.0 → 0.75 once conviction is live).

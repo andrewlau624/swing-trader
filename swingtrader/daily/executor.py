@@ -22,7 +22,6 @@ the swing executor skips anything listed in state/book-daily.json.
 """
 from __future__ import annotations
 
-import dataclasses
 import datetime as dt
 import json
 import math
@@ -67,17 +66,9 @@ class DailyExecutor:
                  broker: PaperBroker | None = None,
                  state_dir: Path | None = None, log_dir: Path | None = None,
                  dry_run: bool = False):
-        self.cfg, self.d = cfg, cfg.daily
+        self.cfg = cfg
         self.account = account
-        self.profile = ""
-        if account == "live":
-            self.profile = (get_env("DAILY_LIVE_PROFILE") or "").strip()
-            if self.profile:
-                over = (cfg.daily.profiles or {}).get(self.profile)
-                if over is None:
-                    raise ValueError(f"DAILY_LIVE_PROFILE={self.profile!r} is not in "
-                                     f"daily.profiles ({sorted(cfg.daily.profiles or {})})")
-                self.d = dataclasses.replace(cfg.daily, **over)
+        self.d, self.profile = cfg.daily.for_account(account)
         self.live = account in REAL_ACCOUNTS      # real money
         # Roth IRA: a cash account. No margin (so no overnight leverage and no
         # intraday leg, which shorts), and every buy is paid for in full.

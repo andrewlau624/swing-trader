@@ -7,6 +7,7 @@ means you believe you swept a parameter and in fact did not.
 """
 from __future__ import annotations
 
+import dataclasses
 import os
 import warnings
 from dataclasses import dataclass, field, fields
@@ -233,6 +234,20 @@ class DailyCfg:
     noise_lookback: int = 14
     noise_target_vol: float = 0.02
     noise_max_lev: float = 3.5       # 4x intraday limit minus the IBS leg
+
+    def for_account(self, account: str) -> tuple["DailyCfg", str]:
+        """(settings, profile name) the book for `account` actually trades.
+        The DAILY_LIVE_PROFILE override applies to "live" only."""
+        if account != "live":
+            return self, ""
+        name = (get_env("DAILY_LIVE_PROFILE") or "").strip()
+        if not name:
+            return self, ""
+        over = (self.profiles or {}).get(name)
+        if over is None:
+            raise ValueError(f"DAILY_LIVE_PROFILE={name!r} is not in "
+                             f"daily.profiles ({sorted(self.profiles or {})})")
+        return dataclasses.replace(self, **over), name
 
     def resolved_accounts(self) -> list[str]:
         """config accounts, plus "live" when .env says DAILY_LIVE=on and

@@ -909,6 +909,25 @@ def test_live_profile_overrides_only_the_brokerage_book(tmp_path, monkeypatch):
                       state_dir=tmp_path, log_dir=tmp_path)
 
 
+def test_status_shows_the_profile_the_live_book_trades(tmp_path, monkeypatch, capsys):
+    import importlib, sys as _s
+    _s.path.insert(0, "scripts")
+    daily = importlib.import_module("daily")
+    (tmp_path / "state").mkdir()
+    for acc in ("live", "paper"):
+        DailyBook(cash=1000, start_equity=1000).save(tmp_path / "state", daily.book_file(acc))
+    monkeypatch.setattr(daily, "ROOT", tmp_path)
+    monkeypatch.setenv("DAILY_LIVE_PROFILE", "aggressive")
+    daily.status("live")
+    out = capsys.readouterr().out
+    assert "=== LIVE (real money) profile aggressive ===" in out
+    assert "overnight size 1.30x (ibs 0.65 + night 0.65; no gate)" in out
+    assert "night name cap 20%" in out
+    daily.status("paper")
+    out = capsys.readouterr().out
+    assert "profile" not in out and "overnight size 1.00x" in out
+
+
 def test_roth_never_goes_above_1x_overnight_whatever_the_weights(tmp_path, monkeypatch):
     roth = DailyExecutor(Config.load(), account="roth", broker=RothBroker("5000"),
                          state_dir=tmp_path, log_dir=tmp_path)
