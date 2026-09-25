@@ -14,6 +14,22 @@ losses are one bad night, not execution. `daily-status`'s +33bp is vs the 15:50
 decision price, not a cost. At 50 exits ≤ 10bp: overnight leverage opens by
 itself, and the aggressive profile (addendum 22) becomes an option.
 
+## Addendum 26 (2026-09-24): watchdog shipped, two Sharpe levers dead
+
+- **Server, once:** add `HEALTHCHECK_URL=` to `.env` (a free healthchecks.io check: cron
+  `1,31 10-15 * * 1-5`, America/New_York, grace 30 min). Then `make notify-test`: until
+  that email arrives, no alert (including the new watchdog) is proven to reach you.
+- **New in the email:** the 16:10 run warns `watchdog: today's schedule has gaps` if a
+  phase did not run. `make review` now shows §2b (lever gate with a 95% upper bound),
+  §6 (night cost by price: the addendum 21 `night_price_min` check) and §7 (intraday
+  fill hygiene: the conviction switch-on evidence).
+- **Dead:** moving budget from overnight legs to the intraday leg on high-vol or
+  after-drop days (placebo-level, −0.23 Sharpe in 2024–26); an 11-ETF trend sleeve
+  (placebo fails in both halves, +0.06 Sharpe at best for −4.6pp/yr). Retest trend only
+  with 20+ futures markets (~$30k account).
+- **Unchanged and waiting (the user's 2–3 week hold):** aggressive profile, conviction
+  `auto`, raising `DAILY_LIVE_CAPITAL`. Decide with §2b / §7 of `make review`.
+
 ## Addendum 25 (2026-09-24): micro futures, nothing new to run
 
 No new edge in futures. The live QQQ noise leg on MNQ passes (both halves,
@@ -267,6 +283,8 @@ but "should" is not "did".
 | IBS idle half in SPY/QQQ/overnight index | **dead** | helps 2024–26 only; BIL stays (add. 16) |
 | Night leg: skip high-cost names | **dead** | cheap thin names are the best bounces (add. 16) |
 | Daily-bar spread estimators as cost model | **dead** | measure volatility, not spread, on these names (add. 16) |
+| Cross-leg regime tilt (overnight → intraday on high-vol / after-drop days) | **dead** | placebo-level; every leg earns more on high-vol days (add. 26a) |
+| Cross-asset ETF trend sleeve (TSMOM, 11 ETFs) | **dead** | placebo fails both halves; +0.06 Sharpe at best, a drawdown dial (add. 26b) |
 
 ## Ideas not yet tested
 

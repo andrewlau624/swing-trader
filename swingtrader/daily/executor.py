@@ -61,6 +61,25 @@ def phase_for(now_et: dt.datetime) -> str:
     return "reconcile"
 
 
+def heartbeat_gaps(hb: dict) -> list[str]:
+    """What today's runs are missing, from a heartbeat {session_close, runs}.
+    The timer fires 09:15 open, 10:01-15:31 intraday (12), 15:40 close,
+    15:57 flatten; on a half day only what falls before the bell counts."""
+    close = hb.get("session_close") or "16:00"
+    runs = hb.get("runs", [])
+    phases = {p for p, _ in runs}
+    out = [] if "open" in phases else ["no 09:15 open run"]
+    slots = [f"{h}:{m:02d}" for h in range(10, 16) for m in (1, 31)]
+    due = [t for t in slots if t.zfill(5) < close]
+    got = sum(p == "intraday" for p, _ in runs)
+    if got < len(due) - 2:        # a slow run can skip one slot on the lock
+        out.append(f"{got}/{len(due)} intraday runs")
+    if close >= "15:50":
+        out += [f"no {t} {p} run" for p, t in (("close", "15:40"), ("flatten", "15:57"))
+                if p not in phases]
+    return out
+
+
 class DailyExecutor:
     def __init__(self, cfg: Config, account: str = "paper",
                  broker: PaperBroker | None = None,
@@ -178,6 +197,12 @@ class DailyExecutor:
         elif phase == "flatten":
             self._flatten_noise(book, today, tif="day", kind="flat")
 
+        if not self.dry_run:
+            if trading_day:
+                self._heartbeat(today, phase, now, clock)
+            elif phase == "reconcile" and now.hour >= 16:
+                self._watchdog(today)
+
         marks = self._marks(book)
         eq = book.equity(marks)
         book.log_equity(today, eq)
@@ -194,6 +219,46 @@ class DailyExecutor:
         with open(self.log_dir / f"daily{self.tag}-{today}.log", "a") as fh:
             fh.write("\n".join(self.lines) + "\n")
         return 0
+
+    # ------------------------------------------------------------ watchdog
+    # Quiet runs send nothing, so silence cannot tell "nothing to do" from
+    # "never ran". Every trading-day run stamps state/heartbeat*.json; the
+    # 16:10 run checks today's stamps and emails if a phase is missing (a lock
+    # timeout, a crash before the failure email, a timer that did not fire).
+    # The server being down entirely is HEALTHCHECK_URL's job (scripts/daily.py).
+    def _hb_path(self) -> Path:
+        return self.state_dir / f"heartbeat{self.tag}.json"
+
+    def _heartbeat(self, today: str, phase: str, now: dt.datetime, clock) -> None:
+        try:
+            hb = json.loads(self._hb_path().read_text())
+        except Exception:
+            hb = {}
+        if hb.get("date") != today:
+            hb = {"date": today, "runs": []}
+        try:     # today's close (13:00 on a half day); clock.next_close is today's until the bell
+            hb["session_close"] = pd.Timestamp(clock.next_close).tz_convert(ET).strftime("%H:%M")
+        except Exception:
+            pass
+        hb["runs"].append([phase, now.strftime("%H:%M")])
+        try:
+            self._hb_path().write_text(json.dumps(hb))
+        except Exception as exc:
+            self.log(f"  heartbeat not saved ({exc})")
+
+    def _watchdog(self, today: str) -> None:
+        try:
+            hb = json.loads(self._hb_path().read_text())
+        except Exception:
+            hb = {}
+        if hb.get("date") != today:
+            return          # holiday, or down all day: HEALTHCHECK_URL covers that
+        missing = heartbeat_gaps(hb)
+        if missing:
+            self.warn("watchdog: today's schedule has gaps - " + "; ".join(missing)
+                      + ". Check `make daily-logs` and `make persist-status`.")
+        else:
+            self.log(f"[watchdog] all phases ran today ({len(hb['runs'])} runs)")
 
     # ------------------------------------------------------------ reconcile
     def reconcile(self, book: DailyBook, today: str) -> None:
@@ -339,7 +404,9 @@ class DailyExecutor:
                 f"overnight leverage {'ON' if ok else 'OFF'}: legs at "
                 f"{self.d.lever_weight if ok else self.d.night_weight:.2f} each - {why}")
         else:
-            self.log(f"[lever] {'on' if ok else 'off'} - {why}")
+            ucb = getattr(self, "_exit_ucb", float("nan"))
+            self.log(f"[lever] {'on' if ok else 'off'} - {why}"
+                     + (f" (95% upper bound on the mean {ucb:+.1f}bp)" if np.isfinite(ucb) else ""))
         book.levered = ok
 
     # ------------------------------------------------------ open routing
@@ -473,6 +540,7 @@ class DailyExecutor:
             n, bps = sg.night_exit_cost(sells, opens)
             routes = sg.exit_cost_by_route(sells, opens)
             self._exit_stats = sg.night_exit_cost(sells, opens, window=sg.LEVER_MIN_EXITS)
+            self._exit_ucb = sg.cost_upper_bound(sg.night_exit_costs(sells, opens, window=sg.LEVER_MIN_EXITS))
         except Exception as exc:
             self.log(f"[night] exit-cost check skipped ({type(exc).__name__}: {str(exc)[:80]})")
             return

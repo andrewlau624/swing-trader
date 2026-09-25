@@ -31,3 +31,21 @@ def test_costs_and_round_trip(monkeypatch):
     assert r.ret == pytest.approx(10.15 / 10.02 - 1)
     assert r.bt_ret == pytest.approx(10.20 / 10.00 - 1 - 15 / 1e4)
     assert r.pnl == pytest.approx(16 * (10.15 - 10.02))
+
+
+def test_noise_hygiene_counts_clean_days():
+    t = lambda s: pd.Timestamp(s, tz=ET)
+    f = pd.DataFrame([
+        dict(book="live", sym="QQQ", leg="noise", side="buy", qty=2, px=1.0, when=t("2026-09-24 10:01:05")),
+        dict(book="live", sym="QQQ", leg="noise", side="sell", qty=2, px=1.0, when=t("2026-09-24 15:57:03")),
+        dict(book="live", sym="SMH", leg="noise", side="buy", qty=1, px=1.0, when=t("2026-09-25 11:31:02"))])
+    out = review.noise_hygiene(f)
+    assert "2026-09-24: 2 fills, flat - clean" in out
+    assert "NOT flat" in out and "1 clean day(s) of 2." in out
+
+
+def test_healthcheck_ping_is_a_noop_without_a_url(monkeypatch):
+    import daily
+    monkeypatch.delenv("HEALTHCHECK_URL", raising=False)
+    monkeypatch.setattr(daily, "__name__", "daily")
+    daily.ping_healthcheck(0)       # must not raise or reach the network

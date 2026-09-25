@@ -111,13 +111,30 @@ def night_exit_cost(fills: list[dict], opens: dict, window: int = 30) -> tuple[i
     edge is in the open auction (RESULTS.md addendum 10), and every 5bp/side
     here costs ~8pp/yr; it is gone near 28bp (addendum 14). `opens` maps
     (sym, 'YYYY-MM-DD') -> official open. Returns (n measured, mean bps)."""
+    costs = night_exit_costs(fills, opens, window)
+    return len(costs), (float(np.mean(costs)) if costs else float("nan"))
+
+
+def night_exit_costs(fills: list[dict], opens: dict, window: int = 30) -> list[float]:
+    """The per-sell costs behind night_exit_cost, bps/side (+ = below the open)."""
     sells = [f for f in fills if f.get("leg") == "night" and f.get("side") == "sell"]
     costs = []
     for f in sells[-window:]:
         o = opens.get((f["sym"], str(f.get("filled_at", ""))[:10]))
         if o and o > 0 and f.get("fill_px"):
             costs.append(-(float(f["fill_px"]) / o - 1.0) * 1e4)
-    return len(costs), (float(np.mean(costs)) if costs else float("nan"))
+    return costs
+
+
+def cost_upper_bound(costs, z: float = 1.645) -> float:
+    """One-sided 95% upper bound on the mean cost (normal approximation, fine
+    from ~20 exits). Reporting only: the lever gate stays the pre-registered
+    mean <= LEVER_MAX_EXIT_BPS over LEVER_MIN_EXITS. It says how much the mean
+    could still move, e.g. a -2bp mean with a +12bp bound is not yet proof."""
+    c = np.asarray(costs, float)
+    if len(c) < 2:
+        return float("nan")
+    return float(c.mean() + z * c.std(ddof=1) / np.sqrt(len(c)))
 
 
 def exit_cost_by_route(fills: list[dict], opens: dict, window: int = 60) -> dict:

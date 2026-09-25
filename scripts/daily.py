@@ -131,7 +131,25 @@ def main(argv=None):
                     dedupe_key=f"daily-fail:{acc}:{_dt.date.today()}:{type(exc).__name__}"))
             except Exception:
                 pass
+    if not a.dry_run:
+        ping_healthcheck(rc)
     return rc
+
+
+def ping_healthcheck(rc: int) -> None:
+    """Dead-man switch for when the server itself is down: every run pings
+    HEALTHCHECK_URL (e.g. a healthchecks.io check), `/fail` if any account
+    failed. The service emails you when pings STOP, which nothing running on
+    this box can do. Never raises."""
+    from swingtrader.config import get_env
+    url = (get_env("HEALTHCHECK_URL") or "").strip().rstrip("/")
+    if not url:
+        return
+    try:
+        import requests
+        requests.get(url + ("/fail" if rc else ""), timeout=10)
+    except Exception as exc:
+        print(f"healthcheck ping failed: {type(exc).__name__}", flush=True)
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ but off. The original swing book is quarantined (`SWING_BOOK=off`).
 
 > **Picking this up again?** Read `NEXT.md` first: what is waiting on what,
 > and everything already tested and ruled out. `RESULTS.md` has the evidence
-> (addenda 1-25).
+> (addenda 1-26).
 
 ## What runs
 
@@ -75,7 +75,9 @@ Server deployment: **DEPLOY.md**. Real money and the 7-day login: **SCHWAB.md**.
 Updating a clone: `make pull` (it survives a force-push; plain `git pull` does not).
 
 Alerts go by email ([Resend](https://resend.com)) on every order, fill,
-warning, failed run, and Schwab login expiry. Quiet runs send nothing.
+warning, failed run, and Schwab login expiry. Quiet runs send nothing, so the
+16:10 run checks that every phase ran today, and `HEALTHCHECK_URL` (optional)
+pages you through an outside service if the server itself goes quiet.
 
 ## Layout
 

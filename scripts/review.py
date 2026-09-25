@@ -146,6 +146,25 @@ def round_trips(f: pd.DataFrame) -> pd.DataFrame:
     return pd.DataFrame(out)
 
 
+def noise_hygiene(f: pd.DataFrame) -> str:
+    """Per live trading day of the intraday leg: fills at the bot's :01/:31
+    decision slots, and flat by the close (bought == sold per symbol). Clean
+    days are what daily.conviction_mode: auto waits on (addendum 19)."""
+    g = f[(f.book == "live") & (f.leg == "noise")]
+    if g.empty:
+        return "No live intraday fills yet (the leg trades when the ACCOUNT holds >= $2,000)."
+    lines, clean = [], 0
+    for day, d in g.groupby(g.when.dt.date):
+        net = d.assign(q=np.where(d.side == "buy", d.qty, -d.qty)).groupby("sym").q.sum()
+        flat = bool((net.abs() < 1e-6).all())
+        late = int((d.when.dt.hour * 60 + d.when.dt.minute > 15 * 60 + 58).sum())
+        ok = flat and not late
+        clean += ok
+        lines.append(f"- {day}: {len(d)} fills, {'flat' if flat else 'NOT flat: ' + net[net.abs() > 1e-6].to_dict().__repr__()}"
+                     + (f", {late} fills after 15:58" if late else "") + (" - clean" if ok else ""))
+    return "\n".join(lines + [f"{clean} clean day(s) of {len(lines)}."])
+
+
 # ------------------------------------------------------------ signal replay
 def replay_night_signal(day: pd.Timestamp, cfg) -> set[str]:
     """What the honest research signal picks at 15:40 that day, from SIP
@@ -209,6 +228,23 @@ def main(argv=None):
     for (book, leg, side), g in f.dropna(subset=["cost_bps"]).groupby(["book", "leg", "side"]):
         say(f"- {book:5s} {leg:6s} {side:4s}: n={len(g):3d}  mean {g.cost_bps.mean():+6.1f}bp  "
             f"median {g.cost_bps.median():+6.1f}bp  worst {g.cost_bps.max():+6.1f}bp")
+
+    say("\n## 2b. Overnight leverage gate (night open sells vs the official open)")
+    say(f"Opens 1.3x at >= {sg.LEVER_MIN_EXITS} exits with mean <= {sg.LEVER_MAX_EXIT_BPS:g}bp/side. "
+        "The 95% upper bound says how far the mean could still move.")
+    for book, g in f[(f.leg == "night") & (f.side == "sell")].dropna(subset=["cost_bps"]).groupby("book"):
+        c = g.cost_bps.to_numpy()[-sg.LEVER_MIN_EXITS:]
+        say(f"- {book:5s}: {len(c)}/{sg.LEVER_MIN_EXITS} exits, mean {c.mean():+.1f}bp, "
+            f"95% upper bound {sg.cost_upper_bound(c):+.1f}bp")
+    say("\n## 6. Night-leg cost by price (addendum 21: set night_price_min 3.0 if < $10 costs <= ~20bp/side)")
+    nb = f[f.leg == "night"].dropna(subset=["cost_bps"]).copy()
+    if not nb.empty:
+        nb["bucket"] = pd.cut(nb.px, [0, 10, 30, np.inf], labels=["< $10", "$10-30", "$30+"])
+        for (book, side, bucket), g in nb.groupby(["book", "side", "bucket"], observed=True):
+            say(f"- {book:5s} {side:4s} {bucket:>6s}: n={len(g):3d}  mean {g.cost_bps.mean():+6.1f}bp  "
+                f"median {g.cost_bps.median():+6.1f}bp")
+    say("\n## 7. Intraday leg fill hygiene (conviction goes live after ~a week of clean days)")
+    say(noise_hygiene(f))
 
     rt = round_trips(f)
     say("\n## 4. Night-leg round trips: actual vs backtest on the same trades")

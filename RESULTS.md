@@ -1702,3 +1702,150 @@ one past `max_lev`, and has a test. No new signal: a futures book would call
 order path exists. Going live would need Schwab futures approval (a separate
 futures account). There is no PDT rule, and the market runs nearly 24 hours,
 with Globex moves the proxy never saw.
+
+
+# Addendum 26 — second hostile review: two Sharpe levers dead, the ops holes closed (2026-09-24)
+
+A "leave no money idle, +1 Sharpe" review. The honest arithmetic first: leverage does not
+move Sharpe, and an uncorrelated stream of Sharpe S2 lifts the book to about sqrt(S1^2 + S2^2),
+so +1 on a ~1.7-2.0 book needs an independent ~2.0 stream. The two candidates that could
+plausibly add Sharpe without new data were tested; both are dead. What shipped is
+operational: the dead-man switch and review reporting.
+
+**Shipped (no strategy change):**
+- **Watchdog.** Every trading-day run stamps `state/heartbeat*.json`; the 16:10 run emails if
+  today is missing the open, the close, the flatten, or more than 2 of the intraday runs (half
+  days: only what falls before the bell). Catches lock timeouts, crashes before the failure
+  email, and timers that did not fire.
+- **`HEALTHCHECK_URL`** (optional, `.env`): every run pings it (`/fail` if an account failed),
+  so a dead server pages you. Nothing on the box can report its own death.
+- **Lever gate: a 95% upper bound on the mean open-sell cost**, in the `[lever]` log line and
+  `make review` §2b. Reporting only: the pre-registered gate (mean <= 10bp over 50 exits) is
+  unchanged. Opening it early on a sequential test after seeing a good mean would be loosening a
+  rule after the fact.
+- **`make review` §6: night cost by price bucket** (the addendum 21 `night_price_min: 3.0`
+  check) and **§7: intraday fill hygiene** per day (flat by the close, no fills after 15:58),
+  the evidence `conviction_mode: auto` waits on.
+
+## 26a — regime-conditional budget between legs: dead (2026-09-24)
+
+Question (hostile review): the intraday leg is the crash hedge (+114bp on SPY −3% days)
+and the night leg the crash risk (−42bp). On high-risk days, move budget from the
+overnight legs to the intraday leg? Not portfolio vol targeting (dead, add. 9): total
+risk is moved, not scaled. Script: `research/sim/regime_tilt.py`.
+
+**Mechanics that constrain it.** V7's intraday cap is margin-bound: (1 − 0.5·IBS − 0.75·conv)/0.5
+= 0.75, and on regime days the vol-target leverage (median 1.06) still exceeds it. The
+night leg is bought at the close and sold at the open, so cutting it frees **no** daytime
+margin. Only IBS (held through the day) and the conviction trade free room for the
+intraday leg.
+
+**Pre-registered** (nothing searched; all reported). Flag R = SPY 20d realised vol above its
+trailing 252d 80th percentile, closes through d−1 (17% / 19% / 24% of days in 2016–20 /
+2021–23 / 2024–26). Flag D = SPY d−1 ≤ −2%. IBS bought at the d+1 open uses closes through d.
+Placebo = T3's action on random 20-session blocks, same day count, 20 seeds.
+
+CAGR / Sharpe / maxDD, time-weighted; 2021–26 is the dollar replay ($3k + $1k/21, whole shares);
+2016–20 is the holdout returns book (night half in bills before 2020, bias-corrected rebuild in 2020).
+
+| | 2021–23 | 2024–26 | 2021–26 tier | tier_hi | 2016–20 holdout | NW t of daily diff 21–26 / ho |
+|---|---|---|---|---|---|---|
+| V7 shipped (cap 0.75) | 48.6/2.23/−10 | 46.4/1.80/−13 | 47.5/1.99/−13 | 39.6/1.73/−14 | 15.5/1.05/−21 | |
+| T1 R: night ×0.5 (cut-only control) | 47.6/2.21/−10 | 42.6/1.80/−11 | 45.2/2.00/−11 | 38.3/1.75/−12 | 15.5/1.08/−17 | −1.29 / −0.12 |
+| T2 R: IBS → bills, cap 1.25 | 48.5/2.22/−10 | 38.9/1.61/−14 | 43.8/1.89/−14 | 35.9/1.62/−15 | 15.2/1.03/−19 | −1.57 / −0.14 |
+| T3 R: night ×0.5 + IBS → bills (the transfer) | 47.8/2.22/−10 | 34.8/1.57/−12 | 41.4/1.89/−12 | 34.6/1.63/−13 | 15.2/1.06/−19 | −2.07 / −0.16 |
+| T4 R: T3 + conviction off, cap 2.0 | 39.0/2.08/−10 | 35.7/1.66/−12 | 37.4/1.86/−12 | 30.9/1.59/−13 | 15.9/1.24/−10 | −2.65 / −0.00 |
+| T5 D: T3 on SPY d−1 ≤ −2% | 44.2/2.13/−10 | 44.2/1.77/−13 | 44.2/1.93/−13 | 36.6/1.66/−14 | 13.4/0.93/−18 | −1.93 / −1.04 |
+
+Placebo, Sharpe change vs V7: T3 −0.01 / −0.23 / +0.02 (2021–23 / 2024–26 / holdout) vs
+placebo mean −0.04 / −0.08 / −0.02; T3 beats 11/20, 3/20, 15/20. Indistinguishable from
+random, and worse than random in 2024–26.
+
+Episodes (%): COVID crash V7 −12.9, T1 −10.7, T3 −10.8, **T4 −2.4**; COVID rebound V7 +13.3,
+T3 +3.0, T4 +5.1; 2022 bear V7 +39.3, T3 +41.1, T4 +21.7; Aug 2024 V7 −2.7, T3 −0.3;
+Apr 2025 V7 +12.8, T3 +7.7.
+
+**Why it fails.** The premise holds on crash *days* but not in a high-vol *regime*. On R days
+(2021–26) every leg earns more, not less: night +6.6bp/day of equity (sd 100) vs +4.9 (sd 77)
+otherwise, IBS +3.5 vs +3.1, intraday +11.4 vs +6.4. Per unit of risk the night and IBS legs
+are about as good on R days as on other days, so taking them off gives up edge. The −42bp
+night average is concentrated in a few gap days that a lagged vol flag does not isolate
+(the same lesson as add. 18's rejected vol > 30% halving: it gives back the rebound).
+Moving IBS to bills to free margin doesn't help either: the intraday leg's extra leverage
+earns less than the IBS trades it replaces (T2).
+
+**Verdict: dead.** No variant raises Sharpe in both halves. T3 (the actual hypothesis) costs
+6pp/yr and −0.23 Sharpe in 2024–26 (t −2.07). The one tempting row, T4 (holdout Sharpe +0.19,
+maxDD −21 → −10, COVID −2%), gives up 10pp/yr and Sharpe in both 2021–26 halves: it is a
+drawdown-for-return trade, not a Sharpe gain. T1 is neutral (Sharpe +0.00/+0.01, maxDD −2pp,
+−2.3pp/yr) and adds nothing over the weekend/dedupe guards already live. Do not retest
+cross-leg tilts on lagged realised-vol or prior-day-drop flags.
+
+## 26b — a cross-asset trend sleeve as a diversifier: dead as a Sharpe lever (2026-09-24)
+
+`research/sim/trend_sleeve.py` (36 s). Question from the hostile review: the book is all US
+equity, short-horizon. Does a genuinely different stream, time-series momentum across asset
+classes, raise its Sharpe?
+
+**Setup (pre-registered).** Universe fixed before looking: every non-sector, non-leveraged,
+non-VIX ETF in `etf_daily.parquet`: SPY QQQ IWM EFA EEM TLT IEF GLD SLV USO HYG (total-return
+prices; no UUP/DBC in the cache). Signals at close t, traded at the close of t+1, monthly.
+A = 12-1 sign, long-only 1/N; B = 3/6/12 sign blend, long-only; C = B inverse-vol at 10%
+ex-ante vol, gross ≤ 1; D = C long/short (brokerage only; 0.5%/yr borrow). Costs 2bp (tier)
+and 5bp (tier_hi) per side on turnover. Idle sleeve cash earns BIL. Placebo: scores shuffled
+across assets at each rebalance, 200 seeds.
+
+**Standalone** (CAGR / Sharpe / maxDD, tier; tier_hi within 0.02 Sharpe, turnover 1–6x/yr):
+
+| | 2017-20 holdout | 2021-23 | 2024-26 | full | placebo beats (3 periods) |
+|---|---|---|---|---|---|
+| A 12-1 long-only | 4.0 / 0.45 / −21 | 2.0 / 0.31 / −8 | 18.7 / 1.58 / −9 | 7.3 / 0.78 / −21 | – |
+| **B 3/6/12 long-only** | 5.6 / 0.86 / −10 | 2.4 / 0.44 / −6 | 14.6 / 1.56 / −6 | **7.0 / 0.99 / −10** | 94% / **38%** / **10%** |
+| C vol-scaled | 7.0 / 0.86 / −13 | 1.2 / 0.17 / −15 | 12.2 / 1.43 / −7 | 6.6 / 0.77 / −15 | 74% / 49% / 20% |
+| D long/short | 4.7 / 0.73 / −9 | −0.3 / 0.00 / −18 | 8.6 / 1.20 / −5 | 4.2 / 0.60 / −18 | 90% / 40% / 5% |
+| C weekly (robustness) | 6.9 / 0.93 / −14 | 1.7 / 0.23 / −17 | 13.0 / 1.57 / −7 | 6.9 / 0.85 / −17 | |
+| equal-weight buy & hold, 11 ETFs | 10.2 / 0.83 / −26 | 3.3 / 0.33 / −20 | 21.8 / 1.71 / −11 | 11.1 / 0.91 / −26 | |
+
+The timing adds nothing in the two periods that judge the book: shuffled scores (same
+exposure, wrong assets) match or beat the real signal in 2021-23 and 2024-26. The 2024-26
+Sharpe is beta (gold, equities and credit all rose); equal-weight buy-and-hold does as well.
+Only the 2017-20 holdout (COVID) shows trend timing, the classic crisis-alpha case. With 11
+ETFs, 5 of them equity, there is too little breadth: TSMOM's published Sharpe comes from 50+
+futures markets.
+
+**Against V7 (2021-02 → 2026-09, tier).** Correlation +0.18 (B), +0.08 (D). It is **not a crash
+hedge**: on the 11 SPY ≤ −3% days correlation rises to +0.3 and the sleeve loses 15–31bp
+while V7 makes +166bp (the intraday leg). Monthly trend is too slow for one-day crashes. The
+ceiling at that correlation, max Sharpe = √((S₁² + S₂² − 2ρS₁S₂)/(1 − ρ²)) with S₁ = 1.99 and
+S₂ = 1.03, is **2.11: +0.12 at the very best**. √(S₁² + S₂²) at zero correlation is 2.24.
+
+**Combined** (2021-23 / 2024-26 | full, CAGR / Sharpe / maxDD):
+
+| | tier | tier_hi |
+|---|---|---|
+| V7 shipped | 48.6/2.23/−10 · 46.4/1.80/−13 · **47.5/1.99/−13** | **39.6/1.73/−14** |
+| B in the IBS half's idle SGOV cash, up to 0.25 (free capacity) | 47.2 / 1.97 / −13 | 38.6 / 1.68 |
+| B in idle cash, up to 0.50 | 46.8 / 1.94 / −13 | 37.6 / 1.63 |
+| carve 0.2 of ibs+night → B (overnight 1.0x) | 43.7/2.24/−9 · 42.0/1.88/−11 · **42.9/2.05/−11** | 36.8 / 1.81 / −11 |
+| carve 0.3 → B | 39.6 / 2.03 / −9 | 34.9 / 1.83 / −11 |
+| carve 0.5 → B | 34.5 / 2.02 / −9 | 31.2 / 1.86 / −10 |
+| V7 at 1.3x overnight (the budget in ibs+night) | 53.4 / 1.93 / −16 | 43.3 / 1.64 / −17 |
+| V7 + 0.15 B on margin (the budget in the sleeve) | 45.3 / 1.96 / −13 | 37.6 / 1.69 / −14 |
+| edge-halves, tier_hi: V7 / carve 0.3 → B | 17.5 / 0.89 / −20 vs 16.3 / 0.97 / −17 | |
+
+- **Idle cash: worse** in every variant, cost and half. Same verdict as addendum 16's idle IBS
+  half: SGOV stays.
+- **Carve-out:** Sharpe +0.04 to +0.08 (tier_hi +0.08 to +0.13), positive in both halves for B,
+  maxDD −13 → −9/−11. It costs 4.6pp/yr (0.2) to 8pp/yr (0.3). That is a de-risking dial, not
+  an edge: the sleeve earns about BIL + beta, and the gain matches what any low-vol,
+  low-correlation holding would give. C and D do no better than B.
+- **Overlay:** at the same 1.3x budget the sleeve earns 8pp/yr less than levering ibs+night,
+  for +0.03 Sharpe.
+
+**Verdict: dead as a Sharpe or return lever.** Placebo fails in both judged halves, the
+correlation ceiling is +0.12, and the realized best is +0.06 at −4.6pp/yr. Keep in mind: a
+B carve of 0.2–0.3 is an honest drawdown dial (edge-halves maxDD −20 → −17) if the book ever
+needs to be de-risked for a reason other than Sharpe; it beats simply cutting leverage only
+marginally. Conditional: re-test only with real breadth (micro futures across rates, FX,
+metals, energy, ags, 20+ markets), which needs the ~$30k futures account from addendum 25.
+Nothing changed in live code or config.

@@ -944,3 +944,47 @@ def test_night_tilt_v2_weights_yesterdays_winners_up_and_keeps_gross():
     assert np.all(sg.night_tilt_v2([1, 1], [-0.1, -0.2], [0, 0], k=0) == 1)
     extreme = sg.night_tilt_v2([1.0, 1.0], [-0.12, -0.12], [5.0, 0.61])
     assert extreme[0] == pytest.approx(extreme[1]), "winsorised at the fit's 99th percentile"
+
+
+# ------------------------------------------------------------ watchdog
+from swingtrader.daily.executor import heartbeat_gaps  # noqa: E402
+
+FULL_DAY = ([["open", "09:15"], ["reconcile", "09:50"]]
+            + [["intraday", f"{h}:{m:02d}"] for h in range(10, 16) for m in (1, 31)]
+            + [["close", "15:40"], ["flatten", "15:57"]])
+
+
+def test_heartbeat_full_day_has_no_gaps():
+    assert heartbeat_gaps({"session_close": "16:00", "runs": FULL_DAY}) == []
+
+
+def test_heartbeat_flags_a_missing_close_and_dead_afternoon():
+    runs = [r for r in FULL_DAY if r[0] != "close" and not r[1].startswith(("13", "14", "15"))]
+    gaps = heartbeat_gaps({"session_close": "16:00", "runs": runs})
+    assert "no 15:40 close run" in gaps and "no 15:57 flatten run" in gaps
+    assert any("6/12 intraday" in g for g in gaps)
+
+
+def test_heartbeat_half_day_expects_only_what_is_before_the_bell():
+    runs = [r for r in FULL_DAY if r[1] < "13:00"]
+    assert heartbeat_gaps({"session_close": "13:00", "runs": runs}) == []
+
+
+def test_heartbeat_then_watchdog_emails_the_gap(tmp_path, monkeypatch):
+    ex = _executor(tmp_path, monkeypatch)
+    clock = FakeBroker().clock()
+    for phase, t in [r for r in FULL_DAY if r[0] != "close"]:
+        h, m = map(int, t.split(":"))
+        ex._heartbeat("2026-09-23", phase, dt.datetime(2026, 9, 23, h, m), clock)
+    ex._watchdog("2026-09-23")
+    assert any("no 15:40 close run" in w for w in ex.warnings)
+    ex.warnings.clear(); ex._watchdog("2026-09-24")       # nothing recorded that day: not our call
+    assert ex.warnings == []
+
+
+def test_cost_upper_bound():
+    from swingtrader.daily import signals as sg
+    assert np.isnan(sg.cost_upper_bound([3.0]))
+    c = [-2.0, 1.0, -5.0, 4.0, -3.0] * 10
+    assert sg.cost_upper_bound(c) > np.mean(c)
+    n, m = sg.night_exit_cost([], {}); assert n == 0 and np.isnan(m)

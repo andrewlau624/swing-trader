@@ -201,6 +201,7 @@ fresh: no restart needed after editing it.
 | weekly | `make daily-status`: no `KILLED` lines, intraday fills clean |
 | after any `git push` | `make pull` here |
 | decisions | `make pending` (NEXT.md) |
+| once | `HEALTHCHECK_URL` in `.env` (see `.env.example`) and `make notify-test`: the 16:10 watchdog and the dead-man ping only help if alerts arrive |
 
 ## Stopping it
 
