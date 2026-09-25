@@ -5,6 +5,16 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Addendum 25 (2026-09-24): micro futures, nothing new to run
+
+No new edge in futures. The live QQQ noise leg on MNQ passes (both halves,
+placebo, stress), and so does IBS overnight weakly, but both are bets the book
+already holds. MNQ's advantage over QQQ is about +1.6pp/yr after tax (1256
+60/40, lower cost, no wash sales). The blocker is size: one MNQ is about $61k
+notional, so staying at or below 2x needs about $30k per contract. Revisit
+when the brokerage book reaches about $30k: move the noise leg from QQQ to
+MNQ in a futures account instead of adding a second copy. ORB on NQ/ES: dead.
+
 ## Addendum 24 (2026-09-24): leap book, SHADOW ONLY, off
 
 No tested rule 5x's in months: P(5x in 12 months) is 7% at best; ~4 years median,

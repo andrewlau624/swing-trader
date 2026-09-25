@@ -1619,3 +1619,86 @@ they still lost). Halts are not modelled. A live leap book in the brokerage or
 Roth account would create **wash sales** against the Roth intraday leg, which
 also trades SOXL/SOXS; a loss disallowed against an IRA is lost for good.
 Every gain is short-term.
+
+---
+
+# Addendum 25 — micro index futures (MNQ, MES): do our edges carry over? (2026-09-24)
+
+`research/sim/futures.py`. The ask: futures as a real strategy at sane leverage,
+not a one-day 5x. **Proxy, not futures data:** QQQ minute bars for NQ and SPY
+for ES, regular session only, index = 41 x QQQ / 10 x SPY. No Globex-session
+signals, no roll or basis. Overnight holds bear the ETF's close -> open gap, as
+a futures holder would. Costs, stated assumptions: $1.00 (tier) / $1.50
+(tier_hi) per micro per side plus 1 / 2 ticks. That is 0.25 / 0.41bp per side
+on MNQ and 0.58 / 1.03bp on MES at 2026 levels, but ~1.7bp on MNQ in 2016,
+when the contract was a quarter the size. ETF comparison at 1bp (the house
+noise-leg figure is 0.5bp; both shown). Tax: 30% short-term, 15% long-term;
+Section 1256 = 21% blended. 12 pre-registered variants, priors in the docstring.
+
+| tier costs, CAGR / Sharpe / maxDD | 2016-20 | 2021-23 | 2024-26 | bp/day, t (21-23 / 24-26) | placebo |
+|---|---|---|---|---|---|
+| **MNQ noise leg, vol-target <= 2x** | 8.1 / 0.71 / −23 | 19.4 / 1.52 / −7 | 10.4 / 0.85 / −18 | +5.1 t2.5 / +2.7 t1.3 | beats 10/10 |
+| QQQ noise leg (ETF, 0.5bp) | 13.9 / 1.15 / −14 | 19.8 / 1.55 / −7 | 9.2 / 0.76 / −18 | | |
+| MES noise leg | −5.0 | 13.5 | −7.5 | +3.0 / −1.3 | 8/10 |
+| MNQ ORB30 (the pick on both halves) | **−8.6** | 16.7 | 10.7 | +6.5 t2.0 / +4.3 t1.5 | ORB15 16/20 |
+| MES ORB 5/15/30 | −10 to −11 | 4 to 7 | −0.7 to −4.7 | | 17/20 |
+| MNQ IBS < 0.2, 15:59 close -> next open | 4.2 / 0.72 / −7 | 4.7 / 0.69 / −14 | 7.2 / 1.13 / −8 | +8.3 t1.2 / +17.3 t1.9 | 19/20 |
+| MES IBS, -> next open | 3.3 | 1.8 | 2.9 | t0.6 / t1.0 | 20/20 |
+| MNQ / MES IBS, -> next close | 20.0 / 7.7 | 2.6 / 2.7 | 13.2 / 6.6 | exit pick flips between halves on MNQ | 20/20 |
+
+Stress, CAGR 2016-20 / 2021-23 / 2024-26. "+1 tick" means $1.50 + 3 ticks; "fill 1 min late" means filling one minute after the signal.
+
+| Rule | +1 tick | Fill 1 min late |
+|---|---|---|
+| MNQ noise | −0.8 / +14.9 / +7.8 | +7.6 / +18.2 / +9.5 |
+| MNQ ORB15 | −12.7 / +11.4 / +6.6 | −10.1 / +11.7 / +6.1 |
+| MES noise | dead | dead |
+
+**Verdicts.**
+- **MNQ noise leg: passes.** It is positive in both halves at both cost
+  tiers, beats every placebo, and survives both stresses in 2021-26. But it
+  is **the live QQQ noise leg in another wrapper, not a new edge.** Running
+  both doubles one bet.
+- **ORB on the index: dead.** NQ is negative in 2016-20 at every range and
+  both cost tiers, which repeats addendum 24's SOXL ORB. ES is dead outright.
+- **MES noise: dead.** 2024-26 is negative.
+- **IBS overnight: passes the sign test but is weak.** MNQ -> open is
+  positive in every period, but t is below 2 in each half. It is also small:
+  4-7%/yr at 1x, in the market ~18% of nights. It is the IBS leg's bet again.
+
+**Is futures a better vehicle than the ETF?** Only slightly, and only
+recently. At 2026 contract sizes MNQ costs half of QQQ at 0.5bp. In 2016-20
+it was worse, because the contract was small. Tax does more: the same MNQ
+noise series taxed as short-term earns 10.6% after tax (2021-26), versus
+11.9% under 1256. Against QQQ at 0.5bp, futures come out about +1.6pp/yr
+after tax (11.9% vs 10.3%), roughly half from cost and half from tax. There
+is also no wash-sale rule, which matters next to the Roth.
+
+**Account size is the real constraint.** One MNQ is $61k of Nasdaq and one
+MES is $39k of S&P. MC: 1 year, 21-day blocks from 2021-26, whole contracts
+at 2026 notional, at least 1 contract when margin allows. "Tradable" means
+the account covers the assumed margin: 25% of a 7%-of-notional initial
+margin intraday, the full 7% overnight.
+
+| MNQ noise | $1k | $5k | $10k | $25k | $50k |
+|---|---|---|---|---|---|
+| leverage of 1 contract | 61x | 12x | 6.1x | 2.4x | 1.2x |
+| tradable | no | yes | yes | yes | yes |
+| median 1y / P(−50%) / P(ruin) | — | +122% / 13% / 3% | +61% / 1% / 0% | +24% / 0 / 0 | +12% / 0 / 0 |
+
+| MNQ IBS (overnight margin) | $5k | $10k | $25k | $50k |
+|---|---|---|---|---|
+| median 1y / P(−50%) / P(ruin) | −15% / 1% / **51%** | +41% / 8% / 5% | +16% / 0 / 0 | +8% / 0 / 0 |
+
+Under ~$30k (MNQ) or ~$20k (MES), one contract is already more than 2x
+leverage. The small-account medians are just forced leverage on a history
+that includes the strong 2021-23. MES at $1k runs at 39x: median −37%,
+P(ruin) 74%. At <= 2x, MNQ needs **>= $30k per contract**.
+
+**Built:** `swingtrader/leap/signals.py` has `FUTURES` specs and
+`futures_contracts()`. It sizes whole contracts, returns 0 rather than force
+one past `max_lev`, and has a test. No new signal: a futures book would call
+`daily.signals.noise_*`. Nothing is scheduled, no live code changed, and no
+order path exists. Going live would need Schwab futures approval (a separate
+futures account). There is no PDT rule, and the market runs nearly 24 hours,
+with Globex moves the proxy never saw.

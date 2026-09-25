@@ -72,3 +72,13 @@ def test_shadow_decide_and_log(tmp_path):
     l2 = l.copy(); l2[20] = 29.0
     d = shadow.decide(Config.load(), dict(open=o, high=_day()[1], low=l2, close=o), None, dt.date(2026, 9, 25))
     assert d[0]["buy"] == "SOXS" and d[0]["side"] == -1
+
+
+def test_futures_contracts_never_force_leverage():
+    # MNQ at NQ 30,000 = $60,000 notional per contract
+    assert sg.futures_contracts(1_000, 30_000, "MNQ", 1.0) == 0      # would be 60x
+    assert sg.futures_contracts(25_000, 30_000, "MNQ", 1.0) == 0     # 2.4x > 1x target
+    assert sg.futures_contracts(50_000, 30_000, "MNQ", 1.5) == 1
+    assert sg.futures_contracts(100_000, 30_000, "MNQ", 5.0) == 3    # capped at 2x
+    assert sg.futures_contracts(50_000, 7_700, "MES", 2.0) == 2      # $38.5k each
+    assert sg.futures_contracts(50_000, float("nan"), "MES", 1.0) == 0

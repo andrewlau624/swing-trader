@@ -10,6 +10,11 @@ one implementation. Two rules survived research; neither is a 5x machine:
         with a 1-minute fill delay.
   ibs - SOXL IBS < 0.2 on the last complete daily bar: hold SOXL next open
         -> following open. Positive 2016-20, 2021-23 and 2024-26.
+
+Micro futures (addendum 25): no new signal. The daily book's noise-band leg
+(daily.signals.noise_*) on MNQ passed; what a futures version needs on top
+is whole-contract sizing, below. Never force one contract past max_lev: a
+small account holding 1 MNQ is 12x at $5k, 61x at $1k.
 """
 from __future__ import annotations
 
@@ -50,3 +55,18 @@ def orb_stopped(side: int, stop: float, bar_high: float, bar_low: float) -> bool
 def ibs_entry(high: float, low: float, close: float, ibs_max: float) -> bool:
     v = ibs(high, low, close)
     return bool(np.isfinite(v) and v < ibs_max)
+
+
+# ------------------------------------------------ micro futures (addendum 25)
+FUTURES = {"MNQ": {"mult": 2.0, "tick": 0.25},     # $2 x Nasdaq-100 futures
+           "MES": {"mult": 5.0, "tick": 0.25}}     # $5 x S&P 500 futures
+
+
+def futures_contracts(equity: float, index_level: float, fut: str,
+                      target_lev: float, max_lev: float = 2.0) -> int:
+    """Whole contracts for `target_lev` x equity, never above `max_lev` x
+    equity. 0 when even one contract would exceed max_lev (account too small)."""
+    n = FUTURES[fut]["mult"] * index_level
+    if not (equity > 0 and n > 0 and np.isfinite(index_level)):
+        return 0
+    return int(np.floor(min(target_lev, max_lev) * equity / n))
