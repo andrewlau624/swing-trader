@@ -301,6 +301,34 @@ def realised_drawdown(closed: list[dict], equity: float) -> float:
     return float(min(0.0, (cum - np.maximum.accumulate(np.r_[0.0, cum])[1:]).min()) / equity)
 
 
+# Oversold overnight (addendum 27, SHADOW). SPY/QQQ after 3 down closes in a
+# row or RSI(2) < 10, bought at the close auction with the IBS leg's idle
+# money and sold at the next open. research/sim/oversold.py honest_1540 is the
+# reference: the 15:40 price stands in for today's close.
+OVERSOLD_SYMBOLS = ("SPY", "QQQ")
+OVERSOLD_RSI_MAX = 10.0
+OVERSOLD_COST_BPS = 1.0       # per side, shadow scoring (research tier)
+
+
+def oversold_trigger(closes, price: float) -> tuple[bool, str]:
+    """(fires?, why) from prior daily closes (oldest -> newest, through
+    yesterday) and the decision-time price. RSI(2) is Wilder-style EWM with
+    alpha 0.5 over the prior changes, updated with today's change."""
+    c = np.asarray(closes, float)
+    if len(c) < 4 or not np.isfinite(price):
+        return False, "not enough history"
+    d = pd.Series(np.diff(c))
+    up = d.clip(lower=0).ewm(alpha=0.5, adjust=False).mean().iloc[-1]
+    dn = (-d.clip(upper=0)).ewm(alpha=0.5, adjust=False).mean().iloc[-1]
+    chg = price - c[-1]
+    up_t, dn_t = 0.5 * up + 0.5 * max(chg, 0.0), 0.5 * dn + 0.5 * max(-chg, 0.0)
+    rsi = 100.0 if dn_t == 0 else 100 - 100 / (1 + up_t / dn_t)
+    down3 = price < c[-1] < c[-2] < c[-3]
+    why = " + ".join(x for x, on in (("3 down closes", down3),
+                                      (f"RSI(2) {rsi:.1f} < {OVERSOLD_RSI_MAX:g}", rsi < OVERSOLD_RSI_MAX)) if on)
+    return bool(down3 or rsi < OVERSOLD_RSI_MAX), why or f"RSI(2) {rsi:.1f}"
+
+
 # Overnight leverage gate (addendum 16). 1.3x overnight gross adds ~+7pp/yr
 # in both halves at backtest costs, and nearly nothing at pessimistic costs.
 # So it switches on only once live fills PROVE the costs, and off again the

@@ -70,6 +70,12 @@ def status(account: str):
               + (f"  win {100*np.mean(np.array(r)>0):.0f}%  avg {np.mean(r)*100:+.2f}% on TQQQ" if r else "")
               + (f"  today: {'holding ' + format(b.conviction['pos'], '+d') if b.conviction.get('pos') else ('done' if b.conviction.get('done') else 'waiting')}"
                  if b.conviction.get("day") else ""))
+    oh = b.oversold.get("history", [])
+    if oh or b.oversold.get("pending"):
+        r = [x["ret"] for x in oh]
+        print(f"oversold SPY/QQQ ({d.oversold_mode}) nights {len(r)}"
+              + (f"  win {100*np.mean(np.array(r)>0):.0f}%  avg {np.mean(r)*1e4:+.1f}bp net" if r else "")
+              + (f"  tonight: {', '.join(b.oversold['pending'])}" if b.oversold.get("pending") else ""))
     f = ROOT / "logs" / (f"daily-fills-{account}.jsonl" if account in ("live", "roth") else "daily-fills.jsonl")
     if f.exists():
         rows = [json.loads(l) for l in f.read_text().splitlines() if l.strip()]

@@ -227,6 +227,10 @@ class DailyCfg:
     # more). The conviction trade's TQQQ/SQQQ uses this much of equity per
     # dollar instead of 1/multiplier, which shrinks the intraday leg's room.
     conviction_margin: float = 0.75
+    # Oversold overnight (addendum 27): SPY/QQQ after 3 down closes or RSI(2)
+    # < 10, close auction -> next open, idle IBS money. shadow = decide, log
+    # and score from SIP prices, place nothing. off = skip. (No order path yet.)
+    oversold_mode: str = "shadow"
     # Named overrides of the fields above. DAILY_LIVE_PROFILE=<name> in .env
     # applies one to the real-money brokerage book only (never paper, never
     # the Roth), so an experiment survives `make pull`. RESULTS.md addendum 22.

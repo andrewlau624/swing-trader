@@ -33,6 +33,7 @@ class DailyBook:
     noise: dict = field(default_factory=dict)       # shadow/live intraday leg state (primary: QQQ)
     noise_more: dict = field(default_factory=dict)  # further intraday instruments: signal sym -> state
     conviction: dict = field(default_factory=dict)  # TQQQ strong-first-breakout trade (shadow or live)
+    oversold: dict = field(default_factory=dict)    # SPY/QQQ oversold-overnight shadow: pending, history
     daytrade_live: bool = False
     noise_lev_cap: float = 0.0                      # set each morning from the broker's multiplier
     route_refused: str = ""                         # date Schwab last refused a directed open sell

@@ -11,7 +11,7 @@ but off. The original swing book is quarantined (`SWING_BOOK=off`).
 
 > **Picking this up again?** Read `NEXT.md` first: what is waiting on what,
 > and everything already tested and ruled out. `RESULTS.md` has the evidence
-> (addenda 1-26).
+> (addenda 1-27).
 
 ## What runs
 
@@ -43,6 +43,7 @@ The books never share a symbol, and each account has a single-writer lock.
 |---|---|---|
 | aggressive profile: 1.3x overnight ungated, 20% name cap, conviction live | `DAILY_LIVE_PROFILE=aggressive` | addendum 22. Turn on only after the fill-cost checkpoint |
 | night tilt v2 (adds yesterday's return) | `daily.night_tilt_model: v2` | addendum 23, borderline |
+| oversold overnight (SPY/QQQ after 3 down closes or RSI(2) < 10, close -> open) | `daily.oversold_mode` (shadow now) | addendum 27, post-hoc |
 | leap book (SOXL IBS / SOXL ORB) and micro-futures sizing | `leap.enabled`, shadow only, no order path | addenda 24-25: nothing 5x's quickly; MNQ needs ~$30k per contract |
 
 ## Everyday commands

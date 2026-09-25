@@ -220,6 +220,52 @@ class DailyExecutor:
             fh.write("\n".join(self.lines) + "\n")
         return 0
 
+    # ------------------------------------------------------ oversold (shadow)
+    def _oversold_shadow(self, book: DailyBook, today: str, now, clock) -> None:
+        """Score last night's shadow entries (close -> today's official open),
+        then decide tonight's. Addendum 27; places nothing."""
+        st = book.oversold
+        st.setdefault("history", [])
+        pend = st.pop("pending", {}) or {}
+        syms = list(sg.OVERSOLD_SYMBOLS)
+        bars = md.sip_daily(syms, pd.Timestamp(today) - pd.Timedelta(days=120), None)
+        for sym, e in pend.items():
+            b = bars.get(sym)
+            idx = [d.date().isoformat() for d in b.index] if b is not None else []
+            if e["date"] not in idx or today not in idx:
+                continue
+            c0, o1 = float(b.iloc[idx.index(e["date"])]["close"]), float(b.iloc[idx.index(today)]["open"])
+            r = o1 / c0 - 1 - 2 * sg.OVERSOLD_COST_BPS / 1e4
+            st["history"].append({"date": e["date"], "sym": sym, "ret": r, "usd": e.get("usd", 0.0)})
+            self.log(f"[oversold] shadow {sym} {e['date']}: close {c0:.2f} -> open {o1:.2f} = {r*1e4:+.0f}bp net")
+        close_et = pd.Timestamp(clock.next_close).tz_convert(ET)
+        if close_et.date() != now.date() or close_et.hour != 16:
+            return
+        rows, _ = md.decision_rows(syms, self.d.quote_source, log=self.log)
+        equity = self._sizing_equity(book)
+        held = book.leg_positions("ibs")
+        used = sum(float(p["qty"]) * float(p["avg_px"]) for p in held.values())
+        idle = max(0.0, self._w_ibs(book) * equity - used)
+        fire = {}
+        for sym in syms:
+            b = bars.get(sym)
+            if b is None or sym not in rows.index:
+                continue
+            prior = b[[d.date().isoformat() < today for d in b.index]]["close"].to_numpy()
+            ok, why = sg.oversold_trigger(prior, float(rows.at[sym, "price"]))
+            if ok and sym in held:
+                self.log(f"[oversold] {sym} triggered ({why}) but the IBS leg holds it - skip")
+            elif ok:
+                fire[sym] = why
+        if not fire:
+            self.log("[oversold] no trigger tonight (SPY/QQQ: 3 down closes or RSI(2) < 10)")
+            return
+        per = idle / len(fire)
+        st["pending"] = {sym: {"date": today, "usd": round(per, 2)} for sym in fire}
+        for sym, why in fire.items():
+            self.log(f"[oversold] SHADOW: would buy {sym} ${per:,.0f} at the close ({why}), "
+                     "sell at the open - no order placed")
+
     # ------------------------------------------------------------ watchdog
     # Quiet runs send nothing, so silence cannot tell "nothing to do" from
     # "never ran". Every trading-day run stamps state/heartbeat*.json; the
@@ -561,6 +607,11 @@ class DailyExecutor:
     def phase_close(self, book: DailyBook, today: str, now, clock) -> None:
         self._check_exit_cost(book, today)
         self._lever_gate(book)
+        if self.d.oversold_mode != "off":
+            try:
+                self._oversold_shadow(book, today, now, clock)
+            except Exception as exc:        # a shadow leg must never cost the night leg
+                self.log(f"[oversold] skipped ({type(exc).__name__}: {str(exc)[:80]})")
         if book.is_killed("night"):
             self.log("[night] leg killed - no new buys"); return
         close_et = pd.Timestamp(clock.next_close).tz_convert(ET)

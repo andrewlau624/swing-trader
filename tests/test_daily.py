@@ -988,3 +988,41 @@ def test_cost_upper_bound():
     c = [-2.0, 1.0, -5.0, 4.0, -3.0] * 10
     assert sg.cost_upper_bound(c) > np.mean(c)
     n, m = sg.night_exit_cost([], {}); assert n == 0 and np.isnan(m)
+
+
+# ------------------------------------------------------ oversold (shadow)
+def test_oversold_trigger():
+    from swingtrader.daily import signals as sg
+    up = np.linspace(100, 110, 30)
+    assert sg.oversold_trigger(up, 111.0)[0] is False
+    ok, why = sg.oversold_trigger(np.r_[up, 109.0, 108.0], 107.5)     # 3 down closes
+    assert ok and "3 down" in why
+    ok, why = sg.oversold_trigger(up, 104.0)                           # one sharp drop: RSI(2) < 10
+    assert ok and "RSI(2)" in why
+    assert sg.oversold_trigger([100.0, 99.0], 98.0)[0] is False        # too little history
+
+
+def test_oversold_shadow_decides_then_scores(tmp_path, monkeypatch):
+    from swingtrader.daily import executor as E
+    days = pd.bdate_range("2026-06-01", "2026-09-23")
+    closes = np.r_[np.linspace(400, 450, len(days) - 3), 448.0, 446.0, 444.0]
+    bars = pd.DataFrame({"open": closes, "close": closes}, index=days)
+    monkeypatch.setattr(E.md, "sip_daily", lambda syms, *a, **k: {"SPY": bars, "QQQ": bars * 1.1})
+    monkeypatch.setattr(E.md, "decision_rows", lambda syms, *a, **k: (
+        pd.DataFrame({"price": [442.0, 600.0]}, index=["SPY", "QQQ"]), "alpaca"))
+    ex = _executor(tmp_path, monkeypatch)
+    book = DailyBook(cash=3000.0, start_equity=3000.0)
+    now = dt.datetime(2026, 9, 24, 15, 40, tzinfo=ET)
+    clock = SimpleNamespace(next_close=pd.Timestamp("2026-09-24 16:00", tz=ET))
+    ex._oversold_shadow(book, "2026-09-24", now, clock)
+    assert set(book.oversold["pending"]) == {"SPY"}, "QQQ is up on the day: no trigger"
+    assert book.oversold["pending"]["SPY"]["usd"] == pytest.approx(1500.0)   # the idle IBS half
+    assert not ex.broker.client.submitted, "shadow places nothing"
+    # next day: scored close 09-24 -> open 09-25
+    nb = pd.concat([bars, pd.DataFrame({"open": [445.0, 447.0], "close": [443.0, 450.0]},
+                                       index=pd.to_datetime(["2026-09-24", "2026-09-25"]))])
+    monkeypatch.setattr(E.md, "sip_daily", lambda syms, *a, **k: {"SPY": nb, "QQQ": nb * 1.1})
+    ex._oversold_shadow(book, "2026-09-25", dt.datetime(2026, 9, 25, 15, 40, tzinfo=ET),
+                        SimpleNamespace(next_close=pd.Timestamp("2026-09-25 16:00", tz=ET)))
+    h = book.oversold["history"]
+    assert len(h) == 1 and h[0]["ret"] == pytest.approx(447.0 / 443.0 - 1 - 2e-4)

@@ -14,6 +14,15 @@ losses are one bad night, not execution. `daily-status`'s +33bp is vs the 15:50
 decision price, not a cost. At 50 exits ≤ 10bp: overnight leverage opens by
 itself, and the aggressive profile (addendum 22) becomes an option.
 
+## Addendum 27 (2026-09-25): oversold overnight in SHADOW, three patterns dead
+
+`daily.oversold_mode: shadow`: SPY/QQQ after 3 down closes or RSI(2) < 10, close auction
+-> next open, idle IBS money. Backtest V7 47.5% / 1.99 -> 49.9% / 2.04 (edge-halves
+17.5 -> 18.2%), but the variant is post-hoc, so it only logs `[oversold]` and scores itself.
+Decide after ~15-30 shadow nights (`make daily-status` line `oversold SPY/QQQ`): if its
+average is positive and near the backtest's +10..+30bp/night, build the order path (reuse
+the night leg's MOC buy / open-auction sell on SPY/QQQ).
+
 ## Addendum 26 (2026-09-24): watchdog shipped, two Sharpe levers dead
 
 - **Server, once:** add `HEALTHCHECK_URL=` to `.env` (a free healthchecks.io check: cron
@@ -285,6 +294,13 @@ but "should" is not "did".
 | Daily-bar spread estimators as cost model | **dead** | measure volatility, not spread, on these names (add. 16) |
 | Cross-leg regime tilt (overnight → intraday on high-vol / after-drop days) | **dead** | placebo-level; every leg earns more on high-vol days (add. 26a) |
 | Cross-asset ETF trend sleeve (TSMOM, 11 ETFs) | **dead** | placebo fails both halves; +0.06 Sharpe at best, a drawdown dial (add. 26b) |
+| Friday dips held over the weekend | **dead** | the worst down day to buy (SPY Fri <= -1%: negative all 3 periods) (add. 27) |
+| Day-of-week, turn-of-month, chase-the-up-day, 52w highs, fear spikes | **dead** | unstable across periods or ~0 (add. 27 scan) |
+| Pre-holiday session | **watch** | +14..+31bp 2021-26, mixed 2016-20, ~9 days/yr: never provable (add. 27) |
+| Multi-day oversold SPY/QQQ, next-open entry (IBS timing) | **dead** | the edge is in the overnight gap; V6 (close -> open) is in shadow (add. 27 R1) |
+| Night leg: 2/3/5-day losers | **dead** | slow slides continue; book worse every variant (add. 27 R2) |
+| Last-half-hour intraday momentum (Gao et al.) | **dead** | sign flips across periods; overlaps the noise leg (add. 27 R3) |
+| Sector-loser reversal, ETF pairs, international close->open | **dead** | duplicates IBS / no edge after costs (add. 27 R4) |
 
 ## Ideas not yet tested
 

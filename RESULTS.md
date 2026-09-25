@@ -1849,3 +1849,264 @@ needs to be de-risked for a reason other than Sharpe; it beats simply cutting le
 marginally. Conditional: re-test only with real breadth (micro futures across rates, FX,
 metals, energy, ags, 20+ markets), which needs the ~$30k futures account from addendum 25.
 Nothing changed in live code or config.
+
+
+# Addendum 27 — pattern hunt: one small survivor (oversold overnight, SHADOW), three dead (2026-09-25)
+
+A broad scan of daily-bar patterns (calendar, day-of-week, Friday dips, chase, 52w highs, fear
+spikes, breadth, flight-to-quality, multi-day oversold) found one lead; four deep tests followed.
+The scan itself: Friday dips held over the weekend are the WORST down days to buy (SPY Friday
+<= -1%: -22 / -10 / -18bp to Monday open, vs Mon-Thu down days +4 / +6 / +7); turn of month dead
+(2021-23 negative); after an up day the next day is ~0; buying a +1.5% day loses (SPY -53bp
+2016-20); strong Mondays are 2024-26 only; pre-holiday +14..+31bp 2021-26 but ~9 days/yr, never
+significant (watch only). Scripts were scratch; the deep tests below are in `research/sim/`.
+
+| | idea | verdict |
+|---|---|---|
+| R1 | multi-day oversold SPY/QQQ in the idle IBS half | V1-V5 dead; **V6 (15:40 signal, close -> next open) +2.4pp/yr, Sharpe 1.99 -> 2.04, post-hoc: built SHADOW** |
+| R2 | 2/3/5-day losers in the idle night capacity | dead (continuation, not overshoot) |
+| R3 | last-half-hour momentum (Gao et al. 2018) | dead (sign flips; noise leg already holds trend days into the close) |
+| R4 | sector-loser reversal, pairs, international overnight | dead as additions (the sector bounce is the IBS bet again) |
+
+**Built:** `daily.oversold_mode: shadow` (config.yaml). At 15:40 each book scores last night's shadow
+entries against the official open, then logs `[oversold] SHADOW: would buy SPY $X at the close (3 down
+closes / RSI(2) n)`. No order path. `make daily-status` shows `oversold SPY/QQQ (shadow) nights n  win  avg`.
+The live trigger (`signals.oversold_trigger`) matches the research formula on 100% of 2017-26 days.
+Decide after ~3-6 months of shadow nights (it fires on ~11% of days, so ~15-30 nights).
+
+## multi-day oversold trigger for the idle IBS half (2026-09-25)
+
+`research/sim/oversold.py` (~70 s). Lead from the pattern scan: after 3 down closes in a row or
+RSI(2) < 10, SPY/QQQ earn +30..60bp close-to-close the next day in 2021-26, also on days the
+IBS leg is not in. The IBS leg's half sits in T-bills on **67%** of 2021-26 sessions (it
+deploys fully on days it has a pick, not at all otherwise). Put that idle money into the trigger?
+
+**Setup.** Only idle IBS money (ibs_w × equity minus what the IBS picks use), equal over triggered
+names the IBS leg does not hold, whole shares; it replaces T-bills, so overnight gross stays
+≤ 1.0x (measured max 1.00-1.01x) and daytime margin is unchanged. Baseline V7 as shipped
+(47.5 / 1.99 / −13). Costs 1bp/side (tier), 3bp/side (tier_hi). Placebo: same entry count per
+symbol on random dates, 50 seeds. Holdout 2016-02 → 2020-12 via addendum 26a's returns book.
+
+**Pre-registered V1-V5 (IBS timing: signal at d's close, buy d+1 open, sell d+2 open): dead.**
+
+| standalone, bp per position-day (NW t, n) | 2016-20 | 2021-23 | 2024-26 |
+|---|---|---|---|
+| V1 SPY+QQQ 3-down | −12.1 (−0.9, 125) | +31.0 (+1.9) | +27.3 (+1.4) |
+| V2 SPY+QQQ RSI2<10 | −7.6 | +6.9 | +40.8 (+2.1) |
+| V3 SPY+QQQ either | −8.1 | +20.3 | +31.0 |
+| V4 either, hold ≤ 5 | −7.3 | +21.3 | +30.4 |
+| V5 IBS top-3 momentum, either | +8.4 | +15.7 | +47.6 (+2.4) |
+
+In the book: Sharpe change vs V7 (2021-23 / 2024-26 / holdout) V1 +0.01/−0.01/−0.08, V2 −0.14/+0.06/−0.07,
+V3 −0.02/+0.02/−0.03, V4 −0.01/+0.02/−0.03, V5 −0.04/+0.14/+0.07. None positive in both halves; fit
+2021-23 picks V1 (judges −0.01 / holdout −0.08), fit 2024-26 picks V5 (judges −0.04). All negative
+in 2016-20 except V5. Placebo: V1-V4 beat ≤ 40/50 somewhere and fail the holdout (5-20/50).
+
+**Why: the edge is overnight, and next-open entry misses it.** Splitting the trigger's next-day return
+(either, bp): close→open SPY +10 / +9 / +30, QQQ +16 / +13 / +38 (2024-26 t ≈ 3.4); the open→open
+hold the IBS timing buys is −13 / +18 / +36 (SPY), negative in 2016-20.
+
+**V6, added AFTER V1-V5 (post-hoc; judge on placebo and holdout).** SPY+QQQ, either trigger evaluated at
+**15:40 with the 15:40 price** (minute data; agrees with the close signal on 97.9% of symbol-days),
+bought at the close auction, sold at the next open (the night leg's timing), idle IBS money only.
+
+| per night, net of 1bp/side (t, n) | 2016-20 | 2021-23 | 2024-26 |
+|---|---|---|---|
+| SPY triggered | +6.8 (0.8, 101) | +7.9 (1.0, 102) | +25.6 (2.8, 80) |
+| QQQ triggered | +16.6 (1.4, 82) | +10.2 (1.1, 102) | +34.1 (3.1, 76) |
+| SPY / QQQ every night (control) | +2.4 / +4.1 | −1.0 / −1.8 | +4.0 / +6.5 |
+
+Standalone leg (overnight when triggered, T-bills otherwise): 3.2 / 0.71 / −8 (2016-20), 6.5 / 1.14 / −5,
+15.1 / 2.58 / −7.
+
+| book | 2021-23 | 2024-26 | 2021-26 tier | tier_hi | edge-halves tier_hi | 2016-20 ho |
+|---|---|---|---|---|---|---|
+| V7 shipped | 48.6/2.23/−10 | 46.4/1.80/−13 | 47.5/1.99/−13 | 39.6/1.73/−14 | 17.5/0.89/−20 | 15.5/1.05/−21 |
+| **V7 + V6** | 49.3/2.23/−9 | 50.6/1.89/−13 | **49.9/2.04/−13** | **41.4/1.76/−14** | 18.2/0.91/−19 | 16.5/1.09/−22 |
+
+- Sharpe change 2021-23 / 2024-26 / holdout: **−0.00 / +0.09 / +0.04**; NW t of the daily difference
+  +1.91 (2021-26), +1.08 (holdout). Placebo beats **45/50, 48/50, 34/50**.
+- Deployed on 8% of sessions at ~0.49 of equity; adds **+1.8pp/yr** simple (tier_hi +1.4pp); CAGR +2.4pp.
+- Calendar years V7 → V7+V6: 2021 51→52, 2022 69→72, 2023 24→23, 2024 31→36, 2025 62→63, 2026 32→37%.
+- Episodes: 2018 Q4 +24.3 → +24.0, COVID crash −12.9 → −14.1, 2022 bear +39.3 → +41.4, Aug 2024 −2.7 → −2.2,
+  Apr 2025 +12.8 → +10.6. It buys index weakness, so it adds a little to crash-day losses.
+- Margin: overnight gross ≤ 1.01x (the money was in T-bills); no daytime use.
+
+**Verdict: V1-V5 dead. V6 borderline-positive, a small free return add, not a Sharpe lever.** Conditional
+nights beat every-night by +4..+13bp (2016-20), +9..+12 (2021-23), +22..+28 (2024-26), and the placebo
+passes in both judged halves, but 2021-23 is Sharpe-flat (t ≈ 1 per night) and the variant is post-hoc.
+Worth ~+1.5-2pp/yr on idle money at no extra leverage. If built: shadow first (log the 15:40 decision,
+no orders), reuse the night leg's close-auction path (SPY/QQQ MOC, sell at the open auction). Live notes:
+QQQ held overnight is sold at 09:30, before the intraday leg's first decision (10:01), so no conflict;
+a Roth copy would need the wash-sale guard vs the brokerage book.
+
+Series (tier): scratchpad/r1_series.pkl {"v7", "v7_plus" (V7+V6), "leg_unit" (V6 standalone from 2016-02)}.
+
+## multi-day losers for the night leg's idle capacity: dead (2026-09-24)
+
+`research/sim/multiday_night.py` (~12 min, 300 placebo replays). NEXT.md's one untested structural
+fix for the night leg's ~half utilisation was "multiple formation horizons". Addendum 20 killed
+the plain −6..−8% single-day band. Question: does a big MULTI-DAY drop rescue those names?
+
+**Pre-registered** (nothing searched, all reported): a name that is NOT down 8% today, but whose
+p50 (15:50) vs the close n days ago is
+M2: 2-day ≤ −12% · M3: 3-day ≤ −15% · M5: 5-day ≤ −20%.
+Same live filters (IBS < 0.1 at 15:50, vol20 ≥ 60%, ADV ≥ $10M, price ≥ $5), 0.7 dedupe against the
+regular names, 10% each, spare capacity only (never crowds out ≤ −8% picks), deepest multi-day drop
+first, buy the close / sell the open, weekend half size, V7 otherwise. Pool = the honest 15:50
+reconstruction used by addendum 20 (`depth.candidates`, 2021-02 on); no 2020 rebuild exists for
+the −6..−8% band, so no holdout. Placebo = the same count per night drawn at random from the
+same −6..−8% pool, 50 seeds. Rule: adopt only if both halves beat V7 at tier and tier_hi AND beat
+the placebo.
+
+**Screen (daily bars, close-based: biased, gate only), close → next open, gross:**
+
+| pool | 2021–23 | 2024–26 |
+|---|---|---|
+| regular (day ≤ −8%) | +10.3bp (10.0/day) | +50.7bp (14.5/day) |
+| any name near its low, day > −8% | +2.9 | +21.3 |
+| M2 | −8.9 | +27.0 |
+| M3 | −16.9 | +19.4 |
+| M5 | −11.6 | +36.9 |
+
+Already failing the gate: every multi-day pool is negative in 2021–23 and no better than a random
+near-its-low name in 2024–26. A multi-day drop is momentum, not overreaction.
+
+**Honest book test** (15:50 data; CAGR/Sharpe/maxDD; V7 here is the depth pipeline's V7, 49.8/1.98,
+as in addendum 20):
+
+| | 2021–23 | 2024–26 | full | tier_hi full | per trade net, 21–23 / 24–26 (tier) | placebo beats (Sharpe, 21–23/24–26/full) |
+|---|---|---|---|---|---|---|
+| V7 | 51.3/2.21/−10 | 48.2/1.79/−14 | 49.8/1.98/−14 | 42.3/1.75 | — | — |
+| M2 | 49.6/2.14/−10 | 48.6/1.78/−13 | 49.1/1.94/−13 | 41.2/1.70 | −35.0bp / +11.0bp | 26% / 82% / 66% |
+| M3 | 50.9/2.20/−10 | 45.1/1.68/−13 | 48.1/1.92/−13 | 40.4/1.67 | −3.2 / −73.7 | 34% / 0% / 0% |
+| M5 | 50.8/2.19/−10 | 44.5/1.67/−14 | 47.7/1.90/−14 | 40.2/1.66 | −13.0 / −108.3 | 24% / 4% / 10% |
+
+- Utilisation barely moves: 46% → 48% (+0.2–0.3 names/night). After the IBS and vol filters and
+  the dedupe, few nights have a multi-day loser at 15:50.
+- Edge-halves at tier_hi: V7 18.6/0.90/−21; M2 18.1/0.87, M3 17.7/0.86, M5 17.6/0.86.
+- Episodes (2022 bear, Aug 2024, Apr 2025): within ±0.7pp of V7, so no crash cost and no benefit.
+
+**Verdict: dead.** No variant beats V7 in either half at either cost. M3/M5 do worse than random
+−6..−8% names in 2024–26. M2 beats the placebo in 2024–26 only, after losing 35bp/trade in 2021–23,
+the half-flipping pattern the bar exists to reject. The screen already shows why: a slide over
+several days, without a capitulation day, is continuation, not overshoot. The night edge lives in
+the single-day ≤ −8% capitulation. Do not retest multi-day horizons on the night leg; the idle
+half stays in cash/T-bills.
+
+## end-of-day intraday momentum (Gao et al. 2018): dead (2026-09-25)
+
+`research/sim/late_momentum.py` (9 s). Claim: the first half-hour (prev close → 10:00) and the
+15:00–15:30 return predict the last half-hour; leveraged-ETF rebalancing and hedging push into
+the close in the direction of the day. Bot timing: signal from the 15:30 bar, entry at 15:31
+(+1 min delay test), exit at the 15:57 flatten or the close auction (MOC sent with the entry).
+Costs 0.5bp/side (the repo's intraday tier) and 2bp stressed. Placebo: random side on the same
+days, 100 seeds. SPY / QQQ / SMH minute bars, 2016-01 → 2026-09.
+
+**Pre-registered** (all reported): V1 sign(prev close → 10:00); V2 sign(open → 15:30);
+V3 sign(15:00 → 15:30); V4 sign(prev close → 15:30) when |move| > 1σ (20d, known at d−1);
+V5 same when > 2σ (the LETF-rebalancing version).
+
+**Standalone, MOC exit, tier cost: per trade bp (t) / placebo beats** — 2016-20 | 2021-23 | 2024-26
+
+| | SPY | QQQ | SMH |
+|---|---|---|---|
+| V1 first half-hour | −1.4 (−1.6) 38% · −1.8 (−1.8) 26% · −0.9 62% | +1.0 96% · **−3.2 (−2.9) 2%** · −0.3 | +1.6 100% · **−3.5 (−2.4) 1%** · −1.3 |
+| V2 open → 15:30 | −1.2 · +0.5 · **−2.2 (−2.7)** | −0.5 · +0.4 · −1.9 (−2.0) | +1.5 · +0.4 · −3.1 |
+| V3 15:00 → 15:30 | −0.9 · +1.8 (1.9) 100% · −0.3 | −0.5 · +0.7 · −1.2 | −0.7 · +1.7 · −2.1 |
+| V4 > 1σ | 0.0 · −1.3 · 0.0 | +4.1 (1.4) · −0.1 · −2.0 | +7.8 (2.7) · −0.3 · −3.6 |
+| V5 > 2σ (n ≈ 40–85/period) | +2.6 · −9.6 (−2.2) · +9.6 | +13.6 (1.8) · **−14.8 (−3.2)** · +6.6 | +11.4 · −7.2 · +16.7 (2.2) |
+
+At 2bp/side every variant is negative in every period on every ETF. The 15:57 exit is worse
+than MOC nearly everywhere (the last three minutes carry part of the move). The +1 min delay
+changes little: there is no edge to lose.
+
+**Fit/judge (QQQ, Sharpe):** best on 2016-20 = V5 → 2021-23 −1.72, 2024-26 +0.75. Best on
+2021-23 = V3 → 2016-20 −0.20, 2024-26 −0.74. Nothing survives out of sample.
+
+**Overlap with the live noise leg** (QQQ position held from the 15:30 decision). Late-leg
+trades on days the noise leg is flat (the only incremental ones; "same" is just more leverage
+on a position already held): V1 +0.1 / −2.8 (t −2.1) / −0.3bp; V3 +0.3 / +1.1 / −1.7;
+V4 +9.3 / +5.3 / −5.3 (n 55–87); V5 n = 4–8 per period. V2 and V4 are never opposite the noise
+leg: once the day has trended, the noise leg is already in that direction, which is why the
+remaining late-day drift is priced.
+
+**Book: V7 + late leg on QQQ in the free daytime margin at 15:30** (cap 0.75 minus noise gross):
+
+| | 2021-23 | 2024-26 | full tier | tier_hi | edge-halves tier_hi |
+|---|---|---|---|---|---|
+| V7 shipped | 48.6/2.23/−10 | 46.4/1.80/−13 | 47.5/1.99/−13 | 39.6/1.73/−14 | 17.5/0.89/−20 |
+| + V5 (fit winner) | 48.4/2.23/−10 | 46.2/1.79/−13 | 47.3/1.99/−13 | 39.3/1.72/−14 | 17.4/0.88/−20 |
+| + V4 | 49.6/2.26/−9 | 44.6/1.74/−13 | 47.1/1.98/−13 | 38.4/1.68/−14 | 17.0/0.87/−21 |
+| + V1 (Gao's headline) | 42.4/1.95/−13 | 45.6/1.77/−13 | 43.9/1.85/−13 | 31.0/1.40/−15 | 13.8/0.72/−21 |
+
+Free margin on trade days averages 0.14x (V5) to 0.53x (V1): capacity exists; the edge does not.
+
+**Verdict: dead.** The published effect (SPY 1993–2013) is gone or reversed in 2016–26: no
+variant is positive in all three periods on any ETF, the fit winner flips sign out of sample
+(QQQ V5 2021-23 t −3.2, placebo 0%), and every combination leaves V7's Sharpe flat or lower.
+Consistent with the known post-publication decay and with the live noise leg already holding
+the day's direction into the close on trend days. Do not retest last-half-hour momentum on
+index ETFs; the live noise leg is the version of this idea that still works.
+
+## ETF cross-sectional reversal, pairs, international overnight: nothing adds (2026-09-25)
+
+`research/sim/etf_xsec.py` (20 s). Patterns the IBS leg does not trade, pre-registered, all reported.
+Signal on d's bar, bought at the d+1 open (IBS timing). Costs/side: tier 1bp (2bp international),
+tier_hi 3bp (5bp). Placebo: same number of names drawn at random from the same universe, 100 seeds.
+
+**Standalone** (CAGR / Sharpe / maxDD, t; leg fully invested when active):
+
+| | 2016-20 holdout | 2021-23 | 2024-26 | placebo beats (3 periods) |
+|---|---|---|---|---|
+| X1 2 worst 1-day sector ETFs (of 11), hold 1 | 21.2/0.92/−38 t2.1 | 17.5/0.77/−35 t1.3 | 32.1/1.37/−25 t2.2 | **99% / 95% / 97%** |
+| X1 tier_hi | 12.0/0.59 | 8.7/0.46 | 21.8/1.00 | |
+| X2 2 worst 5-day, hold 5 | 17.0/0.81 | 5.6/0.35 | 32.4/1.46 | 91% / **15%** / 100% |
+| X3 pairs laggard (QQQ/SPY, SMH/QQQ, XLK/SPY, z ≤ −2), hold 3 | 4.4/0.52/−12 | 10.2/0.97/−14 | 5.5/0.63/−13 | 97% / 59% / 85% |
+| X4 EFA/EEM/FXI/KWEB close→open, net tier | 2.0/0.20 | **−19.4/−0.90** | 1.3/0.16 | — |
+| *equal-weight sectors / SPY, open→open* | 14.8/0.84 · 14.8/0.89 | 10.7/0.66 · 10.2/0.64 | 20.8/1.37 · 21.3/1.29 | |
+
+X1 grid (k 1-3, hold 1-5): positive everywhere, holdout Sharpe 0.63-0.96; not picked from.
+
+- **X1 is a real effect:** sector-ETF 1-day losers beat random sector picks by ~4-6bp/day in all three
+  periods. **X2** fails placebo in 2021-23. **X3** is weak (placebo 59% in 2021-23, t < 2 everywhere).
+- **X4 is dead:** international ETFs' overnight returns are not a premium net of two auction trips
+  (EFA/EEM/FXI net tier −16 to −29%/yr in 2021-23); KWEB's +36%/yr overnight in 2016-20 is the only
+  cell with t > 2 and it vanished after. SPY/QQQ overnight beat the international ones.
+
+**Why X1 adds nothing to the book: its edge is on the IBS leg's days.** Split by whether the IBS
+leg holds a position (next-day bp, tier):
+
+| | 2017-20 | 2021-23 | 2024-26 |
+|---|---|---|---|
+| X1 on IBS-flat days (the free capacity) | +6.0 (t1.0) | **+0.5 (t0.1)**; tier_hi −2.6 | +9.7 (t1.6) |
+| X1 on IBS-active days | +11.2 | +21.7 | +16.9 |
+| BIL it would replace | 0.4 | 0.8 | 1.7 |
+
+It is the same market-wide oversold bounce IBS already harvests, seen through sectors. On the days
+the IBS half sits in SGOV there is little left.
+
+**Against V7 (2021-02 → 2026-09).** ρ with V7 +0.10 to +0.15; not a crash hedge (X1 +36bp vs V7
++166bp on SPY ≤ −3% days).
+
+| full 2021-26, CAGR / Sharpe (2021-23 · 2024-26) | tier | tier_hi | edge-halves tier_hi |
+|---|---|---|---|
+| V7 shipped | **47.5 / 1.99** (48.6/2.23 · 46.4/1.80) | 39.6 / 1.73 | 17.5 / 0.89 |
+| + X1 in idle IBS cash (free capacity) | 49.7 / 1.97 (44.5/1.94 · 55.6/2.01) | 36.3 / 1.54 | 16.0 / 0.79 |
+| + X2 in idle IBS cash | 44.8 / 1.79 | 34.7 / 1.46 | 15.3 / 0.76 |
+| + X3 in idle IBS cash | 46.2 / 1.94 | 36.5 / 1.60 | 16.2 / 0.83 |
+| + X4 in idle IBS cash | 40.2 / 1.58 | 26.1 / 1.12 | 11.4 / 0.58 |
+| V7 at 1.3x overnight (levering ibs+night) | 53.4 / 1.93 | 43.3 / 1.64 | 18.6 / 0.84 |
+| V7 + 0.3 X1 on IBS-active days, on margin (same budget) | 52.3 / 1.98 (54.3/2.20 · 50.2/1.78) | 43.1 / 1.70 | 18.7 / 0.87 |
+
+- In free capacity every variant **lowers** Sharpe; X1 loses a half (2021-23 −4pp) and all of
+  tier_hi. SGOV stays (same verdict as add. 16/26b).
+- As a use of the 1.3x leverage budget, X1 on IBS-active days ≈ levering ibs+night: same return,
+  Sharpe +0.05 (tier) / +0.06 (tier_hi), better 2021-23, worse 2024-26. It is a different wrapper on
+  the IBS bet, not a new edge. Borderline; would only matter once the lever gate opens, and a
+  second executor path is not worth +0.05 Sharpe.
+
+**Verdict: dead as additions.** X1 is a genuine cross-sectional reversal but redundant with IBS;
+X2/X3 fail placebo or significance; X4 has no net overnight premium. Series (X1 overlay, borderline)
+in scratchpad/r4_series.pkl. No live code or config changed.
+

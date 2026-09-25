@@ -127,6 +127,10 @@ daily:
   conviction_weight: 0.5
   conviction_mode: shadow
   conviction_margin: 0.75        # house margin on TQQQ/SQQQ (3 x 25%); shrinks the intraday cap
+  # Oversold overnight (RESULTS.md addendum 27): SPY/QQQ after 3 down closes or RSI(2) < 10,
+  # bought at the close with the IBS leg's idle money, sold at the next open. V7 47.5 -> 49.9%/yr,
+  # Sharpe 1.99 -> 2.04, but post-hoc: shadow only (logs `[oversold]`, scores itself, no orders).
+  oversold_mode: shadow
   noise_lookback: 14
   noise_target_vol: 0.02
   noise_max_lev: 3.5
