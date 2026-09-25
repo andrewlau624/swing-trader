@@ -11,7 +11,7 @@ but off. The original swing book is quarantined (`SWING_BOOK=off`).
 
 > **Picking this up again?** Read `NEXT.md` first: what is waiting on what,
 > and everything already tested and ruled out. `RESULTS.md` has the evidence
-> (addenda 1-27).
+> (addenda 1-28).
 
 ## What runs
 

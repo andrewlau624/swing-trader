@@ -301,6 +301,7 @@ but "should" is not "did".
 | Night leg: 2/3/5-day losers | **dead** | slow slides continue; book worse every variant (add. 27 R2) |
 | Last-half-hour intraday momentum (Gao et al.) | **dead** | sign flips across periods; overlaps the noise leg (add. 27 R3) |
 | Sector-loser reversal, ETF pairs, international close->open | **dead** | duplicates IBS / no edge after costs (add. 27 R4) |
+| Theme-explosion sleeve (breakouts, top-1% momentum, theme clusters, residual momentum) | **dead** | no rule beats vol-matched random picks; trails SPY; caught quantum late and got stopped out (add. 28) |
 
 ## Ideas not yet tested
 

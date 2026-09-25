@@ -2110,3 +2110,41 @@ the IBS half sits in SGOV there is little left.
 X2/X3 fail placebo or significance; X4 has no net overnight premium. Series (X1 overlay, borderline)
 in scratchpad/r4_series.pkl. No live code or config changed.
 
+
+
+# Addendum 28 — theme-explosion sleeve ("catch the next quantum"): dead (2026-09-25)
+
+`research/sim/theme_explosion.py`. Goal: catch explosive new-theme runs (quantum 2024-25,
+AI, nuclear, crypto) without naming tickers. Survivorship-aware panel: 14,697 symbols,
+1,958 delisted (delisting returns counted), ~800-2,450 liquid names/day. Next-open entry,
+10 slots, trail 25% / below 50d MA / 126d max hold, idle cash in BIL. Four pre-registered rules:
+V1 52-week-high breakout on 3x volume; V2 top 1% 63-day return above the 50d MA; V3 "theme
+cluster" (>= 3 correlated names breaking out together); V4 residual momentum vs SPY.
+
+| standalone, CAGR / Sharpe / maxDD (tier) | 2016-20 | 2021-23 | 2024-26 | beats vol-matched random picks |
+|---|---|---|---|---|
+| V1 breakout | 5.0 / 0.34 / −44 | −7.3 / −0.01 / −65 | 4.6 / 0.30 / −51 | 22% / 48% / 44% |
+| V2 top-1% momentum | 13.9 / 0.56 / −61 | −24.8 / −0.35 / −81 | −2.6 / 0.20 / −57 | 88% / 16% / 36% |
+| V3 theme cluster | 0.7 / 0.12 / −41 | −7.9 / −0.32 / −37 | 5.6 / 0.34 / −28 | 10% / 16% / 40% |
+| V4 residual momentum | 1.0 / 0.19 / −68 | −31.5 / −0.52 / −86 | −21.6 / −0.18 / −66 | 28% / 4% / 2% |
+| SPY | 15.2 / 0.87 / −34 | 10.0 / 0.63 / −24 | 21.1 / 1.31 / −19 | |
+
+- **No rule beats random stocks of the same volatility** in the judged periods: the "explosion"
+  selection adds nothing over just owning volatile names, and SPY beats every rule in every
+  period. Win rates 25-45%; the top 5 trades are 100-2,400% of P&L (GME, AMC, PTON, ASTS...):
+  the lottery-stock (MAX-effect) result, not a theme edge.
+- **Quantum was caught, badly.** V1 entered RGTI on 2024-12-30 (after a 0.69 → ~15 run) and was
+  stopped −37%; QUBT −34%, QBTS −18%. V2/V4 caught IONQ +95% and QUBT +93/+132%, but those rules lose
+  −25..−32%/yr in 2021-23 on the meme/SPAC busts. By the time a rule can see an explosion, most of
+  the move is done and the reversal risk is at its peak.
+- **Exits:** a 50% trail looks good in 2024-26 (V1 36%/yr) and loses in 2021-23: regime, not edge.
+- **Against V7:** correlation −0.09, but the sleeve loses 276bp on SPY <= −3% days (V7 +166).
+  Carving 0.1 / 0.2 of ibs+night into V1: 47.5/1.99 → 42.7/1.95 → 38.2/1.86; edge-halves 17.5 →
+  16.2 → 14.9%. (The run's "sleeve in idle IBS cash" rows, 54-61%/yr, are a combination bug: the
+  sleeve's mean day is −3.6bp, and V7 + 0.1 x sleeve done directly is 46.2 / 1.96.)
+
+**Verdict: dead.** Momentum on explosive, high-attention stocks is volatility exposure with a
+lottery tail, and after costs and delistings it trails SPY. The bot already harvests these names'
+volatility the profitable way: the night leg buys their one-day crashes (RGTI/IONQ/QBTS/QUBT all pass
+its filters). A long-term thematic bet is a personal allocation (a small position held by hand; the
+bot never trades a symbol the account holds), not a rule.
