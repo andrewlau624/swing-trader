@@ -24,7 +24,8 @@ side by side, so paper and real fills stay comparable.
 - It must be a **margin** account. The bot sells at the open and re-buys at the
   close with the same day's money; in a cash account that is a good-faith
   violation. `make daily-live-check` refuses to go live on a cash account.
-- Fund it with the $3,000.
+- Fund it. The bot sizes from the real balance; to trade only part of it, set
+  `DAILY_LIVE_CAPITAL` (dollars) in `.env`. It is a hard cap.
 
 ## 3. On the server
 
@@ -44,7 +45,30 @@ SCHWAB_APP_SECRET=...
 SCHWAB_CALLBACK_URL=https://127.0.0.1
 # only if more than one account is linked:
 # SCHWAB_ACCOUNT_NUMBER=12345678
+DAILY_LIVE_CAPITAL=1000          # optional hard cap in dollars
 ```
+
+Check it the next morning with `make daily-status` and, once night exits
+exist, `make review SINCE=<first live day> ARGS=--no-replay`.
+
+## 3b. The Roth IRA book (optional)
+
+The same login can drive a Roth IRA as a third book: 1.0x overnight at most
+(an IRA never borrows), the intraday leg through 3x ETFs instead of shorting,
+and a 30-day wash-sale gap against the brokerage book (a loss disallowed
+against an IRA is gone for good). Addendum 20.
+
+1. Ask Schwab for **limited margin** on the Roth. Without it the book would
+   reuse unsettled cash, which is a good-faith violation.
+2. Set **both** account numbers in `.env` *before* linking the Roth
+   (`SCHWAB_ACCOUNT_NUMBER` and `SCHWAB_ROTH_ACCOUNT_NUMBER`; the last 4
+   digits are enough). With two accounts linked and no number set, the
+   brokerage book stops rather than guess.
+3. `make schwab-login` again, ticking both accounts.
+4. `ROTH_LIMITED_MARGIN=yes`, optionally `DAILY_ROTH_CAPITAL=...`.
+5. Sell the Roth's existing holdings yourself if you want the bot to use that
+   cash. The bot never touches positions it did not open.
+6. `make daily-roth-check`, then `make daily-roth-on`.
 
 ## 4. Every 7 days: `make schwab-login`
 
@@ -77,7 +101,10 @@ keeps running and the 15:40 scan falls back to Alpaca data.
 
 **Watch the open fills.** Research (addendum 10) found the overnight leg's
 entire edge is in the opening auction: +20bp at the open, gone by 09:35.
-`make daily-status` reports live slippage per leg, and every 15:40 run logs
+`make daily-status` reports slippage per leg against the price at decision
+time (15:50 for night buys). That includes the market's move into the
+auction, so it reads worse than the execution cost. **The number that gates
+leverage is in `make review`:** fills vs the official auction print. Every 15:40 run logs
 each route's cost and **auction hit rate** (fills within half a cent of the
 official open). A high hit rate on NASDAQ/NYSE/ECN_ARCA routes means the
 emulated market-on-open works. The bot kills the night leg by itself if open

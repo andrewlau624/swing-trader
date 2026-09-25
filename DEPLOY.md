@@ -1,5 +1,7 @@
 # Deploying on the SSH box
 
+**Already deployed?** The routine is at the bottom: "Routine operation".
+
 This replaces the old `llm-trader` deployment in the same repo. Do it in this
 order — stop the old trader *before* starting the new one, so two processes are
 never touching the same Alpaca account.
@@ -71,8 +73,8 @@ manage them under *its* rules, which is probably not what you want.
 ```bash
 make setup     # venv + dependencies
 make doctor    # where .env is, what is set, what is missing
-make test      # 36 tests, none touch the network
-make dry       # one full cycle, submits nothing
+make test      # none touch the network
+make daily-dry # the daily book's current phase, submits nothing
 ```
 
 Add email alerts (appends to `.env`, then sends a test):
@@ -101,6 +103,9 @@ make persist-status # confirm it is actually scheduled
 ```
 
 `make persist` picks whatever the box actually supports and says which it used.
+It installs `daily-trader.timer` and `schwab-reminder.timer`. The swing book's
+`swing-trader.timer` is installed only when `.env` has `SWING_BOOK=on`
+(quarantined since addendum 14).
 
 ### "Failed to connect to bus: No medium found"
 
@@ -148,63 +153,54 @@ make logs
 
 ### How long a run takes
 
-| run | market | what it does | time |
-|---|---|---|---|
-| 09:05 ET | closed | refreshes ~14,760 symbols, decides, submits | **1–3 min** |
-| 09:47 ET | open | reconciles fills, arms stops, measures slippage | ~10 s |
-| 15:52 ET | open | pre-close sweep | ~10 s |
+| daily-book run (ET) | what it does | time |
+|---|---|---|
+| 09:15 | sell the night leg at the open, rebalance IBS, build the night universe | ~30-60 s |
+| 09:50, 16:10 | reconcile fills | ~10 s |
+| 10:01-15:31, every 30 min | intraday decision | ~10 s |
+| 15:40 | scan for night picks, buy at the close auction (cutoff 15:50) | ~30-60 s |
+| 15:57 | flatten the intraday leg | ~10 s |
 
-Only the decision run pays for the data refresh, and it prints progress with an
-ETA. If `make dry` looks frozen on `refreshing recent bars...`, it is working —
-give it a few minutes, or watch the percentage tick up.
-
-**You do not need to wait for it.** `make persist` only installs the timer; it
-runs no cycle. Ctrl+C a long `make dry` and run `make persist` straight away,
-or use a second SSH session.
+`make persist` only installs the timer; it runs no cycle. `make daily-dry`
+runs the current phase and submits nothing.
 
 ## 5. Watch it
 
 ```bash
-make results     # positions, P&L, measured slippage, recent activity
-make slippage    # the number that decides whether the backtest was honest
-make logs        # live tail
-journalctl --user -u swing-trader -n 100 --no-pager    # Linux
+make daily-status   # every account: equity, positions, legs, profile, overnight size, slippage
+make daily-logs     # live tail
+journalctl --user -u daily-trader -n 100 --no-pager    # Linux
 ```
 
-Email lands automatically whenever an order is placed, a fill happens, or
-anything warns. Quiet runs send nothing — with ~40 trades a year and 1.29 mean
-concurrent positions, most days are quiet, and that is normal rather than a
-malfunction.
+Email lands on every order, fill, warning and failed run. Quiet runs send nothing.
 
-## The daily book (added 2026-09-22)
+## The daily book
 
-A second, independent book runs on the same paper account: `scripts/daily.py`,
-its own timer (`daily-trader.timer`), its own state (`state/book-daily.json`),
-and a **$3,000 virtual starting equity** that changes only through its own
-fills. See RESULTS.md addendum 6 for the research, and NEXT.md item 4 for the rules.
+`scripts/daily.py`, its own timer (`daily-trader.timer`), one state file per
+account (`state/book-daily*.json`). Paper runs on Alpaca with a $3,000 virtual
+equity that changes only through its own fills; real money runs on Schwab and
+sizes from the real balance, capped by `DAILY_LIVE_CAPITAL`. Research:
+RESULTS.md addendum 6 onward. What each leg does: README.md.
 
-To install it on a box that already runs the swing timer:
+The books never share a symbol: positions net per symbol at the broker, so a
+shared name would corrupt both ledgers. Each book skips anything held at the
+broker by someone else, and the brokerage and Roth books keep a 30-day
+wash-sale gap between them. Daily positions carry no stop by design.
 
-```bash
-make pull
-make test            # 55 tests, no network
-make daily-dry       # runs the current phase, submits nothing, saves nothing
-make persist         # re-installs BOTH timers (swing + daily)
-make persist-status  # should list swing-trader.timer AND daily-trader.timer
-```
+Real money: **SCHWAB.md** (`make daily-live-check`, then `make daily-live-on`).
+Every switch lives in `.env` (`DAILY_LIVE`, `DAILY_ROTH`, `DAILY_LIVE_CAPITAL`,
+`DAILY_LIVE_PROFILE`), so `make pull` cannot undo it. Each run reads `.env`
+fresh: no restart needed after editing it.
 
-Watch it with `make daily-status` (equity, positions per leg, slippage) and
-`make daily-logs`. The first real activity is the 15:40 ET run: it buys
-at the close auction. The 09:15 run next morning sells those at the open auction.
+## Routine operation
 
-The two books never share a symbol. Alpaca nets positions per symbol, so a
-shared name would corrupt both books' accounting. The daily book skips
-anything the swing book holds or has pending. The swing executor ignores
-anything listed in the daily book: it won't adopt it, stop it, or trade it.
-Daily positions carry no stop by design; `make positions` labels them.
-
-Real money: see NEXT.md item 4 (`make daily-live-check`, then `make daily-live-on`).
-The switch lives in `.env` as `DAILY_LIVE=on`, so `make pull` cannot undo it.
+| when | do |
+|---|---|
+| every 7 days | `make schwab-login`, **on the server** (a login anywhere else revokes the server's) |
+| weekly | `make review SINCE=2026-09-22 ARGS=--no-replay`: open-sell cost vs the auction, exits so far, kill-rule progress. Drop `ARGS` for the slow signal replay |
+| weekly | `make daily-status`: no `KILLED` lines, intraday fills clean |
+| after any `git push` | `make pull` here |
+| decisions | `make pending` (NEXT.md) |
 
 ## Stopping it
 
@@ -212,7 +208,6 @@ The switch lives in `.env` as `DAILY_LIVE=on`, so `make pull` cannot undo it.
 make stop        # aliases: make persist-stop, make unpersist
 ```
 
-Removes both the systemd timer and any cron entries. Open positions keep their
-GTC stops at the broker and are unaffected.
-
-Open positions keep their GTC stops at the broker and are unaffected.
+Removes the systemd timers and any cron entries. Open positions stay open at
+the broker: the daily book's night and IBS positions have no stops, so close
+them yourself if you stop it for long.

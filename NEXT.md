@@ -5,6 +5,15 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Live checkpoint (2026-09-24, `make review SINCE=2026-09-22`)
+
+Schwab brokerage live since 09-22 on a $1k cap. Night exits **19/50**; open
+sells **−2.1bp/side** vs the auction print (buys −0.5bp), well inside the
+10bp gate. Live beat the backtest on the same trades (−1.75% vs −1.92%); the
+losses are one bad night, not execution. `daily-status`'s +33bp is vs the 15:50
+decision price, not a cost. At 50 exits ≤ 10bp: overnight leverage opens by
+itself, and the aggressive profile (addendum 22) becomes an option.
+
 ## Addendum 25 (2026-09-24): micro futures, nothing new to run
 
 No new edge in futures. The live QQQ noise leg on MNQ passes (both halves,
@@ -293,11 +302,11 @@ instruments (book.noise is single-instrument today).
 
 ---
 
-## 4. Daily-cadence book — RUNNING (paper), $3k virtual equity
+## 4. Daily-cadence book — RUNNING (paper + Schwab live since 2026-09-22)
 
-**The plan:** paper-test now. Then real money starting at $3k, with the
-same two overnight legs. When the real account reaches $25k, the QQQ
-intraday leg switches on by itself (`daytrade_mode: auto`).
+**The plan (original, 2026-09-22):** paper-test, then real money. Done:
+Schwab live since 09-22 on a $1k cap. The intraday leg switches on by itself
+once the ACCOUNT holds $2,000 (`daytrade_mode: auto`; PDT retired 2026-06-04).
 
 **Going real-money — via SCHWAB, see SCHWAB.md** (paper stays on Alpaca and
 keeps running beside it). The Alpaca-live steps below still work if
