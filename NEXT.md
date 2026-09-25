@@ -5,6 +5,17 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Addendum 24 (2026-09-24): leap book, SHADOW ONLY, off
+
+No tested rule 5x's in months: P(5x in 12 months) is 7% at best; ~4 years median,
+about the aggressive profile's pace with 2-4x its drawdown. Two survivors, built
+in shadow only (`swingtrader/leap/`, `leap.enabled: false`, no order path):
+SOXL IBS < 0.2 (robust) and SOXL 15-min ORB (fragile: ~0 in 2016-20, dies
+at 10bp or a 1-min fill delay). Going live needs a separate Schwab account and a
+wash-sale plan against the Roth's SOXL/SOXS intraday leg. The shadow logger is
+not scheduled yet: it needs a minute-bar feed (the streaming process). Wire
+that, run a few months of shadow, then decide.
+
 ## Addendum 23 (2026-09-24): tilt v2 built, OFF
 
 `daily.night_tilt_model: v2` adds yesterday's return to night sizing: replay +$23k

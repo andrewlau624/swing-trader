@@ -260,6 +260,19 @@ class DailyCfg:
 
 
 @dataclass
+class LeapCfg:
+    """The leap book (RESULTS.md addendum 24). SHADOW ONLY: nothing in the
+    repo places its orders. A future live version needs its own Schwab
+    account (.env SCHWAB_LEAP_ACCOUNT_NUMBER, LEAP_LIVE, LEAP_CAPITAL)."""
+    enabled: bool = False
+    mode: str = "shadow"
+    symbol: str = "SOXL"
+    inverse_symbol: str = "SOXS"
+    orb_minutes: int = 15            # the cross-half pick; ORB5 was steadier in 2016-20
+    ibs_max: float = 0.2
+
+
+@dataclass
 class Config:
     data: DataCfg = field(default_factory=DataCfg)
     walkforward: WalkForwardCfg = field(default_factory=WalkForwardCfg)
@@ -268,6 +281,7 @@ class Config:
     strategy: StrategyCfg = field(default_factory=StrategyCfg)
     portfolio: PortfolioCfg = field(default_factory=PortfolioCfg)
     daily: DailyCfg = field(default_factory=DailyCfg)
+    leap: LeapCfg = field(default_factory=LeapCfg)
 
     @classmethod
     def load(cls, path: Path | None = None, **overrides: Any) -> "Config":
@@ -302,6 +316,7 @@ class Config:
             strategy=build(StrategyCfg, raw.get("strategy", {})),
             portfolio=build(PortfolioCfg, raw.get("portfolio", {})),
             daily=build(DailyCfg, raw.get("daily", {})),
+            leap=build(LeapCfg, raw.get("leap", {})),
         )
 
         # dotted overrides from argparse: strategy__z_entry=-2.5

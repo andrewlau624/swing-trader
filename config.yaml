@@ -143,3 +143,14 @@ daily:
       conviction_weight: 0.5
       conviction_mode: auto
       noise_max_lev: 0.6         # the tested cap (2x account: 2 x (1 - 0.5 x 0.75) - 0.65)
+
+# Leap book (RESULTS.md addendum 24): SHADOW ONLY, off. SOXL opening-range
+# breakout (fragile: ~0 in 2016-20, dies at 10bp/side) and SOXL IBS < 0.2
+# (robust). Neither 5x's in a year: P(5x in 12 months) <= 7%, ~4 years median.
+leap:
+  enabled: false
+  mode: shadow
+  symbol: SOXL
+  inverse_symbol: SOXS
+  orb_minutes: 15
+  ibs_max: 0.2

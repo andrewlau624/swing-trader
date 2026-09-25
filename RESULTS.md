@@ -1555,3 +1555,67 @@ v1 the 15:40 log prints the v2 weights.
 **IBS up-weighted below SPY's 200d SMA: dead as sizing.** The per-trade edge is real (2016–23
 +50bp, t 3.5 vs +18bp) but sizing up takes daytime room from the intraday leg: 2021–23
 falls at both cost tiers (×1.5: 48.6 → 48.0; ×2: 46.8).
+
+---
+
+# Addendum 24 — a "leap" book: can a day trade turn $100 into $500? (2026-09-24)
+
+`research/sim/leap.py`. The ask: a separate book for big, fast gains. Five
+families were pre-registered with a written prior (in the file's docstring,
+before any run): **20 variants**, on top of ~90 earlier intraday variants
+(addenda 6, 8, 19, 21, 22). Cash-account rules ($100 cannot use margin): 1.0x
+equity, no shorting, a down signal buys the inverse ETF. Costs per side: 3x
+ETFs 3 / 5bp intraday, 5 / 7.5bp at the open; stocks on the tier / tier_hi table.
+
+| family (tier costs) | 2021–23 CAGR/Sh/DD | 2024–26 | placebo | verdict |
+|---|---|---|---|---|
+| A. SOXL opening-range breakout, 15 min (cross-half pick both ways) | 82.1 / 1.27 / −45 | 62.9 / 1.04 / −60 | beats 20/20 | **passes, fragile** |
+| A. TQQQ ORB (reference: the conviction trade owns TQQQ) | 35.5 / 0.92 / −34 | 11.5 / 0.48 / −45 | — | weak, collides |
+| B. 3x-ETF Donchian breakout, multi-day | best in one half, loses the other | | 10% | dead |
+| C. small-cap gap-and-go with a runner | −14 to −54 | −25 to −86 | 65% | dead (as addendum 8) |
+| D. night leg concentrated, top 1 at 100% | −39.9 / 0.34 / −96 | −76.3 / 0.37 / −99 | 75% | dead: Kelly |
+| D. night leg top 3 | 17.8 / 0.58 / −45 | 83.0 / 1.12 / −59 | — | dead at tier_hi (−1.2%) |
+| E. SOXL IBS < 0.2, next open → following open | 52.6 / 1.05 / −39 | 48.0 / 1.03 / −54 | beats 19/20 | **passes** |
+
+**The ORB does not survive stress.** 2016–20 was never used to choose
+anything, and there ORB15 makes 3.6%/yr with a −80% drawdown. At 10bp/side it
+loses money in 2016–20 and makes 15–28% after. A market order one minute after
+the break (what a bar-polling bot gets) takes it to −10 / 52 / 34%. Longs carry
+it (inverse-only: −4 / 7 / 19%). Day-clustered t per half ≤ 2.2. By year:
++23 +3 +10 +5 −13 | +37 +41 +17 | +30 +64 −23 bp/trade (2016 … 2026 YTD).
+That is a 2021–25 semiconductor-volatility regime more than a rule. ORB5 was
+steadier in 2016–20 (25.6%) but choosing it for that would be hindsight.
+
+**SOXL IBS holds up:** 50.1 / 52.6 / 48.0% in 2016–20 / 2021–23 / 2024–26,
+36% in each at 15bp/side, t 2.7 / 1.8 / 1.7. It is the daily book's IBS rule
+(the same `ibs()` function) on one 3x ETF instead of 18 1x ETFs, so it is the
+same bet, concentrated. maxDD −54%.
+
+**The number that was asked for.** Block bootstrap (21-day blocks), whole shares:
+
+| | P(5x in 3 / 6 / 12 months), $100 | P(−50% first, 1y) | median years to 5x (hist) | same, edge halved |
+|---|---|---|---|---|
+| SOXL ORB15 | 0.0 / 0.7 / 6.7% | 3.5% | 4.3 | not within 8 years (P 42%) |
+| SOXL ORB15, fill +1 min | — | — | 7.6 | not within 8 years (P 27%) |
+| SOXL IBS < 0.2 | 0.0 / 0.0 / 0.9% | 2.0% | 3.6 | 7.9 |
+| night top 1 (the only "lottery" shape) | 0.7 / 3.5 / 9.7% | **66.9%** | — | — |
+| aggressive profile (addendum 22), for reference | | | 3.0 | 8.0 |
+
+Nothing tested here turns $100 into $500 in months. The fastest honest rule
+takes about as long as the aggressive profile already running on the existing
+book, with 2–4x its drawdown. The only shape with a real chance of a 5x year
+(concentrated night picks) reaches −50% first two times in three.
+
+**Built, SHADOW ONLY, off:** `swingtrader/leap/` (`signals.py`: `orb_break`,
+`orb_fill`, `orb_stopped`, `ibs_entry`, which the research now calls; `shadow.py`:
+decide + append to `logs/leap-shadow.jsonl`, with no broker or order code at
+all), `config.yaml leap:` (`enabled: false`), and `LEAP_LIVE` / `LEAP_CAPITAL` /
+`SCHWAB_LEAP_ACCOUNT_NUMBER` reserved in `.env.example` and read by nothing.
+Not scheduled, and there is no make target yet.
+
+Caveats: SOXS is modelled as −1x SOXL's intraday move (close, not exact). The
+gap universe is names still listed in 2026 (survivorship flatters longs, and
+they still lost). Halts are not modelled. A live leap book in the brokerage or
+Roth account would create **wash sales** against the Roth intraday leg, which
+also trades SOXL/SOXS; a loss disallowed against an IRA is lost for good.
+Every gain is short-term.
