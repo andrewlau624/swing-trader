@@ -1,0 +1,378 @@
+# Round 1 research — hypotheses and pre-registrations (2026-09-29)
+
+Research standards per README ("Research standards") and RESULTS.md addenda 27-41.
+This file contains ONLY hypothesis statements, mechanisms, variant lists and pass bars.
+No 2024-26 or variant result has been computed at the time of the stamps below.
+
+Baseline: corrected raw-price pool (`load_sim(raw_price=True)`, night pool corr 0.7).
+Verified reproduction before anything else was computed: V7 1.0x cap .10 conv .5 at 3bp
+= 50.2 / 44.1 / 47.2/2.06/-14 and tier_hi 34.4 / 24.3 / 29.4/1.41/-17 — matches addenda 30/39
+to the decimal. Costs: 3bp flat ("measured"), tier, tier_hi via `book.cost_bps`.
+
+## The candidate list this round (8, ranked by expected after-tax $/yr x P(survive))
+
+| # | hypothesis | mechanism | data | why not in the dead list |
+|---|---|---|---|---|
+| 1 | Night-leg exit: hold past the opening auction when the open gaps down hard (≤ -5% / ≤ -8%), sell at a 09:35-10:00 minute close instead | For extreme overnight gaps the opening auction is mechanically overwhelmed (overnight order imbalance, share-count clearing); the forced-supply side keeps hitting it into the first half hour. Existing test (add. 10, 09:35 exit) was unconditional and mixed all gaps; conditional-on-gap-size is a different rule | `data/research/night/gm1` minute bars for the 1,474 eligible-gap sessions 2020-11..2026-09 (38.8 names/day, top-40 by abs gap >= 3%), joined to the raw night pool | the dead list has unconditional 09:35 exit (add. 10) and Friday/weekend entry patterns, but no gap-conditioned EXIT study |
+| 2 | Earnings-reaction skip on the night leg (skip/size names whose -8% day was the earnings reaction) | information/liquidity asymmetry: earnings-reaction drops are informed flow that continues | would need point-in-time earnings dates | dead by prior: the point-in-time headline test (add. 12) measured exactly this as the "earnings" category: n 9.2%, mean +19.7bp vs +18.3 no-news, excess vs same night +0.6 bp (t ~0.4-0.6), no category after controlling for the night. The rule buys after the news is priced; "whether the selling overshot" is not measured by the headline. Not retested. |
+| 3 | Always-full night deployment via cross-sectional ranking | none beyond volume | - | dead by prior: index filler (add. 16: 2024-26 only), multi-day losers M2/M3/M5 (add. 27 R2: slides are continuation), depth -6/-7% band (add. 21), tilt v2 (add. 23, OFF when tested) |
+| 4 | Taxable-book V6 (SPY/QQQ oversold overnight on idle IBS money) on the RAW pool at tier/tier_hi | index-level liquidity provision at the close into weakness (already shadow) | ETF daily/minute bars | not a new rule: an on-raw restatement of the taxable side of add. 27/31's shadow variant, which add. 39 never restated for the taxable book (it restated the Roth A2 only). New money question: is the increment still positive at tier_hi on raw prices |
+| 5 | Closing-auction imbalance (15:50) as a night-entry filter | imbalance-driven close-price displacement | not obtainable free historically | untestable: declared n/a |
+| 6 | Noise-band rule on non-equity 24h markets via deep ETFs | hedging flows in 24h markets | ETF minutes (TLT/GLD/...) | dead by prior: bonds/gold/oil/SPY intraday diversification dead (add. 20), 24h/crypto variants dead (add. 3) |
+| 7 | Second overnight leg on up-day extremes in ETFs | short the ETF at the close after an extreme up day | data exists | dead by prior: chase-the-up-day ~0-; long/short dead; S&P "post-effective reversal" dead (add. 34). No new mechanism named |
+| 8 | Tax-lot / loss-harvest scheduling in the taxable book | wash-sale-aware timing | - | structurally void: every leg holds <= 1 session, so all realizations are ST within the year and there is no scheduling freedom; the wash guard (roth_first, add. 31/39) already manages the cross-account part |
+
+Ranking rationale: #1 is the only hypothesis with (a) a forced/structural counterparty at the
+opening auction, (b) data already on disk, (c) potential low correlation to existing legs (it
+changes WHEN the same leg sells, not what it buys), (d) direct capacity. #4 is a cheap, honest
+restatement decision-gating a shadow that the program already built. #2-#3, #6-#8 are judged
+dead-by-prior with the citations above (each counted as a tested idea, zero variants run).
+
+## Pre-registration — Study A: gap-conditioned night exit (stamped below)
+
+**Hypothesis.** For night picks whose next session opens with a gap-down of <= G% from the
+previous close, extending the exit from the opening auction to the minute-M close earns more
+than the auction exit, net of costs, in both halves, because the auction print for such names
+is a mechanically dominated venue (forced overnight clearance) and the residual supply keeps
+arriving; the bounce completes later.
+
+**Data / linkage (all decisions at live times, no lookahead).**
+- Pick legs: raw-price night pool (s = validate.load_sim(raw_price=True), N = book.night_days
+  (raw_price=True, max_corr=0.7)); each pick's entry price `nd.close`, the published auction
+  return `nd.ret`, the decision price `nd.price`, adv and vol20 already known at 15:40+.
+- Next-morning minute bars from `data/research/night/gm1` (SIP minute, eligibility C1 >= $3
+  and ADV >= $5M, top-40 by abs gap per session). Exit decision = the MINUTE close (what a
+  live market order at that minute would hit); the minute-0 open is the auction proxy.
+- Rebase minute prices onto the daily-panel basis with scale = daily open / minute-0 open for
+  that (session, name); assert the last minute close vs the daily close agrees within 0.5% (else
+  drop the name-day and count it).
+- Cost of the exit leg: `book.cost_bps` at tier / tier_hi on the raw exit price (raw factor =
+  raw open / adjusted open of that session; from the raw_close.parquet, addendum 30).
+- Whole shares are preserved by the book replay (as shipped).
+
+**Variants (5 pre-registered; all judged with the same pass bar).**
+- E1: gap <= -5%: sell at the 09:35 close (minute 5)
+- E2: gap <= -5%: sell at the 09:45 close (minute 15)
+- E3: gap <= -5%: sell at the 10:00 close (minute 30)
+- E4: gap <= -8%: sell at the 10:00 close (minute 30)
+- E5: gap <= -5%: half at the opening auction, half at the 10:00 close
+
+Each variant is scored versus the shipped V7 book on the SAME simulated trade set, at tier and
+tier_hi, with the per-trade diff and a book replay. A position not qualifying (no minute data,
+gap above the threshold, or the minute price missing) keeps the shipped auction exit.
+
+**Controls.**
+- Placebo (200 draws): for each qualifying pick, a random OTHER eligible gap name from the same
+  session with a same-signed gap of any magnitude >= 3%, same vol20 decile (deciles over the
+  study's own pooled names), scored with the same variant's exit rule. The actual mean
+  per-trade diff must beat the 95th percentile of the placebo diffs in BOTH halves.
+- Periods: 2021-23 (fit) / 2024-26 (judge), and the reverse; the full span 2021-26 t (NW,
+  5 lags) on the book-level daily increment; 2020 (part of the gm1 span) reported as an
+  episode check with COVID 2020-02-19..03-23 behaviour, not a pass gate.
+
+**Pass bar (all must hold, at tier_hi AND at tier, for "adopt"; else "dead" unless 1-3 of the
+next list hold -> "shadow").**
+1. mean per-trade diff (alt minus auction) net > 0 in 2021-23 AND 2024-26;
+2. placebo percentile >= 95 in both halves;
+3. book (V7 raw, corr .7) increment positive in both halves and 2016-20 holdout not negative;
+4. Newey-West (5 lags) t >= 2.0 on the book increment 2021-26;
+5. edge-halves and P(DD>50% in 5y, $3k+$1k/mo, after 35% tax) not worse than the base;
+6. still positive with each leg's mean contribution halved (growth.eh-style stress);
+7. wash-sale / account structure unchanged (exit timing does not affect the pick, the account
+   split or the guard), so items 5-7 re-check via the book only.
+
+**Variant count for deflation:** A: 5 pre-registered + any post-hoc shadow-only add-ons;
+followed by Study B variants (2) + dead-by-prior ideas (5, zero variants). Baseline N = 559.
+
+**Date stamp (output of `date`, before any variant number):** Tue Sep 29 01:33:38 PDT 2026
+(correction to an earlier placeholder in the first save: 01:41:04 was written from the session's
+earlier `date` output at 01:26:38; the authoritative stamp is this 01:33:38 reading, which precedes
+every variant run below. Study B's line inherits the same stamp.)
+
+## Pre-registration — Study B: taxable V6 on the raw pool
+
+**Variants (2).**
+- A1t: V6 (SPY/QQQ "either" trigger at 15:40, close auction -> next open) funded ONLY by the
+  idle IBS half, on the V7 base book (1.0x, cap .10, conv .5), raw pool.
+- A2t: same, funded from ALL idle overnight money (idle IBS half + night-leg unused), cap the
+  overnight gross at 1.0x, whole shares, Roth F3-style FOMC overlap NOT added (F3's taxable
+  filler stays separate; on overlap days F3 keeps priority, both pre-registered).
+
+**Costs.** V6 leg: 1bp/side (tier) and 3bp/side (tier_hi) as in add. 27's taxable test; the
+night leg at 3bp flat ("measured") / tier / tier_hi reading the raw pool.
+
+**Pass bar (inherited, restated on the raw pool).** Both halves positive at 3bp and tier_hi;
+2016-20 holdout not worse (Sharpe); placebo (same trigger count on random dates, 200 draws,
+exposure-matched) >= 95th pct in both judged halves; NW t (5 lags) of the daily book increment
+>= 2.0 over 2021-26; EH and 5y MC ($3k+$1k/mo, 35% tax) P(DD>30%) <= 15% and P(DD>50%) <= 5%
+(taxable bound); skip if either half fails.
+
+**Date stamp (output of `date`):** Tue Sep 29 01:33:38 PDT 2026 (same run as above; see correction note)
+
+## Amendment — Study C: tilt-v2 raw restatement (pre-registered before any number)
+
+`date`: Tue Sep 29 01:50:46 PDT 2026 (added before ANY of Study C's variant numbers were computed).
+
+**Hypothesis.** `signals.night_tilt_v2` (addendum 23, built OFF, borderline on the adjusted
+pool: +31bp per sd of yesterday's return, t 2.0/2.6 per half, fitted on 2021-23 only) restated
+on the RAW night pool at tier and tier_hi. The raw pool removes the sub-$5 lookahead trades the
+adjusted pool allowed (add. 30), so a pick-tilt fitted on 2021-23 could behave differently.
+Winner-prev-day inside the same -8%/same-day/corr-0.7/price>=5 pool.
+
+**Variants (2, pre-registered).**
+- C1 V7 1.0x cap .10 conv .5 with tilt = night_tilt_v2 (k .25, the shipped default), RAW pool.
+- C2 moderate as-built 1.0x cap .15 conv .5 with tilt = night_tilt_v2, RAW pool.
+(Each also reported with the shipped v1 tilt as the direct baseline.)
+
+**Controls.** Placebo: the same weights with the third input's ORDER shuffled within the day
+(the second input kept), 200 draws, mean per-day book increment; both halves >= 95th pct.
+Fit 2021-23 / judge 2024-26 and the reverse (weights are already frozen from 2021-23; the
+fit/judge test applies to the ROBUSTNESS bar: both halves positive).
+
+**Pass bar.** v2 beats v1 in BOTH halves at tier AND tier_hi on the same book; placebo
+>= 95th pct in both halves; NW t (5 lags) >= 2.0 of the daily increment over 2021-26; the
+2016-20 holdout (via the 2020 raw rebuild where the tilt's boosted inputs can be rebuilt)
+not worse than the v1. Adopt requires ALL; the t/placement pattern add. 23 already showed
+(+31bp per sd) means the realistic outcome is shadow at most — this run's job is the
+RAW-pool restatement, and the verdict counts in our N. (counts as 2 variants)
+
+## Amendment — Study D: MNQ (micro-futures) vs the QQQ noise leg, 1256 vs 35% ST tax (pre-register)
+
+`date`: Tue Sep 29 02:04:34 PDT 2026 (the authoritative stamp; before any Study D number).
+
+**Hypothesis.** The QQQ noise leg's edge carries to MNQ (add. 25, both halves, placebo,
+stress) and 1256's 60% LT / 40% ST blended rate beats the all-short-term ETF leg after tax;
+the blocker is contract size (one MNQ is ~82 x QQQ). Question: at which taxable equity does
+moving the noise leg's QQQ half to MNQ add after-tax growth at $3k/$15k/$30k/$50k/$100k + $1k/mo,
+and the risk (P(DD>50%) or a forced single-contract leverage over the bound)?
+
+**Data.** MNQ stands in via QQQ minute bars (add. 25's stated PROXY: NQ ≈ 41 x QQQ, MNQ = $2 x
+NQ, so notional ≈ 82 x QQQ; the Globex session, roll and basis are NOT modelled — the proxy
+only sees the ETF's 09:30-16:00 session, so overnight gains/losses beyond the ETF's gap are not
+in the series). QQQ/SMH noise leg uses the same live rule (swingtrader/daily/signals) at
+0.5bp/side and 1.5bp stressed; MNQ busy per side = comm + ticks×tick value on the notional
+(add. 25's tier $1.00 + 1 tick ≈ $0.50 = $1.50/side; tier_hi $1.50 + 2 x $0.50 = $2.50;
+stress $1.50 + 3 ticks). The raw-price sim (load_sim(raw_price=True), corr 0.7) supplies the
+book's other legs exactly as the last rounds did.
+
+**Variants (4, pre-registered).**
+- D1 V7 raw with noise = QQQ(0.5) + SMH(0.5), 3bp/tier/tier_hi night costs (base rows).
+- D2 the same book with the QQQ half shifted to MNQ (asset = the MNQ leg's own return,
+  futures costs per side, vol-target kept, same 0.02 target, cap 0.75-1.5 as the books run).
+- D3 the MNQ leg with the Kelly x1.5 noise target (0.03) as the add. 40 shadow spec.
+- D4 the whole-contract machine (futures.account_mc): contract granularity + margin at the
+  REAL sizes ($15k/$30k/$50k/$100k) for D1 vs D2 and D3, after tax at the user's bracket
+  (ST 35%, LT 20%, so 1256 blended = 0.26): Monte-Carlo medians, P(DD>50%), and "forced
+  single-contract leverage" flags.
+
+**Pass bar.** a) the MNQ leg's gross is not negative against QQQ at any cost model
+(the swap only wins if futures costs per side < the ETF's at the same gross — a cost study,
+not a new signal); b) the AFTER-TAX increment > +0.5pp at the sizes where a contract fits
+the target (whole contracts); c) both halves positive and 2016-20 not worse; d) the
+contract-granularity MC's forced-lev median: any equity where the forced single contract
+exceeds 2x equity is OUT of range (not a candidate). Adopt only as a spec/gate, not as a
+live switch at sizes where the contract does not fit.
+
+(Tax modelled per add. 32: ST 35% on the non-1256 net, LT 20%, so 1256 blended = 0.6×0.20 +
+0.4×0.35 = 0.26; 1256 net losses carry forward but can ONLY offset 1256 gains (no ordinary
+deduction except the $3k NLL election); ETF legs keep the T3 model. No wash-sale issue: MNQ
+is not a security and shares no symbol with the taxable legs.)
+
+**Variant count for deflation:** D1-D4 (4; D4 is one run at 4 equity sizes × 2 Leg options x 3
+cost tiers = a sensitivity table, reported as ONE variant per book row; count 4). N goes to
+568 + 4 = 572.
+
+## Amendment — Study E: a GBM picker on the organic 15:40 features (pre-register)
+
+`date`: Tue Sep 29 02:14:15 PDT 2026 (the authoritative stamp; before any Study E number).
+
+**Hypothesis** (per the reply's proposal #1). A gradient-boosted model (sklearn
+HistGradientBoostingRegressor) predicting the night pick's close→next-open net return,
+trained ONLY on features computable at 15:50 from data already held, with purged/embargoed
+walk-forward, produces named bump more than the shipped v1 tilt is able to capture, i.e. the
+raw-pool book's 2024-26 grows with it in BOTH halves, placebo-beaten. Add. 23's 9-feature
+linear tilt is not this test: it fit a monotone-in-quintiles linear form and its raw-pool
+2024-26 verdict is negative (Study C).
+
+**Data / features (all honest at 15:50, no lookahead).** From `data.night_candidates(raw=True)`
+(the 20,501-candidate raw pool 2020-10..2026-09) joined to the big split-adjusted daily panels:
+  f1  day_ret (the candidate's day move, the pool's -8% filter)
+  f2  ibs_last = (p50 - L50) / max(H50 - L50, eps)   (the pool's ~0.1 gate)
+  f3  gap = open / pc - 1   (the day open from the big panel)
+  f4  pm_move = p50 / open - 1                    (the day's move by 15:50)
+  f5  late = (p50 / (pc and the 15:30 bar...))     NOT available here: use (p50 - pc) share of day_ret
+  f6  width = (H50 - L50) / p50                   (the late window's range)
+  f7  p50 (log price)
+  f8  vol20, f9 ret20 (20d momentum), f10 adv (log)
+  f11 dopen/p50-1 = the day open's gap share of the day's move
+Labels = ret (close→next open) net of 2 × book.cost_bps("tier on the RAW price") per side
+(the raw pool's own convention). Missing amenities -> np.nan handled in-model.
+
+**Variants (3, pre-registered).**
+- E1 GBM: HistGradientBoostingRegressor (depth-3, lr 0.05, 300 trees, min_samples_leaf 200),
+  inside-day-2021..-23 fit, 2024-26 judged; 30-calendar-day embargo between the fit's last
+  pick and the judge's start. Reverse fit (2024-26 -> judge 2021-23) reported too.
+- E2 GBM with ONLY the add. 23's 9-feature honest panel (the add. 23 linear model's own
+  feature set), to separate "more model" from "more features".
+- E3 linear ridge on the same big feature panel (the interaction-free reference).
+All three produce per-name predicted edge; the book leg's tilt uses the SAME weight form as
+the shipped tilt: w = clip(1 + k * pred/sd_pred, 0.25, 2), mean-normalized per day; the sizing
+reuses the shipped night_sizing's frac and the whole-share/everything else unchanged.
+
+**Controls.**
+- Placebo: the same weights with the predictioN's VALUES shuffled WITHIN THE DAY (the
+  model's structure destroyed), 200 draws; the actual daily book increment must beat the
+  95th percentile in BOTH halves.
+- Batching: fit 2021-23 vs the shipped v1 tilt AND the equal-weight base, both as book rows.
+- The 2016-20 holdout is NOT computable from this pool (the honest 15:50 reconstruction
+  starts 2020-10), so the verdict caps at SHADOW by construction (as in add. 23). This study
+  counts; the PROGRAM's adopt bar unmodified (no holdout ⇒ no adopt).
+
+**Pass bar.** 1) the book increment (E vs the shipped v1 tilt) > 0 in BOTH halves at tier AND
+tier_hi on the raw pool; 2) placebo ≥ 95th pct in both halves; 3) NW t (5 lags) ≥ 2.0 over
+2021-26; 4) edge-halves not worse and P(DD>50%) not worse than the shipped book; 5) still
+positive with each leg's mean halved. Verdict: all → the best a NEW STUDY can be is SHADOW
+(no holdout); 1-3 hold but a later bar fails → dead.
+
+**Variant count for deflation:** 3 model variants × the book rows; N = 572 + 3 = 575.
+
+## Amendment — Round 2: two more studies, pre-registered before any number
+
+`date`: Tue Sep 29 02:32:51 PDT 2026 (the authoritative stamp, before any F/G number).
+
+### Study F: IBS on non-equity ETFs (a different asset class, the same mechanics — NOT in the dead list)
+
+Checked first against the dead list: the intraday diversification row (add. 20/26a) killed
+the *intraday* noise rule on TLT/GLD/IWM/XLE/USO/EEM/SPY, and add. 34's "SPY−TLT MTD" as an
+IBS *sizing* dial is a "watch" (not a test of IBS itself on those instruments). The phase-1
+swing study noted IBS holds on defensive/bond/commodity ETFs (12.7% CAGR, line 615) but was
+never judged at the daily book's live 09:15 timing and the whole-share account. Testing the
+IBS rule (last bar's IBS < 0.2, open -> open, momentum top_k among the candidate universe)
+on a non-equity universe:
+
+- Universe (fixed): TLT, IEF, IEI, TLO, GLD, SLV, IAUF, USO, UUP, HYG, LQD, EMB, KIE, XLP, XLU,
+  DBC, EZU, FXE, EWZ, EWJ, EEM, EFA, VGK — every liquid non-3x-ETF in etf_daily 2016+, plus
+  3x pairs on the pool. Momentum top-3 of 12 rolling 12-1 windows, whole shares, 1bp/side
+  (tier) and 3bp (tier_hi).
+- Variants (3): F1 the non-equity ETFs as an ADDITIONAL 12-ETF IBS pool (3 top picks),
+  F2 the non-equity IBS leg REMOVING the equity IBS picks that share the day (dedupe),
+  F3 non-equity IBS as a book-level substitute for the equity IBS half.
+- Pass bar: the increment vs V7 (raw pool, corr .7) positive in 2021-23 AND 2024-26 at
+  3bp AND tier_hi; placebo (random-day same-count) ≥ 95 pct in both halves; NW t ≥ 2; holdout
+  2016-20 not worse; no look-ahead (12-1 momentum, IBS on the last full bar only).
+
+### Study G: the "LLM idea" — a local semantic classifier on add. 12's news corpus
+
+Data: `night_news.pkl` (17,552 point-in-time headline rows, `heads` text, the keyword
+labels, the next-day returns). Add. 12's keyword parser got every category ≈ 0 excess
+except "dilution"'s sign against intuition (t 1.6, n 1.4%). THE TEST: does an LLM's semantic
+classification of the same headlines produce categories, the keyword machine's, that split
+the next-open P&L (the meaning-level "is this a forced-flow story vs a real informational
+shock")?
+
+- I (the session's LLM) label a stratified sample of 400 headline rows while blind to the
+  keyword class and the returns: label ∈ {"B1 dilution/whatever-share", "B2 drop-in-night-hop",
+  "C macro-day", "D risk-warning", "E FDA/trial-claustrophobia", "F mere-news"}; classify
+  ("the news STATED something material about the name" vs "it described the market flow").
+- Sample power: at 40bp/trade sd and a target 15bp effect at 80% power, 400 rows per class
+  ≈ ± 50bp confidence interval; the test CAN flag big effects only; note explicitly that a
+  <30bp/trade effect is undetectable in-sample and the honest report is "power-limited".
+- The rule: the LLM's classes' P&L comparison stays; the "dilution trades bounce shifted
+  their mean" pf add. 12's table row must be regenerated by the LLM's groups to test.
+- Verdict gating: at power limits the honest verdict is "report" (not adopt/dead), and the
+  add. 12 conclusion remains the default: prospective at ~$0 edge.
+
+Both studies' variant counts add to the program's N: F 3 + LLM 1 labelled sample (report,
+0 rule variants) ⇒ N = 575 + 3 = **578**.
+
+## Amendment — Round 3: Study H, F2's tie-break resolved + a smaller defensive sleeve (pre-register)
+
+`date`: Tue Sep 29 09:52:46 PDT 2026 (the authoritative stamp; no Study H number below the stamp). Round 3's question, following round 2's finding: the F2 (the equity-18 + the 10
+non-equity) IBS pool's +2.7..+5.5pp/yr depends on `sg.momentum_top`'s tie-break, which
+today is the listing frame's own order. To test a version whose tie-break is deterministic
+and ORDER-independent (the kind a live config could ship):
+
+- H1 F2 with an alphabetical pool order (deterministic; the implementation sorts the pool
+  before momentum_top; nothing else changes) at 3bp/tier/tier_hi — the pass bar identical
+  to F2: both halves positive, placebo-200 >= 95 in both halves, NW t >= 2, the 2016-20
+  holdout not worse, EH and the 5y MC draws not worse.
+- H2 SMALLER: the equity-18 + a 4-sleeve of the non-equity (the pool = 22 with the non-
+  equity sleeve at a 0.25 share of the leg: this tests whether the result needs a 24-pool
+  or a smaller budget). Same pass bar.
+- H3 the corr-dedupe variant: the same 24-pool with the momentum top-3's within-pool
+  dedupe (drop a tie whose 20-day Pearson r > 0.9 with a higher-ranked pick, a live
+  signal-mechanic already in the code base). Same pass bar.
+- If H1 passes ALL its bars (both halves >=, placebo >= 95 both halves, NW t >= 2, holdout
+  not worse, EH not worse) with the SAME value as F2's last review (+2-5pp/yr at tier),
+  the verdict is STILL SHADOW (no 2020 rebuild, no 2016-20 minute holdout for the non-
+  equity minute data): its own SHADOW-LOG spec carries over from study F's draft.
+Variant count: H 3. N = 578 + 3 = 581.
+
+## Amendment — Round 4: Study R, the Roth at $1,000 vs $3,000 sizing (pre-register)
+
+`date`: Tue Sep 29 10:28:42 PDT 2026 (the authoritative stamp; no Study R number existed when this was written).
+
+Question: at the Roth's real $1,000, how much of the daily book's backtest edge survives
+whole-share rounding and the per-name cap? Schwab has no fractional API: night CLS buys are
+`floor(per * w / price)` shares (`executor` night sizing), IBS/SGOV DAY buys go by notional but
+SchwabAdapter floors `notional / ref_px` and refuses 0 shares. Live real-money also has the
+1-share probe (`night_probe_max_usd` 150: a pick that rounds to 0 shares and costs <= $150
+buys 1 share, while book cash lasts).
+
+Roth book as modelled (limited-margin IRA, per the code): night 0.5 + IBS 0.5 = 1.0x, NO
+intraday leg, NO conviction, NO borrowing (cash floor 0), tilt v1 (k 0.25), max_corr 0.7,
+weekend x0.5, name cap 0.10 of the leg, raw prices, idle IBS half in T-bills (BIL proxy,
+whole shares in the whole-share variants), no deposits. Not modelled: the roth_first wash
+guard (look-alike swaps / blocked names) — it can only remove picks, so it biases toward
+the Roth looking better than it is; flagged, not fixed.
+
+Variants (the program's N counts each configuration):
+- R1-R4 whole shares + probe (live rules) at $1k / $2k / $3k / $5k.
+- R5-R8 fractional (the sim's `whole=False`) at the same four sizes (the "full edge" reference).
+- R9 $1k whole + probe with the night name cap 0.15 (the moderate10 cap).
+- R10 $1k whole, probe OFF (what the probe is worth).
+Each at tier and tier_hi costs (costs are a stress, not extra variants). N = 581 + 10 = **591**.
+
+Metrics, 2021-23 / 2024-26 / full:
+- PRIMARY, fixed capital (the book is reset to its size each day; P&L withdrawn): CAGR,
+  Sharpe, maxDD of the daily return on that fixed capital. This isolates account size.
+- the gap G(size) = CAGR(whole+probe) - CAGR(fractional) at the same size, pp/yr, and the
+  annualised tracking error of the daily return difference.
+- night picks skipped (0 shares after probe) as % of picks; night leg notional deployed as
+  % of the leg budget; probe share of night trades.
+- SECONDARY, compounding from the start size, no deposits (the account as it would grow).
+- MC: 21-day block bootstrap of the fixed-capital daily returns (2021-02..2026-09), 4000
+  paths x 1260 days (5y), the SAME block draws for every variant (paired), compounding
+  from the start size: p10 / median / p90 terminal, P(DD > 30%), and the paired median of
+  (terminal whole / terminal fractional).
+
+Decision rule (fixed before any number):
+- G($1k) at tier, full period, >= -2.0pp/yr (i.e. rounding costs <= 2pp/yr) -> NO ACTION:
+  the Roth runs fine at $1k.
+- G($1k) < -2.0pp/yr -> sizing matters. Recommend topping up DAILY_ROTH capital to the
+  smallest tested size with G >= -2.0pp/yr at tier (within contribution limits), and report
+  G at tier_hi. The MC paired ratio must agree in sign, else "report" only.
+- R9 (cap 0.15 at $1k) is only a candidate if it improves $1k whole+probe CAGR by >= 1pp in
+  BOTH halves at tier AND tier_hi with maxDD no more than 3pp worse; even then SHADOW/report
+  (moderate10 already exists as a profile; this is not a new rule).
+- R10 is descriptive (no decision).
+- Sanity: $3k fractional with the Roth settings must be within 0.5pp/yr of the same
+  replay run through the unmodified `B.Sim.day_pnl` (whole=False, noise off, conviction 0);
+  if not, the study is void.
+
+
+## Amendment — Round 4b: Study P (probe off), stamped Tue Sep 29 10:34:59 PDT 2026
+
+Written before any Study P number. R10 found the 1-share night probe (`night_probe_max_usd`
+150) hurts at $1k (post-hoc). The probe's purpose (measure open-sell cost on
+expensive names) is served: live open sells ~0bp over 34 exits. Study P tests it at the
+sizes the live books actually run.
+
+- Variants (2): whole shares with probe $150 vs whole shares, no probe; sizes $1k, $2k,
+  $2,259 (brokerage today), $3k, $5k (sizes are one test, not separate variants).
+  Same model as Study R (`roth_sizing.day`, 1x, name cap 0.10, raw prices, capital reset daily).
+- Costs: tier and tier_hi. Periods 2021-23, 2024-26, full.
+- **Decision rule:** switch the probe OFF (`daily.night_probe_max_usd: null`) if no-probe is
+  >= probe in CAGR in BOTH halves at BOTH cost tiers at $2k, $2,259 and $3k, and its maxDD
+  is not worse by more than 3pp at any of them. Otherwise keep it.
+- N: +2 -> 593.

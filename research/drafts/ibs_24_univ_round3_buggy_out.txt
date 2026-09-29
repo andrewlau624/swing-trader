@@ -1,0 +1,47 @@
+== Study H: 24-ETF IBS with an alphabetical tie-break; started 2026-09-29 09:53:14.786445 ==
+
+3.0     H1 24-univ alphabetical  2021-23: d  -1.38pp / Sharpe -0.17 / DD -14
+3.0     H1 24-univ alphabetical  2024-26: d  -2.96pp / Sharpe -0.43 / DD -17
+3.0     H1 24-univ alphabetical  2016-20: d   +nanpp / Sharpe  nan / DD nan
+                                 full:  -2.15pp  NW t -0.64
+
+3.0     H2 20-univ alphabetical  2021-23: d  -3.91pp / Sharpe -0.65 / DD -19
+3.0     H2 20-univ alphabetical  2024-26: d  -3.37pp / Sharpe -0.55 / DD -17
+3.0     H2 20-univ alphabetical  2016-20: d   +nanpp / Sharpe  nan / DD nan
+                                 full:  -3.65pp  NW t -1.40
+
+3.0     H3 24-univ corr-dedupe   2021-23: d  -0.36pp / Sharpe -0.01 / DD -16
+3.0     H3 24-univ corr-dedupe   2024-26: d  -2.66pp / Sharpe -0.37 / DD -16
+3.0     H3 24-univ corr-dedupe   2016-20: d   +nanpp / Sharpe  nan / DD nan
+                                 full:  -1.48pp  NW t -0.40
+
+tier    H1 24-univ alphabetical  2021-23: d  -1.10pp / Sharpe -0.27 / DD  -7
+tier    H1 24-univ alphabetical  2024-26: d  -0.42pp / Sharpe -0.08 / DD  -6
+tier    H1 24-univ alphabetical  2016-20: d   +nanpp / Sharpe  nan / DD nan
+                                 full:  -0.77pp  NW t -0.39
+
+tier    H2 20-univ alphabetical  2021-23: d  -3.81pp / Sharpe -0.67 / DD -13
+tier    H2 20-univ alphabetical  2024-26: d  -0.82pp / Sharpe -0.17 / DD  -6
+tier    H2 20-univ alphabetical  2016-20: d   +nanpp / Sharpe  nan / DD nan
+                                 full:  -2.38pp  NW t -1.10
+
+tier    H3 24-univ corr-dedupe   2021-23: d  +0.00pp / Sharpe 0.00 / DD   0
+tier    H3 24-univ corr-dedupe   2024-26: d  +0.00pp / Sharpe 0.00 / DD   0
+tier    H3 24-univ corr-dedupe   2016-20: d   +nanpp / Sharpe  nan / DD nan
+                                 full:  +0.00pp  NW t +0.00
+
+tier_hi H1 24-univ alphabetical  2021-23: d  -0.96pp / Sharpe -0.23 / DD  -6
+tier_hi H1 24-univ alphabetical  2024-26: d  -0.38pp / Sharpe -0.07 / DD  -6
+tier_hi H1 24-univ alphabetical  2016-20: d   +nanpp / Sharpe  nan / DD nan
+                                 full:  -0.68pp  NW t -0.34
+
+tier_hi H2 20-univ alphabetical  2021-23: d  -3.73pp / Sharpe -0.66 / DD -13
+tier_hi H2 20-univ alphabetical  2024-26: d  -0.80pp / Sharpe -0.16 / DD  -6
+tier_hi H2 20-univ alphabetical  2016-20: d   +nanpp / Sharpe  nan / DD nan
+                                 full:  -2.33pp  NW t -1.07
+
+tier_hi H3 24-univ corr-dedupe   2021-23: d  +0.00pp / Sharpe 0.00 / DD   0
+tier_hi H3 24-univ corr-dedupe   2024-26: d  +0.00pp / Sharpe 0.00 / DD   0
+tier_hi H3 24-univ corr-dedupe   2016-20: d   +nanpp / Sharpe  nan / DD nan
+                                 full:  +0.00pp  NW t +0.00
+

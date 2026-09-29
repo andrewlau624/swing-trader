@@ -33,6 +33,27 @@ kill rules run and change nothing else.
 
 ---
 
+## Round 3-4 verification (2026-09-29): one bug fixed, nothing adopted, Roth blocked
+
+- **Roth has never traded: it is blocked by design, not broken.** `executor.py:165` returns before
+  any phase unless `.env` has `ROTH_LIMITED_MARGIN=yes` (a plain cash IRA would take good-faith
+  violations). Get Schwab's margin-in-IRA approval, then set the flag on the server.
+- **Study R (Roth sizing, pre-registered):** whole shares + probe vs fractional, tier, pp/yr:
+  $1k −3.5, $2k −2.5, **$3k −1.2 (first size inside the −2.0 bar)**, $5k −0.8. At $1k the IBS
+  leg (~$167/ETF) buys 0 QQQ/SPY/SMH. Fund the Roth to ~$3k before judging it.
+- **Study P (probe off, pre-registered):** KEEP the 1-share probe. No-probe wins the full
+  period and Sharpe at every size (e.g. $2,259 tier 12.9 vs 12.3%, Sharpe 1.07 vs 0.95) but
+  loses 2024-26 CAGR at $2k-$3k (16.8 vs 17.6% at $2,259), which the rule required it to win.
+  Only at $1k is it better everywhere. Do not revisit on these numbers.
+- **Study H corrected:** the round-3 "tie-break mirage" was a bug in `research/sim/ibs_24_univ.py`
+  (it traded the alphabetically-first 3 of the top 8; 15-name "EQ18"; baseline never reset).
+  Rerun (control reproduces baseline exactly): 24-ETF IBS +3.0pp/yr, t 1.1; with the corr
+  dedupe +4.0pp, t 1.4; both halves positive, both below the t ≥ 2 bar. **F2 stays dead by t,
+  not as an artifact.** Live code was never affected. Details: `research/drafts/study_fg.md`.
+- Program N: 581 + 10 (R) + 2 (P) = **593**. Nothing clears the bar.
+
+---
+
 ## Addenda 40-41 (2026-09-29): day trading after the PDT rule — nothing to adopt, one shadow
 
 **40, intraday buying power: SHADOW.** Schwab gives margin accounts ≥ $2k *Intraday Margin Buying Power*

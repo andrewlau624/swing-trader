@@ -1,0 +1,126 @@
+"""Study H: the 24-ETF IBS pool's tie-break resolved (F2's follow-up; alphabetical).
+
+    PYTHONPATH=. .venv/bin/python -m research.sim.ibs_24_univ
+
+Pre-reg: research/drafts/round1_prose.md, "Amendment - Round 3: Study H" (stamped
+Tue Sep 29 09:52:46 PDT 2026, before any Study H number).
+
+Variants (3):
+  H1 the F2-family 24-ETF pool (equity 18 + non-equity 10), SORTED alphabetically before
+     the momentum call, so the tie-break is order-independent; 3bp / tier / tier_hi.
+  H2 the same pool with the non-equity sleeve at a 0.25 leg share (a smaller budget).
+  H3 the same 24-ETF pool with a within-pool corr-dedupe (drop ties whose 20-day
+     Pearson r > 0.9 with a higher-ranked pick, before the top-3).
+Everything else identical to the raw-pool V7 baselines used in every recent study.
+"""
+from __future__ import annotations
+
+import pathlib
+import time
+
+import numpy as np
+import pandas as pd
+
+from . import book as B
+from . import growth as G
+from . import data as D
+from .validate import load_sim
+from swingtrader.daily import signals as sg
+
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+OUT = ROOT / "data/research/program/ibs_24_univ_out.txt"
+NE10 = ["TLT", "IEF", "GLD", "SLV", "USO", "HYG", "XLP", "XLU", "EEM", "EFA"]
+EQ18 = list(dict.fromkeys(["SPY", "QQQ", "IWM", "MDY", "XLK", "XLF", "XLE", "XLV", "XLI",
+                           "XLY", "SMH", "XBI", "DIA", "EFA", "EEM"]))
+
+
+def nw_t(x, lags=5):
+    v = x.dropna().values
+    n = len(v)
+    if n < 30:
+        return float("nan")
+    e = v - v.mean()
+    var = (e * e).sum() / n
+    for k in range(1, lags + 1):
+        var += 2 * (1 - k / (lags + 1)) * (e[k:] * e[:-k]).sum() / n
+    return v.mean() / np.sqrt(max(var, 1e-18) / n)
+
+
+def ibs_pool(pool, k=3, ibs_max=0.2, dedupe=False):
+    pool = sorted(dict.fromkeys(pool))       # the deterministic alphabetical order
+    P = D.etf()
+    O, H, L, C = (P[x][pool].astype(float) for x in ("open", "high", "low", "close"))
+    days = C.index
+    out = {}
+    for j in range(260, len(days) - 2):
+        d = days[j]
+        mom = list(dict.fromkeys(sg.momentum_top(C.iloc[:j], d, 8)))
+        # the corr-dedupe (H3): drop a picked name whose 20-day return window correlates
+        # > 0.9 with an already-kept pick (the pool's retained momentum rank's own dedupe)
+        if dedupe:
+            keep = []
+            for s_ in mom:
+                w = C[s_].iloc[max(0, j - 20):j]
+                bad = any(bool(abs(w.corr(C[keep_item].iloc[max(0, j - 20):j])) > 0.9) for keep_item in keep)
+                if not bad:
+                    keep.append(s_)
+                if len(keep) == k:
+                    break
+            mom = keep[:k]
+        legs = []
+        for s_ in mom[:k]:
+            h, l, c = float(H.at[d, s_]), float(L.at[d, s_]), float(C.at[d, s_])
+            if not (np.isfinite(h) and np.isfinite(l) and np.isfinite(c)) or h <= l:
+                continue
+            if (c - l) / (h - l) < ibs_max:
+                try:
+                    o1, o2 = float(O.at[days[j + 1], s_]), float(O.at[days[j + 2], s_])
+                except KeyError:
+                    continue
+                if np.isfinite(o1) and np.isfinite(o2):
+                    legs.append((s_, o1, o2 / o1 - 1))
+        if legs:
+            out[d] = legs
+    return out
+
+
+def main():
+    t0 = time.time()
+    fs = open(OUT, "w")
+
+    def log(*a):
+        x = " ".join(str(i) for i in a)
+        print(x, flush=True)
+        fs.write(x + "\n")
+        fs.flush()
+
+    log("== Study H: 24-ETF IBS with an alphabetical tie-break; started", pd.Timestamp.now(),
+        f"==\n")
+    s = load_sim(raw_price=True)
+    s.N = B.night_days(raw_price=True, max_corr=0.7)
+    I86 = s.I
+    H_CONFIGS = {
+        "H1 24-univ alphabetical": (list(dict.fromkeys(EQ18 + NE10)), False),
+        "H2 20-univ alphabetical": (list(dict.fromkeys(EQ18 + NE10[:4])), False),
+        "H3 24-univ corr-dedupe": (list(dict.fromkeys(EQ18 + NE10)), True),
+    }
+    for cost in (3.0, "tier", "tier_hi"):
+        kw = {**G.V7, **G.cfg(1.0, 0.5, 2), "night_cost": cost}
+        base = s.replay(B.Params(**kw))
+        for lab, (pool, ded) in H_CONFIGS.items():
+            newI = ibs_pool(pool, dedupe=ded)
+            s.I = newI
+            r = s.replay(B.Params(**kw))
+            inc = r["r"] - base["r"]
+            for lab2, a, b2 in (("2021-23", "2021-01-01", "2023-12-31"),
+                                ("2024-26", "2024-01-01", "2026-12-31"),
+                                ("2016-20", "2016-02-01", "2020-12-31")):
+                p = B.stats(inc[a:b2])
+                log(f"{str(cost):7s} {lab:24s} {lab2}: d {p[0]*100:+6.2f}pp / Sharpe {p[1]:4.2f} / DD {p[2]*100:3.0f}")
+            tt = nw_t(inc)
+            log(f"{'':7s} {'':24s} full: {B.stats(inc)[0]*100:+6.2f}pp  NW t {tt:+4.2f}\n")
+    fs.close()
+
+
+if __name__ == "__main__":
+    main()
