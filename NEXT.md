@@ -43,10 +43,11 @@ LIVE (Schwab, since 09-22, 6 sessions): **+$18.99 (+0.8%)** on ~$2,240 (deposit
 not fired AND §4's live-minus-backtest gap on the same trades is ≥ −10bp/trade. That proves the
 bot captures the backtest; the edge itself needs ~3,000 trades (~2 years) and rests on the research.
 
-**Addendum 21's `night_price_min: 3.0` conditional is NOT triggered yet:** it needs ~50 exits
-(34 now). Sub-$10 live costs are ~0bp (buy n 13, sell n 14 +1.1bp), so it will likely trigger.
-But the raw-price rerun (RESULTS.md ~L2379) found the $3 floor at −1.7 / +0.7pp (2021-23 /
-2024-26) even at tier+tick: decide at 50 exits with that in view, not on cost alone.
+**Addendum 21's `night_price_min: 3.0` conditional: NO, decided 2026-09-29. Keep $5.** Its
+evidence came from split-adjusted bars, which let in sub-$5 lookahead winners (addendum 36).
+On raw prices (RESULTS.md ~L2379) the $3 floor is −1.7 / +0.7pp (2021-23 / 2024-26) at
+tier+tick, −0.8 at tier_hi 2024-26, and the added names lose 33bp/trade in 2021-23 (placebo
+7%). Cheap live sub-$10 costs (~0bp) were necessary, not sufficient. Do not revisit on cost.
 
 ---
 
