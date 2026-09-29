@@ -39,6 +39,7 @@ from ..live.lock import AccountLock, account_fingerprint
 from ..live.notify import Notifier
 from ..universe import all_assets, valid_symbol
 from . import marketdata as md
+from . import events as ev
 from . import signals as sg
 from .book import TERMINAL, DailyBook, book_file
 
@@ -236,7 +237,8 @@ class DailyExecutor:
                 continue
             c0, o1 = float(b.iloc[idx.index(e["date"])]["close"]), float(b.iloc[idx.index(today)]["open"])
             r = o1 / c0 - 1 - 2 * sg.OVERSOLD_COST_BPS / 1e4
-            st["history"].append({"date": e["date"], "sym": sym, "ret": r, "usd": e.get("usd", 0.0)})
+            st["history"].append({"date": e["date"], "sym": sym, "ret": r, "usd": e.get("usd", 0.0),
+                                  **({"usd_a2": e["usd_a2"]} if "usd_a2" in e else {})})
             self.log(f"[oversold] shadow {sym} {e['date']}: close {c0:.2f} -> open {o1:.2f} = {r*1e4:+.0f}bp net")
         close_et = pd.Timestamp(clock.next_close).tz_convert(ET)
         if close_et.date() != now.date() or close_et.hour != 16:
@@ -262,9 +264,171 @@ class DailyExecutor:
             return
         per = idle / len(fire)
         st["pending"] = {sym: {"date": today, "usd": round(per, 2)} for sym in fire}
+        self._oversold_ibs_idle = idle        # Roth A2 adds the night leg's unused money later
         for sym, why in fire.items():
             self.log(f"[oversold] SHADOW: would buy {sym} ${per:,.0f} at the close ({why}), "
                      "sell at the open - no order placed")
+
+    # --------------------------------------------- research shadows (15:40)
+    # Addenda 31/33/38. Every one of these logs and self-scores; none places an
+    # order or changes a size. Each runs in its own try so a failure can never
+    # cost the night leg (whose orders are already in by now).
+    def _close_shadows(self, book: DailyBook, today: str, now, clock) -> None:
+        plan = getattr(self, "_night_plan", None) or {"requested": 0.0, "planned": 0.0}
+        jobs = []
+        if self.cash_account and self.d.roth_night_cash_log != "off":
+            jobs.append(("roth-cash", lambda: self._roth_cash_log(book, plan)))
+        if self.cash_account and self.d.oversold_mode != "off":
+            jobs.append(("oversold", lambda: self._oversold_roth_a2(book, plan)))
+        if not self.cash_account and self.d.fomc_filler_mode != "off":
+            jobs.append(("fomc", lambda: self._fomc_shadow(book, today, now, clock, plan)))
+        if self.live and self.d.wash_guard_mode != "off":
+            jobs.append(("wash-guard", lambda: self._wash_shadow(book, today, "15:40")))
+        for tag, fn in jobs:
+            try:
+                fn()
+            except Exception as exc:
+                self.log(f"[{tag}] skipped ({type(exc).__name__}: {str(exc)[:80]})")
+
+    def _night_budget(self, book: DailyBook, plan: dict) -> float:
+        if plan.get("budget") is not None:
+            return float(plan["budget"])
+        return self._w_night(book) * self._sizing_equity(book)
+
+    def _roth_cash_log(self, book: DailyBook, plan: dict) -> None:
+        """Roth M2L (addendum 31), log only: the night leg's requested notional
+        vs what the 15:40 cash actually funded. Live sizes on equity and skips
+        names greedily (biggest losers first) once cash runs out; M2L would
+        scale every name pro rata to the free cash instead."""
+        marks = self._marks(book)
+        val = lambda leg: sum(float(p["qty"]) * float(marks.get(s, p["avg_px"]))
+                              for s, p in book.leg_positions(leg).items())
+        req, fund = float(plan.get("requested", 0.0)), float(plan.get("planned", 0.0))
+        cash = float(plan.get("cash_start", book.cash))
+        k = min(1.0, max(0.0, cash) / req) if req > 0 else 1.0
+        self.log(f"[roth-cash] requested ${req:,.0f} funded ${fund:,.0f} "
+                 f"(3x held ${val('noise'):,.0f}, SGOV ${val('tbill'):,.0f}); cash at 15:40 ${cash:,.0f}"
+                 + (f", M2L pro-rata would size every name x{k:.2f}" if req > 0 else ", no night picks"))
+
+    def _oversold_roth_a2(self, book: DailyBook, plan: dict) -> None:
+        """Roth A2 (addendum 31, shadow behind the oversold shadow itself): the
+        same trigger funded by ALL idle overnight money (the IBS idle half +
+        what the night leg left unused), not only the IBS idle half."""
+        pend = book.oversold.get("pending") or {}
+        todays = {s: e for s, e in pend.items() if "usd_a2" not in e}
+        if not todays:
+            return
+        idle = float(getattr(self, "_oversold_ibs_idle", 0.0))
+        spare = ev.filler_spare(self._night_budget(book, plan), float(plan.get("planned", 0.0)))
+        a2 = idle + spare
+        for s, e in todays.items():
+            e["usd_a2"] = round(a2 / len(todays), 2)
+        self.log(f"[oversold] SHADOW Roth A2: all idle overnight money ${a2:,.0f} "
+                 f"(IBS idle ${idle:,.0f} + night unused ${spare:,.0f}) across {', '.join(todays)} "
+                 "- no order placed")
+
+    def _fomc_shadow(self, book: DailyBook, today: str, now, clock, plan: dict) -> None:
+        """F3 (addendum 33), taxable only, SHADOW: on the eve of a scheduled
+        FOMC decision, the night leg's unused money in QQQ at the close, sold
+        at the next open. Scores last event close -> official open, then decides."""
+        st = book.fomc
+        st.setdefault("history", [])
+        sym = ev.FOMC_FILLER_SYMBOL
+        warn = ev.stale_warning(dt.date.fromisoformat(today))
+        if warn:
+            self.warn(warn)
+        pend = st.pop("pending", None)
+        if pend:
+            bars = md.sip_daily([sym], pd.Timestamp(pend["date"]) - pd.Timedelta(days=5), None).get(sym)
+            idx = [d.date().isoformat() for d in bars.index] if bars is not None else []
+            i0 = idx.index(pend["date"]) if pend["date"] in idx else None
+            if i0 is not None and i0 + 1 < len(idx):
+                c0, o1 = float(bars.iloc[i0]["close"]), float(bars.iloc[i0 + 1]["open"])
+                r = o1 / c0 - 1 - 2 * ev.FOMC_COST_BPS / 1e4
+                st["history"].append({"date": pend["date"], "fomc": pend.get("fomc"), "ret": r,
+                                      "usd": pend.get("usd", 0.0), "shares": pend.get("shares", 0)})
+                n, m, off = ev.fomc_score(st["history"])
+                self.log(f"[fomc] shadow {sym} {pend['date']}: close {c0:.2f} -> open {o1:.2f} = "
+                         f"{r*1e4:+.0f}bp net ({pend.get('shares', 0)} sh); running n {n}, mean {m:+.1f}bp")
+                if off:
+                    self.warn(f"[fomc] auto-disable proposed: mean {m:+.1f}bp net after {n} FOMC eves "
+                              f"(pre-registered: < 0 after {ev.FOMC_DISABLE_N}). Set daily.fomc_filler_mode: off")
+            else:
+                st["pending"] = pend          # official open not in the bars yet: try again next run
+        close_et = pd.Timestamp(clock.next_close).tz_convert(ET)
+        if close_et.date() != now.date() or close_et.hour != 16:
+            return
+        nxt = pd.Timestamp(clock.next_open).tz_convert(ET).date()
+        if not ev.is_fomc_eve(nxt):
+            return
+        budget = self._night_budget(book, plan)
+        if "cash_left" in plan:
+            cash_left, floor = float(plan["cash_left"]), float(plan.get("floor", 0.0))
+        else:                                   # the night leg stopped before sizing
+            cash_left = book.cash
+            floor = -(max(1.0, self._w_ibs(book) + self._w_night(book)) - 1.0) * self._sizing_equity(book)
+        spare = ev.filler_spare(budget, float(plan.get("planned", 0.0)), cash_left, floor)
+        rows, _ = md.decision_rows([sym], self.d.quote_source, log=self.log)
+        px = float(rows.at[sym, "price"]) if sym in rows.index else float("nan")
+        sh = ev.filler_shares(spare, px)
+        st["pending"] = {"date": today, "fomc": nxt.isoformat(), "usd": round(sh * px, 2) if sh else 0.0,
+                         "shares": sh, "spare": round(spare, 2)}
+        held = " (another leg holds QQQ: a real version would need QQQM)" if sym in book.positions else ""
+        self.log(f"[fomc] SHADOW: FOMC decision {nxt}: would buy {sh} {sym} (${sh * px:,.0f}) at the close, "
+                 f"sell at the open - spare ${spare:,.0f} of the ${budget:,.0f} night budget "
+                 f"(night planned ${float(plan.get('planned', 0.0)):,.0f}){held} - no order placed")
+
+    def _wash_shadow(self, book: DailyBook, today: str, when: str) -> None:
+        """G4s, the Roth-first wash guard (addendum 31, POST-HOC), SHADOW: what
+        it would change vs the live guard. Neither book's orders change.
+
+        The live guard today (_wash_symbols / _foreign_symbols): SYMMETRIC. On
+        the real-money books only, each book treats as foreign every name the
+        other book holds, has a non-terminal order in, or closed (exit date) in
+        the last 31 days, SGOV excepted, on EVERY leg: IBS targets are dropped,
+        night names are left out of the scan, the intraday leg switches to its
+        stand-in (QQQM/SOXX) or skips the Roth 3x ETF. Nothing looks at gain vs
+        loss, and there is no explicit priority: `resolved_accounts` runs the
+        brokerage book before the Roth in each phase, so it claims the shared
+        names first."""
+        if not self.live:
+            return
+        other = "roth" if self.account == "live" else "live"
+        p = self.state_dir / book_file(other)
+        if not p.exists():
+            self.log(f"[wash-guard] SHADOW {self.account} {when}: no {other} book yet - nothing to compare")
+            return
+        ob = json.loads(p.read_text())
+        raw = list(getattr(self, "_ibs_raw_targets", []) if when == "09:15" else [])
+        g = sg.wash_g4s(self.account, ob, today, raw, self.d.ibs_cash_symbol, TERMINAL)
+        cur, night = g["current"], g["night"]
+        fmt = lambda x: ", ".join(sorted(x)[:15]) or "-"
+        if when == "09:15":
+            now_skip = [s for s in raw if s in cur]
+            self.log(f"[wash-guard] SHADOW {self.account} 09:15 IBS targets {raw or '-'}: live guard skips "
+                     f"{now_skip or '-'}; G4s would hold {g['ibs_take'] or '-'}"
+                     + (f" (look-alikes {', '.join(f'{a}->{b}' for a, b in g['ibs_subs'].items())})" if g["ibs_subs"] else "")
+                     + (f", skip {g['ibs_skip']} (same-index / no look-alike, {other} traded in 31d)" if g["ibs_skip"] else ""))
+            return
+        elig = getattr(self, "_night_elig", None)
+        guarded = sorted((cur | night) & set(elig.index)) if elig is not None else []
+        sig = set()
+        if guarded:
+            rows, _ = md.decision_rows(guarded[:60], self.d.quote_source, log=lambda *_: None)
+            cols = [c for c in ("prev_close", "vol20") if c in elig.columns]
+            rows = rows.join(elig[cols], how="inner") if not rows.empty else rows
+            if not rows.empty:
+                sig = set(sg.loser_picks(rows, day_ret_max=self.d.night_day_ret_max,
+                                         ibs_max=self.d.night_ibs_max, price_min=self.d.night_price_min,
+                                         price_max=self.d.night_price_max).index)
+        if self.account == "live":
+            self.log(f"[wash-guard] SHADOW live 15:40: the Roth traded {len(cur)} names in 31d; "
+                     f"tonight's night signals among them (skipped now and under G4s) {fmt(sig & night)}. "
+                     f"G4s would stop blocking IBS/intraday on {fmt(cur & (set(self.d.ibs_symbols) | set(self._noise_signals())))}")
+        else:
+            self.log(f"[wash-guard] SHADOW roth 15:40: live guard blocks {len(cur)} names; G4s would block "
+                     f"{len(night)} (taxable loss sales 30d + held/pending: {fmt(night)}). Tonight's night signals: "
+                     f"G4s would take {fmt(sig & (cur - night))}, skip {fmt(sig & night)}")
 
     # ------------------------------------------------------------ watchdog
     # Quiet runs send nothing, so silence cannot tell "nothing to do" from
@@ -387,6 +551,11 @@ class DailyExecutor:
         # IBS leg: rank the universe by 12-1 momentum (month-end, bars before
         # today), then IBS < ibs_max on the last complete SIP bar of the top-k
         self._ibs_open(book, today, equity)
+        if self.d.wash_guard_mode != "off":
+            try:
+                self._wash_shadow(book, today, "09:15")
+            except Exception as exc:        # a shadow must never cost a live leg
+                self.log(f"[wash-guard] skipped ({type(exc).__name__}: {str(exc)[:80]})")
 
         # night-leg universe for this afternoon (pays the ~30s SIP pull now)
         u = [s for s in all_assets().symbols if valid_symbol(s)]
@@ -453,7 +622,22 @@ class DailyExecutor:
             ucb = getattr(self, "_exit_ucb", float("nan"))
             self.log(f"[lever] {'on' if ok else 'off'} - {why}"
                      + (f" (95% upper bound on the mean {ucb:+.1f}bp)" if np.isfinite(ucb) else ""))
+        if self.d.lever_g1_log != "off":
+            try:
+                self._log_lever_g1()
+            except Exception as exc:        # a shadow must never cost the live gate
+                self.log(f"[lever-g1] skipped ({type(exc).__name__}: {str(exc)[:80]})")
         book.levered = ok
+
+    def _log_lever_g1(self) -> None:
+        """SHADOW (addendum 38): the sequential gate G1 -- open from 20 exits
+        once the one-sided 95% day-clustered upper bound on the mean open-sell
+        cost is <= 10bp (and >= 8 exit days). Logged only; lever_ok decides."""
+        g = getattr(self, "_exit_g1", None) or sg.lever_g1([])
+        self.log(f"[lever-g1] SHADOW n {g['n']} ({g['days']} days), mean {g['mean']:+.1f}bp, "
+                 f"clustered 95% UB {g['ub']:+.1f}bp -> would_open {'yes' if g['would_open'] else 'no'} "
+                 f"(n >= {sg.G1_MIN_EXITS}, days >= {sg.G1_MIN_DAYS}, UB <= {sg.LEVER_MAX_EXIT_BPS:g}bp; "
+                 "the live gate is unchanged)")
 
     # ------------------------------------------------------ open routing
     ROUTE_RETRY_DAYS = 5
@@ -529,7 +713,8 @@ class DailyExecutor:
             universe = list(closes.columns)
         last = {s: bars[s].iloc[-1].to_dict() for s in universe if s in bars}
         foreign = self._foreign_symbols(book)
-        targets = [s for s in sg.ibs_targets(last, self.d.ibs_max) if s not in foreign]
+        self._ibs_raw_targets = sg.ibs_targets(last, self.d.ibs_max)   # before any guard (wash shadow)
+        targets = [s for s in self._ibs_raw_targets if s not in foreign]
         if book.is_killed("ibs") and targets:
             self.log(f"[ibs] leg killed - not buying {targets}")
             targets = []
@@ -590,6 +775,10 @@ class DailyExecutor:
         except Exception as exc:
             self.log(f"[night] exit-cost check skipped ({type(exc).__name__}: {str(exc)[:80]})")
             return
+        try:                                # shadow (add. 38): must not skip the checks below
+            self._exit_g1 = sg.lever_g1(sg.night_exit_costs_by_day(sells, opens, window=sg.LEVER_MIN_EXITS))
+        except Exception as exc:
+            self.log(f"[lever-g1] skipped ({type(exc).__name__}: {str(exc)[:80]})")
         if not n:
             return
         self.log(f"[night] open-sell cost vs official open, last {n}: {bps:+.1f} bps/side")
@@ -605,6 +794,12 @@ class DailyExecutor:
                       "Consider a broker with real market-on-open orders.")
 
     def phase_close(self, book: DailyBook, today: str, now, clock) -> None:
+        # what the night leg planned tonight, for the shadows below (log only)
+        self._night_plan = {"requested": 0.0, "planned": 0.0}
+        self._phase_close_night(book, today, now, clock)
+        self._close_shadows(book, today, now, clock)
+
+    def _phase_close_night(self, book: DailyBook, today: str, now, clock) -> None:
         self._check_exit_cost(book, today)
         self._lever_gate(book)
         if self.d.oversold_mode != "off":
@@ -626,6 +821,7 @@ class DailyExecutor:
                               cache_dir=self.state_dir)
         if elig.empty:
             self.warn("night universe empty - skipping"); return
+        self._night_elig = elig
         foreign = self._foreign_symbols(book) | set(self.d.ibs_symbols) | set(book.positions)
         syms = [s for s in elig.index if s not in foreign]
         rows, src = md.decision_rows(syms, self.d.quote_source, log=self.log)
@@ -673,6 +869,10 @@ class DailyExecutor:
         # never let this book borrow beyond the gross its weights allow
         floor = -(max(1.0, self._w_ibs(book) + self._w_night(book)) - 1.0) * equity
         cash = book.cash
+        plan = getattr(self, "_night_plan", None)
+        if plan is None:
+            plan = self._night_plan = {"requested": 0.0, "planned": 0.0}
+        plan.update(budget=leg, floor=floor, cash_start=cash, cash_left=cash, n_picks=len(picks))
         v20 = picks["vol20"].values if "vol20" in picks else np.full(len(picks), np.nan)
         w = sg.night_tilt(v20, picks["day_ret"].values, self.d.night_tilt_k)
         prev = np.array([np.expm1(r[-1]) if isinstance(r, list) and r else np.nan
@@ -688,6 +888,7 @@ class DailyExecutor:
         probe_usd = self.d.night_probe_max_usd if self.live else None
         for (sym, r), wi in zip(picks.iterrows(), w):
             qty = math.floor(per * wi / r.price)   # auction orders are whole shares
+            plan["requested"] += per * wi
             probe = False
             if qty < 1 and probe_usd and r.price <= probe_usd:
                 # a small account rounds every name above ~$50 to zero shares, so
@@ -700,6 +901,8 @@ class DailyExecutor:
             if cash - qty * r.price < floor:
                 self.log(f"  skip {sym}: book cash exhausted"); continue
             cash -= qty * r.price
+            plan["planned"] += qty * r.price
+            plan["cash_left"] = cash
             spread = (r.ask - r.bid) / ((r.ask + r.bid) / 2) * 1e4 if (
                 "bid" in r and np.isfinite(r.get("bid", np.nan)) and np.isfinite(r.get("ask", np.nan))
                 and r.ask >= r.bid > 0) else float("nan")

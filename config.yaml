@@ -130,7 +130,12 @@ daily:
   # Oversold overnight (RESULTS.md addendum 27): SPY/QQQ after 3 down closes or RSI(2) < 10,
   # bought at the close with the IBS leg's idle money, sold at the next open. V7 47.5 -> 49.9%/yr,
   # Sharpe 1.99 -> 2.04, but post-hoc: shadow only (logs `[oversold]`, scores itself, no orders).
-  oversold_mode: shadow
+  oversold_mode: shadow          # on the Roth it also logs A2: all idle overnight money (add. 31)
+  # Research-program shadows: off | shadow. shadow = log + self-score, NO orders, no sizing change.
+  fomc_filler_mode: shadow       # F3: QQQ close->open on spare night cash, FOMC eves, taxable only (add. 33)
+  roth_night_cash_log: shadow    # Roth 15:40 `[roth-cash]` requested vs funded night notional, M2L (add. 31)
+  lever_g1_log: shadow           # `[lever-g1]` day-clustered 95% UB gate beside `[lever]`; lever_ok unchanged (add. 38)
+  wash_guard_mode: shadow        # `[wash-guard]` what the Roth-first G4s guard would change vs the live one (add. 31)
   noise_lookback: 14
   noise_target_vol: 0.02
   noise_max_lev: 3.5

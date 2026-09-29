@@ -236,6 +236,10 @@ def main(argv=None):
         c = g.cost_bps.to_numpy()[-sg.LEVER_MIN_EXITS:]
         say(f"- {book:5s}: {len(c)}/{sg.LEVER_MIN_EXITS} exits, mean {c.mean():+.1f}bp, "
             f"95% upper bound {sg.cost_upper_bound(c):+.1f}bp")
+        g1 = sg.lever_g1(list(zip(g["when"].astype(str).str[:10], g.cost_bps))[-sg.LEVER_MIN_EXITS:])
+        say(f"  G1 shadow (add. 38, day-clustered): n {g1['n']} over {g1['days']} days, "
+            f"UB {g1['ub']:+.1f}bp -> would_open {'yes' if g1['would_open'] else 'no'} "
+            f"(n >= {sg.G1_MIN_EXITS}, days >= {sg.G1_MIN_DAYS}, UB <= {sg.LEVER_MAX_EXIT_BPS:g}bp)")
     say("\n## 6. Night-leg cost by price (addendum 21: set night_price_min 3.0 if < $10 costs <= ~20bp/side)")
     nb = f[f.leg == "night"].dropna(subset=["cost_bps"]).copy()
     if not nb.empty:

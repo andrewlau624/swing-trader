@@ -137,6 +137,133 @@ def cost_upper_bound(costs, z: float = 1.645) -> float:
     return float(c.mean() + z * c.std(ddof=1) / np.sqrt(len(c)))
 
 
+def night_exit_costs_by_day(fills: list[dict], opens: dict, window: int = 30) -> list[tuple[str, float]]:
+    """(exit day, cost bps/side) for the scored night sells: the input to the
+    day-clustered bound. Sells on one morning share that morning's auctions,
+    so they are not independent (addendum 38)."""
+    sells = [f for f in fills if f.get("leg") == "night" and f.get("side") == "sell"]
+    out = []
+    for f in sells[-window:]:
+        day = str(f.get("filled_at", ""))[:10]
+        o = opens.get((f["sym"], day))
+        if o and o > 0 and f.get("fill_px"):
+            out.append((day, -(float(f["fill_px"]) / o - 1.0) * 1e4))
+    return out
+
+
+# Lever gate G1 (addendum 38, SHADOW): open from 20 exits once the one-sided
+# 95% DAY-CLUSTERED upper bound on the mean exit cost is <= 10bp. Logged
+# beside the live gate (G0 = lever_ok); lever_ok itself is unchanged. The
+# verifier found a clustered SE from 3-5 exit days unreliable, so G1 also
+# needs G1_MIN_DAYS distinct exit days.
+G1_MIN_EXITS = 20
+G1_MIN_DAYS = 8
+G1_Z = 1.645
+
+
+def clustered_upper_bound(costs, days, z: float = G1_Z) -> tuple[float, float, int]:
+    """(mean, one-sided upper bound, n clusters) of per-exit costs clustered by
+    exit day: SE^2 = G/(G-1) * sum_g (sum_i in g (c_i - mean))^2 / n^2."""
+    c = np.asarray(costs, float)
+    if len(c) == 0:
+        return float("nan"), float("nan"), 0
+    m = float(c.mean())
+    groups: dict = {}
+    for d, x in zip(days, c):
+        groups[d] = groups.get(d, 0.0) + (x - m)
+    g = len(groups)
+    if g < 2:
+        return m, float("nan"), g
+    var = g / (g - 1) * sum(v * v for v in groups.values()) / len(c) ** 2
+    return m, float(m + z * np.sqrt(var)), g
+
+
+def lever_g1(pairs: list[tuple[str, float]]) -> dict:
+    """G1 shadow verdict from (day, cost) pairs. Reporting only."""
+    days, costs = [p[0] for p in pairs], [p[1] for p in pairs]
+    m, ub, g = clustered_upper_bound(costs, days)
+    n = len(costs)
+    would = bool(n >= G1_MIN_EXITS and g >= G1_MIN_DAYS and np.isfinite(ub)
+                 and ub <= LEVER_MAX_EXIT_BPS)
+    return {"n": n, "days": g, "mean": m, "ub": ub, "would_open": would}
+
+
+# Wash guard G4s (addendum 31, POST-HOC, SHADOW). The live guard
+# (executor._wash_symbols) is symmetric: each real-money book avoids every
+# name the other one holds, has an open order in, or closed in the last 31
+# days, on every leg; the brokerage book runs first each phase, so it claims
+# the shared names and starves the Roth (~35pp/yr in the study). G4s: the
+# Roth goes first. The brokerage book yields its NIGHT names to anything the
+# Roth traded in 31 days (its IBS and intraday legs are unrestricted, since
+# the Roth avoids them); the Roth night leg skips only names the brokerage
+# book sold at a LOSS in 30 days (plus names it holds or has orders in right
+# now); the Roth IBS leg trades a different-index look-alike, and skips the
+# same-index/no-look-alike names the brokerage book traded in 31 days.
+WASH_LOOKALIKE = {"SPY": "SPLG", "QQQ": "QQQM", "IWM": "VTWO", "MDY": "IJH", "XLK": "VGT",
+                  "XLF": "VFH", "XLE": "VDE", "XLV": "VHT", "XLI": "VIS", "XLY": "VCR",
+                  "XLP": "VDC", "XLU": "VPU", "XLB": "VAW", "SMH": "SOXX", "EEM": "IEMG",
+                  "EFA": "IEFA"}                    # DIA, XBI: none
+WASH_SAME_INDEX = {"SPY", "QQQ", "IWM", "MDY", "EEM"}   # look-alike tracks the SAME index: not used
+WASH_SAFE_LOOKALIKE = {k: v for k, v in WASH_LOOKALIKE.items() if k not in WASH_SAME_INDEX}
+
+
+def _cut(today: str, days: int) -> str:
+    return (pd.Timestamp(today) - pd.Timedelta(days=days)).date().isoformat()
+
+
+def book_now(b: dict, terminal=frozenset()) -> set[str]:
+    """Names a book (its saved json) holds or has a live order in."""
+    out = set(b.get("positions", {}))
+    out |= {o.get("sym") for o in (b.get("orders") or {}).values()
+            if o.get("sym") and o.get("status") not in terminal}
+    return out
+
+
+def book_recent(b: dict, today: str, days: int = 31, terminal=frozenset()) -> set[str]:
+    """Held, pending, or closed (exit date) in the last `days`: the live guard's set."""
+    cut = _cut(today, days)
+    return book_now(b, terminal) | {c["sym"] for c in b.get("closed", [])
+                                    if str(c.get("exit_date", "")) >= cut}
+
+
+def book_loss_sales(b: dict, today: str, days: int = 30) -> set[str]:
+    """Names the book closed at a loss in the last `days` (the wash-sale trigger)."""
+    cut = _cut(today, days)
+    return {c["sym"] for c in b.get("closed", [])
+            if str(c.get("exit_date", "")) >= cut and float(c.get("pnl") or 0.0) < 0}
+
+
+def wash_g4s(account: str, other: dict, today: str, ibs_targets=(), cash_sym: str | None = None,
+             terminal=frozenset()) -> dict:
+    """What G4s would block vs the live symmetric guard, for `account`
+    ("live" = brokerage, "roth") given the OTHER book's saved state.
+      current   names the live guard blocks on every leg
+      night     names G4s blocks for this account's night leg
+      other     names G4s blocks for this account's IBS / intraday legs
+      ibs_subs  Roth IBS target -> look-alike it would trade instead
+      ibs_skip  Roth IBS targets G4s would skip (same-index or no look-alike, other traded 31d)
+      ibs_take  IBS targets the account would hold under G4s (after subs)."""
+    recent = book_recent(other, today, 31, terminal)
+    recent.discard(cash_sym)
+    out = {"current": set(recent), "ibs_subs": {}, "ibs_skip": [], "ibs_take": []}
+    if account == "roth":
+        night = book_loss_sales(other, today, 30) | book_now(other, terminal)
+        night.discard(cash_sym)
+        out.update(night=night, other=set())
+        for s in ibs_targets:
+            if s in WASH_SAFE_LOOKALIKE:
+                out["ibs_subs"][s] = WASH_SAFE_LOOKALIKE[s]
+                out["ibs_take"].append(WASH_SAFE_LOOKALIKE[s])
+            elif s in recent:
+                out["ibs_skip"].append(s)
+            else:
+                out["ibs_take"].append(s)
+    else:
+        out.update(night=set(recent), other=set())
+        out["ibs_take"] = list(ibs_targets)
+    return out
+
+
 def exit_cost_by_route(fills: list[dict], opens: dict, window: int = 60) -> dict:
     """Open-sell quality per route (NASDAQ/NYSE/... = directed to the listing
     exchange's auction, AUTO = Schwab's routing, "" = broker OPG orders).

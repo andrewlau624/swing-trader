@@ -10,7 +10,7 @@
 Paper always runs. Real money runs too when .env has DAILY_LIVE=on; switch
 with `make daily-live-on` / `make daily-live-off`.
 """
-import argparse, json, sys
+import argparse, datetime as dt, json, sys
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -76,6 +76,24 @@ def status(account: str):
         print(f"oversold SPY/QQQ ({d.oversold_mode}) nights {len(r)}"
               + (f"  win {100*np.mean(np.array(r)>0):.0f}%  avg {np.mean(r)*1e4:+.1f}bp net" if r else "")
               + (f"  tonight: {', '.join(b.oversold['pending'])}" if b.oversold.get("pending") else ""))
+        a2 = [x for x in oh if x.get("usd_a2") is not None]
+        if a2:      # Roth A2 (add. 31): same trigger on all idle overnight money
+            print(f"   Roth A2 (all idle overnight money) nights {len(a2)}  "
+                  f"P&L ${sum(x['ret'] * x['usd_a2'] for x in a2):+,.2f} vs IBS-idle-only "
+                  f"${sum(x['ret'] * x.get('usd', 0.0) for x in a2):+,.2f}")
+    if account != "roth" and d.fomc_filler_mode != "off":
+        from swingtrader.daily import events as ev
+        n, m, off = ev.fomc_score(b.fomc.get("history", []))
+        usd = sum(x["ret"] * x.get("usd", 0.0) for x in b.fomc.get("history", []))
+        nxt = ev.next_fomc(dt.date.today())
+        print(f"FOMC-eve QQQ filler ({d.fomc_filler_mode}, add. 33) events {n}"
+              + (f"  mean {m:+.1f}bp net  P&L ${usd:+,.2f}" if n else "")
+              + (f"  pending {b.fomc['pending']['fomc']}" if b.fomc.get("pending") else "")
+              + f"  next decision {nxt or 'NONE IN CALENDAR'}"
+              + (f"  AUTO-DISABLE PROPOSED (mean < 0 after {ev.FOMC_DISABLE_N})" if off else ""))
+        w = ev.stale_warning(dt.date.today())
+        if w:
+            print(f"!!! WARNING: {w}")
     f = ROOT / "logs" / (f"daily-fills-{account}.jsonl" if account in ("live", "roth") else "daily-fills.jsonl")
     if f.exists():
         rows = [json.loads(l) for l in f.read_text().splitlines() if l.strip()]

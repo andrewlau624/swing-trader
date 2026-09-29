@@ -231,6 +231,17 @@ class DailyCfg:
     # < 10, close auction -> next open, idle IBS money. shadow = decide, log
     # and score from SIP prices, place nothing. off = skip. (No order path yet.)
     oversold_mode: str = "shadow"
+    # Research-program shadows (addenda 31/33/38). Each is off | shadow; shadow
+    # logs and self-scores only, and none of them has an order path.
+    # FOMC-eve filler F3 (add. 33): taxable books only; QQQ close -> open with
+    # the night leg's unused money on the eve of a scheduled FOMC decision.
+    fomc_filler_mode: str = "shadow"
+    # Roth M2L (add. 31): at 15:40 log requested night notional vs cash free.
+    roth_night_cash_log: str = "shadow"
+    # Lever gate G1 (add. 38): day-clustered 95% UB beside the live gate.
+    lever_g1_log: str = "shadow"
+    # Wash guard G4s, Roth first (add. 31, post-hoc): log what it would change.
+    wash_guard_mode: str = "shadow"
     # Named overrides of the fields above. DAILY_LIVE_PROFILE=<name> in .env
     # applies one to the real-money brokerage book only (never paper, never
     # the Roth), so an experiment survives `make pull`. RESULTS.md addendum 22.
