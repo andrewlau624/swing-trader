@@ -2148,3 +2148,46 @@ lottery tail, and after costs and delistings it trails SPY. The bot already harv
 volatility the profitable way: the night leg buys their one-day crashes (RGTI/IONQ/QBTS/QUBT all pass
 its filters). A long-term thematic bet is a personal allocation (a small position held by hand; the
 bot never trades a symbol the account holds), not a rule.
+
+
+# Addendum 29 — live costs are ~0bp: what changes (2026-09-28)
+
+`research/sim/cost_resweep.py` (~4 min). After 26 live night round trips (Schwab, $1k cap):
+buys **−0.5bp**, open sells **−1.0bp/side** vs the official auction prints (95% upper bound
++11.7bp). The research tiers assumed 5-15bp (tier) and 7.5-25bp (tier_hi). The night edge is
+~20bp/trade gross, so costs were eating 25-75% of it. Re-tested at flat 0 and 3bp (3bp = the
+conservative stand-in for "measured"); tier_hi stays the planning floor.
+
+**A. The book, and the lever gate** (2021-23 / 2024-26 / full, CAGR / Sharpe / maxDD):
+
+| | 3bp | tier | tier_hi |
+|---|---|---|---|
+| V7 1.0x | 56.9/2.52 · 59.2/2.17 · **58.0/2.33/−12** | 47.5/1.99/−13 | 39.6/1.73/−14 |
+| V7 1.3x | 62.5/2.49 · 74.8/2.22 · **68.3/2.32/−15** | 53.4/1.93/−16 | 43.3/1.64/−17 |
+
+At measured costs 1.3x adds +10pp/yr at the same Sharpe in both halves (at tier_hi it costs
+Sharpe). The gate opens itself at 50 exits <= 10bp; this says it is a good trade when it does.
+
+**B/C. Rejected ideas re-checked:** shallower night depth (−7%/−6%) is even at 0bp and worse at
+3bp: addendum 20's rejection was the signal, not cost. vol20 >= 0.40-0.50 instead of 0.60:
++1pp / +0.02 Sharpe at 0-3bp, worse at tier and tier_hi: too small; revisit at 50+ exits.
+
+**D. Sizing at measured costs** (history | edge-halves | 5y MC $3k + $1k/month under EH):
+
+| profile | 3bp history | 3bp EH | median | P(DD>30%) / >50% | tier_hi EH, P(DD>30%) |
+|---|---|---|---|---|---|
+| V7 1.0x, cap 0.10 | 58.0 / 2.33 / −12 | 25.1 / 1.19 / −18 | $120k | 11% / 0% | 17.5, 23% |
+| V7 1.3x (gate) | 68.3 / 2.32 / −15 | 28.6 / 1.18 / −17 | $132k | 21% / 0% | 18.6, 39% |
+| **1.3x, cap 0.15** | **85.5 / 2.42 / −18** | **34.3 / 1.23 / −22** | **$153k** | 32% / 1% | 21.4, 56% |
+| aggressive (1.3x, cap 0.20, intraday 0.6) | 93.7 / 2.39 / −20 | 36.7 / 1.21 / −26 | $163k | 44% / 2% | 22.2, 68% |
+| 1.5x, cap 0.10 | 74.4 / 2.28 / −17 | 30.4 / 1.15 / −19 | $138k | 32% / 1% | 18.8, 54% |
+| 1.5x, cap 0.15 | 93.7 / 2.35 / −20 | 36.5 / 1.18 / −24 | $162k | 48% / 3% | 21.3, 72% |
+| 1.3x, no conviction | 62.6 / 2.33 / −15 | 26.6 / 1.19 / −17 | $125k | 14% / 0% | 16.7, 32% |
+
+- **A 15% night-name cap is the best Sharpe of every profile at measured costs** (2.42), and the
+  EH frontier's knee: +5.7pp/yr over the gated 1.3x for +11pp of P(DD>30%). Beyond it
+  (aggressive, 1.5x) return rises ~2pp for +12-16pp of drawdown odds. At tier_hi it loses Sharpe,
+  so it is a bet that live costs stay low: the reason addendum 17 rejected 0.15 at tier costs.
+- Conviction is worth +5.7pp/yr at 1.3x (62.6 → 68.3) at the same Sharpe.
+- **Built:** `daily.profiles.moderate` (night_max_name_pct 0.15, nothing else; leverage still
+  only through the gate). `DAILY_LIVE_PROFILE=moderate` in `.env`. Not enabled.

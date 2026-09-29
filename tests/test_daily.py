@@ -1026,3 +1026,14 @@ def test_oversold_shadow_decides_then_scores(tmp_path, monkeypatch):
                         SimpleNamespace(next_close=pd.Timestamp("2026-09-25 16:00", tz=ET)))
     h = book.oversold["history"]
     assert len(h) == 1 and h[0]["ret"] == pytest.approx(447.0 / 443.0 - 1 - 2e-4)
+
+
+def test_moderate_profile_only_widens_the_name_cap(monkeypatch):
+    monkeypatch.setenv("DAILY_LIVE_PROFILE", "moderate")
+    cfg = Config.load()
+    live, name = cfg.daily.for_account("live")
+    base, _ = cfg.daily.for_account("paper")
+    assert name == "moderate" and live.night_max_name_pct == 0.15
+    assert (live.ibs_weight, live.night_weight, live.lever_weight, live.conviction_mode) == \
+        (base.ibs_weight, base.night_weight, base.lever_weight, base.conviction_mode), \
+        "leverage still comes only through the gate"

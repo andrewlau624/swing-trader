@@ -14,6 +14,16 @@ losses are one bad night, not execution. `daily-status`'s +33bp is vs the 15:50
 decision price, not a cost. At 50 exits ≤ 10bp: overnight leverage opens by
 itself, and the aggressive profile (addendum 22) becomes an option.
 
+## Addendum 29 (2026-09-28): live costs ~0bp; a `moderate` profile, OFF
+
+Live open sells −1.0bp/side (26 exits). At a 3bp stand-in: V7 58.0% / 2.33 (was 47.5 / 1.99),
+1.3x 68.3% / 2.32. New `DAILY_LIVE_PROFILE=moderate` = 15% night-name cap only (best Sharpe
+at measured costs, 2.42; EH 34%/yr, P(DD>30%) 32% in 5y). Decision order at the 10-08
+checkpoint, each only if `make review` 2b still shows open sells <= ~5bp over 50 exits:
+(1) the gate opens 1.3x by itself; (2) `conviction_mode: auto` after ~5 clean intraday days;
+(3) `DAILY_LIVE_PROFILE=moderate`; (4) aggressive only if you accept ~44% odds of a >30% drop.
+Raise `DAILY_LIVE_CAPITAL` in steps alongside; capital is still the biggest lever.
+
 ## Addendum 27 (2026-09-25): oversold overnight in SHADOW, three patterns dead
 
 `daily.oversold_mode: shadow`: SPY/QQQ after 3 down closes or RSI(2) < 10, close auction

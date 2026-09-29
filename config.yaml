@@ -139,6 +139,12 @@ daily:
   # maxDD -21%; if the edge halves at pessimistic costs ~22%/yr (shipped ~18%)
   # with a 68% chance of a >30% drawdown and 9% of >50% within 5 years.
   profiles:
+    # Addendum 29: at measured live costs (~0bp/side; 3bp used) a 15% name cap is the best
+    # Sharpe of every profile tested (2.42 vs 2.33), leverage still arrives only through the
+    # gate. EH 34% vs 25%/yr, P(DD>30%) in 5y 32% vs 11%. At tier_hi costs it is worse
+    # (Sharpe 1.67 vs 1.73): use only while `make review` 2b keeps open sells near 0bp.
+    moderate:
+      night_max_name_pct: 0.15
     aggressive:
       ibs_weight: 0.65           # 1.3x overnight, ungated
       night_weight: 0.65
