@@ -5,6 +5,33 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Live checkpoint (2026-09-29): costs fine, edge unproven, two decisions this week
+
+LIVE (Schwab, since 09-22, 6 sessions): **+$18.99 (+0.8%)** on ~$2,240 (deposit
+09-29 took equity $1,000 -> $2,259; P&L excludes it). In line with the backtest's
+~0.5% for 6 days, but that is noise at this sample.
+- night 34 trades, 38% win, **+0.08%/trade**, +$10.34. SE per trade is ~1%, so
+  this says nothing about the edge yet.
+- ibs 2 trades, 2 wins, +$12.76. noise 1 trade, −$4.17 (live from 09-29).
+- shadows (noise QQQ/SMH, conviction TQQQ): 1-4 days each, not readable.
+- **Costs are settled:** live night buys median −2.5bp, sells median 0.0bp
+  (research assumed 7.5bp/side; the edge dies ~15bp). Paper night is not
+  evidence (Alpaca paper open sells ~+200bp, see item 4).
+
+**Decide this week:**
+1. **Intraday leg is on real money** since the deposit crossed $2,000
+   (`daytrade_mode: auto`, 2.06x intraday cap). To watch it longer first:
+   `daily.daytrade_mode: off` in `config.yaml`.
+2. **Overnight leverage opens by itself at 50 night exits** (34 now, ~1 week):
+   both legs 0.5 -> 0.65, 1.3x overnight gross (`signals.lever_ok`: 50 exits
+   <= 10bp/side, no kill, drawdown within 10%). The cost test will pass; it
+   proves costs, not edge. To wait for edge evidence: `daily.lever_weight: null`.
+
+**Next look at returns:** ~100 live night trades (~3 weeks). Until then let the
+kill rules run and change nothing else.
+
+---
+
 ## Addenda 40-41 (2026-09-29): day trading after the PDT rule — nothing to adopt, one shadow
 
 **40, intraday buying power: SHADOW.** Schwab gives margin accounts ≥ $2k *Intraday Margin Buying Power*
@@ -476,7 +503,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 ---
 
-## 6. TQQQ strongest-breakout leg — FOUND, NOT BUILT (optional)
+## 6. TQQQ strongest-breakout leg — BUILT, SHADOW (addendum 19, `daily.conviction_mode`)
 
 The PDT rule is gone (addendum 9), so the full QQQ intraday leg is now live
 instead. Revisit this only after ~3 months of real intraday fills: the
