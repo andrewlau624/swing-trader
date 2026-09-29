@@ -28,8 +28,25 @@ LIVE (Schwab, since 09-22, 6 sessions): **+$18.99 (+0.8%)** on ~$2,240 (deposit
    The gate (`signals.lever_ok`) proves costs, not edge. Revisit at ~100 live
    night trades; to re-arm, set `lever_weight: 0.65` (the gate still applies).
 
-**Next look at returns:** ~100 live night trades (~3 weeks). Until then let the
-kill rules run and change nothing else.
+**`make review SINCE=2026-09-23` (2026-09-29 17:53 ET):**
+- **Same-trade test (§4) passes early:** live night +0.08%/trade vs the backtest on the SAME
+  trades −0.08% → live is +16bp/trade better (buy −0bp, sell −1bp vs the 15bp assumed). The bot
+  reproduces the backtest; the flat result is the market over these 34 trades, not execution.
+- Open sells vs the official open: mean −1.2bp, 95% UB +8.5bp (n 34). G1 needs 8 exit days
+  (has 4). Kill check: n 34, t +0.11, 66 round trips to a verdict.
+- Signal agreement (§1): live missed 15 of 49 backtest names (09-23 to 09-28, at $1k): small-book
+  rounding and the leg budget, as Study R predicts. Recheck at $2,259.
+- Intraday hygiene (§7): 1 clean day of 1. Conviction (profile moderate10c) needs ~5.
+- Paper night sells +53bp vs the official open (n 6): the Alpaca paper simulator, as found above.
+
+**Re-arm leverage (`lever_weight: 0.65`) when, at ~100 live night trades:** the kill rule has
+not fired AND §4's live-minus-backtest gap on the same trades is ≥ −10bp/trade. That proves the
+bot captures the backtest; the edge itself needs ~3,000 trades (~2 years) and rests on the research.
+
+**Addendum 21's `night_price_min: 3.0` conditional is NOT triggered yet:** it needs ~50 exits
+(34 now). Sub-$10 live costs are ~0bp (buy n 13, sell n 14 +1.1bp), so it will likely trigger.
+But the raw-price rerun (RESULTS.md ~L2379) found the $3 floor at −1.7 / +0.7pp (2021-23 /
+2024-26) even at tier+tick: decide at 50 exits with that in view, not on cost alone.
 
 ---
 
