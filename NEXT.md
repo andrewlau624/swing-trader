@@ -5,6 +5,45 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Addenda 40-41 (2026-09-29): day trading after the PDT rule — nothing to adopt, one shadow
+
+**40, intraday buying power: SHADOW.** Schwab gives margin accounts ≥ $2k *Intraday Margin Buying Power*
+(up to 4x maintenance excess) since 2026-07-13. The live code still reads 2.48 (Reg T `buyingPower`), and
+the broker multiplier is not the binding constraint:
+- 3-4x adds **+0.5-0.6pp EH after tax** (tier_hi, raw prices) to V7 / moderate10c. NW t is 1.6-1.7, and
+  2024-26 t is 0.5-0.6. On moderate10 (no conviction) it adds ~0 (+0.03pp): **dead**.
+- The size that matters is the noise target. Kelly x1.5 (`noise_target_vol` 0.02 → 0.03) at 4x adds
+  **+1.2-1.4pp EH-AT** (NW t 2.0, placebo 98th pct). It is downgraded to shadow for these reasons:
+  - DSR 0.10; 2024-26 t 0.64; t 1.1-1.3 without the 5 best days; 2026 YTD −3.8pp.
+  - Every increment turns negative at 2x the tier_hi intraday costs (break-even ~2bp per noise fill).
+  - P(DD>30%) doubles (23 → 46%). P(DD>50%) goes 0.3 → 3.7% on V7 and 0.9 → 3.3% on moderate10. It is
+    **5.4% on moderate10c, over the bound**.
+- $/yr: +$35 at $3k, +$1,169 at $100k (V3 on moderate10, tier_hi); negative under the cost stress.
+  Multiplier alone on V7: +$18 / +$601.
+- Roth: a limited-margin IRA gets no intraday margin, so there is nothing to change.
+
+**Switch (spec only, NOT built, default OFF, taxable margin book only).** Nothing in `config.yaml` or
+`swingtrader/` changed. A build would add these knobs:
+- (a) `daily.intraday_mult: broker | <float>` with `.env DAILY_INTRADAY_MULT=3.33`. `executor._gate` would use
+  `min(value, 4)` instead of the API ratio (MARGIN account, equity ≥ $2k).
+  - Gate: Schwab.com Balances shows Intraday Margin Buying Power ≥ 3.5x equity (or a `make daily-live-check`
+    `currentBalances` dump names an API field; then read that instead).
+  - Useful only with the conviction trade on.
+- (b) `noise_target_vol: 0.03` as an opt-in profile key, run as a shadow noise equity beside the live 0.02 leg
+  for 60 sessions first.
+  - Go live only if realised noise fills are ≤ 1.5bp all-in, the shadow increment is > 0, and the book's
+    P(DD>50%) is ≤ 5% (so never moderate10c + Kelly).
+  - On conviction books, use it only together with (a) ≥ 3.33.
+- Kill: revert (a) to `broker` if Schwab rejects ≥ 3 intraday orders for margin in 20 sessions. Revert (b) to
+  0.02 if the intraday legs' 60-session drawdown exceeds 15% of equity or the existing noise `KILL_*` fires.
+
+**41, noise rule on single stocks (top 5/10/20 by dollar volume): DEAD, no switch.**
+- Every variant lowers V7 and moderate10c in both halves at the measured spread, and still at zero stock
+  cost. Best S10t: −0.8pp EH-AT, −$24/yr at $3k, −$802/yr at $100k.
+- The megacaps carry QQQ's edge; QQQ is the cheapest wrapper of it (basket corr 0.72, 3x the cost per side).
+
+Program variant count: 546 + 7 (add. 40) + 6 (add. 41) = **559**. Nothing clears DSR 0.95.
+
 ## Live checkpoint (2026-09-24, `make review SINCE=2026-09-22`)
 
 Schwab brokerage live since 09-22 on a $1k cap. Night exits **19/50**; open
@@ -414,6 +453,13 @@ but "should" is not "did".
 | Evidence-keyed capital ramp (cap doubles per 15 exits) | **dead** | a 2-3 day P&L band can't tell edge from none; slower than deploying at the checkpoint (add. 38) |
 | Sequential lever gate for speed | **dead as a money lever** | ~1 session earlier, ~$0; G1 logged only for its stricter false-open rate (add. 38) |
 | Stacking the program's survivors as additive edges | **report** | no increment clears DSR 0.95 at N=546 (best A2 0.34, F3 0.035); the gain is structural (add. 39) |
+| More intraday buying power (3 / 3.33 / 4x) for a book WITHOUT the conviction trade (moderate10) | **dead** | the extra exposure lands on calm days, where the noise leg nets ~0 after tier_hi costs: +0.03..+0.18pp EH-AT, NW t 0.6-1.1, placebo 69-83 (add. 40) |
+| Intraday cap at 3-4x for the conviction books (V7, moderate10c) | **shadow at most** | +0.5-0.6pp EH-AT tier_hi, both halves + 2016-20 positive, but NW t 1.6-1.7 (2024-26 t 0.5-0.6), DSR 0.05; negative at 2x tier_hi intraday costs; live already reads 2.48, not 2 (add. 40) |
+| Noise leg Kelly x1.5 (`noise_target_vol` 0.03) at 4x | **shadow** | +1.2-1.4pp EH-AT, NW t 2.0, placebo 98, but DSR 0.10, 2024-26 t 0.64, 2026 YTD −3.8pp, negative at 2x tier_hi intraday costs, P(DD>30%) 23→46%; moderate10c P(DD>50%) 5.4% fails (add. 40) |
+| Roth intraday leg sized up after the PDT change | **not possible** | limited-margin IRA gets no Intraday Margin Buying Power (add. 40; 3x on all daytime cash already borderline, add. 31) |
+| Noise-area rule on the top 5/10/20 stocks by 63d dollar volume (replacing the SMH half or as a third stream) | **dead** | book −3 to −9pp CAGR in BOTH halves at the measured spread (~1.65bp/side), −5..−11pp at 3bp, negative even at zero stock cost; basket corr 0.72 with QQQ; best S10t −$24/yr at $3k, −$0.8k at $100k (add. 41) |
+| Same noise rule on liquid stocks outside the top 40 (ranks 41-100) | **dead** | gross ~0 bp/day, placebo 71%, book −15pp: the trend-day persistence lives only in the most traded names, which QQQ holds (add. 41) |
+| Single-stock intraday noise legs as an "attention" diversifier to QQQ | **dead** | top-5 gross edge ≈ QQQ's; across name-years it scales with vol (t 6.8), not dollar volume (t 1.3); QQQ is the cheapest wrapper (add. 41) |
 
 ## Ideas not yet tested
 

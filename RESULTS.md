@@ -4701,3 +4701,520 @@ On raw prices the ranking shifts toward the Roth mechanics. The Roth survivors a
 - **"100k scale":** both accounts' starts and deposits are scaled by 100k/7.8k. $/yr at 100k uses the Δ EH CAGR from those runs × $100k per account.
 - **Ops item (#3):** it comes from ops_capital on the adjusted pool and was not re-run.
 - **Post-hoc items:** G4s itself, the Roth-F3 wash finding, the as-built-vs-1.3x comparison and every J-row are post-hoc combinations of survivors. They are not new pre-registered tests.
+
+
+# Addendum 40 — intraday buying power after the PDT rule (Schwab ~4x since 2026-07-13): SHADOW (Kelly x1.5 noise target, multiplier on conviction books), multiplier DEAD on moderate10 (2026-09-29)
+
+**Verified verdict: SHADOW.** Schwab now grants up to ~4x intraday (4x maintenance excess), but the live code reads 2.48 and
+the broker multiplier is not the binding constraint. 3-4x adds +0.5-0.6pp after-tax EH at tier_hi on the conviction books
+(NW t 1.6-1.7, fails the t >= 2 bar) and ~0 on moderate10 (dead). Kelly x1.5 on the noise leg (noise_target_vol 0.02 -> 0.03)
+at 4x adds +1.2-1.4pp EH-AT (NW t 2.0, placebo 98th pct) and met the pre-registered bar on V7/moderate10, but it is
+downgraded: DSR 0.10, 2024-26 NW t 0.64, t 1.1-1.3 without the 5 best days, 2026 YTD negative, every increment turns
+negative at 2x the tier_hi intraday costs (break-even ~2bp per noise fill), P(DD>30%) doubles, and moderate10c + Kelly
+fails P(DD>50%) (5.4%). Variants: 5 pre-registered + 2 post-hoc = 7. Switch: spec only, default OFF (NEXT.md).
+
+    PYTHONPATH=. .venv/bin/python -m research.sim.intraday_bp          # no heavy lock (reads caches)
+
+## 1. Facts (established before any number was computed)
+
+**The rule.** FINRA's Rule 4210 amendments (SR-FINRA-2025-017; SEC approval 2026-04-14; Regulatory
+Notice 26-10, effective 2026-06-04, optional phase-in to 2027-10-20) delete the pattern-day-trader
+definition, the $25k minimum, and the "day-trading buying power" computation (maintenance excess x 4).
+They replace them with an *intraday margin deficit*: after every IML-reducing trade (a purchase or a
+short sale), equity must cover the **maintenance** requirement of paragraph (c) on what is then held.
+The rule "does not change the regular maintenance margin requirements ... but rather supplements them".
+Firms may monitor in real time (block the trade) or compute once at the end of the day.
+Sources: [FINRA Regulatory Notice 26-10](https://www.finra.org/rules-guidance/notices/26-10);
+[Federal Register, approval order 2026-07485](https://www.federalregister.gov/documents/2026/04/17/2026-07485/self-regulatory-organizations-financial-industry-regulatory-authority-inc-notice-of-filing-of);
+[SEC release 34-105226](https://www.sec.gov/files/rules/sro/finra/2026/34-105226.pdf);
+[WilmerHale client alert 2026-04-23](https://www.wilmerhale.com/en/insights/client-alerts/20260423-sec-approves-amendments-to-finra-rule-4210-replacing-day-trading-margin-requirements-with-a-modernized-intraday-margin-standard).
+
+**Schwab.** Stopped counting day trades on 2026-06-08. From **2026-07-13** it offers *Intraday Margin
+Buying Power* to margin accounts with >= $2,000 in cash or eligible securities: "the dollar amount a
+client can trade during the day in eligible securities with a 25% margin requirement ... This can
+provide up to four times the buying power intraday". It is computed in real time from open positions
+and their requirements; positions above overnight (Reg T) buying power must be closed the same day
+(8 p.m. ET) or a margin call may follow; Schwab blocks trades that would create an intraday deficit.
+Source: [Schwab, "Schwab Updates Day Trading and Margin Rules"](https://www.schwab.com/learn/story/schwab-changes-rules-around-day-trading)
+(fetched 2026-09-29; the page text is quoted above). Securities with higher maintenance get less than
+4x. 3x ETFs (TQQQ/SQQQ) carry 75% (FINRA/Cboe 3 x 25%; Schwab's house figure per secondary sources:
+[Cboe RG09-097](https://cdn.cboe.com/resources/regulation/circulars/regulatory/RG09-097.pdf),
+[Schwab margin requirements](https://www.schwab.com/margin/margin-rates-and-requirements)); Schwab's
+house maintenance on ordinary equities is often quoted at 30% (-> 3.33x), and it may raise any
+requirement for a concentrated position.
+
+**What the live code sees.** `brokers.SchwabBroker.account()` sets
+`multiplier = clip(max(dayTradingBuyingPower, buyingPower) / liquidationValue, 2, 4)`, and
+`executor._gate` sets `noise_lev_cap = min(noise_max_lev 3.5, mult x (1 - conv x 0.75) - w_ibs)`.
+The only multiplier ever recorded for the live Schwab account is **2.48** (addendum 22, 2026-09-24,
+i.e. after 07-13); the repo's local logs (`logs/*.log`) contain no multiplier line. So the Trader
+API fields the code reads do **not** show the 4x intraday figure (dayTradingBuyingPower is the old
+PDT field; buyingPower is Reg T). The live cap today is therefore ~2.48 x ..., not what Schwab allows.
+Whether a Trader-API field exposes Intraday Margin Buying Power is unverified (needs a live
+`make daily-live-check` dump of `currentBalances`).
+
+**Roth (limited margin IRA).** Not a margin account: no borrowing, no shorting; Intraday Margin Buying
+Power is for margin accounts only. The Roth's intraday leg is settled cash + unsettled proceeds in 3x
+ETFs (cap = 1 + (1 - w_ibs) x 2). No change is possible from the rule. (A larger 3x share of daytime
+cash was already tested: borderline, add. 31.)
+
+## 2. Pre-registration (stamped below; written before any 2024-26 or book number was computed)
+
+Books (RAW night pool, add. 30; $3k + $1k/21 sessions; baselines of add. 39):
+- **B1 V7**: 1.0x, name cap .10, conviction 0.5.
+- **B2 moderate10**: 1.0x, name cap .15, conviction off (as built today).
+- **B3 moderate10c**: 1.0x, name cap .15, conviction 0.5.
+
+Intraday cap for the taxable book: `cap = min(3.5, mult x (1 - 0.75 conv) - ibs_w)`; noise leverage and
+conviction weight as shipped. Baseline = **mult 2** (the current research assumption).
+
+Variants (5 in total, each evaluated on B1-B3):
+- **V1 mult 3**
+- **V2 mult 4** (Schwab's stated default: 25% -> up to 4x)
+- **V3 Kelly-scaled**: mult 4, noise leverage x 1.5 inside the cap
+- reference rows (reported, not adoptable on their own): **R1 mult 2.48** (what the live code reads
+  today), **R2 mult 3.33** (30% house maintenance)
+
+Costs: night leg 3bp flat / tier / tier_hi. Intraday legs: as shipped (noise 0.5bp/fill, conviction
+1.5bp/side) at 3bp and tier; at tier_hi noise 1.5bp/fill and conviction 3bp/side.
+
+Measures (for every row): CAGR/Sharpe/maxDD 2021-23, 2024-26, full; after-tax (35%, add. 32 T3 with
+wash sales); edge-halves (EH, growth.eh) pre- and after-tax; 5y 21-day block bootstrap under EH,
+$3k + $1k/mo, after tax: median, P(DD>30%), P(DD>50%) on net equity and on the raw balance;
+2016-20 holdout (noise/conviction legs from 2016 minutes; night leg in T-bills before 2020);
+COVID 2020-02-19..03-23, 2022, 2025-04-02..04-08; worst day / month; **worst intraday path** of the
+intraday legs from 1-minute bars (trough of mark-to-market within the session, % of equity) on
+2020-03-09/12/16, 2025-04-03/04/07/09 and the worst over 2016-26. Increment vs mult 2: day-level NW t
+(5 lags), and a placebo matched on frequency and exposure (the variant's extra leverage times the
+noise leg's day return with a random sign, 500 draws; report the percentile of the actual mean).
+
+Pass bar for a variant on a book (all at tier_hi unless stated):
+1. after-tax EH CAGR >= baseline + 0.5pp;
+2. 5y MC under EH after tax: P(DD>50%) <= 5% on net equity (the taxable account's bound);
+3. increment positive in 2021-23 AND 2024-26 (pre-tax) and in the 2016-20 holdout;
+4. increment NW t >= 2.0 and placebo percentile >= 95;
+5. worst intraday path of the intraday legs no worse than -15% of equity.
+Verdict: all pass on the mult Schwab actually grants -> adopt (as a switch the user turns on after
+confirming the API/account value); 1-3 pass but 4 or 5 fails -> shadow; 1 fails -> dead. V3 is
+judged against V2 (its incremental 1.5x) as well as against mult 2.
+
+**Pre-registration stamped: Tue Sep 29 00:11:55 PDT 2026**  (no 2024-26 or book number computed before this line)
+
+
+## 3. Results (computed after the stamp; `research/sim/intraday_bp.py`, output
+`data/research/program/intraday_bp_out.txt`; follow-ups `intraday_bp_extra.py` -> `intraday_bp_extra_out.txt`)
+
+Parity: B1 M2 at 3bp reproduces addendum 39's T0 exactly (47.2/2.06/-14, after-tax 30.9, 2016-20 15.9/1.08/-19).
+The tier_hi rows are lower than add. 39 (B1 24.1 vs 29.4) because this study also charges the
+pre-registered tier_hi intraday costs (noise 1.5bp/fill, conviction 3bp/side).
+
+Rule variants: **5** (V1, V2, V3, R1, R2) x 3 books = 15 book rows + 3 baselines; post-hoc: 2 (P1, P2) x 3.
+
+### A. Books (tier_hi unless marked). cap = intraday noise cap; EH-AT = after-tax edge-halves CAGR;
+MC = 5y EH after-tax, $3k+$1k/mo: P(DD>30%) / P(DD>50%) net (raw balance)
+
+| book | row | cap | 3bp full | tier_hi 21-23 / 24-26 / full | EH-AT | MC P30 | MC P50 | 2016-20 HO | worst intraday path |
+|---|---|---|---|---|---|---|---|---|---|
+| B1 V7 | M2 base | 0.75 | 47.2/2.06/-14 | 28.6 / 19.5 / 24.1/1.20/-17 | 7.1 | 23 (42) | 0.3 (0.9) | 11.3/0.80 | -5.2% |
+| | R1 2.48 (live) | 1.05 | 50.4/2.06/-15 | 30.9 / 20.1 / 25.6/1.19/-18 | 7.4 | 28 (49) | 0.6 (2.1) | 12.2/0.80 | -5.6% |
+| | V1 m3 | 1.38 | 52.6/2.05/-15 | 32.3 / 20.5 / 26.5/1.19/-18 | 7.6 | 31 (53) | 0.9 (2.8) | 12.7/0.78 | -5.6% |
+| | R2 3.33 | 1.58 | 53.6/2.05/-15 | 33.0 / 20.6 / 26.9/1.18/-18 | 7.6 | 32 (54) | 1.1 (3.1) | 13.0/0.78 | -5.6% |
+| | V2 m4 | 2.00 | 54.8/2.04/-15 | 33.6 / 20.7 / 27.2/1.17/-18 | 7.7 | 34 (57) | 1.4 (3.7) | 13.0/0.75 | -5.6% |
+| | V3 m4 Kelly | 2.00 | 61.3/2.01/-16 | 39.7 / 21.7 / 30.7/1.18/-22 | 8.5 | 46 (71) | 3.7 (7.3) | 14.1/0.74 | -6.7% |
+| B2 moderate10 | M2 base | 1.50 | 48.6/2.15/-18 | 19.8 / 20.1 / 19.9/1.04/-21 | 6.0 | 27 (45) | 0.9 (1.9) | 11.3/0.89 | -4.1% |
+| | R1 2.48 | 1.98 | 50.1/2.15/-18 | 20.6 / 20.5 / 20.6/1.04/-21 | 6.2 | 28 (46) | 1.0 (2.1) | 11.6/0.85 | -4.2% |
+| | V1 m3 | 2.50 | 50.9/2.15/-18 | 21.1 / 20.6 / 20.9/1.04/-21 | 6.2 | 29 (48) | 1.1 (2.4) | 11.5/0.80 | -4.2% |
+| | R2 3.33 | 2.83 | 50.9/2.14/-18 | 21.0 / 20.4 / 20.7/1.03/-21 | 6.2 | 30 (49) | 1.1 (2.5) | 11.5/0.78 | -4.2% |
+| | V2 m4 | 3.50 | 50.7/2.12/-18 | 21.0 / 19.9 / 20.5/1.02/-21 | 6.1 | 31 (50) | 1.1 (2.8) | 11.6/0.76 | -4.2% |
+| | V3 m4 Kelly | 3.50 | 61.3/2.13/-19 | 29.1 / 22.1 / 25.7/1.08/-23 | 7.2 | 44 (66) | 3.3 (6.2) | 13.0/0.72 | -6.2% |
+| B3 moderate10c | M2 base | 0.75 | 55.5/2.15/-18 | 29.9 / 23.4 / 26.7/1.20/-21 | 7.7 | 33 (55) | 1.7 (3.3) | 11.9/0.82 | -5.2% |
+| | R1 2.48 | 1.05 | 59.0/2.15/-18 | 32.0 / 24.1 / 28.2/1.20/-22 | 8.0 | 38 (61) | 2.1 (4.7) | 12.8/0.82 | -5.6% |
+| | V1 m3 | 1.38 | 61.2/2.15/-18 | 33.5 / 24.3 / 29.0/1.20/-22 | 8.2 | 41 (64) | 2.5 (5.5) | 13.3/0.80 | -5.6% |
+| | R2 3.33 | 1.58 | 62.3/2.14/-18 | 34.2 / 24.6 / 29.5/1.20/-22 | 8.3 | 42 (65) | 2.7 (5.7) | 13.6/0.79 | -5.6% |
+| | V2 m4 | 2.00 | 63.5/2.14/-18 | 34.9 / 24.6 / 29.8/1.19/-22 | 8.3 | 43 (67) | 3.0 (6.3) | 13.7/0.76 | -5.6% |
+| | V3 m4 Kelly | 2.00 | 70.4/2.12/-20 | 41.0 / 25.6 / 33.4/1.20/-24 | 9.0 | 54 (78) | **5.4 (10.9)** | 14.7/0.76 | -6.7% |
+
+### B. Increments vs mult 2 (tier_hi): dCAGR 2021-23 / 2024-26 / 2016-20 HO, EH-AT, NW t, placebo pct, DSR (N=553)
+
+| book | row | d 21-23 | d 24-26 | d HO | d EH-AT | NW t | placebo | DSR tier_hi / 3bp |
+|---|---|---|---|---|---|---|---|---|
+| B1 | R1 2.48 | +2.3 | +0.6 | +0.9 | +0.32 | 1.77 | 97.6 | 0.07 / 0.39 |
+| B1 | V1 m3 | +3.7 | +1.0 | +1.4 | +0.50 | 1.70 | 96.8 | 0.06 / 0.35 |
+| B1 | R2 3.33 | +4.4 | +1.1 | +1.7 | +0.56 | 1.67 | 96.2 | 0.05 / 0.35 |
+| B1 | V2 m4 | +5.1 | +1.1 | +1.7 | +0.60 | 1.59 | 95.0 | 0.05 / 0.33 |
+| B1 | V3 Kelly | +11.2 | +2.2 | +2.8 | +1.40 | 2.05 | 98.4 | 0.10 / 0.47 |
+| B1 | V3 vs V2 | +6.1 | +1.0 | +1.0 | +0.80 | 2.19 | 98.4 | |
+| B2 | R1 2.48 | +0.9 | +0.4 | +0.2 | +0.13 | 1.25 | 85.4 | 0.03 / 0.15 |
+| B2 | V1 m3 | +1.3 | +0.5 | +0.2 | +0.18 | 1.12 | 82.6 | 0.02 / 0.12 |
+| B2 | R2 3.33 | +1.3 | +0.3 | +0.2 | +0.13 | 0.90 | 77.4 | 0.01 / 0.08 |
+| B2 | V2 m4 | +1.2 | -0.2 | +0.3 | +0.03 | 0.57 | 69.0 | 0.01 / 0.04 |
+| B2 | V3 Kelly | +9.4 | +2.0 | +1.7 | +1.17 | 2.02 | 98.2 | 0.10 / 0.46 |
+| B2 | V3 vs V2 | +8.1 | +2.2 | +1.4 | +1.14 | 2.45 | 99.0 | |
+| B3 | R1 2.48 | +2.1 | +0.8 | +0.9 | +0.32 | 1.74 | 97.6 | 0.06 / 0.40 |
+| B3 | V1 m3 | +3.5 | +1.0 | +1.4 | +0.46 | 1.61 | 96.8 | 0.05 / 0.35 |
+| B3 | R2 3.33 | +4.3 | +1.2 | +1.7 | +0.55 | 1.65 | 96.2 | 0.05 / 0.35 |
+| B3 | V2 m4 | +4.9 | +1.2 | +1.7 | +0.58 | 1.56 | 95.0 | 0.04 / 0.32 |
+| B3 | V3 Kelly | +11.1 | +2.2 | +2.8 | +1.30 | 2.03 | 98.4 | 0.10 / 0.47 |
+
+### C. Crashes and paths (tier_hi)
+- COVID 2020-02-19..03-23 (2016-20 rebuild): B1 -11.7% (base) .. -10.9% (V3); B2 -3.5% .. -3.3%; B3 -12.8% .. -12.0%. More intraday room *helps* in crashes (the noise leg is trend-following).
+- 2022: B1 +40.3% -> +44.6% (V2) / +54.0% (V3). Apr 2-8 2025: +5.8% -> +6.2% / +7.0%.
+- Worst book day unchanged (2026-04-27: B1 -6.4% -> -6.6% V2 / -6.9% V3; B2 -7.9% -> -8.2%). Worst month B1 -11.6% -> -12.6% (V2) / -13.9% (V3).
+- **Worst 1-minute intraday path** of the intraday legs (adverse extreme of each minute, % of equity): 2020-03-16 0.0% in every row (vol-targeting cut the noise size to ~0.4x and there was no strong TQQQ breakout); 2020-03-18 -4.4% (conviction books) / -4.7% V3; 2025-04-04 -2.0 .. -2.4%; 2025-04-07 -2.8 .. -3.6%; 2025-04-09 -3.6 .. -4.3%. Worst session 2016-26: -5.2% (base, 2018-02-09) -> -5.6% (V2) -> -6.7% (V3, 2018-10-11). 1st percentile of sessions -2.1% -> -2.8% (V2) -> -3.2% (V3). Every row is far inside the -15% bar. The noise leg's vol targeting shrinks it on exactly the days a 4x book would otherwise blow through.
+
+### D. POST-HOC (labelled; at most shadow): Kelly x1.5 without any multiplier change
+| book | row | cap | tier_hi full | d EH-AT | d halves | NW t | MC P30 / P50 net (raw) |
+|---|---|---|---|---|---|---|---|
+| B1 | P1 Kelly at 2.48 (live) | 1.05 | 27.0/1.21/-18 | +0.68 | +4.9/+0.8 | 2.38 | 30 (52) / 0.9 (2.6) |
+| B1 | P2 Kelly at 2 | 0.75 | 24.4/1.20/-17 | +0.07 | +0.4/+0.1 | 1.45 | 23 (41) / 0.3 (1.1) |
+| B2 | P1 Kelly at 2.48 | 1.98 | 24.1/1.09/-22 | +1.05 | +6.7/+1.5 | 2.30 | 37 (59) / 2.1 (4.9) |
+| B2 | P2 Kelly at 2 | 1.50 | 22.6/1.09/-22 | +0.74 | +4.2/+1.0 | 2.13 | 34 (53) / 1.6 (3.4) |
+| B3 | P1 Kelly at 2.48 | 1.05 | 29.5/1.22/-22 | +0.68 | +4.8/+0.9 | 2.34 | 40 (63) / 2.4 (5.3) |
+| B3 | P2 Kelly at 2 | 0.75 | 27.0/1.21/-21 | +0.06 | +0.3/+0.2 | 1.23 | 33 (55) / 1.7 (3.4) |
+
+## 4. Reading
+
+1. **The binding constraint is not the broker.** Schwab allows ~4x intraday (25%) since 2026-07-13, but
+   the code reads 2.48 (Reg T buying power). For the conviction books the extra room is worth
+   +0.3pp (2.48, already live) to +0.6pp (4x) after-tax EH at tier_hi, positive in both halves and
+   2016-20, placebo 95-98th pct, **NW t 1.6-1.8 (bar 2.0: fails)**, DSR 0.05. For moderate10 (no
+   conviction) it is worth nothing (+0.03pp at 4x). *Corrected by the verifier:* the 1.5 cap does bind
+   (QQQ vol-target lev > 1.5 on 67% of days, median 1.89), but the extra exposure a higher cap adds lands
+   on calm days, where the noise leg nets ~0 after tier_hi costs.
+2. **The size that matters is the noise leg's target, not the cap.** Kelly x1.5 (= noise_target_vol
+   0.02 -> 0.03) adds +1.2..+1.4pp after-tax EH at tier_hi, NW t 2.0 (V3 vs V2 t 2.2-2.45), placebo
+   98th pct, both halves and 2016-20 positive; it passes all five pre-registered bars on B1 and B2, and
+   fails bar 2 on B3 (P(DD>50%) 5.4% net, 10.9% raw balance). But it is a leverage dial on an existing
+   edge: 2024-26 increment is 1/5 of 2021-23's (+2.2 vs +11.2pp), tier_hi Sharpe does not rise, DSR at
+   N=553 is 0.10, and P(DD>30%) goes 23% -> 46% (B1) / 27% -> 44% (B2): the same trade (+~1pp EH-AT for
+   +15-20pp P(DD>30%)) that addendum 32 called dead for the overnight gross.
+3. The worst intraday path at 4x + Kelly is -6.7% of equity (2018-10-11); no crash day comes close. A
+   margin call from an intraday leg is not the risk; drawdown depth over months is.
+4. **Roth**: limited margin, no Intraday Margin Buying Power; no change is possible.
+
+## 5. Verdict: SHADOW (V3 meets the pre-registered bar on B1/B2 but is downgraded; V1/V2 shadow on conviction books (t < 2), dead on moderate10)
+
+Downgrade reasons: (a) the precondition — the code actually seeing ~4x — is unverified (it reads 2.48);
+(b) DSR 0.10 and a 2024-26 increment of +2.2pp; (c) P(DD>30%) doubles, the add. 32 precedent.
+
+Switch (off by default, taxable margin book only, never paper/Roth):
+- `daily.intraday_mult: broker | <float>` + `.env DAILY_INTRADAY_MULT=3.33` -> `executor._gate` uses
+  `min(that, 4)` instead of the API ratio when the account is MARGIN and equity >= $2,000. Gate: Schwab.com
+  Balances shows Intraday Margin Buying Power >= 3.5x equity (or `make daily-live-check` finds the API
+  field); 3.33 (30% house) gives 96% of 4x's effect with headroom for the real-time blocker.
+- `noise_target_vol: 0.03` (the Kelly x1.5 row) as a separate opt-in profile key; only with the
+  multiplier at >= 3.33 on conviction books; kill if the live noise leg's 60-session drawdown exceeds 15%
+  of equity, or if Schwab rejects >= 3 intraday orders for margin in 20 sessions (revert to `broker`).
+- Shadow first: log the 0.03-target leg's P&L beside the live 0.02 leg (the executor already keeps a
+  shadow equity per noise instrument) for 60 sessions.
+
+Do NOT redo (final wording after verification):
+
+| idea | verdict | why |
+|---|---|---|
+| More intraday buying power (3 / 3.33 / 4x) for a book WITHOUT the conviction trade (moderate10) | **dead** | the extra exposure lands on calm days, where the noise leg nets ~0 after tier_hi costs: +0.03..+0.18pp EH-AT, NW t 0.6-1.1, placebo 69-83 (add. 40) |
+| Intraday cap at 3-4x for the conviction books (V7, moderate10c) | **shadow at most** | +0.5-0.6pp EH-AT tier_hi, both halves + 2016-20 positive, placebo 95-97, but NW t 1.6-1.7 (2024-26 t 0.5-0.6), DSR 0.05; negative at 2x tier_hi intraday costs (add. 40) |
+| Noise leg Kelly x1.5 (noise_target_vol 0.03) at 4x | **shadow** (downgraded from a pre-registered pass on V7/moderate10) | +1.2-1.4pp EH-AT, NW t 2.0, placebo 98, but DSR 0.10, 2024-26 t 0.64, t 1.1-1.3 without the top 5 days, 2026 YTD -3.8pp, negative at 2x tier_hi intraday costs, P(DD>30%) 23->46%; moderate10c P(DD>50%) 5.4% fails (add. 40) |
+| Roth intraday leg sized up after the PDT change | **not possible** | a limited-margin IRA gets no Intraday Margin Buying Power (add. 40; 3x on all daytime cash already borderline, add. 31) |
+
+## Verifier notes (adversarial pass, 2026-09-29; scripts scratchpad/ibp_verify.py, ibp_rerun.py; no study file changed)
+
+**Verdict stays SHADOW. Nothing here supports going live, and the multiplier is DEAD on moderate10.**
+
+1. **Reproduction.** Re-running `replay` for B1 M2 base, B1 V3 and B2 V2 at tier_hi reproduces the
+   pickled daily returns exactly (max |diff| 0.0). The executor's cap formula
+   `mult*(1-conv*0.75)-w_ibs` (executor.py:1205-1206) is algebraically identical to `growth.cfg`
+   (R3X 0.75). Kelly x1.5 is exactly noise_target_vol 0.03, because the sim's `lev` is uncapped (noise_leverage(...,1e9)) and the
+   cap is applied later. It uses prior-14-day closes only, so there is no lookahead.
+2. **Broker facts.** The schwab.com learn page refused automated fetch ("unable to authorize"). The
+   same wording is confirmed by Schwab's July 2026 account-agreement amendments
+   (disclosures.schwab.com REG91216): "Intraday Margin Buying Power generally reflects up to four
+   times your margin maintenance excess for eligible securities that typically have a 25% margin
+   maintenance requirement". Note it is 4x *maintenance excess*, not 4x equity. With IBS holdings at 25%
+   that equals the study's `4 - w_ibs` formula, and at 30% house it equals R2. thinkorswim notes that
+   higher-maintenance names get less. Whether the Trader API exposes the figure is still unverified,
+   so adopt is impossible regardless.
+3. **The mechanism in section 4.1 is wrong.** It says the moderate10 multiplier is null because the
+   noise leverage "rarely exceeds the 1.5 cap". In fact QQQ vol-target lev (target 0.02) is > 1.5 on
+   **67%** of days, with a median of 1.89. The cap binds most days. The extra exposure it would add is on
+   calm days, and that earns ~0 net at tier_hi. The dead row should read "the extra exposure is on calm
+   days, where the noise leg nets ~0 after tier_hi costs". The Kelly x1.5 row earns because it also scales
+   the high-vol days, where lev < cap.
+4. **Cost fragility (post-hoc stress).** With intraday costs at noise 3bp/fill and conviction 5bp/side
+   (2x tier_hi), every increment turns negative:
+   - B1 V2: -0.72pp EH-AT, t -0.32.
+   - B1 V3: -0.84pp, t 0.14.
+   - B2 V2: -0.56pp, t -0.90.
+   - B2 V3: -1.05pp, t -0.01.
+   - 2024-26 is -1.7 to -2.9pp/yr for all four.
+
+   Break-even is roughly 2bp per noise fill. The whole case rests on live QQQ/SMH fills staying at or below ~1.5bp.
+5. **Significance is thin and front-loaded.** V3 vs M2 at tier_hi, NW t by lag: 2.05 (5 lags), 2.08 (10), 2.21 (21).
+   - By half, NW t is 2.35 in 2021-23 but **0.64 in 2024-26**.
+   - The 2016-20 holdout increment is positive but NW t is only 0.72-1.13.
+   - **Dropping the 5 best increment days** (2025-10-10, 2025-04-09, 2024-12-18, 2021-02-25, 2026-06-05) cuts the t to 1.26 (B1) and 1.06 (B2).
+   - By year (B1): +11.7, +10.9, +6.1, +5.0, +6.2, and **-3.8 in 2026 YTD** (pp ann.).
+
+   The multiplier rows (V1/V2/R2) have a 2024-26 t of 0.5-0.6 at tier_hi.
+6. **Other checks.**
+   - Pre-registration: the addendum was created at 00:11:46 and stamped 00:11:55. Outputs are timestamped 00:13:54 or later. The ordering is consistent, but I cannot prove no earlier unsaved run.
+   - Variant count: 5 pre-registered plus 2 post-hoc (P1/P2) = 7 rule variants, x3 books.
+   - The placebo is sign-randomisation of the increment, which is roughly a t-test. It is not a test of the noise edge.
+   - The DSR uses iid t, which is 1.85 for V3 at tier_hi, below the NW 2.0.
+7. **Switch conditions (tightened).** Keep both keys default OFF. Before any live use:
+   - The shadow must show realised noise fills <= 1.5bp all-in over >= 60 sessions.
+   - The shadow Kelly increment must be positive over that window.
+   - The Intraday Margin Buying Power figure must be confirmed from the account or the API.
+   - The multiplier override is useful only on conviction books, and V7 is the only one of those whose P(DD>50%) budget absorbs Kelly.
+
+
+# Addendum 41 — the live noise-area rule on the most liquid single stocks (top 5/10/20 by dollar volume): DEAD (2026-09-29)
+
+**Verified verdict: DEAD, no switch.** Every pre-registered variant lowers V7 and moderate10c in both halves at the measured
+spread (C2 ~1.65bp/side), at 3bp and tier_hi, and still at zero stock cost. Best S10t: -3.3pp CAGR at 3bp night, -0.8pp EH-AT,
+-$24/yr at $3k, -$802/yr at $100k. The top megacaps carry QQQ's gross trend-day edge; names outside the top 40 carry none;
+the basket is 0.72 correlated with the QQQ leg and costs 3x more per side. Variants: 5 pre-registered + 1 control = 6.
+
+## Pre-registration (stamped `Tue Sep 29 00:17:12 PDT 2026`, before any return of the stock rule, in any period, was computed)
+
+Status at stamp: the universe (research/sim/stock_noise_univ.py) is built (ranks only, no returns);
+the minute fetch (research/sim/stock_noise_fetch.py) is running. No noise-rule return, book number
+or 2024-26 statistic of any stock has been computed.
+
+### Hypothesis
+The noise-area momentum rule works on QQQ (and SMH in 2021+) and fails on SPY after costs and on
+IWM entirely (add. 6). One reading: intraday trend persistence comes from flows that concentrate in
+the most traded, most optioned names (dealer gamma hedging, LETF rebalancing, retail attention);
+QQQ is dominated by exactly those names, SPY dilutes them, IWM has none. If so, the rule should work
+on the top names by dollar volume, and less on liquid names outside the top (control C2).
+Against: megacaps are ~70% correlated with QQQ intraday, so a basket may just re-buy the QQQ bet
+at a higher cost per side (the rule is cost-sensitive: QQQ 14.7% at 0.5bp, 9% at 1bp; add. 6).
+
+### Universe (fixed rule, no tickers)
+First session of each month: rank common stocks by the median of close x volume over the 63
+sessions ending the previous session (SIP daily: add. 28 sipd1520 2016-01..2020-09, then the
+research panel). Common stock = asset_meta on a US exchange, not ARCA, not an ETF/ETN/fund by
+new_listings.etf_kind or by fund-issuer / levered / FUND/ETF/ETN/LP words, not a warrant / unit /
+right / preferred / note; one share class per company (the more traded); duplicate histories
+removed. Top N for the month; first month 2016-05. Distinct names: top5 20, top10 35, top20 80.
+Known limit: asset_meta is the current listing file, so names delisted before it (TWTR, ATVI) are
+missing from the ranking (survivorship: reported, not fixed).
+
+### Rule per name (identical to the live leg, through swingtrader.daily.signals)
+sigma = noise_sigma(14 prior sessions' |close_m/open - 1|); bands = noise_bounds(day open, prev close)
+with prev close on the day's basis (adjusted daily close x today's raw/adjusted factor = what the
+live adjustment='all' daily bar shows); decisions noise_decide at minutes 30, 60, ..., 360 on the
+completed minute bar (the :01/:31 decision), flat at minute 389's close; leverage
+noise_leverage(adjusted daily closes, 0.02, cap). 1-minute SIP bars adjustment='raw' (prices and
+costs on raw prices; splits handled by the raw/adjusted daily factor). Half days dropped as for QQQ.
+
+### Book variants (5; the basket shares the existing intraday budget and cap)
+Each name gets min(lev_i, cap) x share / N_avail of equity; cap = the live intraday cap (0.75 with
+conviction on, 1.5 with conviction off, from growth.cfg: TQQQ 75% margin, IBS half held).
+- **S5r**  N=5, basket replaces the SMH half (QQQ 0.5, basket 0.5)
+- **S10r** N=10, replaces SMH half
+- **S20r** N=20, replaces SMH half
+- **S10t** N=10, third stream at equal share (QQQ 1/3, SMH 1/3, basket 1/3)
+- **S20t** N=20, third stream
+Baselines (raw prices, load_sim(raw_price=True), night pools from cache_rawprice corr 0.7):
+**V7 1.0x cap .10 conviction 0.5** (T0) and **moderate10c = 1.0x cap .15 conviction 0.5** (T2b), both
+primary; conviction-off twins (T0L live today, moderate10) reported.
+
+### Costs (per side, stock trades)
+- C1 flat 3bp
+- C2 spread-aware (primary): max(0.5bp, half the median quoted spread + 0.25bp), the median over
+  sampled SIP quotes (4 sessions x 2 ten-second windows per symbol-year, 11:00 and 14:30 ET)
+- C3 tier_hi on raw price and 63d dollar volume (book.cost_bps: 7.5bp for >$20 names)
+QQQ/SMH keep 0.5bp (as every published book). Night leg at 3bp and tier_hi as in add. 39.
+
+### Controls
+- P1 placebo: the same trades (entry/exit minutes, sizes, costs) with each segment's direction drawn
+  at random; 200 draws; the actual book increment must beat the 95th percentile.
+- C2 control: the same rule on 10 random liquid names outside the top (ranks 41-100, drawn each
+  January, seed 7), same budget as S10r; reported (answers "does attention matter").
+- Diagnostic D1: per-name gross edge (bp/day, unit leverage) for the stocks and QQQ/SMH/SPY/IWM;
+  cross-section of name-year gross edge on log dollar volume and trailing vol.
+
+### Periods and tests
+2021-23 / 2024-26 halves; 2016-20 holdout (book: IBS + noise + conviction, night leg 2020 only from
+the raw rebuild, as program_books.tax_holdout); fit 2021-23 / judge 2024-26 and the reverse
+(the variant with the best increment in one half, judged in the other); Newey-West (5 lags) t of
+the daily book increment and day-clustered t of the per-name returns; edge-halves (growth.eh);
+5y block bootstrap (21-day blocks) $3k + $1k/mo after 35% tax (taxable_frontier.mc_tax):
+P(DD>30%), P(DD>50%); COVID 2020-02-19..03-23, 2022, Apr 2-8 2025, worst day / month;
+after-tax (taxable_frontier.after_tax, 35%, wash sales from the trade list, basket as one lot).
+Deflated Sharpe at N = 546 + this study's variants.
+
+### Pass bar
+ADOPT (a variant, on BOTH primary baselines):
+1. book increment > 0 in 2021-23, 2024-26 and the 2016-20 holdout at C2 (night 3bp and tier_hi);
+2. NW t >= 2.0 of the daily increment, 2021-26, C2;
+3. beats P1 (>= 95th pct);
+4. EH-AT (night tier_hi, C2) +0.3pp or more, and 5y P(DD>50%) up by <= 1pp;
+5. increment >= 0 at C1 (3bp flat) full period;
+6. the walk-forward pick (best in one half) is positive in the other half both ways.
+SHADOW: 1-3 hold but 4, 5 or 6 fails. BORDERLINE: full-period positive but a half, the holdout
+or P1 fails. DEAD: increment <= 0 in either half at C2, or P1 below the 80th pct.
+Any post-hoc variant: SHADOW at most.
+
+### Implementability (reported, not a gate)
+The book is simulated fractional (as the QQQ leg). A whole-share replay at $3k + $1k/mo (floor of
+each name's target / raw price) is reported: at user size a name's slice is ~$50-150, below one
+share of most megacaps, and Schwab shorts need whole shares.
+
+## How to run
+
+    until mkdir $SCR/heavy.lock 2>/dev/null; do sleep 10; done; \
+      PYTHONPATH=. .venv/bin/python -m research.sim.stock_noise_univ; rmdir $SCR/heavy.lock   # ~1 min, panel
+    PYTHONPATH=. .venv/bin/python -m research.sim.stock_noise_fetch            # 525 symbol-years, 34 min (API limit 200/min)
+    PYTHONPATH=. .venv/bin/python -m research.sim.stock_noise_fetch --quotes   # 433 symbol-years x 8 windows, ~6 min
+    PYTHONPATH=. .venv/bin/python -m research.sim.stock_noise [--rebuild]      # 45 s; legs cache 35 s
+    output: data/research/program/stock_noise_out.txt, res_stock_noise.pkl; scratchpad stock_noise_run.txt
+
+Data: 135 symbols (top-20 members 2016-05..2026-09 plus the control draws), 124,256 name-days,
+102,632 trade segments. Splits checked (NVDA 2021/2024, AAPL/TSLA 2020, AMZN/GOOGL 2022): prev close
+on the day's basis matches the raw open. Baselines reproduce addendum 39 to the decimal (V7 47.2/2.06
+at 3bp, 29.4/1.41 tier_hi; moderate10c 55.5/2.15, 32.1/1.39; EH-AT tier_hi 8.6 / 9.3).
+Deviation (data collection only, before any result): the quote sampler first ran with Alpaca's
+default 1,000-record pages and hit the 200 req/min limit; it was restarted with 10,000-record pages
+(`limit=10000`), same windows. Quoted spreads: median 3.2bp over all sampled symbol-years; AAPL
+0.6-0.7bp, MSFT/NVDA ~0.7-0.8bp, BKNG/MSTR 20-30bp. 73% of records carry different bid and ask
+exchanges (NBBO-like); if some are single-exchange BBOs, C2 is slightly high.
+C2 per side, median over top-20 name-days 1.65bp (p90 4.3); control 2.05bp (p90 6.7); C3 7.5bp.
+
+## Results (every variant: 5 pre-registered + CTRL10r control; 4 baselines x 2 night costs x 3 stock costs)
+
+### Q1. The rule per name (unit leverage), mean bp/day, day-clustered t: 2016-20 | 2021-23 | 2024-26
+
+| series | gross | C1 3bp | C2 spread | C3 tier_hi |
+|---|---|---|---|---|
+| QQQ (ETF) | +4.4 (3.1) / +6.1 (3.0) / +3.2 (1.6) | | 0.5bp: see book-wtd | |
+| SMH (ETF) | +2.4 (1.4) / +9.2 (3.2) / +4.7 (1.5) | | | |
+| SPY (ETF) | +1.8 (1.5) / +5.0 (3.1) / 0.0 (0.0) | | | |
+| IWM (ETF) | -0.4 / -0.4 / -1.6 | | | |
+| top 5 | +4.0 (2.6) / +6.8 (2.7) / +3.6 (1.5) | -0.8 / +1.6 / -1.0 | +1.4 (0.9) / +4.5 (1.8) / +1.4 (0.6) | -8.0 / -6.1 / -8.1 |
+| top 10 | +3.9 (2.8) / +6.4 (3.1) / +1.9 (0.9) | -1.0 / +1.3 / -2.8 | +0.7 / +3.6 (1.8) / -0.9 | -8.6 / -6.4 / -9.8 |
+| top 20 | +2.7 (2.5) / +3.9 (2.4) / +1.9 (1.1) | -2.2 / -1.2 / -2.8 | -0.5 / +0.4 / -2.4 | -9.7 / -8.8 / -9.9 |
+| control (ranks 41-100) | -0.2 / +1.2 / +0.3 | -5.2 / -3.8 / -4.6 | -3.5 / -5.7 / -6.7 | -13.1 / -12.1 / -12.8 |
+
+Book-weighted (min(lev, 0.75) x net, the unit the book actually holds): QQQ at 0.5bp +2.9 / +3.9 / +1.8;
+SMH +1.4 / +6.0 / +2.8; top 5 at C2 +1.4 / +3.1 / +0.9; top 10 +0.7 / +2.3 / -0.7; top 20 -0.2 / +0.1 / -1.5.
+The vol-target sizing (2%/day) gives the high-vol names, where the gross bp/day is, less weight.
+
+**D1 (why QQQ works, SPY/IWM don't).** Gross, the top-5 megacaps carry the same trend-day
+persistence as QQQ (4.0/6.8/3.6 vs 4.4/6.1/3.2bp/day); the random liquid names outside the top carry
+none (-0.2/+1.2/+0.3, and its random-direction placebo percentile is 71%). SPY dilutes the megacaps
+and fades to 0 in 2024-26; IWM (no megacaps) is negative. So the edge is concentrated in the most
+traded names, consistent with the attention/hedging story. But across 378 name-years the gross
+edge is explained mainly by the name's volatility (logvol +5.7bp per log unit, t 6.8), dollar volume
+adds +0.5 (t 1.3). The basket is 0.72 correlated with the QQQ leg day by day: it is the QQQ bet
+again, bought at 1.6bp/side instead of 0.5bp, with less weight on the names that carry it.
+QQQ is the cheapest wrapper of the same effect; SMH adds a different one (semis, 2021+).
+
+### Q2. Book increments (pp CAGR vs baseline), stock cost C2 (primary)
+
+| variant | V7 3bp: HO / 21-23 / 24-26 / full, NW t | moderate10c 3bp: HO / 21-23 / 24-26 / full | V7 tier_hi full | m10c tier_hi full |
+|---|---|---|---|---|
+| S5r | +0.3 / **-6.2** / **-2.9** / -4.6, t -1.9 | +0.3 / -6.1 / -3.2 / -4.7 | -3.9 | -3.9 |
+| S10r | -0.6 / -7.2 / -5.8 / -6.5, t -2.9 | -0.6 / -7.2 / -6.2 / -6.7 | -5.6 | -5.6 |
+| S20r | -1.8 / -11.2 / -7.0 / -9.1, t -4.3 | -1.8 / -11.4 / -7.5 / -9.5 | -7.9 | -8.0 |
+| S10t | -1.2 / -3.3 / -3.3 / -3.3, t -3.5 | -1.2 / -3.4 / -3.6 / -3.5 | -2.9 | -2.9 |
+| S20t | -2.0 / -6.2 / -4.1 / -5.2, t -5.6 | -2.0 / -6.2 / -4.5 / -5.4 | -4.5 | -4.5 |
+| CTRL10r | -4.7 / -18.3 / -11.1 / -14.8, t -6.4 | -4.7 / -19.0 / -11.9 / -15.6 | -13.0 | -13.3 |
+
+C1 (3bp flat), V7 3bp full: S5r -7.9, S10r -9.1, S20r -10.6, S10t -5.2, S20t -6.2, CTRL10r -12.8pp. C3 (tier_hi): S10t -11.0 ... S20r -18.7, CTRL10r -21.7pp.
+Conviction off (T0L / moderate10, cap 1.5): worse, S5r -6.7 / -7.1pp full at 3bp, S10t -5.2 / -5.4.
+Post-hoc diagnostic (not a variant): at ZERO stock cost, V7 3bp increments are still negative in both halves
+(S5r -3.4 / -0.4, S10r -4.0 / -2.7, S10t -1.2 / -1.2, S20t -3.3 / -1.2): cost is not the only problem;
+the basket earns less per unit of intraday budget than the SMH half it displaces.
+
+Baselines: V7 HO 15.6/1.06/-19 | 50.2/2.26/-9 | 44.1/1.87/-14 | 47.2/2.06/-14 (3bp), 29.4/1.41/-17 tier_hi;
+moderate10c HO 16.3/1.07/-23 | 56.5/2.30/-9 | 54.5/2.01/-18 | 55.5/2.15/-18, 32.1/1.39/-21 tier_hi.
+
+### P1 placebo (200 random-direction draws, mean daily increment 2021-26, C2, night 3bp)
+Top variants beat their placebos (pct 100% for all five, both baselines: e.g. V7 S10t actual -0.94bp/day,
+placebo median -1.80, p95 -1.50): the direction carries information. It is still a loss: the placebo
+bar compares against a random-direction basket that also pays the costs, not against SMH.
+Control CTRL10r: 71% (no direction information outside the top names).
+
+### Walk-forward pick (C2, night 3bp)
+V7: fit 2021-23 -> S10t (-3.3pp) -> 2024-26 -3.3pp; fit 2024-26 -> S5r (-2.9) -> 2021-23 -6.2pp.
+moderate10c: S10t (-3.4) -> -3.6; S5r (-3.2) -> -6.1. The best variant is negative in both halves both ways.
+
+### EH, after tax, MC, crashes (C2; night tier_hi unless noted)
+
+| book | EH-AT | 5y MC median / P(DD>30%) net (acct) / P(DD>50%) | COVID | 2022 | Apr 2-8 2025 | worst day / month |
+|---|---|---|---|---|---|---|
+| V7 base | 8.6 | $78.0k / 17% (35%) / 0% (1%) | -11.4% | +47.3% | +6.0% | -6.4 / -11.2 |
+| V7 S5r | 7.5 | $76.0k / 17% (33%) / 0% (0%) | -11.6% | +43.7% | +5.2% | -5.9 / -11.3 |
+| V7 S10r | 7.0 | $75.0k / 18% (35%) / 0% (1%) | -12.1% | +43.4% | +4.9% | -6.0 / -11.7 |
+| V7 S20r | 6.3 | $73.7k / 19% (35%) / 0% (1%) | -11.1% | +36.9% | +5.3% | -6.0 / -11.7 |
+| V7 S10t | 7.8 | $76.4k / 17% (34%) / 0% (0%) | -12.6% | +45.5% | +5.5% | -6.3 / -11.3 |
+| V7 S20t | 7.3 | $75.5k / 18% (35%) / 0% (0%) | -11.9% | +41.0% | +5.7% | -6.3 / -11.3 |
+| V7 CTRL10r | 4.7 | $70.8k / 25% (42%) / 1% (1%) | -12.0% | +29.4% | +5.4% | -6.0 / -11.2 |
+| m10c base | 9.3 | $79.5k / 27% (49%) / 1% (2%) | -12.5% | +51.8% | +6.8% | -7.7 / -11.0 |
+| m10c S5r | 8.1 | $77.5k / 25% (46%) / 1% (2%) | -12.7% | +48.3% | +6.0% | -7.3 / -11.2 |
+| m10c S10r | 7.6 | $76.6k / 27% (48%) / 1% (2%) | -13.2% | +47.7% | +5.7% | -7.3 / -11.5 |
+| m10c S20r | 7.0 | $75.3k / 28% (49%) / 1% (2%) | -12.2% | +41.0% | +6.1% | -7.3 / -11.6 |
+| m10c S10t | 8.5 | $78.0k / 28% (49%) / 1% (2%) | -13.7% | +49.9% | +6.3% | -7.5 / -11.2 |
+| m10c S20t | 8.0 | $77.2k / 28% (49%) / 1% (2%) | -13.0% | +45.5% | +6.5% | -7.6 / -11.2 |
+
+At 3bp night: V7 EH-AT 13.6 -> 12.3 (S5r) ... 11.1 (S20r), 12.7 (S10t); moderate10c 15.7 -> 14.4 ... 13.2, 14.8.
+The basket slightly lowers the worst day (-6.4 -> -5.9%) and nothing else.
+
+### $/yr (delta EH-AT x capital, night tier_hi, C2)
+Best (least bad) variant S10t: V7 -0.80pp = **-$24/yr at $3k, -$802/yr at $100k**; moderate10c -0.81pp
+(-$24 / -$812). S5r -$34 / -$1,145; S10r -$48 / -$1,584; S20r -$68 / -$2,261; S20t -$38 / -$1,270 (V7).
+
+### DSR (N = 552): every increment has negative Sharpe (t -2.0 .. -5.5); DSR 0.000.
+
+### Implementability
+Whole shares at $3k + $1k/mo (V7 3bp, C2): the basket fills 76-81% of its target over the path (growing
+equity); S10r -7.1pp, S10t -3.8pp vs base. At the user's current $3k a name slice is ~$40-110, under one
+share of most top names; Schwab shorts need whole shares. Moot: the fractional book already loses.
+
+## Verdict: DEAD
+
+Every pre-registered variant lowers the book in BOTH halves on BOTH primary baselines at the realistic
+spread cost (C2), at 3bp and at tier_hi, and in the walk-forward pick both ways; NW t -1.9 to -5.6.
+Only S5r's 2016-20 holdout is marginally positive (+0.3pp). It fails pass-bar items 1, 2, 4, 5, 6
+(it passes 3, the placebo, which shows the direction is informative but not enough to pay for itself).
+Even at zero stock cost the increment is negative. The attention story holds for the GROSS edge
+(top names ~ QQQ, random liquid names ~0), which is exactly why QQQ already captures it; the single
+names add cost, lower vol-targeted weight on the names that carry it, and displace SMH. No switch.
+
+## Do NOT redo
+
+| idea | verdict | why |
+|---|---|---|
+| Noise-area rule on the top 5/10/20 stocks by dollar volume, replacing the SMH half or as a third intraday stream | **dead** | book -3 to -9pp in both halves at the measured spread (C2), -5..-11pp at 3bp; negative even at zero stock cost; basket corr 0.72 with the QQQ leg; best S10t -$24/yr at $3k, -$0.8k at $100k (add. 41) |
+| Same rule on liquid stocks outside the top 40 (ranks 41-100) | **dead** | gross ~0 bp/day, placebo 71%: the trend-day persistence lives only in the most traded names, which QQQ already holds (add. 41) |
+| Single-stock intraday legs as an "attention" diversifier to QQQ | **dead** | gross edge scales with name vol (t 6.8), dollar volume adds little (t 1.3); QQQ is the cheapest wrapper of the same effect (add. 41) |
+
+## Caveats
+- Survivorship: asset_meta is today's listing file; names delisted before it (TWTR, ATVI) never enter the
+  ranking. Few top-20 months are affected; the verdict does not hinge on them.
+- The day open is the first 1-minute bar's open (as the QQQ/SMH sim); live uses Schwab's official open.
+- Quote samples: 8 ten-second windows per symbol-year; records are ~73% NBBO-like. C1 (3bp flat) and the
+  zero-cost diagnostic bracket the cost question: the verdict is the same at any cost.
+- The basket is one lot in the wash-sale model (after-tax figures approximate); pre-tax verdict is unaffected.
+- Placebo increments use the variant's daily return with the basket swapped (no re-replay); rounding effects
+  on the night/IBS legs are ignored there.
+
+## Verifier notes (adversarial check, Tue Sep 29 2026)
+
+Verdict upheld: **DEAD**. No bug was found and no file of the study was changed.
+
+- **Independent rule re-implementation.** I wrote a separate loop from the raw 1-minute parquet (scratchpad/snv_indep.py) that does not call the study's code or swingtrader.signals. For NVDA, TSLA, AAPL and AMZN (2,677 name-days each) it matches the cached per-name-day gross exactly: max |diff| 0.0 and 0 trade-count mismatches. Decisions use C[m] at m = 30..360, the completed-bar close, and exit at minute 389, the same as book.noise_days for QQQ. Leverage uses only prior daily closes. No lookahead.
+- **Splits.** On the split days (NVDA 2021-07-20 and 2024-06-10, TSLA 2020-08-31 and 2022-08-25, AAPL 2020-08-31, AMZN 2022-06-06) the open-vs-prev-close gap is 0.2 to 2.4%, i.e. correctly rebased. The largest |gaps| are real events (NVDA 2023-05-25 +26%). Sigma uses intraday ratios, which splits do not affect.
+- **Universe.** It is point in time. The rank uses med.iloc[i-1], the 63-session median ending the previous session. Survivorship (current asset_meta) is disclosed. It would bias toward the variant, not against it, so it cannot rescue the result.
+- **Cap and margin model.** p.noise_cap is 0.75 with conviction and 1.5 without, for all four bases. That matches CAPS, so the basket dict lookup never silently drops the basket. In the design, the basket shares the existing intraday budget. This matches the live cap (executor: room = mult x (1 - conv x conviction_margin), split across legs).
+- **Decisive book numbers re-run** (scratchpad/snv_book.py). Increments at 3bp night, V7 / moderate10c, 2021-23 / 2024-26, are reproduced exactly:
+  - S5r C2: -6.2/-2.9 and -6.1/-3.2
+  - S10t C2: -3.3/-3.3 and -3.4/-3.6
+  - zero stock cost: S5r -3.4/-0.4, S10t -1.2/-1.2
+  - baselines: 50.2/44.1 and 56.5/54.5
+- **Mechanism check.** On book-weighted net bp/day the result is simple arithmetic. The top-5 basket at C2 (+1.4/+3.1/+0.9) is below both QQQ (+2.9/+3.9/+1.8) and SMH (+1.4/+6.0/+2.8) in every period, so any budget-neutral swap loses.
+- **Diagnostic only, not a variant.** I added the top-5 basket (share 0.5) ON TOP of QQQ/SMH .5/.5, which breaks the live margin cap. This gives +5.2/+1.3pp (V7) and +5.4/+1.3pp (moderate10c). That is extra leverage on a positive-but-inferior stream. It is infeasible under the broker multiplier, and the same room would be better spent on QQQ/SMH. It is not a path to adoption, and I count it as a post-hoc diagnostic.
+- **Pre-registration.** The stamp is 00:17:12. The leg cache is dated 00:49 and the debug and output files 00:50-01:06, so the stamp comes first. Variants: 5 pre-registered plus 1 control = 6. Post-hoc diagnostics (zero cost, whole shares, the verifier's additive run) are not variants.
+- **Placebo.** It randomizes segment direction and holds costs fixed, so it only tests "gross edge > 0". Beating it (100th pct) does not bear on the book-effect verdict.
