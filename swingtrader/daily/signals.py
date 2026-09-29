@@ -199,6 +199,8 @@ def lever_g1(pairs: list[tuple[str, float]]) -> dict:
 # book sold at a LOSS in 30 days (plus names it holds or has orders in right
 # now); the Roth IBS leg trades a different-index look-alike, and skips the
 # same-index/no-look-alike names the brokerage book traded in 31 days.
+# The live version is daily.wash_guard: roth_first (executor._roth_night_wash,
+# _roth_ibs_targets); it keeps the taxable book's IBS/intraday legs symmetric.
 WASH_LOOKALIKE = {"SPY": "SPLG", "QQQ": "QQQM", "IWM": "VTWO", "MDY": "IJH", "XLK": "VGT",
                   "XLF": "VFH", "XLE": "VDE", "XLV": "VHT", "XLI": "VIS", "XLY": "VCR",
                   "XLP": "VDC", "XLU": "VPU", "XLB": "VAW", "SMH": "SOXX", "EEM": "IEMG",
@@ -230,7 +232,19 @@ def book_loss_sales(b: dict, today: str, days: int = 30) -> set[str]:
     """Names the book closed at a loss in the last `days` (the wash-sale trigger)."""
     cut = _cut(today, days)
     return {c["sym"] for c in b.get("closed", [])
-            if str(c.get("exit_date", "")) >= cut and float(c.get("pnl") or 0.0) < 0}
+            if str(c.get("exit_date", "")) >= cut and closed_at_loss(c)}
+
+
+def closed_at_loss(c: dict) -> bool:
+    """A closed round trip (book.py writes "pnl") lost money. No pnl: work it
+    out from qty/entry/exit; nothing to work it out from: call it a loss (a
+    wrongly blocked name costs one trade, a missed wash sale costs the loss)."""
+    if c.get("pnl") is not None:
+        return float(c["pnl"]) < 0
+    try:
+        return float(c.get("qty", 1.0)) * (float(c["exit_px"]) - float(c["entry_px"])) < 0
+    except (KeyError, TypeError, ValueError):
+        return True
 
 
 def wash_g4s(account: str, other: dict, today: str, ibs_targets=(), cash_sym: str | None = None,

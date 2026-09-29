@@ -246,6 +246,7 @@ def test_wash_shadow_logs_and_changes_no_orders(tmp_path, monkeypatch):
         {"cash": 0, "start_equity": 0, **_taxable_book()}))
     ex = _ex(tmp_path, account="roth", mult="1", day="2026-10-20", next_day="2026-10-21")
     ex.d.night_tilt_k = 0
+    ex.d.wash_guard = "symmetric"         # the shadow compares G4s against the OLD live guard
     book = DailyBook(cash=3000.0, start_equity=3000.0)
     ex.phase_close(book, "2026-10-20", dt.datetime(2026, 10, 20, 15, 40, tzinfo=ET), ex.broker.clock())
     assert {r.symbol for r in ex.broker.client.submitted} == {"FREE"}, "live guard still blocks LOSS/GAIN"

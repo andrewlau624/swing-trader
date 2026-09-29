@@ -393,6 +393,10 @@ class DailyExecutor:
         names first."""
         if not self.live:
             return
+        if self._roth_first():
+            self.log(f"[wash-guard] SHADOW {self.account} {when}: the live guard IS G4s (daily.wash_guard: "
+                     "roth_first; taxable IBS/intraday stay exact-symbol symmetric) - see the [wash] line")
+            return
         other = "roth" if self.account == "live" else "live"
         p = self.state_dir / book_file(other)
         if not p.exists():
@@ -702,6 +706,10 @@ class DailyExecutor:
         t = pd.Timestamp(today)
         cash_sym = self.d.ibs_cash_symbol
         syms = list(self.d.ibs_symbols) + ([cash_sym] if cash_sym else [])
+        roth_first = self.account == "roth" and self._roth_first()
+        if roth_first:      # look-alikes the Roth may trade instead (ref prices, sizing, exits)
+            syms += [a for s, a in sg.WASH_SAFE_LOOKALIKE.items()
+                     if s in self.d.ibs_symbols and a not in syms]
         bars = md.sip_daily(syms, t - pd.Timedelta(days=420), t)
         bars = {s: b[b.index < t] for s, b in bars.items() if len(b[b.index < t])}
         closes = pd.DataFrame({s: b["close"] for s, b in bars.items()
@@ -714,13 +722,19 @@ class DailyExecutor:
         last = {s: bars[s].iloc[-1].to_dict() for s in universe if s in bars}
         foreign = self._foreign_symbols(book)
         self._ibs_raw_targets = sg.ibs_targets(last, self.d.ibs_max)   # before any guard (wash shadow)
-        targets = [s for s in self._ibs_raw_targets if s not in foreign]
+        wash_ibs = None
+        if roth_first:
+            wash_ibs = self._roth_ibs_targets(self._ibs_raw_targets, foreign)
+            targets = wash_ibs[0]
+        else:
+            targets = [s for s in self._ibs_raw_targets if s not in foreign]
         if book.is_killed("ibs") and targets:
             self.log(f"[ibs] leg killed - not buying {targets}")
             targets = []
         self.log("[ibs] IBS last bar: " + ", ".join(
             f"{s} {sg.ibs(b['high'], b['low'], b['close']):.2f}" for s, b in sorted(last.items()))
             + f" -> hold {targets or ('T-bills (' + cash_sym + ')' if cash_sym else 'cash')}")
+        self._wash_log(today, wash_ibs)
         held = book.leg_positions("ibs")
         for sym, p in held.items():
             if sym not in targets:
@@ -745,8 +759,14 @@ class DailyExecutor:
             for sym in targets:
                 if sym in held:
                     continue
+                if sym in last:
+                    ref = float(last[sym]["close"])
+                elif sym in bars:           # a roth_first look-alike (VGT for XLK)
+                    ref = float(bars[sym]["close"].iloc[-1])
+                else:
+                    self.warn(f"[ibs] no bars for {sym} - not buying it today"); continue
                 self._order(book, today, sym, "buy", "ibs", notional=per, tif="day",
-                            ref_px=float(last[sym]["close"]), kind="entry")
+                            ref_px=ref, kind="entry")
 
     # --------------------------------------------------------------- close
     EXIT_COST_WARN_BPS = 15.0     # night edge is gone near 28bp/side (RESULTS.md addendum 14)
@@ -822,7 +842,10 @@ class DailyExecutor:
         if elig.empty:
             self.warn("night universe empty - skipping"); return
         self._night_elig = elig
-        foreign = self._foreign_symbols(book) | set(self.d.ibs_symbols) | set(book.positions)
+        foreign = self._foreign_symbols(book, leg="night", today=today) | set(self.d.ibs_symbols) | set(book.positions)
+        if self.account == "roth" and self._roth_first():
+            foreign |= set(sg.WASH_SAFE_LOOKALIKE.values())     # the Roth IBS leg's instruments
+        self._wash_log(today)
         syms = [s for s in elig.index if s not in foreign]
         rows, src = md.decision_rows(syms, self.d.quote_source, log=self.log)
         if rows.empty:
@@ -1415,21 +1438,31 @@ class DailyExecutor:
 
     WASH_DAYS = 31
 
+    def _other_book(self) -> dict | None:
+        """The OTHER real-money book's saved state, or None (paper, no file)."""
+        if not self.live:
+            return None
+        other = "roth" if self.account == "live" else "live"
+        p = self.state_dir / book_file(other)
+        if not p.exists():
+            return None
+        try:
+            return json.loads(p.read_text())
+        except Exception:
+            return None
+
+    def _roth_first(self) -> bool:
+        """daily.wash_guard: roth_first, on a real-money book."""
+        return self.live and getattr(self.d, "wash_guard", "symmetric") == "roth_first"
+
     def _wash_symbols(self, today: str | None = None) -> set[str]:
         """Symbols the OTHER real-money book has held or traded in the last 31
         days. A loss sold in the brokerage account and bought back in the IRA
         within 30 days is a wash sale, and against an IRA the loss is gone for
         good, not deferred. So the two books never share a name inside that
         window (the T-bill ETF excepted: its losses are pennies)."""
-        if not self.live:
-            return set()
-        other = "roth" if self.account == "live" else "live"
-        p = self.state_dir / book_file(other)
-        if not p.exists():
-            return set()
-        try:
-            b = json.loads(p.read_text())
-        except Exception:
+        b = self._other_book()
+        if b is None:
             return set()
         cut = (pd.Timestamp(today or dt.date.today()) - pd.Timedelta(days=self.WASH_DAYS)).date().isoformat()
         out = set(b.get("positions", {}))
@@ -1439,12 +1472,32 @@ class DailyExecutor:
         out.discard(self.d.ibs_cash_symbol)
         return out
 
-    def _foreign_symbols(self, book: DailyBook) -> set[str]:
+    def _roth_night_wash(self, today: str | None = None) -> set[str]:
+        """roth_first, the Roth's NIGHT leg: only what can wash a taxable loss
+        -- names the taxable book holds or has a live order in now, or closed
+        at a LOSS in the last 30 days (Rev. Rul. 2008-5). A taxable GAIN sale
+        cannot be washed, so those names stay open to the Roth."""
+        b = self._other_book()
+        if b is None:
+            return set()
+        day = today or dt.date.today().isoformat()
+        out = sg.book_now(b, TERMINAL) | sg.book_loss_sales(b, day, 30)
+        out.discard(None)
+        out.discard(self.d.ibs_cash_symbol)
+        return out
+
+    def _foreign_symbols(self, book: DailyBook, leg: str | None = None,
+                         today: str | None = None) -> set[str]:
         """Held or pending by the swing book, or held at the broker by anyone
         but this book, or inside the other real-money book's wash-sale window.
-        Never trade these -- Alpaca nets positions per symbol."""
+        Never trade these -- Alpaca nets positions per symbol.
+        leg="night" on the Roth under wash_guard roth_first swaps the 31-day
+        symmetric set for _roth_night_wash; every other leg/book is unchanged."""
         out = set(self.broker.positions()) - set(book.positions)
-        out |= self._wash_symbols() - set(book.positions)
+        if leg == "night" and self.account == "roth" and self._roth_first():
+            out |= self._roth_night_wash(today) - set(book.positions)
+        else:
+            out |= self._wash_symbols(today) - set(book.positions)
         p = self.state_dir / "book-reversion.json"
         if not self.live and p.exists():     # the swing book trades the paper account only
             try:
@@ -1453,6 +1506,50 @@ class DailyExecutor:
             except Exception:
                 pass
         return out
+
+    def _roth_ibs_targets(self, raw: list, foreign: set) -> tuple[list, dict, list]:
+        """roth_first, the Roth's IBS leg. The signal is computed on the
+        original ETF; a target with a different-index look-alike is traded AS
+        the look-alike (XLK -> VGT), unless the look-alike itself is foreign
+        (e.g. SOXX as the taxable noise leg's SMH stand-in). Same-index / no
+        look-alike targets (SPY, QQQ, IWM, MDY, EEM, DIA, XBI) trade as
+        themselves unless foreign (the taxable book traded them in 31 days).
+        Returns (symbols to hold, {target: look-alike}, [skipped with why])."""
+        take, subs, skipped = [], {}, []
+        for s in raw:
+            alt = sg.WASH_SAFE_LOOKALIKE.get(s)
+            if alt:
+                if alt in foreign:
+                    skipped.append(f"{s}->{alt}")
+                else:
+                    subs[s] = alt
+                    take.append(alt)
+            elif s in foreign:
+                skipped.append(s)
+            else:
+                take.append(s)
+        return list(dict.fromkeys(take)), subs, skipped
+
+    def _wash_log(self, today: str, ibs: tuple | None = None) -> None:
+        """One `[wash]` line per run on a real-money book under roth_first."""
+        if not self._roth_first():
+            return
+        try:
+            if self.account == "roth":
+                night = self._roth_night_wash(today)
+                msg = (f"[wash] roth_first: roth night blocks {len(night)} (taxable loss sales 30d + "
+                       f"held/pending: {', '.join(sorted(night)[:15]) or '-'})")
+                if ibs is not None:
+                    _, subs, skipped = ibs
+                    msg += (", IBS look-alikes " + (", ".join(f"{a}->{b}" for a, b in subs.items()) or "-")
+                            + f", skipped {skipped}")
+            else:
+                w = self._wash_symbols(today)
+                msg = (f"[wash] roth_first: taxable (runs after the Roth) blocks {len(w)} names the Roth "
+                       "held/ordered/closed in 31d on every leg (night, IBS, intraday: exact symbol)")
+            self.log(msg)
+        except Exception as exc:
+            self.log(f"[wash] log skipped ({type(exc).__name__}: {str(exc)[:80]})")
 
     def _notify(self, book: DailyBook, equity: float, today: str) -> None:
         if not (self.actions or self.warnings):

@@ -121,6 +121,7 @@ class PortfolioCfg:
 # real-money daily-book accounts: "live" = the margin brokerage account,
 # "roth" = a Roth IRA (cash account: no margin, no shorting, settled funds)
 REAL_ACCOUNTS = ("live", "roth")
+WASH_GUARDS = ("symmetric", "roth_first")      # daily.wash_guard
 
 
 @dataclass
@@ -242,6 +243,15 @@ class DailyCfg:
     lever_g1_log: str = "shadow"
     # Wash guard G4s, Roth first (add. 31, post-hoc): log what it would change.
     wash_guard_mode: str = "shadow"
+    # The LIVE wash guard between the two real-money books (add. 31/39).
+    # symmetric: each book avoids every name the other held/ordered/closed in
+    #   31 days, on every leg; the brokerage book runs first each phase.
+    # roth_first: the Roth runs first each phase; its night leg skips only
+    #   names the taxable book holds / has orders in / sold at a LOSS in 30
+    #   days; its IBS leg trades different-index look-alikes
+    #   (signals.WASH_SAFE_LOOKALIKE). The taxable book keeps the symmetric
+    #   rule on every leg. Paper is never affected.
+    wash_guard: str = "symmetric"
     # Named overrides of the fields above. DAILY_LIVE_PROFILE=<name> in .env
     # applies one to the real-money brokerage book only (never paper, never
     # the Roth), so an experiment survives `make pull`. RESULTS.md addendum 22.
@@ -249,6 +259,10 @@ class DailyCfg:
     noise_lookback: int = 14
     noise_target_vol: float = 0.02
     noise_max_lev: float = 3.5       # 4x intraday limit minus the IBS leg
+
+    def __post_init__(self):
+        if self.wash_guard not in WASH_GUARDS:
+            raise ValueError(f"daily.wash_guard={self.wash_guard!r}: expected one of {WASH_GUARDS}")
 
     def for_account(self, account: str) -> tuple["DailyCfg", str]:
         """(settings, profile name) the book for `account` actually trades.
@@ -271,6 +285,10 @@ class DailyCfg:
         for a, var in (("live", "DAILY_LIVE"), ("roth", "DAILY_ROTH")):
             if (get_env(var, "off") or "off").strip().lower() == "on":
                 acc.append(a)
+        if self.wash_guard == "roth_first" and "live" in acc and "roth" in acc:
+            # the Roth claims the shared names first (addenda 31/39)
+            acc.remove("roth")
+            acc.insert(acc.index("live"), "roth")
         return acc
 
 

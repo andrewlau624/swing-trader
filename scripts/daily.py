@@ -132,7 +132,8 @@ def main(argv=None):
             status(acc); print()
         ra = cfg.daily.resolved_accounts()
         print(f"accounts trading: {ra}  (real money: brokerage {'ON' if 'live' in ra else 'OFF'} "
-              f"[DAILY_LIVE], Roth {'ON' if 'roth' in ra else 'OFF'} [DAILY_ROTH] in .env)")
+              f"[DAILY_LIVE], Roth {'ON' if 'roth' in ra else 'OFF'} [DAILY_ROTH] in .env)"
+              f"  wash guard: {cfg.daily.wash_guard}")
         return 0
     from swingtrader.daily.executor import DailyExecutor
     rc = 0
