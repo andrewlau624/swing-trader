@@ -52,6 +52,11 @@ stays **off** under either guard (Roth QQQ buys disallow 1-10% of taxable losses
    tier_hi). Plain `moderate` turns into 1.3x as soon as the lever gate opens. Moderate at 1.3x (what you get when the gate opens with moderate on) now needs a new
    sign-off: P(DD>50%) 5% net / 9% on the balance at tier_hi. Take it only if §2b stays ~0-3bp.
    Aggressive: no (P(DD>50%) 14% at tier_hi on raw prices).
+2b. Conviction trade live (taxable): `DAILY_LIVE_PROFILE=moderate10c` in `.env` (= moderate10 + conviction auto), gated on `make review`
+   §7 showing ~5 clean live intraday days (entries at :01/:31, flat by 15:57, fill cost near the
+   quote). Raw prices: +6pp/yr (40.6 -> 47.2% at 3bp, 23.7 -> 29.4% tier_hi; EH after tax 7.2 -> 8.6).
+   It shrinks the intraday cap to 0.75 (TQQQ 75% margin). Roth conviction stays off (fails 2016-20).
+   Kill: the existing `KILL_*` rule for the conv leg; undo = back to `DAILY_LIVE_PROFILE=moderate10`.
 3. F3 (taxable): ADOPTed (add. 33) but tiny (~$3/yr at $3k, ~$100/yr at $100k); the order path is
    not built. Build it when convenient and keep the self-score.
 4. M2L (Roth pro-rata night sizing on the real 15:40 cash): sizing only, +$94/yr. Decide from

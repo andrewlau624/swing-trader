@@ -162,6 +162,12 @@ daily:
     moderate10:
       night_max_name_pct: 0.15
       lever_weight: null
+    # moderate10 + the TQQQ conviction trade live (add. 19/39: +6pp/yr on raw prices). Switch on
+    # only after `make review` section 7 shows ~5 clean live intraday days.
+    moderate10c:
+      night_max_name_pct: 0.15
+      lever_weight: null
+      conviction_mode: auto
     aggressive:
       ibs_weight: 0.65           # 1.3x overnight, ungated
       night_weight: 0.65

@@ -1048,3 +1048,12 @@ def test_moderate10_profile_widens_the_cap_and_never_levers(monkeypatch):
     assert live.lever_weight is None, "the gate must never open 1.3x under moderate10"
     assert (live.ibs_weight, live.night_weight, live.conviction_mode) == \
         (base.ibs_weight, base.night_weight, base.conviction_mode)
+
+
+def test_moderate10c_is_moderate10_plus_live_conviction(monkeypatch):
+    monkeypatch.setenv("DAILY_LIVE_PROFILE", "moderate10c")
+    live, name = Config.load().daily.for_account("live")
+    assert name == "moderate10c" and live.night_max_name_pct == 0.15
+    assert live.lever_weight is None and live.conviction_mode == "auto"
+    roth, _ = Config.load().daily.for_account("roth")
+    assert roth.conviction_mode == "shadow", "profiles never reach the Roth"
