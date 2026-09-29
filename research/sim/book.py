@@ -43,6 +43,8 @@ def cost_bps(model: str | float, price: np.ndarray, adv: np.ndarray) -> np.ndarr
     """Per-side cost of a night-leg auction order, in bps, per name.
 
     float -> flat (research used 7.5)
+    "flat<x>" -> flat x bps (string form, for "+tick")
+    "<model>+tick" -> the model, floored at half a $0.01 tick / price per side
     "tier" / "tier_hi" -> by price and dollar volume. Cheap, thin names cost
     more. The tiers are assumptions until daily-decisions-live.jsonl (quoted
     spreads at 15:40) and the fill log can fit them; a daily-bar spread
@@ -51,6 +53,12 @@ def cost_bps(model: str | float, price: np.ndarray, adv: np.ndarray) -> np.ndarr
     price = np.asarray(price, float)
     if not isinstance(model, str):
         return np.full(len(price), float(model))
+    if model.endswith("+tick"):
+        # price-aware floor (addendum 30): at least half a $0.01 tick per side
+        base = cost_bps(model[:-5], price, adv)
+        return np.maximum(base, 0.5 * 0.01 / np.maximum(price, 1e-9) * 1e4)
+    if model.startswith("flat"):              # "flat3+tick" style: flat bps then the tick floor
+        return np.full(len(price), float(model[4:]))
     a, b, c, d = TIERS[model]
     adv = np.asarray(adv, float)
     return np.where(price < 10, a, np.where(price < 20, b, np.where(adv < 5e7, c, d)))
@@ -72,9 +80,17 @@ class NightDay:
 
 
 def night_days(vol_min: float = 0.60, crowd_n: int = 30, max_name_pct: float = 0.10,
-               max_corr: float | None = 0.9, price_min: float = 5.0) -> dict:
-    x = D.night_candidates()
-    R = D.returns20()
+               max_corr: float | None = 0.9, price_min: float = 5.0, raw_price: bool = False,
+               x: pd.DataFrame | None = None, R: pd.DataFrame | None = None) -> dict:
+    """raw_price=True (addendum 30): the price floor/ceiling, NightDay.price/close (so the
+    cost tier and whole-share rounding) use the RAW prices the live executor saw, not the
+    split-adjusted research prices. day_ret / IBS / returns are unchanged (every price of
+    the day is scaled by the same factor). x / R override the loaders (tests)."""
+    x = D.night_candidates(raw=raw_price) if x is None else x
+    R = D.returns20() if R is None else R
+    if raw_price:
+        x = x.assign(p50=x.raw_p50, pc=x.pc * x.raw_f, H50=x.H50 * x.raw_f,
+                     L50=x.L50 * x.raw_f, C=x.raw_C)
     idx = {d: i for i, d in enumerate(R.index)}
     out = {}
     for d, g in x.groupby("date"):
@@ -228,8 +244,9 @@ class Params:
 
 
 class Sim:
-    def __init__(self, noise_syms=("QQQ",), noise_cost: float = 0.5):
-        self.N = night_days()
+    def __init__(self, noise_syms=("QQQ",), noise_cost: float = 0.5, raw_price: bool = False):
+        self.raw_price = raw_price
+        self.N = night_days(raw_price=raw_price)
         self.I = ibs_days()
         P = D.etf(); self.O, self.C = P["open"], P["close"]
         self.bil = self.C["BIL"].pct_change(fill_method=None).shift(-1)

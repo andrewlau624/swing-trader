@@ -23,19 +23,68 @@ DATA = ROOT / "data" / "research" / "night"
 ET = "America/New_York"
 
 
-@lru_cache(maxsize=1)
-def night_candidates() -> pd.DataFrame:
+RAW_CLOSE = DATA / "raw_close.parquet"
+
+
+@lru_cache(maxsize=2)
+def night_candidates(raw: bool = False) -> pd.DataFrame:
     """Every name at <= -8% and IBS < 0.1 at 15:50, with what was known then
     (p50, H50, L50, prev close, vol20, ret20) and what happened after
     (close_move: 15:50 -> close, ret: close -> next open). Candidates were
     chosen on the day's LOW, so a name that bounced into the close is in here
-    (addendum 14's lookahead fix)."""
+    (addendum 14's lookahead fix).
+
+    Prices here are SPLIT-ADJUSTED as of the fetch (adjustment='all'), so a name
+    that later reverse-split shows a price far above what it traded at
+    (addendum 30). raw=True adds raw_f (raw/adjusted close on that date),
+    raw_p50 / raw_C (the prices the live executor actually saw and paid) and
+    raw_src ('exact' | 'rebased' = raw close / our close, when the raw fetch's adjusted
+    close is on a different basis | 'nearest' = factor from the symbol's nearest dated bar |
+    'none' = no raw data, factor 1). Returns are unaffected."""
     x = pd.read_pickle(DATA / "night_trades.v2.pkl")
     x = x[x.ret.abs() <= 1]
     twin = x.groupby(["date", "day50", "ret"]).sym.transform("count")
     x = x[twin == 1].copy()
     x["C"] = x.p50 * (1 + x.close_move)          # the close auction price actually paid
+    if raw:
+        x = add_raw_factor(x, pd.read_parquet(RAW_CLOSE))
     return x
+
+
+def add_raw_factor(x: pd.DataFrame, raw: pd.DataFrame) -> pd.DataFrame:
+    """x: candidates (date, sym, p50, C). raw: symbol, date, raw_close, adj_close
+    (both from the same source, so the ratio is the cumulative split/dividend
+    factor on that date). Missing (sym, date): the factor of the symbol's nearest
+    dated bar (factors are piecewise constant between corporate actions);
+    unknown symbol: factor 1."""
+    r = raw[["symbol", "date", "raw_close", "adj_close"]].dropna()
+    r = r[(r.raw_close > 0) & (r.adj_close > 0)]
+    r = r.assign(f=r.raw_close / r.adj_close, date=pd.to_datetime(r.date))
+    x = x.copy()
+    x["_i"] = np.arange(len(x))
+    ex = x.merge(r[["symbol", "date", "f", "raw_close", "adj_close"]], left_on=["sym", "date"],
+                 right_on=["symbol", "date"], how="left").set_index("_i").reindex(x["_i"])
+    # a corporate action between this frame's fetch and the raw fetch puts the two adjusted
+    # series on different bases (0.1% of candidates): then the factor is raw close / our close
+    rebase = (np.abs(x["C"].values / ex["adj_close"].values - 1) > 0.2) if "C" in x else np.zeros(len(x), bool)
+    ex = np.where(rebase, ex["raw_close"].values / x["C"].values if "C" in x else np.nan,
+                  ex["f"].values).astype(float)
+    src = np.where(np.isfinite(ex), np.where(rebase, "rebased", "exact"), "none").astype(object)
+    miss = ~np.isfinite(ex)
+    if miss.any():
+        m = x.loc[miss, ["_i", "sym", "date"]].sort_values("date")
+        rr = r[["symbol", "date", "f"]].rename(columns={"symbol": "sym"}).sort_values("date")
+        near = pd.merge_asof(m, rr, on="date", by="sym", direction="nearest")
+        near = near.set_index("_i")["f"]
+        fill = near.reindex(x.loc[miss, "_i"]).values
+        ex[miss] = fill
+        src[miss] = np.where(np.isfinite(fill), "nearest", "none")
+    f = np.where(np.isfinite(ex), ex, 1.0)
+    x["raw_f"] = f
+    x["raw_src"] = src
+    x["raw_p50"] = x.p50 * f
+    x["raw_C"] = x.C * f
+    return x.drop(columns="_i")
 
 
 @lru_cache(maxsize=1)

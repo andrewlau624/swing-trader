@@ -18,15 +18,25 @@ from . import book as B
 from .data import DATA, ROOT
 
 CACHE = DATA / "sim_cache.pkl"
+CACHE_RAW = DATA / "sim_cache_raw.pkl"
 
 
-def load_sim(refresh: bool = False, noise_syms=("QQQ", "SMH")) -> B.Sim:
-    if CACHE.exists() and not refresh:
-        s = pickle.load(open(CACHE, "rb"))
+def load_sim(refresh: bool = False, noise_syms=("QQQ", "SMH"), raw_price: bool = False) -> B.Sim:
+    """raw_price=True (addendum 30): the night pool on raw (unadjusted) prices, cached
+    separately in sim_cache_raw.pkl; the default cache and every published number are unchanged.
+    Built from the adjusted cache with only the night pool replaced (needs the panel: heavy lock)."""
+    path = CACHE_RAW if raw_price else CACHE
+    if path.exists() and not refresh:
+        s = pickle.load(open(path, "rb"))
         if set(noise_syms) <= set(s.NZ):
             return s
-    s = B.Sim(noise_syms=noise_syms)
-    pickle.dump(s, open(CACHE, "wb"))
+    if raw_price:
+        s = load_sim(False, noise_syms)
+        s.N = B.night_days(raw_price=True)
+        s.raw_price = True
+    else:
+        s = B.Sim(noise_syms=noise_syms)
+    pickle.dump(s, open(path, "wb"))
     return s
 
 
