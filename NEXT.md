@@ -317,9 +317,15 @@ length, overnight gate and correlation cap.)
 
 ---
 
-## 1. Switch on the overnight-gap filter — WAITING ON LIVE FILLS
+## 1. Switch on the overnight-gap filter — PARKED (swing book quarantined)
 
 **Status:** researched, validated, committed, **deliberately not enabled.**
+**Parked 2026-09-29:** the swing book has been off the schedule since
+a3ddb52 (2026-09-24, addendum 14: 11.2% / 0.67 at the live cadence, behind
+SPY; only scheduled with `SWING_BOOK=on` in `.env`). Its last run was
+2026-09-23 and `make slippage` has no fills, so the trigger below can never
+trip. The daily book's night-leg fills are a different strategy and do not
+count. Revisit only if the swing book is un-quarantined.
 
 **What it is:** require that a dip be made mostly of overnight gaps
 (`prev_close -> open`) rather than intraday selling, over a 5-day window.
@@ -360,9 +366,9 @@ tolerates roughly twice the cost before the edge disappears.
 
 ---
 
-## 2. Lingering on the server — CHECK THIS
+## 2. Lingering on the server — VERIFIED ON (2026-09-29)
 
-`make persist-status` must say `lingering: ON`. If it says OFF, the systemd
+`make persist-status` said `lingering: ON` on 2026-09-29. It must stay ON. If it says OFF, the systemd
 timer dies the moment the SSH session closes and the bot silently never runs.
 As root: `loginctl enable-linger ihearthim`.
 
@@ -542,6 +548,12 @@ margin account (4x intraday); a standard margin account caps this leg at 1.5x.
 **What to watch:**
 - night-leg slippage vs the 15:40 reference price (`make daily-status`).
   Research assumed 7.5bp/side. The edge is gone around 15bp.
+  2026-09-29, split by side: LIVE buys n=34 median −2.5bp, sells n=34
+  median 0.0bp (mean +40.8, a few outliers). PAPER sells n=24 median
+  **+200bp**: Alpaca paper open sells (expired OPGs resent at market, and/or a
+  stale 09:15 mark) cost ~2%/trade, which is roughly the whole gap between paper
+  night (−2.07%/trade) and live (+0.08%). Paper night P&L is not evidence
+  about the strategy; judge the night leg on live fills only.
 - whether 2021-23-style weakness shows up: that leg's return was almost all 2024+.
 - CLS/OPG rejections in the email. Paper has not yet been proven to accept
   auction orders from this code; the first 15:40 run is the test.
