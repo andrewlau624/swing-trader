@@ -14,7 +14,60 @@ losses are one bad night, not execution. `daily-status`'s +33bp is vs the 15:50
 decision price, not a cost. At 50 exits ≤ 10bp: overnight leverage opens by
 itself, and the aggressive profile (addendum 22) becomes an option.
 
+## Addenda 30-39 (2026-09-28): research program
+
+**Restatement (add. 30): every night-leg number before addendum 30 is ~1/5 too high.** The research
+night pool used split-adjusted prices (later reverse splits made penny stocks look like $5+ names).
+Raw-price baseline, 2021-26: V7 shipped **47.2% / 2.06 / −14 at 3bp**, **29.4% / 1.41 at tier_hi**,
+EH tier_hi 13.3%; live today (no conviction) 40.6% / 23.7%; Roth M3 35.3% / 22.4%. Live code was
+always right (it sees real quotes). New research must use `load_sim(raw_price=True)`. Nothing new
+survives multiple-testing deflation (N=546, best increment A2 DSR 0.34); what the program changes is
+structure: about **+$520/yr** at user size EH tier_hi, mostly the wash guard (add. 39).
+
+**Shadows now running, log only** (`config.yaml` `daily.*`, all `shadow`, set `off` to silence):
+`[fomc]` F3 (`fomc_filler_mode`, taxable only), `[roth-cash]` M2L (`roth_night_cash_log`),
+`[oversold] SHADOW Roth A2` (rides `oversold_mode`), `[lever-g1]` (`lever_g1_log`), `[wash-guard]`
+G4s (`wash_guard_mode`). None changes an order or a size.
+
+**Decide BEFORE `make daily-roth-on`: the wash guard.** The live guard (symmetric 31 days, taxable
+first) starves the Roth: its IBS leg almost never gets QQQ/SMH and its night leg gets only names the
+taxable book skipped (Roth EH ~8.8% vs ~13% under G4s; add. 31, 39). G4s = the Roth owns the shared
+night names, the Roth trades different-index look-alikes only (XLK→VGT, SMH→SOXX, sector SPDR→Vanguard;
+never same-index SPLG/QQQM/IVV), and skips names the taxable book sold at a loss in 30 days or holds.
+Worth ~+$363/yr at user size (+$5.3k at 100k); costs ~0.7% of taxable losses permanently disallowed.
+G4s is post-hoc and has no order path yet. Either (a) turn the Roth on under the live guard knowingly
+and read `[wash-guard]` for a few weeks, or (b) build `daily.wash_guard: roth_first` first. Roth F3
+stays **off** under either guard (Roth QQQ buys disallow 1-10% of taxable losses for ~$0 edge).
+
+**Order, each gated on live evidence** (at the 10-08 checkpoint unless noted):
+1. `make review` §2b clean (open sells ≤ ~5bp over 50 exits; `[lever-g1]` agrees): raise or remove
+   `DAILY_LIVE_CAPITAL` / `DAILY_ROTH_CAPITAL` so deposits are not held behind a cap (add. 38), and
+   deploy the rest of the Roth once the guard decision above is made.
+2. Taxable leverage: prefer `moderate` **as built at 1.0x** (cap .15; EH-AT 9.3 vs 1.3x's 9.1 at
+   tier_hi). Moderate at 1.3x (what you get when the gate opens with moderate on) now needs a new
+   sign-off: P(DD>50%) 5% net / 9% on the balance at tier_hi. Take it only if §2b stays ~0-3bp.
+   Aggressive: no (P(DD>50%) 14% at tier_hi on raw prices).
+3. F3 (taxable): ADOPTed (add. 33) but tiny (~$3/yr at $3k, ~$100/yr at $100k); the order path is
+   not built. Build it when convenient and keep the self-score.
+4. M2L (Roth pro-rata night sizing on the real 15:40 cash): sizing only, +$94/yr. Decide from
+   `[roth-cash]` once the Roth trades (does requested exceed funded on long-3x days, as modelled).
+5. A2 (Roth V6 on all idle overnight money): stays shadow until V6 itself leaves shadow (add. 27 rule).
+
+**Pre-registered kill / de-risk rules for the new shadows:**
+- F3: auto-disable after **16 FOMC eves with mean net < 0** (scored at 3bp/side); the status line
+  shows `AUTO-DISABLE PROPOSED`; then `daily.fomc_filler_mode: off`. The calendar in
+  `swingtrader/daily/events.py` ends 2028-01-26; extend it before the <60-day warning starts emailing.
+- A2: lives or dies with V6's shadow record (`oversold SPY/QQQ` line).
+- G1 gate: logging only. It needs n ≥ 20, ≥ 8 distinct exit days and a day-clustered 95% UB ≤ 10bp;
+  the live gate (`lever_ok`) is unchanged. Do not open leverage by hand on G1.
+- No automatic de-risk on leg CUSUMs (add. 37: costs 1-14pp/yr with nothing decayed). The `KILL_*`
+  rules stay as they are. Plan on a walk-forward haircut of ~0-8pp/yr; edge-halves stays the stress.
+
 ## Addendum 29 (2026-09-28): live costs ~0bp; a `moderate` profile, OFF
+
+**Adjusted-pool numbers (too high, see add. 30).** On raw prices: V7 3bp 47.2 / 2.06, 1.3x 53.4 /
+2.04, moderate 1.3x .15 64.2 / 2.10 (tier_hi P(DD>50%) 8% pre-tax); the best Sharpe at 3bp is now
+moderate as built (1.0x .15) 2.15, and the differences are small.
 
 Live open sells −1.0bp/side (26 exits). At a 3bp stand-in: V7 58.0% / 2.33 (was 47.5 / 1.99),
 1.3x 68.3% / 2.32. New `DAILY_LIVE_PROFILE=moderate` = 15% night-name cap only (best Sharpe
@@ -298,7 +351,7 @@ but "should" is not "did".
 | Fixed take-profit exit | **dead** | worse at every level (cutting winners, same as trailing) |
 | Inverse-vol / overnight-share position sizing | **weak** | top8 +5pp CAGR at best, no gain on the uncapped book |
 | Correlation cap on new entries (`max_corr`) | **dead at live cadence** | uncapped Sharpe 1.16→1.33 at 42d refresh; 8.5%/0.58 at the live 1d refresh (add. 14) |
-| Night leg: index filler for unused capital | **dead** | helps 2024–26 only (add. 16) |
+| Night leg: index filler for unused capital | **dead** | helps 2024–26 only (add. 16); the FOMC-eve subset (F3) is a pre-registered conditional, not a redo, and passes (add. 33) |
 | IBS idle half in SPY/QQQ/overnight index | **dead** | helps 2024–26 only; BIL stays (add. 16) |
 | Night leg: skip high-cost names | **dead** | cheap thin names are the best bounces (add. 16) |
 | Daily-bar spread estimators as cost model | **dead** | measure volatility, not spread, on these names (add. 16) |
@@ -312,6 +365,45 @@ but "should" is not "did".
 | Last-half-hour intraday momentum (Gao et al.) | **dead** | sign flips across periods; overlaps the noise leg (add. 27 R3) |
 | Sector-loser reversal, ETF pairs, international close->open | **dead** | duplicates IBS / no edge after costs (add. 27 R4) |
 | Theme-explosion sleeve (breakouts, top-1% momentum, theme clusters, residual momentum) | **dead** | no rule beats vol-matched random picks; trails SPY; caught quantum late and got stopped out (add. 28) |
+| Night pool $5 floor / cost tier / share rounding on split-ADJUSTED prices | **bug, fixed** | 16% of V7 night trades were really < $5; lookahead winners. Every earlier night level ~1/5 too high; use `raw_price=True` (add. 30, 36, 39) |
+| Lower `night_price_min` to $3 / $2 / $1 (raw pool) | **dead** | added names lose 33-73bp in 2021-23, placebo 2-7%; add. 21's live-cost conditional ($3 if sub-$10 costs ≤ ~20bp) still stands (add. 30) |
+| Classify listings by CURRENT asset name on old bars | **bug** | delisted names kept at volume 0, tickers reused (INFO, FB, PCLN): split listings first (add. 36) |
+| Roth: smaller intraday cap (0.75 / 1.0x underlying) | **dead** | lower growth both halves; the Roth is below its Kelly peak (add. 31) |
+| Roth: full-weight IBS after a no-pick night | **dead** | 2024-26 negative, placebo 15/50 (add. 31) |
+| Roth: 3x ETFs up to 3.0x on all daytime cash | **borderline** | +2.8pp but 2016-20 Sharpe −0.07, worst month −11.7% (add. 31) |
+| Roth: TQQQ/SQQQ conviction from the IBS idle cash | **borderline** | +24pp hist but 2016-20 Sharpe −0.10, EH P(DD>30%) 18% (add. 31) |
+| Both accounts running the same legs without a wash guard | **dead** | 82% of taxable losses permanently disallowed (add. 31) |
+| Loss-aware / look-alike guard with taxable first | **weak** | same-day night-name collisions: Roth still ~22% vs ~47% with Roth priority (add. 31) |
+| Flatten the Roth intraday leg before the 15:40 close buys | **dead** | −0.4..−1pp/yr; night starvation is neutral-to-better at tier_hi (add. 31, 38) |
+| Roth F3 (FOMC-eve QQQ) beside a taxable QQQ noise leg | **dead** | 1.1% (G1) / 8.8-9.9% (G4s) of taxable losses permanently disallowed for ~$0 edge (add. 39) |
+| Vol-targeted overnight gross (0.5-1.5x on trailing book vol) | **dead** | de-levers in 2024-26, NW t −1.8/−2.4 vs fixed, placebo 9/20 (add. 32) |
+| Aggressive / 1.5x profiles for the taxable book after tax | **dead** | +0.7pp EH after tax for +12-17pp P(DD>30%); raw tier_hi P(DD>50%) 14% (add. 32, 30) |
+| 1.3x moderate (cap .15) as the taxable knee at tier_hi | **borderline → dead at tier_hi** | raw: EH-AT 9.1 vs as-built 1.0x .15 at 9.3; P(DD>50%) 5% net / 9% balance; increment t 1.0 (add. 32, 39) |
+| QQQ noise half → MNQ below ~$200k; IBS index legs → micro futures | **dead** | one MNQ ≈ $61k > the leg's share of equity; IBS parks 7% margin and most picks are sector ETFs (add. 32) |
+| FOMC eve in SPY instead of QQQ | **borderline** | same sign, half the size; F3 (QQQ) dominates (add. 33) |
+| Pre-FOMC drift in the day session (close → 13:59) | **dead** | faded after 2023, placebo pct 78; the overnight part carries it (add. 33) |
+| Night ×1.5 on FOMC eves | **dead** | placebo pct 67: same as 1.5x on random nights (add. 33) |
+| Night ×0.5 on CPI/NFP nights; ×0.5 before weekly claims | **dead** | the night leg earns MORE across 08:30 releases; the claims rule is a Wednesday rule (add. 33) |
+| Night ×1.5 on CPI/NFP nights | **borderline** | placebo 98th pct but gone in 2024-26 at tier_hi, more DD>30% (add. 33) |
+| IBS ×1.5 when its night spans CPI/NFP | **watch (shadow at most, not built)** | both halves up but 2016-20 holdout negative, t 1.7 (add. 33) |
+| Noise leg off / up on FOMC or CPI/NFP days | **dead** | FOMC ≈ 0; off on CPI/NFP costs 2-5pp (add. 33) |
+| S&P 500 add/delete trades after the announcement | **dead** | the move is in the after-close announcement gap; tradable windows flip sign (add. 34) |
+| Russell recon reversal | **untestable** | no membership/shares data; IWM−SPY proxy t ±0.4, n 11 (add. 34) |
+| LETF-flow conditioned last half hour / night size-up after big down days | **dead** | small momentum the noise leg already holds (add. 34) |
+| Night ×0.5 on QQQ ≤ −2% at 15:30 (LETF-selloff flag) | **borderline** | post-hoc; holdout = 3 COVID nights, 3/6 years negative, \|move\| ≥ 2% both signs does better, placebo 72% (add. 34) |
+| Month-end pension rebalancing (SPY−TLT MTD) as IBS sizing | **watch** | right sign all periods, ~6 trades/yr, +0.15pp/yr, placebo 63% (add. 34) |
+| Options calendar (OPEX Fri / week / post-OPEX) as sizing for noise, IBS, night | **dead** | pinning only in 2016-20; post-OPEX flips 2024-26 (add. 35) |
+| Witching-day night entry | **dead (weak watch)** | vs other pre-weekend entries diff −23bp, t −1.3, placebo 14th pct (add. 35) |
+| 0DTE era as noise-leg decay | **no decay** | 0DTE era +2.2bp/day ≈ 2016-20; plan on ~+2bp/day (add. 35) |
+| Rule-based IBS universe (all liquid equity ETFs, corr-dedupe, momentum top-3) | **dead** | picks theme funds at momentum peaks; −6..−12pp 2021-23 vs the 18 ETFs (add. 36) |
+| Night leg: exclude or 2x up-weight new listings | **dead** | exclude costs −14pp; up-weight was 5 reverse-split penny names, fails 2021-23 on raw prices (add. 36) |
+| New-ETF overnight basket (first year) | **dead** | bid-ask bounce in thin funds; gone at ADV ≥ $10M (add. 36) |
+| Walk-forward annual refit of leg parameters | **report / dead as a method** | refits lose 0-8pp/yr vs shipped; use as a haircut (add. 37) |
+| Automatic de-risk on leg CUSUM / rolling-t | **dead** | costs 1.3-14pp/yr with nothing decayed; a false alarm switches a healthy leg off for years (add. 37) |
+| Any leg decaying 2016-26 | **no** | all NW trend t > −2; noise QQQ 2024-26 a watch (t −1.8) (add. 37) |
+| Evidence-keyed capital ramp (cap doubles per 15 exits) | **dead** | a 2-3 day P&L band can't tell edge from none; slower than deploying at the checkpoint (add. 38) |
+| Sequential lever gate for speed | **dead as a money lever** | ~1 session earlier, ~$0; G1 logged only for its stricter false-open rate (add. 38) |
+| Stacking the program's survivors as additive edges | **report** | no increment clears DSR 0.95 at N=546 (best A2 0.34, F3 0.035); the gain is structural (add. 39) |
 
 ## Ideas not yet tested
 
