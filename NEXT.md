@@ -368,11 +368,9 @@ As root: `loginctl enable-linger ihearthim`.
 
 ---
 
-## 3. Email — never actually verified
+## 3. Email — VERIFIED (2026-09-29)
 
-`make notify-test` has not been run successfully. Until it has, assume alerts
-do not work. `trading@andrewlau.dev` is a verified domain so it should be fine,
-but "should" is not "did".
+Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 ---
 

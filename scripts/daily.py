@@ -98,10 +98,15 @@ def status(account: str):
     f = ROOT / "logs" / (f"daily-fills-{account}.jsonl" if account in ("live", "roth") else "daily-fills.jsonl")
     if f.exists():
         rows = [json.loads(l) for l in f.read_text().splitlines() if l.strip()]
+        # buys and sells are measured against different refs (night buy: the
+        # 15:40 scan price; night sell: the broker's 09:15 mark), so one mean
+        # would mix the close-auction move with the pre-market-to-open gap
         for leg in ("ibs", "night"):
-            v = [r["slippage_bps"] for r in rows if r["leg"] == leg]
-            if v:
-                print(f"slippage {leg:6} n={len(v)} mean {np.mean(v):+.1f} bps (vs ref price at decision)")
+            for side in ("buy", "sell"):
+                v = [r["slippage_bps"] for r in rows if r["leg"] == leg and r["side"] == side]
+                if v:
+                    print(f"slippage {leg:6} {side:4} n={len(v):3} mean {np.mean(v):+7.1f}  "
+                          f"median {np.median(v):+7.1f} bps (vs ref price at decision; + = worse)")
     if len(b.equity_log) > 1:
         print("equity by day: " + "  ".join(f"{e['date'][5:]} {e['equity']:,.0f}" for e in b.equity_log[-10:]))
 
