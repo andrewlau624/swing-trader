@@ -5,7 +5,7 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
-## Live checkpoint (2026-09-29): costs fine, edge unproven, two decisions this week
+## Live checkpoint (2026-09-29): costs fine, edge unproven, overnight leverage off
 
 LIVE (Schwab, since 09-22, 6 sessions): **+$18.99 (+0.8%)** on ~$2,240 (deposit
 09-29 took equity $1,000 -> $2,259; P&L excludes it). In line with the backtest's
@@ -18,14 +18,15 @@ LIVE (Schwab, since 09-22, 6 sessions): **+$18.99 (+0.8%)** on ~$2,240 (deposit
   (research assumed 7.5bp/side; the edge dies ~15bp). Paper night is not
   evidence (Alpaca paper open sells ~+200bp, see item 4).
 
-**Decide this week:**
-1. **Intraday leg is on real money** since the deposit crossed $2,000
-   (`daytrade_mode: auto`, 2.06x intraday cap). To watch it longer first:
-   `daily.daytrade_mode: off` in `config.yaml`.
-2. **Overnight leverage opens by itself at 50 night exits** (34 now, ~1 week):
-   both legs 0.5 -> 0.65, 1.3x overnight gross (`signals.lever_ok`: 50 exits
-   <= 10bp/side, no kill, drawdown within 10%). The cost test will pass; it
-   proves costs, not edge. To wait for edge evidence: `daily.lever_weight: null`.
+**Decided 2026-09-29:**
+1. **Intraday leg stays live on real money** (`daytrade_mode: auto`, 2.06x
+   intraday cap; on since the deposit crossed $2,000). It is the researched
+   design (addendum 9); the kill rules cover it. Off switch:
+   `daily.daytrade_mode: off`.
+2. **Overnight leverage OFF: `daily.lever_weight: null`.** It would have opened
+   by itself at 50 night exits (34 now): both legs 0.5 -> 0.65, 1.3x overnight.
+   The gate (`signals.lever_ok`) proves costs, not edge. Revisit at ~100 live
+   night trades; to re-arm, set `lever_weight: 0.65` (the gate still applies).
 
 **Next look at returns:** ~100 live night trades (~3 weeks). Until then let the
 kill rules run and change nothing else.

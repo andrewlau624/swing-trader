@@ -205,6 +205,7 @@ def test_lever_g1_would_open():
 
 def test_lever_g1_log_leaves_the_live_gate_alone(tmp_path):
     ex = _ex(tmp_path, account="live")
+    ex.d.lever_weight = 0.65                                      # config.yaml may ship it off
     book = DailyBook(cash=3000.0, start_equity=3000.0)
     ex._exit_stats = (60, 2.0)                                    # G0 would open
     ex._exit_g1 = sg.lever_g1([("2026-09-01", 50.0)] * 25)        # G1 would not

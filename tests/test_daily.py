@@ -586,6 +586,7 @@ def test_leverage_gate_needs_proven_costs():
 
 def test_levered_book_sizes_both_overnight_legs_up(tmp_path, monkeypatch):
     ex = _executor(tmp_path, monkeypatch)
+    ex.d.lever_weight = 0.65          # config.yaml may ship it off; test the mechanism
     b = DailyBook(cash=3000, start_equity=3000)
     assert ex._w_night(b) == 0.5 and ex._w_ibs(b) == 0.5
     b.levered = True
