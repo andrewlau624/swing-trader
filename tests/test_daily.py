@@ -1037,3 +1037,14 @@ def test_moderate_profile_only_widens_the_name_cap(monkeypatch):
     assert (live.ibs_weight, live.night_weight, live.lever_weight, live.conviction_mode) == \
         (base.ibs_weight, base.night_weight, base.lever_weight, base.conviction_mode), \
         "leverage still comes only through the gate"
+
+
+def test_moderate10_profile_widens_the_cap_and_never_levers(monkeypatch):
+    monkeypatch.setenv("DAILY_LIVE_PROFILE", "moderate10")
+    cfg = Config.load()
+    live, name = cfg.daily.for_account("live")
+    base, _ = cfg.daily.for_account("paper")
+    assert name == "moderate10" and live.night_max_name_pct == 0.15
+    assert live.lever_weight is None, "the gate must never open 1.3x under moderate10"
+    assert (live.ibs_weight, live.night_weight, live.conviction_mode) == \
+        (base.ibs_weight, base.night_weight, base.conviction_mode)

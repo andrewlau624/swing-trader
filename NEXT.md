@@ -35,16 +35,21 @@ taxable book skipped (Roth EH ~8.8% vs ~13% under G4s; add. 31, 39). G4s = the R
 night names, the Roth trades different-index look-alikes only (XLK→VGT, SMH→SOXX, sector SPDR→Vanguard;
 never same-index SPLG/QQQM/IVV), and skips names the taxable book sold at a loss in 30 days or holds.
 Worth ~+$363/yr at user size (+$5.3k at 100k); costs ~0.7% of taxable losses permanently disallowed.
-G4s is post-hoc and has no order path yet. Either (a) turn the Roth on under the live guard knowingly
-and read `[wash-guard]` for a few weeks, or (b) build `daily.wash_guard: roth_first` first. Roth F3
+G4s is post-hoc. **Built (b): `daily.wash_guard: roth_first` is set in `config.yaml`** (tests in
+`tests/test_wash_guard.py`). With both books on, the Roth runs before the taxable book each phase; the
+taxable book keeps the symmetric 31-day rule on every leg. Revert: `wash_guard: symmetric` (old
+behavior, taxable first). First week, read `[wash] roth_first:` lines: the Roth night block count
+should be small (taxable loss sales 30d + held/pending); IBS look-alikes (XLK->VGT...) must never be
+bought AND sold same-morning (no VGT churn); the taxable 15:40/09:15 runs now start after the Roth's, so
+check the taxable open sells still land before 09:28 and night buys before 15:50. Roth F3
 stays **off** under either guard (Roth QQQ buys disallow 1-10% of taxable losses for ~$0 edge).
 
 **Order, each gated on live evidence** (at the 10-08 checkpoint unless noted):
 1. `make review` §2b clean (open sells ≤ ~5bp over 50 exits; `[lever-g1]` agrees): raise or remove
    `DAILY_LIVE_CAPITAL` / `DAILY_ROTH_CAPITAL` so deposits are not held behind a cap (add. 38), and
    deploy the rest of the Roth once the guard decision above is made.
-2. Taxable leverage: prefer `moderate` **as built at 1.0x** (cap .15; EH-AT 9.3 vs 1.3x's 9.1 at
-   tier_hi). Moderate at 1.3x (what you get when the gate opens with moderate on) now needs a new
+2. Taxable leverage: `DAILY_LIVE_PROFILE=moderate10` (cap .15, never levers; EH-AT 9.3 vs 1.3x's 9.1 at
+   tier_hi). Plain `moderate` turns into 1.3x as soon as the lever gate opens. Moderate at 1.3x (what you get when the gate opens with moderate on) now needs a new
    sign-off: P(DD>50%) 5% net / 9% on the balance at tier_hi. Take it only if §2b stays ~0-3bp.
    Aggressive: no (P(DD>50%) 14% at tier_hi on raw prices).
 3. F3 (taxable): ADOPTed (add. 33) but tiny (~$3/yr at $3k, ~$100/yr at $100k); the order path is

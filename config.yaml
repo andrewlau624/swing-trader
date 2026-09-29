@@ -136,6 +136,12 @@ daily:
   roth_night_cash_log: shadow    # Roth 15:40 `[roth-cash]` requested vs funded night notional, M2L (add. 31)
   lever_g1_log: shadow           # `[lever-g1]` day-clustered 95% UB gate beside `[lever]`; lever_ok unchanged (add. 38)
   wash_guard_mode: shadow        # `[wash-guard]` what the Roth-first G4s guard would change vs the live one (add. 31)
+  # LIVE wash guard between the two real-money books: symmetric | roth_first.
+  # Only matters once DAILY_ROTH=on; addendum 31/39; symmetric = old behavior.
+  # roth_first: the Roth runs first each phase, its night leg skips only taxable
+  # loss sales (30d) + names the taxable book holds/has orders in, its IBS leg trades
+  # different-index look-alikes (XLK->VGT, SMH->SOXX, sector SPDR->Vanguard). Logs `[wash]`.
+  wash_guard: roth_first
   noise_lookback: 14
   noise_target_vol: 0.02
   noise_max_lev: 3.5
@@ -150,6 +156,12 @@ daily:
     # (Sharpe 1.67 vs 1.73): use only while `make review` 2b keeps open sells near 0bp.
     moderate:
       night_max_name_pct: 0.15
+    # Addendum 39 (raw prices, after 35% tax): the 15% cap at 1.0x is the best stressed profile
+    # (edge-halves tier_hi 9.3%/yr after tax vs 9.1 at 1.3x; P(DD>50%) in 5y 1-2% vs 5-9%).
+    # `moderate` becomes 1.3x when the lever gate opens by itself; this one never levers.
+    moderate10:
+      night_max_name_pct: 0.15
+      lever_weight: null
     aggressive:
       ibs_weight: 0.65           # 1.3x overnight, ungated
       night_weight: 0.65
