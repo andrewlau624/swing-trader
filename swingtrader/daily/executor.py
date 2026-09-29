@@ -210,8 +210,7 @@ class DailyExecutor:
         book.last_run = now.isoformat(timespec="seconds")
         if not self.dry_run:
             book.save(self.state_dir, self.fname)
-        self.log(f"book equity ${eq:,.2f} (start ${book.start_equity:,.0f}, "
-                 f"{(eq / book.start_equity - 1) * 100:+.1f}%) | cash ${book.cash:,.2f} | "
+        self.log(f"book equity ${eq:,.2f} ({book.pnl_line(eq)}) | cash ${book.cash:,.2f} | "
                  f"{len(book.positions)} positions"
                  + (f" | account ${float(self.broker.account().equity):,.2f}" if self.live else "")
                  + " | day-trade leg "
@@ -1555,7 +1554,7 @@ class DailyExecutor:
         if not (self.actions or self.warnings):
             return
         body = "<h3>daily book</h3>" + \
-            f"<p>equity ${equity:,.2f} ({(equity/book.start_equity-1)*100:+.1f}% since start)</p>" + \
+            f"<p>equity ${equity:,.2f} &middot; {book.pnl_line(equity)}</p>" + \
             ("<h4>actions</h4><ul>" + "".join(f"<li>{a}</li>" for a in self.actions) + "</ul>" if self.actions else "") + \
             ("<h4>warnings</h4><ul>" + "".join(f"<li>{w}</li>" for w in self.warnings) + "</ul>" if self.warnings else "") + \
             "<pre>" + "\n".join(self.lines[-40:]) + "</pre>"

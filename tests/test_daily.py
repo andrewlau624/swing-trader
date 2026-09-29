@@ -1057,3 +1057,17 @@ def test_moderate10c_is_moderate10_plus_live_conviction(monkeypatch):
     assert live.lever_weight is None and live.conviction_mode == "auto"
     roth, _ = Config.load().daily.for_account("roth")
     assert roth.conviction_mode == "shadow", "profiles never reach the Roth"
+
+
+def test_trading_pnl_ignores_capital_changes():
+    from swingtrader.daily.book import DailyBook
+    b = DailyBook(cash=1000.0, start_equity=1000.0)
+    b.closed = [{"sym": "A", "leg": "night", "qty": 10, "pnl": 12.0},
+                {"sym": "B", "leg": "ibs", "qty": 5, "pnl": -2.0}]
+    b.positions = {"SGOV": {"qty": 10, "avg_px": 100.0, "leg": "tbill", "entry_date": "2026-09-29"}}
+    b.cash = 2250.0                                    # re-synced after a $1,240 deposit
+    eq = b.cash + 10 * 100.5                           # SGOV marked at 100.50
+    t = b.trading_pnl(eq)
+    assert t["realised"] == 10.0 and abs(t["open"] - 5.0) < 1e-9 and abs(t["total"] - 15.0) < 1e-9
+    assert abs(t["pct"] - 15.0 / (eq - 15.0) * 100) < 1e-9, "a % of capital in use, not of the day-one start"
+    assert "P&L $+15.00" in b.pnl_line(eq)

@@ -28,8 +28,9 @@ def status(account: str):
     eq = b.equity_log[-1]["equity"] if b.equity_log else b.cash
     print(f"=== {account.upper()}{' (real money)' if account in ('live', 'roth') else ' (virtual $' + format(b.start_equity, ',.0f') + ')'}"
           f"{' profile ' + profile if profile else ''} ===")
-    print(f"daily book  equity ${eq:,.2f}  start ${b.start_equity:,.0f}  "
-          f"({(eq/b.start_equity-1)*100:+.1f}%)  cash ${b.cash:,.2f}  last run {b.last_run or '-'}")
+    print(f"daily book  equity ${eq:,.2f}  cash ${b.cash:,.2f}  last run {b.last_run or '-'}")
+    print(f"            {b.pnl_line(eq)}"
+          + ("  (equity also moves with deposits / DAILY_*_CAPITAL; this line does not)" if account in ("live", "roth") else ""))
     print(f"day-trade leg {'LIVE' if b.daytrade_live else 'shadow'} "
           f"(mode {d.daytrade_mode}; on at ${d.daytrade_min_equity:,.0f}; "
           f"intraday leverage cap {b.noise_lev_cap:g}x)")

@@ -74,6 +74,25 @@ class DailyBook:
             v += float(p["qty"]) * float(marks.get(s, p["avg_px"]))
         return v
 
+    def trading_pnl(self, equity: float) -> dict:
+        """What the book's own trades made, independent of capital changes.
+        A real-money book re-syncs its cash to the broker each run, so a deposit
+        or a raised DAILY_*_CAPITAL moves equity without being a gain: measure
+        realised P&L (closed round trips) + open P&L (equity - cash - cost of
+        open positions), as a % of the capital in use (equity minus that P&L)."""
+        realised = float(sum(float(c.get("pnl") or 0.0) for c in self.closed))
+        cost = sum(float(p["qty"]) * float(p["avg_px"]) for p in self.positions.values())
+        open_ = float(equity) - self.cash - cost
+        total = realised + open_
+        base = float(equity) - total
+        return {"realised": realised, "open": open_, "total": total,
+                "pct": total / base * 100 if base > 0 else 0.0}
+
+    def pnl_line(self, equity: float) -> str:
+        t = self.trading_pnl(equity)
+        return (f"P&L ${t['total']:+,.2f} ({t['pct']:+.1f}% on ${equity - t['total']:,.0f} in use; "
+                f"realised ${t['realised']:+,.2f}, open ${t['open']:+,.2f})")
+
     # ------------------------------------------------------------ updates
     def register(self, coid: str, **info) -> None:
         self.orders[coid] = {"status": "new", "filled_qty": 0.0, **info}
