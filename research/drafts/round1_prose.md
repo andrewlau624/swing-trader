@@ -434,3 +434,53 @@ are untested by any data we have; a live shadow must log Schwab's locate answer 
 before any money). An A-only pass (auction entry) with B failing -> "report": not
 executable. Otherwise DEAD, and the "Do NOT redo" list gains "short the night picks
 after the open".
+
+
+## Amendment — Round 6: Study T, SEC offering filings on the night picks (pre-register)
+
+`date`: Tue Sep 29 19:56:41 PDT 2026 (the authoritative stamp; no Study T return, split or count of event
+picks, in any period, was computed when this was written).
+
+Motivation: addendum 12's headline parser tagged "dilution / offering" on only 1.4% of
+night trades, and that bucket bounced MOST (+72bp, excess +38bp, t 1.6): against the
+intuition that new supply keeps selling. Headlines are a thin, noisy proxy. SEC EDGAR
+filings are the primary record, with point-in-time acceptance timestamps. THE TEST: does
+an offering-type filing by the issuer, accepted between the previous close and the
+15:40 decision, split the night pick's next-open P&L? Two-sided: add. 12 favours
+"bounces more" (discount-recovery toward the offering price); the naive prior is
+"bounces less" (supply overhang).
+
+Sample: shipped night picks, `B.night_days(raw_price=True, max_corr=0.7)` (V7 pool, as
+Study S). Per-trade net = ret - 2 x cost_bps(tier | tier_hi). Halves 2021-23 / 2024-26;
+2016-20 is a holdout reported only if the pool covers it.
+
+Mapping (fixed now; applied the same to every pick): symbol -> CIK by EDGAR's entity
+index (exact ticker match). A pick is MAPPED only if that CIK's `entityType` is
+"operating" (ETF/ETP trusts file 424B3 continuously; excluded) AND it has a periodic
+filing (10-K, 10-Q, 20-F, 40-F, 6-K) accepted within 400 days before d (guards against
+reused tickers). Unmapped picks leave both groups; the mapped share is reported by year
+(delisted names are likely under-mapped: a survivorship caveat stated with the result).
+
+Events (acceptance time in (16:00 ET on d-1, 15:40 ET on d], timezone of EDGAR's
+acceptanceDateTime verified against filingDate before use):
+- E1: a 424B prospectus (424B1-424B8): an offering priced or a resale registered.
+- E2: an original registration S-1, S-3, F-1 or F-3 (no /A amendments).
+- E3: E1 or E2.
+
+Statistic: excess_i = net_i - the mean net of the OTHER picks the same night (nights with
+>= 2 picks). t = mean excess of event picks / SE clustered by night. Placebo: event labels
+permuted among mapped picks within each night, 1000 draws; percentile of the real mean.
+
+Variants (6; N = 601 + 6 = **607**): {E1, E2, E3} x {DROP the event picks (weight 0),
+DOUBLE them (weight min(2 frac, 0.10))}. Book increment per day
+inc = 0.5 * sum_i w_i * net_i (as Study S), rule minus baseline, pp/yr.
+
+Pass bar (all, at BOTH tier and tier_hi): (1) event n >= 100 over 2021-26 (else
+"power-limited: report"); (2) excess has the rule's sign in BOTH halves (negative for
+DROP, positive for DOUBLE); (3) t in the rule's direction >= 2.0 over 2021-26;
+(4) placebo >= 97.5th pct in that direction; (5) book increment vs baseline > 0 in both
+halves. A 2016-20 sign flip downgrades a pass to "watch".
+Verdict: pass -> SHADOW only (the live bot logs the flag per pick for >= 100 event
+picks; no money). Otherwise DEAD and the do-not-redo list gains "SEC offering filings
+as a night-leg filter". Dollars are reported at $2.3k / $25k / $100k / $500k, with the
+event picks' order size as % of ADV at each (CLAUDE.md: balances are temporary).
