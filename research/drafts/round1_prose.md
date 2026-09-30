@@ -805,3 +805,31 @@ Pass (SHADOW), each variant vs the shipped 0.5 flat, at the stressed cost:
    >= 95th pct;
 4. book (B3, tier_hi, 2021-26) max DD not worse by > 2pp; 5. 5y MC (mc_tax, EH, after tax, $3k+$1k/mo) P(DD>50%) <= 5%.
 DSR of the increment reported at N = 623. All five pass -> SHADOW (config switch spec, default off). Else DEAD.
+
+
+## Amendment — Round 16, Study AG: confidence and confirmation signals at the breakout minute (pre-register; <= 6 variants, N 623 -> <= 629)
+
+`date`: Wed Sep 30 15:43:37 PDT 2026. Brief idea #1. AF (above) was computed and is dead; nothing below was computed. Data coverage checked:
+no NQ futures data and no minute bars for NDX-100 members exist in the repo (only 11 ETFs), so "breadth" and "NQ leads
+QQQ" are UNTESTABLE and are reported as such (not counted). ETF minutes exist for QQQ, TQQQ, SMH, SPY, IWM.
+Trades: the conviction trade list (conviction_af.conv_trades; 785 trades 2016-26). Every feature uses data up to the close
+of the breakout decision minute m0 (or d−1 daily closes), regular-hours minutes only.
+Confirmations (each split into terciles with cut points frozen on the 2016-23 trades, unless categorical):
+- C1 strength (distance past the band / σ; already >= 0.341). Also REPORTED: EV by strength quintile over ALL first
+  breakouts incl. those below 0.341 (2016-23 quintile cuts), both halves.
+- C2 cross-ETF agreement: how many of SMH, SPY, IWM are outside their OWN noise band in the trade's direction at m0
+  (same live band functions): categories 0 / 1 / 2-3.
+- C3 relative volume: QQQ volume over minutes m0−29..m0 / mean of the same window over the prior 14 sessions.
+- C4 VIX(d−1) level; C5 VIX9D/VIX(d−1) (term structure; Cboe closes).
+- C6 time of day: m0 = 10:00 / 10:30-11:30 / 12:00 or later.
+Selection (2016-23 only): net EV per trade (1.5bp/side) must be monotone across the 3 buckets, in either direction. For each
+confirmation that is, the variant AG_k DROPS the worst end bucket (no trade that day; the conviction allowance was reserved
+at the open, so the noise leg is unchanged). Confirmations that are not monotone add no variant (N counts only those run).
+Reported for every confirmation regardless: EV / win / n per bucket in 2016-20, 2021-23, 2024-26.
+Pass (SHADOW), each variant, increment vs the shipped trade at the stressed cost (3bp/side):
+1. increment > 0 in 2016-23 (in-sample, expected) AND 2024-26 (the judgement); 2021-23 and 2024-26 shown separately;
+2. NW t (5 lags) of the daily increment 2016-26 >= 2.0;
+3. placebo: drop the same number of trades at random from the same years (1,000 draws); actual >= 95th pct;
+4. B3 moderate10c book (tier_hi) max DD not worse by > 2pp; 5. mc_tax P(DD>50%) <= 5%. DSR at the new N.
+If two or more pass bars 1-3, a combined AG_all (drop a trade in any variant's worst bucket) is reported, not counted.
+Money at $2.3k / $25k / $100k / $500k (tier_hi, mult 2).
