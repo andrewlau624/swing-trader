@@ -26,6 +26,12 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   - The pullback limit entry fills on the losers: −7 / −5pp, t −2.8.
   - A 1u stop halves the worst trade (−7.9 → −4.1%) but is −2.1pp in 2024-26 (t 0.6).
   - Keep the band/VWAP exit. study_ah_exits.md.
+- **AI: more capital for the conviction trade: DEAD as variants (N 634). Turning the built switch on is the one positive.**
+  - w 0.75 / 1.0 in TQQQ adds ~0 (t 0.5): each unit takes 0.75 of margin from the noise leg.
+  - w 2.0 via MNQ: +15..+35pp/yr, t 2.2, but maxDD −36% and P(DD>50%) 38%.
+  - Turn-on (0 → 0.5), mult 2: +3.3pp/yr 2024-26, t 1.5; P(DD>50%) 0.9 → 1.7%.
+    +$844 / +$3.4k / +$16.9k per yr at $25k / $100k / $500k (pre-tax).
+  - The trade's own edge ≈ +11%/yr per unit weight at 3bp/side, NW t ≈ 2.2 over 2016-26. study_ai_capital.md.
 
 ## Round 13 (2026-09-30): the "use the day" ideas — Z, AB dead; AA small; AC needs data; AD is the news (N 619)
 - **Z SPX put-write overlay: DEAD.** PUT (monthly) is positive every period (+4.9..+8.5%/yr over BIL at tier_hi)
@@ -625,6 +631,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Conviction weight x predicted magnitude (gap/range/rvol/VIX terciles; Round 16 AF) | **dead** | size is predictable (R² .13-.24) but the trade's EV peaks in the middle tercile, loud days −44bp 2024-26; all 4 variants fail both halves and t (best +0.5), placebo 9-80 |
 | Conviction confirmations at the breakout minute: strength buckets, SMH/SPY/IWM agreement, bar volume, VIX, VIX9D/VIX, time (Round 16 AG) | **dead** | none monotone in 2016-23 except time (flat), and dropping 10:00 entries loses −2..−5pp/yr; breadth / NQ lead untestable (no data) |
 | Conviction exits: stop 1u/2u, target 2u/4u, half off at 2u, pullback limit entry (Round 16 AH) | **dead** | targets cut the winners (−1.5..−2pp/yr), pullback fills only the failures (t −2.8); 1u stop halves the worst trade but −2.1pp in 2024-26 |
+| Conviction weight 0.75 / 1.0 in TQQQ (mult 2 or 4), 2.0 via MNQ (Round 16 AI) | **dead** | TQQQ's 75% margin comes out of the noise cap: +0..+2pp, t 0.5; MNQ 2.0 t 2.2 but maxDD −36%, P(DD>50%) 38% |
 
 ## Ideas not yet tested
 
