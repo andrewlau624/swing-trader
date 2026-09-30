@@ -21,6 +21,12 @@ picks at ~100 events. Side note: mapped (operating, still-filing) picks net −1
 Diagnostic: leveraged/inverse ETF picks +45bp gross (2024-26) and foreign ADRs +41bp vs US operating
 stocks +17bp. Study W then showed the LETF gap is leverage, not edge (dead, N 611). ADRs untested.
 
+## Study V (2026-09-29): the night leg does not scale — cap it in dollars
+Best case (sqrt(Q/ADV), Y 0.5) its $/yr peaks at ~$250k of equity (~$11k/yr) and turns negative
+by ~$1M; auction-sized impact models put the peak far lower. Plan: cap the night leg at a fixed
+$ size (shared by taxable + Roth), send growth to IBS / noise / MNQ, and start logging auction
+participation per fill so Y can be fitted from ~$25k. study_v_capacity.md.
+
 ## Live checkpoint (2026-09-29): costs fine, edge unproven, overnight leverage off
 
 LIVE (Schwab, since 09-22, 6 sessions): **+$18.99 (+0.8%)** on ~$2,240 (deposit
