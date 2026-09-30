@@ -1197,3 +1197,31 @@ def test_bar_canary_and_official_open():
     assert sg.official_open(500.2, 500.0) == (500.2, "schwab")
     assert sg.official_open(503.0, 500.0)[0] == 500.0, "a quote open 60bp off the 09:30 print is not the open"
     assert sg.official_open(float("nan"), 500.0) == (500.0, "sip-minute")
+
+
+def test_conviction_scores_a_trade_held_to_the_close(tmp_path, monkeypatch):
+    # long at 10:00 that never re-enters the band: it must be scored the next day at the SIP close,
+    # not dropped when the day's state resets (it was, before Round 16)
+    from swingtrader.daily import executor as E
+    ex, b = _conv_exec(tmp_path, monkeypatch, {30: 101.5, 60: 103.0})
+    ex._conviction_one(b, "2026-09-24")
+    assert b.conviction["pos"] == 1 and not b.conviction["history"]
+    monkeypatch.setattr(E.md, "sip_daily", lambda syms, *a, **k: {syms[0]: pd.DataFrame({"close": [104.0]})})
+    monkeypatch.setattr(E.md, "minute_today", lambda sym: {})
+    ex._conviction_one(b, "2026-09-25")
+    h = b.conviction["history"]
+    assert len(h) == 1 and h[0]["exit"] == "close" and h[0]["date"] == "2026-09-24"
+    assert h[0]["ret"] == pytest.approx(104.0 / 101.5 - 1, abs=1e-5)
+    assert b.conviction["day"] == "2026-09-25" and b.conviction["pos"] == 0
+
+
+def test_conviction_settle_failure_leaves_the_day_running(tmp_path, monkeypatch):
+    from swingtrader.daily import executor as E
+    ex, b = _conv_exec(tmp_path, monkeypatch, {30: 101.5})
+    ex._conviction_one(b, "2026-09-24")
+
+    def boom(*a, **k):
+        raise RuntimeError("SIP down")
+    monkeypatch.setattr(E.md, "sip_daily", boom)
+    ex._conviction_one(b, "2026-09-25")
+    assert b.conviction["day"] == "2026-09-25" and not b.conviction["history"]

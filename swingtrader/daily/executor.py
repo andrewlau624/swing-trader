@@ -1033,6 +1033,8 @@ class DailyExecutor:
         c = book.conviction
         if c.get("day") != today:
             hist_log = c.get("history", [])
+            if c.get("pos") and c.get("entry"):
+                self._settle_conviction(c, sym, hist_log)
             b = self._day_bands(sym, today)
             if b is None:
                 book.conviction = {"day": today, "done": True, "history": hist_log}; return
@@ -1068,13 +1070,28 @@ class DailyExecutor:
                          f"@ {p:.2f} -> {'long TQQQ' if d > 0 else 'long SQQQ'}")
             elif (c["pos"] == 1 and p < max(ub[m], vwap[m])) or (c["pos"] == -1 and p > min(lb[m], vwap[m])):
                 r = c["pos"] * (p / c["entry"] - 1)
-                c["history"].append({"date": today, "dir": c["pos"], "ret": round(r, 5)})
+                c["history"].append({"date": today, "dir": c["pos"], "ret": round(r, 5), "exit": "band"})
                 self.log(f"[conv] {hh:02d}:{mm:02d} back inside the band @ {p:.2f}: out, {r*100:+.2f}% on TQQQ")
                 c.update(pos=0, done=True)
         if self._conviction_live(book):
             self._sync_conviction_live(book, today)
         elif c.get("pos"):
             self.log(f"[conv:SHADOW] holding {c['pos']:+d} (would be {self.d.conviction_weight:.0%} of equity)")
+
+    def _settle_conviction(self, c: dict, sym: str, hist_log: list) -> None:
+        """Yesterday's trade was still open at the close (the 15:57 flatten, ~1/3
+        of trades in the research): score it at that day's SIP close, as
+        _settle_noise does. Before this the history kept only band exits."""
+        day = c["day"]
+        try:
+            b = md.sip_daily([sym], pd.Timestamp(day), pd.Timestamp(day) + pd.Timedelta(days=1))
+            px = float(b[sym]["close"].iloc[0])
+        except Exception as exc:            # the score must never cost a live leg
+            self.log(f"[conv] {day}: no SIP close to score the open trade "
+                     f"({type(exc).__name__}: {str(exc)[:80]}) - left unscored"); return
+        r = c["pos"] * (px / c["entry"] - 1)
+        hist_log.append({"date": day, "dir": c["pos"], "ret": round(r, 5), "exit": "close"})
+        self.log(f"[conv] {day} held to the close @ {px:.2f}: {r*100:+.2f}% on TQQQ")
 
     def _sync_conviction_live(self, book: DailyBook, today: str) -> None:
         c = book.conviction
