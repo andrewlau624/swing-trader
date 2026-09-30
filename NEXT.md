@@ -10,6 +10,13 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Round 16 (2026-09-30): the conviction trade, the user's ideas (prompt_conviction_research.md)
+- **AF: size the conviction weight by predicted magnitude: DEAD (N 623).**
+  - m̂ (gap, range, rvol, VIX at 09:30) predicts the day's size (R² 0.13-0.24) and the trade's |gross| (corr +0.22..+0.31).
+  - The trade's EV peaks in the MIDDLE tercile (+34..+41bp in every half), and the loud tercile is −44bp in 2024-26.
+  - Every variant (m̂ .5/1/1.5, 0/1/2, VIX .5/1/1.5, inverse) fails both-halves and t ≥ 2 (best full t +0.5).
+  - Keep the flat 0.5. TQQQ capacity is fine to $500k (median 0.8% of the entry minute). study_af_magnitude_sizing.md.
+
 ## Round 13 (2026-09-30): the "use the day" ideas — Z, AB dead; AA small; AC needs data; AD is the news (N 619)
 - **Z SPX put-write overlay: DEAD.** PUT (monthly) is positive every period (+4.9..+8.5%/yr over BIL at tier_hi)
   but fails NW t (1.93 < 2.0) and the crash bound (−15.5% in 21 days, 2020-03). WPUT and iron condors are
@@ -605,6 +612,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | SPY held + noise overlay for the taxable account (Round 13 AD) | **report → switch at $100k (Round 14)** | beats B2 after tax, both halves; at the live cap 1.0 and a 10% index it ties at $100k, loses at $25k; more drawdown (−17% / −31% in 2020); taxable only |
 | High-frequency QQQ/SPY scalping (1-15 min momentum/reversal, ~100+ trades/day; diagnostic 2026-09-30, not pre-registered) | **dead** | minute autocorr ~0.01; non-overlapping 5-min reversal after a 2-sd move: −1.0..+0.3bp gross/trade, sign flips across periods, no t ≥ 2; QQQ's 0.13bp spread alone eats it. The pooled −0.47bp "reversal" was overlap + a full-sample sd threshold |
 | Anatomy of the biggest intraday swings -> a direction rule at the open (Round 15, Study AE) | **dead (nothing selected)** | gap size, yesterday's range and volume make a 3σ open->close move 2-2.7x likelier, equally up and down; no feature's extreme decile predicts sign (best t −2.5 on 2021-23, −3bp vs ~10-30bp cost); AE1-5 not run |
+| Conviction weight x predicted magnitude (gap/range/rvol/VIX terciles; Round 16 AF) | **dead** | size is predictable (R² .13-.24) but the trade's EV peaks in the middle tercile, loud days −44bp 2024-26; all 4 variants fail both halves and t (best +0.5), placebo 9-80 |
 
 ## Ideas not yet tested
 
