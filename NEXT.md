@@ -11,6 +11,12 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 ---
 
 ## Round 16 (2026-09-30): the conviction trade, the user's ideas (prompt_conviction_research.md)
+**Bottom line (study_round16_summary.md):**
+- The shipped rule is already the best version the data finds. Magnitude sizing, confirmations, exits, more setups
+  and more TQQQ weight are all dead.
+- Two things add money, and neither touches the signal:
+  (1) switch the built trade on: +$3.4k/yr at $100k, +$16.9k at $500k;
+  (2) later, run it in MNQ: SHADOW, +$2.7-5.6k at $100k. It needs a futures-API broker and ≥ $30k.
 - **AF: size the conviction weight by predicted magnitude: DEAD (N 623).**
   - m̂ (gap, range, rvol, VIX at 09:30) predicts the day's size (R² 0.13-0.24) and the trade's |gross| (corr +0.22..+0.31).
   - The trade's EV peaks in the MIDDLE tercile (+34..+41bp in every half), and the loud tercile is −44bp in 2024-26.
