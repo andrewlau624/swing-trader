@@ -3,7 +3,19 @@
 Short, current, and the first thing to read when picking this up again.
 Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
+> **Standing note (2026-09-29): small balances are temporary.** Live sizes (~$2.3k taxable,
+> Roth $1-3k) are the testing phase; large sums follow once the bot is validated, and the
+> Roth receives a guaranteed **$7,500/yr**. Judge edges at $25k / $100k / $500k too, with
+> capacity checks, not only at today's balance. (Also in CLAUDE.md.)
+
 ---
+
+## Study T (2026-09-29): SEC offering filings on the night picks -> SHADOW (N 607)
+E3 (424B or S/F-1/3 accepted between the prior close and 15:40) DROP passes the pre-registered
+bar at tier and tier_hi, but only after fixing an ETN mapping bug (BMO's 424B flood), t −2.13,
+most of it 2024-26. Not adopted. The OOS check is a rerun of `night_filings.py` on post-09-29
+picks at ~100 events. Side note: mapped (operating, still-filing) picks net −11bp vs unmapped
++15bp at tier; worth its own pre-registered look. Details: research/drafts/study_t_filings.md.
 
 ## Live checkpoint (2026-09-29): costs fine, edge unproven, overnight leverage off
 
@@ -537,6 +549,8 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Noise-area rule on the top 5/10/20 stocks by 63d dollar volume (replacing the SMH half or as a third stream) | **dead** | book −3 to −9pp CAGR in BOTH halves at the measured spread (~1.65bp/side), −5..−11pp at 3bp, negative even at zero stock cost; basket corr 0.72 with QQQ; best S10t −$24/yr at $3k, −$0.8k at $100k (add. 41) |
 | Same noise rule on liquid stocks outside the top 40 (ranks 41-100) | **dead** | gross ~0 bp/day, placebo 71%, book −15pp: the trend-day persistence lives only in the most traded names, which QQQ holds (add. 41) |
 | Single-stock intraday noise legs as an "attention" diversifier to QQQ | **dead** | top-5 gross edge ≈ QQQ's; across name-years it scales with vol (t 6.8), not dollar volume (t 1.3); QQQ is the cheapest wrapper (add. 41) |
+| Night leg: SEC offering filings (Study T) | **shadow** | E3 DROP passes by a hair after an ETN-mapping fix (t −2.1, 2024-26-heavy, 2021 positive); E1/E2/DOUBLE dead; OOS rerun at ~100 events (late 2028), no live code (study_t_filings.md) |
+| Night leg: SSR (Rule 201) flag as a long-side tilt | **not run** | ≈ drop depth (picks need −8% and IBS ≤ .10; SSR = low ≤ −10%): no new information, not worth N |
 
 ## Ideas not yet tested
 
