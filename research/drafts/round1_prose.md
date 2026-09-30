@@ -767,3 +767,41 @@ Pass (SHADOW), each variant, on 2024-26: (1) mean net/trade > 0 at tier_hi; (2) 
 tier; (3) placebo, 200 draws: same days, same count, random universe names from the same vol20 quintile,
 same direction and exit, rule >= 95th pct; (4) 2021-23 net > 0 at tier_hi. Else DEAD. Capacity: $ per name
 at E = $25k / 100k / 500k (0.5 E over 10 names) as % of the opening auction (1.6% of ADV, Study V).
+
+
+## Amendment — Round 16, Study AF: size the conviction trade by predicted magnitude (pre-register; 4 variants, N 619 -> 623)
+
+`date`: Wed Sep 30 15:40:34 PDT 2026. Brief: research/drafts/prompt_conviction_research.md idea #2. No AF number computed; only data coverage
+was checked (QQQ/TQQQ/SMH minutes 2016-01-04..2026-09-21; Cboe VIX, VIX9D daily; cached intraday_bp_res.pkl book
+series B1 V7 / B3 moderate10c, M2 base, 2021-02..2026-09).
+Idea: the conviction trade (book.breakout_days, TQQQ, first breakout >= 0.341σ) profits from the SIZE of the day's move;
+Study AE found size (not sign) predictable at the open. Stated prior against: the trade is sized in fixed notional, so a
+high-magnitude day already carries more dollar risk; if EV per trade scales with magnitude m and variance with m², the
+Kelly weight is flat-to-falling in m, and sizing UP on m buys return with drawdown, not Sharpe. AF4 tests that rival.
+
+Predicted magnitude m̂_d (known at 09:30, regular-hours data only: QQQ RTH minutes give O_d = minute-0 open, C = minute-389
+close, H/L/V = RTH minute max/min/sum; VIX = Cboe official close of d−1):
+- σ20 = sd of ln(C_t/C_{t−1}) over the 20 sessions to d−1; |gap_z| = |ln(O_d/C_{d−1})|/σ20; range1_z = ln(H/L)_{d−1}/σ20;
+  rvol1 = V_{d−1} / mean V over d−20..d−1; vix = VIX_{d−1}/100.
+- m̂ = OLS fit of |ln(C_d/O_d)| on [1, |gap_z|, range1_z, rvol1, vix], QQQ, every session 2016-02..2023-12; coefficients frozen.
+- Tercile cut points of m̂ (and of VIX_{d−1} for AF3) over all 2016-23 sessions, frozen; applied unchanged to 2024-26.
+Variants: conviction weight = 0.5 x multiplier by tercile (low / mid / high):
+- AF1 m̂ 0.5 / 1.0 / 1.5;  AF2 m̂ 0 / 1.0 / 2.0 (skip the calm third, double the loud third);
+- AF3 VIX_{d−1} only, 0.5 / 1.0 / 1.5 (no fitted model);  AF4 m̂ inverse, 1.5 / 1.0 / 0.5 (risk-parity rival).
+Margin (live `executor._gate` reserves conv x 0.75 at the open): the day's noise cap = growth.cfg(1.0, w_conv(d), mult)
+['noise_cap'], so a larger conviction allowance shrinks the QQQ/SMH noise leg that day whether or not a breakout comes;
+this cost is in every variant. Primary mult 2 (the research baseline); mult 4 (add. 40, shadow) reported as a sensitivity.
+Book: variant daily return = cached base (B3 moderate10c, and B1 V7 reported) + Δconviction + Δnoise, additive in daily
+return (each leg is E x weight x leg return). EH series = base EH + Δ − ½ mean(Δ).
+Costs: stressed = tier_hi (conviction 3bp/side = 2x measured 1.5bp; noise 1.5bp/fill, > 2x measured). Also shipped costs.
+Reported (not variants): m̂'s R² for QQQ |open->close| and for the trade's |gross| in 2016-23 and 2024-26; conviction EV /
+win rate / mean |gross| / trade count per m̂ tercile, each half; capacity: TQQQ notional / TQQQ $ volume in the entry
+minute at E = .3k, k, k, k (median, 95th pct, max multiplier); $/yr of the increment at those sizes
+(pre-tax; taxable after 35% ST tax).
+Pass (SHADOW), each variant vs the shipped 0.5 flat, at the stressed cost:
+1. increment > 0 in 2016-23 AND in 2024-26 (also shown 2016-20 / 2021-23 / 2024-26);
+2. Newey-West t (5 lags) of the daily increment, 2016-26, >= 2.0;
+3. placebo: the variant's multipliers permuted across sessions (1,000 draws, same multiplier mix), actual mean increment
+   >= 95th pct;
+4. book (B3, tier_hi, 2021-26) max DD not worse by > 2pp; 5. 5y MC (mc_tax, EH, after tax, $3k+$1k/mo) P(DD>50%) <= 5%.
+DSR of the increment reported at N = 623. All five pass -> SHADOW (config switch spec, default off). Else DEAD.
