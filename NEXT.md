@@ -676,3 +676,10 @@ margin account (4x intraday); a standard margin account caps this leg at 1.5x.
 
 **Not modelled:** at $3k, whole-share rounding on auction orders ($150 per
 name), and names above ~$150 buy one share or none.
+
+## Study Y — the book's rate at size (2026-09-30, report, `research/drafts/study_y_scale_book.md`)
+- Book (IBS + noise, night capped) at CENTRAL impact: ~20% pre-tax at $100k, 17.8% at $500k,
+  15.9% at $1M, 8% at $5M. Taxable after yearly ST tax (32%): 12.5% at $500k.
+- **Roth beats a held index to ~$2.5M; taxable only to ~$250k** (SPY same window 15%/yr,
+  13.5% after deferred tax). Taxable money past ~$250k -> held index unless a new liquid edge.
+- Next candidate study: noise leg as an intraday overlay on an index-held account.
