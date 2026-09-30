@@ -124,8 +124,33 @@ def auction_prices(fills: pd.DataFrame) -> pd.DataFrame:
     bench = np.where(f.tif == "cls", f.close_auction, np.where(pre_open, f.open_auction, np.nan))
     sign = np.where(f.side == "buy", 1, -1)
     f["bench"] = bench
+    # intraday (noise) fills: the backtest trades at the close of the SIP minute bar that starts
+    # at the decision slot (:00 / :30), so that bar's close is the benchmark
+    nz = ((f.leg == "noise") & np.isnan(f.bench.astype(float))).to_numpy()
+    if nz.any():
+        f.loc[nz, "bench"] = noise_bench(f[nz])
     f["cost_bps"] = sign * (f.px / f.bench - 1) * 1e4          # + = worse than the auction
     return f
+
+
+def noise_bench(g: pd.DataFrame) -> list[float]:
+    """Close of the SIP 1-minute bar starting at each fill's :00/:30 decision slot."""
+    from alpaca.data.requests import StockBarsRequest
+    from alpaca.data.timeframe import TimeFrame
+    from swingtrader.data import _clients
+    data, _ = _clients()
+    bars = {}
+    for day, d in g.groupby(g.when.dt.date):
+        start = pd.Timestamp(day).tz_localize(ET) + pd.Timedelta(hours=9, minutes=30)
+        df = data.get_stock_bars(StockBarsRequest(
+            symbol_or_symbols=sorted(d.sym.unique()), timeframe=TimeFrame.Minute,
+            start=start.tz_convert("UTC"), end=(start + pd.Timedelta(hours=6, minutes=30)).tz_convert("UTC"),
+            feed="sip", adjustment="raw")).df
+        if df is not None and not df.empty:
+            df = df.reset_index()
+            for s, t, c in zip(df.symbol, df.timestamp, df.close):
+                bars[(s, pd.Timestamp(t).tz_convert(ET))] = float(c)
+    return [bars.get((s, w.floor("30min")), np.nan) for s, w in zip(g.sym, g.when)]
 
 
 def impact_inputs(f: pd.DataFrame) -> pd.DataFrame:
