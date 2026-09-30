@@ -21,6 +21,11 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   Breadth and NQ-lead are untestable (no data). Most of them peak in the middle tercile (≈ one vol observation, post-hoc).
   Forward check only: join Cboe VIX to the `[conv]` shadow log by trade date; at ~60 round trips, compare VIX(d−1) > 21 trades with the rest.
   study_ag_confirmations.md.
+- **AH: exits: DEAD (N 630).**
+  - Targets cut winners, as predicted: 2u −1.5 / −2.0pp/yr (2016-23 / 2024-26), half-off −0.7 / −1.0.
+  - The pullback limit entry fills on the losers: −7 / −5pp, t −2.8.
+  - A 1u stop halves the worst trade (−7.9 → −4.1%) but is −2.1pp in 2024-26 (t 0.6).
+  - Keep the band/VWAP exit. study_ah_exits.md.
 
 ## Round 13 (2026-09-30): the "use the day" ideas — Z, AB dead; AA small; AC needs data; AD is the news (N 619)
 - **Z SPX put-write overlay: DEAD.** PUT (monthly) is positive every period (+4.9..+8.5%/yr over BIL at tier_hi)
@@ -619,6 +624,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Anatomy of the biggest intraday swings -> a direction rule at the open (Round 15, Study AE) | **dead (nothing selected)** | gap size, yesterday's range and volume make a 3σ open->close move 2-2.7x likelier, equally up and down; no feature's extreme decile predicts sign (best t −2.5 on 2021-23, −3bp vs ~10-30bp cost); AE1-5 not run |
 | Conviction weight x predicted magnitude (gap/range/rvol/VIX terciles; Round 16 AF) | **dead** | size is predictable (R² .13-.24) but the trade's EV peaks in the middle tercile, loud days −44bp 2024-26; all 4 variants fail both halves and t (best +0.5), placebo 9-80 |
 | Conviction confirmations at the breakout minute: strength buckets, SMH/SPY/IWM agreement, bar volume, VIX, VIX9D/VIX, time (Round 16 AG) | **dead** | none monotone in 2016-23 except time (flat), and dropping 10:00 entries loses −2..−5pp/yr; breadth / NQ lead untestable (no data) |
+| Conviction exits: stop 1u/2u, target 2u/4u, half off at 2u, pullback limit entry (Round 16 AH) | **dead** | targets cut the winners (−1.5..−2pp/yr), pullback fills only the failures (t −2.8); 1u stop halves the worst trade but −2.1pp in 2024-26 |
 
 ## Ideas not yet tested
 
