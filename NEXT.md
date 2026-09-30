@@ -604,6 +604,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Closing-auction imbalance (Round 13 AC) | **untested: data** | needs Nasdaq/NYSE imbalance history (Databento 2018+) and a live feed |
 | SPY held + noise overlay for the taxable account (Round 13 AD) | **report → switch at $100k (Round 14)** | beats B2 after tax, both halves; at the live cap 1.0 and a 10% index it ties at $100k, loses at $25k; more drawdown (−17% / −31% in 2020); taxable only |
 | High-frequency QQQ/SPY scalping (1-15 min momentum/reversal, ~100+ trades/day; diagnostic 2026-09-30, not pre-registered) | **dead** | minute autocorr ~0.01; non-overlapping 5-min reversal after a 2-sd move: −1.0..+0.3bp gross/trade, sign flips across periods, no t ≥ 2; QQQ's 0.13bp spread alone eats it. The pooled −0.47bp "reversal" was overlap + a full-sample sd threshold |
+| Anatomy of the biggest intraday swings -> a direction rule at the open (Round 15, Study AE) | **dead (nothing selected)** | gap size, yesterday's range and volume make a 3σ open->close move 2-2.7x likelier, equally up and down; no feature's extreme decile predicts sign (best t −2.5 on 2021-23, −3bp vs ~10-30bp cost); AE1-5 not run |
 
 ## Ideas not yet tested
 
