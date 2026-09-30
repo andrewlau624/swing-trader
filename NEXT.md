@@ -39,6 +39,11 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
     It needs a second broker (e.g. IBKR); parked cash there costs an est. 0.5-1.5pp/yr, not simulated.
   - Needs equity ≥ ~$29k (one contract ≈ $43k). $/yr AJ1: $100k +$2.7k, $500k +$15.9k.
   - Spec only: `conviction_instrument: tqqq | mnq`, default tqqq; gates and kill rule in study_aj_mnq.md.
+- **AK: more setups: DEAD (N 642).**
+  - A second TQQQ breakout after a failed first is positive in every half (+0.4..+0.9pp/yr) but t 0.9.
+  - SMH / SPY / IWM on no-TQQQ days: 0 / −1.7 / −7.0pp in 2024-26 (IWM t −2.7). SPY is the same bet (corr 0.75).
+  - Latency: a 1-minute fill delay costs 2.4bp of 15.3bp per trade (−16%), so faster triggers have little to gain.
+  - The L1 recorder was not built (it runs on the live server: user's call). study_ak_setups_latency.md.
 
 ## Round 13 (2026-09-30): the "use the day" ideas — Z, AB dead; AA small; AC needs data; AD is the news (N 619)
 - **Z SPX put-write overlay: DEAD.** PUT (monthly) is positive every period (+4.9..+8.5%/yr over BIL at tier_hi)
@@ -640,6 +645,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Conviction exits: stop 1u/2u, target 2u/4u, half off at 2u, pullback limit entry (Round 16 AH) | **dead** | targets cut the winners (−1.5..−2pp/yr), pullback fills only the failures (t −2.8); 1u stop halves the worst trade but −2.1pp in 2024-26 |
 | Conviction weight 0.75 / 1.0 in TQQQ (mult 2 or 4), 2.0 via MNQ (Round 16 AI) | **dead** | TQQQ's 75% margin comes out of the noise cap: +0..+2pp, t 0.5; MNQ 2.0 t 2.2 but maxDD −36%, P(DD>50%) 38% |
 | Conviction trade in MNQ instead of TQQQ (Round 16 AJ) | **shadow (AJ1 .5, AJ2 .75); AJ3 1.0 dead** | same trades, cheaper, frees the noise leg's margin, 60/40: +2.5..+5.3pp 2024-26, t 4+; Schwab API cannot trade futures, needs a second broker; ≥ ~$29k |
+| More conviction setups: second breakout after a failed first; SMH/SPY/IWM on no-TQQQ days (Round 16 AK) | **dead** | 2nd breakout +0.4..+0.9pp all halves but t 0.9; SPY = same bet (corr .75); SMH/SPY/IWM fill-ins 0..−7pp 2024-26 (IWM t −2.7) |
 
 ## Ideas not yet tested
 
