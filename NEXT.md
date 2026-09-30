@@ -16,6 +16,11 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   - The trade's EV peaks in the MIDDLE tercile (+34..+41bp in every half), and the loud tercile is −44bp in 2024-26.
   - Every variant (m̂ .5/1/1.5, 0/1/2, VIX .5/1/1.5, inverse) fails both-halves and t ≥ 2 (best full t +0.5).
   - Keep the flat 0.5. TQQQ capacity is fine to $500k (median 0.8% of the entry minute). study_af_magnitude_sizing.md.
+- **AG: confirmations at the breakout minute: DEAD (N 624).** No confirmation raises EV monotonically: strength, SMH/SPY/IWM
+  agreeing, breakout-bar volume, VIX, VIX9D/VIX. The only monotone one (time of day) loses when used.
+  Breadth and NQ-lead are untestable (no data). Most of them peak in the middle tercile (≈ one vol observation, post-hoc).
+  Forward check only: from the `[conv]` shadow log, at ~60 round trips, compare VIX(d−1) > 21 trades with the rest.
+  study_ag_confirmations.md.
 
 ## Round 13 (2026-09-30): the "use the day" ideas — Z, AB dead; AA small; AC needs data; AD is the news (N 619)
 - **Z SPX put-write overlay: DEAD.** PUT (monthly) is positive every period (+4.9..+8.5%/yr over BIL at tier_hi)
@@ -613,6 +618,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | High-frequency QQQ/SPY scalping (1-15 min momentum/reversal, ~100+ trades/day; diagnostic 2026-09-30, not pre-registered) | **dead** | minute autocorr ~0.01; non-overlapping 5-min reversal after a 2-sd move: −1.0..+0.3bp gross/trade, sign flips across periods, no t ≥ 2; QQQ's 0.13bp spread alone eats it. The pooled −0.47bp "reversal" was overlap + a full-sample sd threshold |
 | Anatomy of the biggest intraday swings -> a direction rule at the open (Round 15, Study AE) | **dead (nothing selected)** | gap size, yesterday's range and volume make a 3σ open->close move 2-2.7x likelier, equally up and down; no feature's extreme decile predicts sign (best t −2.5 on 2021-23, −3bp vs ~10-30bp cost); AE1-5 not run |
 | Conviction weight x predicted magnitude (gap/range/rvol/VIX terciles; Round 16 AF) | **dead** | size is predictable (R² .13-.24) but the trade's EV peaks in the middle tercile, loud days −44bp 2024-26; all 4 variants fail both halves and t (best +0.5), placebo 9-80 |
+| Conviction confirmations at the breakout minute: strength buckets, SMH/SPY/IWM agreement, bar volume, VIX, VIX9D/VIX, time (Round 16 AG) | **dead** | none monotone in 2016-23 except time (flat), and dropping 10:00 entries loses −2..−5pp/yr; breadth / NQ lead untestable (no data) |
 
 ## Ideas not yet tested
 
