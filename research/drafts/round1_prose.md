@@ -833,3 +833,27 @@ Pass (SHADOW), each variant, increment vs the shipped trade at the stressed cost
 4. B3 moderate10c book (tier_hi) max DD not worse by > 2pp; 5. mc_tax P(DD>50%) <= 5%. DSR at the new N.
 If two or more pass bars 1-3, a combined AG_all (drop a trade in any variant's worst bucket) is reported, not counted.
 Money at $2.3k / $25k / $100k / $500k (tier_hi, mult 2).
+
+
+## Amendment — Round 16, Study AH: stops, targets, scale-outs and a pullback entry for the conviction trade (pre-register; 6 variants, N 624 -> 630)
+
+`date`: Wed Sep 30 15:45:43 PDT 2026. Brief idea #3. AF and AG are computed (dead); nothing below was computed.
+Stated prior: fixed targets and trailing exits lost on every earlier leg (add. 3, 13 and NEXT.md dead list) because they
+cut the winners a ~39%-win trend trade lives on. Expect targets to lose and stops to be ~neutral (the band/VWAP exit is
+already a stop, checked every 30 min).
+Base: the shipped trade (conviction_af.conv_trades; entry at the breakout decision minute m0 close e, direction s, band σ
+= sig[m0] of TQQQ, a fraction of the open). Unit u = sig[m0] x e. Stops/targets are resting orders checked on every
+TQQQ minute from m0+1 (regular-hours minute high/low), IN ADDITION to the shipped band/VWAP exit at decision minutes and
+15:57. Stop fill = the stop price, or the minute's open if it gapped through (worse); target fill = the target price; if a
+minute touches both, the stop is assumed first.
+- AH1 stop 1.0u;  AH2 stop 2.0u;  AH3 target 2.0u;  AH4 target 4.0u;
+- AH5 half off at a 2.0u target, the rest on the shipped exit;
+- AH6 pullback entry: after a qualifying breakout at m0, a limit at the band edge (ub[m0] long / lb[m0] short) valid for 30
+  minutes; filled if a minute's low (long) / high (short) touches it, else no trade today; then the shipped exits from the
+  next decision minute.
+Costs: stressed 3bp/side (2x measured TQQQ), also 1.5bp; a half exit pays the side cost on each half.
+Pass (SHADOW), each variant vs the shipped exit, increment = 0.5 x (variant − base) net per trade day:
+1. > 0 in 2016-23 AND 2024-26 (2016-20 / 2021-23 / 2024-26 shown); 2. NW t (5 lags) 2016-26 >= 2.0;
+3. placebo: random sign on each trade day's increment (1,000 draws), actual mean >= 95th pct;
+4. B3 moderate10c (tier_hi) max DD not worse by > 2pp; 5. mc_tax P(DD>50%) <= 5%. DSR at N 630.
+Also reported: win rate, mean win / mean loss, share of base P&L from trades that the variant cuts, worst trade.
