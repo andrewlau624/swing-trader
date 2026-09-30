@@ -376,3 +376,61 @@ sizes the live books actually run.
   >= probe in CAGR in BOTH halves at BOTH cost tiers at $2k, $2,259 and $3k, and its maxDD
   is not worse by more than 3pp at any of them. Otherwise keep it.
 - N: +2 -> 593.
+
+
+## Amendment — Round 5: Study S, short the night picks after the open (pre-register)
+
+`date`: Tue Sep 29 19:47:04 PDT 2026 (the authoritative stamp; no Study S return, in any period, was computed
+when this was written).
+
+Motivation (existing numbers, not new): exitt.py shows the shipped night pick's return
+falls from +20.1bp net at the auction to -21.5bp net by 10:30, i.e. the picks drift DOWN
+after the open. Hypothesis: shorting the same picks after the long is sold earns that
+post-open drift (the overnight/intraday "tug of war" reversal). Taxable brokerage only
+(the IRA cannot short).
+
+Sample: shipped night picks, `B.night_days(raw_price=True, max_corr=0.7)` (the V7 pool),
+next session d+1 with am1 minute bars (SIP 09:30-10:31, adjustment all). Basis check: the
+minute-0 open must match the daily-panel open of d+1 within 0.5%, else not scored (a skip).
+Periods 2021-23 / 2024-26 / full (2020-11..12 is in no half).
+
+Tradability filters (fixed now, applied to every variant and to the placebo):
+- SEC Rule 201: a name whose day-d LOW is <= -10% vs close d-1 (daily panel) is SSR on
+  d+1: a market/auction short is not accepted -> untradable, scores 0 (not dropped: it
+  stays in the book denominator as idle money). Reported: the SSR share of picks.
+- Borrow: no data. Not modelled in the mean; the book increment is reported at 100% / 60% /
+  30% locate rates (a random, seeded fraction of the tradable names shorted). Intraday
+  shorts closed the same day pay no borrow fee (Schwab), so fee = 0.
+
+Variants (8; N = 593 + 8 = **601**):
+- Entry A = the official open of d+1 (auction; idealised: Schwab will not take a sell-short
+  in the same auction as the long's sell). Entry B = the close of minute 09:30 (the first
+  minute bar, i.e. after the auction fill is known) — the executable version.
+- Cover at the close of the last minute before 09:45 / 10:00 / 10:30, or at the d+1 CLOSE
+  (daily panel; the close auction).
+- S1-S4 = A x {09:45, 10:00, 10:30, close}; S5-S8 = B x the same four.
+Short return per name: r = 1 - P_cover / P_entry.
+
+Costs per side (tier table `B.TIERS`, by raw price / ADV, as the night leg):
+- auction entry or close-auction cover: the tier cost.
+- continuous-session entry (09:31) or cover (09:45/10:00/10:30): tier + 5bp (tier) and
+  tier_hi + 15bp (tier_hi stress) — small caps' quoted spread, not the auction.
+Net per-trade = r - entry cost - cover cost.
+
+Book increment (the short leg reuses the capital the night leg frees at the open, so it
+is an add-on inside the day, at the night leg's own size): per day
+inc = 0.5 * sum_i min(frac, 0.10) * net_i over the picks (untilted; SSR / unscored = 0).
+
+Placebo (200 draws): each scored pick replaced by a random NON-pick name from the same
+d+1 am1 file, same vol20-decile, that passes the same SSR/basis filters; the pass is the
+mean per-trade net of the variant >= the 95th percentile of the placebo means.
+
+Pass bar (every one required, at BOTH tier and tier_hi, 100% locate):
+(1) mean net per trade > 0 in BOTH halves; (2) placebo >= 95th pct in BOTH halves;
+(3) book increment positive in both halves and NW t (5 lags) >= 2.0 over 2021-26;
+(4) still positive in both halves at 30% locate (scale check only).
+Verdict: a variant passing everything -> SHADOW only (borrow / locates / SSR at the auction
+are untested by any data we have; a live shadow must log Schwab's locate answer per pick
+before any money). An A-only pass (auction entry) with B failing -> "report": not
+executable. Otherwise DEAD, and the "Do NOT redo" list gains "short the night picks
+after the open".
