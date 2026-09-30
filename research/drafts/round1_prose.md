@@ -484,3 +484,26 @@ Verdict: pass -> SHADOW only (the live bot logs the flag per pick for >= 100 eve
 picks; no money). Otherwise DEAD and the do-not-redo list gains "SEC offering filings
 as a night-leg filter". Dollars are reported at $2.3k / $25k / $100k / $500k, with the
 event picks' order size as % of ADV at each (CLAUDE.md: balances are temporary).
+
+
+## Amendment — Round 7: Study U, where the night leg's edge lives (pre-register)
+
+`date`: Tue Sep 29 20:34:25 PDT 2026 (stamped after Study T's side observation, mapped −10.6bp vs unmapped
++14.6bp at tier, and before any return by the classes below was computed).
+
+Classes of each V7 night pick 2021-26 (Study T's EDGAR cache and mapping):
+- ETP: the ticker maps to a CIK whose entityType is not "operating", or to an ETP issuer
+  (SIC 6221, or > 100 424B/yr: ETNs). KNOWABLE at d (a 15:40 lookup) -> rule-eligible.
+- OPER-LIVE: operating CIK with a periodic filing accepted on/after 2026-03-01.
+- OPER-GONE: operating CIK whose last periodic filing is before 2026-03-01 (stopped
+  filing: delisted/acquired/went dark). LOOKAHEAD: report only.
+- UNMAPPED: no CIK by today's ticker index (mostly renamed/delisted). LOOKAHEAD: report only.
+
+Report (0 variants): count, mean net per trade (tier, tier_hi) and share of the leg's total
+net P&L by class and half; for OPER-GONE the median sessions from d to the last filing.
+
+Rules (2 variants; N = 607 + 2 = **609**), book increment as Study T (0.5 x w x net):
+- U1: drop ETP picks. U2: ETP picks only (drop every non-ETP pick).
+Pass (all, at tier AND tier_hi): rule minus baseline > 0 in both halves; NW t (5 lags) of
+the daily increment >= 2.0 over 2021-26; placebo: drop the same number of picks at random
+within each night (200 draws), rule >= 95th pct. Verdict: pass -> SHADOW; else DEAD.
