@@ -729,3 +729,41 @@ Decision rule (taxable account only; the Roth keeps the full book):
 - **No revert rule for the index:** if the noise leg is killed, the account is simply the held index (the fallback
   Study Y already recommends past $250k). Revisit the trigger at the ~March 2027 program review with live noise data.
 Not built: build `daily.taxable_mode: book | index_overlay` (default book) when taxable equity nears $100k.
+
+
+## Amendment — Round 15: Study AE, the anatomy of the biggest intraday swings and a held-out test of what predicts their direction (pre-register; <= 5 variants, N 619 -> <= 624)
+
+`date`: Wed Sep 30 15:25:19 PDT 2026 (no swing-study number computed; only data coverage was checked: SIP daily panel
+2020-10..2026-09, 13.9k symbols; broad-universe minute bars do not exist, so the study is open -> close).
+Ask (user): study the biggest intraday swings and look for a common pattern that says "this will bounce".
+Guard: patterns read off the largest moves select on the outcome; the same precursors (gap, volume, news)
+precede big up AND big down days. So: describe on both halves, SELECT only on 2021-23, JUDGE only on 2024-26.
+
+Universe, day d: every panel symbol with 21 prior bars, dollar ADV20 (d−1) >= $20M, price >= $5 (raw close
+where raw_close.parquet has it, else the panel close; ADV >= $20M keeps out most reverse-split pennies).
+σ = sd of daily log close returns d−21..d−1. Outcome z = ln(C_d / O_d) / σ (open auction -> close).
+Features known at 09:30: gap_z = ln(O_d / C_{d−1}) / σ; r1_z (d−1 close/close); ibs1 (d−1); r5_z (5-day, /σ√5);
+range1_z = ln(H/L)_{d−1} / σ; rvol1 = V_{d−1} / mean V over d−20..d−1; hi20 = C_{d−1} / max H over 20d;
+vol20 (annualised); log ADV20; spy_gap_z (SPY's own gap / SPY σ).
+
+Part 1 (report): big swing = |z| >= 3 (also the day's top 10 by |z|). For big-up and big-down separately,
+per half: the share of events in each feature's top and bottom cross-sectional decile (lift = share / 10%),
+and per feature decile P(|z| >= 3) (magnitude) next to mean z (direction). Reading: which features predict
+size, and whether any predicts sign.
+
+Part 2 (select on 2021-23 only): per feature, per-day cross-sectional deciles; mean open -> close return of
+each extreme decile minus the universe mean that day, day-clustered t. Select up to 3 features whose extreme
+decile has |t| >= 3.0 in 2021-23 (largest |t| first), each with its sign (long the decile if its excess is
+positive, short if negative). Variants (all equal-weight, up to 10 names/day = the most extreme values of the
+decile, enter at the open auction, exit at the close auction):
+- AE1..AE3: one rule per selected feature.
+- AE4: combined score = sum of the selected features' signed decile ranks; top 10 in the favoured direction.
+- AE5: AE4 with a stop at 0.5σ against and a target at 1.0σ in favour (daily high/low; if both are touched the
+  stop is assumed first); otherwise the close.
+Shorts: skip a name whose open is <= −10% vs the prior close (SSR); assume borrow at ADV >= $20M (stated).
+Costs per side by `book.cost_bps` on raw price/ADV: tier and tier_hi. If no feature reaches |t| 3 in 2021-23,
+Part 2 adds no variant and says so.
+Pass (SHADOW), each variant, on 2024-26: (1) mean net/trade > 0 at tier_hi; (2) day-clustered t >= 2.0 at
+tier; (3) placebo, 200 draws: same days, same count, random universe names from the same vol20 quintile,
+same direction and exit, rule >= 95th pct; (4) 2021-23 net > 0 at tier_hi. Else DEAD. Capacity: $ per name
+at E = $25k / 100k / 500k (0.5 E over 10 names) as % of the opening auction (1.6% of ADV, Study V).
