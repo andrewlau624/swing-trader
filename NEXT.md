@@ -68,7 +68,12 @@ tier+tick, −0.8 at tier_hi 2024-26, and the added names lose 33bp/trade in 202
   Rerun (control reproduces baseline exactly): 24-ETF IBS +3.0pp/yr, t 1.1; with the corr
   dedupe +4.0pp, t 1.4; both halves positive, both below the t ≥ 2 bar. **F2 stays dead by t,
   not as an artifact.** Live code was never affected. Details: `research/drafts/study_fg.md`.
-- Program N: 581 + 10 (R) + 2 (P) = **593**. Nothing clears the bar.
+- **Study S (short the night picks after the open, pre-registered): DEAD.** 75% of picks are
+  SSR (Rule 201) the next morning and cannot be shorted at the open. The shortable 25% drift
+  only +8..+13bp gross by 10:30, below the ~20-35bp spread cost: every variant is negative in
+  both halves at tier (NW t -0.4..-3.0). The post-open drop lives in the SSR names (+35..+45bp
+  gross), which are exactly the ones you cannot short. `research/drafts/study_s_night_short.md`.
+- Program N: 581 + 10 (R) + 2 (P) + 8 (S) = **601**. Nothing clears the bar.
 
 ---
 
@@ -456,6 +461,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Bertram optimal thresholds | **dead** | prescribes −0.4σ entry; risk-matched return falls monotonically as entry loosens. −2.0 was already optimal |
 | Trailing / let-winners-run exits | **dead** | selection screens for *non*-trending names; a trend-following exit contradicts it |
 | Long/short (shorting range tops) | **dead** | negative in every configuration |
+| Short the night picks after the open (Study S) | **dead** | 75% are SSR; the shortable rest drift +10bp, below the spread |
 | Looser entry for more trades | **dead** | raises CAGR, raises drawdown faster |
 | Broad-market cohort | **weak** | 1.6% CAGR vs 15.1% — the edge needs high volatility |
 | Momentum sleeve at 25% | **promising, unvalidated** | blend Sharpe 1.09 vs 0.95, but standalone CAGR swings 1.2–43.6% across settings |
