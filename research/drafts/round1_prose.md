@@ -556,3 +556,19 @@ p = Q / bar dollar volume, each side. Impact per side = Y x sigma_daily x sqrt(p
 Report at E = $2.3k, 25k, 100k, 250k, 500k, 1M, 2.5M, 5M: weighted net bp/trade, night-leg
 pp/yr, $/yr, share of picks with p > 10% / 25% of either bar; the E where the net edge halves and
 where it reaches 0. Also the "sell the open over the first N minutes" alternative is NOT tested here.
+
+
+## Amendment — Round 10: Study X, an impact-optimal per-name cap for the night leg (pre-register)
+
+`date`: Tue Sep 29 20:47:57 PDT 2026 (no capped number computed). Follows Study V (the leg's income collapses with size).
+Rule: each night order q_i <= q*_i = ADV_i x (g / (3 x Y_rule x sigma_i))^2, sigma_i = vol20_i/sqrt(252),
+g = 22bp (the weighted gross 24.6 minus live 1bp/side, rounded down). q* maximises
+q (g - 3 Y sigma sqrt(q/ADV)) under the square-root law summed over both auctions (each side
+Y sigma sqrt(q/ADV); the 3 is 2 sides x the 3/2 from the derivative). Money a cap frees stays
+in cash (no reallocation in this study).
+Variants (3; N = 611 + 3 = **614**): Y_rule in {1, 2, 4}.
+Judged under Study V's four truth models (A/B x Y 0.5/1), E in {$25k, 100k, 250k, 500k, 1M, 5M}.
+Adopt the variant that (1) is inert (changes no order) at $2.3k, (2) never has lower night-leg
+$/yr than the uncapped leg at any (E, truth model), (3) has non-negative $/yr at every E under A/Y 1
+and B/Y 0.5; among passers, the highest minimum $/yr at $1M across the four truths.
+Adoption = ship in the live config (it is inert today), NOT a claim of new edge.
