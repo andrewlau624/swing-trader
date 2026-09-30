@@ -642,3 +642,66 @@ after-tax equivalent. Pre-registered readings (the only conclusions to be drawn)
 3. Roth crossover likewise with B3 CENTRAL vs SPY pre-tax.
 A reading that depends on 2024-26 alone (2021-23 below the index at that E while the full span is
 above) is stated as such. All numbers replay the fitting period; they are upper bounds on the edge.
+
+
+## Amendment — Round 13: the untested "use the day" ideas — Studies Z, AA, AB, AC, AD (pre-register; 5 variants, N 614 -> 619)
+
+`date`: Wed Sep 30 14:24:20 PDT 2026 (no number from any of these five studies, at any size or in any period,
+was computed when this was written; only data availability/date ranges were checked). Motivation: the user asked
+for strategies that use the regular session / daytime capital beyond the live legs. Idle daytime cash earns
+nothing (sweep and T-bill ETFs accrue on overnight balances), so the candidates are new daytime signals or new
+instruments. Common: halves 2021-23 / 2024-26 (`night_filings.PER`); holdout 2016-20 wherever the data reach;
+book = Study Y B2/B3 legs (scale_book.py) at constant equity; sizes $2.3k / 25k / 100k / 500k (+ $1M, 5M where
+capacity matters); NW t = Newey-West, 5 lags, on daily increments; DSR reported against N = 619.
+
+### Study Z — SPX put-writing as a taxable overlay (3 variants: Z1 PUT, Z2 WPUT, Z3 CNDR)
+Data: Cboe daily index levels (cdn.cboe.com, `<SYM>_History.csv`, saved to data/research/program/cboe/): PUT
+(monthly ATM SPX put, collateralized), WPUT (weekly ATM put), CNDR (monthly iron condor). The indices include
+their T-bill collateral, so the overlay return is the EXCESS x = index daily return − BIL daily return (as
+`Sim.bil`, aligned to the same day). Costs, not in the indices: per short/long option leg per roll, 2bp of
+notional (tier) / 5bp (tier_hi), charged on roll days (PUT, CNDR: monthly third-Friday roll, CNDR 4 legs;
+WPUT: weekly Friday roll); roll days = the index's roll calendar approximated by 3rd Fridays / Fridays.
+Overlay: notional k = 0.5 x E of the (net) excess return added to the book's daily return (taxable B2 at
+CENTRAL, Study Y), taxed 60/40 (§1256) with the noise leg's futures bucket. Margin check (report): SPX short
+put Reg T ~20% of notional -> 0.1 E, inside the book's unused overnight buying power (book is 1.0x of a 2x
+account). Pass (SHADOW), each variant, at tier_hi: (1) standalone net excess > 0 in 2016-20, 2021-23 AND
+2024-26; (2) the book increment > 0 in both halves; (3) NW t of the increment, 2021-26, >= 2.0; (4) the
+combined book's max drawdown not worse than B2's by > 3pp, and the overlay's worst 21-day loss 2007-26
+(incl. 2008, 2020-03) <= 15% of E at k 0.5 (report the episode). Else DEAD. Report only (no variant): the
+Roth version as a cash-secured sleeve (the Roth's cash is used by the legs, so it is a sleeve, not an overlay)
+= PUT vs SPY as the destination for Roth money past the book's capacity ($2.5M, Study Y): CAGR, Sharpe, max
+DD 2007-26 and 2016-26. Capacity: SPX options, no binding size on the grid (stated, not modelled).
+
+### Study AA — box-spread financing of the overnight debit (report; 0 variants)
+Sim (raw pool, V7 live-today) at lever_weight 0.65 (night 0.65 + IBS 0.65, i.e. 1.3x overnight) and at 1.0 each
+(2.0x, the MAX profile). Overnight debit as `Sim.day_pnl`. Financing: Schwab margin at 12% (Sim default),
+sensitivity 10% / 8% (large-balance tiers); box = BIL's trailing yield + 0.30%/yr. Report $/yr saved and pp/yr
+at each size, both halves. Practical floor: XSP boxes ($10k face at 100-wide) -> from a ~$10k debit. Taxable
+only; Roth cannot borrow. No change to live code (lever_weight is null today).
+
+### Study AB — fade QQQ inside the noise band when the noise leg is flat (2 variants: θ 0.5, 1.0)
+Same decision grid as the live noise leg (10:00..15:30 every 30 min, `sg.noise_*`, 14-day sigma). At a decision
+where the noise rule's position AFTER its own decision is 0 and lb <= p <= ub: if |p / vwap − 1| >= θ x
+sigma[m], open f = −sign(p − vwap). Exit at the next decision if p has crossed VWAP, or if the noise rule enters
+(the fade closes first; the noise leg then trades as live), else at 15:59 close. One fade position at a time;
+re-entry allowed. Size = the noise leg's vol-target lev capped at 1.5 x its budget share (QQQ 1.0), so it uses
+buying power the noise leg is not using at that moment. Costs 0.5bp/side (Sim) and 1.0bp/side (stress).
+Increment = E x lev x fade net return, added to B2. Pass (SHADOW), each θ, at 1.0bp/side: (1) increment > 0 in
+2016-20, 2021-23 AND 2024-26; (2) NW t (2016-26) >= 2.0; (3) placebo, 200 draws: same entry times and exits,
+random direction, rule >= 95th pct of the placebo mean; (4) the book's max DD not worse by > 2pp. Else DEAD.
+Capacity: QQQ impact as Study Y ETF Y 1 x trades.
+
+### Study AC — closing-auction imbalance (feasibility; 0 variants)
+No historical Nasdaq NOII / NYSE imbalance feed is on hand, and neither Schwab nor Alpaca serves imbalance
+messages live. Report only: sources and price (Nasdaq TotalView-ITCH / Databento, NYSE Imbalances), whether
+Alpaca's auctions endpoint gives anything usable (auction prints only, not imbalances), and what a test would
+need. No proxy signal is tested (a 15:50 price move is not an imbalance; last-half-hour momentum is dead, add. 27).
+
+### Study AD — the noise leg as an intraday overlay on a held index (report; 0 variants; Study Y's "next")
+Taxable account holds SPY 1.0x overnight, bought once (tax at sale, Study Y's H = 20 after-tax equivalent),
+plus the QQQ noise leg on daytime buying power (vol target, cap 1.5; intraday gross <= 2.5x, inside Schwab's
+~4x Intraday Margin Buying Power, add. 40), with Study Y's ETF impact (CENTRAL Y 1; OPT Y 0.5). Two tax cases:
+noise as QQQ (short-term, taxed yearly) and as MNQ (60/40). Report at each size, 2016-26 and halves, both
+brackets: after-tax %/yr of (a) SPY held, (b) SPY + noise overlay, (c) Study Y B2. Readings (the only
+conclusions): 1. the sizes where (b) > (a) and where (b) > (c) after tax (MOD); 2. the size where the overlay's
+after-tax increment over SPY halves (noise impact). A reading that holds in 2024-26 alone is stated as such.
