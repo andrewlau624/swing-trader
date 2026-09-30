@@ -594,3 +594,51 @@ Action: any FLAG -> the night leg goes to SHADOW (daily.night_weight 0 with the 
 a pre-registered study of the new regime; no FLAG -> nothing changes. The canaries in code
 (signals.regular_clock / clock_drift / bar_semantics_issues / official_open) only warn; they never
 change sizing.
+
+
+## Amendment — Round 12: Study Y, the whole book's rate at $25k-$5M, after tax, vs an index (report; 0 variants, N stays 614)
+
+`date`: Wed Sep 30 13:39:38 PDT 2026 (no Study Y number, at any size or in any period, was computed when this
+was written). Motivation: long-horizon planning needs the book's return AT SIZE. Studies V/X and
+scale_legs_diag.txt give each leg's impact alone; nothing combines them into the book's rate, pre- and
+after-tax, beside the thing the surplus would otherwise go to (a held index fund). The planning tables
+used a 10%/yr placeholder above $250k; this study replaces it with a measured number.
+
+Legs (raw pool, V7 live-today settings: 1.0x, IBS 0.5 + night 0.5, no conviction, weekend 0.5),
+2021-26 and halves 2021-23 / 2024-26 (`night_filings.PER`), at CONSTANT equity E (the rate at that
+size, deposit-free), fractional shares (whole-share rounding is a small-account effect, reported at
+$2.3k only), E in {$2.3k, 25k, 100k, 250k, 500k, 1M, 2.5M, 5M}:
+- Night: Study X's per-trade table (w = min(frac, 0.10), q = 0.5 E w) with the Y_rule 4 cap
+  (`signals.night_impact_cap`, g 22bp; the live plan from ~$25k). Net = ret - 2 x 1bp - impact under
+  the truth model. Money the cap frees earns BIL that day.
+- IBS: Sim's IBS trades; Q = 0.5 E / (names that day); impact per side Y sd sqrt(Q/ADV), 2 sides, with
+  ADV and daily sd from scale_legs_diag.txt (last-12-month values, applied to the whole history).
+- Noise: `book.noise_days`, Q = E x min(lev, cap) x share, impact per side Y sd sqrt(Q/ADV) times the
+  day's `trades` (the same count the shipped cost charges per side).
+- Idle: BIL, as Sim.
+
+Truth models (fixed now): OPT = night A/Y .5 + ETF Y .5; CENTRAL = night A/Y 1 + ETF Y 1;
+PESS = night B/Y .5 + ETF Y 1. A cost stress repeats CENTRAL with the night leg at `cost_bps(tier)`
+in place of 1bp/side.
+
+Books: B1 = as shipped (noise QQQ .5 + SMH .5, cap 1.5, all short-term). B2 = the scale plan
+(scale_plan.md): noise QQQ-only (SMH retired), traded as MNQ, so the noise leg is taxed 60/40; its
+returns use the QQQ series (futures proxy; MNQ impact taken as QQQ's, conservative). B3 = Roth:
+B2's legs, noise cap 1.5 underlying (3x ETFs, as roth.py), no tax.
+
+Tax (constant equity, so yearly $ gain = E x sum of the year's daily returns; losses carried
+forward): MODERATE bracket ST 32% / LT 24%; TOP bracket ST 54% / LT 37% (fed 37/20 + CA 13.3 + NIIT 3.8).
+The 60/40 rate = 0.6 LT + 0.4 ST.
+Index: SPY over the same 2021-26 window, bought and held: pre-tax CAGR, and its after-tax equivalent
+over H = 20 years with tax only at sale, ((1+g)^H (1-LT) + LT)^(1/H) - 1, per bracket.
+
+Report, per E and truth: pre-tax %/yr (full, halves), after-tax %/yr (both brackets), and the index's
+after-tax equivalent. Pre-registered readings (the only conclusions to be drawn):
+1. The planning rate above $250k = B2 CENTRAL after-tax (MODERATE) at $500k and $1M (taxable), and
+   B3 CENTRAL at $500k and $1M (Roth). These replace the 10% placeholder.
+2. Taxable crossover E* = the smallest E on the grid at which B2 CENTRAL after-tax (MODERATE) falls
+   below the index's after-tax equivalent (MODERATE); if at PESS it falls below at a smaller E, report
+   both. Past E*, surplus taxable money goes to the index unless a later study finds a liquid edge.
+3. Roth crossover likewise with B3 CENTRAL vs SPY pre-tax.
+A reading that depends on 2024-26 alone (2021-23 below the index at that E while the full span is
+above) is stated as such. All numbers replay the fitting period; they are upper bounds on the edge.
