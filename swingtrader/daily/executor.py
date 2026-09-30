@@ -1280,7 +1280,7 @@ class DailyExecutor:
                               and acct >= self.d.daytrade_min_equity)
         # intraday leverage the broker actually grants (4 = leverage-enabled
         # margin, 2 = standard, 1 = cash); the IBS half stays invested intraday
-        mult = float(getattr(a, "multiplier", 1) or 1)
+        mult = self._intraday_mult(float(getattr(a, "multiplier", 1) or 1), acct)
         conv = self.d.conviction_weight if self._conviction_live(book) else 0.0
         if self.cash_account:
             # no borrowing: only the cash the night leg's open sells free up, held
@@ -1497,6 +1497,25 @@ class DailyExecutor:
         foreign = sum(abs(float(p.qty) * float(p.current_price or 0))
                       for s, p in self.broker.positions().items() if s not in book_syms)
         return eq - foreign
+
+    def _intraday_mult(self, broker_mult: float, acct: float) -> float:
+        """DAILY_INTRADAY_MULT in .env (addendum 40, default off = the broker's
+        ratio). Schwab's Intraday Margin Buying Power (since 2026-07-13, margin
+        accounts >= $2,000) allows up to 4x maintenance excess, but the Trader
+        API fields the adapter reads show ~2.48. Real-money margin book only; the
+        Roth gets no intraday margin. Set it only after Schwab.com Balances
+        shows Intraday Margin Buying Power >= 3.5x equity; revert (empty) if
+        Schwab rejects intraday orders for margin."""
+        env = (get_env("DAILY_INTRADAY_MULT") or "").strip().lower()
+        if not env or env in ("broker", "off", "none") or not self.live or self.cash_account:
+            return broker_mult
+        want = min(float(env), 4.0)
+        if acct < 2000.0:
+            self.log(f"[bp] DAILY_INTRADAY_MULT={env} ignored: account ${acct:,.0f} < $2,000 "
+                     f"(Schwab's intraday minimum); broker {broker_mult:.2f}")
+            return broker_mult
+        self.log(f"[bp] intraday mult {want:.2f} (DAILY_INTRADAY_MULT; broker reports {broker_mult:.2f})")
+        return want
 
     def live_cap(self) -> float | None:
         """DAILY_LIVE_CAPITAL in .env wins over config.yaml: `make pull` resets

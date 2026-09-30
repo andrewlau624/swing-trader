@@ -17,6 +17,13 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 - Two things add money, and neither touches the signal:
   (1) switch the built trade on: +$3.4k/yr at $100k, +$16.9k at $500k;
   (2) later, run it in MNQ: SHADOW, +$2.7-5.6k at $100k. It needs a futures-API broker and ≥ $30k.
+**Small-account priority (user, 2026-09-30): % return at today's size first.**
+- MNQ (≥ $29k) and the L1 recorder are parked. The small-money levers are, in order:
+  1. Conviction on (`DAILY_LIVE_PROFILE=moderate10c`): +3.3pp/yr at mult 2. Gate: ~5 clean intraday days in review §7.
+     Fixed 49a0b07: the conviction shadow now scores trades held to the close (it dropped ~1/3 of them).
+  2. `DAILY_INTRADAY_MULT=3.33|4` (built, default empty = broker ~2.48). With conviction on, it lifts the
+     turn-on value to ~+5.1pp/yr (AI, mult 4). Add. 40 rates the multiplier itself SHADOW (t 1.6).
+     Gate: Schwab.com Balances shows Intraday Margin Buying Power ≥ 3.5x equity. Revert by emptying it.
 - **AF: size the conviction weight by predicted magnitude: DEAD (N 623).**
   - m̂ (gap, range, rvol, VIX at 09:30) predicts the day's size (R² 0.13-0.24) and the trade's |gross| (corr +0.22..+0.31).
   - The trade's EV peaks in the MIDDLE tercile (+34..+41bp in every half), and the loud tercile is −44bp in 2024-26.

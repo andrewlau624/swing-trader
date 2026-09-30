@@ -1225,3 +1225,32 @@ def test_conviction_settle_failure_leaves_the_day_running(tmp_path, monkeypatch)
     monkeypatch.setattr(E.md, "sip_daily", boom)
     ex._conviction_one(b, "2026-09-25")
     assert b.conviction["day"] == "2026-09-25" and not b.conviction["history"]
+
+
+def test_intraday_mult_env_is_live_margin_only_and_capped(tmp_path, monkeypatch):
+    from swingtrader.daily import executor as E
+    ex = _executor(tmp_path, monkeypatch)
+    env = {}
+    monkeypatch.setattr(E, "get_env", lambda k: env.get(k))
+    assert ex._intraday_mult(2.48, 3000) == 2.48, "unset: the broker's ratio"
+    env["DAILY_INTRADAY_MULT"] = "3.33"
+    assert ex._intraday_mult(2.48, 3000) == 2.48, "paper book ignores it"
+    ex.live = True
+    assert ex._intraday_mult(2.48, 3000) == pytest.approx(3.33)
+    assert ex._intraday_mult(2.48, 1500) == 2.48, "below Schwab's $2,000 intraday minimum"
+    env["DAILY_INTRADAY_MULT"] = "9"
+    assert ex._intraday_mult(2.48, 3000) == 4.0, "never above 4x"
+    ex.cash_account = True
+    assert ex._intraday_mult(1.0, 3000) == 1.0, "the Roth gets no intraday margin"
+
+
+def test_intraday_mult_widens_the_noise_cap_with_conviction(tmp_path, monkeypatch):
+    from swingtrader.daily import executor as E
+    ex = _executor(tmp_path, monkeypatch)
+    ex.broker.account = lambda: SimpleNamespace(equity="3000", multiplier="2")
+    monkeypatch.setattr(ex, "_intraday_mult", lambda m, acct: 4.0)
+    ex.d.conviction_mode = "auto"
+    book = DailyBook(cash=3000, start_equity=3000)
+    ex._gate(book, 3000)
+    # 4 x (1 - 0.5 x 0.75) - 0.5 IBS = 2.0 (vs 0.75 at the standard 2x)
+    assert book.noise_lev_cap == pytest.approx(2.0)
