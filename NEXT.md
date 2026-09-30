@@ -17,6 +17,11 @@ most of it 2024-26. Not adopted. The OOS check is a rerun of `night_filings.py` 
 picks at ~100 events. Side note: mapped (operating, still-filing) picks net −11bp vs unmapped
 +15bp at tier; worth its own pre-registered look. Details: research/drafts/study_t_filings.md.
 
+## Study U (2026-09-29): dead as registered, but it found where the leg's gross is richest (N 609)
+Diagnostic: leveraged/inverse ETF picks +45bp gross (2024-26) and foreign ADRs +41bp vs US operating
+stocks +17bp. Next: a pre-registered LETF study with a proper point-in-time classifier (the
+close-rebalance mechanism; also the most scalable part of the leg). study_u_classes.md.
+
 ## Live checkpoint (2026-09-29): costs fine, edge unproven, overnight leverage off
 
 LIVE (Schwab, since 09-22, 6 sessions): **+$18.99 (+0.8%)** on ~$2,240 (deposit
@@ -550,6 +555,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Same noise rule on liquid stocks outside the top 40 (ranks 41-100) | **dead** | gross ~0 bp/day, placebo 71%, book −15pp: the trend-day persistence lives only in the most traded names, which QQQ holds (add. 41) |
 | Single-stock intraday noise legs as an "attention" diversifier to QQQ | **dead** | top-5 gross edge ≈ QQQ's; across name-years it scales with vol (t 6.8), not dollar volume (t 1.3); QQQ is the cheapest wrapper (add. 41) |
 | Night leg: SEC offering filings (Study T) | **shadow** | E3 DROP passes by a hair after an ETN-mapping fix (t −2.1, 2024-26-heavy, 2021 positive); E1/E2/DOUBLE dead; OOS rerun at ~100 events (late 2028), no live code (study_t_filings.md) |
+| Night leg: issuer classes via EDGAR (Study U: drop/only 'ETP') | **dead as registered; classes mislabeled** | EDGAR's index misses ETF series ('unmapped' = leveraged ETFs) and 'non-operating' = foreign ADRs; LETF (+45bp gross 24-26) and ADR (+41) buckets beat US stocks (+17) in a diagnostic: needs a proper classifier (study_u_classes.md) |
 | Night leg: SSR (Rule 201) flag as a long-side tilt | **not run** | ≈ drop depth (picks need −8% and IBS ≤ .10; SSR = low ≤ −10%): no new information, not worth N |
 
 ## Ideas not yet tested
