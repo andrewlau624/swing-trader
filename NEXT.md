@@ -19,7 +19,7 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 - **AG: confirmations at the breakout minute: DEAD (N 624).** No confirmation raises EV monotonically: strength, SMH/SPY/IWM
   agreeing, breakout-bar volume, VIX, VIX9D/VIX. The only monotone one (time of day) loses when used.
   Breadth and NQ-lead are untestable (no data). Most of them peak in the middle tercile (≈ one vol observation, post-hoc).
-  Forward check only: from the `[conv]` shadow log, at ~60 round trips, compare VIX(d−1) > 21 trades with the rest.
+  Forward check only: join Cboe VIX to the `[conv]` shadow log by trade date; at ~60 round trips, compare VIX(d−1) > 21 trades with the rest.
   study_ag_confirmations.md.
 
 ## Round 13 (2026-09-30): the "use the day" ideas — Z, AB dead; AA small; AC needs data; AD is the news (N 619)

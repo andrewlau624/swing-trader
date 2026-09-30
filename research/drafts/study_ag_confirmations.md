@@ -37,7 +37,7 @@ Output: `data/research/program/conviction_ag_out.txt`. Brief: `prompt_conviction
 - Most of those features are vol proxies (VIX, VIX9D/VIX, rvol, m̂), so this is roughly **one** observation, not five.
   It is post-hoc and it does not hold in 2024-26 for C3 or C5.
 - It is logged as a hypothesis only: "the trade works in ordinary vol; skip VIX(d−1) > ~21". The only honest test is
-  forward. The live `[conv]` shadow log records VIX, so after ~60 round trips compare the top-VIX-tercile trades with
+  forward. The live `[conv]` shadow log records each trade's date, so VIX(d−1) can be joined from the Cboe file. After ~60 round trips, compare the top-VIX-tercile trades with
   the rest. No variant is counted for it now.
 - Keep the shipped rule unchanged: first breakout, ≥ 0.341σ, 0.5 of equity.
 
