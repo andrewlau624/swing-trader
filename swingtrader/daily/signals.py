@@ -16,8 +16,12 @@ computed from the final close it showed 58% CAGR, computed at 15:50 it showed
 """
 from __future__ import annotations
 
+from types import SimpleNamespace
+
 import numpy as np
 import pandas as pd
+
+ET = "America/New_York"
 
 
 # ------------------------------------------------------------------ IBS leg
@@ -67,6 +71,84 @@ def momentum_top(closes: pd.DataFrame, today: pd.Timestamp, k: int,
         return []
     last = month_ends.iloc[-1].dropna()
     return sorted(last.sort_values(ascending=False).index[:k])
+
+
+# ------------------------------------------------ regular session (23/5-proof)
+# From 2026-12-06 US exchanges trade 21:00-20:00 ET (23/5). The official 09:30
+# open and 16:00 close auctions are unchanged, and every leg trades only them
+# or the regular session. So the book takes its session from the exchange's
+# REGULAR-hours calendar and treats the broker clock as a cross-check: a
+# clock whose next_close moves to 20:00 would otherwise make every day look
+# like an early close and silently switch the night and intraday legs off.
+REGULAR_OPENS = {(9, 30)}
+REGULAR_CLOSES = {(16, 0), (13, 0)}         # 13:00 = scheduled half day
+
+
+def regular_clock(now, sessions) -> SimpleNamespace:
+    """sessions: [(open, close)] tz-aware ET datetimes from the exchange
+    calendar, covering today and the next few sessions. Returns a clock with
+    the broker-clock fields in REGULAR-session meaning. Raises ValueError if
+    a session is not a 09:30 open with a 16:00 / 13:00 close (a calendar
+    whose meaning changed must not be trusted either)."""
+    ss = sorted(sessions)
+    for o, c in ss:
+        if (o.hour, o.minute) not in REGULAR_OPENS or (c.hour, c.minute) not in REGULAR_CLOSES:
+            raise ValueError(f"calendar session {o:%Y-%m-%d %H:%M}-{c:%H:%M} is not regular hours")
+    nxt_open = next((o for o, _ in ss if o > now), None)
+    nxt_close = next((c for _, c in ss if c > now), None)
+    if nxt_open is None or nxt_close is None:
+        raise ValueError("calendar does not reach the next session")
+    return SimpleNamespace(is_open=any(o <= now < c for o, c in ss), next_open=nxt_open,
+                           next_close=nxt_close, source="calendar")
+
+
+def clock_drift(broker_clock, regular) -> str | None:
+    """None when the broker clock still means the regular session; otherwise
+    what differs (the 23/5 canary)."""
+    diffs = []
+    for f in ("next_open", "next_close"):
+        a, b = pd.Timestamp(getattr(broker_clock, f)), pd.Timestamp(getattr(regular, f))
+        if abs((a - b).total_seconds()) > 60:
+            diffs.append(f"{f} broker {a.tz_convert(ET):%m-%d %H:%M} vs regular {b.tz_convert(ET):%m-%d %H:%M}")
+    if bool(broker_clock.is_open) != bool(regular.is_open):
+        diffs.append(f"is_open broker {bool(broker_clock.is_open)} vs regular {bool(regular.is_open)}")
+    return "; ".join(diffs) or None
+
+
+def bar_semantics_issues(sym: str, bar: dict, rth: dict, bar_ts=None,
+                         tol_bps: float = 5.0) -> list[str]:
+    """23/5 canary for a vendor DAILY bar of a liquid ETF vs the same session's
+    regular-hours SIP minutes. Baseline (Sep 2026, SPY/QQQ): stamp 00:00 ET,
+    open/high/low equal the RTH minutes (0bp median, <0.3bp max). A daily bar
+    that starts including the 21:00 overnight session shows up as an open, high
+    or low outside the RTH values, or an evening stamp. Volume already includes
+    pre/post (x1.2) and the research used the same, so it is not checked."""
+    out = []
+    if bar_ts is not None:
+        t = pd.Timestamp(bar_ts).tz_convert(ET)
+        if (t.hour, t.minute) != (0, 0):
+            out.append(f"{sym} daily bar stamped {t:%H:%M} ET (was 00:00)")
+    for f, bad in (("open", lambda b, r: abs(b / r - 1) * 1e4 > tol_bps),
+                   ("high", lambda b, r: (b / r - 1) * 1e4 > tol_bps),
+                   ("low", lambda b, r: (1 - b / r) * 1e4 > tol_bps)):
+        b, r = float(bar.get(f, np.nan)), float(rth.get(f, np.nan))
+        if np.isfinite(b) and np.isfinite(r) and r > 0 and bad(b, r):
+            out.append(f"{sym} daily {f} {b:.2f} vs regular-hours {r:.2f} ({(b / r - 1) * 1e4:+.0f}bp)")
+    return out
+
+
+def official_open(schwab_open: float, sip_open: float, tol_bps: float = 10.0) -> tuple[float, str]:
+    """The regular-session open for the intraday bands. Schwab's quote open is
+    the official one today; the consolidated 09:30 minute is regular-hours by
+    construction. If they disagree (23/5: a quote 'open' could become the 21:00
+    overnight print), trust the minute bar."""
+    s_ok, m_ok = np.isfinite(schwab_open), np.isfinite(sip_open) and sip_open > 0
+    if s_ok and m_ok:
+        return ((schwab_open, "schwab") if abs(schwab_open / sip_open - 1) * 1e4 <= tol_bps
+                else (sip_open, "sip-minute (schwab open disagreed)"))
+    if s_ok:
+        return schwab_open, "schwab"
+    return (sip_open, "sip-minute") if m_ok else (float("nan"), "none")
 
 
 # ---------------------------------------------------------------- night leg

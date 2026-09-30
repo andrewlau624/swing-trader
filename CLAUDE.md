@@ -16,3 +16,10 @@
   buying power.
 - "Deposits beat alpha at $2k" is true today and is not an argument against
   research: the research is for the account this becomes.
+
+## Sessions (23/5 trading from 2026-12-06)
+- The book trades only the official 09:30 / 16:00 auctions and the regular session. Take session
+  times from the exchange's regular-hours calendar (`signals.regular_clock`), never from a broker
+  clock or a vendor "day" (which may start at 21:00 the evening before). Label bars/fills by trade
+  date (`marketdata.trade_date`). Anything new that reads a daily bar or quote open/high/low must say
+  why it is regular-hours, or use regular-hours minutes (`marketdata.rth_minutes`).

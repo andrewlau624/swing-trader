@@ -11,6 +11,7 @@ import pandas as pd
 import pytest
 
 from swingtrader.config import Config
+from swingtrader.daily import marketdata as md
 from swingtrader.daily import signals as sg
 from swingtrader.daily.book import DailyBook, owned_by_daily
 from swingtrader.daily.executor import DailyExecutor, phase_for
@@ -1122,3 +1123,77 @@ def test_impact_cap_shrinks_thin_volatile_names_and_is_off_by_default(tmp_path, 
     assert on["DEEP"] == 500, "liquid, calmer name: untouched"
     rec = [json.loads(x) for x in (tmp_path / "daily-decisions.jsonl").read_text().splitlines()]
     assert rec[-1]["adv20"] and rec[-1]["pct_adv"] > 0, "participation is logged for the Y fit"
+
+
+# ------------------------------------------------ 23/5 trading (from 2026-12-06)
+def _sess(*days, close=(16, 0)):
+    return [(pd.Timestamp(f"{d} 09:30", tz=ET), pd.Timestamp(f"{d} {close[0]:02d}:{close[1]:02d}", tz=ET))
+            for d in days]
+
+
+def test_regular_clock_follows_the_exchange_calendar():
+    s = _sess("2026-11-25") + _sess("2026-11-27", close=(13, 0)) + _sess("2026-11-30")
+    c = sg.regular_clock(pd.Timestamp("2026-11-25 15:40", tz=ET), s)
+    assert c.is_open and c.next_close.hour == 16 and c.next_open.date() == dt.date(2026, 11, 27)
+    c = sg.regular_clock(pd.Timestamp("2026-11-27 12:00", tz=ET), s)
+    assert c.next_close.hour == 13, "half day"
+    c = sg.regular_clock(pd.Timestamp("2026-11-26 10:00", tz=ET), s)
+    assert not c.is_open and c.next_open.date() == dt.date(2026, 11, 27), "Thanksgiving: closed"
+    with pytest.raises(ValueError):
+        sg.regular_clock(pd.Timestamp("2026-12-07 10:00", tz=ET), _sess("2026-12-07", close=(20, 0)))
+
+
+def test_clock_drift_flags_a_23_5_broker_clock():
+    s = _sess("2026-12-07", "2026-12-08")
+    now = pd.Timestamp("2026-12-07 15:40", tz=ET)
+    reg = sg.regular_clock(now, s)
+    same = SimpleNamespace(is_open=True, next_open=reg.next_open, next_close=reg.next_close)
+    assert sg.clock_drift(same, reg) is None
+    ext = SimpleNamespace(is_open=True, next_open=pd.Timestamp("2026-12-07 21:00", tz=ET),
+                          next_close=pd.Timestamp("2026-12-07 20:00", tz=ET))
+    msg = sg.clock_drift(ext, reg)
+    assert "next_close" in msg and "next_open" in msg
+
+
+class TwentyThreeFiveBroker(FakeBroker):
+    """A broker clock that reports the 23/5 day (20:00 close, 21:00 reopen)."""
+    def clock(self):
+        return SimpleNamespace(is_open=True, next_open=pd.Timestamp("2026-09-23 21:00", tz=ET),
+                               next_close=pd.Timestamp("2026-09-23 20:00", tz=ET))
+
+    def sessions(self, start, end):
+        return _sess("2026-09-23", "2026-09-24")
+
+
+def test_night_leg_still_trades_when_the_broker_clock_goes_23_5(tmp_path, monkeypatch):
+    _night_rows(monkeypatch, {"LOSER": 9.0})
+    ex = DailyExecutor(Config.load(), broker=TwentyThreeFiveBroker(), state_dir=tmp_path, log_dir=tmp_path)
+    ex.notifier.send = lambda *a, **k: "skipped"
+    ex.d.quote_source = "alpaca"
+    now = dt.datetime(2026, 9, 23, 15, 40, tzinfo=ET)
+    raw = ex.broker.clock()
+    book = DailyBook(cash=3000, start_equity=3000)
+    ex.phase_close(book, "2026-09-23", now, raw)
+    assert ex.broker.client.submitted == [], "the raw 23/5 clock looks like an early close"
+    clock = ex._regular_clock(raw, now, "close")
+    assert clock.next_close.hour == 16 and any("[session]" in x for x in ex.lines)
+    ex.phase_close(book, "2026-09-23", now, clock)
+    assert [r.symbol for r in ex.broker.client.submitted] == ["LOSER"]
+
+
+def test_trade_date_rolls_evening_stamps_forward():
+    assert md.trade_date(pd.Timestamp("2026-12-08 05:00", tz="UTC")) == pd.Timestamp("2026-12-08")  # 00:00 ET
+    assert md.trade_date(pd.Timestamp("2026-12-07 02:00", tz="UTC")) == pd.Timestamp("2026-12-07")  # Sun 21:00 ET
+    s = md.trade_date(pd.Series(pd.to_datetime(["2026-12-08 05:00", "2026-12-09 01:00"], utc=True)))
+    assert list(s) == [pd.Timestamp("2026-12-08"), pd.Timestamp("2026-12-09")], "20:00 ET belongs to the next day"
+
+
+def test_bar_canary_and_official_open():
+    rth = {"open": 500.0, "high": 505.0, "low": 498.0}
+    assert sg.bar_semantics_issues("SPY", dict(rth), rth, pd.Timestamp("2026-12-08 05:00", tz="UTC")) == []
+    wide = {"open": 501.5, "high": 505.0, "low": 495.0}           # overnight trades inside the bar
+    msgs = sg.bar_semantics_issues("SPY", wide, rth, pd.Timestamp("2026-12-08 02:00", tz="UTC"))
+    assert len(msgs) == 3 and "stamped 21:00" in msgs[0]
+    assert sg.official_open(500.2, 500.0) == (500.2, "schwab")
+    assert sg.official_open(503.0, 500.0)[0] == 500.0, "a quote open 60bp off the 09:30 print is not the open"
+    assert sg.official_open(float("nan"), 500.0) == (500.0, "sip-minute")

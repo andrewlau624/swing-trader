@@ -143,7 +143,7 @@ class DailyExecutor:
         now = dt.datetime.now(ZoneInfo(ET))
         today = now.date().isoformat()
         phase = phase or phase_for(now)
-        clock = self.broker.clock()
+        clock = self._regular_clock(self.broker.clock(), now, phase)
         acct = self.broker.account()
         # live: the book starts at the FREE equity (not your other holdings)
         start = self._live_start() if self.live else self.d.start_equity
@@ -190,6 +190,7 @@ class DailyExecutor:
         if not trading_day:
             self.log("not a trading day - reconcile only")
         elif phase == "open":
+            self._session_canary(clock, now)
             self.phase_open(book, today)
         elif phase == "intraday":
             self.phase_intraday(book, today, now, clock)
@@ -439,6 +440,50 @@ class DailyExecutor:
     # 16:10 run checks today's stamps and emails if a phase is missing (a lock
     # timeout, a crash before the failure email, a timer that did not fire).
     # The server being down entirely is HEALTHCHECK_URL's job (scripts/daily.py).
+    def _session_canary(self, clock, now) -> None:
+        """Once a day (09:15): yesterday's vendor daily bars for SPY/QQQ must still
+        mean the regular session (signals.bar_semantics_issues). Warns and changes
+        nothing: the fix, if one is needed, is a decision (RESULTS/NEXT: 23/5)."""
+        if self.dry_run or not getattr(self.broker, "sessions", None):
+            return
+        try:
+            prev = [o for o, _ in self.broker.sessions(now.date() - dt.timedelta(days=7), now.date())
+                    if o.date() < now.date()]
+            if not prev:
+                return
+            day = pd.Timestamp(prev[-1].date())
+            issues = [x for sym, bar, ts, rth in md.daily_bar_check(["SPY", "QQQ"], day)
+                      for x in sg.bar_semantics_issues(sym, bar, rth, ts)]
+        except Exception as exc:
+            self.log(f"  [session] canary skipped ({type(exc).__name__}: {str(exc)[:80]})")
+            return
+        if issues:
+            self.warn("[session] vendor daily bars changed meaning (23/5?): " + "; ".join(issues)
+                      + " - IBS signals, ADV and the open benchmark read these bars")
+        else:
+            self.log(f"  [session] {day.date()} daily bars match regular hours (SPY, QQQ)")
+
+    def _regular_clock(self, clock, now, phase: str):
+        """The session every leg trades: the exchange's REGULAR hours (see
+        signals.regular_clock). The broker clock is kept only as a canary; if it
+        stops meaning the regular session (23/5 trading from 2026-12-06), warn
+        once a day at the open run and carry on with the calendar."""
+        get = getattr(self.broker, "sessions", None)
+        if get is None:
+            return clock                      # test doubles: their clock is the calendar
+        try:
+            reg = sg.regular_clock(now, get(now.date() - dt.timedelta(days=1),
+                                            now.date() + dt.timedelta(days=10)))
+        except Exception as exc:
+            self.log(f"  regular-hours calendar unavailable ({type(exc).__name__}: {str(exc)[:80]})"
+                     " - using the broker clock")
+            return clock
+        drift = sg.clock_drift(clock, reg)
+        if drift:
+            msg = f"[session] broker clock no longer matches the regular session ({drift}); using the calendar"
+            self.warn(msg) if phase == "open" else self.log(msg)
+        return reg
+
     def _hb_path(self) -> Path:
         return self.state_dir / f"heartbeat{self.tag}.json"
 
@@ -1142,6 +1187,18 @@ class DailyExecutor:
                     src = "schwab"
             except Exception:
                 pass
+        if src == "schwab":
+            # 23/5 guard: the quote's "open" must still be the 09:30 regular open
+            try:
+                m = md.rth_minutes([sym], pd.Timestamp(today), until_hm=931)
+                sip_open = float(m.loc[sym, "open"]) if sym in m.index else float("nan")
+            except Exception:
+                sip_open = float("nan")
+            day_open, how = sg.official_open(day_open, sip_open)
+            if how.startswith("sip-minute"):
+                self.warn(f"[session] {sym}: Schwab open disagrees with the 09:30 consolidated "
+                          f"minute ({sip_open:.2f}) - using the minute bar")
+                src = "sip"
         if src == "iex":
             self.warn(f"[intraday] {sym}: using IEX open (Schwab not available) - the open "
                       "can be wrong on IEX; bounds may be off")

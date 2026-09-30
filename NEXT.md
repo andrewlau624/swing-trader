@@ -27,6 +27,17 @@ by ~$1M; auction-sized impact models put the peak far lower. Plan: cap the night
 $ size (shared by taxable + Roth), send growth to IBS / noise / MNQ, and start logging auction
 participation per fill so Y can be fitted from ~$25k. study_v_capacity.md.
 
+## 23/5 trading (from 2026-12-06): the bot is session-agnostic; regime check pre-registered
+- Every leg trades only the 09:30 / 16:00 auctions or the regular session, which 23/5 does not change.
+- The book's session now comes from the exchange's REGULAR-hours calendar (`signals.regular_clock`);
+  the broker clock is a canary (`[session]` warning at 09:15 if it drifts, e.g. a 20:00 "close").
+- Daily bars are labelled by trade date (evening stamps roll forward, `md.trade_date`).
+- 09:15 canary: yesterday's SPY/QQQ daily bars must equal regular-hours minutes (warns if not).
+- Intraday open: Schwab's quote open is cross-checked against the 09:30 consolidated minute (>10bp -> minute).
+- After launch, watch: the first `[session]` warnings; `make review` section 1 (live picks vs the
+  RTH-minute replay: catches a quote high/low that starts including the overnight session).
+- ~March 2027: run the pre-registered 23/5 regime check (round1_prose.md Round 11).
+
 ## Study X + scale plan (2026-09-29): impact cap BUILT (off), measurement loop live (N 614)
 - `daily.night_impact_y: null`: turn on (4, or review section 8's fitted UB) once the account passes ~$25k.
 - Night decisions now log `adv20` / `pct_adv`; `make review` section 8 fits the impact coefficient Y.

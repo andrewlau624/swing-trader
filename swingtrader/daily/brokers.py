@@ -59,6 +59,20 @@ def _fallback_clock():
     return SimpleNamespace(is_open=is_open, next_open=nxt_open, next_close=nxt_close)
 
 
+def regular_sessions(start: dt.date, end: dt.date) -> list:
+    """[(open, close)] tz-aware ET for each REGULAR session in [start, end],
+    from Alpaca's exchange calendar (holidays and 13:00 half days included).
+    Its open/close are the regular session; the 23/5 overnight and the
+    pre/post sessions are not in it."""
+    from zoneinfo import ZoneInfo
+    from alpaca.trading.client import TradingClient
+    from alpaca.trading.requests import GetCalendarRequest
+    k, s = require_alpaca_keys()
+    tz = ZoneInfo(ET)
+    cal = TradingClient(k, s, paper=True).get_calendar(GetCalendarRequest(start=start, end=end))
+    return [(c.open.replace(tzinfo=tz), c.close.replace(tzinfo=tz)) for c in cal]
+
+
 class AlpacaAdapter:
     """Thin pass-through over live.broker.PaperBroker (or a test double)."""
 
@@ -68,6 +82,11 @@ class AlpacaAdapter:
         self.b = broker
         self.key, self.secret = broker.key, broker.secret
         self.client = broker.client       # tests inspect submitted requests here
+        # regular-session calendar: the real Alpaca broker uses the exchange
+        # calendar; a test double may supply its own, else None (= trust clock())
+        from ..live.broker import PaperBroker
+        self.sessions = (getattr(broker, "sessions", None)
+                         or (regular_sessions if isinstance(broker, PaperBroker) else None))
 
     def clock(self):
         return self.b.clock()
@@ -174,6 +193,8 @@ class SchwabAdapter:
         self.hash = account_hash or self._pick_account()
         self.key, self.secret = f"schwab:{k}", self.hash
         self._clock = clock_source
+        # regular-session calendar (signals.regular_clock); an injected clock means a test
+        self.sessions = regular_sessions if clock_source is None else None
         # "primary": direct open sells to the listing exchange; "auto": Schwab routes
         self.open_route = open_route
         self._exchange_of = exchange_of or _alpaca_exchange

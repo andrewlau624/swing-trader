@@ -572,3 +572,25 @@ Adopt the variant that (1) is inert (changes no order) at $2.3k, (2) never has l
 $/yr than the uncapped leg at any (E, truth model), (3) has non-negative $/yr at every E under A/Y 1
 and B/Y 0.5; among passers, the highest minimum $/yr at $1M across the four truths.
 Adoption = ship in the live config (it is inert today), NOT a claim of new edge.
+
+
+## Amendment — Round 11: the 23/5 regime check (pre-register; monitoring, 0 variants, N stays 614)
+
+`date`: Wed Sep 30 02:03:15 PDT 2026. Nasdaq and NYSE Arca plan 23/5 trading from Sun 2026-12-06 21:00 ET (SEC-approved,
+still conditional on data-system readiness). The 09:30 opening and 16:00 closing auctions and the
+official close are unchanged; a 21:00-04:00 overnight session is added (no auctions, no market
+orders). The night leg's close -> open trade is unchanged mechanically, but overnight price
+discovery may move into that session and thin the 09:30 auction. No post-launch data exists.
+
+Launch = the first regular session on/after the actual go-live date (expected Mon 2026-12-07).
+Tests, run once ~60 sessions of post-launch SIP data exist (about March 2027), V7 raw pool:
+1. Night-leg gross close->open per trade (book weights), post-launch vs 2024-26: difference and
+   t (clustered by night). FLAG if post < 0.5 x 2024-26 AND t <= -2.0.
+2. Opening-auction depth: median 09:30 SIP minute $ volume / ADV20 of the picks, post vs the
+   Study V baseline (1.6%). FLAG if it falls below 1.0% (capacity model: Y rises ~sqrt(1.6/x)).
+3. Live: make review sections 4/8 on post-launch live night trades (the same-trade gap and the
+   impact fit) and the pre-registered kill rules, unchanged.
+Action: any FLAG -> the night leg goes to SHADOW (daily.night_weight 0 with the shadow log) pending
+a pre-registered study of the new regime; no FLAG -> nothing changes. The canaries in code
+(signals.regular_clock / clock_drift / bar_semantics_issues / official_open) only warn; they never
+change sizing.

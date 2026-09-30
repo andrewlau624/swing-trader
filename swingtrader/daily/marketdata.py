@@ -27,6 +27,20 @@ def _sip_end() -> pd.Timestamp:
     return pd.Timestamp.now(tz="UTC") - pd.Timedelta(minutes=16)
 
 
+def trade_date(ts) -> pd.Series | pd.Timestamp:
+    """Trade date (naive, normalised) of a bar/fill timestamp. Alpaca stamps
+    daily bars at 00:00 ET today. Under 23/5 trading (from 2026-12-06) trade
+    date D starts at 20:00-21:00 ET on D-1, so an EVENING stamp belongs to the
+    next day; labelling it by calendar date would shift every date join by one."""
+    t = pd.to_datetime(ts)
+    t = t.dt.tz_convert(ET) if isinstance(t, pd.Series) else t.tz_convert(ET)
+    if isinstance(t, pd.Series):
+        d = t.dt.tz_localize(None).dt.normalize()
+        return d + pd.to_timedelta((t.dt.hour >= 17).astype(int), unit="D")
+    d = t.tz_localize(None).normalize()
+    return d + pd.Timedelta(days=1) if t.hour >= 17 else d
+
+
 def sip_daily(symbols: list[str], start, end=None) -> dict[str, pd.DataFrame]:
     """Completed SIP daily bars, indexed by ET session date."""
     from alpaca.data.requests import StockBarsRequest
@@ -47,8 +61,7 @@ def sip_daily(symbols: list[str], start, end=None) -> dict[str, pd.DataFrame]:
         if df is None or df.empty:
             continue
         df = df.reset_index()
-        df["date"] = (df["timestamp"].dt.tz_convert(ET).dt.tz_localize(None)
-                      .dt.normalize())
+        df["date"] = trade_date(df["timestamp"])
         for sym, g in df.groupby("symbol"):
             out[sym] = g.set_index("date")[["open", "high", "low", "close", "volume"]]
     return out
@@ -189,12 +202,61 @@ def live_rows(symbols: list[str], max_age_min: float = 10.0) -> pd.DataFrame:
             hi, lo = float(s.daily_bar.high), float(s.daily_bar.low)
             d = dsip.get(sym)
             if d is not None and d.daily_bar is not None:
-                db_day = pd.Timestamp(d.daily_bar.timestamp).tz_convert(ET).date()
+                db_day = trade_date(pd.Timestamp(d.daily_bar.timestamp)).date()
                 if db_day == now.tz_convert(ET).date():
                     hi, lo = max(hi, float(d.daily_bar.high)), min(lo, float(d.daily_bar.low))
             rows[sym] = {"price": float(s.latest_trade.price), "high": hi, "low": lo,
                          "trade_age_min": age}
     return pd.DataFrame.from_dict(rows, orient="index")
+
+
+def rth_minutes(symbols: list[str], day: pd.Timestamp, until_hm: int = 1600) -> pd.DataFrame:
+    """SIP 1-minute bars of ONE regular session (09:30 up to until_hm ET),
+    aggregated per symbol: open (first minute), high, low, close, volume.
+    Regular hours by construction, so it is the reference the 23/5 canaries
+    compare vendor daily bars and quotes against."""
+    from alpaca.data.requests import StockBarsRequest
+    from alpaca.data.timeframe import TimeFrame
+    data, _ = _clients()
+    d = pd.Timestamp(day).tz_localize(ET) if pd.Timestamp(day).tzinfo is None else pd.Timestamp(day)
+    start = d.normalize() + pd.Timedelta(hours=9, minutes=30)
+    end = min(d.normalize() + pd.Timedelta(hours=until_hm // 100, minutes=until_hm % 100),
+              _sip_end().tz_convert(ET))
+    df = data.get_stock_bars(StockBarsRequest(
+        symbol_or_symbols=list(symbols), timeframe=TimeFrame.Minute,
+        start=start.tz_convert("UTC"), end=end.tz_convert("UTC"),
+        feed="sip", adjustment="raw")).df
+    if df is None or df.empty:
+        return pd.DataFrame(columns=["open", "high", "low", "close", "volume"])
+    df = df.reset_index().sort_values("timestamp")
+    return df.groupby("symbol").agg(open=("open", "first"), high=("high", "max"),
+                                    low=("low", "min"), close=("close", "last"),
+                                    volume=("volume", "sum"))
+
+
+def daily_bar_check(symbols: list[str], day: pd.Timestamp) -> list[tuple]:
+    """[(sym, raw daily bar dict, bar timestamp, RTH-minute aggregate dict)] for one
+    past session, raw prices on both sides (a dividend adjustment must not look
+    like a semantics change). Input to signals.bar_semantics_issues."""
+    from alpaca.data.requests import StockBarsRequest
+    from alpaca.data.timeframe import TimeFrame
+    data, _ = _clients()
+    d = pd.Timestamp(day).normalize()
+    df = data.get_stock_bars(StockBarsRequest(
+        symbol_or_symbols=list(symbols), timeframe=TimeFrame.Day,
+        start=(d - pd.Timedelta(days=2)).tz_localize("UTC"), end=(d + pd.Timedelta(days=1)).tz_localize("UTC"),
+        feed="sip", adjustment="raw")).df
+    rth = rth_minutes(symbols, d)
+    out = []
+    if df is None or df.empty:
+        return out
+    df = df.reset_index()
+    df["date"] = trade_date(df["timestamp"])
+    for _, r in df[df["date"] == d].iterrows():
+        if r.symbol in rth.index:
+            out.append((r.symbol, r[["open", "high", "low", "close", "volume"]].to_dict(),
+                        r.timestamp, rth.loc[r.symbol].to_dict()))
+    return out
 
 
 def minute_history(symbol: str, sessions: int) -> dict:
