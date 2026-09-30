@@ -22,7 +22,10 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 - **AD SPY held + noise overlay (taxable): beats the full book after tax at every size ≥ $25k** (MOD, MNQ:
   $100k 21.5 vs 14.5%/yr; $1M 19.1 vs 11.2), both halves pre-tax. Not a new edge: beta held for tax deferral
   plus the uncorrelated noise leg. Costs: max DD −17% (2021-26) / −31% (2020) vs the book's −10%. Taxable only
-  (Roth has no intraday margin). **Decision pending:** pre-register the taxable switch past ~$25k or not.
+  (Roth has no intraday margin). **Decided (Round 14): switch the taxable account at $100k, not $25k.** Live code
+  caps the noise leg at 1.0 on top of held SPY, and at a 10%/yr index the overlay only ties the book at $100k and
+  loses at $25k. Gates: noise not killed, >= 60 live sessions, fills <= 1.5bp/side, user re-confirms the drawdown.
+  Build `daily.taxable_mode` when taxable nears $100k.
   research/drafts/study_z_ad_day_ideas.md.
 
 ## Study T (2026-09-29): SEC offering filings on the night picks -> SHADOW (N 607)
@@ -599,7 +602,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Fade QQQ inside the noise band while the noise leg is flat (Round 13 AB) | **dead** | in-band drift < one side of cost; −2..−4pp/yr, NW t ≈ −1.2, placebo 41-82 |
 | Box-spread financing of the overnight debit (Round 13 AA) | **report** | debit ~3.6% of equity at 1.3x: ~$320/yr at $100k; ~$1.7k at 2.0x; only with MAX leverage |
 | Closing-auction imbalance (Round 13 AC) | **untested: data** | needs Nasdaq/NYSE imbalance history (Databento 2018+) and a live feed |
-| SPY held + noise overlay for the taxable account (Round 13 AD) | **report, decision pending** | beats B2 after tax at every size ≥ $25k, both halves; more drawdown (−17% / −31% in 2020); taxable only |
+| SPY held + noise overlay for the taxable account (Round 13 AD) | **report → switch at $100k (Round 14)** | beats B2 after tax, both halves; at the live cap 1.0 and a 10% index it ties at $100k, loses at $25k; more drawdown (−17% / −31% in 2020); taxable only |
 
 ## Ideas not yet tested
 

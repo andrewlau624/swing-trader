@@ -68,3 +68,9 @@ drawdowns. Study Y's crossover ($250k) moves down to ~$25k under this comparison
 If adopted it should be pre-registered as a switch with the drawdown stated up front, not slid in.
 
 Program N: 614 + 3 (Z) + 2 (AB) = **619**. Nothing new clears the bar; AD is structural.
+
+## Round 14 addendum (feasibility sensitivity, after AD; decides the trigger, not a new variant)
+Live `executor._gate` gives the noise leg `min(noise_max_lev, mult − overnight weight)`: with the index held 1.0x
+at mult 2 the cap is 1.0. After tax (MOD, MNQ), 2021-26, B2 vs overlay at cap 1.0 vs cap 1.0 with SPY at 10%/yr:
+$25k 15.9 / 20.3 / 15.2; $100k 14.5 / 20.0 / 14.9; $500k 12.5 / 19.2 / 14.1; $1M 11.2 / 18.6 / 13.5. Max DD
+−17..−18% at cap 1.0. Pre-tax halves at $100k, cap 1.0: 23.8 / 24.3. -> trigger set at $100k (Round 14).
