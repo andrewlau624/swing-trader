@@ -352,6 +352,44 @@ def night_sizing(picks: pd.DataFrame, *, vol_min: float, crowd_n: int,
     return kept, per
 
 
+def night_impact_cap(adv, vol20, edge_bps: float, impact_y: float) -> np.ndarray:
+    """Largest night order ($) per name that still raises expected profit
+    (research/drafts Study X). Under the square-root law each auction costs
+    Y * sigma * sqrt(q / ADV), so q * (g - 2 Y sigma sqrt(q/ADV)) peaks at
+    q* = ADV * (g / (3 Y sigma))^2. Thin or volatile names are capped first;
+    at a few $k of equity no order comes near q*. sigma = daily sd from the
+    annualised vol20. Returns +inf where the inputs are missing."""
+    adv = np.asarray(adv, float)
+    sig = np.asarray(vol20, float) / np.sqrt(252)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        q = adv * (edge_bps / 1e4 / (3 * impact_y * sig)) ** 2
+    return np.where(np.isfinite(q) & (adv > 0) & (sig > 0), q, np.inf)
+
+
+def impact_fit(cost_bps, x_bps, days=None) -> dict:
+    """Fit the square-root impact coefficient Y from live night fills:
+    cost_bps = Y * x_bps, x = sigma_daily * sqrt(order $ / ADV) in bp, through
+    the origin (the spread is ~0 at the auctions, NEXT.md). SE clustered by
+    day when `days` is given (one morning's sells share its auctions).
+    `identified` = the 95% interval is narrower than +-1, i.e. it can tell the
+    Study X choices (Y 1 / 2 / 4) apart. Tiny orders give x ~ 1bp and leave Y
+    unidentified: that is the expected answer at a few $k."""
+    c = np.asarray(cost_bps, float); x = np.asarray(x_bps, float)
+    ok = np.isfinite(c) & np.isfinite(x) & (x > 0)
+    c, x = c[ok], x[ok]
+    n = len(c)
+    if n < 5 or (x ** 2).sum() <= 0:
+        return {"n": n, "y": float("nan"), "se": float("nan"), "ub": float("nan"),
+                "mean_x": float(x.mean()) if n else float("nan"), "identified": False}
+    y = float((c * x).sum() / (x ** 2).sum())
+    e = c - y * x
+    g = np.asarray(days)[ok] if days is not None else np.arange(n)
+    sx = pd.Series(e * x).groupby(g).sum().to_numpy()
+    se = float(np.sqrt((sx ** 2).sum()) / (x ** 2).sum())
+    return {"n": n, "y": y, "se": se, "ub": y + 1.96 * se, "mean_x": float(x.mean()),
+            "identified": bool(1.96 * se < 1.0)}
+
+
 # Night sizing tilt (RESULTS.md addendum 16). OLS of the next-open return on
 # (log vol20, day return), fitted on 2021-23 ONLY and judged on 2024-26: live
 # book 41.3% -> 46.8% there, beating a shuffled-weight placebo (42.9%). The

@@ -202,6 +202,11 @@ class DailyCfg:
     # v1 = depth + vol20 (shipped); v2 adds yesterday's return (addendum 23).
     # Under v1 the 15:40 log still prints the v2 weights for comparison.
     night_tilt_model: str = "v1"
+    # Impact cap (research Study X): each night order <= ADV * (edge / (3 Y sigma))^2,
+    # the size past which square-root impact eats more than the order adds. None = off
+    # (Y is unmeasured: `make review` section 8 fits it from live fills as orders grow).
+    night_impact_y: float | None = None
+    night_impact_edge_bps: float = 22.0
     # leg 3: QQQ noise-area intraday momentum (shadow until the gate trips)
     noise_symbol: str = "QQQ"
     # traded instead when another leg (IBS) already holds noise_symbol --

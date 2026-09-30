@@ -7,7 +7,7 @@ Rebuilt entirely from the brokers and market data, so it runs anywhere with
 the keys (no server logs needed) and never writes results into git -- the
 repo is public. Output: printed, plus out/review-<today>.md (gitignored).
 
-It answers four questions, in the order that isolates problems:
+It answers these questions, in the order that isolates problems:
   1. SIGNAL   did it trade what the honest backtest signal picks that day?
   2. FILLS    did fills match the official auction prices the backtest used?
   3. PAPER vs LIVE   same days, same decisions: does Schwab execution differ?
@@ -126,6 +126,25 @@ def auction_prices(fills: pd.DataFrame) -> pd.DataFrame:
     f["bench"] = bench
     f["cost_bps"] = sign * (f.px / f.bench - 1) * 1e4          # + = worse than the auction
     return f
+
+
+def impact_inputs(f: pd.DataFrame) -> pd.DataFrame:
+    """Per night fill: ADV20 and daily vol20 as of the session BEFORE the fill
+    (what the 15:40 decision knew), and x = sigma_daily * sqrt(fill $ / ADV) in bp."""
+    if f.empty:
+        return f.assign(x_bps=[], pct_adv=[])
+    bars = md.sip_daily(sorted(f.sym.unique()), f.day.min() - pd.Timedelta(days=45), f.day.max())
+    adv, vol = [], []
+    for s, d in zip(f.sym, f.day):
+        b = bars.get(s)
+        h = b[b.index < d].tail(21) if b is not None else None
+        if h is None or len(h) < 21:
+            adv.append(np.nan); vol.append(np.nan); continue
+        adv.append(float((h.close * h.volume).iloc[-20:].mean()))
+        vol.append(float(np.log(h.close).diff().iloc[-20:].std()))
+    f = f.assign(adv20=adv, sig=vol)
+    q = f.qty * f.px
+    return f.assign(pct_adv=q / f.adv20 * 100, x_bps=f.sig * 1e4 * np.sqrt(q / f.adv20))
 
 
 def round_trips(f: pd.DataFrame) -> pd.DataFrame:
@@ -249,6 +268,19 @@ def main(argv=None):
                 f"median {g.cost_bps.median():+6.1f}bp")
     say("\n## 7. Intraday leg fill hygiene (conviction goes live after ~a week of clean days)")
     say(noise_hygiene(f))
+
+    say("\n## 8. Price impact: fit Y for the night leg's impact cap (Study X, `night_impact_y`)")
+    say("cost = Y x sigma_daily x sqrt(fill $ / ADV20). Y 4 = the robust cap; 1-2 if impact is low.")
+    try:
+        imp = impact_inputs(f[f.leg == "night"].dropna(subset=["cost_bps"]))
+        for book, g in imp.groupby("book"):
+            r = sg.impact_fit(g.cost_bps, g.x_bps, g.day.astype(str))
+            say(f"- {book:5s}: n {r['n']}, mean x {r['mean_x']:.2f}bp (median order "
+                f"{g.pct_adv.median():.4f}% of ADV), Y {r['y']:+.1f} (95% UB {r['ub']:+.1f}) -> "
+                + ("identified" if r["identified"] else
+                   "not identified yet: orders too small to move the auction (expected below ~$25k)"))
+    except Exception as exc:
+        say(f"(impact inputs skipped: {str(exc)[:80]})")
 
     rt = round_trips(f)
     say("\n## 4. Night-leg round trips: actual vs backtest on the same trades")

@@ -27,6 +27,12 @@ by ~$1M; auction-sized impact models put the peak far lower. Plan: cap the night
 $ size (shared by taxable + Roth), send growth to IBS / noise / MNQ, and start logging auction
 participation per fill so Y can be fitted from ~$25k. study_v_capacity.md.
 
+## Study X + scale plan (2026-09-29): impact cap BUILT (off), measurement loop live (N 614)
+- `daily.night_impact_y: null`: turn on (4, or review section 8's fitted UB) once the account passes ~$25k.
+- Night decisions now log `adv20` / `pct_adv`; `make review` section 8 fits the impact coefficient Y.
+- Scale order (research/drafts/scale_plan.md): night leg stops ~$100-250k; noise QQQ ~$1M (MNQ past
+  ~$160k fixes both tax and capacity); SMH ~$250k; IBS low single-digit $M.
+
 ## Live checkpoint (2026-09-29): costs fine, edge unproven, overnight leverage off
 
 LIVE (Schwab, since 09-22, 6 sessions): **+$18.99 (+0.8%)** on ~$2,240 (deposit

@@ -49,3 +49,18 @@ def test_healthcheck_ping_is_a_noop_without_a_url(monkeypatch):
     monkeypatch.delenv("HEALTHCHECK_URL", raising=False)
     monkeypatch.setattr(daily, "__name__", "daily")
     daily.ping_healthcheck(0)       # must not raise or reach the network
+
+
+def test_impact_inputs_use_only_bars_before_the_fill(monkeypatch):
+    import numpy as np
+    days = pd.bdate_range("2026-08-01", "2026-09-25")
+    close = pd.Series(10 * np.exp(0.03 * np.sin(np.arange(len(days)))), index=days)
+    b = pd.DataFrame({"open": close, "high": close, "low": close, "close": close, "volume": 1e6})
+    b.loc[pd.Timestamp("2026-09-25"), "volume"] = 1e9          # the fill day: must be ignored
+    monkeypatch.setattr(review.md, "sip_daily", lambda syms, *a, **k: {"X": b})
+    f = pd.DataFrame([dict(book="live", sym="X", qty=100, px=10.0, day=pd.Timestamp("2026-09-25"))])
+    r = review.impact_inputs(f).iloc[0]
+    h = b[b.index < pd.Timestamp("2026-09-25")].tail(21)
+    assert r.adv20 == pytest.approx((h.close * h.volume).iloc[-20:].mean())
+    sig = np.log(h.close).diff().iloc[-20:].std()
+    assert r.x_bps == pytest.approx(sig * 1e4 * np.sqrt(1000 / r.adv20))

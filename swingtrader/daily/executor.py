@@ -850,7 +850,7 @@ class DailyExecutor:
         if rows.empty:
             self.warn("no live prices returned - skipping night leg"); return
         self.log(f"[night] prices from {src.upper()} ({len(rows)} fresh quotes)")
-        cols = [c for c in ("prev_close", "vol20") if c in elig.columns]
+        cols = [c for c in ("prev_close", "vol20", "adv20") if c in elig.columns]
         rows = rows.join(elig[cols], how="inner")
         bad = sg.prev_close_mismatch(rows)
         if bad.any():
@@ -908,9 +908,17 @@ class DailyExecutor:
         self.log(f"[night] tilt {self.d.night_tilt_model} (would be {other}: "
                  + ", ".join(f"{s} {a:.2f}" for s, a in zip(picks.index[:8], w_other)) + ")")
         probe_usd = self.d.night_probe_max_usd if self.live else None
-        for (sym, r), wi in zip(picks.iterrows(), w):
-            qty = math.floor(per * wi / r.price)   # auction orders are whole shares
-            plan["requested"] += per * wi
+        adv = (picks["adv20"].values if "adv20" in picks else np.full(len(picks), np.nan))
+        cap = (sg.night_impact_cap(adv, v20, self.d.night_impact_edge_bps, self.d.night_impact_y)
+               if self.d.night_impact_y else np.full(len(picks), np.inf))
+        for (sym, r), wi, ci, ai in zip(picks.iterrows(), w, cap, adv):
+            target = per * wi
+            if target > ci:
+                self.log(f"  {sym}: impact cap ${ci:,.0f} < target ${target:,.0f} "
+                         f"(ADV ${ai / 1e6:,.1f}M, vol20 {r.get('vol20', np.nan):.0%})")
+                target = ci
+            qty = math.floor(target / r.price)   # auction orders are whole shares
+            plan["requested"] += target
             probe = False
             if qty < 1 and probe_usd and r.price <= probe_usd:
                 # a small account rounds every name above ~$50 to zero shares, so
@@ -918,7 +926,7 @@ class DailyExecutor:
                 # only. One share measures the auction fill just as well.
                 qty, probe = 1, True
             if qty < 1:
-                self.log(f"  skip {sym}: ${per * wi:.0f} buys 0 shares at {r.price:.2f}")
+                self.log(f"  skip {sym}: ${target:.0f} buys 0 shares at {r.price:.2f}")
                 continue
             if cash - qty * r.price < floor:
                 self.log(f"  skip {sym}: book cash exhausted"); continue
@@ -930,12 +938,13 @@ class DailyExecutor:
                 and r.ask >= r.bid > 0) else float("nan")
             self.log(f"  {sym}: day {r.day_ret*100:+.1f}%  ibs {r.ibs:.2f}  px {r.price:.2f}  w {wi:.2f}"
                      + (f"  spread {spread:.0f}bp" if np.isfinite(spread) else "")
-                     + (f"  PROBE 1 sh (target ${per * wi:.0f})" if probe else ""))
-            self._log_decision(today, sym, r, spread, qty)
+                     + (f"  PROBE 1 sh (target ${target:.0f})" if probe else ""))
+            self._log_decision(today, sym, r, spread, qty, ai)
             self._order(book, today, sym, "buy", "night", qty=qty, tif="cls",
                         ref_px=float(r.price), kind="entry")
 
-    def _log_decision(self, today: str, sym: str, r, spread_bps: float, qty: int) -> None:
+    def _log_decision(self, today: str, sym: str, r, spread_bps: float, qty: int,
+                      adv20: float = float("nan")) -> None:
         """One line per night pick with what was known at 15:40, including the
         quoted spread. This is the dataset a per-name cost model will be fitted
         on once fills accumulate (research/sim uses a price/volume tier until then)."""
@@ -944,7 +953,11 @@ class DailyExecutor:
         rec = {"date": today, "sym": sym, "price": float(r.price), "day_ret": float(r.day_ret),
                "ibs": float(r.ibs), "vol20": float(r.get("vol20", np.nan)),
                "spread_bps": None if not np.isfinite(spread_bps) else round(spread_bps, 1),
-               "qty": int(qty)}
+               "qty": int(qty),
+               # participation, for fitting the impact coefficient (review section 8)
+               "adv20": None if not np.isfinite(adv20) else round(float(adv20)),
+               "pct_adv": None if not np.isfinite(adv20) or adv20 <= 0
+               else round(qty * float(r.price) / adv20 * 100, 5)}
         with open(self.log_dir / f"daily-decisions{self.tag}.jsonl", "a") as fh:
             fh.write(json.dumps(rec) + "\n")
 

@@ -1072,3 +1072,53 @@ def test_trading_pnl_ignores_capital_changes():
     assert t["realised"] == 10.0 and abs(t["open"] - 5.0) < 1e-9 and abs(t["total"] - 15.0) < 1e-9
     assert abs(t["pct"] - 15.0 / (eq - 15.0) * 100) < 1e-9, "a % of capital in use, not of the day-one start"
     assert "P&L $+15.00" in b.pnl_line(eq)
+
+
+# ------------------------------------------- impact cap + fit (research Study X)
+def test_night_impact_cap_is_the_profit_maximising_size():
+    adv, vol, g, y = 40e6, 1.2, 22.0, 2.0
+    q_star = sg.night_impact_cap([adv], [vol], g, y)[0]
+    sig = vol / np.sqrt(252)
+    profit = lambda q: q * (g / 1e4 - 2 * y * sig * np.sqrt(q / adv))
+    grid = np.linspace(q_star * 0.2, q_star * 3, 2001)
+    assert grid[np.argmax(profit(grid))] == pytest.approx(q_star, rel=0.01)
+    assert np.isinf(sg.night_impact_cap([np.nan, 1e7], [1.0, 0.0], g, y)).all(), "missing inputs never cap"
+
+
+def test_impact_fit_recovers_y_and_says_when_orders_are_too_small():
+    rng = np.random.default_rng(0)
+    x = rng.uniform(5, 40, 400)
+    r = sg.impact_fit(2.0 * x + rng.normal(0, 5, 400), x)
+    assert r["y"] == pytest.approx(2.0, abs=0.1) and r["identified"]
+    tiny = rng.uniform(0.2, 1.5, 40)                   # a few-$k book: x ~ 1bp
+    r = sg.impact_fit(rng.normal(0, 8, 40), tiny, days=np.repeat(np.arange(10), 4))
+    assert not r["identified"], "10bp noise on 1bp of impact cannot pin Y down"
+    assert sg.impact_fit([1, 2], [1, 1])["n"] == 2 and not sg.impact_fit([1, 2], [1, 1])["identified"]
+
+
+def test_impact_cap_shrinks_thin_volatile_names_and_is_off_by_default(tmp_path, monkeypatch):
+    from swingtrader.daily import executor as E
+    syms = ["THIN", "DEEP"]
+    elig = pd.DataFrame({"prev_close": [10 / 0.9, 10 / 0.9], "vol20": [1.5, 0.8],
+                         "adv20": [40e6, 500e6]}, index=syms)
+    live = pd.DataFrame({"price": [10.0, 10.0], "high": [10 / 0.9] * 2, "low": [9.99] * 2}, index=syms)
+    monkeypatch.setattr(E.md, "eligibility", lambda *a, **k: elig)
+    monkeypatch.setattr(E.md, "live_rows", lambda s, *a, **k: live.loc[[x for x in s if x in live.index]])
+    monkeypatch.setattr(E, "all_assets", lambda: SimpleNamespace(symbols=syms))
+    ex = _executor(tmp_path, monkeypatch)
+    ex.d.night_tilt_k = 0
+    assert ex.d.night_impact_y is None, "off until review section 8 measures Y"
+    run = lambda day: (ex.broker.client.submitted.clear(),
+                       ex.phase_close(DailyBook(cash=100_000, start_equity=100_000), day,
+                                      dt.datetime.fromisoformat(day + "T15:40").replace(tzinfo=ET),
+                                      ex.broker.clock()),
+                       {r.symbol: r.qty for r in ex.broker.client.submitted})[-1]
+    off = run("2026-09-23")
+    assert off["THIN"] == off["DEEP"] == 500, "$100k x 0.5 x 10% = $5,000 a name"
+    ex.d.night_impact_y = 4.0
+    on = run("2026-09-23")
+    q_thin = sg.night_impact_cap([40e6], [1.5], ex.d.night_impact_edge_bps, 4.0)[0]
+    assert 0 < on["THIN"] == int(q_thin // 10) < 500, "150%-vol, $40M ADV: capped to ~$150"
+    assert on["DEEP"] == 500, "liquid, calmer name: untouched"
+    rec = [json.loads(x) for x in (tmp_path / "daily-decisions.jsonl").read_text().splitlines()]
+    assert rec[-1]["adv20"] and rec[-1]["pct_adv"] > 0, "participation is logged for the Y fit"

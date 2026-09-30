@@ -115,6 +115,10 @@ daily:
                                  # book -17% -> -4% with the dedupe; 2021-26 Sharpe up, not down)
   night_tilt_k: 0.25             # weight deeper drops more (addendum 16; fitted 2021-23, held out 2024-26). 0 = equal
   night_tilt_model: v1           # v2 adds yesterday's return: replay +$23k, but borderline (addendum 23)
+  night_impact_y: null           # impact cap (Study X): order <= ADV (edge/(3 Y sigma))^2. null = off until
+                                 # `make review` section 8 measures Y; 4 is the robust choice (Study X), 1-2
+                                 # if fills show low impact. At ~$2k it binds only on ~300%-vol names.
+  night_impact_edge_bps: 22.0    # the leg's weighted gross (24.6bp) minus live cost, rounded down
   noise_symbol: QQQ
   noise_alt_symbol: QQQM         # used on days the IBS leg holds QQQ
   # QQQ + SMH split the intraday budget equally (RESULTS.md addendum 16:
