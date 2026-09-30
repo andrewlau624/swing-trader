@@ -10,6 +10,21 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Round 13 (2026-09-30): the "use the day" ideas — Z, AB dead; AA small; AC needs data; AD is the news (N 619)
+- **Z SPX put-write overlay: DEAD.** PUT (monthly) is positive every period (+4.9..+8.5%/yr over BIL at tier_hi)
+  but fails NW t (1.93 < 2.0) and the crash bound (−15.5% in 21 days, 2020-03). WPUT and iron condors are
+  negative after costs. Do not rerun with a new k. In the Roth, PUT loses to a held index (8.4 vs 15.2%/yr).
+- **AA box financing:** the overnight debit averages only 3.6% of equity at 1.3x, so it saves ~$320/yr at $100k;
+  at 2.0x ~$1.7k/$100k. Only worth it with the MAX profile at ≥ $100k. $0 today (leverage off).
+- **AB fade QQQ inside the noise band: DEAD** (−2..−4pp/yr at 1bp/side, NW t −1.1..−1.3, placebo 41-82).
+- **AC closing imbalance:** untested; needs Databento/Nasdaq imbalance data (2018+, $125 free credit may cover
+  a test) and a paid live feed. User's call.
+- **AD SPY held + noise overlay (taxable): beats the full book after tax at every size ≥ $25k** (MOD, MNQ:
+  $100k 21.5 vs 14.5%/yr; $1M 19.1 vs 11.2), both halves pre-tax. Not a new edge: beta held for tax deferral
+  plus the uncorrelated noise leg. Costs: max DD −17% (2021-26) / −31% (2020) vs the book's −10%. Taxable only
+  (Roth has no intraday margin). **Decision pending:** pre-register the taxable switch past ~$25k or not.
+  research/drafts/study_z_ad_day_ideas.md.
+
 ## Study T (2026-09-29): SEC offering filings on the night picks -> SHADOW (N 607)
 E3 (424B or S/F-1/3 accepted between the prior close and 15:40) DROP passes the pre-registered
 bar at tier and tier_hi, but only after fixing an ETN mapping bug (BMO's 424B flood), t −2.13,
@@ -580,6 +595,11 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Night leg: issuer classes via EDGAR (Study U: drop/only 'ETP') | **dead as registered; classes mislabeled** | EDGAR's index misses ETF series ('unmapped' = leveraged ETFs) and 'non-operating' = foreign ADRs; LETF (+45bp gross 24-26) and ADR (+41) buckets beat US stocks (+17) in a diagnostic: needs a proper classifier (study_u_classes.md) |
 | Night leg: leveraged-ETF picks up/down-weighted (Study W) | **dead** | per unit of vol an LETF pick = a same-vol non-LETF pick (z +0.017, t 0.6); no L(L−1) gradient; the +45bp gross was leverage (study_w_letf.md) |
 | Night leg: SSR (Rule 201) flag as a long-side tilt | **not run** | ≈ drop depth (picks need −8% and IBS ≤ .10; SSR = low ≤ −10%): no new information, not worth N |
+| SPX put-write overlay (Cboe PUT / WPUT / CNDR, k 0.5, Round 13 Z) | **dead** | PUT positive every period but NW t 1.93 and −15.5% worst 21d (2020); WPUT/CNDR negative after costs; in the Roth PUT < held index |
+| Fade QQQ inside the noise band while the noise leg is flat (Round 13 AB) | **dead** | in-band drift < one side of cost; −2..−4pp/yr, NW t ≈ −1.2, placebo 41-82 |
+| Box-spread financing of the overnight debit (Round 13 AA) | **report** | debit ~3.6% of equity at 1.3x: ~$320/yr at $100k; ~$1.7k at 2.0x; only with MAX leverage |
+| Closing-auction imbalance (Round 13 AC) | **untested: data** | needs Nasdaq/NYSE imbalance history (Databento 2018+) and a live feed |
+| SPY held + noise overlay for the taxable account (Round 13 AD) | **report, decision pending** | beats B2 after tax at every size ≥ $25k, both halves; more drawdown (−17% / −31% in 2020); taxable only |
 
 ## Ideas not yet tested
 
