@@ -543,3 +543,16 @@ baseline > 0 pp/yr in both halves; (3) NW t (5 lags) of the daily increment >= 2
 picks of the same vol decile in the same night (or the nearest night when absent), rule >=
 95th pct; (5) the book's max drawdown under the rule not worse than baseline by > 2pp.
 Verdict: pass -> SHADOW; else DEAD. Capacity reported at $25k/$100k/$500k (% of ADV).
+
+
+## Amendment — Round 9: Study V, night-leg capacity at the auctions (report; 0 variants, N stays 611)
+
+`date`: Tue Sep 29 20:40:54 PDT 2026 (no impact-adjusted number computed yet).
+Picks: V7 2021-26 with a 16:00 bar on d (lm1: closing cross + that minute) and a 09:30 bar on
+d+1 (am1: opening cross + that minute); bar volumes OVERSTATE the auctions, so every capacity
+number here is a best case. Order at equity E: Q = 0.5 x E x w (book weights). Participation
+p = Q / bar dollar volume, each side. Impact per side = Y x sigma_daily x sqrt(p), Y in {0.5, 1}
+(square-root law; auctions assumed no deeper than continuous trading). Live cost 1bp/side.
+Report at E = $2.3k, 25k, 100k, 250k, 500k, 1M, 2.5M, 5M: weighted net bp/trade, night-leg
+pp/yr, $/yr, share of picks with p > 10% / 25% of either bar; the E where the net edge halves and
+where it reaches 0. Also the "sell the open over the first N minutes" alternative is NOT tested here.
