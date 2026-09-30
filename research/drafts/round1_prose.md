@@ -507,3 +507,39 @@ Rules (2 variants; N = 607 + 2 = **609**), book increment as Study T (0.5 x w x 
 Pass (all, at tier AND tier_hi): rule minus baseline > 0 in both halves; NW t (5 lags) of
 the daily increment >= 2.0 over 2021-26; placebo: drop the same number of picks at random
 within each night (200 draws), rule >= 95th pct. Verdict: pass -> SHADOW; else DEAD.
+
+
+## Amendment — Round 8: Study W, leveraged ETFs inside the night leg (pre-register)
+
+`date`: Tue Sep 29 20:38:42 PDT 2026. Known before writing (Study U diagnostic, w-weighted GROSS): the
+EDGAR-"unmapped" bucket (mostly LETFs) +19.5 / +44.9bp 2021-23 / 2024-26 vs US operating
+stocks +21.8 / +16.7. No return by the classifier below, and no vol-normalised number, has
+been computed.
+
+Why raw bp is not the test: a 3x fund returns ~3x per trade, so higher gross bp can be
+leverage (risk per dollar), not edge. The test is RISK-ADJUSTED.
+
+Classifier (point-in-time, fixed now): LETF = `new_listings.etf_kind(sym) == "lev"` AND a
+leverage factor parsed from the name: "<n>X"/"-<n>X" -> n (sign negative with BEAR / SHORT /
+INVERSE / "-"), ULTRAPRO -> 3, ULTRA -> 2, ULTRASHORT -> -2, ULTRAPRO SHORT -> -3; |L| >= 1.5
+or L = -1 (plain inverse). Option-income / YieldMax / anything unparsed is NOT LETF. Ticker
+reuse guard: d must fall inside the ticker's LAST listing segment (`cache_new_listings_seg`,
+add. 36), else not LETF. Subclass: single-stock LETF (name names one company: "LONG <X>",
+"<X> DAILY", T-REX/TRADR/GRANITESHARES/DEFIANCE issuers) vs index/sector LETF.
+
+Primary per-trade test (report + gate): z = ret / vol20 (the pick's own 20d daily sd).
+LETF z vs non-LETF picks in the SAME vol20 decile and half (pooled deciles), difference and
+t clustered by night, per half. Mechanism check (report only): mean z by L(L-1) group
+{2: 2x & -1x, 6: 3x & -2x, 12: -3x}; the rebalance story predicts z rising with L(L-1).
+
+Rules (2 variants; N = 609 + 2 = **611**), book increment inc = 0.5 x w x net, V7 picks 2021-26:
+- W1: drop LETF picks.
+- W2: LETF picks at 2 x weight with a 0.20 name cap for index/sector LETFs (single-stock
+  LETFs stay at 0.10: their underlying is one company).
+Pass (all, at tier AND tier_hi): (1) z difference has the rule's sign in both halves
+(negative for W1, positive for W2) with t (2021-26) >= 2.0 in that direction; (2) rule minus
+baseline > 0 pp/yr in both halves; (3) NW t (5 lags) of the daily increment >= 2.0;
+(4) placebo, 200 draws: the same operation applied to the same number of random non-LETF
+picks of the same vol decile in the same night (or the nearest night when absent), rule >=
+95th pct; (5) the book's max drawdown under the rule not worse than baseline by > 2pp.
+Verdict: pass -> SHADOW; else DEAD. Capacity reported at $25k/$100k/$500k (% of ADV).
