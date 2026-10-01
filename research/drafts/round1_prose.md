@@ -1339,3 +1339,24 @@ temperature 0, the same system prompt + a JSON-keys line, at most **20** new pic
 the judge cover every pick instead of the 8 deepest). Every record logs the model that actually served it (a public
 issue reports this ID may serve DeepSeek V3.2, knowledge cutoff 2025-05; immaterial to a forward test, but logged).
 Variant BA1, scoring and bars unchanged. Changing provider/model/prompt again restarts the count.
+
+
+## Amendment — Round 25: the LLM news judge on PAST night picks after the model's cutoff — Study BC (pre-register; 1 variant, N 690 -> 691)
+
+`date`: Thu Oct 1 2026 (stamped by the commit), before the probe or any historical verdict is run.
+Same judge as Study BA (Round 23b: OpenCode Go `deepseek-v4-flash`, temperature 0, same prompt; the date is never
+in the prompt). Script: `research/sim/news_judge_hist.py`; picks: the shipped night pool (raw, corr .7)
+2025-01-02..2026-09-18, 4,071 rows, `research/sim/news_judge_hist_picks.csv`.
+
+Contamination rule (fixed now): `probe` asks 9 dated true/false questions about public events (2024-11..2025-10)
+and 3 fabricated controls. If any control is answered true, the probe is void and BC does not run. Otherwise the
+window starts on the first day of the THIRD month after the latest month answered true (two full months of
+margin) and ends 2026-09-18. If the latest known month is 2025-10 (the last probe), the model's cutoff is not
+placed by the probe and BC does not run (a later probe would be a new registration).
+
+Inputs point-in-time per pick: news published from the previous session's 16:00 ET to 15:40 ET on d, SEC filings
+accepted in the same window. Variant BC1 = BA1 (weight 0.25 on picks judged fundamental with confidence >= 0.7,
+freed cash idles). Scored by `research/sim/news_judge_eval.py` on the official crosses (close cross d -> next
+open cross), 2 x 2.5bp; PASS only if: >= 300 scored picks, daily increment > 0 in both halves of the window (split
+at the median date), NW t >= 2, sign-flip and within-night flag-shuffle placebos >= 95th. A PASS here plus a PASS
+of BA (forward) would be needed to spec a live switch; BC alone moves BA's prior, not the book.

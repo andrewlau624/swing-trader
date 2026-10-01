@@ -377,3 +377,13 @@ forward-status: ## every forward-only shadow gate in one place (AU3 is in `make 
 	@PYTHONPATH=. $(PY) -m research.sim.quote_imbalance_eval
 	@echo ""
 	@echo "== Round 19 AU3 tug-of-war tilt: run  make review SINCE=2026-09-22 ARGS=--no-replay  (section 9) =="
+
+news-hist-probe: ## Round 25 BC: find the LLM's knowledge cutoff (one call)
+	@PYTHONPATH=. $(PY) -m research.sim.news_judge_hist probe
+
+news-hist-run:   ## Round 25 BC: judge past night picks from START (resumable): make news-hist-run START=YYYY-MM-DD
+	@test -n "$(START)" || { echo "usage: make news-hist-run START=YYYY-MM-DD (from news-hist-probe)"; exit 1; }
+	@PYTHONPATH=. $(PY) -m research.sim.news_judge_hist run --start $(START) $(ARGS)
+
+news-hist-eval:  ## Round 25 BC: score the historical verdicts on official crosses
+	@PYTHONPATH=. $(PY) -m research.sim.news_judge_eval state/news-judge-hist.jsonl
