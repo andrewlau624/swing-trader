@@ -831,3 +831,13 @@ def test_industry_momentum_shadow_ranks_the_fixed_list():
     C.loc[months[1]:months[-2], "GDX"] = np.linspace(100, 140, 12)
     C.loc[months[1]:months[-2], "NOTALIST"] = np.linspace(100, 900, 12)
     assert industry_picks(C, months[-1], top=2) == ["SMH", "GDX"]
+
+
+def test_gapper_sweep_skips_corporate_actions():
+    from daytrade.recorder import looks_like_corporate_action, select_gappers
+    assert looks_like_corporate_action(14.58 / 77.65)          # CTVA 2026-10-01 (-81%)
+    assert looks_like_corporate_action(0.5) and looks_like_corporate_action(10.2)
+    assert not looks_like_corporate_action(1.06) and not looks_like_corporate_action(0.92)
+    q = {"CTVA": {"quote": {"lastPrice": 14.58, "closePrice": 77.65, "totalVolume": 3_313_483}},
+         "REAL": {"quote": {"lastPrice": 21.0, "closePrice": 20.0, "totalVolume": 500_000}}}
+    assert [g["sym"] for g in select_gappers(q)] == ["REAL"]

@@ -81,6 +81,19 @@ def client(asyncio_: bool, dest: Path = TOKEN_COPY):
 
 
 # ------------------------------------------------------------------ gappers (pre-session selection)
+SPLIT_RATIOS = (2, 3, 4, 5, 10, 20)
+
+
+def looks_like_corporate_action(ratio: float) -> bool:
+    """A premarket last / previous close of +-50% or more, or within 3% of 1/k or k for a common split ratio k: on
+    2026-10-01 the sweep picked CTVA at -81% (a separation priced against Schwab's unadjusted previous close)."""
+    if ratio <= 0:
+        return True
+    if ratio >= 1.5 or ratio <= 0.5:
+        return True
+    return any(abs(ratio * k - 1) <= 0.03 or abs(ratio / k - 1) <= 0.03 for k in SPLIT_RATIOS)
+
+
 def select_gappers(quotes: dict, cap: int = GAPPER_CAP, exclude=CORE) -> list[dict]:
     """quotes: Schwab get_quotes JSON. A gapper: premarket last vs previous close >= 3% either way,
     price >= $5; ranked by premarket volume (the quote's day volume before 09:30). This is the one
@@ -92,6 +105,8 @@ def select_gappers(quotes: dict, cap: int = GAPPER_CAP, exclude=CORE) -> list[di
         if sym in exclude or not (last and prev and vol) or last < GAPPER_MIN_PRICE:
             continue
         gap = last / prev - 1
+        if looks_like_corporate_action(last / prev):
+            continue                          # split/spin-off against an unadjusted previous close, not a move
         if abs(gap) >= GAPPER_MIN_ABS_GAP:
             rows.append({"sym": sym, "gap": round(gap, 4), "premarket_volume": int(vol),
                          "last": last, "prev_close": prev})
