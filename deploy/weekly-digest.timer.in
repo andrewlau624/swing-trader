@@ -1,0 +1,11 @@
+# Saturdays 09:13 ET: after the week's last reconcile, before you plan the next week.
+[Unit]
+Description=swing-trader weekly digest schedule
+
+[Timer]
+OnCalendar=Sat *-*-* 09:13:00 America/New_York
+Persistent=true
+Unit=weekly-digest.service
+
+[Install]
+WantedBy=timers.target

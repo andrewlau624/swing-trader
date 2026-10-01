@@ -128,14 +128,17 @@ unpersist:
 	@-./scripts/sysd.sh disable --now swing-trader.timer 2>/dev/null
 	@-./scripts/sysd.sh disable --now daily-trader.timer 2>/dev/null
 	@-./scripts/sysd.sh disable --now schwab-reminder.timer 2>/dev/null
+	@-./scripts/sysd.sh disable --now weekly-digest.timer 2>/dev/null
 	@-rm -f $(HOME)/.config/systemd/user/swing-trader.service \
 	        $(HOME)/.config/systemd/user/swing-trader.timer \
 	        $(HOME)/.config/systemd/user/daily-trader.service \
 	        $(HOME)/.config/systemd/user/daily-trader.timer \
 	        $(HOME)/.config/systemd/user/schwab-reminder.service \
-	        $(HOME)/.config/systemd/user/schwab-reminder.timer
+	        $(HOME)/.config/systemd/user/schwab-reminder.timer \
+	        $(HOME)/.config/systemd/user/weekly-digest.service \
+	        $(HOME)/.config/systemd/user/weekly-digest.timer
 	@-./scripts/sysd.sh daemon-reload 2>/dev/null
-	@-crontab -l 2>/dev/null | grep -v 'run-live.sh' | grep -v 'run-daily.sh' | grep -v 'schwab_reminder.py' \
+	@-crontab -l 2>/dev/null | grep -v 'run-live.sh' | grep -v 'run-daily.sh' | grep -v 'schwab_reminder.py' | grep -v 'weekly_digest.py' \
 	  | grep -vE '^CRON_TZ=America/New_York|^# swing-trader|^# *[0-9]{2}:[0-9]{2} PT' \
 	  | crontab - 2>/dev/null
 	@echo "schedule removed (systemd timer and cron entries)."
@@ -387,3 +390,9 @@ news-hist-run:   ## Round 25 BC: judge past night picks from START (resumable): 
 
 news-hist-eval:  ## Round 25 BC: score the historical verdicts on official crosses
 	@PYTHONPATH=. $(PY) -m research.sim.news_judge_eval state/news-judge-hist.jsonl
+
+weekly:       ## weekly digest, printed: balances, gates, shadow "what if" $, 1/3/5y projections
+	@$(PY) scripts/weekly_digest.py
+
+weekly-send:  ## same, and email it (Resend -> NOTIFY_EMAIL); `make persist` schedules it Saturdays 09:13 ET
+	@$(PY) scripts/weekly_digest.py --send

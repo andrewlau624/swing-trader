@@ -1,0 +1,11 @@
+# Installed by `make persist`. Emails the weekly digest (scripts/weekly_digest.py): balances, gates,
+# what each shadow idea would have made, and 1/3/5-year projections. Read-only.
+[Unit]
+Description=swing-trader weekly digest email
+
+[Service]
+Type=oneshot
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=-__APP_DIR__/.env
+ExecStart=__APP_DIR__/.venv/bin/python -u scripts/weekly_digest.py --send
+TimeoutStartSec=180
