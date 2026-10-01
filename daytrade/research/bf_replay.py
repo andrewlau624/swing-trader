@@ -96,7 +96,7 @@ def run():
     B.TOP = TOP
     B.OUT = OUT
     orig = B.signals_for
-    B.signals_for = lambda df, o: orig(df, o + dt.timedelta(seconds=31))   # B uses o - 2 min -> 09:28:31 exclusive
+    B.signals_for = lambda df, o: orig(df, o + dt.timedelta(seconds=30))   # B uses o - 2 min -> at or before 09:28:30
     cal = pickle.loads((Z.OUT / "sessions.pkl").read_bytes())
     if not (OUT / "signals.parquet").exists():
         B.prices(cal)
