@@ -42,7 +42,7 @@ def opens():
     from swingtrader.daily.marketdata import trade_date
     data, _ = A._clients()
     df = data.get_stock_bars(StockBarsRequest(symbol_or_symbols=["SVXY", "BIL", "SPY"], timeframe=TimeFrame.Day,
-                                              start=pd.Timestamp("2018-02-01", tz="UTC"), end=pd.Timestamp("2026-10-02", tz="UTC"),
+                                              start=pd.Timestamp("2018-02-01", tz="UTC"), end=pd.Timestamp("2026-09-30T23:00", tz="UTC"),
                                               feed="sip", adjustment="all")).df.reset_index()
     df["date"] = trade_date(df["timestamp"])
     x = df.pivot_table(index="date", columns="symbol", values="open").sort_index()
