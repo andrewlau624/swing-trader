@@ -77,6 +77,10 @@ tercile and in the low- and high-vol terciles.
 little earlier: at $100k ≈ +$2.8k/yr if the leg's level holds; at $500k it is moot (the night leg is
 capped in dollars).
 
+## Round 20 robustness (study_ax_auction_share.md)
+- R1: TOW computed from the official crosses (corr +0.96 with the vendor version): +2.4-2.9pp, t 2.5-2.6.
+- R2: under the moderate 15% name cap +4.4pp (t 3.0); on top of tilt v2 +2.7pp (t 2.5). No conflict with either.
+
 ## Switch — BUILT 2026-10-01, OFF (shadow logging only)
 Built on the user's instruction after the round. Code: `signals.tug_of_war` / `night_tilt_tow` / `tow_gate`,
 `marketdata.eligibility` (adds `tow`), executor 15:40 `[night] tow shadow:` line + `tow` in

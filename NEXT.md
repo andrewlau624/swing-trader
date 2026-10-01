@@ -9,6 +9,18 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Rounds 20-21 (2026-10-01): free-data night tilts — AX, AY DEAD; AU3 holds on cross prices and combines (N 682 -> 686)
+- **AX (Round 20): trailing closing-/opening-cross share of volume** (Alpaca auction sizes, free; the stand-in for
+  closing imbalance, which stays parked: the user does not want a Databento account unless necessary). AX1
+  closing share flips halves (t 0.1); AX2 opening share +1.2pp both halves but t 1.5, placebo 94%: DEAD.
+  study_ax_auction_share.md.
+- **AU3 robustness:** TOW built from the official crosses still +2.4-2.9pp, t 2.5-2.6 (R1); under the moderate
+  15% name cap +4.4pp, t 3.0, and on top of tilt v2 +2.7pp, t 2.5 (R2). No conflict with either.
+- **AY (Round 21): FINRA daily short-volume ratio, both signs: DEAD** (|inc| ≤ 0.4pp, t ≤ 0.6, shuffle 53%).
+  study_ay_finra_short.md.
+
+---
+
 ## Round 19 (2026-10-01): outside-first scan — AU3 tug-of-war tilt SHADOW, AW restates the night leg, AV dead (N 677 -> 682, counting the lab's Round 18)
 
 Brief: `research/drafts/prompt_max_edge.md`. 44 sourced candidates (`max_edge_candidates.md`); summary
@@ -739,6 +751,9 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Night tilts on gap share, relative volume, late selling, idio move, 20d/52w distance, price | **dead** | add. 23: none monotone, most flip halves (was only in RESULTS.md) |
 | IBS leg decided at 15:50 and bought in the close auction | **dead** | add. 6: QQQ 13.9 → 8.8%; trade at the next open (V6 index version is separate, shadow) |
 | Zero-shot TS foundation models (Chronos/TimesFM/Moirai/Kronos) as filters | **not run: power** | clean post-release holdouts 11-30 months ≈ 1/6 of the trades needed; published: ~51% direction, net-negative at 11-21bp (Round 19 list #35-38) |
+| Night leg: trailing closing-cross share of volume (Round 20 AX1) | **dead** | flips sign between halves (+1.1 / −1.1pp), t 0.1; mostly a low-vol proxy |
+| Night leg: trailing opening-cross share of volume (Round 20 AX2) | **dead** | +1.2pp both halves but t 1.5, placebo 94%, terciles not monotone; do not retest with a new window |
+| Night leg: FINRA off-exchange short-volume ratio, either sign (Round 21 AY) | **dead** | 2021-23 terciles flat; book ±0.4pp, t ≤ 0.6, feature shuffle 53% |
 
 ## Ideas not yet tested
 
