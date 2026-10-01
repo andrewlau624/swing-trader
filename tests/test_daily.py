@@ -1254,3 +1254,34 @@ def test_intraday_mult_widens_the_noise_cap_with_conviction(tmp_path, monkeypatc
     ex._gate(book, 3000)
     # 4 x (1 - 0.5 x 0.75) - 0.5 IBS = 2.0 (vs 0.75 at the standard 2x)
     assert book.noise_lev_cap == pytest.approx(2.0)
+
+
+# --------------------------------------- Round 17 Study AL: roth cash-IRA mode
+def test_roth_cash_ira_defaults_off():
+    d = Config.load().daily
+    assert d.roth_cash_ira is False
+    assert d.roth_cash_ira_ibs_weight == 0.75
+
+
+def test_roth_cash_ira_runs_ibs_only_and_submits_no_other_leg(tmp_path, monkeypatch):
+    from swingtrader.daily import executor as E
+    ex = DailyExecutor(Config.load(), account="roth", broker=FakeBroker(),
+                       state_dir=tmp_path, log_dir=tmp_path)
+    ex.notifier.send = lambda *a, **k: "notify skipped (test)"
+    ex.d.quote_source = "alpaca"
+    ex.d.roth_cash_ira = True
+    book = DailyBook(cash=3000, start_equity=3000)
+    # the IBS leg is on, the night leg is off, no intraday leg
+    assert ex._w_night(book) == 0.0
+    assert ex._w_ibs(book) == ex.d.roth_cash_ira_ibs_weight
+    clock = ex.broker.clock()
+    ex.phase_intraday(book, "2026-09-23", dt.datetime(2026, 9, 23, 10, 1, tzinfo=ET), clock)
+    ex._phase_close_night(book, "2026-09-23", dt.datetime(2026, 9, 23, 15, 40, tzinfo=ET), clock)
+    assert ex.broker.client.submitted == [], "no intraday or night orders in cash-IRA mode"
+
+
+def test_roth_cash_ira_off_still_requires_limited_margin(tmp_path, monkeypatch):
+    ex = DailyExecutor(Config.load(), account="roth", broker=FakeBroker(),
+                       state_dir=tmp_path, log_dir=tmp_path)
+    assert ex.roth_limited_margin() is False
+    assert ex.d.roth_cash_ira is False          # so the _run gate still refuses

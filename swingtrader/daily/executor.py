@@ -163,12 +163,15 @@ class DailyExecutor:
                 self.warn("LIVE account is blocked from trading - nothing submitted")
                 return 1
             if self.cash_account:
-                if not self.roth_limited_margin():
+                if not self.roth_limited_margin() and not self.d.roth_cash_ira:
                     # a plain cash IRA must not reuse same-day sale proceeds (good-faith
-                    # violations), and the settled-cash version trails SPY (addendum 20)
+                    # violations), and the settled-cash version trails SPY (addendum 20).
+                    # Round 17 Study AL: `daily.roth_cash_ira` runs the GFV-safe IBS leg
+                    # only on a plain cash IRA, without limited margin.
                     self.warn("Roth book needs Schwab LIMITED MARGIN on the IRA (Schwab form: "
                               "margin in IRA). Once approved set ROTH_LIMITED_MARGIN=yes in "
-                              ".env. Nothing traded.")
+                              ".env, or set daily.roth_cash_ira for the cash-IRA IBS-only book. "
+                              "Nothing traded.")
                     return 1
             elif float(getattr(acct, "multiplier", 1) or 1) < 2:
                 # cash account: selling at the open and re-buying at the close
@@ -606,11 +609,14 @@ class DailyExecutor:
                 self.log(f"[wash-guard] skipped ({type(exc).__name__}: {str(exc)[:80]})")
 
         # night-leg universe for this afternoon (pays the ~30s SIP pull now)
-        u = [s for s in all_assets().symbols if valid_symbol(s)]
-        elig = md.eligibility(u, dt.date.fromisoformat(today), price_min=self.d.night_price_min,
-                              adv_min=self.d.night_adv_min, cache_dir=self.state_dir)
-        self.log(f"[night] {len(elig)} names eligible today "
-                 f"(close >= ${self.d.night_price_min:.0f}, 20d SIP $vol >= ${self.d.night_adv_min/1e6:.0f}M)")
+        if self.cash_account and self.d.roth_cash_ira:
+            self.log("[night] roth cash-IRA mode - no night leg")
+        else:
+            u = [s for s in all_assets().symbols if valid_symbol(s)]
+            elig = md.eligibility(u, dt.date.fromisoformat(today), price_min=self.d.night_price_min,
+                                  adv_min=self.d.night_adv_min, cache_dir=self.state_dir)
+            self.log(f"[night] {len(elig)} names eligible today "
+                     f"(close >= ${self.d.night_price_min:.0f}, 20d SIP $vol >= ${self.d.night_adv_min/1e6:.0f}M)")
 
     # ------------------------------------------------------ kill rules
     def _kill(self, book: DailyBook, leg: str, today: str, reason: str) -> None:
@@ -642,11 +648,15 @@ class DailyExecutor:
         return min(1.0, 1.0 / tot) if (self.cash_account and tot > 0) else 1.0
 
     def _w_night(self, book: DailyBook) -> float:
+        if self.cash_account and self.d.roth_cash_ira:
+            return 0.0                       # Study AL: no night leg in the cash IRA
         lw = self.d.lever_weight
         w = max(self.d.night_weight, lw) if (book.levered and lw) else self.d.night_weight
         return w * self._cash_scale()
 
     def _w_ibs(self, book: DailyBook) -> float:
+        if self.cash_account and self.d.roth_cash_ira:
+            return self.d.roth_cash_ira_ibs_weight
         lw = self.d.lever_weight
         w = max(self.d.ibs_weight, lw) if (book.levered and lw) else self.d.ibs_weight
         return w * self._cash_scale()
@@ -864,6 +874,8 @@ class DailyExecutor:
         self._close_shadows(book, today, now, clock)
 
     def _phase_close_night(self, book: DailyBook, today: str, now, clock) -> None:
+        if self.cash_account and self.d.roth_cash_ira:
+            self.log("[night] roth cash-IRA mode - no night leg"); return
         self._check_exit_cost(book, today)
         self._lever_gate(book)
         if self.d.oversold_mode != "off":
@@ -1008,6 +1020,8 @@ class DailyExecutor:
 
     # ------------------------------------------------------------ intraday
     def phase_intraday(self, book: DailyBook, today: str, now, clock) -> None:
+        if self.cash_account and self.d.roth_cash_ira:
+            self.log("[noise] roth cash-IRA mode - no intraday leg"); return
         close_et = pd.Timestamp(clock.next_close).tz_convert(ET)
         if not clock.is_open or close_et.hour != 16:
             self.log("[noise] market shut or early close - no intraday decision"); return
@@ -1276,6 +1290,7 @@ class DailyExecutor:
         book_min = self.d.live_min_capital if self.live else self.d.daytrade_min_equity
         book.daytrade_live = (self.d.daytrade_mode == "auto"
                               and not book.is_killed("noise")
+                              and not (self.cash_account and self.d.roth_cash_ira)
                               and equity >= book_min
                               and acct >= self.d.daytrade_min_equity)
         # intraday leverage the broker actually grants (4 = leverage-enabled
