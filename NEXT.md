@@ -56,6 +56,12 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   sessions, sign-flip placebo).
 - **DSR audit of the lab's passes:** at N 745 the best is Lab-BW (industry momentum) at DSR 0.55; BT 0.43, BZ 0.16,
   BY 0.11. None clears 0.95, even at the lab's own N ~50 (best 0.85). No lab finding is a confirmed edge.
+- **Daily new-data loop (this Claude session, weekdays 13:23 PT, expires after 7 days):**
+  - replays each recorded session through every lab strategy and the risk layer (`daytrade.research.day_check`);
+  - runs Lab-AT's registered first look once 40 clean sessions exist;
+  - updates the momentum shadows on the first session of each month;
+  - commits the results.
+  It stops when this session ends. For a permanent version, add the same steps to a server timer after `make pull`.
 - **Nothing to switch on.** The live book is unchanged. The next real look is Lab-AT after 40 recorded sessions
   (~early Dec). Expect few signals (Lab-AV).
 
