@@ -3,6 +3,8 @@ strategies, recorder. No network."""
 import ast
 import datetime as dt
 import json
+
+import pandas as pd
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -847,3 +849,22 @@ def test_gapper_sweep_skips_corporate_actions():
 def test_every_strategy_states_its_study_verdict():
     for name, cls in REGISTRY.items():
         assert cls.status.split(":")[0] in ("dead", "pending", "pass"), name
+
+
+def test_forward_log_skew_and_monthly_momentum(tmp_path):
+    from daytrade.forward_log import run as forward, skew_z
+    days = pd.bdate_range("2025-01-01", periods=300)
+    vals = [120.0 + (i % 5) * 0.5 for i in range(299)] + [140.0]          # last day spikes
+    csv = "DATE,SKEW\n" + "\n".join(f"{d:%m/%d/%Y},{v}" for d, v in zip(days, vals))
+    z = skew_z(csv, days[-1].date())
+    assert z["skew_high"] and z["skew_z"] > 3
+    calls = []
+    oct1 = dt.date(2026, 10, 1)
+    sess = [(dt.datetime(2026, 10, 1, 9, 30, tzinfo=ET), dt.datetime(2026, 10, 1, 16, 0, tzinfo=ET)),
+            (dt.datetime(2026, 10, 2, 9, 30, tzinfo=ET), dt.datetime(2026, 10, 2, 16, 0, tzinfo=ET))]
+    row = forward(oct1, sess, fetch=lambda u: csv, log=tmp_path / "f.jsonl", momentum=lambda: calls.append(1))
+    assert row["momentum_shadows"] == "updated" and calls == [1]
+    row2 = forward(dt.date(2026, 10, 2), sess, fetch=lambda u: (_ for _ in ()).throw(OSError("down")),
+                   log=tmp_path / "f.jsonl", momentum=lambda: calls.append(2))
+    assert "skew_error" in row2 and calls == [1]                            # not the first session: no momentum
+    assert len((tmp_path / "f.jsonl").read_text().splitlines()) == 2

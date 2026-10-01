@@ -308,4 +308,10 @@ def run(today: dt.date | None = None, smoke_s: int = 0, root: Path = DATA) -> in
     rec.write_meta(final=True)
     log(f"done: {rec.rows} rows, {len(rec.gaps)} gaps, {len(rec.reconnects)} reconnects, "
         f"flagged={json.loads(rec.meta_path.read_text())['flagged']}")
+    try:                                            # forward evidence for the shadow signals; never fails the day
+        from .forward_log import run as forward
+        from .session import calendar
+        log(f"forward log: {forward(today, calendar(today, today))}")
+    except Exception as exc:
+        log(f"forward log failed: {type(exc).__name__}: {str(exc)[:100]}")
     return 0

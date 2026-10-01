@@ -57,7 +57,6 @@ def test(sig_raw, smooth, sign, halves, mkt):
     d = pd.DataFrame({"z": z, "fwd": fwd}).dropna()
     d = d[d.index.isin(mkt.index)]
     hi = d.z >= 1.0
-    diff_series = np.where(hi, d.fwd - d.fwd[~hi].mean(), np.nan)
     res = {"n_signal_days": int(hi.sum()), "n_days": len(d)}
     for name, a, b in halves:
         m = (d.index >= a) & (d.index <= b)
