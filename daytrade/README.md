@@ -104,6 +104,7 @@ pre-registration (a new variant, +1 N). That is the user's call; see NEXT.md.
 | `orb_in_play` | plans/orb_in_play.md (Study Lab-AU) | **DEAD**: −23.5bp/trade at 5bp/side (19k trades); the optimistic fill bound grosses only ~+10bp, so −9bp at 10bp/side. Already dead in RESULTS.md |
 | `vwap_trend` | plans/vwap_trend.md (Study Lab-AW) | **DEAD**: VWAP side is informative (+6.7bp/day gross, placebo 97th) but 16 switches/day cost 16bp |
 | `late_mover` | plans/late_mover.md (Study Lab-AX) | **DEAD**: −33.7bp/trade at 20bp/side; gross +6bp, the move is over by 15:00 |
+| `halt_resume` | plans/halt_resume.md (Study Lab-AY) | **DEAD** long: ~−130bp gross per 30 min after a halt either way (a first "pass" was a fill bug); the short side is Lab-BA |
 | `open_imbalance` | plans/open_imbalance.md (Study Lab-AT; Lab-AV = the same on historical SIP ticks) | waiting: first look after 40 unflagged recorded sessions (or a new historical pre-registration, above) |
 
 ## 4. One engine, three modes
