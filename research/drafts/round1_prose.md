@@ -1457,3 +1457,27 @@ has been computed. Grep of RESULTS.md / NEXT.md / this file: no halt-trading stu
 - Lab-AY1 = buy after a halt UP; Lab-AY2 = buy after a halt DOWN. Costs 20/40bp per side. Halves at 2024-06-01.
 - Pass per variant: 2x > 0 both halves; day-clustered t >= 2 at 1x; >= 95th pct of a random-minute placebo on the
   same stock-days.
+
+
+## Amendment — Round 26: closing-auction imbalance on the night picks — Study BD (pre-register; 2 variants, program N 699 -> 701)
+
+`date`: Thu Oct 1 2026 (stamped by the commit), before any imbalance record is downloaded. The parked Round 13 AC
+idea (the one untested mechanism with a named payer), now testable: the user supplied a Databento key. Source:
+Bogousslavsky & Muravyev (JFM 2023): passive/index flow pushes the closing cross off the mid and ~85% reverts by
+the next morning; the published imbalance is the ex-ante measure of that pressure. Payer: close sellers (passive,
+forced, risk-reducing) who demand liquidity in the auction.
+
+Data: Databento `imbalance` schema, closing-auction messages, for each night pick's listing exchange (NYSE ->
+XNYS.PILLAR, Nasdaq -> XNAS.ITCH, Arca -> ARCX.PILLAR, NYSE American -> XASE.PILLAR; Cboe BZX listings, ~4% of
+picks, have no feed here and keep z = 0), 15:50:00-15:52:00 ET on the pick day, 2021-26. Timing: the FIRST
+closing-imbalance message at or after 15:50:00 and before 15:52:00 is the signal (what a live order could see:
+NYSE accepts a buy MOC that offsets a sell imbalance after 15:50; Nasdaq takes MOC until 15:55).
+Feature: SIR = signed imbalance shares / 20-day ADV in shares (positive = SELL imbalance), ADV shares = the pool's
+dollar ADV / the 15:50 price. z constants from the 2021-23 picks.
+- BD1: weight = live v1 tilt x clip(1 + 0.25 z(SIR), 0.25, 2), renormalised (more weight on heavier selling).
+- BD2: drop picks with a BUY imbalance in the first message (the close is being bid up: little pressure left to revert).
+Judged exactly as Round 20 (night returns from the official crosses; V7 and Roth cash books; $2.3k / $10k / $25k;
+2.5bp/side judged, tier_hi reported; increment > 0 in both halves; NW t >= 2; sign-flip and within-night
+feature-shuffle placebos >= 95th; dDD >= -2pp; P(DD>50%) <= 5%). Also: coverage by exchange, terciles per half,
+Spearman with TOW / vol20 / depth. DSR at N 701. A pass is SHADOW only: live use needs a paid live imbalance feed
+(Massive $49/mo, NYSE-listed only; Databento live for Nasdaq), priced in the writeup.
