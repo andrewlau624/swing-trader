@@ -3,6 +3,18 @@
 What went wrong, and what changed so it cannot repeat. Newest first. One entry per mistake:
 date, what happened, the cost (in $ or bp, or "none, caught in replay"), the fix (code, test or rule).
 
+## 2026-10-01 — Lab-BE repeated Lab-AZ's mistake at the open, and spent $27.13 on unusable data
+- **What happened.** Nasdaq's opening NOII carries near/far prices only from 09:28:00 (it switches from every 10 s to
+  every second). The field probe spanned 09:27:50-09:28:05, so the "83% have a near price" came from the post-09:28
+  messages. The registered window ended at 09:28:00. 0 signals: untestable as registered.
+- **Cost.** $27.13 of the $125 Databento credit on data that cannot answer the question, and 2 variants of N. Combined
+  Databento spend is now ~$108 + the re-run (~$8) = ~$116.
+- **Fix.**
+  - Probe the field strictly INSIDE the registered window ([start, decision]), not around it.
+  - Databento bills per symbol-day (~$0.00022), not by window length: price universes by symbol count.
+  - **This is the second time.** The same rule from the Lab-AZ entry was not applied, so it is now a checklist item in
+    every Databento script: `assert` the decision-time field is non-zero on 5 sample days before any full pull.
+
 ## 2026-10-01 — Lab-AZ registered a signal that does not exist before 15:55
 - **What happened.** Lab-AZ's rule reads Nasdaq's near indicative clearing price at 15:54:30. Nasdaq's NOII sends
   the near/far prices only from 15:55. The 15:50-15:55 "early" messages carry the imbalance size, side, paired

@@ -19,3 +19,7 @@ adds to the program N. Results of the old variant are never deleted.
 | 2026-10-01 | halt_short | clarification before any result: Lab-BA3's "no SSR" test uses the last pre-halt price (> 0.9 x previous close), since the order is sent during the halt and the reopening print is not yet known | code and plan must agree | not a new variant |
 | 2026-10-01 | close_cross | Lab-AZ untestable: the near price is 0 before 15:55 | registration error | N stays |
 | 2026-10-01 | close_imbalance | created (Study Lab-BB1 long+short, Lab-BB2 long only): imbalance/paired rank at 15:54:30 | the observable part of the early NOII | program N 708 -> 710 |
+| 2026-10-01 | close_imbalance | Lab-BB DEAD (gross +3.4bp < the 7.5bp spread); new variant Lab-BC: |r| >= the H1 q75, judged on H2 only | monotone dose-response in H1 | program N 710 -> 711 |
+| 2026-10-01 | close_imbalance | new variant Lab-BD: QQQ every day, long r >= 0.2585 / short r <= -0.2824 (H1 quintiles), judged on H2 | cheapest instrument for a real but spread-bound signal | program N 711 -> 712 |
+| 2026-10-01 | open_cross_reversal | created (Study Lab-BE1 long+short, Lab-BE2 long only) | the cross is entered at no spread; auction pressure reverts | program N 712 -> 714 |
+| 2026-10-01 | open_cross_reversal | Lab-BE untestable (near price 0 before 09:28); new variant Lab-BF: decision 09:28:30, 30 names, top/bottom 2 | registration error; Databento budget | program N 714 -> 716 |
