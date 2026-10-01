@@ -31,6 +31,18 @@ def picks(C: pd.DataFrame, V: pd.DataFrame, RAW: pd.DataFrame, last: str, top: i
     return list(score.sort_values(ascending=False).index[:top]), u
 
 
+def vol_weight(rows, target: float = 0.12, months: int = 6) -> float | None:
+    """Lab-BU's crash control, REPORTED only: min(1, 12% / annualised vol of the shadow's last 6 scored monthly
+    excess returns). None until 6 months are scored. (Lab-BU missed its bar by 0.02 Sharpe in 1963-89 but halved the
+    worst 12-month crash; see study_lab_bt_momentum_history.md.)"""
+    ex = [r["realised"]["picks"] - r["realised"]["universe"] for r in rows if r.get("realised")][-months:]
+    if len(ex) < months:
+        return None
+    import statistics
+    vol = statistics.stdev(ex) * (12 ** 0.5)
+    return round(min(1.0, target / vol), 3) if vol > 0 else 1.0
+
+
 def _monthly(symbols, adjustment, months_back=15):
     from alpaca.data.requests import StockBarsRequest
     from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
@@ -70,7 +82,8 @@ def run(log: Path = LOG) -> int:
     if not any(r["hold_month"] == nxt for r in rows):
         p, u = picks(C, V, RAW, last)
         rows.append({"decided": dt.date.today().isoformat(), "signal_month": last, "hold_month": nxt,
-                     "picks": p, "universe": u, "realised": None, "mode": "paper shadow (no orders)"})
+                     "picks": p, "universe": u, "realised": None, "mode": "paper shadow (no orders)",
+                     "vol_scaled_weight": vol_weight(rows)})
     log.parent.mkdir(parents=True, exist_ok=True)
     log.write_text("".join(json.dumps(r) + "\n" for r in rows))
     scored = [r for r in rows if r.get("realised")]

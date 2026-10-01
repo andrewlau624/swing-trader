@@ -666,3 +666,11 @@ def test_momentum_shadow_picks_rank_12_1_inside_the_liquid_universe():
     p, u = picks(C, V, RAW, months[-1], top=2, univ=4)
     assert "THIN" not in u and "CHEAP" not in u
     assert p == ["A", "B"]
+
+
+def test_momentum_vol_weight_is_reported_after_six_scored_months():
+    from daytrade.momentum import vol_weight
+    calm = [{"realised": {"picks": 0.01 + 0.001 * (i % 2), "universe": 0.0}} for i in range(6)]
+    wild = [{"realised": {"picks": 0.15 * (-1) ** i, "universe": 0.0}} for i in range(6)]
+    assert vol_weight(calm[:5]) is None
+    assert vol_weight(calm) == 1.0 and vol_weight(wild) < 0.3
