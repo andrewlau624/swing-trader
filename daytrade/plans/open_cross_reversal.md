@@ -28,3 +28,7 @@ already do (`brokers.OPEN_ROUTE`). This pays no spread. Sell at 10:00. Mirror: s
 ## Pass bar, per variant
 Mean net per trade > 0 at 2x in BOTH halves (split 2024-06-01), AND day-clustered t >= 2.0 at 1x, AND >= 95th pct of a
 random-side placebo (gross open -> 10:00 mid, sign-flipped, same costs), AND the mean without the 20 best trades > 0.
+
+## Lab-BF (2026-10-01; round1_prose.md Lab Round 30)
+Lab-BE was untestable: the near price is 0 before 09:28:00. Lab-BF uses the same rule with the decision at 09:28:30,
+on the top 28 names + QQQ + TQQQ (the budget), taking the 2 most extreme names per side.

@@ -1577,3 +1577,18 @@ Data: Lab-AZ's NOII files (already paid). No return computed.
 - Lab-BE1 long+short; Lab-BE2 long only. Costs 0.5/1bp at the cross; NBBO + 0.5bp (1x) / + half-spread + 1bp (2x) at exit.
 - Pass: 2x > 0 both halves; day-clustered t >= 2 at 1x; >= 95th pct of a random-side placebo; mean without the top 20 > 0.
 - Databento: ~$6 (09:27-09:28 window); with Lab-AZ's $64.88 and main BD/BE, inside the $125 credit.
+
+
+## Amendment — Lab Round 29 result: Study Lab-BE UNTESTABLE as registered (0 signals; near price 0 before 09:28:00)
+Nasdaq's opening NOII carries near/far only from 09:28:00. The registered window ended at 09:28:00, so 0 signals.
+$27.13 spent (MISTAKES.md). Lab-BE's 2 variants stay counted.
+
+## Amendment — Lab Round 30, Study Lab-BF: Lab-BE's rule at 09:28:30 on a 30-name universe (pre-register; 2 variants, program N 714 -> 716)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Plan: `daytrade/plans/open_cross_reversal.md` (Lab-BF section).
+- Universe: the first 28 names of Lab-AZ's list (top by Nov-Dec 2021 dollar volume) + QQQ + TQQQ. Budget: Databento
+  bills ~$0.00022 per symbol-day; 30 names x 1,190 days ~ $8. Combined spend ~$116 of $125.
+- Decision 09:28:30: each name's latest opening message at or before 09:28:30 with a near price > 0.
+  d = near / ref - 1. Long the 2 most negative d with side A; short the 2 most positive d with side B.
+- Enter in the opening cross (official open); exit 10:00 at the NBBO. Costs and pass bar as Lab-BE (2x > 0 both
+  halves; t >= 2 at 1x; placebo >= 95th; without the top 20 > 0). Lab-BF1 long+short; Lab-BF2 long only.
+- Gate in code: before the full pull, assert that >= 50% of 09:28:00-09:28:30 messages have near > 0 on 5 sample days.
