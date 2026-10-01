@@ -1235,3 +1235,27 @@ Reports (0 variants, no N):
   instead of vendor bars: same weights rule; does the tilt survive on official prices for its INPUT too?
 - R2 AU3 under the `moderate` profile's 15% name cap applied after the tilt, and AU3 on top of tilt v2 (both
   flagged in study_au_tow.md as needing a check before combination).
+
+
+## Amendment — Round 21: FINRA daily short-sale volume on the night picks — Study AY (pre-register; 2 variants, N 684 -> 686)
+
+`date`: Thu Oct 1 2026 (stamped by the commit). Data: FINRA Reg SHO daily short-sale volume, consolidated
+off-exchange (CNMS) files, public CDN, 2020-10..2026-09 (`research/sim/finra_short_fetch.py`). Not on the
+do-not-redo list (Study S shorted the picks; the SSR flag was not run). Nothing below computed.
+
+Feature per night pick on d: SVR5 = sum(ShortVolume) / sum(TotalVolume) over the 5 sessions d-5..d-1 (the
+file for t is published after t's close, so d itself is excluded); >= 3 sessions with TotalVolume > 0, else
+unknown (z = 0). z constants fixed from the 2021-23 picks; weights as AU3 (live v1 x clip(1 + 0.25 z, 0.25, 2),
+renormalised).
+
+The sign is genuinely ambiguous, so BOTH are registered and counted:
+- AY1: tilt toward HIGH SVR5. Reading: off-exchange "short" volume is mostly wholesalers/market makers
+  shorting to fill retail BUY orders, so a high ratio = a retail buying clientele (the AU3 mechanism: demand at
+  the next open, where the leg sells). Payer: retail buyers at the open.
+- AY2: tilt toward LOW SVR5. Reading: Diether-Lee-Werner (RFS 2009), Boehmer-Jones-Zhang (JF 2008): heavy short
+  selling is informed and predicts lower returns, so high-SVR drops are information and bounce less. Payer: the
+  liquidity demanders on the low-SVR picks.
+Judged exactly as Round 20 (auction returns, V7 and Roth cash, $2.3k / $10k / $25k, 2.5bp/side judged, tier_hi
+reported, both halves, NW t >= 2, sign-flip and feature-shuffle placebos >= 95th, dDD, P(DD>50%)), DSR at N 686.
+Also reported: tercile nets per half; Spearman with TOW, vol20, depth, log price, log ADV. AY1 and AY2 are
+mirror images; at most one can pass.
