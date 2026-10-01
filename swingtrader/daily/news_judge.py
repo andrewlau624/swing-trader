@@ -23,13 +23,17 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-# SEC fair access: requests without a contact email in the User-Agent get 403. Set it in .env:
-#   SEC_USER_AGENT="Your Name you@example.com"
-# Without it the judge skips filings (news only) and says so in the record.
+# SEC fair access: requests without a contact email in the User-Agent get 403. The contact is the
+# Resend notification address already in .env (NOTIFY_EMAIL, the user's choice); SEC_USER_AGENT
+# overrides it. With neither, the judge skips filings (news only) and says so in the record.
 def sec_headers() -> dict:
-    ua = os.environ.get("SEC_USER_AGENT", "").strip()
+    from ..config import get_env
+    ua = (get_env("SEC_USER_AGENT") or "").strip()
     if "@" not in ua:
-        raise RuntimeError("SEC_USER_AGENT (name + contact email) not set in .env")
+        mail = (get_env("NOTIFY_EMAIL") or "").strip()
+        ua = f"swing-trader personal research {mail}" if "@" in mail else ""
+    if not ua:
+        raise RuntimeError("no SEC contact: set NOTIFY_EMAIL (or SEC_USER_AGENT) in .env")
     return {"User-Agent": ua}
 
 

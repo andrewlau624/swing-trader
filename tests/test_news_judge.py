@@ -116,9 +116,13 @@ def test_default_provider_is_opencode_deepseek_flash():
     assert (d.news_judge_provider, d.news_judge_model) == ("opencode-go", "deepseek-v4-flash")
 
 
-def test_sec_needs_a_contact_user_agent(monkeypatch):
-    monkeypatch.delenv("SEC_USER_AGENT", raising=False)
-    with pytest.raises(RuntimeError, match="SEC_USER_AGENT"):
+def test_sec_contact_comes_from_the_resend_address(monkeypatch):
+    for v in ("SEC_USER_AGENT", "NOTIFY_EMAIL"):
+        monkeypatch.delenv(v, raising=False)
+    monkeypatch.setattr("swingtrader.config.load_dotenv", lambda path=None: None)
+    with pytest.raises(RuntimeError, match="NOTIFY_EMAIL"):
         nj.sec_headers()
-    monkeypatch.setenv("SEC_USER_AGENT", "Jane Doe jane@example.com")
-    assert nj.sec_headers() == {"User-Agent": "Jane Doe jane@example.com"}
+    monkeypatch.setenv("NOTIFY_EMAIL", "jane@example.com")
+    assert nj.sec_headers() == {"User-Agent": "swing-trader personal research jane@example.com"}
+    monkeypatch.setenv("SEC_USER_AGENT", "Jane Doe jane@work.com")
+    assert nj.sec_headers() == {"User-Agent": "Jane Doe jane@work.com"}, "explicit override wins"
