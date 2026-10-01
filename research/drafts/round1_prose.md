@@ -1259,3 +1259,30 @@ Judged exactly as Round 20 (auction returns, V7 and Roth cash, $2.3k / $10k / $2
 reported, both halves, NW t >= 2, sign-flip and feature-shuffle placebos >= 95th, dDD, P(DD>50%)), DSR at N 686.
 Also reported: tercile nets per half; Spearman with TOW, vol20, depth, log price, log ADV. AY1 and AY2 are
 mirror images; at most one can pass.
+
+
+## Amendment — Round 22: tax-exempt ex-dividend overnight capture in the Roth — Study AZ (pre-register; 2 variants, N 686 -> 688)
+
+`date`: Thu Oct 1 2026 (stamped by the commit). Brief topic: "tax placement between the accounts". Sources:
+Elton & Gruber (1970) and the clientele literature (the ex-day drop < the dividend because taxable holders
+value dividends less; a tax-exempt holder captures the gap); against it: Ruan & Ma (JFR 2012, ETF drops = the
+dividend, so ETFs excluded), Bali & Hite (JFE 1998, tick discreteness), Frank & Jagannathan (1998). A forum-grade
+2026 blog (mega-caps, overnight drop ~0.63 x dividend, no market adjustment) gets no credit. Payer: taxable
+holders who sell before the ex-date (or will not buy cum-dividend) and short-horizon arbitrage costs. Not on the
+do-not-redo list. Nothing below computed; dividend data (Alpaca /v1/corporate-actions, cash_dividend, free) is
+fetched after this commit.
+
+Universe on night d: common stocks (not ETFs) in the top 500 by 20-session SIP dollar volume through d-1, raw
+price >= $10, with a regular (non-special) cash dividend whose ex-date is the NEXT session (declared in advance).
+Trade (Roth cash book only; taxable excluded: a one-night dividend is non-qualified): the Roth's idle overnight
+cash at 15:50 (equity - IBS held tonight - night leg used) buys these names equally, whole shares, <= 25% of equity
+per name, MOC d -> MOO d+1. Return = the dividend-inclusive (adjusted) close -> open move from the SIP panel.
+- AZ1: dividend yield (rate / raw close d) >= 0.25%.
+- AZ2: dividend yield >= 0.50%.
+Judged on the Roth cash IBS+night book (auction night returns, 2.5bp/side on the night leg AND the sleeve; tier
+reported) at $2.3k / $10k / $25k: increment > 0 in both halves (2021-23 / 2024-26), NW t >= 2, sign-flip placebo
+>= 95th, dDD >= -2pp, P(DD>50%) <= 5%, AND a matched placebo >= 95th pct: the same rule fed the same names on
+random non-ex nights (each event moved to a random session of the same name 20-60 sessions away; 200 draws, Roth
+$10k), which separates the dividend gap from ordinary overnight drift (the index filler died on drift, add. 16).
+Also reported: per-event overnight return minus SPY's, the implied drop ratio per half, events/yr, idle share.
+DSR at N 688.
