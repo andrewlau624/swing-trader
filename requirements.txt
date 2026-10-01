@@ -8,3 +8,5 @@ pytest>=7.4
 schwab-py>=1.5.1
 anthropic>=1.11
 matplotlib>=3.8
+scipy>=1.11
+requests>=2.31
