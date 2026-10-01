@@ -40,6 +40,14 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Round 25 (2026-10-01): LLM judge on PAST picks — BC does not run (probe void; model knows events through 2025-10)
+- Probe v2: `deepseek-v4-flash` answered all 8 dated questions through Oct 2025 correctly, and invented "Roku" for
+  a fabricated Apple acquisition. Every 2025 pick is inside the model's memory, and the clean 2026 window is too
+  short for 300 picks. Historical verdicts collected are not scored. study_bc_news_hist.md.
+- The forward test (BA, `make forward-status`) is the only valid test of the judge.
+
+---
+
 ## Round 22 (2026-10-01): Roth ex-dividend overnight capture — AZ DEAD (N 688)
 - Large caps going ex do drop by only 0.90-0.96 of the dividend (+7.4bp / +3.9bp vs SPY per event, 2021-23 / 2024-26),
   but that is one round trip: as a sleeve on idle Roth cash it is −0.1..−0.8pp/yr at 2.5bp/side, −5pp at 5bp,
@@ -781,6 +789,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Night leg: trailing opening-cross share of volume (Round 20 AX2) | **dead** | +1.2pp both halves but t 1.5, placebo 94%, terciles not monotone; do not retest with a new window |
 | Night leg: FINRA off-exchange short-volume ratio, either sign (Round 21 AY) | **dead** | 2021-23 terciles flat; book ±0.4pp, t ≤ 0.6, feature shuffle 53% |
 | Roth: buy large caps the night before their ex-dividend date with idle cash (Round 22 AZ) | **dead** | drop ratio 0.90-0.96 = +4..+7bp/event vs SPY, about one round trip; book −0.1..−0.8pp at 2.5bp/side, matched placebo 87-90% |
+| Backtesting an LLM news judge on past picks (Round 25 BC) | **invalid by construction** | the model (OpenCode Go deepseek-v4-flash) knows events through 2025-10 and hallucinated a control; past verdicts can carry outcome memory. Test LLM signals forward only |
 
 ## Ideas not yet tested
 
