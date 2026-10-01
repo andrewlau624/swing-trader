@@ -24,6 +24,13 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Round 22 (2026-10-01): Roth ex-dividend overnight capture — AZ DEAD (N 688)
+- Large caps going ex do drop by only 0.90-0.96 of the dividend (+7.4bp / +3.9bp vs SPY per event, 2021-23 / 2024-26),
+  but that is one round trip: as a sleeve on idle Roth cash it is −0.1..−0.8pp/yr at 2.5bp/side, −5pp at 5bp,
+  matched placebo 87-90%. study_az_exdiv_roth.md.
+
+---
+
 ## Round 19 (2026-10-01): outside-first scan — AU3 tug-of-war tilt SHADOW, AW restates the night leg, AV dead (N 677 -> 682, counting the lab's Round 18)
 
 Brief: `research/drafts/prompt_max_edge.md`. 44 sourced candidates (`max_edge_candidates.md`); summary
@@ -757,6 +764,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Night leg: trailing closing-cross share of volume (Round 20 AX1) | **dead** | flips sign between halves (+1.1 / −1.1pp), t 0.1; mostly a low-vol proxy |
 | Night leg: trailing opening-cross share of volume (Round 20 AX2) | **dead** | +1.2pp both halves but t 1.5, placebo 94%, terciles not monotone; do not retest with a new window |
 | Night leg: FINRA off-exchange short-volume ratio, either sign (Round 21 AY) | **dead** | 2021-23 terciles flat; book ±0.4pp, t ≤ 0.6, feature shuffle 53% |
+| Roth: buy large caps the night before their ex-dividend date with idle cash (Round 22 AZ) | **dead** | drop ratio 0.90-0.96 = +4..+7bp/event vs SPY, about one round trip; book −0.1..−0.8pp at 2.5bp/side, matched placebo 87-90% |
 
 ## Ideas not yet tested
 
