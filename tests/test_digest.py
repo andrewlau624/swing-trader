@@ -64,7 +64,8 @@ def test_digest_numbers_from_books_and_logs(tmp_path):
 
 def test_ten_year_lines_and_charts(tmp_path):
     yrs, lines, marks = D.ten_year("roth", 1000.0)
-    assert len(yrs) == 121 and set(lines) == {"This bot", "Everything on", "Backtest", "Index fund"}
+    assert len(yrs) == 121 and set(lines) == set(D.LINES)
+    assert marks["Backtest, everything on"][1] > marks["Backtest"][1]
     assert marks["Backtest"][1] > marks["Everything on"][1], "the research rate is above every planning line"
     assert marks["Everything on"][1] > marks["This bot"][1] > marks["Index fund"][1] > 75000, "deposits + growth"
     _, tl, tm = D.ten_year("live", 2000.0)
@@ -91,3 +92,26 @@ def test_pace_compares_live_to_backtest_on_the_same_balances(tmp_path):
     assert pc["backtest"][-1] > pc["plan"][-1] > 0 and pc["sd"][-1] == pytest.approx(2000 * 0.010 * n ** 0.5)
     _, html, _, imgs = D.render({**D.build(st, lg, 3000.0, 0.5), "accounts": {"live": a}}, charts=True)
     assert "Backtest pace" in html and "normal range" in html and ("pnl-live" in [c for c, _ in imgs])
+
+
+def test_brokerage_index_is_taxed_fairly_and_both_market_scenarios_shown(tmp_path):
+    _, lines, marks = D.ten_year("live", 2260.0, 1000.0)
+    raw = D._path(2260.0, D.INDEX_RATE - D.INDEX_DIV_DRAG, 12000.0)[120]
+    contrib = 2260.0 + 120000.0
+    assert marks["Index fund"][1] == pytest.approx(raw - (raw - contrib) * D.LT_TAX), "index shown as if sold"
+    assert D.index_path("roth", 1000.0, 7500.0, 0.10)[120] == pytest.approx(D._path(1000.0, 0.10, 7500.0)[120]), \
+        "no tax in the Roth"
+    hot = D.index_path("taxable", 2260.0, 12000.0, D.INDEX_RATE_RECENT)[120]
+    assert hot > marks["This bot"][1], "in a 2021-26-like market the index fund beats the bot after tax"
+    st, lg = _state(tmp_path)
+    _, html, _, _ = D.render(D.build(st, lg, 3000.0, 0.5, 1000.0), charts=False, taxable_monthly=1000.0)
+    assert "long-run 10%" in html and "repeat 2021-26" in html and "behind</b> an index fund" in html
+
+
+def test_edge_shrinks_with_size():
+    assert D.size_mult("taxable", 10e3) == 1.0 and D.size_mult("taxable", 1e5) == pytest.approx(0.645)
+    assert D.size_mult("taxable", 3e5) < D.size_mult("taxable", 1e5) and D.size_mult("taxable", 5e6) == pytest.approx(0.513)
+    assert D.size_mult("roth", 2e5) == 1.0 and D.size_mult("roth", 1e6) == pytest.approx(0.72)
+    flat = D._path(10e3, 0.31 * 0.68, 0, 120)[120]
+    curved = D._path(10e3, 0.31, 0, 120, kind="taxable", k=0.68)[120]
+    assert curved < flat, "a balance that grows past $25k earns a smaller rate"

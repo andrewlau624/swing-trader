@@ -54,8 +54,8 @@ def _png(fig) -> bytes:
 def projection_png(years: list[float], lines: dict[str, list[float]]) -> bytes:
     """lines: {"This bot": [...], "Everything on": [...], "Index fund": [...]} on the same `years` grid."""
     fig, ax = _axes(3.3)
-    style = {"This bot": (S1, "-"), "Everything on": (S2, "-"), "Backtest": (INK, (0, (1, 2))),
-             "Index fund": (REF, (0, (4, 3)))}
+    style = {"This bot": (S1, "-"), "Backtest, everything on": (S2, "-"), "Backtest": (INK, (0, (1, 2))),
+             "Everything on": (S1, (0, (6, 2))), "Index fund": (REF, (0, (4, 3)))}
     ends = []
     for name, ys in lines.items():
         c, ls = style.get(name, (REF, "-"))
