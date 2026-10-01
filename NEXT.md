@@ -9,7 +9,7 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
-## Day-trading lab (2026-10-01, Lab Rounds 18-31): 15 studies, NO edge found; recorder LIVE (lab variants counted in program N, now 719)
+## Day-trading lab (2026-10-01, Lab Rounds 18-38): 25 studies (intraday, events, multi-day, market-neutral, vol premium), NO edge found; recorder LIVE (program N 729)
 
 **Overnight bottom line (for the user, 2026-10-01 morning).**
 - Every intraday idea tested at real costs is dead. The recurring pattern:
