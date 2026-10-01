@@ -1049,3 +1049,19 @@ conviction) at fixed capital $2.3k / $10k / $25k, whole shares + $150 probe, tie
 bar (SHADOW): increment > 0 in both halves at the stressed cost; NW t >= 2.0; placebo = random sign
 on the IBS leg's daily contribution (1,000 draws) >= 95th pct; book max DD not worse by > 2pp;
 mc_tax P(DD>50%) <= 5%. Also reported for the IBS-only cash-IRA book (Study AL). DSR at N 669.
+
+
+## Amendment — Round 17c, Study AQ: the night leg's cost crossover (pre-register; report, 0 variants, N stays 669)
+
+`date`: Wed Sep 30 22:14:00 PDT 2026. Triggered by Study AL: at the repo's `tier_hi` (15-50bp
+round trip) the night leg is negative (-3.4%/yr), but the brief's cost instruction is the MEASURED
+costs (buys ~-2.5bp, sells ~0bp) "stressed at 2x" (~5bp round trip), and add. 29 measured buys
+-0.5bp / sells -1.0bp. tier_hi is 5-10x measured, not 2x. Nothing below computed.
+
+Report: for the cash-IRA Roth book at fixed capital $3k, sweep the flat night round-trip cost over
+{0, 2.5, 5, 7.5, 10, 15, 20}bp for IBS .5 + night .5 (AL1), IBS-only (AL3) and night-only (AL4);
+report full CAGR and the crossover where IBS-only overtakes. Then re-evaluate AL1 at the brief's
+stress (5bp): stats, both halves, NW t vs BIL, sign-flip placebo, mc_tax P(DD30/50), and $/yr at
+$2.3k/$10k/$25k. Same for the taxable V7 book (B.Sim.replay) at the same costs. No new variant; a
+sensitivity on registered variants. If IBS+night beats IBS-only at <= 5bp in both halves, the
+cash-IRA spec becomes IBS .5 + night .5 (not IBS-only) with the cost level named as the gate.
