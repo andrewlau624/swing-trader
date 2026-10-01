@@ -1850,3 +1850,23 @@ Lab-BY (on industry momentum: 10/20bp per month while in, + 10bp per switch). Wh
 - (c) max DD better than the market's;
 - (d) worst 12m better than −30%.
 Reported: 1927-63, 2016-26.
+
+
+## Amendment — Lab Round 49, Study Lab-CA: 3x daily-levered market with a 200-day trend exit ("Leverage for the Long Run", Gayed & Bilello 2016), 1963-2015 (pre-register; 1 variant, program N 741 -> 742)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). grep: the 200dma appears only as a gate on the swing book
+("buys Sharpe for return"); a levered index with a trend exit is untested.
+- Data: French DAILY factors (CRSP 202608). Market = Mkt-RF + RF.
+- Levered fund (simulated, daily rebalanced like UPRO): r3 = 3 x market - 2 x (RF + 0.5%/yr financing spread) -
+  0.95%/yr expense, applied daily.
+- Rule: at day t's close, if the market index level > its 200-day average, hold the levered fund on day t+1, else
+  T-bills (RF). Switch cost 10bp (1x) / 20bp (2x).
+- Judged as a whole sleeve vs the market (buy and hold) on 1963-07-01 .. 2015-12-31, halves 1963-89 / 1990-2015.
+- Pass:
+  - (a) CAGR at 2x >= the market's in BOTH halves;
+  - (b) Sharpe > the market's in both halves;
+  - (c) the worst 12-month return better than −50%;
+  - (d) max drawdown reported, and must be better than buy-and-hold 3x without the filter.
+- Reported: 1927-63, and 2016-26 both simulated and with the real UPRO / SPY (Alpaca, adjusted daily).
+- Small-account notes: it trades ~5-10 times a year, needs no margin (the leverage is inside the ETF) and works in a
+  cash account and the Roth. The live book's IBS/conviction legs already hold 3x ETFs: a wash-sale check is needed
+  before any taxable use.
