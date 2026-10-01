@@ -89,7 +89,7 @@ def test_pace_compares_live_to_backtest_on_the_same_balances(tmp_path):
     assert pc["live"][-1] == pytest.approx(9.0), "10 - 6 + 5 x 1"
     n = len(pc["days"])
     assert pc["backtest"][-1] == pytest.approx(n * 2000 * D.BACKTEST["taxable"]["rate"] / 252)
-    assert pc["backtest"][-1] > pc["plan"][-1] > 0 and pc["sd"][-1] == pytest.approx(2000 * 0.010 * n ** 0.5)
+    assert pc["backtest"][-1] > pc["plan"][-1] > 0 and pc["sd"][-1] == pytest.approx(2000 * D.BACKTEST["taxable"]["sd_day"] * n ** 0.5)
     _, html, _, imgs = D.render({**D.build(st, lg, 3000.0, 0.5), "accounts": {"live": a}}, charts=True)
     assert "Backtest pace" in html and "normal range" in html and ("pnl-live" in [c for c, _ in imgs])
 
