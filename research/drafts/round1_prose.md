@@ -1708,3 +1708,16 @@ so ex-dates are inferred from raw SIP daily bars.
 - Costs 10/20bp per side. Halves: event years 2017-2021 / 2022-2026.
 - Pass: 2x excess > 0 both halves; month-clustered t >= 2 (1x); >= 95th pct of a random-date placebo (same stocks, 60
   days, 1,000 draws); without the best 10 events > 0 (fewer events than the other studies).
+
+
+## Amendment — Lab Round 38, Study Lab-BN: short-volatility (SVXY, −0.5x VIX futures) only in VIX term-structure contango, else T-bills (pre-register; 1 variant, program N 728 -> 729)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). grep: no SVXY / contango / VRP study here. Source: the volatility
+risk premium (Carr & Wu 2009; Simon & Campasano 2014, the VIX futures basis).
+- Signal: Cboe VIX close / VIX3M close on day t (cdn.cboe.com History CSVs) < 1 = contango.
+- Position from day t+1's opening cross to day t+2's opening cross: SVXY if contango, else BIL. A switch trades at the
+  opening cross (directed MOO-style order). Adjusted Alpaca SIP daily opens. 2018-03-01 .. 2026-09-30 (SVXY is −0.5x
+  from 2018-02-28). Halves: 2018-03..2021-12 / 2022-01..2026-09.
+- Costs: 1x 5bp/side per switch; 2x 10bp.
+- Pass: monthly excess over BIL (net) > 0 at 2x in both halves; t >= 2 (monthly); max drawdown at 1x better than −50%;
+  >= 95th pct of a placebo (random in/out days with the same in-market share, shuffled in 21-day blocks, 1,000 draws);
+  without the best 5 months > 0. Reported beside SVXY buy-and-hold and SPY; Roth-compatible (long ETFs only).
