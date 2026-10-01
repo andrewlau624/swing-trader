@@ -1515,3 +1515,14 @@ Data from 2018-05 (the feed's start): judged on 2018-05..2023 (select) and 2024-
 leg, and the books 2021-26 as Round 20 (V7 and Roth cash; $2.3k / $10k / $25k; 2.5bp/side judged, tier_hi
 reported; increment > 0 in both halves; NW t >= 2; sign-flip placebo and a within-day shuffle of the skip flags
 >= 95th; dDD >= -2pp). Also reported: per-entry open->open net by GAPI tercile per period. DSR at N 705.
+
+
+## Amendment — Lab Round 25, Study Lab-BA: short the reopening after a halt (pre-register; 3 variants, program N 705 -> 708)
+
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Motivated by Lab-AY (longs lose ~130bp/30 min after a halt
+either way); no short-side statistic computed. Plan (part of this registration): `daytrade/plans/halt_short.md`.
+- Lab-AY's detection, universe, 30-minute hold, flat 15:55; entry SELL SHORT at the reopening; 10% stop above the fill.
+- Lab-BA1 halt up, all names; Lab-BA2 halt up, names Alpaca flags easy_to_borrow+shortable today (disclosed look-ahead
+  proxy for a locate); Lab-BA3 halt down when the reopening print > 0.9 x previous close (no SSR today).
+- Costs 20/40bp per side. Pass: 2x > 0 both halves; day-clustered t >= 2 at 1x; >= 95th pct of a random-30-minute-
+  short placebo; mean without the 20 best trades > 0 at 1x.
