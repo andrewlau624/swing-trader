@@ -3,6 +3,16 @@
 What went wrong, and what changed so it cannot repeat. Newest first. One entry per mistake:
 date, what happened, the cost (in $ or bp, or "none, caught in replay"), the fix (code, test or rule).
 
+## 2026-10-01 — Lab-AZ registered a signal that does not exist before 15:55
+- **What happened.** Lab-AZ's rule reads Nasdaq's near indicative clearing price at 15:54:30. Nasdaq's NOII sends
+  the near/far prices only from 15:55. The 15:50-15:55 "early" messages carry the imbalance size, side, paired
+  shares and reference price, with the near price 0. The 70-second field sample was taken at 15:55:07, and the
+  registration assumed the field existed from 15:50. Result: 0 trades in 1,190 days. **Untestable as registered**,
+  not dead. The data ($64.88) is kept.
+- **Cost.** One registration (2 variants of N) and a re-registration. The data spend is not wasted: the imbalance
+  size/side are in it.
+- **Fix.** Before registering on a new feed, sample the field AT the decision time on several days, not near it.
+
 ## 2026-10-01 — a stop already through the market filled at the stop price (Lab-AY2's false "PASS")
 - **What happened.** Lab-AY2 (buy after a halt down) "passed": +757bp/trade, t 3.9. The top trades exited "by stop"
   at 4-10x the entry (CIGL bought $2.17, "stopped" at $22.67). The stop was 10% below the pre-halt price, far

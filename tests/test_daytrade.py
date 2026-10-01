@@ -632,3 +632,18 @@ def test_stop_pct_is_measured_from_the_fill(tmp_path):
     path = lambda i: 25.0 if i < 31 else 2.0  # noqa: E731   (fills after a collapse)
     e = engine([s], tmp_path, equity=100_000).run(minute_bars("AAA", "09:30", "11:00", path=path))
     assert e.trades and e.trades[0]["stop"] == pytest.approx(round(e.trades[0]["entry_px"] * 0.9, 2))
+
+
+def test_halt_short_sells_the_reopening_with_a_stop_above(tmp_path):
+    from daytrade.strategies.halt_resume import HaltResume
+    path = lambda i: 20.0 if i < 30 else 20.0 * (1 + 0.012 * (i - 29))  # noqa: E731
+    pre = minute_bars("HLT", "09:30", "10:05", path=path)
+    post = minute_bars("HLT", "10:10", "11:00", 22.0)
+    clocks = [Clock(t("09:30") + dt.timedelta(minutes=m)) for m in range(0, 91)]
+    evs = sorted(pre + post + clocks, key=lambda e: (e.ts, 0 if isinstance(e, Bar) else 1))
+    e = engine([HaltResume("up", side="sell")], tmp_path, equity=100_000).run(evs)
+    tr = e.trades[0]
+    assert tr["side"] == "short" and tr["stop"] == pytest.approx(round(tr["entry_px"] * 1.1, 2))
+    assert tr["exit_reason"] == "30-minute exit"
+    e2 = engine([HaltResume("up", side="sell")], tmp_path, equity=1_500).run(evs)   # cash: no shorts
+    assert not e2.trades

@@ -1515,3 +1515,28 @@ Data from 2018-05 (the feed's start): judged on 2018-05..2023 (select) and 2024-
 leg, and the books 2021-26 as Round 20 (V7 and Roth cash; $2.3k / $10k / $25k; 2.5bp/side judged, tier_hi
 reported; increment > 0 in both halves; NW t >= 2; sign-flip placebo and a within-day shuffle of the skip flags
 >= 95th; dDD >= -2pp). Also reported: per-entry open->open net by GAPI tercile per period. DSR at N 705.
+
+
+## Amendment — Lab Round 25, Study Lab-BA: short the reopening after a halt (pre-register; 3 variants, program N 705 -> 708)
+
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Motivated by Lab-AY (longs lose ~130bp/30 min after a halt
+either way); no short-side statistic computed. Plan (part of this registration): `daytrade/plans/halt_short.md`.
+- Lab-AY's detection, universe, 30-minute hold, flat 15:55; entry SELL SHORT at the reopening; 10% stop above the fill.
+- Lab-BA1 halt up, all names; Lab-BA2 halt up, names Alpaca flags easy_to_borrow+shortable today (disclosed look-ahead
+  proxy for a locate); Lab-BA3 halt down when the reopening print > 0.9 x previous close (no SSR today).
+- Costs 20/40bp per side. Pass: 2x > 0 both halves; day-clustered t >= 2 at 1x; >= 95th pct of a random-30-minute-
+  short placebo; mean without the 20 best trades > 0 at 1x.
+
+
+## Amendment — Lab Round 24 result: Study Lab-AZ UNTESTABLE as registered (0 trades)
+Nasdaq's NOII publishes the near/far indicative prices only from 15:55. The 15:50-15:55 early messages have
+cont_book_clr_price = 0, so the 15:54:30 rule never fires (0 signals in 1,190 sessions). This is a registration
+error (MISTAKES.md), not a result. Lab-AZ's 2 variants stay counted in N.
+
+## Amendment — Lab Round 26, Study Lab-BB: early closing-imbalance size as a 15:54 signal (pre-register; 2 variants, program N 708 -> 710)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Plan (part of this registration): `daytrade/plans/close_imbalance.md`.
+Data: Lab-AZ's NOII files (already paid). No return computed.
+- r = signed imbalance / paired shares from the latest closing message at 15:54:30. Long the top 5 with r > 0; short
+  the bottom 5 with r < 0. Enter at the NBBO 1s later; exit market-on-close at the official close.
+- Lab-BB1 long+short; Lab-BB2 long only. Costs as Lab-AZ.
+- Pass: 2x > 0 both halves; day-clustered t >= 2 at 1x; >= 95th pct of a random-side placebo; mean without the top 20 > 0.
