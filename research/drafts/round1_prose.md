@@ -1096,3 +1096,8 @@ costs and drop conditions are in the plans, which are part of this registration:
 - First look after 40 unflagged recorded sessions, run once; halves = first/last 20 sessions. Pass as AS
   (2x both halves, t >= 2 at 1x, sign-flip placebo >= 95th pct). Counted in N now so the look cannot be
   re-tuned.
+
+### Round 18 results (2026-10-01)
+- **AS: DEAD.** 1x/1s: −18.9bp/trade (n 3,308, t −3.2); 2x: H1 −28.8, H2 −41.5; placebo 59th pct; gross
+  −1.7bp. Fails every bar. study_as_gap_vwap.md. N 670.
+- **AT: not yet looked at** (needs 40 unflagged recorded sessions). N 671 counted at registration.

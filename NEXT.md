@@ -9,6 +9,36 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Day-trading lab (2026-10-01, Round 18): built; AS DEAD; AT waits for data (N 669 -> 671)
+
+Brief: `research/drafts/prompt_daytrade_lab.md`. Lab README: `daytrade/README.md`. It has its own package, account
+and state, and does not touch the live book.
+- **Recording: NOT YET RUNNING.** The recorder is built and tested against fake messages. This session could
+  not write to the server. On the server: `make pull && make daytrade-smoke && make daytrade-persist`, then
+  check `make daytrade-status` after the first session. It starts 09:20 ET, runs its own unit (350 MB cap)
+  and its own token copy, and records the core 5 ETFs + 10 gappers.
+- **In replay:**
+  - **AS (gap + premarket volume, VWAP reclaim): DEAD.** 3,308 trades 2022-26: −18.9bp/trade at 1x
+    (t −3.2), −36bp at 2x (both halves negative), gross −1.7bp, placebo 59th pct. $2.3k -> $568 through
+    the risk layer. `research/drafts/study_as_gap_vwap.md`.
+  - **AT (opening L1 imbalance): waiting.** First look after 40 unflagged recorded sessions (~early Dec).
+  - **Decision for the user:** Alpaca's free plan has historical SIP tick NBBO quotes and trades back to
+    at least 2018 (verified). AT could be re-registered on that history now (+1 N) instead of waiting
+    8 weeks.
+- **Paper: not started.** It needs a second Alpaca paper account (`ALPACA_DAYTRADE_API_KEY/_SECRET_KEY`), a
+  lab Schwab account (`SCHWAB_DAYTRADE_ACCOUNT_NUMBER`) and a strategy that passes replay. None exists yet.
+- **$500 gate** (README §8):
+  - replay > 0 at 2x costs in both halves, t ≥ 2, placebo ≥ 95th pct;
+  - ≥ 40 paper round trips, with drift < half the edge;
+  - 0 rule breaks;
+  - HALT tested on the live lab account at $0 risk;
+  - the guard proven on the server;
+  - the user's written approval.
+
+  At $500 (cash, one turn a day) even a 20bp edge is ~$1/day: tuition.
+
+---
+
 ## Round 17 (2026-09-30): more %/yr at $2-25k — AL/AQ Roth cash book SHADOW, AP dead, AM/AN/AO dead or report (N 642 -> 669)
 
 Brief: `research/drafts/prompt_small_account_profit.md`. Pre-registration: round1_prose.md Round 17.
@@ -686,6 +716,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Conviction weight 0.75 / 1.0 in TQQQ (mult 2 or 4), 2.0 via MNQ (Round 16 AI) | **dead** | TQQQ's 75% margin comes out of the noise cap: +0..+2pp, t 0.5; MNQ 2.0 t 2.2 but maxDD −36%, P(DD>50%) 38% |
 | Conviction trade in MNQ instead of TQQQ (Round 16 AJ) | **shadow (AJ1 .5, AJ2 .75); AJ3 1.0 dead** | same trades, cheaper, frees the noise leg's margin, 60/40: +2.5..+5.3pp 2024-26, t 4+; Schwab API cannot trade futures, needs a second broker; ≥ ~$29k |
 | More conviction setups: second breakout after a failed first; SMH/SPY/IWM on no-TQQQ days (Round 16 AK) | **dead** | 2nd breakout +0.4..+0.9pp all halves but t 0.9; SPY = same bet (corr .75); SMH/SPY/IWM fill-ins 0..−7pp 2024-26 (IWM t −2.7) |
+| Gap ≥ 4% + premarket vol ≥ 250k, pullback to VWAP, reclaim, 2R target (Round 18 AS, day-trading lab) | **dead** | gross −1.7bp/trade, −18.9 at 10bp/side (t −3.2), −36 at 2x both halves; placebo 59th pct; $2.3k -> $568 over 2022-26 |
 
 ## Ideas not yet tested
 
