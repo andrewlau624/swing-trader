@@ -939,6 +939,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | IBS leg: skip entries indicated (09:28 opening imbalance) to gap up ≥ 0.5% / 1% (Round 27 BE) | **dead** | gap-up entries earn as much or more (2024-26 +51 / +84bp); skipping −1.9..−2.0pp, t −1.5 |
 | Night leg: drop / halve picks that LULD-halted that day (Round 28 BF) | **dead (too rare)** | 0.6% of picks halt; +0.6pp, t 0.5, shuffle 80%; ~9 halted picks a year |
 | Roth sleeve: UPRO when SPY > 200d SMA else BIL (lab's Lab-CA follow-up, not registered) | **user decision, not research** | leverage, not edge (1963-2015 Sharpe ≈ market, maxDD −75%; 2016-26 24.5%/yr but −51% DD); competes with IBS+night for the cash IRA's money; would fail P(DD>50%) ≤ 5%. Only as a deliberate risk choice by the user |
+| Size the legs down when Cboe SKEW z >= +1 (lab's Lab-CC follow-up, not registered) | **declined** | SKEW forecasts 20-day market direction, which the legs don't earn (night = idiosyncratic overnight bounce, IBS = next-day reversal, noise = two-way intraday); market-regime size dials are dead here (add. 26a: every leg earns MORE on stressed days); t −2.34 at N 744 with clustered signal days |
 
 ## Ideas not yet tested
 
