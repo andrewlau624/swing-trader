@@ -26,7 +26,9 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 - Two registrations were untestable (Nasdaq publishes near prices only from 09:28 / 15:55).
 - **Databento: lab $100.22 + main ~$16 = ~$116 of the $125 credit. No more pulls.**
 - **Recorder: live on the server since 2026-10-01 09:20 ET** (first session: ~97k rows by 11:30, no gaps, 106 MB).
-  Note: the 09:25 gapper sweep can pick up corporate actions (CTVA −81% was a separation, not a move).
+  Note: the 09:25 gapper sweep picked a corporate action (CTVA −81%, a separation). **Fixed in 1ebf2c8** (it now skips
+  |gap| >= 50% and split ratios); it reaches the server on the next `make pull` there (the timer picks it up the next
+  morning, no reinstall needed).
 - **Lab-BH/BI (announcement-gap drift, daily, multi-day): DEAD.** In 2022-26 gappers UNDERPERFORM SPY by 185bp over
   20 days (every year), but the short + hedge judged on unseen 2017-21 fails (t 0.6; 2018 and 2020 lose).
   study_lab_bh_bi_event_drift.md.
