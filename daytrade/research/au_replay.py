@@ -154,12 +154,15 @@ def load_days():
 
 
 def replay(long_only: bool, cost_bp: float, equity=1e7, kind="margin", limits=None, keep=False):
+    stats = limits is None
     lim = limits or Limits(max_positions=99, daily_loss_pct=1e9, max_position_pct=1e9, intraday_mult=1e9)
     acct = AccountModel(equity, kind, lim.intraday_mult)
     trades, events, keep_by = [], [], {}
     days = list(load_days())
     for i, (day, rec, cal) in enumerate(days):
         st = session_times(day, cal, lim)
+        if stats:   # per-trade statistics: a fresh account each day, so losses never shrink later trades
+            acct = AccountModel(equity, kind, lim.intraday_mult)
         evs = A.day_events(rec)
         nxt = days[i + 1][0] if i + 1 < len(days) else day + dt.timedelta(days=1)
         eng = Engine([S.OrbInPlay(long_only=long_only)], SimBroker(latency_s=1.0, cost_bp=cost_bp),

@@ -215,12 +215,15 @@ def replay(latency: float, cost_bp: float, equity: float = 1e7, kind: str = "mar
     per-trade statistics are not shaped by sizing. Pass a small equity for the $/day runs."""
     # per-trade statistics: no position cap and no daily loss limit (a sizing rule, applied in the
     # $/day runs, which use the lab's default limits)
+    stats = limits is None
     lim = limits or Limits(max_positions=99, daily_loss_pct=1e9)
     acct = AccountModel(equity, kind, lim.intraday_mult)
     trades, events, bars_by = [], [], {}
     days = list(load_days())
     for i, (day, rec, cal) in enumerate(days):
         st = session_times(day, cal, lim)
+        if stats:   # per-trade statistics: a fresh account each day, so losses never shrink later trades
+            acct = AccountModel(equity, kind, lim.intraday_mult)
         evs = day_events(rec)
         nxt = days[i + 1][0] if i + 1 < len(days) else day + dt.timedelta(days=1)
         eng = Engine([G.GapVwapReclaim()], SimBroker(latency_s=latency, cost_bp=cost_bp), equity=acct.equity,

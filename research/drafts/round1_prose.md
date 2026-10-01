@@ -1116,3 +1116,20 @@ registration). Nothing below computed; no data fetched.
   out-of-sample for the paper).
 - Pass (per variant): 2x net > 0 in both halves; day-clustered t >= 2.0 at 1x; >= 95th pct of a coin-flip-direction
   placebo (1,000 draws). Otherwise dead; nothing re-tuned.
+
+
+## Amendment — Round 20, Study AV: Study AT's opening imbalance on historical SIP ticks (pre-register; 1 variant, N 673 -> 674)
+
+`date`: Thu Oct 1 03:20 PDT 2026. Why: Alpaca's free plan serves historical SIP NBBO quotes and trades (verified
+back to 2018), so AT's idea need not wait 40 recorded sessions. Nothing below computed; no tick data fetched.
+- Rules: exactly `daytrade/plans/open_imbalance.md` and the lab's `OpenImbalance` strategy code (QI >= +0.20 and
+  FLOW >= +0.10 long; mirror short; window 09:30:00-09:34:59; enter 09:35 + 1s; exit 10:05:00; stop at the window
+  low/high -/+ $0.01). SIP NBBO replaces Schwab L1 (quote sizes in shares; NBBO, not one venue).
+- Symbols: **QQQ and SPY only** (the two cheapest instruments; the data budget, fixed before looking).
+- Data: SIP quotes (sampled to the last quote of each second, which is all the strategy reads) and every SIP trade in
+  the window; SIP quotes 09:35:00-09:35:05 and 10:05:00-10:05:05 for the fills; SIP minute bars 09:35-10:06 for the stop.
+- 2022-01-03 .. 2026-09-30, halves split 2024-06-01. Costs: fills at the NBBO + 0.5bp/side (1x); + 1.0bp/side plus
+  the half-spread again (2x). Stops on minute bars at 1bp/side (1x) / 2bp (2x).
+- Pass: 2x net > 0 in both halves, day-clustered t >= 2.0 at 1x, sign-flip placebo (random direction on the same
+  trades, gross mid-to-mid return minus the same cost) >= 95th pct. Otherwise dead; thresholds not re-tuned.
+- Pre-check done: RESULTS.md and NEXT.md have no opening-imbalance study (only closing-auction imbalance, AC/add. 35).
