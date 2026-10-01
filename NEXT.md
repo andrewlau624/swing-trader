@@ -36,6 +36,7 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   SEC quarterly Form 3/4/5 datasets. The SEC returns 403 without a contact email in the User-Agent. The repo's
   convention (`swingtrader/daily/news_judge.sec_headers`) uses `NOTIFY_EMAIL` or `SEC_USER_AGENT` from `.env`, and
   the Mac's `.env` has neither. Set one (your choice) to unblock; the lab will register and run it.
+- **Lab-BK (short LETF pairs) and Lab-BL (stock pairs): DEAD.** Crypto was already dead in RESULTS.md.
 - **Nothing to switch on.** The live book is unchanged. The next real look is Lab-AT after 40 recorded sessions
   (~early Dec). Expect few signals (Lab-AV).
 
@@ -892,6 +893,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Announcement-gap drift (gap >= 5% on 3x volume), long 5/20d; and the short+SPY hedge (Lab-BH/BI, lab) | **dead** | long −185bp 20d excess 2022-26; the short fails out of sample on 2017-21 (t 0.6; 2018, 2020 negative): a post-2021 regime |
 | Calendar-month return seasonality, top 20 of 500 most traded, monthly (Lab-BJ, lab) | **dead** | −69bp/month vs the EW universe 2021-26, placebo 3.9th pct |
 | Short both legs of a 3x LETF pair (TQQQ+SQQQ, UPRO+SPXU), weekly (Lab-BK, lab) | **dead** | weekly rebalancing keeps only daily-minus-weekly variance (~3.8%/yr gross on QQQ); shorts pay the bear ETFs' T-bill distributions; ~0 after 2-4% borrow, negative at HTB rates |
+| Distance-method stock pairs on the top 100 (Gatev et al.), 6-month periods (Lab-BL, lab) | **dead** | −13bp/month, negative 8 of 10 years, placebo 68th pct |
 | Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
 | IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
 | IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |
