@@ -1756,3 +1756,20 @@ uses ETF momentum only to choose mean-reversion entries).
 - Benchmark: equal-weight all available sector SPDRs (excess), and SPY reported.
 - Test 2017-01 .. 2026-09; halves 2017-21 / 2022-26. Costs 5/10bp per side, full turnover.
 - Pass: 2x excess > 0 both halves; t >= 2 (monthly); >= 95th pct of a random-3 placebo; without the best 5 months > 0.
+
+
+## Amendment — Lab Round 42, Study Lab-BT: long-only top-decile momentum vs the market on 1963-2015 (Kenneth French library) (pre-register; 1 variant, program N 734 -> 735)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Purpose: Lab-BR (12-1 momentum, top 20 of 500, 2017-26) failed only
+on t (1.5) with ~10 years of Alpaca history. This tests the same long-only idea on the decades this program has never
+used, survivorship-free.
+- Data: Ken French "10 Portfolios Formed on Prior (12-2) Return", value-weighted monthly (CRSP), and the FF factors
+  (market = Mkt-RF + RF). Downloaded 2026-10-01 (CRSP 202608); no return looked at before this registration.
+- Book: hold the value-weighted TOP decile (Hi PRIOR) each month. Excess = Hi PRIOR - market.
+- Judged on 1963-07 .. 2015-12 (the modern CRSP era, before this program's data). Halves 1963-07..1989-12 /
+  1990-01..2015-12.
+- Costs (full monthly turnover, conservative): 1x 20bp/month; 2x 40bp/month.
+- Pass: 2x excess > 0 in BOTH halves; t >= 2 (monthly, judged period); the mean without the best 5 months > 0.
+- Reported, not judged: 1927-1963 and 2016-2026-08, the worst 12-month excess (momentum crashes, e.g. 2009), CAGR vs
+  market.
+- If it passes: build a monthly momentum sleeve (Lab-BR's rule) in the lab as a PAPER SHADOW only. Its own live gate
+  stays the lab's $500 gate; nothing in the live book changes.

@@ -34,3 +34,4 @@ adds to the program N. Results of the old variant are never deleted.
 | 2026-10-01 | cross_section | created (Studies Lab-BO 52w-high, Lab-BP low-vol, Lab-BQ 1-month reversal; monthly top 20 of 500) | classic anomalies, Roth/small-account friendly | program N 729 -> 732 |
 | 2026-10-01 | cross_section | Lab-BO/BP/BQ DEAD; new variant Lab-BR: 12-1 momentum, same frame | the classic left untested | program N 732 -> 733 |
 | 2026-10-01 | sector_momentum | created (Study Lab-BS: top-3 sector SPDRs by 12-1 momentum, monthly) | industry momentum, Roth-friendly | program N 733 -> 734 |
+| 2026-10-01 | momentum | new variant Lab-BT: top-decile momentum vs market on 1963-2015 (French library) | Lab-BR failed only on t with 10 years of data | program N 734 -> 735 |
