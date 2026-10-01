@@ -368,3 +368,12 @@ news-eval:    ## forward test of the LLM news judge on state/news-judge.jsonl (v
 
 qi-eval:      ## forward test of the 15:40 quote-imbalance tilt (Round 24 BB; verdict read once at 300)
 	@PYTHONPATH=. $(PY) -m research.sim.quote_imbalance_eval
+
+forward-status: ## every forward-only shadow gate in one place (AU3 is in `make review` section 9)
+	@echo "== Round 23 BA: LLM news judge (verdict once at 300) =="
+	@PYTHONPATH=. $(PY) -m research.sim.news_judge_eval 2>/dev/null || echo "  no state/news-judge.jsonl yet"
+	@echo ""
+	@echo "== Round 24 BB: 15:40 quote imbalance (verdict once at 300) =="
+	@PYTHONPATH=. $(PY) -m research.sim.quote_imbalance_eval
+	@echo ""
+	@echo "== Round 19 AU3 tug-of-war tilt: run  make review SINCE=2026-09-22 ARGS=--no-replay  (section 9) =="

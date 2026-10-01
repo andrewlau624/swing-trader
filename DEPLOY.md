@@ -201,6 +201,8 @@ fresh: no restart needed after editing it.
 | weekly | `make daily-status`: no `KILLED` lines, intraday fills clean |
 | after any `git push` | `make pull` here |
 | decisions | `make pending` (NEXT.md) |
+| weekly | `make forward-status`: the forward-only shadows (LLM news judge, 15:40 quote imbalance); each verdict is read once at 300 picks |
+| once (LLM news judge) | `pip install -r requirements.txt`, add `ANTHROPIC_API_KEY=...` to `.env`, then `make news-smoke SYM=<a ticker down today>`; without the key the judge stays silently off |
 | once | `HEALTHCHECK_URL` in `.env` (see `.env.example`) and `make notify-test`: the 16:10 watchdog and the dead-man ping only help if alerts arrive |
 
 ## Stopping it
