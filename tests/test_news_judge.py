@@ -114,3 +114,11 @@ def test_default_provider_is_opencode_deepseek_flash():
     from swingtrader.config import Config
     d = Config.load().daily
     assert (d.news_judge_provider, d.news_judge_model) == ("opencode-go", "deepseek-v4-flash")
+
+
+def test_sec_needs_a_contact_user_agent(monkeypatch):
+    monkeypatch.delenv("SEC_USER_AGENT", raising=False)
+    with pytest.raises(RuntimeError, match="SEC_USER_AGENT"):
+        nj.sec_headers()
+    monkeypatch.setenv("SEC_USER_AGENT", "Jane Doe jane@example.com")
+    assert nj.sec_headers() == {"User-Agent": "Jane Doe jane@example.com"}

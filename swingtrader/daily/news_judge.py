@@ -23,7 +23,21 @@ from pathlib import Path
 import pandas as pd
 import requests
 
-SEC_UA = {"User-Agent": "swing-trader news-judge (personal research)"}
+# SEC fair access: requests without a contact email in the User-Agent get 403. Set it in .env:
+#   SEC_USER_AGENT="Your Name you@example.com"
+# Without it the judge skips filings (news only) and says so in the record.
+def sec_headers() -> dict:
+    ua = os.environ.get("SEC_USER_AGENT", "").strip()
+    if "@" not in ua:
+        raise RuntimeError("SEC_USER_AGENT (name + contact email) not set in .env")
+    return {"User-Agent": ua}
+
+
+def _sec_json(url: str) -> dict:
+    r = requests.get(url, headers=sec_headers(), timeout=20)
+    if r.status_code != 200:
+        raise RuntimeError(f"SEC HTTP {r.status_code} for {url.rsplit('/', 1)[-1]}")
+    return r.json()
 LOG_NAME = "news-judge.jsonl"
 
 SYSTEM = """You classify why a US-listed stock fell sharply today, for a strategy that buys big \
@@ -72,7 +86,7 @@ def _cik_map(cache_dir: Path) -> dict:
     f = cache_dir / f"sec-tickers-{dt.date.today().isoformat()}.json"
     if f.exists():
         return json.loads(f.read_text())
-    j = requests.get("https://www.sec.gov/files/company_tickers.json", headers=SEC_UA, timeout=20).json()
+    j = _sec_json("https://www.sec.gov/files/company_tickers.json")
     mp = {v["ticker"].upper(): int(v["cik_str"]) for v in j.values()}
     cache_dir.mkdir(parents=True, exist_ok=True)
     for old in cache_dir.glob("sec-tickers-*.json"):
@@ -86,7 +100,7 @@ def filings(sym: str, start: pd.Timestamp, cache_dir: Path) -> list[dict]:
     cik = _cik_map(cache_dir).get(sym.upper().replace(".", "-"))
     if cik is None:
         return []
-    j = requests.get(f"https://data.sec.gov/submissions/CIK{cik:010d}.json", headers=SEC_UA, timeout=20).json()
+    j = _sec_json(f"https://data.sec.gov/submissions/CIK{cik:010d}.json")
     rec = j.get("filings", {}).get("recent", {})
     out = []
     for i, acc in enumerate(rec.get("acceptanceDateTime", [])):
@@ -240,11 +254,11 @@ def run_shadow(picks: pd.DataFrame, today: str, prev_close: pd.Timestamp, now: p
         try:
             news = fetch_news(str(sym), prev_close, now, keys)
         except Exception as exc:                       # noqa: BLE001 — inputs are best effort
-            news = []; rec["news_error"] = f"{type(exc).__name__}"
+            news = []; rec["news_error"] = f"{type(exc).__name__}: {str(exc)[:80]}"
         try:
             sec = fetch_filings(str(sym), prev_close, cache_dir)
         except Exception as exc:                       # noqa: BLE001
-            sec = []; rec["sec_error"] = f"{type(exc).__name__}"
+            sec = []; rec["sec_error"] = f"{type(exc).__name__}: {str(exc)[:80]}"
         rec.update(n_news=len(news), n_sec=len(sec))
         try:
             rec.update(judge(client, model, effort, str(sym), float(r.day_ret), float(r.price), news, sec))
@@ -270,8 +284,14 @@ def main(argv=None) -> int:
     sym, day_ret = args[0].upper(), float(args[1]) if len(args) > 1 else -0.10
     now = pd.Timestamp.now(tz="America/New_York")
     start = now - pd.Timedelta(days=1)
-    news = headlines(sym, start, now, require_alpaca_keys())
-    sec = filings(sym, start, ROOT / "state")
+    try:
+        news = headlines(sym, start, now, require_alpaca_keys())
+    except Exception as exc:                           # noqa: BLE001 — same as the live run: best effort
+        news = []; print(f"news skipped: {type(exc).__name__}: {str(exc)[:120]}")
+    try:
+        sec = filings(sym, start, ROOT / "state")
+    except Exception as exc:                           # noqa: BLE001
+        sec = []; print(f"SEC filings skipped: {str(exc)[:120]}")
     from ..config import Config
     d = Config.load().daily
     client = make_client(d.news_judge_provider)

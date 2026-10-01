@@ -15,7 +15,7 @@ import pytest
 
 import swingtrader.config as C
 
-SWITCH_PREFIXES = ("DAILY_", "ROTH_", "ANTHROPIC_", "OPENCODE_")    # no test may call an LLM API
+SWITCH_PREFIXES = ("DAILY_", "ROTH_", "ANTHROPIC_", "OPENCODE_", "SEC_")    # no test may call an LLM API
 
 
 @pytest.fixture(autouse=True)

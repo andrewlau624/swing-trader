@@ -30,7 +30,7 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   fundamental / liquidity / unclear + confidence to `state/news-judge.jsonl`. Never changes an order; failures are
   logged and swallowed. ≤ 20 new calls a night, shared by all books (pennies/month). `daily.news_judge: shadow`
   (off = disable); no-op without `OPENCODE_API_KEY` in .env.
-- **Server setup:** add `OPENCODE_API_KEY=...` to .env, then `make news-smoke SYM=<a ticker that fell today>`.
+- **Server setup:** add `OPENCODE_API_KEY=...` and `SEC_USER_AGENT="Your Name you@example.com"` to .env, then `make news-smoke SYM=<a ticker that fell today>`.
 - **Gate:** `make news-eval` prints progress; the BA1 verdict (fundamental conf ≥ 0.7 at x0.25) is read once at
   300 judged picks (~2-4 months), scored on the official crosses. Forward only: a historical LLM backtest is
   contaminated by the model's knowledge.
