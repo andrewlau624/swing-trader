@@ -1870,3 +1870,18 @@ Reported: 1927-63, 2016-26.
 - Small-account notes: it trades ~5-10 times a year, needs no margin (the leverage is inside the ETF) and works in a
   cash account and the Roth. The live book's IBS/conviction legs already hold 3x ETFs: a wash-sale check is needed
   before any taxable use.
+
+
+## Amendment — Lab Round 50, Studies Lab-CB / Lab-CC: Cboe sentiment as a predictor of 20-day market returns (pre-register; 2 variants, program N 742 -> 744)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Predictive tests, not timing overlays: a pass would be an input
+for SIZING the live book's legs (main program's call), not a market-timing book (timing the index already lost on
+return: the 200dma gate, Lab-BN, Lab-BY/BZ in 2016-26). Data: Cboe CSVs (cdn.cboe.com, downloaded 2026-10-01; no
+return looked at) and the French daily market (CRSP 202608).
+- **Lab-CB put/call contrarian.** Equity put/call ratio (equitypc.csv, 2006-11 .. 2019-10). Signal day t: the 10-day
+  mean P/C, z-scored against its trailing 252-day mean/sd; HIGH = z >= +1 (fear). Hypothesis: HIGH -> higher forward
+  20-day market return (t+1..t+20).
+- **Lab-CC SKEW.** Cboe SKEW (1990 .. 2026-09). Signal: SKEW z-scored against its trailing 252 days; HIGH = z >= +1.
+  Hypothesis: HIGH -> LOWER forward 20-day return.
+- Test: forward 20-day return on signal days minus on all other days, Newey-West t (20 lags), in each half (CB:
+  2006-11..2012-12 / 2013-01..2019-10; CC: 1990-2007 / 2008-2026-08). Pass: the hypothesised sign in BOTH halves AND
+  NW |t| >= 2 over the whole sample. Overlapping windows are handled by the NW lags.
