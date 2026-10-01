@@ -49,37 +49,47 @@ def fetch() -> None:
     (OUT / "sessions.pkl").write_bytes(pickle.dumps(cal))
     d = OUT / "imbalance"; d.mkdir(parents=True, exist_ok=True)
     spent_p = OUT / "spent.json"
-    spent = json.loads(spent_p.read_text())["usd"] if spent_p.exists() else 0.0
-    for o, cl in cal:
-        if o.date() > END:
-            break
-        f = d / f"{o.date()}.parquet"
-        if f.exists():
-            continue
+    import threading
+    from concurrent.futures import ThreadPoolExecutor
+    lock = threading.Lock()
+    state = {"spent": json.loads(spent_p.read_text())["usd"] if spent_p.exists() else 0.0, "stop": False}
+    todo = [(o, cl) for o, cl in cal if o.date() <= END and not (d / f"{o.date()}.parquet").exists()]
+
+    def one(ocl):
+        o, cl = ocl
+        if state["stop"]:
+            return
         s, e = (cl - dt.timedelta(minutes=10)).astimezone(dt.timezone.utc), (cl - dt.timedelta(minutes=5)).astimezone(dt.timezone.utc)
+        cli = db.Historical(get_env("DATABENTO_API_KEY"))
         for attempt in range(6):
             try:
-                cost = c.metadata.get_cost(dataset="XNAS.ITCH", schema="imbalance", symbols=syms, start=s, end=e)
-                if spent + cost > BUDGET:
-                    break
-                df = c.timeseries.get_range(dataset="XNAS.ITCH", schema="imbalance", symbols=syms,
-                                            start=s, end=e).to_df()
+                cost = cli.metadata.get_cost(dataset="XNAS.ITCH", schema="imbalance", symbols=syms, start=s, end=e)
+                with lock:
+                    if state["spent"] + cost > BUDGET:
+                        state["stop"] = True
+                        log(f"STOP: {o.date()} would take spend to ${state['spent'] + cost:.2f} > ${BUDGET}")
+                        return
+                    state["spent"] += cost          # reserve before downloading
+                df = cli.timeseries.get_range(dataset="XNAS.ITCH", schema="imbalance", symbols=syms,
+                                              start=s, end=e).to_df()
                 break
             except Exception as exc:
                 log(f"{o.date()} retry {attempt}: {type(exc).__name__}"); time.sleep(10 * (attempt + 1))
         else:
-            raise RuntimeError(f"{o.date()}: Databento unavailable")
-        if spent + cost > BUDGET:
-            log(f"STOP: {o.date()} would take spend to ${spent + cost:.2f} > ${BUDGET}"); break
+            log(f"{o.date()}: Databento unavailable, skipped (rerun to resume)"); return
         if len(df):
             df = df.reset_index()[["ts_event", "symbol", "ref_price", "cont_book_clr_price", "auct_interest_clr_price",
                                    "paired_qty", "total_imbalance_qty", "side", "auction_type"]]
             df = df[df.auction_type == "C"]
-        df.to_parquet(f)
-        spent += cost
-        spent_p.write_text(json.dumps({"usd": round(spent, 4)}))
-        if o.day <= 3 or len(df) == 0:
-            log(f"{o.date()}: {len(df)} records, spent ${spent:.2f}")
+        df.to_parquet(d / f"{o.date()}.parquet")
+        with lock:
+            spent_p.write_text(json.dumps({"usd": round(state["spent"], 4)}))
+        if o.day <= 2 or len(df) == 0:
+            log(f"{o.date()}: {len(df)} records, spent ${state['spent']:.2f}")
+
+    with ThreadPoolExecutor(6) as ex:
+        list(ex.map(one, todo))
+    spent = state["spent"]
     log(f"imbalance done, spent ${spent:.2f}")
     fetch_prices(cal)
 
