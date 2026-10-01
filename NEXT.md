@@ -45,7 +45,9 @@ and state, and does not touch the live book.
     close in H2; the captured spread leaves +2.2bp, t 1.6. A first "pass" counted off-exchange sub-penny prints as
     fills (MISTAKES.md). study_lab_bg_passive_close.md.
   - Databento credit: lab $100.22 + main BD/BE ~$16 = ~$116 of $125. No more pulls.
-  - **Lab-AV (Lab-AT's imbalance on historical SIP ticks, QQQ/SPY): running.**
+  - **Lab-AV (Lab-AT's opening imbalance on SIP ticks, QQQ/SPY): DEAD, underpowered.** The 0.20 QI threshold fired on
+    89 of ~2,400 symbol-days (NBBO sizes sit within ±0.15); +3.3bp t 1.35, 2x H2 negative.
+    study_lab_av_open_imbalance_ticks.md. Lab-AT (the same rule on the recordings) will fire rarely too.
   - **Lab-AT (opening L1 imbalance): waiting.** First look after 40 unflagged recorded sessions (~early Dec).
   - **Decision for the user:** Alpaca's free plan has historical SIP tick NBBO quotes and trades back to
     at least 2018 (verified). Lab-AT could be re-registered on that history now (+1 N) instead of waiting
