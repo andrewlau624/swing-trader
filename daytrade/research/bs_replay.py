@@ -36,6 +36,8 @@ def run():
         sc = MOM.loc[prev, ETFS].dropna()
         avail = list(sc.index)
         picks = list(sc.sort_values(ascending=False).index[:TOP])
+        if len(avail) < TOP + 1:
+            continue                      # no full 12-1 signal yet (SIP history starts 2016-01)
         rows.append({"month": m, "port": float(R.loc[m, picks].mean()), "bench": float(R.loc[m, avail].mean()),
                      "spy": float(R.loc[m, "SPY"]), "univ": R.loc[m, avail].values})
     t = pd.DataFrame(rows)

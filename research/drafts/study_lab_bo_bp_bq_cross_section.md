@@ -24,3 +24,11 @@ Stamp: round1_prose.md Lab Round 39 (commit f385248). Script `daytrade/research/
   bound. Nothing re-tuned.
 - (The first run printed t = NaN: an early month without a full 13-month signal gave an empty portfolio. Fixed by
   skipping months without a full signal. BO/BP/BQ unchanged.)
+
+## Lab-BS — sector-SPDR 12-1 momentum, top 3 monthly (Lab Round 41): DEAD
+| | 1x excess / month vs EW sectors | 2x 2017-21 / 2022-26 | t | without best 5 | placebo | CAGR (1x) vs EW sectors / SPY |
+|---|---|---|---|---|---|---|
+| Lab-BS | +11bp | **−31** / +35 | 0.6 | −9 | 89.4 | 13.6% vs 12.1% / 15.1% |
+
+By year (1x): 2022 +159bp/month (energy) carries it; 2019 −54, 2021 −76. Trails SPY. **DEAD.** (The SIP history starts
+2016-01, so the first full 12-1 signal is 2017-02; 116 test months.)
