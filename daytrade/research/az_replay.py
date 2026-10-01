@@ -30,7 +30,7 @@ from . import as_replay as A
 
 OUT = DATA / "research" / "az"
 START, END, SPLIT = A.START, A.END, A.SPLIT
-BUDGET = 60.0
+BUDGET = 72.0       # ~$0.058/day x 1,190 days ~ $69; with Study BD (~$15) inside the $125 credit
 DEV_MIN = 0.0010
 log = A.log
 
