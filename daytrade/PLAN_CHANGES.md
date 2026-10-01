@@ -17,3 +17,5 @@ adds to the program N. Results of the old variant are never deleted.
 | 2026-10-01 | close_cross | created (Study Lab-AZ1 long+short, Lab-AZ2 long only); exits in the 16:00 closing cross (a stated exception to flat-by-15:55) | first study on paid imbalance data (Databento) | program N 701 -> 703 |
 | 2026-10-01 | halt_short | created (Study Lab-BA1/2/3: short the reopening after a halt) | Lab-AY: post-halt drift is down either way | program N 705 -> 708 |
 | 2026-10-01 | halt_short | clarification before any result: Lab-BA3's "no SSR" test uses the last pre-halt price (> 0.9 x previous close), since the order is sent during the halt and the reopening print is not yet known | code and plan must agree | not a new variant |
+| 2026-10-01 | close_cross | Lab-AZ untestable: the near price is 0 before 15:55 | registration error | N stays |
+| 2026-10-01 | close_imbalance | created (Study Lab-BB1 long+short, Lab-BB2 long only): imbalance/paired rank at 15:54:30 | the observable part of the early NOII | program N 708 -> 710 |
