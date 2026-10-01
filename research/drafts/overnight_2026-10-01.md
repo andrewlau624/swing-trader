@@ -32,6 +32,12 @@ turn them on only after live night costs confirm ≤ ~3bp/side.
   removes exposure.
 - **BE, skip IBS entries indicated to gap up at 09:28: DEAD.** Gap-up entries actually earn more.
 The closing-imbalance idea that had been parked since Round 13 is now settled with real exchange data.
+- **BF, night picks that hit a trading halt that day** (the lab's idea; free minute bars): **DEAD, too rare.**
+  0.6% of picks halt; dropping them is +0.6pp, t 0.5.
+
+Program trial count: N 719 (main and lab together). With free data and the Databento credit used up, the next
+evidence has to come from live trading: the forward tests (LLM judge, quote imbalance, tug-of-war) and the
+switch gates in the weekly digest.
 
 ## Earlier today
 - **AU3 tug-of-war tilt:** built, OFF, logging.
