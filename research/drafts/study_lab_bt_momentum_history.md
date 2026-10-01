@@ -23,3 +23,18 @@ CAGR 1963-2015: top decile 14.2% vs the market 10.1%; 2016-26: 15.5% vs 15.0%. W
 
 Per the registration: build a monthly momentum sleeve as a **PAPER SHADOW only** (`daytrade/shadow_momentum.py`), to
 gather forward evidence. No orders, no live change, and the $500 gate applies to any future live test.
+
+## Lab-BU — volatility-scaled version (Barroso & Santa-Clara; Lab Round 43): DEAD by its bar, but a real crash cut
+Weight = min(1, 12% / trailing 6-month vol of the momentum excess); the rest in the market. 1x:
+
+| period | excess bp/month scaled / unscaled | Sharpe scaled / unscaled | worst 12m scaled / unscaled |
+|---|---|---|---|
+| judged 1963-2015 | +38.7 / +39.7 | 0.451 / 0.412 | **−23.5% / −30.6%** |
+| 1963-89 | +49.1 / +54.7 | **0.589 / 0.611** (fails) | −21.0% / −21.3% |
+| 1990-2015 | +28.0 / +24.4 | 0.318 / 0.237 | −23.5% / −30.6% |
+| ref 1927-63 | +37.3 / +33.6 | 0.437 / 0.321 | **−25.5% / −50.4%** |
+| ref 2016-26 | +15.2 / +16.5 | 0.138 / 0.130 | −29.7% / −30.8% |
+
+t 3.3; 2x positive both halves. **DEAD** only on bar (a): the 1963-89 Sharpe is 0.02 lower. Recorded for the shadow:
+scaling halves the worst historical crash at almost no cost to the mean. A live version would register it as its
+risk control.
