@@ -126,3 +126,22 @@ def test_sec_contact_comes_from_the_resend_address(monkeypatch):
     assert nj.sec_headers() == {"User-Agent": "swing-trader personal research jane@example.com"}
     monkeypatch.setenv("SEC_USER_AGENT", "Jane Doe jane@work.com")
     assert nj.sec_headers() == {"User-Agent": "Jane Doe jane@work.com"}, "explicit override wins"
+
+
+def test_opencode_client_retries_without_json_mode_on_400_and_shows_errors(monkeypatch):
+    calls = []
+
+    def post(url, json=None, timeout=None, headers=None):
+        calls.append(json)
+        if "response_format" in json:
+            return SimpleNamespace(status_code=400, text='{"error":"response_format not supported"}')
+        if json["model"] == "bad":
+            return SimpleNamespace(status_code=400, text='{"error":"unknown model bad"}')
+        return SimpleNamespace(status_code=200, text="", json=lambda: {"ok": 1})
+
+    monkeypatch.setattr(nj.requests, "post", post)
+    c = nj.OpenCodeClient("k")
+    assert c.chat({"model": "m", "response_format": {"type": "json_object"}}) == {"ok": 1}
+    assert "response_format" not in calls[-1] and "not supported" in c.json_mode_rejected
+    with pytest.raises(RuntimeError, match="unknown model bad"):
+        c.chat({"model": "bad"})

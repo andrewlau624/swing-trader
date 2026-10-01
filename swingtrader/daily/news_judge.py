@@ -137,8 +137,16 @@ class OpenCodeClient:
                 r = requests.post(self.url, json=payload, timeout=self.timeout,
                                   headers={"Authorization": f"Bearer {self.key}"})
                 if r.status_code == 429 or r.status_code >= 500:
-                    last = RuntimeError(f"HTTP {r.status_code}"); time.sleep(2 * (attempt + 1)); continue
-                r.raise_for_status()
+                    last = RuntimeError(f"HTTP {r.status_code}: {r.text[:300]}")
+                    time.sleep(2 * (attempt + 1)); continue
+                if r.status_code == 400 and "response_format" in payload:
+                    # not every gateway model takes JSON mode: retry once without it (the prompt
+                    # already demands JSON only and _parse validates the reply either way)
+                    self.json_mode_rejected = r.text[:300]
+                    payload = {k: v for k, v in payload.items() if k != "response_format"}
+                    continue
+                if r.status_code != 200:
+                    raise RuntimeError(f"OpenCode HTTP {r.status_code}: {r.text[:300]}")
                 return r.json()
             except requests.ConnectionError as exc:
                 last = exc; time.sleep(2 * (attempt + 1))
