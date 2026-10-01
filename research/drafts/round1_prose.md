@@ -1133,3 +1133,15 @@ back to 2018), so AT's idea need not wait 40 recorded sessions. Nothing below co
 - Pass: 2x net > 0 in both halves, day-clustered t >= 2.0 at 1x, sign-flip placebo (random direction on the same
   trades, gross mid-to-mid return minus the same cost) >= 95th pct. Otherwise dead; thresholds not re-tuned.
 - Pre-check done: RESULTS.md and NEXT.md have no opening-imbalance study (only closing-auction imbalance, AC/add. 35).
+
+
+## Amendment — Round 21, Study AW: VWAP trend on QQQ / TQQQ (Zarattini & Aziz 2023) (pre-register; 2 variants, N 674 -> 676)
+
+`date`: Thu Oct 1 03:35 PDT 2026. Source SSRN 4631351 (QQQ 2018-23 Sharpe 2.1, commissions only). Full rules:
+`daytrade/plans/vwap_trend.md`. Nothing computed; no data fetched. RESULTS.md/NEXT.md grep: no VWAP-trend study.
+- QQQ 1-min close vs session VWAP from 09:31; long above, short below; reverse at the next minute's open on a cross;
+  flat 15:55; 2% catastrophe stop. AW1 QQQ, AW2 TQQQ on QQQ's signal.
+- Costs: QQQ 0.5/1.0bp per side, TQQQ 1.5/3.0bp per side (1x/2x). SIP minutes 2022-01-03 .. 2026-09-30, halves
+  at 2024-06-01. Unit = day.
+- Pass: 2x day-mean > 0 both halves; day t >= 2.0 at 1x; >= 95th pct of a segment-direction placebo. Report the
+  correlation with the noise leg.
