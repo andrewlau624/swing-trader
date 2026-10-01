@@ -1660,3 +1660,13 @@ RESULTS.md/NEXT.md grep: earnings appears only as a news filter on the overnight
   - Pass, per variant: hedged net > 0 at 2x in both halves; month-clustered t >= 2 at 1x; >= 95th pct of a placebo
     (the same stocks on random non-event dates, same short+hedge, 1,000 draws); mean without the 20 best events > 0.
   - Shorts need a margin account (no Roth, no cash account under $2k): stated for any $ figures.
+
+
+## Amendment — Lab Round 34, Study Lab-BJ: calendar-month return seasonality, top 20 of the 500 most traded stocks (pre-register; 1 variant, program N 723 -> 724)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Plan (part of this registration): `daytrade/plans/seasonality.md`.
+Heston & Sadka (2008); Keloharju, Linnainmaa & Nyberg (2016). grep: untested here.
+- Monthly adjusted SIP bars 2016-01 .. 2026-09. Universe: price >= $5, top 500 by trailing-12-month dollar volume.
+  Signal = mean same-calendar-month return over the prior 5 years (>= 3 obs). Long the top 20, equal weight, close to
+  close, rebalanced monthly. Excess vs the equal-weight universe.
+- Test 2021-01 .. 2026-09; halves at 2024-01. Costs 10/20bp per side, full turnover.
+- Pass: 2x excess > 0 both halves; t >= 2; >= 95th pct of a random-20 placebo; without the 5 best months > 0.
