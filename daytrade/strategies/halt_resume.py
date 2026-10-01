@@ -18,8 +18,10 @@ STOP_PCT = 0.10
 class HaltResume(Strategy):
     name = "halt_resume"
 
-    def __init__(self, direction: str = "up"):
-        self.direction = direction            # "up": buy after a halt up; "down": after a halt down
+    def __init__(self, direction: str = "up", side: str = "buy", no_ssr: bool = False):
+        self.direction = direction            # "up": act after a halt up; "down": after a halt down
+        self.side = side                      # "buy" (Lab-AY) or "sell" short (Lab-BA)
+        self.no_ssr = no_ssr                  # skip names already down 10% from the previous close (Rule 201)
 
     def on_session_start(self, ctx) -> list:
         self.bars: dict[str, list] = {}
@@ -34,7 +36,7 @@ class HaltResume(Strategy):
         return []
 
     def on_fill(self, ctx, fill) -> list:
-        if fill.side == "buy":
+        if fill.side == self.side:
             self.filled_at.setdefault(fill.sym, fill.ts)
         return []
 
@@ -50,11 +52,19 @@ class HaltResume(Strategy):
                 move = last.close / bs[-6].close - 1
                 hit = move >= MOVE if self.direction == "up" else move <= -MOVE
                 if hit and len(recent) >= ACTIVE_MIN:
+                    d = ctx.day_info(s)
+                    if self.no_ssr and (d is None or last.close <= 0.9 * d.prev_close):
+                        self.done.add(s)
+                        continue
+                    if self.side == "sell" and ctx.is_cash_account():
+                        continue
                     self.done.add(s)
-                    out.append(Order(s, "buy", ref_price=last.close, stop=round(last.close * (1 - STOP_PCT), 2),
-                                     stop_pct=STOP_PCT, reason=f"halt {self.direction} ({move:+.1%} in 5 min)"))
+                    sign = 1 if self.side == "buy" else -1
+                    out.append(Order(s, self.side, ref_price=last.close,
+                                     stop=round(last.close * (1 - sign * STOP_PCT), 2), stop_pct=STOP_PCT,
+                                     reason=f"halt {self.direction} ({move:+.1%} in 5 min), {self.side}"))
         for s, t0 in self.filled_at.items():
-            if s not in self.exited and now >= t0 + HOLD and ctx.position(s) > 0:
+            if s not in self.exited and now >= t0 + HOLD and ctx.position(s) != 0:
                 self.exited.add(s)
-                out.append(Order(s, "sell", entry=False, reason="30-minute exit"))
+                out.append(Order(s, "sell" if ctx.position(s) > 0 else "buy", entry=False, reason="30-minute exit"))
         return out
