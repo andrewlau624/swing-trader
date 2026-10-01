@@ -2,7 +2,7 @@
 
 Written 2026-10-01 before any imbalance history was downloaded. A 70-second QQQ sample from one day was used only to
 learn the record's fields. Pre-registration: `research/drafts/round1_prose.md`, Lab Round 24 (2 variants, program N
-699 -> 701). Data: Databento XNAS.ITCH `imbalance` (Nasdaq NOII), paid from the user's free credit (~$52 for this
+701 -> 703; main Round 26 BD took 699 -> 701). Data: Databento XNAS.ITCH `imbalance` (Nasdaq NOII), paid from the user's free credit (~$52 for this
 universe and window). The research is done in `daytrade/research/az_replay.py`; a strategy plug-in is built only if it passes.
 
 ## The idea

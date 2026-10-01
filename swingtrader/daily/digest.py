@@ -33,10 +33,33 @@ ROTH_DEPOSIT_YR = 7500.0
 TAXABLE_MONTHLY_DEFAULT = 1000.0       # the user's plan: $1k a month into the brokerage account
 TAXABLE_TAX = 0.32                      # short-term federal + state, the program's planning rate
 HORIZONS = (1, 3, 5)
-INDEX_RATE = 0.10                       # S&P 500 long-run nominal, held (no yearly tax), the benchmark
+INDEX_RATE = 0.10                       # S&P 500 long-run nominal, the benchmark
+INDEX_RATE_RECENT = 0.15                # what it returned 2021-26, the years the bot's research comes from
+INDEX_DIV_DRAG = 0.002                  # taxable: ~1.3% dividends taxed each year at ~15%
+LT_TAX = 0.20                           # long-term gains when the index fund is sold (federal 15% + state)
 # What the research backtest says (auction-corrected, Study AW; 2.5bp/side stress, fixed capital ~$2-25k):
 # V7 brokerage book ~31%/yr, Roth cash IBS+night ~20%/yr; daily vol from the same runs (Sharpe ~1.95 / ~1.5).
-BACKTEST = {"taxable": {"rate": 0.31, "sd_day": 0.010}, "roth": {"rate": 0.20, "sd_day": 0.0085}}
+BACKTEST = {"taxable": {"rate": 0.31, "sd_day": 0.010, "levers": 0.15},
+            "roth": {"rate": 0.20, "sd_day": 0.0085, "levers": 0.03}}
+# levers in backtest terms: brokerage 1.3x overnight +10pp (add. 29, measured costs), conviction + 4x intraday
+# +5pp (Study AI); Roth (no overnight margin/intraday): tug-of-war tilt ~+3pp (Study AU3).
+# The edge SHRINKS with size (the night leg trades thin names; Study V/Y): rate multiplier by balance,
+# log-interpolated. Brokerage: Study Y book at central impact (31% -> 20% at $100k, 17.8% at $500k,
+# 15.9% at $1M). Roth (IBS + night, night capped near $250k): flat to $250k, then approx.
+SIZE_CURVE = {"taxable": [(25e3, 1.0), (1e5, 0.645), (5e5, 0.574), (1e6, 0.513)],
+              "roth": [(2.5e5, 1.0), (5e5, 0.85), (1e6, 0.72)]}
+
+
+def size_mult(kind: str, bal: float) -> float:
+    import math
+    pts = SIZE_CURVE[kind]
+    if bal <= pts[0][0]:
+        return pts[0][1]
+    for (a, ma), (b, mb) in zip(pts, pts[1:]):
+        if bal <= b:
+            f = (math.log(bal) - math.log(a)) / (math.log(b) - math.log(a))
+            return ma + f * (mb - ma)
+    return pts[-1][1]
 LEVER_LABEL = {"conviction": "conviction trade", "intraday_x4": "4x intraday margin",
                "overnight_1.3x": "overnight 1.3x", "tow_tilt": "tug-of-war tilt",
                "llm_judge": "LLM news judge", "quote_imbalance": "quote imbalance"}
@@ -234,26 +257,46 @@ def _plan(G: list) -> tuple[dict | None, list, list]:
     return step, rest, tests
 
 
+def _path(bal: float, r: float, dep_yr: float, months: int = 120, kind: str | None = None,
+          k: float = 1.0) -> list[float]:
+    """Monthly path. With `kind`, the bot's pre-tax rate r scales down with the balance (SIZE_CURVE) and
+    k (1 - tax) is applied after; without it, r is a flat rate (the index fund)."""
+    e, out = bal, [bal]
+    for _ in range(months):
+        rr = r * size_mult(kind, e) * k if kind else r
+        e = e * (1 + rr) ** (1 / 12) + dep_yr / 12
+        out.append(e)
+    return out
+
+
+LINES = ("This bot", "Everything on", "Backtest", "Backtest, everything on", "Index fund")
+CHART_LINES = ("Backtest, everything on", "Backtest", "This bot", "Index fund")
+
+
 def ten_year(acct: str, bal: float, taxable_monthly: float = 0.0) -> tuple[list, dict, dict]:
-    """(years grid, {line: values}, {line: (5y, 10y)}). Brokerage lines are AFTER yearly short-term tax
-    (the book's gains are taxed every year; a held index fund is not, until sold)."""
+    """(years grid, {line: values}, {line: (5y, 10y)}). Bot lines: pre-tax rate x size curve, then (brokerage)
+    yearly short-term tax. Index fund: flat rate; in the brokerage, a small yearly dividend tax and
+    long-term tax as if sold at that point. Roth: nothing is taxed."""
     kind = "roth" if acct == "roth" else "taxable"
-    p = PLAN[kind]
+    p, bt = PLAN[kind], BACKTEST[kind]
     dep = ROTH_DEPOSIT_YR if kind == "roth" else 12 * taxable_monthly
     k = (1 - TAXABLE_TAX) if kind == "taxable" else 1.0
-    rates = {"This bot": p["base"] * k, "Everything on": (p["base"] + sum(p["levers"].values())) * k,
-             "Backtest": BACKTEST[kind]["rate"] * k, "Index fund": INDEX_RATE}
+    lines = {"This bot": _path(bal, p["base"], dep, kind=kind, k=k),
+             "Everything on": _path(bal, p["base"] + sum(p["levers"].values()), dep, kind=kind, k=k),
+             "Backtest": _path(bal, bt["rate"], dep, kind=kind, k=k),
+             "Backtest, everything on": _path(bal, bt["rate"] + bt["levers"], dep, kind=kind, k=k),
+             "Index fund": index_path(kind, bal, dep, INDEX_RATE)}
     years = [m / 12 for m in range(0, 121)]
-    lines = {n: [project(bal, r, 0, dep)] for n, r in rates.items()}
-    for n, r in rates.items():
-        e, mr = bal, (1 + r) ** (1 / 12) - 1
-        vals = [e]
-        for _ in range(120):
-            e = e * (1 + mr) + dep / 12
-            vals.append(e)
-        lines[n] = vals
-    marks = {n: (v[60], v[120]) for n, v in lines.items()}
+    marks = {n: (lines[n][60], lines[n][120]) for n in LINES}
     return years, lines, marks
+
+
+def index_path(kind: str, bal: float, dep: float, rate: float) -> list[float]:
+    """Index fund value; in the brokerage, net of the long-term tax you would pay if you sold then."""
+    if kind == "roth":
+        return _path(bal, rate, dep)
+    raw = _path(bal, rate - INDEX_DIV_DRAG, dep)
+    return [v - max(v - (bal + dep * m / 12), 0.0) * LT_TAX for m, v in enumerate(raw)]
 
 
 def pace(acct: Account) -> dict | None:
@@ -301,7 +344,7 @@ def render(d: dict, charts: bool = True, taxable_monthly: float = 0.0) -> tuple[
         T += ["", "If these had been on:"] + [f"  {NAME[n]:10s} {r['idea'][:34]:34s} {_signed(r['usd']):>7s}" for n, r in ideas]
     for n, _ in real:
         _, _, mk = proj[n]
-        T += ["", f"{NAME[n]}{' (after tax)' if n == 'live' else ''}:     5 years    10 years"]
+        T += ["", f"{NAME[n]}{' (after tax; index as if sold)' if n == 'live' else ''}:     5 years    10 years"]
         T += [f"  {k:14s} {money(v5):>10s}  {money(v10):>10s}" for k, (v5, v10) in mk.items()]
     text = "\n".join(T)
 
@@ -372,16 +415,18 @@ def render(d: dict, charts: bool = True, taxable_monthly: float = 0.0) -> tuple[
     for n, a in real:
         yrs, lines, mk = proj[n]
         dep = ROTH_DEPOSIT_YR / 12 if n == "roth" else taxable_monthly
-        sub = (f"${dep:,.0f} a month in deposits" + (" · after short-term tax" if n == "live" else " · tax-free"))
+        sub = (f"${dep:,.0f} a month in deposits"
+               + (" · the bot after short-term tax each year, the index fund after tax if sold" if n == "live" else " · tax-free"))
         B.append(section(f"{NAME[n]} over 10 years", sub))
         if charts:
             cid = f"proj-{n}"
             from .digest_charts import projection_png
-            images.append((cid, projection_png(yrs, lines)))
+            images.append((cid, projection_png(yrs, {k: lines[k] for k in CHART_LINES})))
             B.append(f"<img src='cid:{cid}' width='560' alt='{NAME[n]} projection: "
                      + "; ".join(f"{k} {money(v10)} in 10 years" for k, (_, v10) in mk.items())
                      + "' style='display:block;width:100%;max-width:560px;height:auto;margin:0 0 14px'>")
-        dot = {"This bot": "#2a78d6", "Everything on": "#eb6834", "Backtest": INK, "Index fund": "#8c959f"}
+        dot = {"This bot": "#2a78d6", "Everything on": "#9ec1ec", "Backtest": INK, "Backtest, everything on": "#eb6834",
+               "Index fund": "#8c959f"}
         best = max(v10 for _, v10 in mk.values())
         rr = "".join(
             f"<tr><td style='{cell}'><span style='display:inline-block;width:10px;height:10px;border-radius:5px;"
@@ -389,10 +434,20 @@ def render(d: dict, charts: bool = True, taxable_monthly: float = 0.0) -> tuple[
             f"<td style='{numc}{'color:' + UP + ';' if v10 == best else ''}'>{money(v10)}</td></tr>"
             for k, (v5, v10) in mk.items())
         B.append(table(["", "In 5 years", "In 10 years"], rr))
-        idx = mk["Index fund"][1]
-        diff = mk["This bot"][1] - idx
-        B.append(p(f"After 10 years this bot, as it runs today, is <b style='color:{UP if diff >= 0 else DOWN}'>"
-                   f"{money(abs(diff))} {'ahead of' if diff >= 0 else 'behind'}</b> an index fund.", 14, MUTE, "margin-top:10px"))
+        B.append(p("<b>This bot</b> and <b>Everything on</b> are the conservative plan (about half the backtest); "
+                   "<b>Backtest</b> lines are what the research measured. Every bot line slows as the balance grows: "
+                   "the edge gets smaller with size.", 13, MUTE, "margin-top:8px"))
+        kind = "roth" if n == "roth" else "taxable"
+        dep = ROTH_DEPOSIT_YR if kind == "roth" else 12 * taxable_monthly
+        bot = mk["This bot"][1]
+        msgs = []
+        for lab, r in ((f"if stocks return their long-run {INDEX_RATE:.0%}", INDEX_RATE),
+                       (f"if they repeat 2021-26 (~{INDEX_RATE_RECENT:.0%} a year)", INDEX_RATE_RECENT)):
+            diff = bot - index_path(kind, a.equity, dep, r)[120]
+            how = ("even with" if abs(diff) < 500 else ("ahead of" if diff >= 0 else "behind"))
+            msgs.append(f"{lab}, the plan line ends <b style='color:{UP if diff >= 0 else DOWN}'>"
+                        + ("" if how == "even with" else money(abs(diff)) + " ") + f"{how}</b> an index fund")
+        B.append(p("After 10 years, " + "; ".join(msgs) + ".", 14, MUTE, "margin-top:10px"))
     if ideas:
         rr = "".join(
             f"<tr><td style='{cell}'>{_esc(r['idea'].split(' (')[0][:1].upper() + r['idea'].split(' (')[0][1:])}"
@@ -427,9 +482,12 @@ def render(d: dict, charts: bool = True, taxable_monthly: float = 0.0) -> tuple[
         B.append(p(msg, 14, MUTE, "margin-top:10px"))
     B.append(p(f"Projections use planning rates, not forecasts: this bot {PLAN['taxable']['base']:.0%} a year "
                f"(Roth {PLAN['roth']['base']:.0%}), everything on {PLAN['taxable']['base'] + sum(PLAN['taxable']['levers'].values()):.0%}, "
-               f"backtest {BACKTEST['taxable']['rate']:.0%} (Roth {BACKTEST['roth']['rate']:.0%}; research results usually shrink live), "
-               f"index fund {INDEX_RATE:.0%}. Every line gets the same deposits. Brokerage figures assume {TAXABLE_TAX:.0%} short-term "
-               f"tax each year; the index fund is shown before you sell it.", 13, MUTE,
+               f"backtest {BACKTEST['taxable']['rate']:.0%} (Roth {BACKTEST['roth']['rate']:.0%}), backtest everything on "
+               f"{BACKTEST['taxable']['rate'] + BACKTEST['taxable']['levers']:.0%} (Roth {BACKTEST['roth']['rate'] + BACKTEST['roth']['levers']:.0%}), "
+               f"all at small balances and shrinking with size (Study Y), "
+               f"index fund {INDEX_RATE:.0%}. Every line gets the same deposits. Brokerage: the bot pays {TAXABLE_TAX:.0%} short-term "
+               f"tax each year; the index fund pays a little dividend tax yearly and {LT_TAX:.0%} long-term tax when sold "
+               f"(shown as if sold). The bot's edge is strongest in the Roth, where nothing is taxed.", 13, MUTE,
                f"margin-top:34px;padding-top:16px;border-top:1px solid {LINE}"))
     html = (f"<div style='background:#eaeef2;padding:24px 10px'><div style='max-width:600px;margin:0 auto;background:#ffffff;"
             f"border:1px solid {LINE}'>" + "".join(H)
