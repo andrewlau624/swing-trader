@@ -884,6 +884,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Nasdaq opening-cross imbalance, reversal by 10:00 (Lab-BE/BF, day-trading lab) | **dead** | wrong sign (−7.8bp gross, placebo 0.4th); continuation decayed from +13.5bp (H1) to +1.9bp (H2), below the exit spread |
 | Closing-imbalance signal with a passive limit at the touch until 15:55 (Lab-BG, day-trading lab) | **dead** | adverse selection: filled trades −0.6bp mid -> close (H2); net +2.2bp t 1.6; a false pass came from counting TRF sub-penny prints |
 | Announcement-gap drift (gap >= 5% on 3x volume), long 5/20d; and the short+SPY hedge (Lab-BH/BI, lab) | **dead** | long −185bp 20d excess 2022-26; the short fails out of sample on 2017-21 (t 0.6; 2018, 2020 negative): a post-2021 regime |
+| Calendar-month return seasonality, top 20 of 500 most traded, monthly (Lab-BJ, lab) | **dead** | −69bp/month vs the EW universe 2021-26, placebo 3.9th pct |
 | Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
 | IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
 | IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |
