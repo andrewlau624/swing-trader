@@ -1745,3 +1745,14 @@ cross-sectional stock version is untested.
 - Score = close of month m-2 / close of month m-13 - 1 (skip the last month); long the top 20 of the 500, equal weight,
   monthly. Lab-BJ's frame, costs and test months (2017-01 .. 2026-09; halves 2017-21 / 2022-26).
 - Pass: 2x excess > 0 both halves; t >= 2; >= 95th pct of the random-20 placebo; without the best 5 months > 0.
+
+
+## Amendment — Lab Round 41, Study Lab-BS: sector-ETF momentum rotation (Moskowitz & Grinblatt 1999) (pre-register; 1 variant, program N 733 -> 734)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). grep: no sector rotation / industry momentum study (the IBS leg
+uses ETF momentum only to choose mean-reversion entries).
+- Universe (fixed): the 11 Select Sector SPDRs XLB XLC XLE XLF XLI XLK XLP XLRE XLU XLV XLY (XLC from 2018-07, XLRE from
+  2015-10; a fund joins once it has 13 months). Monthly adjusted SIP bars 2015-11 .. 2026-09.
+- Score = 12-1 momentum (close m-2 / close m-13 - 1). Hold the top 3, equal weight, month-end close to month-end close.
+- Benchmark: equal-weight all available sector SPDRs (excess), and SPY reported.
+- Test 2017-01 .. 2026-09; halves 2017-21 / 2022-26. Costs 5/10bp per side, full turnover.
+- Pass: 2x excess > 0 both halves; t >= 2 (monthly); >= 95th pct of a random-3 placebo; without the best 5 months > 0.
