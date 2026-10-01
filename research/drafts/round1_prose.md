@@ -1109,3 +1109,58 @@ every size; NW t (5 lags) of the daily increment >= 2.0; sign-flip placebo of th
 >= 95th pct (1,000 draws); max DD not worse by > 2pp. AT also needs the kept-minus-skipped per-trade
 gap to have the passing sign in 2016-20. DSR reported at N 675. A variant that fails any clause is
 DEAD.
+
+
+## Amendment — Round 19: max edge from outside sources — Studies AU, AV, AW (pre-register; 5 variants, N 675 -> 680)
+
+`date`: Thu Oct  1 2026 (stamped by the commit). Brief: `research/drafts/prompt_max_edge.md`. Candidate
+list (44 rows, sources, decay, counterparty, dead-list check): `research/drafts/max_edge_candidates.md`,
+committed in the same commit as this amendment, before any number below was computed.
+
+Common to AU and AV. `load_sim(raw_price=True)`, night pool `night_days(raw_price=True, max_corr=0.7)`.
+Two books: **V7** (night .5 + IBS .5, QQQ/SMH noise .5/.5 cap .75, live tilt, weekend x.5, no
+conviction) and **Roth cash** (IBS .5 + night .5, noise off, live tilt, weekend x.5). Fixed capital
+$2.3k / $10k / $25k, whole shares. Costs: night **2.5bp per side** (the brief's 2x of measured; the
+judged cost) and `tier_hi` (reported, not judged); IBS 1bp/side. Halves 2021-23 (select) / 2024-26
+(judge). **Pass bar (SHADOW)**, at 2.5bp/side, in BOTH books at ALL three sizes: increment > 0 in
+both halves; Newey-West t (5 lags) of the daily increment >= 2.0; sign-flip placebo (1,000 draws) >=
+95th pct; book maxDD not worse by > 2pp; 5y P(maxDD > 50%) <= 5% (stationary block bootstrap of the
+variant's daily book returns, 21-day blocks, 1,000 paths, at $10k). DSR reported at N 680.
+
+### Study AU — night picks tilted by trailing overnight-return persistence (3 variants)
+Sources: Aboody et al. JFQA 2018; Akbas-Boehmer-Jiang-Koch JFE 2022; CXO "overnight momentum".
+Mechanism: names with persistent retail demand at the open are bid up again at the next open, which
+is where the night leg sells. Different from add. 7 (overnight momentum as a standalone strategy):
+a weight inside picks that already pay the cost. Features from the SIP daily panel (raw ratios, so
+split-neutral), all known at 15:50 on d:
+- ON20 = mean of open_t / close_{t-1} - 1 over t = d-19..d (20 gaps, including d's own open);
+- TOW = count of t in d-20..d-1 with open_t/close_{t-1} > 1 and close_t/open_t < 1 (tug of war).
+z = (feature - mean) / sd with mean and sd fixed from the 2021-23 night picks (select half only).
+- AU1: weight = live tilt x clip(1 + 0.25 z(ON20), 0.25, 2), renormalised to the live tilt's mean that night.
+- AU2: drop picks with ON20 < 0 (their slice stays in cash; no redeployment).
+- AU3: weight = live tilt x clip(1 + 0.25 z(TOW), 0.25, 2), renormalised as AU1.
+Extra placebo for AU1/AU3: the feature shuffled across picks within the same night (200 draws), V7
+$10k 2.5bp: the actual increment must beat the 95th pct. Picks with no panel history keep z = 0.
+Also reported: per-pick net by feature tercile per half (monotone or not).
+
+### Study AV — the IBS leg's exit: hold until a state exit (2 variants)
+Sources: Pagonidis (NAAIM 2014) IBS > 0.5 / 0.8 exits; idousse/mean-reversion-strategy (clean,
+costed) exit close > yesterday's high. Shipped: entry when IBS_d < 0.2 on the month's top-3, held
+open d+1 -> open d+2 and re-held while IBS < 0.2. Variants change only the exit; an entered name is
+held (open -> open, re-evaluated each close) until the condition, a 5-session cap, or the name
+leaving the month's top-3; legs are equal-weighted across held names as shipped.
+- AV1: sell at the next open after the first close with IBS > 0.5.
+- AV2: sell at the next open after the first close above the prior session's high.
+Also judged: the 2016-20 holdout of the unit IBS leg (open->open, -2bp) must not be negative for a
+variant to pass (the book sim starts 2021).
+
+### Study AW — audit: night-leg returns on the official auction prints (report, 0 variants)
+Source: Quantpedia 2025 (OHLC open = first trade, not the cross; GDX overnight 30%/yr vs 8.6%).
+For every night pick 2021-26 (raw pool, corr .7), fetch Alpaca `/v2/stocks/auctions` (SIP): the
+official closing cross on d and opening cross on d+1 (the largest-size print of each list). Compute
+ret_auc = open_cross(d+1) / close_cross(d) - 1 vs the pool's ret (close -> next open from the vendor
+daily bars). Prints are unadjusted: a pick whose |ret_auc - ret| > 20% is treated as a corporate
+action and keeps ret. Report: coverage; mean and median (ret_auc - ret) in bp per half and by price
+tier; the night-leg and both books' %/yr and $/yr at $2.3k / $10k / $25k with ret_auc substituted
+where available. Decision rule: if the per-trade mean differs by more than 3bp in either half, every
+night-leg level in NEXT.md is restated on auction prints. No variant, no N.
