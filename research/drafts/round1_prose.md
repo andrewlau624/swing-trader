@@ -1694,3 +1694,17 @@ grep: ETF pairs dead (add. 27 R4); stock pairs untested.
   2x 20bp.
 - Halves 2017-2021 / 2022-2026-09. Pass: 2x monthly net > 0 both halves; t >= 2 (monthly); without the best 3 months
   > 0; >= 95th pct of a placebo (20 random pairs from the same universe, same rules, 200 draws).
+
+
+## Amendment — Lab Round 37, Study Lab-BM: post-split drift after FORWARD-split ex-dates (pre-register; 1 variant, program N 727 -> 728)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Source: Ikenberry, Rankine & Stice (1996); Desai & Jain (1997)
+(positive drift after splits). grep: untested here. Alpaca's corporate-announcement history is unusable before 2024,
+so ex-dates are inferred from raw SIP daily bars.
+- Event: a common stock whose raw open on day 0 / raw close on day -1 is within ±6% of 1/k for k in {2, 3, 4, 5, 10,
+  20} (a k-for-1 forward split; reverse splits excluded). Raw post-split day-0 open >= $5; 20-day ADV (pre-split $)
+  >= $5M. Raw SIP daily 2016-10 .. 2026-09 (Lab-BI's and Lab-AU's caches).
+- Buy at day 0's official close (market-on-close); sell at day 60's official close. Return on raw prices after day
+  0, adjusted by any further detected split in the window. Excess vs SPY (adjusted) on the same window.
+- Costs 10/20bp per side. Halves: event years 2017-2021 / 2022-2026.
+- Pass: 2x excess > 0 both halves; month-clustered t >= 2 (1x); >= 95th pct of a random-date placebo (same stocks, 60
+  days, 1,000 draws); without the best 10 events > 0 (fewer events than the other studies).
