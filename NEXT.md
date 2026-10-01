@@ -33,8 +33,11 @@ and state, and does not touch the live book.
   - **Lab-BA (short the reopening after a halt): DEAD, closes the halt family.** +40bp means are a few 40-55%
     collapses; medians −100..−308bp, negative without the top 20, t ≤ 1.2; on easy-to-borrow names −70bp gross.
     study_lab_ba_halt_short.md.
-  - **Lab-AV (Lab-AT's imbalance on historical SIP ticks, QQQ/SPY): running.** **Lab-AZ (Nasdaq closing-cross
-    convergence, Databento ~$69): fetching.**
+  - **Lab-AZ/BB/BC (Nasdaq closing imbalance, Databento, $64.88): signal REAL, not tradable.** A big early imbalance
+    predicts ~+6-7bp from 15:54 to the close, out of sample (H2 holdout, placebo 100th pct). But crossing the spread
+    at 15:54 costs as much: Lab-BC H2 +0.3bp net at 1x, −5.7 at 2x. Lab-AZ was untestable (near price published only
+    from 15:55). study_lab_bb_close_imbalance.md. Best use: the night leg's closing-cross entry (main BD).
+  - **Lab-AV (Lab-AT's imbalance on historical SIP ticks, QQQ/SPY): running.**
   - **Lab-AT (opening L1 imbalance): waiting.** First look after 40 unflagged recorded sessions (~early Dec).
   - **Decision for the user:** Alpaca's free plan has historical SIP tick NBBO quotes and trades back to
     at least 2018 (verified). Lab-AT could be re-registered on that history now (+1 N) instead of waiting
@@ -839,6 +842,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | +25% movers at 15:00 held to 15:55, long only (Lab-AX, day-trading lab) | **dead** | gross +6bp/trade, −33.7 at 20bp/side, H2 −53.6; the run-up is done by 15:00 |
 | Buy the reopening after a LULD halt, up or down (Lab-AY, day-trading lab) | **dead** | ~−130bp gross per 30 min either way (t −4..−5); post-halt drift is down; short side = Lab-BA |
 | Short the reopening after a halt (up; ETB-only; down without SSR) (Lab-BA, day-trading lab) | **dead** | a lottery: a few 40-55% collapses in unborrowable names; negative without the top 20; ETB names −70bp gross |
+| Nasdaq early closing imbalance (15:54) as an intraday trade to the close (Lab-AZ/BB/BC, day-trading lab) | **dead: real signal, spread-bound** | +6-7bp gross out of sample (placebo 100th) but the 15:54 spread eats it: H2 +0.3bp net 1x, −5.7bp 2x |
 | Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
 | IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
 | IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |
