@@ -1567,3 +1567,13 @@ Data: Lab-AZ's NOII files (already paid). No return computed.
 - Costs: 1x = NBBO + 0.5bp in, 0.5bp out; 2x = NBBO + 1bp + half-spread again in, 1bp out.
 - **Judged on H2 only (2024-06-03 .. 2026-09-30):** H2 net > 0 at 2x; t >= 2 at 1x (days are the unit: one trade a day
   at most); >= 95th pct of a random-side placebo; without the top 20 > 0. Long and short legs are reported separately.
+
+
+## Amendment — Lab Round 29, Study Lab-BE: buy (short) in the Nasdaq opening cross after a big sell (buy) imbalance, exit 10:00 (pre-register; 2 variants, program N 712 -> 714)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Plan (part of this registration):
+`daytrade/plans/open_cross_reversal.md`. A priori rule; only the field availability was checked (4 days).
+- 09:28:00 latest opening message; d = near / ref - 1. Long the 5 most negative d with a sell imbalance; short the 5
+  most positive d with a buy imbalance. Enter in the opening cross (official open); exit 10:00 at the NBBO.
+- Lab-BE1 long+short; Lab-BE2 long only. Costs 0.5/1bp at the cross; NBBO + 0.5bp (1x) / + half-spread + 1bp (2x) at exit.
+- Pass: 2x > 0 both halves; day-clustered t >= 2 at 1x; >= 95th pct of a random-side placebo; mean without the top 20 > 0.
+- Databento: ~$6 (09:27-09:28 window); with Lab-AZ's $64.88 and main BD/BE, inside the $125 credit.

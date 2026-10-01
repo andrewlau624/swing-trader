@@ -21,3 +21,4 @@ adds to the program N. Results of the old variant are never deleted.
 | 2026-10-01 | close_imbalance | created (Study Lab-BB1 long+short, Lab-BB2 long only): imbalance/paired rank at 15:54:30 | the observable part of the early NOII | program N 708 -> 710 |
 | 2026-10-01 | close_imbalance | Lab-BB DEAD (gross +3.4bp < the 7.5bp spread); new variant Lab-BC: |r| >= the H1 q75, judged on H2 only | monotone dose-response in H1 | program N 710 -> 711 |
 | 2026-10-01 | close_imbalance | new variant Lab-BD: QQQ every day, long r >= 0.2585 / short r <= -0.2824 (H1 quintiles), judged on H2 | cheapest instrument for a real but spread-bound signal | program N 711 -> 712 |
+| 2026-10-01 | open_cross_reversal | created (Study Lab-BE1 long+short, Lab-BE2 long only) | the cross is entered at no spread; auction pressure reverts | program N 712 -> 714 |
