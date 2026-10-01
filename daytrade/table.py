@@ -40,6 +40,9 @@ ROWS = [
     Row("gap_vwap_reclaim (lab, Study AS: DEAD)", -18.9, 2.78, 0.139,
         "Study AS 2022-26 replay at 1x (10bp/side), 1s; lev 0.14 = the risk layer's measured average "
         "(0.5% risk per trade). Gross -1.7bp: no edge. At 2x costs -36.1bp"),
+    Row("orb_in_play (lab, Study AU1: DEAD)", -23.5, 2.37, 0.15,
+        "Study AU 2022-26 at 5bp/side: 19,016 trades; even the optimistic fill bound is ~0 at 5bp and "
+        "-9bp at 10bp/side. 2.4 trades/day and lev 0.15 as measured under the lab limits (3 slots, 0.5% risk)"),
     Row("illustration only: 10bp x 5 trades", 10.0, 5.0, 4.0,
         "the brief's illustration, NOT a measured edge", measured=False),
 ]

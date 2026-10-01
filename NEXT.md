@@ -21,6 +21,9 @@ and state, and does not touch the live book.
   - **AS (gap + premarket volume, VWAP reclaim): DEAD.** 3,308 trades 2022-26: −18.9bp/trade at 1x
     (t −3.2), −36bp at 2x (both halves negative), gross −1.7bp, placebo 59th pct. $2.3k -> $568 through
     the risk layer. `research/drafts/study_as_gap_vwap.md`.
+  - **AU (5-min ORB on Stocks in Play, Zarattini-Barbon-Aziz 2024): DEAD** (and already dead in RESULTS.md).
+    −23.5bp/trade at 5bp/side; the optimistic fill bound grosses ~+10bp, below costs. study_au_orb_in_play.md.
+  - **AV (AT's imbalance on historical SIP ticks, QQQ/SPY): running.**
   - **AT (opening L1 imbalance): waiting.** First look after 40 unflagged recorded sessions (~early Dec).
   - **Decision for the user:** Alpaca's free plan has historical SIP tick NBBO quotes and trades back to
     at least 2018 (verified). AT could be re-registered on that history now (+1 N) instead of waiting
@@ -717,6 +720,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Conviction trade in MNQ instead of TQQQ (Round 16 AJ) | **shadow (AJ1 .5, AJ2 .75); AJ3 1.0 dead** | same trades, cheaper, frees the noise leg's margin, 60/40: +2.5..+5.3pp 2024-26, t 4+; Schwab API cannot trade futures, needs a second broker; ≥ ~$29k |
 | More conviction setups: second breakout after a failed first; SMH/SPY/IWM on no-TQQQ days (Round 16 AK) | **dead** | 2nd breakout +0.4..+0.9pp all halves but t 0.9; SPY = same bet (corr .75); SMH/SPY/IWM fill-ins 0..−7pp 2024-26 (IWM t −2.7) |
 | Gap ≥ 4% + premarket vol ≥ 250k, pullback to VWAP, reclaim, 2R target (Round 18 AS, day-trading lab) | **dead** | gross −1.7bp/trade, −18.9 at 10bp/side (t −3.2), −36 at 2x both halves; placebo 59th pct; $2.3k -> $568 over 2022-26 |
+| 5-min ORB on Stocks in Play, re-test at 5/10bp per side, 2022-26 (Round 19 AU, lab) | **dead (again)** | −23.5bp/trade, 19k trades, t −16.7; even the optimistic fill bound grosses only ~+10bp: −9bp at 10bp/side both halves. Already dead in RESULTS.md (check RESULTS.md's dead tables too) |
 
 ## Ideas not yet tested
 
