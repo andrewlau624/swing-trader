@@ -1457,3 +1457,15 @@ has been computed. Grep of RESULTS.md / NEXT.md / this file: no halt-trading stu
 - Lab-AY1 = buy after a halt UP; Lab-AY2 = buy after a halt DOWN. Costs 20/40bp per side. Halves at 2024-06-01.
 - Pass per variant: 2x > 0 both halves; day-clustered t >= 2 at 1x; >= 95th pct of a random-minute placebo on the
   same stock-days.
+
+
+## Amendment — Lab Round 24, Study Lab-AZ: Nasdaq closing-cross convergence from the NOII (pre-register; 2 variants, program N 699 -> 701)
+
+`date`: Thu Oct 1 ~04:30 PDT 2026 (the commit time is the stamp). Plan (part of this registration):
+`daytrade/plans/close_cross.md`. Data: Databento XNAS.ITCH imbalance (user's key; ~$52 of the free credit). Nothing
+downloaded beyond a 70-second QQQ field sample.
+- Universe: top 100 Nasdaq-listed common stocks by Nov-Dec 2021 dollar volume + QQQ, TQQQ (fixed file).
+- At close - 5:30 (15:54:30): the latest closing NOII, dev = near / ref - 1. Long if dev >= +10bp and side B; short if
+  dev <= -10bp and side A. Enter at the SIP NBBO 1s later; exit market-on-close at the official close.
+- Lab-AZ1 long+short; Lab-AZ2 long only. Costs NBBO+0.5bp / close 0.5bp (1x); NBBO+1bp+half-spread / close 1bp (2x).
+- Halves at 2024-06-01. Pass: 2x > 0 both halves; day-clustered t >= 2 at 1x; >= 95th pct of a random-side placebo.

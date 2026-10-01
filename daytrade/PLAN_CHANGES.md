@@ -14,3 +14,4 @@ adds to the program N. Results of the old variant are never deleted.
 | 2026-10-01 | vwap_trend | created (Study Lab-AW1 QQQ, Lab-AW2 TQQQ) | published VWAP trend (SSRN 4631351) at real costs, out of sample | N 674 -> 676 |
 | 2026-10-01 | late_mover | created (Study Lab-AX) | the long mirror of a measured, untradable short effect (RESULTS.md: losers ≥ 25% by 15:00) | N 676 -> 677 |
 | 2026-10-01 | halt_resume | created (Study Lab-AY1 halt-up long, Lab-AY2 halt-down long) | untested event class where small size is an advantage | program N 697 -> 699 |
+| 2026-10-01 | close_cross | created (Study Lab-AZ1 long+short, Lab-AZ2 long only); exits in the 16:00 closing cross (a stated exception to flat-by-15:55) | first study on paid imbalance data (Databento) | program N 699 -> 701 |
