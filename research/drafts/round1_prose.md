@@ -1065,3 +1065,34 @@ stress (5bp): stats, both halves, NW t vs BIL, sign-flip placebo, mc_tax P(DD30/
 $2.3k/$10k/$25k. Same for the taxable V7 book (B.Sim.replay) at the same costs. No new variant; a
 sensitivity on registered variants. If IBS+night beats IBS-only at <= 5bp in both halves, the
 cash-IRA spec becomes IBS .5 + night .5 (not IBS-only) with the cost level named as the gate.
+
+
+## Amendment — Round 18: the day-trading lab's first two strategies, Studies AS and AT (pre-register; 2 variants, N 669 -> 671)
+
+`date`: Thu Oct 1 00:14 PDT 2026. Brief: `research/drafts/prompt_daytrade_lab.md`. The lab is a separate package
+(`daytrade/`), account and state; nothing here touches the live book. Nothing below computed. The full rules,
+costs and drop conditions are in the plans, which are part of this registration:
+`daytrade/plans/gap_vwap_reclaim.md` and `daytrade/plans/open_imbalance.md`.
+
+### Study AS — gap + premarket volume, pullback to VWAP, reclaim entry (1 variant, N -> 670)
+- Selection at the official open: common stocks, prev close $5-1,000, 20d ADV >= $5M, gap >= +4.0% (09:30 SIP
+  minute open / prev close), premarket SIP volume 04:00-09:29 >= 250k shares, top 5 by premarket volume.
+- Entry: a bar ending >= 09:36 touches session VWAP (low <= VWAP, VWAP > prev close); a later bar closes above
+  VWAP and the previous bar's high, by 11:30; market buy. Stop pullback low - $0.01 (skip if R < 0.2% or > 5%);
+  target +2R; flat by 15:55; one entry per name per day; long only. Same bar stop+target = stop.
+- Costs 10bp/side (1x), 20bp/side (2x). Latency 1s = next minute open; 0s / 60s reported.
+- Data SIP minutes 2022-01-03 .. 2026-09-30; halves split at 2024-06-01.
+- Pass (to paper): mean net/trade > 0 at 2x in both halves, day-clustered t >= 2.0 at 1x, and >= 95th pct of a
+  random-entry placebo (same symbol-days, random minute 09:36-11:30, same % stop and 2R, 1,000 draws).
+  Otherwise dead; no re-tuning of X, Y, cutoff, R or target.
+- Prior: dead (AE, AB, AK, add. 41). It is the brief's "popular pattern" and the engine's first plug-in.
+
+### Study AT — opening L1 quote imbalance + signed trade flow, ETFs (1 variant, N -> 671)
+- QQQ, SPY, TQQQ, IWM, SMH; window 09:30:00-09:34:59 of the lab's own L1 recording. QI = mean per-second
+  (bid_sz - ask_sz)/(bid_sz + ask_sz); FLOW = signed last-trade volume share (quote rule, tick rule at the mid).
+  Long if QI >= +0.20 and FLOW >= +0.10; short if <= -0.20 and <= -0.10 (margin only). Enter 09:35 + 1s, exit
+  10:05:00, stop at the window's low/high -/+ $0.01.
+- Costs: recorded spread + 0.5bp/side (1x); 2x the half-spread + 0.5bp (2x).
+- First look after 40 unflagged recorded sessions, run once; halves = first/last 20 sessions. Pass as AS
+  (2x both halves, t >= 2 at 1x, sign-flip placebo >= 95th pct). Counted in N now so the look cannot be
+  re-tuned.
