@@ -309,7 +309,7 @@ def test_strategy_code_cannot_see_the_mode():
         mods = {n.module or "" for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)}
         assert not (names & FORBIDDEN), (f.name, names & FORBIDDEN)
         assert all(m in ("", "base", "events", "__future__", "math", "pathlib", "gap_vwap_reclaim",
-                                 "open_imbalance", "orb_in_play", "vwap_trend")
+                                 "open_imbalance", "orb_in_play", "vwap_trend", "late_mover")
                    or m.endswith(("events", "base")) for m in mods), (f.name, mods)
 
 
@@ -586,3 +586,15 @@ def test_vwap_trend_trades_tqqq_on_qqq_signal(tmp_path):
                   key=lambda b: (b.ts, b.sym))
     e = engine([VwapTrend(trade="TQQQ")], tmp_path, equity=100_000).run(bars)
     assert {x["sym"] for x in e.trades} == {"TQQQ"} and e.trades[0]["side"] == "long"
+
+
+def test_late_mover_buys_big_up_movers_at_1500_and_exits_1555(tmp_path):
+    from daytrade.strategies.late_mover import LateMover
+    info = {"UPX": DayInfo("UPX", 10.0), "FLAT": DayInfo("FLAT", 10.0)}
+    bars = sorted(minute_bars("UPX", "09:30", "16:00", 13.0) + minute_bars("FLAT", "09:30", "16:00", 10.5),
+                  key=lambda b: (b.ts, b.sym))
+    bars = [Bar(b.ts, b.sym, b.open, b.high, b.low, b.close, 1_000_000, b.start) for b in bars]
+    e = engine([LateMover()], tmp_path, equity=100_000, day_info=info).run(bars)
+    assert [x["sym"] for x in e.trades] == ["UPX"]
+    assert dt.datetime.fromisoformat(e.trades[0]["entry_ts"]) == t("15:00")
+    assert e.trades[0]["exit_reason"] == "flat by close"

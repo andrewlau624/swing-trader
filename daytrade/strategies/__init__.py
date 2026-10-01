@@ -3,5 +3,6 @@ from .gap_vwap_reclaim import GapVwapReclaim
 from .open_imbalance import OpenImbalance
 from .orb_in_play import OrbInPlay
 from .vwap_trend import VwapTrend
+from .late_mover import LateMover
 
-REGISTRY = {s.name: s for s in (GapVwapReclaim, OpenImbalance, OrbInPlay, VwapTrend)}
+REGISTRY = {s.name: s for s in (GapVwapReclaim, OpenImbalance, OrbInPlay, VwapTrend, LateMover)}

@@ -262,7 +262,7 @@ def summary(trades, n_days) -> dict:
             "win": float(np.mean([v > 0 for v in x])) if x else float("nan"),
             "mean_r": float(np.mean([t.get("r", 0) for t in trades])) if x else float("nan"),
             "t_day": clustered_t(trades),
-            "exits": dict(pd.Series([t["exit_reason"] for t in trades]).value_counts()) if x else {}}
+            "exits": dict(pd.Series([t.get("exit_reason", "") for t in trades]).value_counts()) if x else {}}
 
 
 def sim_one(bars: list[Bar], i0: int, stop_pct: float, cost: float, flat_by,
