@@ -1145,3 +1145,15 @@ back to 2018), so AT's idea need not wait 40 recorded sessions. Nothing below co
   at 2024-06-01. Unit = day.
 - Pass: 2x day-mean > 0 both halves; day t >= 2.0 at 1x; >= 95th pct of a segment-direction placebo. Report the
   correlation with the noise leg.
+
+
+## Amendment — Round 22, Study AX: late-day continuation of +25% movers, long only (pre-register; 1 variant, N 676 -> 677)
+
+`date`: Thu Oct 1 04:00 PDT 2026. Plan: `daytrade/plans/late_mover.md`. Nothing computed; no data fetched.
+- Motivation: the RESULTS.md intraday-setups table's "stocks down >= 25% by 15:00 keep falling into the close (~-1.5% gross, both halves), untradable (Rule 201,
+  HTB)". The long mirror has never been tested (grep RESULTS.md/NEXT.md).
+- Rules: common stock, prev close >= $5; at 15:00 (14:59 bar close) day change >= +25% and 09:30-15:00 $ volume
+  >= $10M; buy at the next minute's open; sell at 15:55; 10% catastrophe stop; long only.
+- Costs 20/40bp per side (1x/2x). SIP minutes 2022-01-03 .. 2026-09-30, halves at 2024-06-01.
+- Pass: 2x > 0 both halves; day-clustered t >= 2 at 1x; >= 95th pct of a random-earlier-hour placebo on the same
+  stock-days. Diagnostic: the losers' mirror gross.
