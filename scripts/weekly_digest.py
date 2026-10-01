@@ -21,6 +21,8 @@ from swingtrader.live.notify import Notifier  # noqa: E402
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--send", action="store_true", help="also email it")
+    ap.add_argument("--scheduled", action="store_true",
+                    help="the Saturday timer: send at most once per ISO week (a manual --send always sends)")
     a = ap.parse_args(argv)
     d = Config.load().daily
     data = digest.build(ROOT / "state", ROOT / "logs", d.start_equity, d.conviction_weight,
@@ -29,7 +31,8 @@ def main(argv=None) -> int:
     print(subj); print(); print(text)
     if a.send:
         week = dt.date.today().isocalendar()
-        print("\n" + Notifier(ROOT / "state").send(subj, html, dedupe_key=f"digest-{week[0]}-{week[1]}"))
+        key = f"digest-{week[0]}-{week[1]}" if a.scheduled else f"digest-manual-{dt.datetime.now():%Y%m%d%H%M%S}"
+        print("\n" + Notifier(ROOT / "state").send(subj, html, dedupe_key=key))
     return 0
 
 

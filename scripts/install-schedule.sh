@@ -94,7 +94,7 @@ for (h, m) in daily:
     print(f"{t.minute:2d} {t.hour} * * 1-5 {app}/scripts/run-daily.sh  # {h:02d}:{m:02d} ET - daily book")
 print(f"7 */2 * * * cd {app} && ./.venv/bin/python scripts/schwab_reminder.py >> logs/cron-reminder.log 2>&1  # Schwab login reminder")
 t = dt.datetime.combine(today, dt.time(9, 13), tzinfo=et).astimezone(local)
-print(f"{t.minute} {t.hour} * * 6 cd {app} && ./.venv/bin/python scripts/weekly_digest.py --send >> logs/cron-digest.log 2>&1  # weekly digest")
+print(f"{t.minute} {t.hour} * * 6 cd {app} && ./.venv/bin/python scripts/weekly_digest.py --send --scheduled >> logs/cron-digest.log 2>&1  # weekly digest")
 PYEOF
   else
     echo "# swing-trader - times below are US/Eastern via CRON_TZ" >> "$tmp"
@@ -112,7 +112,7 @@ PYEOF
       echo "57 15 * * 1-5 $APP/scripts/run-daily.sh  # daily book: flatten intraday leg"
       echo "10 16 * * 1-5 $APP/scripts/run-daily.sh  # daily book: reconcile closing fills"
       echo "7 */2 * * * cd $APP && ./.venv/bin/python scripts/schwab_reminder.py >> logs/cron-reminder.log 2>&1  # Schwab login reminder"
-      echo "13 9 * * 6 cd $APP && ./.venv/bin/python scripts/weekly_digest.py --send >> logs/cron-digest.log 2>&1  # weekly digest (Sat 09:13 ET)"
+      echo "13 9 * * 6 cd $APP && ./.venv/bin/python scripts/weekly_digest.py --send --scheduled >> logs/cron-digest.log 2>&1  # weekly digest (Sat 09:13 ET)"
     } >> "$tmp"
   fi
 

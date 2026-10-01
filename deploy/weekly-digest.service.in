@@ -7,5 +7,5 @@ Description=swing-trader weekly digest email
 Type=oneshot
 WorkingDirectory=__APP_DIR__
 EnvironmentFile=-__APP_DIR__/.env
-ExecStart=__APP_DIR__/.venv/bin/python -u scripts/weekly_digest.py --send
+ExecStart=__APP_DIR__/.venv/bin/python -u scripts/weekly_digest.py --send --scheduled
 TimeoutStartSec=180

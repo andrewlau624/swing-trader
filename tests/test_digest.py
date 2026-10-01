@@ -56,6 +56,7 @@ def test_digest_numbers_from_books_and_logs(tmp_path):
     assert p["with_levers"] > p["without"] > 3 * D.ROTH_DEPOSIT_YR
     subj, html, text = D.render(data)
     assert "$3,260 total" in subj and "In 5 years" in text
-    assert "+$60 this week" in text and "+$60 this week" in html
+    assert "+$4 from trades this week" in text and "+$4 from trades this week" in html, \
+        "trades' P&L (10 - 6), not the equity change, which includes deposits"
     assert "Next step" in html and "Conviction trade on" in html and "<pre" not in html
     assert "Paper" not in html, "virtual book left out of the email"

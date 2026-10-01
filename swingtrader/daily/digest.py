@@ -79,6 +79,7 @@ class Account:
     name: str
     equity: float
     week_ago: float | None
+    week_pnl: float
     closed: list
     conviction: list
     oversold: list
@@ -95,7 +96,9 @@ def load_account(name: str, state: Path, start_equity: float) -> Account | None:
     eq = b.equity_log[-1]["equity"] if b.equity_log else b.cash
     cut = (dt.date.today() - dt.timedelta(days=7)).isoformat()
     old = [e["equity"] for e in b.equity_log if e["date"] <= cut]
-    return Account(name, float(eq), float(old[-1]) if old else None, list(b.closed),
+    # what the TRADES made this week: equity also moves with deposits / DAILY_*_CAPITAL
+    wk = sum(float(c.get("pnl", 0.0)) for c in b.closed if str(c.get("exit_date", "")) > cut)
+    return Account(name, float(eq), float(old[-1]) if old else None, wk, list(b.closed),
                    list(b.conviction.get("history", [])), list(b.oversold.get("history", [])),
                    list(b.fomc.get("history", [])), list(b.equity_log))
 
@@ -244,7 +247,7 @@ def render(d: dict) -> tuple[str, str, str]:
     # ---------------- plain text (terminal)
     T = []
     for n, a in real:
-        wk = f"  {_signed(a.equity - a.week_ago)} this week" if a.week_ago is not None else ""
+        wk = f"  {_signed(a.week_pnl)} from trades this week"
         T.append(f"{NAME[n]:10s} {money(a.equity):>9s}{wk}")
     if step:
         T += ["", ("READY: " if step["ready"] else "NEXT: ") + f"{step['gate']}  "
@@ -275,11 +278,9 @@ def render(d: dict) -> tuple[str, str, str]:
     cells = []
     for i, (n, a) in enumerate(real):
         gut = "0 6px 0 0" if i == 0 else "0 0 0 6px"
-        chg = ""
-        if a.week_ago is not None:
-            x = a.equity - a.week_ago
-            chg = (f"<div style='font-family:{FONT};font-size:14px;color:{C['up'] if x >= 0 else C['down']};margin-top:2px'>"
-                   f"{_signed(x)} this week</div>")
+        x = a.week_pnl
+        chg = (f"<div style='font-family:{FONT};font-size:14px;color:{C['up'] if x >= 0 else C['down']};margin-top:2px'>"
+               f"{_signed(x)} from trades this week</div>")
         cells.append(f"<td style='font-family:{FONT};width:50%;vertical-align:top;padding:{gut}'><div style='font-family:{FONT};background:{C['card']};"
                      f"border-radius:12px;padding:16px 18px;border:1px solid {C['line']}'>"
                      f"<div style='font-family:{FONT};font-size:13px;color:{C['mute']}'>{NAME[n]}</div>"
