@@ -131,8 +131,10 @@ def test_sec_contact_comes_from_the_resend_address(monkeypatch):
 def test_opencode_client_retries_without_json_mode_on_400_and_shows_errors(monkeypatch):
     calls = []
 
+    seen = []
+
     def post(url, json=None, timeout=None, headers=None):
-        calls.append(json)
+        calls.append(json); seen.append(headers)
         if "response_format" in json:
             return SimpleNamespace(status_code=400, text='{"error":"response_format not supported"}')
         if json["model"] == "bad":
@@ -145,3 +147,6 @@ def test_opencode_client_retries_without_json_mode_on_400_and_shows_errors(monke
     assert "response_format" not in calls[-1] and "not supported" in c.json_mode_rejected
     with pytest.raises(RuntimeError, match="unknown model bad"):
         c.chat({"model": "bad"})
+    h = seen[0]
+    assert h["x-opencode-session"].startswith("news-judge-") and h["User-Agent"] == nj.USER_AGENT
+    assert h["Authorization"] == "Bearer k"

@@ -123,6 +123,9 @@ JSON_ONLY = ("\n\nReply with only a JSON object with exactly these keys: verdict
              "liquidity, unclear), confidence (number 0-1), catalyst (string), reason (string).")
 
 
+USER_AGENT = "swing-trader-news-judge/1.0"
+
+
 class OpenCodeClient:
     """Minimal OpenAI-compatible chat client for OpenCode Go (key: OPENCODE_API_KEY)."""
     provider = "opencode-go"
@@ -130,12 +133,17 @@ class OpenCodeClient:
     def __init__(self, key: str, url: str = OPENCODE_URL, timeout: float = 90.0):
         self.key, self.url, self.timeout = key, url, timeout
 
-    def chat(self, payload: dict) -> dict:
+    def chat(self, payload: dict, session: str | None = None) -> dict:
+        """OpenCode Go routes by `x-opencode-session` (a stable ID per conversation; each verdict is its
+        own one-shot conversation) and asks clients to name themselves in the User-Agent
+        (https://opencode.ai/docs/go/)."""
+        import uuid
+        headers = {"Authorization": f"Bearer {self.key}", "User-Agent": USER_AGENT,
+                   "x-opencode-session": session or f"news-judge-{uuid.uuid4()}"}
         last = None
         for attempt in range(3):                       # 429 / 5xx / network: short backoff
             try:
-                r = requests.post(self.url, json=payload, timeout=self.timeout,
-                                  headers={"Authorization": f"Bearer {self.key}"})
+                r = requests.post(self.url, json=payload, timeout=self.timeout, headers=headers)
                 if r.status_code == 429 or r.status_code >= 500:
                     last = RuntimeError(f"HTTP {r.status_code}: {r.text[:300]}")
                     time.sleep(2 * (attempt + 1)); continue
