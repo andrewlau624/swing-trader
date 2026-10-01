@@ -20,6 +20,7 @@ import json
 import pickle
 import random
 import sys
+import time
 
 import numpy as np
 import pandas as pd
@@ -56,10 +57,20 @@ def fetch() -> None:
         if f.exists():
             continue
         s, e = (cl - dt.timedelta(minutes=10)).astimezone(dt.timezone.utc), (cl - dt.timedelta(minutes=5)).astimezone(dt.timezone.utc)
-        cost = c.metadata.get_cost(dataset="XNAS.ITCH", schema="imbalance", symbols=syms, start=s, end=e)
+        for attempt in range(6):
+            try:
+                cost = c.metadata.get_cost(dataset="XNAS.ITCH", schema="imbalance", symbols=syms, start=s, end=e)
+                if spent + cost > BUDGET:
+                    break
+                df = c.timeseries.get_range(dataset="XNAS.ITCH", schema="imbalance", symbols=syms,
+                                            start=s, end=e).to_df()
+                break
+            except Exception as exc:
+                log(f"{o.date()} retry {attempt}: {type(exc).__name__}"); time.sleep(10 * (attempt + 1))
+        else:
+            raise RuntimeError(f"{o.date()}: Databento unavailable")
         if spent + cost > BUDGET:
             log(f"STOP: {o.date()} would take spend to ${spent + cost:.2f} > ${BUDGET}"); break
-        df = c.timeseries.get_range(dataset="XNAS.ITCH", schema="imbalance", symbols=syms, start=s, end=e).to_df()
         if len(df):
             df = df.reset_index()[["ts_event", "symbol", "ref_price", "cont_book_clr_price", "auct_interest_clr_price",
                                    "paired_qty", "total_imbalance_qty", "side", "auction_type"]]
