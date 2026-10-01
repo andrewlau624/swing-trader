@@ -1024,3 +1024,28 @@ throws away fills. Study R's method (whole vs fractional, by size). Baseline: th
 Reported at $2.3k / $10k / $25k: whole+probe minus fractional (pp/yr) per half, skipped-fill rate, and each variant's
 increment in pp/yr and $/yr; paired 5y MC (P(DD>30/50%)). PASS (adopt) only if a variant raises the $2.3k CAGR by >= 2.0pp
 in both halves at the stressed cost (Study R's decision bar), else report/dead.
+
+
+## Amendment — Round 17b, Study AP: the IBS leg's selection — cross-sectional rank and always-deployed (pre-register; 5 variants, N 664 -> 669)
+
+`date`: Wed Sep 30 22:11:14 PDT 2026. Follow-on to Study AL: the IBS leg is the book's best %/yr
+lever at small size (17.9%/yr at tier_hi, nearly cost-insensitive) and the cash-IRA Roth runs it
+alone. NEXT.md's untested list names "cross-sectional ranking instead of a binary z-threshold
+(always deployed)". Nothing below computed. Baseline = the shipped IBS leg (`book.ibs_days`:
+monthly top-3 momentum ETFs, buy at open d+1 those with IBS < 0.2, equal weight, hold while IBS <
+0.2). The whole leg return is the pick's open d+1 -> open d+2 move, so selection changes the trades.
+
+Variants (each swaps `s.I`):
+- AP1 rank-1 (threshold): of the top-3, hold ONLY the lowest-IBS name, and only if IBS < 0.2.
+- AP2 rank-1 (always): the lowest-IBS name of the top-3 every session (no threshold).
+- AP3 all-18 rank-1 (always): the single lowest-IBS name of the 18 EQ18 ETFs each session, no
+  momentum filter and no threshold.
+- AP4 rank-2 (threshold): the two lowest-IBS names with IBS < 0.2, equal weight (the shipped leg
+  with the least-oversold of three dropped when all three pass).
+- AP5 stricter gate: shipped selection with `ibs_max` 0.1 instead of 0.2.
+
+Judged on the V7 book (night .5 + IBS .5 + QQQ/SMH noise cap .75, live tilt, weekend x.5, no
+conviction) at fixed capital $2.3k / $10k / $25k, whole shares + $150 probe, tier and tier_hi. Pass
+bar (SHADOW): increment > 0 in both halves at the stressed cost; NW t >= 2.0; placebo = random sign
+on the IBS leg's daily contribution (1,000 draws) >= 95th pct; book max DD not worse by > 2pp;
+mc_tax P(DD>50%) <= 5%. Also reported for the IBS-only cash-IRA book (Study AL). DSR at N 669.
