@@ -674,3 +674,74 @@ def test_momentum_vol_weight_is_reported_after_six_scored_months():
     wild = [{"realised": {"picks": 0.15 * (-1) ** i, "universe": 0.0}} for i in range(6)]
     assert vol_weight(calm[:5]) is None
     assert vol_weight(calm) == 1.0 and vol_weight(wild) < 0.3
+
+
+# ------------------------------------------------------------------ paper loop, end to end
+class FakeAlpacaTrading:
+    """Fills a market order at the price the test sets; limits/stops stay open."""
+    def __init__(self):
+        self.orders, self.px = {}, 100.0
+
+    def submit_order(self, req):
+        from types import SimpleNamespace
+        oid = f"o{len(self.orders) + 1}"
+        kind = type(req).__name__
+        self.orders[oid] = SimpleNamespace(id=oid, req=req, kind=kind, status="new", filled_qty=0, filled_avg_price=None,
+                                           filled_at=None)
+        if kind == "MarketOrderRequest":
+            o = self.orders[oid]
+            o.status, o.filled_qty, o.filled_avg_price = "filled", req.qty, self.px
+        return self.orders[oid]
+
+    def get_order_by_id(self, oid):
+        return self.orders[oid]
+
+    def cancel_order_by_id(self, oid):
+        self.orders[oid].status = "canceled"
+
+    def cancel_orders(self):
+        for o in self.orders.values():
+            if o.status == "new":
+                o.status = "canceled"
+
+    def get_account(self):
+        from types import SimpleNamespace
+        return SimpleNamespace(equity="100000")
+
+
+def test_paper_session_end_to_end_with_shadow_fills_and_flat_by_close(tmp_path):
+    from daytrade.brokers import AlpacaLabPaper
+    from daytrade.runner import run_session
+    s = st()
+    rows = []
+    for k in range(0, 6 * 3600 + 1800, 5):          # a quote every 5s, 09:30 -> 16:00
+        ts = (s.open + dt.timedelta(seconds=k)).astimezone(dt.timezone.utc)
+        px = 100 + 0.001 * k
+        rows.append({"ts": ts, "sym": "QQQ", "bid": px - 0.01, "ask": px + 0.01, "bid_size": 100, "ask_size": 100,
+                     "last": px, "last_size": 10, "volume": 1000 + k, "trade_ms": k})
+    fake = FakeAlpacaTrading()
+    broker = AlpacaLabPaper(poll_s=0, trading=fake)
+    strat = Scripted([(t("10:00"), lambda: Order("QQQ", "buy", ref_price=103.6, stop=100.0))])
+    eng = run_session("paper", s, broker, 25_000, "margin", {}, [strat], rows, journal_root=tmp_path,
+                      halt_path=tmp_path / "HALT")
+    assert len(eng.trades) == 1 and eng.trades[0]["exit_reason"] == "flat by close"
+    j = [json.loads(x) for x in (tmp_path / "journal-paper.jsonl").read_text().splitlines()]
+    assert j[0]["replay_entry_px"] is not None and "entry_drift_bp" in j[0]       # the drift report has data
+    kinds = {o.kind for o in fake.orders.values()}
+    assert "StopOrderRequest" in kinds and "MarketOrderRequest" in kinds           # the stop rested at the broker
+    assert not eng.positions
+
+
+def test_paper_session_halts_on_the_halt_file(tmp_path):
+    from daytrade.brokers import AlpacaLabPaper
+    from daytrade.runner import run_session
+    s = st()
+    (tmp_path / "HALT").write_text("x")
+    rows = [{"ts": (s.open + dt.timedelta(seconds=k)).astimezone(dt.timezone.utc), "sym": "QQQ", "bid": 99.99,
+             "ask": 100.01, "bid_size": 1, "ask_size": 1, "last": 100, "last_size": 1, "volume": k, "trade_ms": k}
+            for k in range(0, 600, 5)]
+    fake = FakeAlpacaTrading()
+    strat = Scripted([(t("09:31"), lambda: Order("QQQ", "buy", ref_price=100.0, stop=99.0))])
+    eng = run_session("paper", s, AlpacaLabPaper(poll_s=0, trading=fake), 25_000, "margin", {}, [strat], rows,
+                      journal_root=tmp_path, halt_path=tmp_path / "HALT")
+    assert eng.halted and not eng.trades and not fake.orders

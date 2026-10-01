@@ -31,6 +31,7 @@ class Position:
     stop: float | None = None
     target: float | None = None
     exits: list = field(default_factory=list)      # resting stop/target order ids
+    entry_oid: int | None = None
 
 
 class Ctx:
@@ -94,6 +95,7 @@ class Engine:
         self.shadow_px: dict[int, float] = {}
         self.events: list[dict] = []              # rule events: rejections, limits, halts
         self.trades: list[dict] = []              # closed round trips
+        self._unjournaled: list[tuple] = []       # (row, entry_oid, exit_oid) waiting for shadow fills
         self.halted = False
         self.flattened = False
         self.now = session.open
@@ -115,6 +117,7 @@ class Engine:
         if self.shadow is not None:
             for f in self.shadow.on_event(ev):
                 self.shadow_px[f.order_id] = f.price
+            self._flush_journal()
         if isinstance(ev, Bar):
             # protective orders placed on a fill from this bar are live for the rest of it
             for f in self.broker.on_event(ev):
@@ -204,7 +207,7 @@ class Engine:
             if o.stop_pct is not None:
                 stop = round(f.price * (1 - o.stop_pct) if signed > 0 else f.price * (1 + o.stop_pct), 2)
             p = Position(f.sym, o.strategy, signed, f.price, f.ts, o.reason,
-                         self.shadow_px.get(o.id), stop, o.target)
+                         self.shadow_px.get(o.id), stop, o.target, entry_oid=o.id)
             self.positions[f.sym] = p
             self.risk.account.on_open(f.qty * f.price)
             self._place_exits(p, o)
@@ -264,8 +267,9 @@ class Engine:
         if p.stop is not None and p.avg != p.stop:
             row["r"] = round(sign * (f.price - p.avg) / abs(p.avg - p.stop), 3)
         self.trades.append(row)
-        if self.journal is not None:
-            self.journal.trade(row)
+        # a real broker can fill before the shadow model does: journal once both replay prices are known
+        self._unjournaled.append((row, p.entry_oid, o.id))
+        self._flush_journal()
         p.qty, p.exits = 0, []
         del self.positions[p.sym]
 
@@ -290,6 +294,21 @@ class Engine:
             cancel_all()
         self.flatten("halt")
 
+    def _flush_journal(self, force: bool = False) -> None:
+        keep = []
+        for row, eoid, xoid in self._unjournaled:
+            if row["replay_entry_px"] is None and eoid in self.shadow_px:
+                row["replay_entry_px"] = self.shadow_px[eoid]
+            if row["replay_exit_px"] is None and xoid in self.shadow_px:
+                row["replay_exit_px"] = self.shadow_px[xoid]
+            done = self.shadow is None or (row["replay_entry_px"] is not None and row["replay_exit_px"] is not None)
+            if done or force:
+                if self.journal is not None:
+                    self.journal.trade(row)
+            else:
+                keep.append((row, eoid, xoid))
+        self._unjournaled = keep
+
     def end_of_data(self) -> None:
         """Replay ran out of data with something open: close at the last mark and flag it."""
         for p in list(self.positions.values()):
@@ -298,6 +317,7 @@ class Engine:
             o = Order(p.sym, "sell" if p.qty > 0 else "buy", entry=False, reason="end of data",
                       strategy=p.strategy)
             self._close(p, Fill(o.id, p.sym, o.side, abs(p.qty), px, self.now, "end of data"), o)
+        self._flush_journal(force=True)
 
     def _rule(self, kind: str, detail: str, strategy: str = "") -> None:
         row = {"ts": str(self.now), "kind": kind, "detail": detail, "strategy": strategy,

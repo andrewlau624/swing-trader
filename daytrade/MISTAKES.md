@@ -3,6 +3,19 @@
 What went wrong, and what changed so it cannot repeat. Newest first. One entry per mistake:
 date, what happened, the cost (in $ or bp, or "none, caught in replay"), the fix (code, test or rule).
 
+## 2026-10-01 — the drift report would have been empty in paper/live
+- **What happened.** In paper/live the real broker usually reports a fill BEFORE the shadow replay broker fills the
+  same order (the shadow waits out its 1s latency model). The journal row was written at the close with
+  replay_entry_px / replay_exit_px = None, so the weekly drift report and the $500 gate's drift test would have had
+  no data.
+- **Cost.** None: found by the first end-to-end paper-session test (fake Alpaca paper client, scripted strategy)
+  before any paper run.
+- **Fix.**
+  - The engine holds each closed trade's journal row until both shadow fills arrive (or the session ends), and
+    attaches late shadow fills by order id.
+  - `runner.run_session` was split out of `run_live` so the session runs under test without a clock or network.
+  - Tests cover the drift fields, a stop resting at the broker, flat by close, and HALT.
+
 ## 2026-10-01 — passive fills counted off-exchange sub-penny prints (Lab-BG's false "PASS")
 - **What happened.** Lab-BG's first fill model filled a lit limit whenever any SIP trade printed through it.
   ~half of SIP prints are TRF/off-exchange (exchange "D") at sub-penny prices: wholesaler internalisation, which never

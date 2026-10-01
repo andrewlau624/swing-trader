@@ -127,18 +127,25 @@ def run_live(mode: str, strategy: str = "all") -> int:
                 for g in morning_gappers(today)}
     c = client(asyncio_=False, dest=ENGINE_TOKEN)
     symbols = sorted(set(CORE) | set(info))
-    eng = Engine(strategies(strategy), broker, equity=equity, session=st, account_kind=kind,
-                 day_info=info, journal=Journal(mode), shadow=SimBroker(latency_s=1.0, extra_bp=0.5),
-                 log=print)
-    print(f"{mode}: {today} equity ${equity:,.0f} ({kind}), {len(symbols)} symbols, "
-          f"strategies {[s.name for s in eng.strategies]}")
     while dt.datetime.now(tz) < st.open:
         if HALT.exists():
             print("HALT set before the open: not starting"); return 0
         time.sleep(1)
-    eng.run(rows_to_events(live_rows(c, symbols, st.close + dt.timedelta(minutes=1)), st, clock_every_s=1))
-    print(f"{mode}: done, {len(eng.trades)} trades, {len(eng.events)} rule events")
+    run_session(mode, st, broker, equity, kind, info, strategies(strategy),
+                live_rows(c, symbols, st.close + dt.timedelta(minutes=1)))
     return 0
+
+
+def run_session(mode, st, broker, equity, kind, info, strats, rows, journal_root=STATE, halt_path=HALT):
+    """One paper/live session: rows (live polls or recorded) -> the engine, with the shadow SimBroker beside the
+    real broker for the drift report. Separated from run_live so it can be tested without a clock or a network."""
+    eng = Engine(strats, broker, equity=equity, session=st, account_kind=kind, day_info=info,
+                 journal=Journal(mode, journal_root), shadow=SimBroker(latency_s=1.0, extra_bp=0.5),
+                 halt_path=halt_path, log=print)
+    print(f"{mode}: {st.day} equity ${equity:,.0f} ({kind}), strategies {[s.name for s in eng.strategies]}")
+    eng.run(rows_to_events(rows, st, clock_every_s=1))
+    print(f"{mode}: done, {len(eng.trades)} trades, {len(eng.events)} rule events")
+    return eng
 
 
 def status() -> int:
