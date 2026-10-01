@@ -3,6 +3,16 @@
 What went wrong, and what changed so it cannot repeat. Newest first. One entry per mistake:
 date, what happened, the cost (in $ or bp, or "none, caught in replay"), the fix (code, test or rule).
 
+## 2026-10-01 — passive fills counted off-exchange sub-penny prints (Lab-BG's false "PASS")
+- **What happened.** Lab-BG's first fill model filled a lit limit whenever any SIP trade printed through it.
+  ~half of SIP prints are TRF/off-exchange (exchange "D") at sub-penny prices: wholesaler internalisation, which never
+  touches a resting lit order. Fill rate 89%, +7.8bp/fill, t 6.4: a false pass.
+- **Cost.** None (caught by the implausible fill rate). The corrected run is DEAD (+2.2bp, t 1.6).
+- **Fix.**
+  - Lit-only queue accounting, and a full tick through for an immediate fill.
+  - Rule: for any passive-fill model, report the fill rate. If it is high in the direction the signal expects the
+    price to move away, assume a fill-model bug.
+
 ## 2026-10-01 — Lab-BE repeated Lab-AZ's mistake at the open, and spent $27.13 on unusable data
 - **What happened.** Nasdaq's opening NOII carries near/far prices only from 09:28:00 (it switches from every 10 s to
   every second). The field probe spanned 09:27:50-09:28:05, so the "83% have a near price" came from the post-09:28

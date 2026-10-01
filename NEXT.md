@@ -41,6 +41,9 @@ and state, and does not touch the live book.
   - **Lab-BE/BF (Nasdaq opening-cross imbalance, Databento $35.34): DEAD.** Reversal is the wrong sign (−7.8bp gross,
     placebo 0.4th). The continuation was +13.5bp gross in H1 but +1.9bp in H2, below the ~3.7bp exit cost (not
     registered: H2 is spent). Lab-BE was untestable (near price only from 09:28). study_lab_be_bf_open_cross.md.
+  - **Lab-BG (closing imbalance, passive entry at the touch): DEAD.** Adverse selection: filled trades earn −0.6bp mid ->
+    close in H2; the captured spread leaves +2.2bp, t 1.6. A first "pass" counted off-exchange sub-penny prints as
+    fills (MISTAKES.md). study_lab_bg_passive_close.md.
   - Databento credit: lab $100.22 + main BD/BE ~$16 = ~$116 of $125. No more pulls.
   - **Lab-AV (Lab-AT's imbalance on historical SIP ticks, QQQ/SPY): running.**
   - **Lab-AT (opening L1 imbalance): waiting.** First look after 40 unflagged recorded sessions (~early Dec).
@@ -853,6 +856,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Short the reopening after a halt (up; ETB-only; down without SSR) (Lab-BA, day-trading lab) | **dead** | a lottery: a few 40-55% collapses in unborrowable names; negative without the top 20; ETB names −70bp gross |
 | Nasdaq early closing imbalance (15:54) as an intraday trade to the close (Lab-AZ/BB/BC, day-trading lab) | **dead: real signal, spread-bound** | +6-7bp gross out of sample (placebo 100th) but the 15:54 spread eats it: H2 +0.3bp net 1x, −5.7bp 2x |
 | Nasdaq opening-cross imbalance, reversal by 10:00 (Lab-BE/BF, day-trading lab) | **dead** | wrong sign (−7.8bp gross, placebo 0.4th); continuation decayed from +13.5bp (H1) to +1.9bp (H2), below the exit spread |
+| Closing-imbalance signal with a passive limit at the touch until 15:55 (Lab-BG, day-trading lab) | **dead** | adverse selection: filled trades −0.6bp mid -> close (H2); net +2.2bp t 1.6; a false pass came from counting TRF sub-penny prints |
 | Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
 | IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
 | IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |
