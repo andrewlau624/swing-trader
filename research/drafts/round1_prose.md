@@ -917,3 +917,110 @@ correlation of each ETF's trade returns with the TQQQ trade on days both would f
 Latency REPORT (idea #4, no variant): the shipped trade with entry AND exits filled 1 and 2 minutes after the decision
 minute (the close of minute m+1 / m+2), EV per trade and $/yr by half. Sub-minute delays (5/15/60 s) need tick data the
 repo does not have; the Schwab L1 recorder is NOT built this session (it would run on the live server: user's call).
+
+
+## Amendment — Round 17: more %/yr on a small account ($2-25k) — Studies AL-AO (pre-register; N 642 -> 665)
+
+`date`: Wed Sep 30 18:57:16 PDT 2026. Brief: research/drafts/prompt_small_account_profit.md. Program N = 642 at the end of
+Round 16. **Nothing below is computed.** All studies use `load_sim(raw_price=True)` (add. 30), the night pool corr 0.7,
+regular-hours only. Costs are the repo convention: 3bp flat = the measured planning level (live buys median -2.5bp, open
+sells median 0bp, add. 29), `tier` = planning, and `tier_hi` = the **stressed** level the pass bar is scored on (add. 39).
+Select 2016-23 (2021-23 where the night pool is the subject) and judge 2024-26; report both halves. Pass bar (SHADOW):
+increment > 0 in both halves at the stressed cost; Newey-West t >= 2.0; placebo >= 95th pct; book max DD not worse by
+> 2pp; mc_tax P(DD>50%) <= 5%. DSR is reported at the new N. Dead-list items are not retested.
+
+### Study AL — the idle Roth: what the limited-margin delay costs, and the best cash-IRA book (delay report + 7 variants)
+
+Motivation: the Roth has never traded; `executor.py:165` returns before any phase unless `.env` has
+`ROTH_LIMITED_MARGIN=yes`. The question is what waiting costs, and whether a book that needs no limited margin clears the
+bar so the Roth can start now.
+
+**Mechanism (checked before running, add. 31/38).** In a plain cash IRA (no limited margin, no borrowing, no shorting):
+- the IBS leg buys at open d+1 (settles d+2) and sells at open d+2 (= the funding sale's T+1 settlement date) -> GFV-safe;
+- the night leg buys at the 16:00 close d (settles d+1) and sells at the open d+1 (= the settlement date) -> GFV-safe;
+- the **3x-ETF intraday leg** (buy ~10:01, sell ~15:57 same day, funded by the morning's unsettled sale) is the only leg
+  that needs limited margin. So the cash-IRA book = IBS + night, no intraday leg.
+Two readings of same-day reuse are tested: *lenient* (allowed, as add. 38 Q4) and *strict* (each overnight dollar works
+every other night = both legs at half weight, roth.py's "a-strict").
+
+**A. Cost of the delay (report).** Run at $1k and $3k start + $7,500/yr ($625 every 21 sessions), 2021-02..2026-09:
+M3 (live executor rule: SGOV held at 15:40, greedy skip), M2L (pro-rata on the 15:40 cash), cash-IRA AL1, BIL, SPY.
+Report CAGR/Sharpe/maxDD (both halves + full), and the delay cost as $/month = (book - BIL CAGR) x equity / 12 at $1k,
+$3k and at $25k-equivalent, plus a start-6/12/24-months-earlier end-$ comparison (the compounding value of starting now
+instead of waiting for approval). The Roth's contributions are **savings, not alpha**: at $2k the deposits dominate the
+dollars, and the report says so.
+
+**B. Cash-IRA book (variants, pass bar in the brief, baseline BIL, reference M3).**
+- AL1 IBS 0.5 + night 0.5, **no intraday leg** (lenient settlement). The live weights.
+- AL2 IBS 0.5 + night 0.5 strict (both legs 0.25/0.25).
+- AL3 IBS only, weight 1.0, lenient.
+- AL4 night only, weight 1.0, lenient.
+- AL5 alternating sessions: IBS 0.5 on even sessions, night 0.5 on odd sessions (each dollar employed every other night).
+- AL6 AL1 with the live whole-share + night 1-share probe ($150) constraint (the as-traded book).
+- AL7 AL1 with F3 off by construction (a Roth F3 is dead for wash, add. 39) and the A2 V6 leg **not** included (V6 is
+  itself shadow; out of scope).
+Reported: CAGR/Sharpe/maxDD per half + full at 3bp/tier/tier_hi, NW t of the daily difference vs BIL (2021-26), placebo =
+sign-randomised position returns (1,000 draws) >= 95th pct, max DD vs M3, mc_tax $3k+$1k P(DD>30/50%), $/yr at
+$2.3k/$10k/$25k. If AL1 (or better) clears, spec the switch (default off, kill rule, tests, `make test`).
+
+### Study AM — limit orders at the bid/ask for the night leg (pre-register; 6 variants, N -> 656)
+
+Motivation: add. 13 bounds the prize at ~+2pp CAGR ("earning the bid instead of paying the ask"), worth more at small size
+where thin names cost nothing in impact. The repo has **no quotes/order-book data**: only SIP trade prints. The model is
+therefore built from the trade path, with a per-name tick floor, and its bounds are stated.
+
+**Data / linkage.** Night picks (raw pool, corr 0.7). Entry reference `p50` = the 15:50 price (the live decision price);
+`C` = the official close (= p50 x (1+close_move)); `ret` = close -> next open. The 15:50-16:00 minute trade bars come from
+`data/research/night/lm1` (+ `lm6`), the next-morning 09:30-10:31 bars from `data/research/night/am1`; bars are rebased onto
+the daily basis (scale = daily close / 16:00 bar close) and a name-day with no bar keeps the shipped exit (counted). The
+per-side cost on any continuous-session fill = `book.cost_bps(<model>+tick)` on the raw fill price.
+
+- AM1/AM2/AM3 **close limit buy** at L = p50 x (1 - b), b in {5, 10, 20} bp. Fill rule: a resting limit fills at L if the
+  15:50-15:59 trade low <= L (continuous), else fills at the official close if close <= L (the closing cross clears at or
+  below the limit), else the name is **skipped** (capital redeployed pro-rata to the filled names, as night_sizing does).
+- AM4 **sweep-to-the-low limit**: L = the 15:50-15:59 minute low (best case; upper bound on earning the bid).
+- AM5 **limit-on-open sell** at H = C (sell only at/above the prior close); unfilled -> sell at the 09:45 minute close.
+- AM6 **sell at the open + 1 tick**: after the open, rest a limit sell at the open + one tick; fill if the 09:30-09:59 high
+  reaches it, else sell at the 09:59 close (earn the sell-side spread).
+Measured and reported for each: fill rate; adverse selection = mean net per filled trade minus mean net of the same names
+unfilled; book increment per half at the stressed cost; NW t; placebo (random sign on each changed pick's return, 1,000
+draws) >= 95th pct; $/yr at $2.3k/$10k/$25k. Pass bar as above; the buy and sell sides are judged separately (a side
+passes on its own; AM1 is the control that must reproduce the shipped book).
+
+### Study AN — night-leg pick quality where small size helps (pre-register; 5 variants, N -> 661)
+
+Motivation: Study U's diagnostic (+41bp foreign ADRs vs +17bp US operating) and Study T's side note (mapped operating
+filers -11bp vs unmapped +15bp). Study U's EDGAR classifier mislabels: "UNMAPPED" = leveraged ETFs, "ETP" = foreign ADRs
+(add. 30/36/Study W). This study builds a **proper** classifier and pre-registers tilts/filters.
+
+**Classifier** (per pick, point-in-time; EDGAR cache `data/research/night/edgar`, forms accepted within the 400 days before
+the pick; LETF from `new_listings.etf_kind`):
+- `FOREIGN` any 20-F/40-F or 6-K filing (foreign private issuer / ADR);
+- `US_OPER` entityType operating, not ETP, has 10-K/10-Q, no foreign form;
+- `LETF` `etf_kind == "lev"`; `ETP` entityType != operating or SIC 6221 or >100 424B/yr; else `OTHER`.
+- AN1 drop US_OPER picks (Study T's finding, as a filter).
+- AN2 keep only FOREIGN picks (Study U's bucket); report the trade-count cut.
+- AN3 FOREIGN picks at 2x weight (cap 0.20).
+- AN4 drop LETF picks (control; Study W says the LETF gross is leverage, not edge).
+- AN5 drop US_OPER and 2x-weight FOREIGN (combined).
+Method as Study U/W: per-pick w = min(frac, 0.10), book increment = 0.5 x w x net vs the unmodified pool; NW t (day-
+clustered), within-night placebo drawing the same number of picks at random (1,000 draws); $/yr at $2.3k/$10k/$25k; capacity
+= the added/filtered names' ADV vs the leg's $ size (where the tilt breaks). Pass bar as above.
+
+### Study AO — whole-share drag at $2.3k (pre-register; 5 variants, N -> 666)
+
+Motivation: at $2.3k the IBS leg's per-ETF budget is ~$383 (3 picks) and the night cap is $115/name; whole-share rounding
+throws away fills. Study R's method (whole vs fractional, by size). Baseline: the live Roth/taxable whole+probe book.
+
+- AO1 baseline: whole + night 1-share probe ($150), the shipped as-traded book; fractional is the upper bound.
+- AO2 **fewer, larger IBS picks**: IBS top_k in {2, 1} instead of 3 (rebuilt `ibs_days`) -> the per-pick budget rises.
+- AO3 **cheaper look-alike per ETF**: size each IBS pick at the look-alike's share price but the same index return
+  (QQQ->QQQM, IWM->VTWO, SMH->SOXX, XLK->VGT, XLF->VFH, XLE->VDE, XLV->VHT, XLI->VIS, XLY->VCR, XLP->VDC, XLU->VPU,
+  XLB->VAW, MDY->IJH, EEM->IEMG, EFA->IEFA; prices from `panel.pkl`, 2020-10 onward). **SPLG has no research data**: the
+  SPY and DIA legs are left at the original price and the SPY->SPLG gain is estimated separately as SPY_price/8.5
+  (labelled a sensitivity, not a result).
+- AO4 **IBS probe**: buy 1 share when the per-ETF budget is below one share and the price <= $150 (as the night leg does).
+- AO5 AO3 + AO4.
+Reported at $2.3k / $10k / $25k: whole+probe minus fractional (pp/yr) per half, skipped-fill rate, and each variant's
+increment in pp/yr and $/yr; paired 5y MC (P(DD>30/50%)). PASS (adopt) only if a variant raises the $2.3k CAGR by >= 2.0pp
+in both halves at the stressed cost (Study R's decision bar), else report/dead.
