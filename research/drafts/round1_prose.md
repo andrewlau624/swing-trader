@@ -1839,3 +1839,14 @@ momentum here (TSMOM cross-asset dead, add. 26b, is a different book).
   - (c) max drawdown better than the market's over the judged period;
   - (d) the worst 12-month return better than −30%.
 - Reported: 1927-63 and 2016-26 (the recent, already-seen era), time in market, switches per year.
+
+
+## Amendment — Lab Round 48, Study Lab-BZ: industry momentum (Lab-BW's top 5 of 49) with Lab-BY's trend filter, 1963-2015 (pre-register; 1 variant, program N 740 -> 741)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Combines the two best long-history findings: Lab-BW (industry
+momentum, positive every decade) and Lab-BY's market filter (10-month SMA, else T-bills). Same costs and switch cost as
+Lab-BY (on industry momentum: 10/20bp per month while in, + 10bp per switch). Whole-sleeve bars as Lab-BY:
+- (a) 2x CAGR >= the market's in both halves;
+- (b) Sharpe > the market's in both halves;
+- (c) max DD better than the market's;
+- (d) worst 12m better than −30%.
+Reported: 1927-63, 2016-26.

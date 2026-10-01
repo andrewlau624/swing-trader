@@ -40,3 +40,4 @@ adds to the program N. Results of the old variant are never deleted.
 | 2026-10-01 | industry_momentum | created (Study Lab-BW: top 5 of 49 French industries by 12-1, 1963-2015) | durability check behind Lab-BS | program N 737 -> 738 |
 | 2026-10-01 | industry_momentum | new variant Lab-BX: top 5 of 20 fixed industry ETFs by 12-1, vs SPY, 2017-26 | implementable Lab-BW | program N 738 -> 739 |
 | 2026-10-01 | momentum | new variant Lab-BY: top-decile momentum only while the market > 10-month SMA, else T-bills; whole-sleeve bars incl. drawdown | crash bound for Lab-BT | program N 739 -> 740 |
+| 2026-10-01 | industry_momentum | new variant Lab-BZ: Lab-BW + Lab-BY trend filter, whole-sleeve bars | combine the two best long-history results | program N 740 -> 741 |
