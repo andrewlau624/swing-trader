@@ -54,7 +54,8 @@ def _png(fig) -> bytes:
 def projection_png(years: list[float], lines: dict[str, list[float]]) -> bytes:
     """lines: {"This bot": [...], "Everything on": [...], "Index fund": [...]} on the same `years` grid."""
     fig, ax = _axes(3.3)
-    style = {"This bot": (S1, "-"), "Everything on": (S2, "-"), "Index fund": (REF, (0, (4, 3)))}
+    style = {"This bot": (S1, "-"), "Everything on": (S2, "-"), "Backtest": (INK, (0, (1, 2))),
+             "Index fund": (REF, (0, (4, 3)))}
     ends = []
     for name, ys in lines.items():
         c, ls = style.get(name, (REF, "-"))
@@ -86,14 +87,32 @@ def projection_png(years: list[float], lines: dict[str, list[float]]) -> bytes:
     return buf.getvalue()
 
 
-def pnl_png(dates: list, cum: list[float]) -> bytes:
-    """Cumulative P&L from closed trades (deposits excluded)."""
-    fig, ax = _axes(2.0)
-    c = "#1a7f37" if cum[-1] >= 0 else "#cf222e"
-    ax.plot(dates, cum, color=c, linewidth=2.4, solid_capstyle="round")
-    ax.fill_between(dates, cum, 0, color=c, alpha=0.08, linewidth=0)
+def pnl_png(dates: list, live: list[float], backtest: list[float], plan: list[float], sd: list[float]) -> bytes:
+    """Cumulative P&L from closed trades (deposits excluded) vs the backtest's pace on the same balances,
+    with its normal range (+-2 sd shaded), and the planning pace as a dashed reference."""
+    import numpy as np
+    fig, ax = _axes(2.6)
+    bt, sd = np.asarray(backtest), np.asarray(sd)
+    ax.fill_between(dates, bt - 2 * sd, bt + 2 * sd, color=INK, alpha=0.07, linewidth=0)
+    ax.plot(dates, bt, color=INK, linewidth=1.8, linestyle=(0, (1, 2)))
+    ax.plot(dates, plan, color=REF, linewidth=1.8, linestyle=(0, (4, 3)))
+    c = "#1a7f37" if live[-1] >= 0 else "#cf222e"
+    ax.plot(dates, live, color=c, linewidth=2.6, solid_capstyle="round")
     ax.axhline(0, color=GRID, linewidth=1)
+    ends = sorted([(live[-1], "Your trades"), (bt[-1], "Backtest pace"), (plan[-1], "Plan pace")])
+    lo, hi = ax.get_ylim()
+    gap, placed = 0.09 * (hi - lo), []
+    for v, name in ends:
+        y = v if not placed or v - placed[-1] >= gap else placed[-1] + gap
+        placed.append(y)
+        ax.annotate(name, xy=(dates[-1], v), xytext=(8, 0), textcoords="offset points", color=INK, fontsize=10,
+                    fontweight="bold", va="center", annotation_clip=False)
+        if y != v:
+            ax.texts[-1].set_position((8, (y - v) / (hi - lo) * 2.6 * 72 * 0.8))
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: ("-" if v < 0 else "") + f"${abs(v):,.0f}"))
     ax.xaxis.set_major_locator(matplotlib.dates.AutoDateLocator(maxticks=5))
     ax.xaxis.set_major_formatter(matplotlib.dates.DateFormatter("%b %-d"))
-    return _png(fig)
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=DPI, facecolor="white", bbox_inches="tight", pad_inches=0.08)
+    plt.close(fig)
+    return buf.getvalue()

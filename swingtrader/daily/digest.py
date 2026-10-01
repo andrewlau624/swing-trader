@@ -34,6 +34,9 @@ TAXABLE_MONTHLY_DEFAULT = 1000.0       # the user's plan: $1k a month into the b
 TAXABLE_TAX = 0.32                      # short-term federal + state, the program's planning rate
 HORIZONS = (1, 3, 5)
 INDEX_RATE = 0.10                       # S&P 500 long-run nominal, held (no yearly tax), the benchmark
+# What the research backtest says (auction-corrected, Study AW; 2.5bp/side stress, fixed capital ~$2-25k):
+# V7 brokerage book ~31%/yr, Roth cash IBS+night ~20%/yr; daily vol from the same runs (Sharpe ~1.95 / ~1.5).
+BACKTEST = {"taxable": {"rate": 0.31, "sd_day": 0.010}, "roth": {"rate": 0.20, "sd_day": 0.0085}}
 LEVER_LABEL = {"conviction": "conviction trade", "intraday_x4": "4x intraday margin",
                "overnight_1.3x": "overnight 1.3x", "tow_tilt": "tug-of-war tilt",
                "llm_judge": "LLM news judge", "quote_imbalance": "quote imbalance"}
@@ -239,7 +242,7 @@ def ten_year(acct: str, bal: float, taxable_monthly: float = 0.0) -> tuple[list,
     dep = ROTH_DEPOSIT_YR if kind == "roth" else 12 * taxable_monthly
     k = (1 - TAXABLE_TAX) if kind == "taxable" else 1.0
     rates = {"This bot": p["base"] * k, "Everything on": (p["base"] + sum(p["levers"].values())) * k,
-             "Index fund": INDEX_RATE}
+             "Backtest": BACKTEST[kind]["rate"] * k, "Index fund": INDEX_RATE}
     years = [m / 12 for m in range(0, 121)]
     lines = {n: [project(bal, r, 0, dep)] for n, r in rates.items()}
     for n, r in rates.items():
@@ -251,6 +254,28 @@ def ten_year(acct: str, bal: float, taxable_monthly: float = 0.0) -> tuple[list,
         lines[n] = vals
     marks = {n: (v[60], v[120]) for n, v in lines.items()}
     return years, lines, marks
+
+
+def pace(acct: Account) -> dict | None:
+    """Live trading P&L vs what the backtest's rate and the planning rate would have made on the same
+    balances over the same days, with the backtest's normal range (+-1 and 2 sd). None before 5 trades."""
+    import pandas as pd
+    cl = [c for c in acct.closed if c.get("exit_date")]
+    if len(cl) < 5 or not acct.equity_log:
+        return None
+    kind = "roth" if acct.name == "roth" else "taxable"
+    s = pd.Series([float(c["pnl"]) for c in cl], index=pd.to_datetime([str(c["exit_date"]) for c in cl]))
+    s = s.groupby(level=0).sum().sort_index()
+    eq = pd.Series({pd.Timestamp(e["date"]): float(e["equity"]) for e in acct.equity_log}).sort_index()
+    days = eq.index[eq.index >= s.index[0] - pd.Timedelta(days=1)]
+    if len(days) < 2:
+        days = pd.DatetimeIndex(sorted(set(s.index) | set(eq.index[-1:])))
+    e = eq.reindex(days, method="ffill").fillna(acct.equity)
+    bt, sd = BACKTEST[kind]["rate"], BACKTEST[kind]["sd_day"]
+    live = s.reindex(days.union(s.index)).fillna(0).cumsum().reindex(days, method="ffill").fillna(0)
+    return dict(days=list(days), live=list(live.values),
+                backtest=list((e * bt / 252).cumsum().values), plan=list((e * PLAN[kind]["base"] / 252).cumsum().values),
+                sd=list(((e * sd) ** 2).cumsum().pow(0.5).values), n=len(cl))
 
 
 def render(d: dict, charts: bool = True, taxable_monthly: float = 0.0) -> tuple[str, str, str, list]:
@@ -356,7 +381,7 @@ def render(d: dict, charts: bool = True, taxable_monthly: float = 0.0) -> tuple[
             B.append(f"<img src='cid:{cid}' width='560' alt='{NAME[n]} projection: "
                      + "; ".join(f"{k} {money(v10)} in 10 years" for k, (_, v10) in mk.items())
                      + "' style='display:block;width:100%;max-width:560px;height:auto;margin:0 0 14px'>")
-        dot = {"This bot": "#2a78d6", "Everything on": "#eb6834", "Index fund": "#8c959f"}
+        dot = {"This bot": "#2a78d6", "Everything on": "#eb6834", "Backtest": INK, "Index fund": "#8c959f"}
         best = max(v10 for _, v10 in mk.values())
         rr = "".join(
             f"<tr><td style='{cell}'><span style='display:inline-block;width:10px;height:10px;border-radius:5px;"
@@ -376,20 +401,33 @@ def render(d: dict, charts: bool = True, taxable_monthly: float = 0.0) -> tuple[
         B += [section("If these had been on", "what each idea still in testing would have made on your real days"),
               table(["", "Would have made"], rr),
               p("A handful of trades swings these a lot; they settle as the count grows.", 13, MUTE, "margin-top:8px")]
-    live = A.get("live")
-    if charts and live:
-        cl = sorted((c for c in live.closed if c.get("exit_date")), key=lambda c: str(c["exit_date"]))
-        if len(cl) >= 5:
-            import pandas as pd
+    for n, a in real:
+        pc = pace(a)
+        if not pc:
+            continue
+        lv, bt, pl, sd = pc["live"][-1], pc["backtest"][-1], pc["plan"][-1], pc["sd"][-1]
+        inside = abs(lv - bt) <= 2 * sd
+        B.append(section(f"{NAME[n]} trades so far", f"{pc['n']} trades since {pc['days'][0]:%b %-d} · deposits excluded"))
+        if charts:
             from .digest_charts import pnl_png
-            s = pd.Series([float(c["pnl"]) for c in cl], index=pd.to_datetime([str(c["exit_date"]) for c in cl]))
-            s = s.groupby(level=0).sum().cumsum()
-            images.append(("pnl-live", pnl_png(list(s.index), list(s.values))))
-            B += [section("Brokerage trades so far", f"{_signed(float(s.iloc[-1]))} over {len(cl)} trades · deposits excluded"),
-                  f"<img src='cid:pnl-live' width='560' alt='Cumulative profit from trades' "
-                  f"style='display:block;width:100%;max-width:560px;height:auto'>"]
+            cid = f"pnl-{n}"
+            images.append((cid, pnl_png(pc["days"], pc["live"], pc["backtest"], pc["plan"], pc["sd"])))
+            B.append(f"<img src='cid:{cid}' width='560' alt='{NAME[n]}: trades made {_signed(lv)}; backtest pace "
+                     f"{_signed(bt)}; plan pace {_signed(pl)}' style='display:block;width:100%;max-width:560px;"
+                     f"height:auto;margin:0 0 12px'>")
+        dot = {"Your trades": UP if lv >= 0 else DOWN, "Backtest pace": INK, "Plan pace": "#8c959f"}
+        rr = "".join(f"<tr><td style='{cell}'><span style='display:inline-block;width:10px;height:10px;border-radius:5px;"
+                     f"background:{dot[k]};margin-right:8px'></span>{k}</td><td style='{numc}'>{_signed(v)}</td></tr>"
+                     for k, v in (("Your trades", lv), ("Backtest pace", bt), ("Plan pace", pl)))
+        B.append(table(["", "So far"], rr))
+        rng = f"(backtest pace {_signed(bt)} ± {money(2 * sd)})"
+        msg = (f"Inside the backtest's normal range {rng}. Too few trades to tell the backtest from the plan yet; "
+               f"that takes months, not weeks." if inside else
+               f"<b>Outside</b> the backtest's normal range {rng}. Worth a look: paste <code>make review</code> to Claude.")
+        B.append(p(msg, 14, MUTE, "margin-top:10px"))
     B.append(p(f"Projections use planning rates, not forecasts: this bot {PLAN['taxable']['base']:.0%} a year "
                f"(Roth {PLAN['roth']['base']:.0%}), everything on {PLAN['taxable']['base'] + sum(PLAN['taxable']['levers'].values()):.0%}, "
+               f"backtest {BACKTEST['taxable']['rate']:.0%} (Roth {BACKTEST['roth']['rate']:.0%}; research results usually shrink live), "
                f"index fund {INDEX_RATE:.0%}. Every line gets the same deposits. Brokerage figures assume {TAXABLE_TAX:.0%} short-term "
                f"tax each year; the index fund is shown before you sell it.", 13, MUTE,
                f"margin-top:34px;padding-top:16px;border-top:1px solid {LINE}"))
