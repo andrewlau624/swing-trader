@@ -1371,3 +1371,25 @@ def test_news_judge_crash_never_touches_the_night_orders(tmp_path, monkeypatch):
     ex.phase_close(book, "2026-09-23", dt.datetime(2026, 9, 23, 15, 40, tzinfo=ET), ex.broker.clock())
     assert {r.symbol for r in ex.broker.client.submitted} == {"LOWT", "HIGHT"}, "orders placed first"
     assert any("[news] skipped (RuntimeError" in m for m in lines)
+
+
+def test_schwab_rows_keep_book_sizes_for_the_imbalance_log():
+    from swingtrader.daily import marketdata as md
+    now_ms = pd.Timestamp.now(tz="UTC").value / 1e6
+    js = {"ABC": {"quote": {"lastPrice": 9.0, "tradeTime": now_ms, "highPrice": 10.0, "lowPrice": 8.9,
+                            "openPrice": 9.8, "closePrice": 10.0, "bidPrice": 8.99, "askPrice": 9.01,
+                            "bidSize": 300, "askSize": 1200, "totalVolume": 5e6}}}
+    resp = SimpleNamespace(raise_for_status=lambda: None, json=lambda: js)
+    rows = md.schwab_rows(["ABC"], client=SimpleNamespace(get_quotes=lambda c: resp))
+    r = rows.loc["ABC"]
+    assert (r.bid_size, r.ask_size, r.day_volume) == (300.0, 1200.0, 5e6)
+
+
+def test_decision_log_records_the_book_snapshot(tmp_path, monkeypatch):
+    ex = _executor(tmp_path, monkeypatch)
+    ex.dry_run = False
+    r = pd.Series({"price": 9.0, "day_ret": -0.1, "ibs": 0.05, "vol20": 0.9, "bid": 8.99, "ask": 9.01,
+                   "bid_size": 300.0, "ask_size": 1200.0, "day_volume": 5e6, "open": 9.8})
+    ex._log_decision("2026-10-01", "ABC", r, 22.0, 5, 1e7, 6.0)
+    rec = json.loads((tmp_path / f"daily-decisions{ex.tag}.jsonl").read_text().splitlines()[-1])
+    assert rec["bid_size"] == 300.0 and rec["ask_size"] == 1200.0 and rec["tow"] == 6 and rec["open"] == 9.8

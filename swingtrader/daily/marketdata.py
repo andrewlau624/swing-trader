@@ -158,6 +158,11 @@ def schwab_rows(symbols: list[str], max_age_min: float = 10.0, client=None) -> p
                          # cost model needs (daily-bar estimators confuse it with vol)
                          "bid": float(bid) if bid else float("nan"),
                          "ask": float(ask) if ask else float("nan"),
+                         # book depth at the touch + day volume: logged per night pick so a
+                         # quote-imbalance study can run forward (no historical L1 exists)
+                         "bid_size": float(q.get("bidSize") or "nan"),
+                         "ask_size": float(q.get("askSize") or "nan"),
+                         "day_volume": float(q.get("totalVolume") or "nan"),
                          "trade_age_min": age}
     return pd.DataFrame.from_dict(rows, orient="index")
 

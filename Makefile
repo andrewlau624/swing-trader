@@ -365,3 +365,6 @@ news-smoke:   ## one live LLM news verdict for SYM (Round 23 BA): make news-smok
 
 news-eval:    ## forward test of the LLM news judge on state/news-judge.jsonl (verdict read once at 300)
 	@PYTHONPATH=. $(PY) -m research.sim.news_judge_eval
+
+qi-eval:      ## forward test of the 15:40 quote-imbalance tilt (Round 24 BB; verdict read once at 300)
+	@PYTHONPATH=. $(PY) -m research.sim.quote_imbalance_eval

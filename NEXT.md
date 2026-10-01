@@ -36,6 +36,9 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   300 judged picks (~2-4 months), scored on the official crosses. Forward only: a historical LLM backtest is
   contaminated by the model's knowledge.
 
+- **Round 24 BB (forward): 15:40 quote imbalance.** The night leg now logs Schwab bid/ask sizes + day volume per
+  pick in `daily-decisions*.jsonl` (free stand-in for the parked imbalance feed). `make qi-eval`; verdict at 300.
+
 ---
 
 ## Round 22 (2026-10-01): Roth ex-dividend overnight capture — AZ DEAD (N 688)

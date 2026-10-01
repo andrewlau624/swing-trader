@@ -1311,3 +1311,19 @@ only if: the daily increment > 0 in both halves of the judged sample (split at t
 sign-flip placebo >= 95th and within-night flag-shuffle placebo >= 95th. Also reported: net by verdict and by
 confidence. Model, prompt, effort and the 0.7 / 0.25 constants are frozen; changing any of them restarts the
 count from zero as a new registration.
+
+
+## Amendment — Round 24: 15:40 quote imbalance on the night picks, FORWARD test only — Study BB (pre-register; 1 variant, N 689 -> 690)
+
+`date`: Thu Oct 1 2026 (stamped by the commit), before any snapshot exists (the logging ships in the same commit).
+The free part of the closing-imbalance idea (AC, parked: no paid feed): the Schwab quote the night leg already
+pulls at 15:40 carries bid/ask sizes. QI = (bid_size - ask_size) / (bid_size + ask_size). Mechanism (order-book
+imbalance literature, e.g. Cont-Kukanov-Stoikov 2014; the lab's Lab-AT): a sell-heavy touch into the close marks
+remaining selling pressure that the close auction absorbs and the next open reverses; a buy-heavy touch says the
+pressure is already gone. Predicted sign: ambiguous in level, so ONE pre-committed direction is tested: buy-heavy
+up-weighted (pressure exhausted, the bounce has started; the add. 23 "late selling" null argues against the
+opposite). No historical L1 exists, so forward only.
+- BB1: weight clip(1 + 0.5 QI, 0.5, 1.5), renormalised within the night.
+Scored by `research/sim/quote_imbalance_eval.py` (`make qi-eval`) on the official crosses, 2 x 2.5bp, one row per
+(date, symbol); read once at >= 300 picks with a snapshot; bars as Study BA (both halves, NW t >= 2, sign-flip
+and within-night shuffle >= 95th).

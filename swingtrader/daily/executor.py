@@ -1041,6 +1041,15 @@ class DailyExecutor:
                else round(qty * float(r.price) / adv20 * 100, 5),
                # tug-of-war count (Round 19 AU3): the shadow gate joins this to the fills
                "tow": None if not np.isfinite(tow) else int(tow)}
+        # 15:40 book snapshot (Schwab quotes only): bid/ask sizes and day volume, for a forward
+        # quote-imbalance study; the open is the gap reference
+        for k in ("bid", "ask", "bid_size", "ask_size", "day_volume", "open"):
+            v = r.get(k, np.nan) if hasattr(r, "get") else np.nan
+            try:
+                v = float(v)
+            except (TypeError, ValueError):
+                v = float("nan")
+            rec[k] = None if not np.isfinite(v) else round(v, 4)
         with open(self.log_dir / f"daily-decisions{self.tag}.jsonl", "a") as fh:
             fh.write(json.dumps(rec) + "\n")
 
