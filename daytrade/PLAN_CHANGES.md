@@ -37,3 +37,4 @@ adds to the program N. Results of the old variant are never deleted.
 | 2026-10-01 | momentum | new variant Lab-BT: top-decile momentum vs market on 1963-2015 (French library) | Lab-BR failed only on t with 10 years of data | program N 734 -> 735 |
 | 2026-10-01 | momentum | new variant Lab-BU: vol-scaled top-decile momentum (12% target), judged 1963-2015 | crash protection for Lab-BT | program N 735 -> 736 |
 | 2026-10-01 | lt_reversal | created (Study Lab-BV: long the bottom 60-13 decile vs market, French data 1963-2015) | price-based, long history, implementable | program N 736 -> 737 |
+| 2026-10-01 | industry_momentum | created (Study Lab-BW: top 5 of 49 French industries by 12-1, 1963-2015) | durability check behind Lab-BS | program N 737 -> 738 |

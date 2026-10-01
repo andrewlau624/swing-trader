@@ -1796,3 +1796,14 @@ used, survivorship-free.
   2x 20bp/month.
 - Pass: 2x excess > 0 both halves; t >= 2; without the best 5 months > 0; worst 12-month excess reported.
 - Reported: 1927-63, 2016-26-08, by decade.
+
+
+## Amendment — Lab Round 45, Study Lab-BW: industry momentum on French's 49 industries, 1963-2015 (pre-register; 1 variant, program N 737 -> 738)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Moskowitz & Grinblatt (1999). Lab-BS (11 sector SPDRs, 2017-26)
+was dead; this asks whether the premium itself is durable.
+- Data: "49 Industry Portfolios", value-weighted monthly (CRSP 202608; no return looked at). An industry with a missing
+  month (-99.99) is excluded that month.
+- Score = 12-1 momentum of each industry's cumulative return (months m-12..m-2). Hold the top 5, equal weight;
+  excess vs the market.
+- Judged 1963-07 .. 2015-12, halves as Lab-BT. Costs: 1x 10bp/month, 2x 20bp/month.
+- Pass: 2x excess > 0 both halves; t >= 2; without the best 5 months > 0. Reported: 1927-63, 2016-26, by decade.
