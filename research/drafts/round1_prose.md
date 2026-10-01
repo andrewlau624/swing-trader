@@ -1540,3 +1540,18 @@ Data: Lab-AZ's NOII files (already paid). No return computed.
   the bottom 5 with r < 0. Enter at the NBBO 1s later; exit market-on-close at the official close.
 - Lab-BB1 long+short; Lab-BB2 long only. Costs as Lab-AZ.
 - Pass: 2x > 0 both halves; day-clustered t >= 2 at 1x; >= 95th pct of a random-side placebo; mean without the top 20 > 0.
+
+
+## Amendment — Lab Round 26 result: Study Lab-BB DEAD; Lab Round 27, Study Lab-BC pre-registered on the H2 holdout (1 variant, program N 710 -> 711)
+`date`: Thu Oct 1 2026 (the commit time is the stamp).
+- **Lab-BB result (DEAD, both).** The imbalance side predicts the close: placebo 100th pct, gross +3.4bp (long +4.1)
+  from the 15:54:31 mid to the official close. But the mean entry spread is 7.5bp, so net −1.3bp (t −4.0), negative
+  in both halves; long-only −0.7bp. Without the top 20 −1.6bp. study_lab_bb_close_imbalance.md.
+- **Lab-BC (designed on H1 only, judged on H2 only).** In H1 (2022-01 .. 2024-05) Lab-BB1's gross rises
+  monotonically with |r| = |imbalance / paired|: by quartile −1.9 / +2.6 / +3.6 / **+7.0bp**; the top quartile nets
+  +2.1bp at 1x. Spread quartiles matter less. Rule: Lab-BB1 (long the top 5 with r > 0, short the bottom 5 with
+  r < 0), taking ONLY names with |r| >= **1.6742** (the H1 75th percentile of |r| among Lab-BB1 trades). Entry, exit
+  and costs as Lab-BB.
+- **Judged ONLY on 2024-06-03 .. 2026-09-30 (H2), which the rule never saw.** Pass: H2 net > 0 at 2x; day-clustered t
+  >= 2 at 1x on H2; >= 95th pct of a random-side placebo on H2; H2 mean without the top 20 > 0. H1 is reported for
+  reference only (in-sample).

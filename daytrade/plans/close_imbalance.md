@@ -27,3 +27,8 @@ As Lab-AZ: 1x = NBBO + 0.5bp in, 0.5bp out; 2x = NBBO + 1bp + half-spread again 
 ## Pass bar, per variant
 Mean net per trade > 0 at 2x in BOTH halves (split 2024-06-01), AND day-clustered t >= 2.0 at 1x, AND >= 95th pct of a
 random-side placebo, AND the mean without the 20 best trades > 0 at 1x.
+
+
+## Lab-BC (added 2026-10-01, a new variant; round1_prose.md Lab Round 27)
+Lab-BB1 restricted to |r| >= 1.6742, the H1 75th percentile of |r|, chosen on H1 only. Judged on H2 (2024-06-03 ..
+2026-09-30) alone: 2x net > 0, t >= 2 at 1x, placebo >= 95th, mean without the top 20 > 0.
