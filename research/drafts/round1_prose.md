@@ -1807,3 +1807,20 @@ was dead; this asks whether the premium itself is durable.
   excess vs the market.
 - Judged 1963-07 .. 2015-12, halves as Lab-BT. Costs: 1x 10bp/month, 2x 20bp/month.
 - Pass: 2x excess > 0 both halves; t >= 2; without the best 5 months > 0. Reported: 1927-63, 2016-26, by decade.
+
+
+## Amendment — Lab Round 46, Study Lab-BX: industry-ETF momentum (the implementable Lab-BW), 2017-2026 (pre-register; 1 variant, program N 738 -> 739)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Lab-BW passed on French's 49 industries (1963-2015) and was
+weaker after 2010. This tests the version a $2-25k account or the Roth can hold.
+- Fixed list, one liquid US industry ETF per industry, chosen before looking: XBI (biotech), XHB (homebuilders),
+  XRT (retail), KRE (regional banks), KIE (insurance), XME (metals/mining), XOP (oil & gas E&P), OIH (oil services),
+  SMH (semiconductors), IGV (software), ITA (aerospace/defense), IYT (transports), XPH (pharma), IHI (medical
+  devices), XHS (health services), GDX (gold miners), IYR (real estate), IYZ (telecom), JETS (airlines), TAN (solar).
+- Monthly adjusted SIP bars. Score = 12-1 momentum. Hold the top 5, equal weight, month-end close to month-end close.
+  The first full signal is 2017-02 (SIP history starts 2016-01).
+- Excess vs SPY (the implementable alternative). Equal-weight list also reported.
+- Costs: 1x 10bp/month, 2x 20bp/month (full turnover).
+- Halves 2017-02..2021-12 / 2022-01..2026-09.
+- Pass: 2x excess vs SPY > 0 both halves; t >= 2; >= 95th pct of a random-5 placebo; without the best 5 months > 0.
+- Either way, a PAPER SHADOW of this rule is built (forward evidence for Lab-BW's durable premium). A live test would
+  need its own registration, the $500 gate and the user's approval.
