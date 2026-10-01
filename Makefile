@@ -14,7 +14,9 @@ UNAME := $(shell uname -s)
 .PHONY: help setup env test lint kill-old persist unpersist persist-status \
         daily-status daily-dry daily-once daily-logs daily-live-check daily-live-on daily-live-off daily-roth-check daily-roth-on daily-roth-off schwab-login schwab-quote-check schwab-reminder review support errors \
         results status positions slippage logs once dry digest notify-test \
-        notify-setup doctor pull scan backtest clean stop persist-stop linger _lastlog pending
+        notify-setup doctor pull scan backtest clean stop persist-stop linger _lastlog pending \
+        daytrade-record daytrade-smoke daytrade-status daytrade-halt daytrade-unhalt daytrade-review \
+        daytrade-table daytrade-replay daytrade-paper daytrade-persist daytrade-unpersist daytrade-logs
 
 help:
 	@echo "swing-trader"
@@ -55,6 +57,10 @@ help:
 	@echo "  daily-live-on     start trading real money too (asks you to type REAL MONEY)"
 	@echo "  daily-live-off    stop trading real money (paper keeps running)"
 	@echo "  daily-roth-check / daily-roth-on / daily-roth-off   the same for the Roth IRA book"
+	@echo ""
+	@echo "  daytrade-*     the separate day-trading lab (daytrade/README.md):"
+	@echo "                 persist | unpersist | logs | status | smoke | record | replay DAY=YYYY-MM-DD"
+	@echo "                 halt | unhalt | review | table | paper"
 	@echo ""
 	@echo "  scan           what looks tradable today"
 	@echo "  backtest       full walk-forward (slow; writes out/)"
@@ -312,3 +318,43 @@ backtest:
 clean:
 	@rm -rf __pycache__ */__pycache__ .pytest_cache
 	@echo "cleaned (cache, state and logs left alone)"
+
+# ------------------------------------------------------- day-trading lab
+# A separate package, account, state and log (daytrade/README.md). Nothing here touches the live book.
+daytrade-persist:
+	@./scripts/daytrade-install.sh
+
+daytrade-unpersist:
+	@./scripts/daytrade-install.sh remove
+
+daytrade-logs:
+	@journalctl --user -u daytrade-recorder -n 60 --no-pager 2>/dev/null || echo "no recorder runs yet"
+
+daytrade-status:
+	@$(PY) scripts/daytrade.py status
+	@./scripts/sysd.sh list-timers daytrade-recorder.timer --no-pager 2>/dev/null | grep -E "daytrade|NEXT" || echo "  recorder timer not installed (make daytrade-persist)"
+
+daytrade-smoke:
+	@$(PY) scripts/daytrade.py record --smoke $${SECS:-20} --root /tmp/daytrade-smoke
+
+daytrade-record:
+	@$(PY) scripts/daytrade.py record
+
+daytrade-replay:
+	@test -n "$(DAY)" || { echo "usage: make daytrade-replay DAY=YYYY-MM-DD"; exit 1; }
+	@$(PY) scripts/daytrade.py replay --day $(DAY) $(ARGS)
+
+daytrade-paper:
+	@$(PY) scripts/daytrade.py run --mode paper $(ARGS)
+
+daytrade-halt:
+	@$(PY) scripts/daytrade.py halt
+
+daytrade-unhalt:
+	@$(PY) scripts/daytrade.py unhalt
+
+daytrade-review:
+	@$(PY) scripts/daytrade.py review $(ARGS)
+
+daytrade-table:
+	@$(PY) scripts/daytrade.py table
