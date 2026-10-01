@@ -9,6 +9,23 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Round 18 (2026-09-30): two ideas from a quant Discord — AS, AT both DEAD (N 669 -> 675)
+
+Triage, results and an AQ correction: `research/drafts/study_as_at_discord.md`. Most of the chat
+was already covered (order-book imbalance: data; decay monitors: add. 37; ML: Study E; placebos =
+the "null model"). Two untested ideas, pre-registered (b025d63):
+- **AS: split the overnight budget IBS/night by trailing metrics (softmax of Sharpe, inverse vol)
+  — DEAD.** At 2.5bp/side, ~0 to −1.5pp/yr. The tier_hi "gains" (AS2 +2.5..+3.4pp, t 1.8) come only
+  from a lower mean night weight (0.40) when the night leg nets ~0. That is AQ's cost gate again, not timing.
+- **AT: vol-ratio (10d/60d) and 50d trend-slope filters on IBS picks — DEAD.** VR gates flip sign
+  vs the 2016-20 holdout. **Trend filter is harmful: −7pp/yr, t −3.1.** Downtrend dips revert the
+  most (+72bp vs −1bp in 2024-26). Never add a short trend filter to an MR leg.
+- **Correction to AQ:** its cost sweep is PER SIDE (`ret − 2·c`), not round trip. The brief's 2×
+  stress (5bp RT) is 22.0%/yr for the cash-IRA book, not 19.0%; the night crossover is ~5-6bp/side
+  (~10-12bp RT). Conservative error: the IBS+night Roth verdict stands, with a wider gate.
+
+---
+
 ## Round 17 (2026-09-30): more %/yr at $2-25k — AL/AQ Roth cash book SHADOW, AP dead, AM/AN/AO dead or report (N 642 -> 669)
 
 Brief: `research/drafts/prompt_small_account_profit.md`. Pre-registration: round1_prose.md Round 17.
@@ -16,12 +33,13 @@ Brief: `research/drafts/prompt_small_account_profit.md`. Pre-registration: round
   `ROTH_LIMITED_MARGIN`). A plain cash IRA is GFV-safe on the IBS leg (buy open d+1, sell open d+2,
   the funding sale's T+1 date) and the night leg (buy close d, sell open d+1); only the 3x-ETF
   intraday leg needs limited margin. **The cash-IRA book is IBS .5 + night .5**: at the brief's
-  stressed cost (measured x2 ~ 5bp round trip) it earns **19.0%/yr** (22.0% at 2.5bp), halves
+  cost of 5bp/side (~10bp round trip, ~4x measured) it earns **19.0%/yr**; at the brief's real 2x
+  stress (2.5bp/side = 5bp RT) **22.0%** (Round 18: AQ's sweep is per side). At 5bp/side: halves
   13.0/26.0, NW t vs BIL 3.06, placebo 99%, P(DD>50%) 0%, maxDD −12% (= M3). **AQ corrected AL:**
   the earlier "IBS-only" call used `tier_hi` (15-50bp), which is 5-10x measured, not the brief's 2x.
-  The night leg's **crossover is ~6bp round trip** (0bp: 31.3%; 5bp: 18.9%; tier_hi: −3.4%); the
-  taxable V7 book is 32.0%/yr at 5bp, 18.6% at tier_hi. So run IBS+night now with the cost gate;
-  IBS-only (17.9% at tier_hi) is the fallback above ~6bp. The delay costs ~$890-1,010/mo vs idle.
+  The night leg's **crossover is ~6bp PER SIDE (~12bp round trip; Round 18 correction: AQ's sweep was per side)** (night-only: 0bp 31.3%; 5bp/side 18.9%; tier_hi −3.4%); the
+  taxable V7 book is 32.0%/yr at 5bp/side, 18.6% at tier_hi. So run IBS+night now with the cost gate;
+  IBS-only (17.9% at tier_hi) is the fallback above ~6bp/side. The delay costs ~$890-1,010/mo vs idle.
   Spec: `daily.roth_cash_ira` (default off, IBS+night, no intraday) — BUILT + tested.
 - **AP: IBS selection — DEAD.** Cross-sectional rank-1 (threshold/always), all-18 rank-1, rank-2 and
   a stricter 0.1 gate all lose −0.3..−7.6pp vs the shipped top-3/IBS<0.2 leg. The overnight-reversal
@@ -686,6 +704,9 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Conviction weight 0.75 / 1.0 in TQQQ (mult 2 or 4), 2.0 via MNQ (Round 16 AI) | **dead** | TQQQ's 75% margin comes out of the noise cap: +0..+2pp, t 0.5; MNQ 2.0 t 2.2 but maxDD −36%, P(DD>50%) 38% |
 | Conviction trade in MNQ instead of TQQQ (Round 16 AJ) | **shadow (AJ1 .5, AJ2 .75); AJ3 1.0 dead** | same trades, cheaper, frees the noise leg's margin, 60/40: +2.5..+5.3pp 2024-26, t 4+; Schwab API cannot trade futures, needs a second broker; ≥ ~$29k |
 | More conviction setups: second breakout after a failed first; SMH/SPY/IWM on no-TQQQ days (Round 16 AK) | **dead** | 2nd breakout +0.4..+0.9pp all halves but t 0.9; SPY = same bet (corr .75); SMH/SPY/IWM fill-ins 0..−7pp 2024-26 (IWM t −2.7) |
+| Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
+| IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
+| IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |
 
 ## Ideas not yet tested
 

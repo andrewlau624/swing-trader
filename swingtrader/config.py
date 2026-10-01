@@ -186,7 +186,7 @@ class DailyCfg:
     # d+1, sell open d+2) and the night leg (buy close d, sell open d+1) are
     # GFV-safe, the 3x-ETF intraday leg is not. When on, the Roth runs IBS + night
     # (the shipped overnight book) with NO intraday leg, without ROTH_LIMITED_MARGIN.
-    # Gate: live night round-trip cost <= ~5bp (2x measured; crossover ~6bp). If it
+    # Gate: live night cost <= ~5bp/side (crossover ~6bp/side, ~12bp round trip). If it
     # drifts higher, run IBS-only. Default off.
     roth_cash_ira: bool = False
     # Overnight leverage: BOTH overnight legs move to this weight once
