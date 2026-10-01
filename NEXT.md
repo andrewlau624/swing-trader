@@ -18,8 +18,9 @@ and ranked table `study_round19_summary.md`. Pre-registration dc53fcb (branch `r
   ~orthogonal to vol20/depth/prev. V7 +3.1 / +3.2 / +2.8pp/yr at $2.3k / $10k / $25k (+$70 / +$323 / +$705),
   t 2.6-3.0, placebo 99-100%; Roth +$64 / +$296 / +$645. Holds on auction prints and in a second
   implementation. Against it: DSR 0.46 at N 680, 2022-23 ≈ 0, and it needs the uncapped post-tilt weights
-  (a hard 10% cap after the tilt cuts it to +0.4pp). Spec `daily.night_tilt_tow` (off) in study_au_tow.md:
-  log the weights first; on after ≥ 300 picks if the high-TOW tercile out-earns the low one.
+  (a hard 10% cap after the tilt cuts it to +0.4pp). **BUILT, OFF:** `daily.night_tilt_tow: false`; the
+  15:40 log prints `[night] tow shadow:` and decisions jsonl records `tow`. **Gate = `make review` §9:** turn
+  on (`night_tilt_tow: true`) at ≥ 300 night round trips if high-TOW (≥ 6) out-earns low-TOW (< 4); same rule kills it.
 - **AW — REPORT: the backtest's next open is the vendor first print, not the cross.** On Alpaca's official
   auction prints the night leg earns 3.8bp/trade less (t −7.5; worst < $10). Every book with a night leg is
   ~2pp/yr lower (V7 2.5bp: 34.6 → 32.3% at $10k; Roth cash: 23.0 → 20.9%). No verdict flips; AQ's

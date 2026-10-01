@@ -1280,3 +1280,79 @@ def test_roth_cash_ira_off_still_requires_limited_margin(tmp_path, monkeypatch):
                        state_dir=tmp_path, log_dir=tmp_path)
     assert ex.roth_limited_margin() is False
     assert ex.d.roth_cash_ira is False          # so the _run gate still refuses
+
+
+# ------------------------------------- Round 19 AU3: tug-of-war tilt (shadow, off by default)
+def test_tug_of_war_counts_up_gaps_followed_by_down_days():
+    # closes/opens oldest first: session k gaps up from the previous close, then falls
+    o = [10, 10.2, 10.0, 10.3, 10.1]
+    c = [10, 10.1, 10.1, 10.0, 10.2]
+    # gaps: 10.2>10 up, 10.0<10.1 down, 10.3>10.1 up, 10.1>10.0 up; days: 10.1<10.2 down,
+    # 10.1>10.0 up, 10.0<10.3 down, 10.2>10.1 up -> tug of war on sessions 1 and 3
+    import swingtrader.daily.signals as S
+    old = S.TOW_MIN_SESSIONS
+    try:
+        S.TOW_MIN_SESSIONS = 4
+        assert sg.tug_of_war(o, c) == 2.0
+    finally:
+        S.TOW_MIN_SESSIONS = old
+    assert np.isnan(sg.tug_of_war(o, c)), "fewer than 15 valid sessions -> unknown"
+
+
+def test_tug_of_war_matches_the_research_feature():
+    rng = np.random.default_rng(1)
+    c = 20 * np.exp(np.cumsum(rng.normal(0, 0.02, 40)))
+    o = c * np.exp(rng.normal(0, 0.01, 40))
+    O, C = pd.Series(o), pd.Series(c)
+    gap, intr = O / C.shift(1) - 1, C / O - 1
+    ref = ((gap > 0) & (intr < 0)).astype(float).where(gap.notna() & intr.notna())
+    ref = ref.rolling(20, min_periods=15).sum()       # research/sim/max_edge.py, at the last bar
+    assert sg.tug_of_war(o, c) == ref.iloc[-1]
+
+
+def test_night_tilt_tow_keeps_gross_and_weights_high_counts_up():
+    base = np.array([1.2, 0.9, 0.9])
+    w = sg.night_tilt_tow(base, [5.14, 10, np.nan])
+    assert np.isclose(w.mean(), base.mean())
+    assert w[1] / base[1] > w[2] / base[2], "high TOW up-weighted vs an unknown one"
+    assert np.allclose(sg.night_tilt_tow(base, [np.nan] * 3), base), "unknown TOW -> no tilt"
+
+
+def _tow_rows(monkeypatch, tows):
+    from swingtrader.daily import executor as E
+    syms = list(tows)
+    elig = pd.DataFrame({"prev_close": [10.0] * len(syms), "tow": list(tows.values())}, index=syms)
+    live = pd.DataFrame({"price": [9.0] * len(syms), "high": [10.0] * len(syms),
+                         "low": [8.99] * len(syms)}, index=syms)
+    monkeypatch.setattr(E.md, "eligibility", lambda *a, **k: elig)
+    monkeypatch.setattr(E.md, "live_rows", lambda s, *a, **k: live.loc[[x for x in s if x in live.index]])
+    monkeypatch.setattr(E, "all_assets", lambda: SimpleNamespace(symbols=syms))
+
+
+def test_tow_tilt_is_logged_but_not_applied_when_off(tmp_path, monkeypatch):
+    _tow_rows(monkeypatch, {"LOWT": 1, "HIGHT": 12})
+    ex = _executor(tmp_path, monkeypatch)
+    assert ex.d.night_tilt_tow is False, "shipped default is shadow"
+    lines = []; ex.log = lambda m: lines.append(m)
+    book = DailyBook(cash=100000, start_equity=100000)
+    ex.phase_close(book, "2026-09-23", dt.datetime(2026, 9, 23, 15, 40, tzinfo=ET), ex.broker.clock())
+    q = {r.symbol: r.qty for r in ex.broker.client.submitted}
+    assert q["LOWT"] == q["HIGHT"], "off: equal names keep equal size"
+    assert any("[night] tow shadow" in m for m in lines)
+
+
+def test_tow_tilt_sizes_up_high_counts_when_on(tmp_path, monkeypatch):
+    _tow_rows(monkeypatch, {"LOWT": 1, "HIGHT": 12})
+    ex = _executor(tmp_path, monkeypatch)
+    ex.d.night_tilt_tow = True
+    book = DailyBook(cash=100000, start_equity=100000)
+    ex.phase_close(book, "2026-09-23", dt.datetime(2026, 9, 23, 15, 40, tzinfo=ET), ex.broker.clock())
+    q = {r.symbol: r.qty for r in ex.broker.client.submitted}
+    assert q["HIGHT"] > q["LOWT"]
+
+
+def test_tow_gate_waits_then_turns_on_or_off():
+    t = [1] * 150 + [8] * 150
+    assert sg.tow_gate(t[:100], [0.0] * 100)["verdict"] == "wait"
+    assert sg.tow_gate(t, [-0.001] * 150 + [0.002] * 150)["verdict"] == "on"
+    assert sg.tow_gate(t, [0.002] * 150 + [-0.001] * 150)["verdict"] == "off"

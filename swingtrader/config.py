@@ -210,6 +210,9 @@ class DailyCfg:
     # v1 = depth + vol20 (shipped); v2 adds yesterday's return (addendum 23).
     # Under v1 the 15:40 log still prints the v2 weights for comparison.
     night_tilt_model: str = "v1"
+    # Round 19 AU3 (research/drafts/study_au_tow.md, SHADOW): also weight night names by the
+    # 20-session tug-of-war count (overnight up, day down). False = only logged at 15:40.
+    night_tilt_tow: bool = False
     # Impact cap (research Study X): each night order <= ADV * (edge / (3 Y sigma))^2,
     # the size past which square-root impact eats more than the order adds. None = off
     # (Y is unmeasured: `make review` section 8 fits it from live fills as orders grow).

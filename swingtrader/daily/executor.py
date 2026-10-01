@@ -955,6 +955,17 @@ class DailyExecutor:
             w_other, other = w2, "v2"
         self.log(f"[night] tilt {self.d.night_tilt_model} (would be {other}: "
                  + ", ".join(f"{s} {a:.2f}" for s, a in zip(picks.index[:8], w_other)) + ")")
+        # Round 19 AU3 tug-of-war tilt: always logged (the shadow record its gate needs),
+        # applied only when daily.night_tilt_tow is on
+        tow = (pd.to_numeric(elig["tow"].reindex(picks.index), errors="coerce").values.astype(float)
+               if "tow" in elig.columns else np.full(len(picks), np.nan))
+        w_tow = sg.night_tilt_tow(w, tow, self.d.night_tilt_k)
+        self.log(f"[night] tow {'on' if self.d.night_tilt_tow else 'shadow'}: "
+                 + ", ".join(f"{s} tow {'na' if not np.isfinite(t) else int(t)} w {a:.2f}"
+                             for s, t, a in zip(picks.index[:8], tow, w_tow)))
+        tow_of = dict(zip(picks.index, tow))
+        if self.d.night_tilt_tow:
+            w = w_tow
         probe_usd = self.d.night_probe_max_usd if self.live else None
         adv = (picks["adv20"].values if "adv20" in picks else np.full(len(picks), np.nan))
         cap = (sg.night_impact_cap(adv, v20, self.d.night_impact_edge_bps, self.d.night_impact_y)
@@ -987,12 +998,12 @@ class DailyExecutor:
             self.log(f"  {sym}: day {r.day_ret*100:+.1f}%  ibs {r.ibs:.2f}  px {r.price:.2f}  w {wi:.2f}"
                      + (f"  spread {spread:.0f}bp" if np.isfinite(spread) else "")
                      + (f"  PROBE 1 sh (target ${target:.0f})" if probe else ""))
-            self._log_decision(today, sym, r, spread, qty, ai)
+            self._log_decision(today, sym, r, spread, qty, ai, tow_of.get(sym, float("nan")))
             self._order(book, today, sym, "buy", "night", qty=qty, tif="cls",
                         ref_px=float(r.price), kind="entry")
 
     def _log_decision(self, today: str, sym: str, r, spread_bps: float, qty: int,
-                      adv20: float = float("nan")) -> None:
+                      adv20: float = float("nan"), tow: float = float("nan")) -> None:
         """One line per night pick with what was known at 15:40, including the
         quoted spread. This is the dataset a per-name cost model will be fitted
         on once fills accumulate (research/sim uses a price/volume tier until then)."""
@@ -1005,7 +1016,9 @@ class DailyExecutor:
                # participation, for fitting the impact coefficient (review section 8)
                "adv20": None if not np.isfinite(adv20) else round(float(adv20)),
                "pct_adv": None if not np.isfinite(adv20) or adv20 <= 0
-               else round(qty * float(r.price) / adv20 * 100, 5)}
+               else round(qty * float(r.price) / adv20 * 100, 5),
+               # tug-of-war count (Round 19 AU3): the shadow gate joins this to the fills
+               "tow": None if not np.isfinite(tow) else int(tow)}
         with open(self.log_dir / f"daily-decisions{self.tag}.jsonl", "a") as fh:
             fh.write(json.dumps(rec) + "\n")
 

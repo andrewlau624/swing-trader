@@ -77,7 +77,11 @@ tercile and in the low- and high-vol terciles.
 little earlier: at $100k ≈ +$2.8k/yr if the leg's level holds; at $500k it is moot (the night leg is
 capped in dollars).
 
-## Spec for a switch (NOT built this round; default off)
+## Switch — BUILT 2026-10-01, OFF (shadow logging only)
+Built on the user's instruction after the round. Code: `signals.tug_of_war` / `night_tilt_tow` / `tow_gate`,
+`marketdata.eligibility` (adds `tow`), executor 15:40 `[night] tow shadow:` line + `tow` in
+`daily-decisions*.jsonl`, `make review` section 9 (the gate), config `daily.night_tilt_tow: false`, 7 tests.
+The spec it implements:
 - `daily.night_tilt_tow: false`. When true, multiply the live v1 tilt by
   `clip(1 + 0.25 · (TOW − 5.14) / 2.10, 0.25, 2)` and renormalise to the v1 mean.
 - **Inputs:** TOW = the count of the 20 completed sessions before d with open_t > close_{t−1} and
