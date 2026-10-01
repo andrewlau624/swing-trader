@@ -4,7 +4,7 @@ You are working in the `swing-trader` repo (the research data lives here, not on
 Read these before running anything:
 - CLAUDE.md: priority = % return at small balances ($2.3k / $10k / $25k).
 - NEXT.md: the top section, and the "Things already tested — do NOT redo these" table.
-- research/drafts/study_round16_summary.md and research/drafts/prompt_small_account_profit.md.
+- research/drafts/study_round16_summary.md, study_round17_summary.md (Studies AL-AR) and prompt_small_account_profit.md.
 - research/drafts/study_e_ml.md (the program's earlier ML attempt) and study_w_letf.md.
 - RESULTS.md addenda 13, 27, 31, 32, 33, 34, 37, 40.
 
@@ -14,7 +14,7 @@ Raise the current book's **%/yr after costs at $2.3k, $10k and $25k** (taxable),
 QQQ/SMH noise leg, conviction trade (shadow). Do not build a new bot.
 
 This round is different from every earlier one: **look outside before testing anything.** Seventeen
-rounds of in-house ideas have produced N = 642 variants and few survivors. The next idea should come
+rounds of in-house ideas have produced N = 669 variants and few survivors. The next idea should come
 from what others have found and published, then be checked against our data and our costs.
 
 ## Step 1: the candidate list (no backtests yet)
@@ -99,7 +99,7 @@ why.
 ## Step 2: test only the best few
 Pick the **top 3-6** candidates. For each one:
 - **Pre-register first:** append a dated amendment to research/drafts/round1_prose.md (source, the
-  variants, pass bars, what gets reported) and commit it BEFORE computing any result. Program N = 642;
+  variants, pass bars, what gets reported) and commit it BEFORE computing any result. Program N = 669 (check round1_prose.md for anything later);
   report DSR at the new N.
 - **Select on 2016-23 (or 2021-23 for the night pool), judge once on 2024-26.** Report both halves. For
   a Hugging Face model, judge only on data after its release/cutoff.
