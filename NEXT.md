@@ -78,6 +78,8 @@ and state, and does not touch the live book.
   imbalance feed is not worth buying for the night leg. study_bd_closing_imbalance.md.
 - **BE (skip IBS entries indicated to gap up at 09:28): DEAD.** Gap-up entries earn as much or more (2024-26:
   +51bp at ≥ 0.5%, +84bp at ≥ 1%); skipping costs −1.9..−2.0pp (t −1.5). study_be_ibs_open_gap.md.
+- **BF (night picks that LULD-halted that day; lab's idea): DEAD — too rare.** 0.6% of picks halt; down-halted
+  picks −86 / −43bp (n 9 / 25) but dropping them is +0.6pp, t 0.5. study_bf_halted_picks.md.
 
 ---
 
@@ -874,6 +876,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Backtesting an LLM news judge on past picks (Round 25 BC) | **invalid by construction** | the model (OpenCode Go deepseek-v4-flash) knows events through 2025-10 and hallucinated a control; past verdicts can carry outcome memory. Test LLM signals forward only |
 | Night leg: closing-auction imbalance at 15:50 as tilt or buy-imbalance filter (Round 26 BD, Databento) | **dead** | side buckets flip halves (sell +27.5 -> −4.8bp); tilt t 0.6, shuffle 62%; filter = lost exposure (shuffle 60%). Do not buy a live imbalance feed for this leg |
 | IBS leg: skip entries indicated (09:28 opening imbalance) to gap up ≥ 0.5% / 1% (Round 27 BE) | **dead** | gap-up entries earn as much or more (2024-26 +51 / +84bp); skipping −1.9..−2.0pp, t −1.5 |
+| Night leg: drop / halve picks that LULD-halted that day (Round 28 BF) | **dead (too rare)** | 0.6% of picks halt; +0.6pp, t 0.5, shuffle 80%; ~9 halted picks a year |
 
 ## Ideas not yet tested
 
