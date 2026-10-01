@@ -3,10 +3,9 @@
 Short, current, and the first thing to read when picking this up again.
 Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
-> **Standing note (2026-09-29): small balances are temporary.** Live sizes (~$2.3k taxable,
-> Roth $1-3k) are the testing phase; large sums follow once the bot is validated, and the
-> Roth receives a guaranteed **$7,500/yr**. Judge edges at $25k / $100k / $500k too, with
-> capacity checks, not only at today's balance. (Also in CLAUDE.md.)
+> **Standing note (2026-09-30, replaces 09-29): % return at small balances first.** Rank ideas by
+> %/yr at $2-25k (taxable ~$2.3k, Roth $1-3k + $7.5k/yr). Large sizes ($100k/$500k) are one
+> capacity line, not a ranking criterion. (Also in CLAUDE.md.)
 
 ---
 

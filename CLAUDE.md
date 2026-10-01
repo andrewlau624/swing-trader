@@ -1,21 +1,23 @@
 # Standing context for Claude (read before any sizing, ROI or "is it worth it" call)
 
-## Account sizes are temporary — judge ideas at the capital that is coming
-- Today's live balances (Schwab taxable ~$2.3k as of 2026-09; Roth $1-3k) are a
-  **testing phase**, not the plan. Once live testing validates the bot, **large sums
-  will be deployed**. Never dismiss or rank an edge by its $/yr at today's balance.
-- Report every money estimate at several sizes: today's, **$25k, $100k and $500k**.
-  At the large sizes, check capacity: % of ADV per name, market impact, auction
-  size. An edge that lives only in thin names (the night leg's cheap small caps)
-  can stop working as capital grows, so say where it breaks. Known (Study V): the night
-  leg's income peaks by ~$250k of equity at best and must be capped in dollars; growth
-  goes to the scalable legs (IBS ETFs, QQQ/SMH noise, MNQ past ~$200k).
+## Priority: % return on the money that exists now (user, 2026-09-30)
+- The user cares most about **more return on lower money**: today's balances (Schwab taxable
+  ~$2.3k as of 2026-09; Roth $1-3k) and the next few years of growth (to ~$25k). Rank ideas
+  by **%/yr at $2-25k** after costs, whole shares and margin rules. An edge that only pays
+  at $100k+ (MNQ needs ~$29k for one contract; capacity fixes) ranks below anything that
+  pays now, however large it gets later.
+- Report money at **$2.3k, $10k and $25k** first. Add $100k / $500k as one line for
+  capacity: say where the edge breaks (Study V: the night leg peaks by ~$250k), but do not
+  let large-size scalability decide a ranking.
+- Small size is an advantage to use: thin names, auctions and odd lots have no capacity
+  limit at $2-25k. Whole-share rounding and the $2,000 margin / intraday minimums are the
+  real small-account constraints; model them.
 - Roth IRA: **$7,500/yr of new contributions is guaranteed, every year**. Model the
   Roth as a growing account (+$7.5k/yr, compounding tax-free), not a static
   $1-3k. Roth rules still apply: no shorting, limited margin, no intraday margin
   buying power.
-- "Deposits beat alpha at $2k" is true today and is not an argument against
-  research: the research is for the account this becomes.
+- "Deposits beat alpha at $2k" is true in dollars and is not an argument against
+  research: %/yr compounds on every deposit.
 
 ## Sessions (23/5 trading from 2026-12-06)
 - The book trades only the official 09:30 / 16:00 auctions and the regular session. Take session
