@@ -1065,3 +1065,47 @@ stress (5bp): stats, both halves, NW t vs BIL, sign-flip placebo, mc_tax P(DD30/
 $2.3k/$10k/$25k. Same for the taxable V7 book (B.Sim.replay) at the same costs. No new variant; a
 sensitivity on registered variants. If IBS+night beats IBS-only at <= 5bp in both halves, the
 cash-IRA spec becomes IBS .5 + night .5 (not IBS-only) with the cost level named as the gate.
+
+
+## Amendment — Round 18: two ideas from a quant Discord (MemLabs server) — Studies AS, AT (pre-register; 6 variants, N 669 -> 675)
+
+`date`: Wed Sep 30 23:54:33 PDT 2026. Source: chat logs the user pasted. Most ideas there are already
+in NEXT.md's do-not-redo table (order-book / auction imbalance: data; decay monitors / CUSUM de-risk:
+add. 37; regime & 200dma gates; inverse-vol name sizing; ML/XGBoost: Study E; parameter
+sensitivity / DSR). Two are concrete and untested here. Nothing below computed.
+
+### Study AS — allocate the overnight budget between legs by trailing metrics ("softmax of metrics")
+MemLabs: "pass your metrics as a vector into the softmax function and that gives a weight
+allocation"; sxssion: allocate by vol or expectancy. The shipped book splits the overnight budget
+IBS .5 / night .5, fixed. Each variant keeps night_w + ibs_w = 1.0 (no added leverage, cash-IRA
+compatible), clips each weight to [0.2, 0.8], and leaves the noise leg unchanged. Signals use each
+leg's per-unit daily return (fractional $100k replay, IBS unit includes its idle BIL), lagged 2
+sessions (an IBS signal on d-2 is realised at open d; nothing later is known at d's decisions).
+- AS1 softmax of trailing 63-session annualised Sharpe, temperature 1.
+- AS2 inverse trailing 63-session vol (risk parity between the two legs).
+- AS3 softmax of trailing 252-session annualised Sharpe, temperature 1.
+Books: V7 (night .5 + IBS .5 + QQQ/SMH noise cap .75, live tilt, weekend x.5, no conviction) and
+IBS+night with noise off (the cash-IRA mix, approximated in B.Sim: no GFV timing), fixed capital
+$2.3k / $10k / $25k, whole shares. Night cost: 5bp flat round trip (the brief's measured x2, Study
+AQ) and tier_hi as the stress. Window 2021-02..2026-09 (the honest night pool); no 2016-20 holdout,
+so the verdict caps at SHADOW.
+
+### Study AT — vol-contraction and trend-slope conditioning for the IBS (mean-reversion) leg
+Whiskey: filter "false mean-reversion signals" when short-term vol is regressing toward the
+medium-term regime (20-bar vs 100-bar), and/or take MR trades only when a regression slope agrees.
+Per IBS pick s on signal day d (d's close; known before the d+1 open buy):
+VR = stdev of s's log close returns over the last 10 sessions / over the last 60 sessions.
+- AT1 skip the pick if VR < 0.8 (vol contracting).
+- AT2 skip the pick if VR > 1.25 (vol expanding) — the opposite sign, registered so a one-sided
+  look can't pass by choosing the sign after the fact.
+- AT3 skip the pick unless the OLS slope of s's log close over the last 50 sessions is > 0.
+Skipped picks leave their slice of the IBS half in BIL (the shipped idle rule).
+Holdout: the IBS leg alone exists 2016-01..2020-12; report per-trade mean gross (open->open, 1bp
+side) of kept vs skipped picks in 2016-20, 2021-23, 2024-26. Books as Study AS, night 5bp and tier_hi.
+
+### Pass bar (both studies, SHADOW at most)
+At the stressed cost (tier_hi) and at 5bp: book increment > 0 in both halves (2021-23, 2024-26) at
+every size; NW t (5 lags) of the daily increment >= 2.0; sign-flip placebo of the daily increment
+>= 95th pct (1,000 draws); max DD not worse by > 2pp. AT also needs the kept-minus-skipped per-trade
+gap to have the passing sign in 2016-20. DSR reported at N 675. A variant that fails any clause is
+DEAD.
