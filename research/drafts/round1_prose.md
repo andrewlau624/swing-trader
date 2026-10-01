@@ -1670,3 +1670,13 @@ Heston & Sadka (2008); Keloharju, Linnainmaa & Nyberg (2016). grep: untested her
   close, rebalanced monthly. Excess vs the equal-weight universe.
 - Test 2021-01 .. 2026-09; halves at 2024-01. Costs 10/20bp per side, full turnover.
 - Pass: 2x excess > 0 both halves; t >= 2; >= 95th pct of a random-20 placebo; without the 5 best months > 0.
+
+
+## Amendment — Lab Round 35, Study Lab-BK: short both legs of a 3x LETF pair (volatility drag), weekly rebalanced (pre-register; 2 variants, program N 724 -> 726)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Plan (part of this registration): `daytrade/plans/letf_decay.md`.
+grep: untested here.
+- Lab-BK1 TQQQ+SQQQ; Lab-BK2 UPRO+SPXU. Short 0.5E each, rebalance at each week's last close (MOC). Adjusted SIP daily,
+  2016-01 .. 2026-09. No short rebate.
+- Costs 1x: 5bp/side + borrow 2%/4% (bull/bear); 2x: 10bp/side + 5%/10%.
+- Pass: 2x weekly net > 0 both halves (2016-20 / 2021-26); t >= 2; without the best 5 weeks > 0; max DD (1x) > -40%.
+  Reference: QQQ+PSQ shorted the same way.

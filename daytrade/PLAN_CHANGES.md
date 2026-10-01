@@ -27,3 +27,4 @@ adds to the program N. Results of the old variant are never deleted.
 | 2026-10-01 | event_drift | created (Study Lab-BH1 hold 20d, Lab-BH2 hold 5d) | multi-day drift after big announcement-day moves; costs paid once | program N 719 -> 721 |
 | 2026-10-01 | event_drift | Lab-BH DEAD long (20d excess −185bp, every year); new variant Lab-BI: short + SPY hedge, judged on unseen 2017-2021 | the drift is a reversal in 2022-26 | program N 721 -> 723 |
 | 2026-10-01 | seasonality | created (Study Lab-BJ: same-calendar-month seasonality, top 20 of 500, monthly) | long-documented multi-year anomaly, small-account and Roth friendly | program N 723 -> 724 |
+| 2026-10-01 | letf_decay | created (Study Lab-BK1 TQQQ+SQQQ, Lab-BK2 UPRO+SPXU short pairs) | mechanical volatility-drag harvest, untested here | program N 724 -> 726 |
