@@ -62,7 +62,8 @@ and state, and does not touch the live book.
 - **BD (closing imbalance at 15:50, Databento): DEAD.** Sell/buy-imbalance buckets flip sign between halves; the
   tilt is +0.3pp (t 0.6, shuffle 62%); dropping buy-imbalance picks is −6pp (lost exposure: shuffle 60%). The
   imbalance feed is not worth buying for the night leg. study_bd_closing_imbalance.md.
-- BE (IBS entry vs 09:28 indicative gap, N 705) pre-registered; data pull running (~$1).
+- **BE (skip IBS entries indicated to gap up at 09:28): DEAD.** Gap-up entries earn as much or more (2024-26:
+  +51bp at ≥ 0.5%, +84bp at ≥ 1%); skipping costs −1.9..−2.0pp (t −1.5). study_be_ibs_open_gap.md.
 
 ---
 
@@ -855,6 +856,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Roth: buy large caps the night before their ex-dividend date with idle cash (Round 22 AZ) | **dead** | drop ratio 0.90-0.96 = +4..+7bp/event vs SPY, about one round trip; book −0.1..−0.8pp at 2.5bp/side, matched placebo 87-90% |
 | Backtesting an LLM news judge on past picks (Round 25 BC) | **invalid by construction** | the model (OpenCode Go deepseek-v4-flash) knows events through 2025-10 and hallucinated a control; past verdicts can carry outcome memory. Test LLM signals forward only |
 | Night leg: closing-auction imbalance at 15:50 as tilt or buy-imbalance filter (Round 26 BD, Databento) | **dead** | side buckets flip halves (sell +27.5 -> −4.8bp); tilt t 0.6, shuffle 62%; filter = lost exposure (shuffle 60%). Do not buy a live imbalance feed for this leg |
+| IBS leg: skip entries indicated (09:28 opening imbalance) to gap up ≥ 0.5% / 1% (Round 27 BE) | **dead** | gap-up entries earn as much or more (2024-26 +51 / +84bp); skipping −1.9..−2.0pp, t −1.5 |
 
 ## Ideas not yet tested
 
