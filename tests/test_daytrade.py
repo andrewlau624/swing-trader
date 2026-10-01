@@ -260,6 +260,39 @@ def test_halt_file_cancels_flattens_and_stops(tmp_path):
     assert "BBB" not in {x["sym"] for x in e.trades}  # strategies are not even called once halted
 
 
+def test_a_late_fill_of_a_cancelled_leg_is_flattened(tmp_path):
+    """Real brokers can fill both legs of a stop/target pair inside one poll."""
+    class Late(SimBroker):
+        def __init__(self):
+            super().__init__(latency_s=1, cost_bp=0)
+            self.ghost = None
+
+        def submit(self, o, qty, now):
+            o.oco = None                                 # a real broker does not cancel the pair for us
+            return super().submit(o, qty, now)
+
+        def cancel(self, oid):
+            o = self.open.get(oid)
+            if o is not None and o.kind == "limit" and self.ghost is None:
+                self.ghost = (o, self.qty[oid])          # pretend the cancel lost the race
+            super().cancel(oid)
+
+        def on_event(self, ev):
+            out = super().on_event(ev)
+            if self.ghost and isinstance(ev, Bar) and ev.sym == self.ghost[0].sym:
+                o, q = self.ghost
+                self.ghost = False
+                out.append(self._fill(o, q, o.limit, ev.ts, "late"))
+            return out
+
+    s = Scripted([(t("10:00"), lambda: Order("AAA", "buy", ref_price=100.0, stop=99.0, target=105.0))])
+    path = lambda i: 100.0 if i < 40 else 98.0  # noqa: E731
+    e = engine([s], tmp_path, broker=Late()).run(minute_bars("AAA", "09:30", "11:00", path=path))
+    assert any(x["kind"] == "late fill after cancel" for x in e.events)
+    assert not e.positions                          # the accidental short was bought back
+    assert [x["exit_reason"] for x in e.trades][-1] == "late fill after cancel"
+
+
 # ------------------------------------------------------------------ mode independence
 FORBIDDEN = {"mode", "paper", "live", "replay", "broker", "SimBroker", "AlpacaLabPaper", "SchwabLabLive",
              "os", "environ", "getenv", "account_number", "HALT"}

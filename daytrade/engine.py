@@ -209,8 +209,10 @@ class Engine:
             self._place_exits(p, o)
         else:                                            # exit (full)
             self._close(p, f, o)
-        if late and (self.halted or self.flattened or self.risk.stopped_for_day):
-            # a real broker filled an order the engine had cancelled: close it at once
+        if late:
+            # a real broker filled an order the engine had cancelled (e.g. both legs of a stop/target
+            # pair inside one poll): whatever it opened is unintended, so close it at once
+            self._rule("late fill after cancel", f"{f.sym} {f.side} {f.qty} @ {f.price:.2f}", o.strategy)
             self.flatten("late fill after cancel")
             return
         for s in self.strategies:
