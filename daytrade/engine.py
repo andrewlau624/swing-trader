@@ -159,8 +159,9 @@ class Engine:
                 try:
                     reserved = [(x.sym, (x.qty or 0) * (x.ref_price or 0)) for x in self.pending.values()
                                 if x.entry]
-                    qty = self.risk.size_entry(o, self.now, self.session, self.positions, self.marks,
-                                               reserved)
+                    # a position with a full exit already sent is closing: an entry now is a reversal
+                    live = {s_: p for s_, p in self.positions.items() if not self._exit_pending(s_)}
+                    qty = self.risk.size_entry(o, self.now, self.session, live, self.marks, reserved)
                 except Rejected as r:
                     self._rule("rejected", f"{o.sym} {o.side}: {r}", strategy=o.strategy)
                     continue

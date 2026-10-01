@@ -309,7 +309,7 @@ def test_strategy_code_cannot_see_the_mode():
         mods = {n.module or "" for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)}
         assert not (names & FORBIDDEN), (f.name, names & FORBIDDEN)
         assert all(m in ("", "base", "events", "__future__", "math", "pathlib", "gap_vwap_reclaim",
-                                 "open_imbalance", "orb_in_play")
+                                 "open_imbalance", "orb_in_play", "vwap_trend")
                    or m.endswith(("events", "base")) for m in mods), (f.name, mods)
 
 
@@ -566,3 +566,23 @@ def test_pending_entries_hold_slots(tmp_path):
     e = engine([OrbInPlay()], tmp_path, equity=100_000, day_info=info).run(bars)
     assert len(e.trades) == 3
     assert sum("max 3 positions" in x["detail"] for x in e.events) == 3
+
+
+# ------------------------------------------------------------------ VWAP trend
+def test_vwap_trend_reverses_on_a_cross_and_is_flat_at_the_close(tmp_path):
+    from daytrade.strategies.vwap_trend import VwapTrend
+    path = lambda i: 100 + 0.05 * i if i < 60 else 103 - 0.05 * (i - 60)  # noqa: E731
+    e = engine([VwapTrend()], tmp_path, equity=100_000).run(minute_bars("QQQ", "09:30", "16:00", path=path))
+    sides = [x["side"] for x in e.trades]
+    assert sides[:2] == ["long", "short"] and not e.positions
+    assert e.trades[0]["exit_reason"] == "VWAP cross" and e.trades[-1]["exit_reason"] == "flat by close"
+    assert not [x for x in e.events if x["kind"] == "rejected" and "against" in x["detail"]]
+
+
+def test_vwap_trend_trades_tqqq_on_qqq_signal(tmp_path):
+    from daytrade.strategies.vwap_trend import VwapTrend
+    path = lambda i: 100 + 0.05 * i  # noqa: E731
+    bars = sorted(minute_bars("QQQ", "09:30", "11:00", path=path) + minute_bars("TQQQ", "09:30", "11:00", 50.0),
+                  key=lambda b: (b.ts, b.sym))
+    e = engine([VwapTrend(trade="TQQQ")], tmp_path, equity=100_000).run(bars)
+    assert {x["sym"] for x in e.trades} == {"TQQQ"} and e.trades[0]["side"] == "long"
