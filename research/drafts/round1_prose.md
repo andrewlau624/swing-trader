@@ -1101,3 +1101,18 @@ costs and drop conditions are in the plans, which are part of this registration:
 - **AS: DEAD.** 1x/1s: −18.9bp/trade (n 3,308, t −3.2); 2x: H1 −28.8, H2 −41.5; placebo 59th pct; gross
   −1.7bp. Fails every bar. study_as_gap_vwap.md. N 670.
 - **AT: not yet looked at** (needs 40 unflagged recorded sessions). N 671 counted at registration.
+
+
+## Amendment — Round 19, Study AU: 5-minute opening-range breakout on Stocks in Play (pre-register; 2 variants, N 671 -> 673)
+
+`date`: Thu Oct 1 01:05 PDT 2026. Source: Zarattini, Barbon & Aziz (2024), SSRN 4729284 (Sharpe 2.81 in 2016-23,
+commission-only costs, no held-out period). Full rules: `daytrade/plans/orb_in_play.md` (part of this
+registration). Nothing below computed; no data fetched.
+- Universe: common stock, 09:30 open > $5, 14d avg volume >= 1M, ATR14 > $0.50 (prior sessions). RVOL = 09:30-09:34
+  SIP volume / its 14-session average (>= 10 obs); RVOL >= 1, top 20. Direction = the 5-minute candle; stop entry at
+  the OR high/low from 09:35; stop 10% ATR14; flat 15:55; no target.
+- AU1 long+short (the paper); AU2 long only.
+- Costs 5bp/side (1x), 10bp/side (2x). SIP minutes 2022-01-03 .. 2026-09-30, halves split 2024-06-01 (H2 is
+  out-of-sample for the paper).
+- Pass (per variant): 2x net > 0 in both halves; day-clustered t >= 2.0 at 1x; >= 95th pct of a coin-flip-direction
+  placebo (1,000 draws). Otherwise dead; nothing re-tuned.
