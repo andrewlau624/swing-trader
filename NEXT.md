@@ -9,7 +9,7 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
-## Day-trading lab (2026-10-01, Lab Rounds 18-38): 25 studies (intraday, events, multi-day, market-neutral, vol premium, cross-section), four momentum-family PASSES on 1963-2015 (BT, BW, BY, BZ) that all lag the index in 2016-26; paper shadows only; recorder LIVE (program N 742)
+## Day-trading lab (2026-10-01, Lab Rounds 18-38): 25 studies (intraday, events, multi-day, market-neutral, vol premium, cross-section), four momentum-family PASSES on 1963-2015 (BT, BW, BY, BZ) that all lag the index in 2016-26; paper shadows only; recorder LIVE (program N 744)
 
 **Overnight bottom line (for the user, 2026-10-01 morning).**
 - Every intraday idea tested at real costs is dead. The recurring pattern:
@@ -915,6 +915,8 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Top-decile momentum only while the market > 10-month SMA, else T-bills, 1963-2015 (Lab-BY, lab) | **PASS (registered), recent era poor** | 13.9%/yr, Sharpe 0.84, max DD −29% vs market 10.1% / 0.71 / −50%; but 2016-26 7.4% vs 15.0%. Shadow records the filter; no live change |
 | Industry momentum + 10-month market filter, 1963-2015 (Lab-BZ, lab) | **PASS (registered), recent era poor** | 14.6%/yr Sharpe 0.91 max DD −28% vs market 10.1%/0.71/−50%; but 2016-26 5.6% vs 15.0%. Momentum family: 4 long-history passes, all lag the index since 2016: do not deploy on the 60-year record |
 | 3x daily-levered market with a 200-day exit (Gayed & Bilello), French daily 1963-2015 (Lab-CA, lab) | **dead (risk bars)** | 17.4%/yr vs 10.0% but Sharpe ≈ market's (fails 1990-2015), max DD −75%, worst 12m −55%; real UPRO 2016-26 24.5% vs SPY 15.0% with −51% DD: leverage, not edge |
+| Equity put/call (10d mean) high -> higher 20-day market returns, 2006-19 (Lab-CB, lab) | **dead** | right sign both halves (+49/+58bp) but NW t 0.9 |
+| Cboe SKEW high -> lower 20-day market returns, 1990-2026 (Lab-CC, lab) | **PASS (predictive), sizing input only** | −30bp (1990-2007) / −110bp (2008-26), NW t −2.34; clustered signal, marginal at N 744; handed to the main program as a sizing candidate |
 | Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
 | IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
 | IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |
