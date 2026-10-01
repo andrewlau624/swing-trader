@@ -309,7 +309,7 @@ def test_strategy_code_cannot_see_the_mode():
         mods = {n.module or "" for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)}
         assert not (names & FORBIDDEN), (f.name, names & FORBIDDEN)
         assert all(m in ("", "base", "events", "__future__", "math", "pathlib", "gap_vwap_reclaim",
-                                 "open_imbalance", "orb_in_play", "vwap_trend", "late_mover")
+                                 "open_imbalance", "orb_in_play", "vwap_trend", "late_mover", "halt_resume")
                    or m.endswith(("events", "base")) for m in mods), (f.name, mods)
 
 
@@ -598,3 +598,19 @@ def test_late_mover_buys_big_up_movers_at_1500_and_exits_1555(tmp_path):
     assert [x["sym"] for x in e.trades] == ["UPX"]
     assert dt.datetime.fromisoformat(e.trades[0]["entry_ts"]) == t("15:00")
     assert e.trades[0]["exit_reason"] == "flat by close"
+
+
+def test_halt_resume_buys_the_reopening_after_a_halt_up(tmp_path):
+    from daytrade.strategies.halt_resume import HaltResume
+    path = lambda i: 20.0 if i < 30 else 20.0 * (1 + 0.012 * (i - 29))  # noqa: E731  (+6% in 5 min by 10:05)
+    pre = minute_bars("HLT", "09:30", "10:05", path=path)
+    post = minute_bars("HLT", "10:10", "11:00", 22.0)                     # silent 10:05-10:09: halted
+    clocks = [Clock(t("09:30") + dt.timedelta(minutes=m)) for m in range(0, 91)]
+    evs = sorted(pre + post + clocks, key=lambda e: (e.ts, 0 if isinstance(e, Bar) else 1))
+    e = engine([HaltResume("up")], tmp_path, equity=100_000).run(evs)
+    assert len(e.trades) == 1
+    tr = e.trades[0]
+    assert dt.datetime.fromisoformat(tr["entry_ts"]) == t("10:10") and tr["entry_px"] == pytest.approx(22.0)
+    assert tr["exit_reason"] == "30-minute exit"
+    e2 = engine([HaltResume("down")], tmp_path, equity=100_000).run(evs)
+    assert not e2.trades

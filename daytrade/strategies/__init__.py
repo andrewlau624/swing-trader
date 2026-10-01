@@ -4,5 +4,6 @@ from .open_imbalance import OpenImbalance
 from .orb_in_play import OrbInPlay
 from .vwap_trend import VwapTrend
 from .late_mover import LateMover
+from .halt_resume import HaltResume
 
-REGISTRY = {s.name: s for s in (GapVwapReclaim, OpenImbalance, OrbInPlay, VwapTrend, LateMover)}
+REGISTRY = {s.name: s for s in (GapVwapReclaim, OpenImbalance, OrbInPlay, VwapTrend, LateMover, HaltResume)}
