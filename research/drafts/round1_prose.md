@@ -1555,3 +1555,15 @@ Data: Lab-AZ's NOII files (already paid). No return computed.
 - **Judged ONLY on 2024-06-03 .. 2026-09-30 (H2), which the rule never saw.** Pass: H2 net > 0 at 2x; day-clustered t
   >= 2 at 1x on H2; >= 95th pct of a random-side placebo on H2; H2 mean without the top 20 > 0. H1 is reported for
   reference only (in-sample).
+
+
+## Amendment — Lab Round 28, Study Lab-BD: QQQ's early closing imbalance, every day, H2 holdout (1 variant, program N 711 -> 712)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Designed on H1 only.
+- In H1, QQQ (median spread 0.31bp) moves from the 15:54:31 mid to the official close: by quintile of r = signed
+  imbalance / paired at 15:54:30, −2.4 / +1.9 / +1.8 / +4.1bp (TQQQ noisy, spread 2.7bp: excluded).
+- Rule: QQQ only. Long if r >= **0.2585** (the H1 80th pct); short if r <= **-0.2824** (the H1 20th pct). Enter at the
+  NBBO at 15:54:31 (Lab-AZ's timing); exit market-on-close (official close). The same stated flat-by-15:55 exception
+  (the 16:00 cross).
+- Costs: 1x = NBBO + 0.5bp in, 0.5bp out; 2x = NBBO + 1bp + half-spread again in, 1bp out.
+- **Judged on H2 only (2024-06-03 .. 2026-09-30):** H2 net > 0 at 2x; t >= 2 at 1x (days are the unit: one trade a day
+  at most); >= 95th pct of a random-side placebo; without the top 20 > 0. Long and short legs are reported separately.
