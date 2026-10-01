@@ -9,7 +9,7 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
-## Round 19 (2026-10-01): outside-first scan — AU3 tug-of-war tilt SHADOW, AW restates the night leg, AV dead (N 675 -> 680)
+## Round 19 (2026-10-01): outside-first scan — AU3 tug-of-war tilt SHADOW, AW restates the night leg, AV dead (N 677 -> 682, counting the lab's Round 18)
 
 Brief: `research/drafts/prompt_max_edge.md`. 44 sourced candidates (`max_edge_candidates.md`); summary
 and ranked table `study_round19_summary.md`. Pre-registration dc53fcb (branch `round19-max-edge`).

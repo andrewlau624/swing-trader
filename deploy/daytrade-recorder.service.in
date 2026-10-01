@@ -1,0 +1,20 @@
+# Installed by `make daytrade-persist`. The day-trading lab's market-data recorder.
+# Its own unit, separate from the live bot's timers; it places no orders and reads no account.
+[Unit]
+Description=day-trading lab recorder (Schwab level-one, regular session)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=-__APP_DIR__/.env
+ExecStart=__APP_DIR__/.venv/bin/python -u scripts/daytrade.py record
+# The server has 1 GB of RAM and the live bot must always win: cap the recorder.
+MemoryMax=350M
+CPUQuota=50%
+Nice=10
+# Starts 09:20 ET, waits for the 09:25 gapper sweep, records to 16:00:30 and exits.
+RuntimeMaxSec=8h
+Restart=on-failure
+RestartSec=20

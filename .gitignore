@@ -15,3 +15,6 @@ research/signals/*.log
 
 # research datasets (SIP bars, minute bars, pickles) - ~3 GB, rebuilt by research/*/fetch_*.py
 data/research/
+
+# day-trading lab recordings (parquet, ~tens of MB/day)
+data/daytrade/

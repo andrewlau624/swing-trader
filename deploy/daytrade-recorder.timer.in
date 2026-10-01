@@ -1,0 +1,12 @@
+[Unit]
+Description=day-trading lab recorder schedule
+
+[Timer]
+# 09:20 ET every weekday; the recorder itself exits on holidays (regular-hours calendar).
+OnCalendar=Mon..Fri *-*-* 09:20:00 America/New_York
+Persistent=false
+AccuracySec=15s
+Unit=daytrade-recorder.service
+
+[Install]
+WantedBy=timers.target
