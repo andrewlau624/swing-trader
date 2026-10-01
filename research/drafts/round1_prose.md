@@ -1736,3 +1736,12 @@ grep: 52w-high only as a swing filter, a night tilt and SPY timing (dead); low-v
 - **Lab-BQ 1-month reversal** (Jegadeesh 1990): score = −return of month m-1; long the 20 biggest losers.
 - Pass, each: 2x excess > 0 both halves; t >= 2 (monthly); >= 95th pct of a random-20 placebo; without the best 5 months
   > 0. For Lab-BP the Sharpe of the long book must also beat the universe's in both halves.
+
+
+## Amendment — Lab Round 39 result: Lab-BO / BP / BQ all DEAD (study_lab_bo_bp_bq_cross_section.md). Lab Round 40, Study Lab-BR: 12-1 momentum in the same frame (pre-register; 1 variant, program N 732 -> 733)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Jegadeesh & Titman (1993). grep: NEXT "Momentum sleeve at 25%:
+promising, unvalidated"; theme/breakout/top-1% momentum dead (add. 28); the IBS leg uses ETF momentum. The plain
+cross-sectional stock version is untested.
+- Score = close of month m-2 / close of month m-13 - 1 (skip the last month); long the top 20 of the 500, equal weight,
+  monthly. Lab-BJ's frame, costs and test months (2017-01 .. 2026-09; halves 2017-21 / 2022-26).
+- Pass: 2x excess > 0 both halves; t >= 2; >= 95th pct of the random-20 placebo; without the best 5 months > 0.
