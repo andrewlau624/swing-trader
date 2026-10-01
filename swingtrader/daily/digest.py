@@ -22,12 +22,14 @@ import numpy as np
 from . import signals as sg
 
 # ---------------------------------------------------------------- planning assumptions
-# Realistic (haircut) yearly rates, pre-tax, from study_round19_summary + the session's guidance:
-# base = the live book as it runs today; each lever = its probability-weighted gain if switched on.
+# PLAN = the program's standard haircut, "edge-halves" (half of every leg's mean profit removed, costs and
+# margin interest kept), from ONE simulation of the live sizing map at 2.5bp/side, fixed $10k, official-cross
+# night returns (research/sim/everything_on.py; study_everything_on.md). Each lever = its EH step, added in the
+# order the gates open (conviction ships with the 15% name cap in the moderate10c profile).
 PLAN = {
-    "taxable": {"base": 0.17, "levers": {"conviction": 0.014, "intraday_x4": 0.005, "overnight_1.3x": 0.018,
-                                         "tow_tilt": 0.006, "llm_judge": 0.005, "quote_imbalance": 0.003}},
-    "roth":    {"base": 0.15, "levers": {"tow_tilt": 0.006, "llm_judge": 0.005, "quote_imbalance": 0.003}},
+    "taxable": {"base": 0.178, "levers": {"tow_tilt": 0.014, "name_cap": 0.034, "conviction": 0.031,
+                                         "intraday_x4": 0.016, "overnight_1.3x": 0.038}},
+    "roth":    {"base": 0.100, "levers": {"tow_tilt": 0.013, "name_cap": 0.032}},
 }
 ROTH_DEPOSIT_YR = 7500.0
 TAXABLE_MONTHLY_DEFAULT = 1000.0       # the user's plan: $1k a month into the brokerage account
@@ -39,12 +41,12 @@ INDEX_DIV_DRAG = 0.002                  # taxable: ~1.3% dividends taxed each ye
 LT_TAX = 0.20                           # long-term gains when the index fund is sold (federal 15% + state)
 # What the research backtest says (auction-corrected, Study AW; 2.5bp/side stress, fixed capital ~$2-25k):
 # V7 brokerage book ~31%/yr, Roth cash IBS+night ~20%/yr; daily vol from the same runs (Sharpe ~1.95 / ~1.5).
-BACKTEST = {"taxable": {"rate": 0.39, "sd_day": 0.012, "levers": 0.37},
-            "roth": {"rate": 0.20, "sd_day": 0.0085, "levers": 0.03}}
+BACKTEST = {"taxable": {"rate": 0.394, "sd_day": 0.012, "levers": 0.372},
+            "roth": {"rate": 0.209, "sd_day": 0.0085, "levers": 0.104}}
 # Brokerage: ONE simulation of the live sizing map (research/sim/everything_on.py, auction returns, 2.5bp/side,
 # fixed $2-25k): live today 38-40%/yr (Sharpe 2.0); tug-of-war + 15% cap + conviction + 4x intraday + 1.3x
 # overnight 75-77% (Sharpe 2.2, maxDD -21%). At tier_hi costs: 22% -> 42%. Roth (cash IRA, no margin):
-# IBS + night 20% (Study AQ/AW), tug-of-war ~+3pp (Study AU3).
+# IBS + night 20.9%, + tug-of-war + 15% cap 31.3% (same script's settings, cash IRA book, $10k).
 # The edge SHRINKS with size (the night leg trades thin names; Study V/Y): rate multiplier by balance,
 # log-interpolated. Brokerage: Study Y book at central impact (31% -> 20% at $100k, 17.8% at $500k,
 # 15.9% at $1M). Roth (IBS + night, night capped near $250k): flat to $250k, then approx.
@@ -62,7 +64,7 @@ def size_mult(kind: str, bal: float) -> float:
             f = (math.log(bal) - math.log(a)) / (math.log(b) - math.log(a))
             return ma + f * (mb - ma)
     return pts[-1][1]
-LEVER_LABEL = {"conviction": "conviction trade", "intraday_x4": "4x intraday margin",
+LEVER_LABEL = {"name_cap": "15% night name cap", "conviction": "conviction trade", "intraday_x4": "4x intraday margin",
                "overnight_1.3x": "overnight 1.3x", "tow_tilt": "tug-of-war tilt",
                "llm_judge": "LLM news judge", "quote_imbalance": "quote imbalance"}
 
@@ -436,7 +438,8 @@ def render(d: dict, charts: bool = True, taxable_monthly: float = 0.0) -> tuple[
             f"<td style='{numc}{'color:' + UP + ';' if v10 == best else ''}'>{money(v10)}</td></tr>"
             for k, (v5, v10) in mk.items())
         B.append(table(["", "In 5 years", "In 10 years"], rr))
-        B.append(p("<b>This bot</b> and <b>Everything on</b> are the conservative plan (about half the backtest); "
+        B.append(p("<b>This bot</b> and <b>Everything on</b> are the conservative plan (the backtest with half of every "
+                   "leg's profit removed); "
                    "<b>Backtest</b> lines are what the research measured. Every bot line slows as the balance grows: "
                    "the edge gets smaller with size.", 13, MUTE, "margin-top:8px"))
         kind = "roth" if n == "roth" else "taxable"
@@ -482,7 +485,7 @@ def render(d: dict, charts: bool = True, taxable_monthly: float = 0.0) -> tuple[
                f"that takes months, not weeks." if inside else
                f"<b>Outside</b> the backtest's normal range {rng}. Worth a look: paste <code>make review</code> to Claude.")
         B.append(p(msg, 14, MUTE, "margin-top:10px"))
-    B.append(p(f"Projections use planning rates, not forecasts: this bot {PLAN['taxable']['base']:.0%} a year "
+    B.append(p(f"Projections use planning rates, not forecasts (plan = backtest with half of each leg's profit removed): this bot {PLAN['taxable']['base']:.0%} a year "
                f"(Roth {PLAN['roth']['base']:.0%}), everything on {PLAN['taxable']['base'] + sum(PLAN['taxable']['levers'].values()):.0%}, "
                f"backtest {BACKTEST['taxable']['rate']:.0%} (Roth {BACKTEST['roth']['rate']:.0%}), backtest everything on "
                f"{BACKTEST['taxable']['rate'] + BACKTEST['taxable']['levers']:.0%} (Roth {BACKTEST['roth']['rate'] + BACKTEST['roth']['levers']:.0%}), "
