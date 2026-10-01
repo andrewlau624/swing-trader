@@ -88,3 +88,24 @@ months far better). It is the best risk profile of the lab, but **in 2016-26 it 
 
 As a small-account bot today it would most likely have lagged a plain index fund. Kept as a PAPER SHADOW signal: the
 stock momentum shadow now records whether the trend filter is on each month.
+
+## Lab-BZ — industry momentum (top 5 of 49) with the trend filter (Lab Round 48): PASS on 1963-2015, poor since 2016
+| period (1x) | sleeve CAGR / Sharpe / max DD / worst 12m | market |
+|---|---|---|
+| **judged 1963-2015** | **14.6% / 0.91 / −28% / −25%** | 10.1% / 0.71 / −50% / −43% |
+| 1963-89 | 13.9% / 0.85 / −28% | 10.7% / 0.73 / −47% |
+| 1990-2015 | 15.2% / 0.97 / −23% | 9.4% / 0.68 / −50% |
+| ref 1927-63 | 10.8% / 0.64 / −50% | 9.0% / 0.49 / −84% |
+| **ref 2016-26** | **5.6% / 0.42 / −25%** | **15.0% / 0.98 / −25%** |
+
+At 2x: 13.6% / 0.85 (judged). **PASS on every bar.** It is the strongest long-run result of the lab, and like Lab-BT and
+Lab-BY it **lagged the market by ~9 points a year in 2016-26**.
+
+## What the momentum results mean for "the most profitable bot"
+- Four long-history passes (BT, BW, BY, BZ) and four failures in the era a bot would trade now (BR t 1.5, BX tied SPY,
+  BY 7.4% vs 15.0%, BZ 5.6% vs 15.0%).
+- The 2016-26 market was led by a few mega caps that a 5-of-49 industry book or a 20-stock momentum book only partly
+  held; the trend filter also whipsawed out in 2018, 2020 and 2022.
+- **Do not deploy on the 60-year record alone.** The recent decade is the relevant regime and it says "index".
+- The paper shadows (stock and industry, with the vol-scale and trend-filter fields) collect forward evidence. Any
+  live use needs a new registration judged on forward shadow months, the $500 gate and the user's approval.

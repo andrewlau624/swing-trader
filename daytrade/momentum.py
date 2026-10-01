@@ -100,7 +100,8 @@ def run_industry(log: Path = INDUSTRY_LOG) -> int:
     nxt = (pd.Period(last, "M") + 1).strftime("%Y-%m")
     if not any(r["hold_month"] == nxt for r in rows):
         rows.append({"decided": dt.date.today().isoformat(), "signal_month": last, "hold_month": nxt,
-                     "picks": industry_picks(C, last), "realised": None, "mode": "paper shadow (no orders)"})
+                     "picks": industry_picks(C, last), "realised": None, "mode": "paper shadow (no orders)",
+                     "trend_filter_on": trend_on(last)})
     log.parent.mkdir(parents=True, exist_ok=True)
     log.write_text("".join(json.dumps(r) + "\n" for r in rows))
     print(f"industry momentum shadow: holding {nxt}: {rows[-1]['picks']}")
