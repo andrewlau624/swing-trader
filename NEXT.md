@@ -30,6 +30,9 @@ and state, and does not touch the live book.
   - **Lab-AY (buy the reopening after a halt, up or down): DEAD.** Both lose ~−130bp gross in 30 minutes (t −4..−5).
     A first "PASS" was a fill-model bug (MISTAKES.md). The post-halt drift is DOWN either way, which points to the
     short side (Lab-BA). study_lab_ay_halts.md.
+  - **Lab-BA (short the reopening after a halt): DEAD, closes the halt family.** +40bp means are a few 40-55%
+    collapses; medians −100..−308bp, negative without the top 20, t ≤ 1.2; on easy-to-borrow names −70bp gross.
+    study_lab_ba_halt_short.md.
   - **Lab-AV (Lab-AT's imbalance on historical SIP ticks, QQQ/SPY): running.** **Lab-AZ (Nasdaq closing-cross
     convergence, Databento ~$69): fetching.**
   - **Lab-AT (opening L1 imbalance): waiting.** First look after 40 unflagged recorded sessions (~early Dec).
@@ -833,6 +836,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | +25% movers at 15:00 held to 15:55, long only (Lab-AX, day-trading lab) | **dead** | gross +6bp/trade, −33.7 at 20bp/side, H2 −53.6; the run-up is done by 15:00 |
 | Buy the reopening after a LULD halt, up or down (Lab-AY, day-trading lab) | **dead** | ~−130bp gross per 30 min either way (t −4..−5); post-halt drift is down; short side = Lab-BA |
+| Short the reopening after a halt (up; ETB-only; down without SSR) (Lab-BA, day-trading lab) | **dead** | a lottery: a few 40-55% collapses in unborrowable names; negative without the top 20; ETB names −70bp gross |
 | Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
 | IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
 | IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |
