@@ -9,7 +9,7 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
-## Day-trading lab (2026-10-01, Lab Rounds 18-38): 25 studies (intraday, events, multi-day, market-neutral, vol premium, cross-section), two registered PASSES on long history (Lab-BT stock momentum, faded since 2000; Lab-BW industry momentum, durable), shadows only; recorder LIVE (program N 738)
+## Day-trading lab (2026-10-01, Lab Rounds 18-38): 25 studies (intraday, events, multi-day, market-neutral, vol premium, cross-section), two registered PASSES on long history (Lab-BT stock momentum, faded since 2000; Lab-BW industry momentum, durable), shadows only; recorder LIVE (program N 739)
 
 **Overnight bottom line (for the user, 2026-10-01 morning).**
 - Every intraday idea tested at real costs is dead. The recurring pattern:
@@ -40,8 +40,9 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 - **Lab-BT: PASS (with caveats).** Long top-decile momentum beat the market by +40bp/month 1963-2015 (t 3.0; 2x
   positive both halves, the second only +4bp), but the excess was about 0 in the 2000s, the 2010s and 2016-26 after
   costs, with crash risk (−50% worst 12 months). A priced risk factor, not a free edge.
-  -> **Built as a PAPER SHADOW**: `make daytrade-momentum` logs the monthly top 20 of 500 by 12-1 momentum (Lab-BR's
-  rule) and their realised return vs the universe. No orders. study_lab_bt_momentum_history.md.
+  -> **Built as PAPER SHADOWS**: `make daytrade-momentum` logs, monthly, the top 20 of 500 stocks by 12-1 momentum
+  (Lab-BR) with Lab-BU's vol-scaled weight, and the top 5 of 20 industry ETFs (Lab-BW passed 1963-2015 in every
+  decade; the ETF version Lab-BX tied SPY in 2017-26). No orders. study_lab_bt_momentum_history.md.
 - **Nothing to switch on.** The live book is unchanged. The next real look is Lab-AT after 40 recorded sessions
   (~early Dec). Expect few signals (Lab-AV).
 
@@ -908,6 +909,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Vol-scaled top-decile momentum, 12% target (Lab-BU, lab) | **dead by bar (useful risk control)** | 1963-89 Sharpe 0.589 vs 0.611 fails "better in both halves"; but the worst 12m −50% -> −25% (1927-63), −31% -> −24% (1963-2015), t 3.3 |
 | Long-term reversal, bottom 60-13 decile vs market, French 1963-2015 (Lab-BV, lab) | **dead** | +28bp/month but t 1.76; 2010s −56bp, 2016-26 −22bp at 2x; worst 12m −41% |
 | Industry momentum, top 5 of French's 49 industries, 1963-2015 (Lab-BW, lab) | **PASS (registered bar)** | +49bp/month t 3.3, 2x +41/+36 both halves, positive every decade incl. the 2000s; weaker since 2010 (+3bp at 2x 2016-26); worst 12m −41% (2009) |
+| Industry-ETF momentum, top 5 of 20 fixed ETFs vs SPY, 2017-26 (Lab-BX, lab) | **dead (shadow kept)** | ties SPY (15.2% vs 15.1%), t 0.3; picks the better ETFs (placebo 97th) but not the index; paper shadow logs it forward |
 | Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
 | IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
 | IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |

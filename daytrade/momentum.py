@@ -17,6 +17,19 @@ from .settings import STATE
 
 TOP, UNIV = 20, 500
 LOG = STATE / "momentum-shadow.jsonl"
+# Lab-BX's fixed industry-ETF list (Lab Round 46): one liquid US ETF per industry; top 5 by 12-1 momentum
+INDUSTRY_ETFS = ["XBI", "XHB", "XRT", "KRE", "KIE", "XME", "XOP", "OIH", "SMH", "IGV", "ITA", "IYT", "XPH", "IHI", "XHS",
+                 "GDX", "IYR", "IYZ", "JETS", "TAN"]
+INDUSTRY_LOG = STATE / "industry-momentum-shadow.jsonl"
+
+
+def industry_picks(C: pd.DataFrame, last: str, etfs=INDUSTRY_ETFS, top: int = 5) -> list:
+    """Top `top` ETFs by 12-1 momentum as of the completed month `last` (Lab-BX's rule)."""
+    k = C.index.get_loc(last)
+    if k < 12:
+        return []
+    score = (C.iloc[k - 1] / C.iloc[k - 12] - 1)[[e for e in etfs if e in C.columns]].dropna()
+    return list(score.sort_values(ascending=False).index[:top])
 
 
 def picks(C: pd.DataFrame, V: pd.DataFrame, RAW: pd.DataFrame, last: str, top: int = TOP, univ: int = UNIV) -> tuple[list, list]:
@@ -59,6 +72,28 @@ def _monthly(symbols, adjustment, months_back=15):
     x = pd.concat(parts)
     x["month"] = x.timestamp.dt.tz_convert("America/New_York").dt.strftime("%Y-%m")
     return x
+
+
+def run_industry(log: Path = INDUSTRY_LOG) -> int:
+    """Industry-ETF momentum PAPER SHADOW (Lab-BW passed 1963-2015; Lab-BX's ETF version tied SPY in 2017-26)."""
+    adj = _monthly(INDUSTRY_ETFS + ["SPY"], "all")
+    C = adj.pivot_table(index="month", columns="symbol", values="close")
+    this = dt.date.today().strftime("%Y-%m")
+    last = [m for m in C.index if m < this][-1]
+    R = C / C.shift(1) - 1
+    rows = [json.loads(x) for x in log.read_text().splitlines() if x.strip()] if log.exists() else []
+    for r in rows:
+        if r.get("realised") is None and r["hold_month"] in R.index and r["hold_month"] < this:
+            m = r["hold_month"]
+            r["realised"] = {"picks": float(R.loc[m, r["picks"]].mean()), "spy": float(R.loc[m, "SPY"])}
+    nxt = (pd.Period(last, "M") + 1).strftime("%Y-%m")
+    if not any(r["hold_month"] == nxt for r in rows):
+        rows.append({"decided": dt.date.today().isoformat(), "signal_month": last, "hold_month": nxt,
+                     "picks": industry_picks(C, last), "realised": None, "mode": "paper shadow (no orders)"})
+    log.parent.mkdir(parents=True, exist_ok=True)
+    log.write_text("".join(json.dumps(r) + "\n" for r in rows))
+    print(f"industry momentum shadow: holding {nxt}: {rows[-1]['picks']}")
+    return 0
 
 
 def run(log: Path = LOG) -> int:

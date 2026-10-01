@@ -364,6 +364,7 @@ daytrade-table:
 
 daytrade-momentum:
 	@$(PY) scripts/daytrade.py momentum
+	@$(PY) scripts/daytrade.py momentum --industry
 
 news-smoke:   ## one live LLM news verdict for SYM (Round 23 BA): make news-smoke SYM=XYZ
 	@test -n "$(SYM)" || { echo "usage: make news-smoke SYM=TICKER"; exit 1; }

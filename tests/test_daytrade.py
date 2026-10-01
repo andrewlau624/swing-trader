@@ -819,3 +819,15 @@ def test_live_broker_refuses_the_live_books_account_and_short_entries(monkeypatc
     b = SchwabLabLive(500, client=FakeSchwabLab(), poll_s=0)
     with pytest.raises(guard.AccountGuardError, match="long-only"):
         b.submit(Order("QQQ", "sell", ref_price=100.0, stop=101.0), 1, t("10:00"))
+
+
+def test_industry_momentum_shadow_ranks_the_fixed_list():
+    import numpy as np
+    import pandas as pd
+    from daytrade.momentum import industry_picks
+    months = [f"2025-{m:02d}" for m in range(1, 13)] + ["2026-01", "2026-02"]
+    C = pd.DataFrame(100.0, index=months, columns=["XBI", "SMH", "KRE", "GDX", "NOTALIST"])
+    C.loc[months[1]:months[-2], "SMH"] = np.linspace(100, 180, 12)
+    C.loc[months[1]:months[-2], "GDX"] = np.linspace(100, 140, 12)
+    C.loc[months[1]:months[-2], "NOTALIST"] = np.linspace(100, 900, 12)
+    assert industry_picks(C, months[-1], top=2) == ["SMH", "GDX"]

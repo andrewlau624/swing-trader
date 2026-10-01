@@ -60,3 +60,12 @@ By decade (1x): 1920s +116, 1930s +46, 1940s +68, 1950s +24, 1960s +79, 1970s +6
 **PASS.** Unlike stock momentum (Lab-BT), industry momentum stayed positive in every decade, including the 2000s. It
 is weaker since 2010 (+6 / +27bp, about +3bp at 2x in 2016-26). Lab-BS (11 broad sector SPDRs) failed in 2017-26, so
 granularity matters. Next: the implementable version on liquid US industry ETFs (Lab-BX), and a paper shadow.
+
+## Lab-BX — industry-ETF momentum, top 5 of 20 fixed ETFs vs SPY, 2017-02 .. 2026-09 (Lab Round 46): DEAD
+| | 1x excess vs SPY / month | 2x 2017-21 / 2022-26 | t | without best 5 | placebo (vs random 5 of the list) | CAGR (1x) vs SPY |
+|---|---|---|---|---|---|---|
+| Lab-BX | +9.5bp | −4.1 / +3.3 | 0.3 | −32 | 96.8 | 15.2% vs 15.1% |
+
+By year (1x): 2020 +306, 2022 +187, 2025 +89; 2021 −130, 2023 −107. **DEAD**: momentum picks the better ETFs from the
+list (placebo 97th) but only ties SPY, as Lab-BW's weak post-2010 decades predicted. As registered, a PAPER SHADOW was
+built anyway (`make daytrade-momentum` now logs both shadows; first industry month, 2026-10: SMH, OIH, XBI, XPH, XOP).

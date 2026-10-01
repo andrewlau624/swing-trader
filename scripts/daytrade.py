@@ -7,7 +7,7 @@
   halt | unhalt                   create / remove state/daytrade/HALT
   review [--days 7]               weekly review per strategy (writes daytrade/reviews/)
   table                           the $/day table
-  momentum                        monthly momentum PAPER SHADOW (logs picks and realised returns; no orders)
+  momentum [--industry]           monthly momentum PAPER SHADOW: stocks (Lab-BR/BT) or industry ETFs (Lab-BW/BX); no orders
   status                          recordings, HALT, journal counts
 """
 from __future__ import annotations
@@ -32,7 +32,8 @@ def main() -> int:
     rn.add_argument("--strategy", default="all")
     sub.add_parser("halt"); sub.add_parser("unhalt")
     rv = sub.add_parser("review"); rv.add_argument("--days", type=int, default=7)
-    sub.add_parser("table"); sub.add_parser("status"); sub.add_parser("momentum")
+    sub.add_parser("table"); sub.add_parser("status")
+    mo = sub.add_parser("momentum"); mo.add_argument("--industry", action="store_true")
     a = ap.parse_args()
 
     if a.cmd == "record":
@@ -63,8 +64,8 @@ def main() -> int:
         print(markdown())
         return 0
     if a.cmd == "momentum":
-        from daytrade.momentum import run as momentum
-        return momentum()
+        from daytrade.momentum import run as momentum, run_industry
+        return run_industry() if a.industry else momentum()
     if a.cmd == "status":
         from daytrade.runner import status
         return status()
