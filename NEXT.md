@@ -30,6 +30,12 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 - **Lab-BH/BI (announcement-gap drift, daily, multi-day): DEAD.** In 2022-26 gappers UNDERPERFORM SPY by 185bp over
   20 days (every year), but the short + hedge judged on unseen 2017-21 fails (t 0.6; 2018 and 2020 lose).
   study_lab_bh_bi_event_drift.md.
+- **Lab-BJ (calendar-month seasonality, monthly top 20 of 500): DEAD** (−69bp/month vs the universe 2021-26).
+- **Waiting on the user: insider-purchase drift (not registered, no N).** Officer/director open-market buys
+  (Lakonishok & Lee 2001; Cohen, Malloy & Pomorski 2012) are the strongest untested multi-day idea with free data:
+  SEC quarterly Form 3/4/5 datasets. The SEC returns 403 without a contact email in the User-Agent. The repo's
+  convention (`swingtrader/daily/news_judge.sec_headers`) uses `NOTIFY_EMAIL` or `SEC_USER_AGENT` from `.env`, and
+  the Mac's `.env` has neither. Set one (your choice) to unblock; the lab will register and run it.
 - **Nothing to switch on.** The live book is unchanged. The next real look is Lab-AT after 40 recorded sessions
   (~early Dec). Expect few signals (Lab-AV).
 
