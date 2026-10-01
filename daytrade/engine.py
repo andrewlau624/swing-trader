@@ -157,7 +157,10 @@ class Engine:
                 continue
             if o.entry:
                 try:
-                    qty = self.risk.size_entry(o, self.now, self.session, self.positions, self.marks)
+                    reserved = [(x.sym, (x.qty or 0) * (x.ref_price or 0)) for x in self.pending.values()
+                                if x.entry]
+                    qty = self.risk.size_entry(o, self.now, self.session, self.positions, self.marks,
+                                               reserved)
                 except Rejected as r:
                     self._rule("rejected", f"{o.sym} {o.side}: {r}", strategy=o.strategy)
                     continue

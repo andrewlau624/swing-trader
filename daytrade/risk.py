@@ -83,8 +83,12 @@ class RiskLayer:
         pnl = self.account.equity + unrealized - self.day_start_equity
         return pnl <= -self.limits.daily_loss_pct * self.day_start_equity
 
-    def size_entry(self, o: Order, now: dt.datetime, session, positions: dict, marks: dict) -> int:
-        """Shares for an entry order, or raise Rejected with the rule's name."""
+    def size_entry(self, o: Order, now: dt.datetime, session, positions: dict, marks: dict,
+                   reserved: list | None = None) -> int:
+        """Shares for an entry order, or raise Rejected with the rule's name. `reserved` = [(sym,
+        notional)] of entry orders sent but not filled (e.g. resting stop entries): they hold a
+        position slot and buying power until they fill or are cancelled."""
+        reserved = reserved or []
         lim = self.limits
         if self.stopped_for_day:
             raise Rejected("stopped for the day")
@@ -105,13 +109,15 @@ class RiskLayer:
             mark = marks.get(o.sym, o.ref_price)
             if (mark - p.avg) * (1 if long else -1) <= 0:
                 raise Rejected("adding to a losing position / averaging down")
-        elif sum(1 for q in positions.values() if q.qty != 0) >= lim.max_positions:
+        elif (sum(1 for q in positions.values() if q.qty != 0)
+              + len({s for s, _ in reserved if s not in positions})) >= lim.max_positions:
             raise Rejected(f"max {lim.max_positions} positions")
         eq = self.account.equity
         per_share = abs(o.ref_price - o.stop)
         qty = math.floor(lim.risk_per_trade_pct * eq / per_share)
         qty = min(qty, math.floor(lim.max_position_pct * eq / o.ref_price))
-        qty = min(qty, math.floor(self.account.buying_power() / o.ref_price))
+        bp = self.account.buying_power() - sum(n for _, n in reserved)
+        qty = min(qty, math.floor(max(bp, 0.0) / o.ref_price))
         if qty < 1:
             raise Rejected("rounds to 0 whole shares (risk, notional or buying power)")
         return qty

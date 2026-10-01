@@ -54,6 +54,9 @@ class DayInfo:
     prev_close: float
     adv20_usd: float = 0.0
     premarket_volume: float = 0.0
+    atr14: float = 0.0                 # true range average, prior 14 sessions
+    avg_volume14: float = 0.0          # shares/day, prior 14 sessions
+    or_volume_avg14: float = 0.0       # 09:30-09:34 volume, average of prior sessions
 
 
 @dataclass
