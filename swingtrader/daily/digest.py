@@ -30,6 +30,7 @@ PLAN = {
     "roth":    {"base": 0.15, "levers": {"tow_tilt": 0.006, "llm_judge": 0.005, "quote_imbalance": 0.003}},
 }
 ROTH_DEPOSIT_YR = 7500.0
+TAXABLE_MONTHLY_DEFAULT = 1000.0       # the user's plan: $1k a month into the brokerage account
 TAXABLE_TAX = 0.32                      # short-term federal + state, the program's planning rate
 HORIZONS = (1, 3, 5)
 INDEX_RATE = 0.10                       # S&P 500 long-run nominal, held (no yearly tax), the benchmark
@@ -279,74 +280,102 @@ def render(d: dict, charts: bool = True, taxable_monthly: float = 0.0) -> tuple[
         T += [f"  {k:14s} {money(v5):>10s}  {money(v10):>10s}" for k, (v5, v10) in mk.items()]
     text = "\n".join(T)
 
-    # ---------------- HTML (email): a statement, not a dashboard
-    def p(s, size=15, color=INK, extra=""):
-        return f"<p style='margin:0;font-family:{SANS};font-size:{size}px;line-height:1.45;color:{color};{extra}'>{s}</p>"
+    # ---------------- HTML (email): a statement with clear structure
+    BAND, PANEL, LINE = "#0f2a44", "#f6f8fa", "#d8dee4"
 
-    def head(s):
-        return (f"<p style='margin:28px 0 12px;font-family:{SANS};font-size:13px;font-weight:600;"
-                f"color:{INK};border-bottom:1px solid {RULE};padding-bottom:8px'>{s}</p>")
+    def p(s, size=16, color=INK, extra=""):
+        return f"<p style='margin:0;font-family:{SANS};font-size:{size}px;line-height:1.5;color:{color};{extra}'>{s}</p>"
 
-    def bar(frac, color=ACC):
+    def section(title, sub=""):
+        return (f"<p style='margin:34px 0 14px;font-family:{SANS};font-size:19px;font-weight:700;color:{INK};"
+                f"letter-spacing:-.01em'>{title}"
+                + (f"<span style='display:block;font-size:14px;font-weight:400;color:{MUTE};margin-top:2px'>{sub}</span>" if sub else "")
+                + "</p>")
+
+    def bar(frac, color=ACC, h=6):
         w = max(0, min(100, round(frac * 100)))
-        return (f"<div style='background:{RULE};height:3px;width:100%'><div style='background:{color};"
-                f"height:3px;width:{w}%'></div></div>")
+        return (f"<div style='background:#e1e6eb;height:{h}px;border-radius:{h // 2}px;width:100%'><div style='background:{color};"
+                f"height:{h}px;border-radius:{h // 2}px;width:{w}%'></div></div>")
 
-    td = f"font-family:{SANS};font-size:14px;color:{INK};padding:7px 0;"
-    num = f"font-family:{SANS};font-size:14px;color:{INK};padding:7px 0;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;"
-    H = [p(f"Week of {dt.date.today():%B %-d, %Y}", 13, MUTE),
-         f"<p style='margin:6px 0 2px;font-family:{SERIF};font-size:34px;color:{INK};"
-         f"font-variant-numeric:tabular-nums'>{money(tot)}</p>",
-         p("across your accounts", 13, MUTE)]
-    rows = "".join(
-        f"<tr><td style='{td}'>{NAME[n]}</td><td style='{num}'>{money(a.equity)}</td>"
-        f"<td style='{num}color:{UP if a.week_pnl >= 0 else DOWN};padding-left:16px'>{_signed(a.week_pnl)}</td></tr>"
+    def table(head_cells, rows_html):
+        th = "".join(f"<td style='font-family:{SANS};font-size:13px;font-weight:600;color:{MUTE};padding:0 0 8px;"
+                     f"border-bottom:2px solid {LINE};{'text-align:right;' if i else ''}'>{c}</td>"
+                     for i, c in enumerate(head_cells))
+        return (f"<table role='presentation' width='100%' cellspacing='0' cellpadding='0'>"
+                f"<tr>{th}</tr>{rows_html}</table>")
+
+    cell = f"font-family:{SANS};font-size:16px;color:{INK};padding:12px 0;border-bottom:1px solid {LINE};"
+    numc = cell + "text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:600;"
+    H = []
+    # header band
+    acc_rows = "".join(
+        f"<td style='padding:14px 0 0;vertical-align:top;width:50%'>"
+        f"<div style='font-family:{SANS};font-size:14px;color:#a8bccf'>{NAME[n]}</div>"
+        f"<div style='font-family:{SANS};font-size:24px;font-weight:700;color:#ffffff;font-variant-numeric:tabular-nums'>{money(a.equity)}</div>"
+        f"<div style='font-family:{SANS};font-size:14px;font-weight:600;color:{'#7ee2a8' if a.week_pnl >= 0 else '#ff9b9b'}'>"
+        f"{_signed(a.week_pnl)} <span style='font-weight:400;color:#a8bccf'>from trades this week</span></div></td>"
         for n, a in real)
-    H.append(f"<table role='presentation' width='100%' cellspacing='0' cellpadding='0' style='margin-top:14px'>"
-             f"<tr><td style='{td}color:{MUTE};font-size:12px'></td><td style='{num}color:{MUTE};font-size:12px'>Balance</td>"
-             f"<td style='{num}color:{MUTE};font-size:12px;padding-left:16px'>Trades this week</td></tr>{rows}</table>")
+    H.append(f"<div style='background:{BAND};padding:24px 26px 22px'>"
+             f"<div style='font-family:{SANS};font-size:14px;color:#a8bccf'>Week of {dt.date.today():%B %-d, %Y}</div>"
+             f"<div style='font-family:{SERIF};font-size:44px;color:#ffffff;margin-top:4px;font-variant-numeric:tabular-nums'>{money(tot)}</div>"
+             f"<div style='font-family:{SANS};font-size:14px;color:#a8bccf'>total across your accounts</div>"
+             f"<table role='presentation' width='100%' cellspacing='0' cellpadding='0' style='margin-top:6px'><tr>{acc_rows}</tr></table></div>")
+    B = []          # body
     if step:
         k = min(step["n"], step["need"]) / step["need"]
         col = UP if step["ready"] else ACC
-        lead = "Ready to switch on" if step["ready"] else "Next step"
-        H += [head(lead),
-              p(f"<b>{_esc(step['gate'])}</b> &nbsp;<span style='color:{MUTE}'>{min(step['n'], step['need'])} of "
-                f"{step['need']} {_esc(step['unit'])}</span>"),
-              f"<div style='margin:8px 0 10px'>{bar(k, col)}</div>",
-              p(("Do it now: " if step["ready"] else "When it fills: ")
-                + f"<span style='font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;"
-                  f"background:#f6f8fa;padding:1px 5px;word-break:break-all'>{_esc(step['action'])}</span>", 14)]
+        lead = "READY TO SWITCH ON" if step["ready"] else "NEXT STEP"
+        B.append(f"<div style='background:{'#eef8f1' if step['ready'] else '#eef4fb'};border-left:5px solid {col};"
+                 f"padding:18px 20px;margin-top:26px'>"
+                 f"<div style='font-family:{SANS};font-size:12px;font-weight:700;letter-spacing:.06em;color:{col}'>{lead}</div>"
+                 f"<div style='font-family:{SANS};font-size:22px;font-weight:700;color:{INK};margin:4px 0 12px'>{_esc(step['gate'])}</div>"
+                 + bar(k, col, 8)
+                 + f"<div style='font-family:{SANS};font-size:15px;color:{INK};margin:8px 0 12px'><b>{min(step['n'], step['need'])}</b> of "
+                   f"{step['need']} {_esc(step['unit'])}</div>"
+                 + f"<div style='font-family:{SANS};font-size:15px;color:{INK}'>{'Do it now:' if step['ready'] else 'When it fills:'}</div>"
+                 + f"<div style='font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;background:#ffffff;"
+                   f"border:1px solid {LINE};padding:8px 10px;margin-top:6px;word-break:break-all;color:{INK}'>{_esc(step['action'])}</div>"
+                 + "</div>")
     if rest or tests:
         rr = "".join(
-            f"<tr><td style='{td}width:48%'>{_esc(g['gate'].replace(' verdict', ''))}</td>"
-            f"<td style='padding:7px 12px;width:30%'>{bar(min(g['n'], g['need']) / g['need'], ACC if g in rest else '#afb8c1')}</td>"
-            f"<td style='{num}color:{MUTE}'>{g['n']} of {g['need']}</td></tr>" for g in rest + tests)
-        H += [head("Also counting"),
-              f"<table role='presentation' width='100%' cellspacing='0' cellpadding='0'>{rr}</table>"]
+            f"<tr><td style='{cell}width:44%'>{_esc(g['gate'].replace(' verdict', ''))}"
+            + (f"<div style='font-size:12px;color:{MUTE}'>experiment</div>" if g in tests else "")
+            + f"</td><td style='{cell}width:32%;padding-left:14px;padding-right:14px'>{bar(min(g['n'], g['need']) / g['need'], ACC if g in rest else '#8c959f')}</td>"
+              f"<td style='{numc}'>{g['n']} <span style='font-weight:400;color:{MUTE}'>of {g['need']}</span></td></tr>"
+            for g in rest + tests)
+        B += [section("Also counting"), table(["", "", "Progress"], rr)]
     for n, a in real:
         yrs, lines, mk = proj[n]
-        sub = " · after short-term tax" if n == "live" else " · includes $7,500 a year of deposits"
-        H.append(head(f"{NAME[n]} over 10 years<span style='font-weight:400;color:{MUTE}'>{sub}</span>"))
+        dep = ROTH_DEPOSIT_YR / 12 if n == "roth" else taxable_monthly
+        sub = (f"${dep:,.0f} a month in deposits" + (" · after short-term tax" if n == "live" else " · tax-free"))
+        B.append(section(f"{NAME[n]} over 10 years", sub))
         if charts:
             cid = f"proj-{n}"
             from .digest_charts import projection_png
             images.append((cid, projection_png(yrs, lines)))
-            H.append(f"<img src='cid:{cid}' width='520' alt='{NAME[n]} projection: "
+            B.append(f"<img src='cid:{cid}' width='560' alt='{NAME[n]} projection: "
                      + "; ".join(f"{k} {money(v10)} in 10 years" for k, (_, v10) in mk.items())
-                     + "' style='display:block;width:100%;max-width:520px;height:auto;margin:0 0 6px'>")
-        rr = "".join(f"<tr><td style='{td}'>{k}</td><td style='{num}'>{money(v5)}</td><td style='{num}'>{money(v10)}</td></tr>"
-                     for k, (v5, v10) in mk.items())
-        H.append(f"<table role='presentation' width='100%' cellspacing='0' cellpadding='0'>"
-                 f"<tr><td style='{td}color:{MUTE};font-size:12px'></td><td style='{num}color:{MUTE};font-size:12px'>5 years</td>"
-                 f"<td style='{num}color:{MUTE};font-size:12px'>10 years</td></tr>{rr}</table>")
+                     + "' style='display:block;width:100%;max-width:560px;height:auto;margin:0 0 14px'>")
+        dot = {"This bot": "#2a78d6", "Everything on": "#eb6834", "Index fund": "#8c959f"}
+        best = max(v10 for _, v10 in mk.values())
+        rr = "".join(
+            f"<tr><td style='{cell}'><span style='display:inline-block;width:10px;height:10px;border-radius:5px;"
+            f"background:{dot[k]};margin-right:8px'></span>{k}</td><td style='{numc}'>{money(v5)}</td>"
+            f"<td style='{numc}{'color:' + UP + ';' if v10 == best else ''}'>{money(v10)}</td></tr>"
+            for k, (v5, v10) in mk.items())
+        B.append(table(["", "In 5 years", "In 10 years"], rr))
+        idx = mk["Index fund"][1]
+        diff = mk["This bot"][1] - idx
+        B.append(p(f"After 10 years this bot, as it runs today, is <b style='color:{UP if diff >= 0 else DOWN}'>"
+                   f"{money(abs(diff))} {'ahead of' if diff >= 0 else 'behind'}</b> an index fund.", 14, MUTE, "margin-top:10px"))
     if ideas:
         rr = "".join(
-            f"<tr><td style='{td}'>{_esc(r['idea'].split(' (')[0][:1].upper() + r['idea'].split(' (')[0][1:])}"
-            f"<span style='color:{MUTE};font-size:12px'> · {NAME[n]}</span></td>"
-            f"<td style='{num}color:{UP if r['usd'] >= 0 else DOWN}'>{_signed(r['usd'])}</td></tr>" for n, r in ideas)
-        H += [head("If these had been on"),
-              f"<table role='presentation' width='100%' cellspacing='0' cellpadding='0'>{rr}</table>",
-              p("A handful of trades swings these a lot; they settle as the count grows.", 12, MUTE, "margin-top:6px")]
+            f"<tr><td style='{cell}'>{_esc(r['idea'].split(' (')[0][:1].upper() + r['idea'].split(' (')[0][1:])}"
+            f"<div style='font-size:12px;color:{MUTE}'>{NAME[n]} · {r['n']} trade{'s' if r['n'] != 1 else ''}</div></td>"
+            f"<td style='{numc}color:{UP if r['usd'] >= 0 else DOWN}'>{_signed(r['usd'])}</td></tr>" for n, r in ideas)
+        B += [section("If these had been on", "what each idea still in testing would have made on your real days"),
+              table(["", "Would have made"], rr),
+              p("A handful of trades swings these a lot; they settle as the count grows.", 13, MUTE, "margin-top:8px")]
     live = A.get("live")
     if charts and live:
         cl = sorted((c for c in live.closed if c.get("exit_date")), key=lambda c: str(c["exit_date"]))
@@ -356,16 +385,17 @@ def render(d: dict, charts: bool = True, taxable_monthly: float = 0.0) -> tuple[
             s = pd.Series([float(c["pnl"]) for c in cl], index=pd.to_datetime([str(c["exit_date"]) for c in cl]))
             s = s.groupby(level=0).sum().cumsum()
             images.append(("pnl-live", pnl_png(list(s.index), list(s.values))))
-            H += [head(f"Brokerage trades so far <span style='font-weight:400;color:{MUTE}'>· "
-                       f"{_signed(float(s.iloc[-1]))} over {len(cl)} trades, deposits excluded</span>"),
-                  f"<img src='cid:pnl-live' width='520' alt='Cumulative profit from trades' "
-                  f"style='display:block;width:100%;max-width:520px;height:auto'>"]
-    H.append(p(f"Projections use planning rates, not forecasts: this bot {PLAN['taxable']['base']:.0%} a year "
+            B += [section("Brokerage trades so far", f"{_signed(float(s.iloc[-1]))} over {len(cl)} trades · deposits excluded"),
+                  f"<img src='cid:pnl-live' width='560' alt='Cumulative profit from trades' "
+                  f"style='display:block;width:100%;max-width:560px;height:auto'>"]
+    B.append(p(f"Projections use planning rates, not forecasts: this bot {PLAN['taxable']['base']:.0%} a year "
                f"(Roth {PLAN['roth']['base']:.0%}), everything on {PLAN['taxable']['base'] + sum(PLAN['taxable']['levers'].values()):.0%}, "
-               f"index fund {INDEX_RATE:.0%}. Brokerage figures assume {TAXABLE_TAX:.0%} short-term tax each year; "
-               f"the index fund is shown before you sell it.", 12, MUTE, "margin-top:28px"))
-    html = (f"<div style='background:#ffffff;padding:28px 20px'><div style='max-width:560px;margin:0 auto'>"
-            + "".join(H) + "</div></div>")
+               f"index fund {INDEX_RATE:.0%}. Every line gets the same deposits. Brokerage figures assume {TAXABLE_TAX:.0%} short-term "
+               f"tax each year; the index fund is shown before you sell it.", 13, MUTE,
+               f"margin-top:34px;padding-top:16px;border-top:1px solid {LINE}"))
+    html = (f"<div style='background:#eaeef2;padding:24px 10px'><div style='max-width:600px;margin:0 auto;background:#ffffff;"
+            f"border:1px solid {LINE}'>" + "".join(H)
+            + f"<div style='padding:0 26px 28px'>" + "".join(B) + "</div></div></div>")
     subj = (f"{money(tot)} total" + (" · " + ", ".join(f"{NAME[n]} {money(a.equity)}" for n, a in real) if len(real) > 1 else "")
             + (f" · ready: {step['gate']}" if step and step["ready"] else ""))
     return subj, html, text, images

@@ -4,7 +4,7 @@ projections with vs without the levers (swingtrader/daily/digest.py).
   python scripts/weekly_digest.py           # print only     (make weekly)
   python scripts/weekly_digest.py --send    # print + email to NOTIFY_EMAIL (Resend)   (make weekly-send)
 
-Optional .env: DIGEST_TAXABLE_MONTHLY=<$ you add to the taxable account each month> (default 0).
+Optional .env: DIGEST_TAXABLE_MONTHLY=<$ you add to the brokerage account each month> (default 1000).
 """
 import argparse
 import datetime as dt
@@ -26,9 +26,9 @@ def main(argv=None) -> int:
     a = ap.parse_args(argv)
     d = Config.load().daily
     data = digest.build(ROOT / "state", ROOT / "logs", d.start_equity, d.conviction_weight,
-                        float(get_env("DIGEST_TAXABLE_MONTHLY") or 0))
+                        float(get_env("DIGEST_TAXABLE_MONTHLY") or digest.TAXABLE_MONTHLY_DEFAULT))
     subj, html, text, images = digest.render(data, charts=a.send,
-                                             taxable_monthly=float(get_env("DIGEST_TAXABLE_MONTHLY") or 0))
+                                             taxable_monthly=float(get_env("DIGEST_TAXABLE_MONTHLY") or digest.TAXABLE_MONTHLY_DEFAULT))
     print(subj); print(); print(text)
     if a.send:
         week = dt.date.today().isocalendar()
