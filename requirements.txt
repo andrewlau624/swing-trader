@@ -7,3 +7,4 @@ python-dotenv>=1.0
 pytest>=7.4
 schwab-py>=1.5.1
 anthropic>=1.11
+matplotlib>=3.8

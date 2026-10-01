@@ -54,9 +54,22 @@ def test_digest_numbers_from_books_and_logs(tmp_path):
     assert g["LLM news judge verdict"]["n"] == 1
     p = [x for x in data["proj"] if x["account"] == "roth" and x["years"] == 3][0]
     assert p["with_levers"] > p["without"] > 3 * D.ROTH_DEPOSIT_YR
-    subj, html, text = D.render(data)
-    assert "$3,260 total" in subj and "In 5 years" in text
-    assert "+$4 from trades this week" in text and "+$4 from trades this week" in html, \
+    subj, html, text, images = D.render(data, charts=False)
+    assert "$3,260 total" in subj and "10 years" in text and images == []
+    assert "+$4 from trades this week" in text and "+$4" in html, \
         "trades' P&L (10 - 6), not the equity change, which includes deposits"
-    assert "Next step" in html and "Conviction trade on" in html and "<pre" not in html
+    assert "Next step" in html and "Conviction trade on" in html and "Index fund" in html
     assert "Paper" not in html, "virtual book left out of the email"
+
+
+def test_ten_year_lines_and_charts(tmp_path):
+    yrs, lines, marks = D.ten_year("roth", 1000.0)
+    assert len(yrs) == 121 and set(lines) == {"This bot", "Everything on", "Index fund"}
+    assert marks["Everything on"][1] > marks["This bot"][1] > marks["Index fund"][1] > 75000, "deposits + growth"
+    _, tl, tm = D.ten_year("live", 2000.0)
+    assert tm["This bot"][1] < D.project(2000.0, D.PLAN["taxable"]["base"], 10), "brokerage lines are after tax"
+    st, lg = _state(tmp_path)
+    _, html, _, images = D.render(D.build(st, lg, 3000.0, 0.5), charts=True)
+    cids = [c for c, _ in images]
+    assert cids == ["proj-live", "proj-roth"] and all(png[:4] == b"\x89PNG" for _, png in images)
+    assert all(f"cid:{c}" in html for c in cids)

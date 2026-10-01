@@ -27,12 +27,13 @@ def main(argv=None) -> int:
     d = Config.load().daily
     data = digest.build(ROOT / "state", ROOT / "logs", d.start_equity, d.conviction_weight,
                         float(get_env("DIGEST_TAXABLE_MONTHLY") or 0))
-    subj, html, text = digest.render(data)
+    subj, html, text, images = digest.render(data, charts=a.send,
+                                             taxable_monthly=float(get_env("DIGEST_TAXABLE_MONTHLY") or 0))
     print(subj); print(); print(text)
     if a.send:
         week = dt.date.today().isocalendar()
         key = f"digest-{week[0]}-{week[1]}" if a.scheduled else f"digest-manual-{dt.datetime.now():%Y%m%d%H%M%S}"
-        print("\n" + Notifier(ROOT / "state").send(subj, html, dedupe_key=key))
+        print("\n" + Notifier(ROOT / "state").send(subj, html, dedupe_key=key, images=images))
     return 0
 
 

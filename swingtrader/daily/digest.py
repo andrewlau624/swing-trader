@@ -32,6 +32,7 @@ PLAN = {
 ROTH_DEPOSIT_YR = 7500.0
 TAXABLE_TAX = 0.32                      # short-term federal + state, the program's planning rate
 HORIZONS = (1, 3, 5)
+INDEX_RATE = 0.10                       # S&P 500 long-run nominal, held (no yearly tax), the benchmark
 LEVER_LABEL = {"conviction": "conviction trade", "intraday_x4": "4x intraday margin",
                "overnight_1.3x": "overnight 1.3x", "tow_tilt": "tug-of-war tilt",
                "llm_judge": "LLM news judge", "quote_imbalance": "quote imbalance"}
@@ -206,9 +207,9 @@ def build(state: Path, logs: Path, start_equity: float, conviction_w: float, tax
 
 
 NAME = {"live": "Brokerage", "roth": "Roth IRA"}
-C = dict(bg="#f3f4f6", card="#ffffff", ink="#111827", mute="#6b7280", line="#e5e7eb",
-         up="#047857", down="#b91c1c", accent="#2563eb", ready="#ecfdf5", next="#eff6ff")
-FONT = "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif"  # no quotes: it sits inside style='...'
+INK, MUTE, RULE, ACC, UP, DOWN = "#1f2328", "#6e7781", "#e6e8eb", "#0b5cad", "#1a7f37", "#cf222e"
+SANS = "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif"   # unquoted: inside style='...'
+SERIF = "Georgia,Times New Roman,serif"
 
 
 def _esc(s) -> str:
@@ -216,13 +217,7 @@ def _esc(s) -> str:
 
 
 def _signed(x: float) -> str:
-    return ("+" if x >= 0 else "-") + f"${abs(x):,.0f}"
-
-
-def _bar(frac: float, color: str) -> str:
-    w = max(0, min(100, round(frac * 100)))
-    return (f"<div style='background:{C['line']};border-radius:4px;height:8px;width:100%'>"
-            f"<div style='background:{color};border-radius:4px;height:8px;width:{w}%'></div></div>")
+    return ("+" if x >= 0 else "−") + f"${abs(x):,.0f}"
 
 
 def _plan(G: list) -> tuple[dict | None, list, list]:
@@ -235,122 +230,142 @@ def _plan(G: list) -> tuple[dict | None, list, list]:
     return step, rest, tests
 
 
-def render(d: dict) -> tuple[str, str, str]:
-    """(subject, html, text)."""
+def ten_year(acct: str, bal: float, taxable_monthly: float = 0.0) -> tuple[list, dict, dict]:
+    """(years grid, {line: values}, {line: (5y, 10y)}). Brokerage lines are AFTER yearly short-term tax
+    (the book's gains are taxed every year; a held index fund is not, until sold)."""
+    kind = "roth" if acct == "roth" else "taxable"
+    p = PLAN[kind]
+    dep = ROTH_DEPOSIT_YR if kind == "roth" else 12 * taxable_monthly
+    k = (1 - TAXABLE_TAX) if kind == "taxable" else 1.0
+    rates = {"This bot": p["base"] * k, "Everything on": (p["base"] + sum(p["levers"].values())) * k,
+             "Index fund": INDEX_RATE}
+    years = [m / 12 for m in range(0, 121)]
+    lines = {n: [project(bal, r, 0, dep)] for n, r in rates.items()}
+    for n, r in rates.items():
+        e, mr = bal, (1 + r) ** (1 / 12) - 1
+        vals = [e]
+        for _ in range(120):
+            e = e * (1 + mr) + dep / 12
+            vals.append(e)
+        lines[n] = vals
+    marks = {n: (v[60], v[120]) for n, v in lines.items()}
+    return years, lines, marks
+
+
+def render(d: dict, charts: bool = True, taxable_monthly: float = 0.0) -> tuple[str, str, str, list]:
+    """(subject, html, text, images); images = [(content_id, png)] for the email's cid: references."""
     A, G = d["accounts"], d["gates"]
     real = [(n, A[n]) for n in ("live", "roth") if n in A]
     step, rest, tests = _plan(G)
     ideas = [(n, r) for n, rows in d["whatif"].items() if n in ("live", "roth") for r in rows if r["n"]]
-    proj = {(p["account"], p["years"]): p for p in d["proj"]}
-    far = max(HORIZONS)
+    tot = sum(a.equity for _, a in real)
+    proj = {n: ten_year(n, a.equity, taxable_monthly) for n, a in real}
+    images = []
 
     # ---------------- plain text (terminal)
-    T = []
+    T = [f"Total {money(tot)}"]
     for n, a in real:
-        wk = f"  {_signed(a.week_pnl)} from trades this week"
-        T.append(f"{NAME[n]:10s} {money(a.equity):>9s}{wk}")
+        T.append(f"  {NAME[n]:10s} {money(a.equity):>9s}  {_signed(a.week_pnl)} from trades this week")
     if step:
-        T += ["", ("READY: " if step["ready"] else "NEXT: ") + f"{step['gate']}  "
-              f"({min(step['n'], step['need'])} of {step['need']} {step['unit']})",
-              f"  then: {step['action']}"]
-    if rest:
-        T += ["", "Coming up: " + " · ".join(f"{g['gate']} {g['n']}/{g['need']}" for g in rest)]
-    if tests:
-        T.append("Experiments: " + " · ".join(f"{g['gate'].replace(' verdict', '')} {g['n']}/{g['need']}" for g in tests))
+        T += ["", ("Ready: " if step["ready"] else "Next: ") + f"{step['gate']} — "
+              f"{min(step['n'], step['need'])} of {step['need']} {step['unit']}", f"  then {step['action']}"]
+    for g in rest + tests:
+        T.append(f"  {g['gate'].replace(' verdict', ''):26s} {g['n']:>4} of {g['need']}")
     if ideas:
         T += ["", "If these had been on:"] + [f"  {NAME[n]:10s} {r['idea'][:34]:34s} {_signed(r['usd']):>7s}" for n, r in ideas]
-    T.append("")
-    for n, a in real:
-        p = proj.get((n, far))
-        if p:
-            T.append(f"In {far} years, {NAME[n]}: {money(p['without'])} as is, {money(p['with_levers'])} with everything on")
+    for n, _ in real:
+        _, _, mk = proj[n]
+        T += ["", f"{NAME[n]}{' (after tax)' if n == 'live' else ''}:     5 years    10 years"]
+        T += [f"  {k:14s} {money(v5):>10s}  {money(v10):>10s}" for k, (v5, v10) in mk.items()]
     text = "\n".join(T)
 
-    # ---------------- HTML (email)
-    def card(inner: str, bg: str = C["card"]) -> str:
-        return (f"<tr><td style='font-family:{FONT};padding:0 0 12px'><div style='font-family:{FONT};background:{bg};border-radius:12px;"
-                f"padding:18px 20px;border:1px solid {C['line']}'>{inner}</div></td></tr>")
+    # ---------------- HTML (email): a statement, not a dashboard
+    def p(s, size=15, color=INK, extra=""):
+        return f"<p style='margin:0;font-family:{SANS};font-size:{size}px;line-height:1.45;color:{color};{extra}'>{s}</p>"
 
-    def h(s: str) -> str:
-        return f"<div style='font-family:{FONT};font-size:13px;color:{C['mute']};font-weight:600;letter-spacing:.02em;margin-bottom:10px'>{s}</div>"
+    def head(s):
+        return (f"<p style='margin:28px 0 12px;font-family:{SANS};font-size:13px;font-weight:600;"
+                f"color:{INK};border-bottom:1px solid {RULE};padding-bottom:8px'>{s}</p>")
 
-    H = []
-    cells = []
-    for i, (n, a) in enumerate(real):
-        gut = "0 6px 0 0" if i == 0 else "0 0 0 6px"
-        x = a.week_pnl
-        chg = (f"<div style='font-family:{FONT};font-size:14px;color:{C['up'] if x >= 0 else C['down']};margin-top:2px'>"
-               f"{_signed(x)} from trades this week</div>")
-        cells.append(f"<td style='font-family:{FONT};width:50%;vertical-align:top;padding:{gut}'><div style='font-family:{FONT};background:{C['card']};"
-                     f"border-radius:12px;padding:16px 18px;border:1px solid {C['line']}'>"
-                     f"<div style='font-family:{FONT};font-size:13px;color:{C['mute']}'>{NAME[n]}</div>"
-                     f"<div style='font-family:{FONT};font-size:28px;font-weight:700;color:{C['ink']};margin-top:2px'>{money(a.equity)}</div>"
-                     f"{chg}</div></td>")
-    if cells:
-        H.append(f"<tr><td style='font-family:{FONT};padding:0 0 12px'><table role='presentation' width='100%' cellspacing='0' "
-                 f"cellpadding='0' style='font-family:{FONT};table-layout:fixed'><tr>{''.join(cells)}</tr></table></td></tr>")
+    def bar(frac, color=ACC):
+        w = max(0, min(100, round(frac * 100)))
+        return (f"<div style='background:{RULE};height:3px;width:100%'><div style='background:{color};"
+                f"height:3px;width:{w}%'></div></div>")
+
+    td = f"font-family:{SANS};font-size:14px;color:{INK};padding:7px 0;"
+    num = f"font-family:{SANS};font-size:14px;color:{INK};padding:7px 0;text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums;"
+    H = [p(f"Week of {dt.date.today():%B %-d, %Y}", 13, MUTE),
+         f"<p style='margin:6px 0 2px;font-family:{SERIF};font-size:34px;color:{INK};"
+         f"font-variant-numeric:tabular-nums'>{money(tot)}</p>",
+         p("across your accounts", 13, MUTE)]
+    rows = "".join(
+        f"<tr><td style='{td}'>{NAME[n]}</td><td style='{num}'>{money(a.equity)}</td>"
+        f"<td style='{num}color:{UP if a.week_pnl >= 0 else DOWN};padding-left:16px'>{_signed(a.week_pnl)}</td></tr>"
+        for n, a in real)
+    H.append(f"<table role='presentation' width='100%' cellspacing='0' cellpadding='0' style='margin-top:14px'>"
+             f"<tr><td style='{td}color:{MUTE};font-size:12px'></td><td style='{num}color:{MUTE};font-size:12px'>Balance</td>"
+             f"<td style='{num}color:{MUTE};font-size:12px;padding-left:16px'>Trades this week</td></tr>{rows}</table>")
     if step:
         k = min(step["n"], step["need"]) / step["need"]
-        lab = "Ready to switch on" if step["ready"] else "Next step"
-        col = C["up"] if step["ready"] else C["accent"]
-        H.append(card(
-            f"<div style='font-family:{FONT};font-size:13px;font-weight:600;color:{col};margin-bottom:4px'>{lab}</div>"
-            f"<div style='font-family:{FONT};font-size:20px;font-weight:700;color:{C['ink']};margin-bottom:10px'>{_esc(step['gate'])}</div>"
-            + _bar(k, col)
-            + f"<div style='font-family:{FONT};font-size:13px;color:{C['mute']};margin:6px 0 12px'>"
-              f"{min(step['n'], step['need'])} of {step['need']} {_esc(step['unit'])}</div>"
-            + f"<div style='font-family:{FONT};font-size:14px;color:{C['ink']}'>{'Do now' if step['ready'] else 'When full'}: "
-              f"<code style='font-family:ui-monospace,Menlo,Consolas,monospace;background:{C['bg']};padding:2px 6px;border-radius:4px;font-size:12px;word-break:break-all'>"
-              f"{_esc(step['action'])}</code></div>",
-            C["ready"] if step["ready"] else C["next"]))
+        col = UP if step["ready"] else ACC
+        lead = "Ready to switch on" if step["ready"] else "Next step"
+        H += [head(lead),
+              p(f"<b>{_esc(step['gate'])}</b> &nbsp;<span style='color:{MUTE}'>{min(step['n'], step['need'])} of "
+                f"{step['need']} {_esc(step['unit'])}</span>"),
+              f"<div style='margin:8px 0 10px'>{bar(k, col)}</div>",
+              p(("Do it now: " if step["ready"] else "When it fills: ")
+                + f"<span style='font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;"
+                  f"background:#f6f8fa;padding:1px 5px;word-break:break-all'>{_esc(step['action'])}</span>", 14)]
     if rest or tests:
-        rows = ""
-        for g in rest + tests:
-            k = min(g["n"], g["need"]) / g["need"]
-            rows += (f"<tr><td style='font-family:{FONT};padding:6px 0;font-size:14px;color:{C['ink']};width:46%'>"
-                     f"{_esc(g['gate'].replace(' verdict', ''))}</td>"
-                     f"<td style='font-family:{FONT};padding:6px 10px;width:38%'>{_bar(k, C['accent'] if g in rest else '#9ca3af')}</td>"
-                     f"<td style='font-family:{FONT};padding:6px 0;font-size:13px;color:{C['mute']};text-align:right;white-space:nowrap'>"
-                     f"{g['n']}/{g['need']}</td></tr>")
-        H.append(card(h("COMING UP") + f"<table role='presentation' width='100%' cellspacing='0' cellpadding='0'>{rows}</table>"))
-    if ideas:
-        rows = ""
-        for n, r in ideas:
-            col = C["up"] if r["usd"] >= 0 else C["down"]
-            who = f" · {NAME[n]}" if len(real) > 1 else ""
-            rows += (f"<tr><td style='font-family:{FONT};padding:5px 0;font-size:14px;color:{C['ink']}'>{_esc(r['idea'].split(' (')[0][:1].upper() + r['idea'].split(' (')[0][1:])}"
-                     f"<span style='font-family:{FONT};color:{C['mute']};font-size:12px'>{who}</span></td>"
-                     f"<td style='font-family:{FONT};padding:5px 0;font-size:15px;font-weight:600;color:{col};text-align:right'>"
-                     f"{_signed(r['usd'])}</td></tr>")
-        small = sum(r["n"] for _, r in ideas) < 100
-        H.append(card(h("IF THESE HAD BEEN ON") + f"<table role='presentation' width='100%' cellspacing='0' "
-                      f"cellpadding='0'>{rows}</table>"
-                      + (f"<div style='font-family:{FONT};font-size:12px;color:{C['mute']};margin-top:8px'>Early days: a few trades "
-                         f"swing these a lot.</div>" if small else "")))
-    pr = ""
+        rr = "".join(
+            f"<tr><td style='{td}width:48%'>{_esc(g['gate'].replace(' verdict', ''))}</td>"
+            f"<td style='padding:7px 12px;width:30%'>{bar(min(g['n'], g['need']) / g['need'], ACC if g in rest else '#afb8c1')}</td>"
+            f"<td style='{num}color:{MUTE}'>{g['n']} of {g['need']}</td></tr>" for g in rest + tests)
+        H += [head("Also counting"),
+              f"<table role='presentation' width='100%' cellspacing='0' cellpadding='0'>{rr}</table>"]
     for n, a in real:
-        p = proj.get((n, far))
-        if not p:
-            continue
-        dep = f" · includes {money(p['deposits'])} of deposits" if p["deposits"] else ""
-        pr += (f"<tr><td style='font-family:{FONT};padding:8px 0;vertical-align:top'>"
-               f"<div style='font-family:{FONT};font-size:14px;color:{C['ink']};font-weight:600'>{NAME[n]}</div>"
-               f"<div style='font-family:{FONT};font-size:12px;color:{C['mute']}'>{p['base_rate']:.0%} vs {p['lever_rate']:.0%} a year{dep}</div></td>"
-               f"<td style='font-family:{FONT};padding:8px 0;text-align:right;vertical-align:top;white-space:nowrap'>"
-               f"<div style='font-family:{FONT};font-size:13px;color:{C['mute']}'>as is <b style='font-family:{FONT};color:{C['ink']};font-size:15px'>"
-               f"{money(p['without'])}</b></div>"
-               f"<div style='font-family:{FONT};font-size:13px;color:{C['mute']}'>all on <b style='font-family:{FONT};color:{C['up']};font-size:15px'>"
-               f"{money(p['with_levers'])}</b></div></td></tr>")
-    if pr:
-        H.append(card(h(f"IN {far} YEARS") + f"<table role='presentation' width='100%' cellspacing='0' "
-                      f"cellpadding='0'>{pr}</table><div style='font-family:{FONT};font-size:12px;color:{C['mute']};margin-top:6px'>"
-                      f"Planning rates, not a forecast. Before tax.</div>"))
-    html = (f"<div style='font-family:{FONT};background:{C['bg']};padding:24px 12px;font-family:{FONT}'>"
-            f"<table role='presentation' width='100%' cellspacing='0' cellpadding='0' "
-            f"style='font-family:{FONT};max-width:560px;margin:0 auto'>"
-            f"<tr><td style='font-family:{FONT};padding:0 0 14px;font-size:13px;color:{C['mute']}'>Week of "
-            f"{dt.date.today():%b %-d}</td></tr>{''.join(H)}</table></div>")
-    tot = sum(a.equity for _, a in real)
+        yrs, lines, mk = proj[n]
+        sub = " · after short-term tax" if n == "live" else " · includes $7,500 a year of deposits"
+        H.append(head(f"{NAME[n]} over 10 years<span style='font-weight:400;color:{MUTE}'>{sub}</span>"))
+        if charts:
+            cid = f"proj-{n}"
+            from .digest_charts import projection_png
+            images.append((cid, projection_png(yrs, lines)))
+            H.append(f"<img src='cid:{cid}' width='520' alt='{NAME[n]} projection: "
+                     + "; ".join(f"{k} {money(v10)} in 10 years" for k, (_, v10) in mk.items())
+                     + "' style='display:block;width:100%;max-width:520px;height:auto;margin:0 0 6px'>")
+        rr = "".join(f"<tr><td style='{td}'>{k}</td><td style='{num}'>{money(v5)}</td><td style='{num}'>{money(v10)}</td></tr>"
+                     for k, (v5, v10) in mk.items())
+        H.append(f"<table role='presentation' width='100%' cellspacing='0' cellpadding='0'>"
+                 f"<tr><td style='{td}color:{MUTE};font-size:12px'></td><td style='{num}color:{MUTE};font-size:12px'>5 years</td>"
+                 f"<td style='{num}color:{MUTE};font-size:12px'>10 years</td></tr>{rr}</table>")
+    if ideas:
+        rr = "".join(
+            f"<tr><td style='{td}'>{_esc(r['idea'].split(' (')[0][:1].upper() + r['idea'].split(' (')[0][1:])}"
+            f"<span style='color:{MUTE};font-size:12px'> · {NAME[n]}</span></td>"
+            f"<td style='{num}color:{UP if r['usd'] >= 0 else DOWN}'>{_signed(r['usd'])}</td></tr>" for n, r in ideas)
+        H += [head("If these had been on"),
+              f"<table role='presentation' width='100%' cellspacing='0' cellpadding='0'>{rr}</table>",
+              p("A handful of trades swings these a lot; they settle as the count grows.", 12, MUTE, "margin-top:6px")]
+    live = A.get("live")
+    if charts and live:
+        cl = sorted((c for c in live.closed if c.get("exit_date")), key=lambda c: str(c["exit_date"]))
+        if len(cl) >= 5:
+            import pandas as pd
+            from .digest_charts import pnl_png
+            s = pd.Series([float(c["pnl"]) for c in cl], index=pd.to_datetime([str(c["exit_date"]) for c in cl]))
+            s = s.groupby(level=0).sum().cumsum()
+            images.append(("pnl-live", pnl_png(list(s.index), list(s.values))))
+            H += [head(f"Brokerage trades so far <span style='font-weight:400;color:{MUTE}'>· "
+                       f"{_signed(float(s.iloc[-1]))} over {len(cl)} trades, deposits excluded</span>"),
+                  f"<img src='cid:pnl-live' width='520' alt='Cumulative profit from trades' "
+                  f"style='display:block;width:100%;max-width:520px;height:auto'>"]
+    H.append(p(f"Projections use planning rates, not forecasts: this bot {PLAN['taxable']['base']:.0%} a year "
+               f"(Roth {PLAN['roth']['base']:.0%}), everything on {PLAN['taxable']['base'] + sum(PLAN['taxable']['levers'].values()):.0%}, "
+               f"index fund {INDEX_RATE:.0%}. Brokerage figures assume {TAXABLE_TAX:.0%} short-term tax each year; "
+               f"the index fund is shown before you sell it.", 12, MUTE, "margin-top:28px"))
+    html = (f"<div style='background:#ffffff;padding:28px 20px'><div style='max-width:560px;margin:0 auto'>"
+            + "".join(H) + "</div></div>")
     subj = (f"{money(tot)} total" + (" · " + ", ".join(f"{NAME[n]} {money(a.equity)}" for n, a in real) if len(real) > 1 else "")
             + (f" · ready: {step['gate']}" if step and step["ready"] else ""))
-    return subj, html, text
+    return subj, html, text, images
