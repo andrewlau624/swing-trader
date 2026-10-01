@@ -52,7 +52,7 @@ class HaltResume(Strategy):
                 if hit and len(recent) >= ACTIVE_MIN:
                     self.done.add(s)
                     out.append(Order(s, "buy", ref_price=last.close, stop=round(last.close * (1 - STOP_PCT), 2),
-                                     reason=f"halt {self.direction} ({move:+.1%} in 5 min)"))
+                                     stop_pct=STOP_PCT, reason=f"halt {self.direction} ({move:+.1%} in 5 min)"))
         for s, t0 in self.filled_at.items():
             if s not in self.exited and now >= t0 + HOLD and ctx.position(s) > 0:
                 self.exited.add(s)

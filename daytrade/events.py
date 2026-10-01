@@ -67,7 +67,8 @@ class Order:
     limit: float | None = None
     stop_px: float | None = None   # trigger for kind == "stop"
     entry: bool = True             # opens/extends a position; exits set False
-    stop: float | None = None      # protective stop for an entry (required)
+    stop: float | None = None      # protective stop for an entry (required; used for sizing)
+    stop_pct: float | None = None  # if set, the resting stop is placed this far from the actual FILL
     target: float | None = None    # resting limit exit for an entry (optional)
     ref_price: float | None = None # the decision price (sizing and the 0s-latency fill)
     qty: int | None = None         # set by the risk layer for entries

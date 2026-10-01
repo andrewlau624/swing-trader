@@ -1481,3 +1481,16 @@ Judged exactly as Round 20 (night returns from the official crosses; V7 and Roth
 feature-shuffle placebos >= 95th; dDD >= -2pp; P(DD>50%) <= 5%). Also: coverage by exchange, terciles per half,
 Spearman with TOW / vol20 / depth. DSR at N 701. A pass is SHADOW only: live use needs a paid live imbalance feed
 (Massive $49/mo, NYSE-listed only; Databento live for Nasdaq), priced in the writeup.
+
+## Amendment — Lab Round 24, Study Lab-AZ: Nasdaq closing-cross convergence from the NOII (pre-register; 2 variants, program N 701 -> 703, after main Round 26 BD)
+
+`date`: Thu Oct 1 ~04:30 PDT 2026 (the commit time is the stamp). Plan (part of this registration):
+`daytrade/plans/close_cross.md`. Data: Databento XNAS.ITCH imbalance (user's key; ~$52 of the free credit). Nothing
+downloaded beyond a 70-second QQQ field sample.
+- Universe: top 100 Nasdaq-listed common stocks by Nov-Dec 2021 dollar volume + QQQ, TQQQ (fixed file).
+- At close - 5:30 (15:54:30): the latest closing NOII, dev = near / ref - 1. Long if dev >= +10bp and side B; short if
+  dev <= -10bp and side A. Enter at the SIP NBBO 1s later; exit market-on-close at the official close.
+- Lab-AZ1 long+short; Lab-AZ2 long only. Costs NBBO+0.5bp / close 0.5bp (1x); NBBO+1bp+half-spread / close 1bp (2x).
+- Halves at 2024-06-01. Pass: 2x > 0 both halves; day-clustered t >= 2 at 1x; >= 95th pct of a random-side placebo.
+- Shared Databento credit: this pull (~$52) plus main Round 26 BD (night picks, 2-minute windows) stay inside the
+  $125 free credit; each study prices its pull with `metadata.get_cost` first and stops above its estimate.

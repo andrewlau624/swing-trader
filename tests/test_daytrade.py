@@ -614,3 +614,21 @@ def test_halt_resume_buys_the_reopening_after_a_halt_up(tmp_path):
     assert tr["exit_reason"] == "30-minute exit"
     e2 = engine([HaltResume("down")], tmp_path, equity=100_000).run(evs)
     assert not e2.trades
+
+
+def test_a_stop_already_through_the_market_fills_at_the_market_not_the_stop():
+    """Regression (Lab-AY2): a stop placed above a long's entry must not fill at the stop price."""
+    b = SimBroker(latency_s=1, cost_bp=0)
+    o = Order("AAA", "sell", "stop", stop_px=22.5, entry=False, ref_price=2.17)
+    o.ts = t("10:00", 30)
+    b.submit(o, 10, t("10:00", 30))
+    f = b.on_event(bar("AAA", "10:00", 2.17, 2.30, 2.10, 2.20))
+    assert f and f[0].price == pytest.approx(2.17)
+
+
+def test_stop_pct_is_measured_from_the_fill(tmp_path):
+    """The plan's 10% catastrophe stop sits 10% below the actual fill, not below the decision price."""
+    s = Scripted([(t("10:00"), lambda: Order("AAA", "buy", ref_price=25.0, stop=22.5, stop_pct=0.10))])
+    path = lambda i: 25.0 if i < 31 else 2.0  # noqa: E731   (fills after a collapse)
+    e = engine([s], tmp_path, equity=100_000).run(minute_bars("AAA", "09:30", "11:00", path=path))
+    assert e.trades and e.trades[0]["stop"] == pytest.approx(round(e.trades[0]["entry_px"] * 0.9, 2))
