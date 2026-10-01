@@ -37,3 +37,23 @@ Tested: 3 studies, 5 variants + 1 report.
   - codecat finds noise-area SPY Sharpe ~0 since 2025; ours is QQQ/SMH, watch it by year.
   - perthoptions's intraday-loser overnight spread collapsed in the last ~126 sessions on large caps.
   - Boyarchenko et al. say the index overnight drift is ~0 since 2021.
+
+## Addendum (same day): Rounds 20-22 and the follow-ups (N 682 -> 688, counting the lab's Round 18)
+
+| idea | source | verdict | $2.3k / $10k / $25k per yr | who pays |
+|---|---|---|---|---|
+| AU3 switch | — | **BUILT, OFF**: 15:40 shadow log, `tow` in the decisions log, `make review` §9 gate (≥ 300 round trips, high-TOW > low-TOW) | as above once on | — |
+| AU3 robustness | — | holds with TOW from the official crosses (+2.4-2.9pp, t 2.5); +4.4pp (t 3.0) under the moderate 15% cap; +2.7pp on top of tilt v2 | — | — |
+| Roth cost gate on crosses | Study AW | report: IBS+night beats IBS-only below **3.7bp/side** (was 5.4); measured ~0, gate comment now ~3bp | — | — |
+| IBS ETF opens on crosses | Study AW | report: −0.3..−0.7bp/leg, immaterial | — | — |
+| AX1/AX2 closing / opening cross share | Bogousslavsky-Muravyev 2023; Berkman et al. 2012 | **DEAD** (AX2 +1.2pp both halves but t 1.5, placebo 94%) | ~+$28 / +$134 / +$293 (AX2, unproven) | passive close flow / open buyers |
+| AY FINRA short-volume ratio, both signs | Diether-Lee-Werner 2009; BJZ 2008 | **DEAD** (t ≤ 0.6) | ~0 | — |
+| AZ Roth ex-dividend capture | Elton-Gruber; Ruan-Ma 2012 | **DEAD** (gap +4-7bp/event = one round trip) | −$7 / −$36 / −$30 | taxable holders (gap too small) |
+| Noise leg after publication | codecat replication | report: SPY dead after May 2024, QQQ ~halved (t 1.1), SMH intact; no action | plan QQQ at ~2.5bp/day | — |
+| Closing imbalance (AC) | — | parked: the user does not want a Databento account unless necessary; AX was the free stand-in | — | — |
+
+**Net result of the session:**
+- **One new edge, built and off:** AU3, +$70 / +$323 / +$705 a year at $2.3k / $10k / $25k, plus the Roth.
+- **One correction:** every night-leg level is ~2pp/yr lower on official auction prints.
+- **The Roth cost gate is tighter:** ~3bp/side.
+- **Six new dead ideas,** recorded so they are not redone.
