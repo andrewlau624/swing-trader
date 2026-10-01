@@ -9,7 +9,7 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
-## Day-trading lab (2026-10-01, Lab Rounds 18-38): 25 studies (intraday, events, multi-day, market-neutral, vol premium), NO edge found; recorder LIVE (program N 729)
+## Day-trading lab (2026-10-01, Lab Rounds 18-38): 25 studies (intraday, events, multi-day, market-neutral, vol premium, cross-section), NO edge passed (12-1 momentum the closest: t 1.5); recorder LIVE (program N 733)
 
 **Overnight bottom line (for the user, 2026-10-01 morning).**
 - Every intraday idea tested at real costs is dead. The recurring pattern:
@@ -897,6 +897,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Drift after forward-split ex-dates, 60 days (Lab-BM, lab) | **dead** | −250bp excess at 2x, both halves negative; the same stocks on random dates beat SPY by ~12%: splitters underperform right after the split |
 | SVXY only in VIX/VIX3M contango, else BIL (Lab-BN, lab) | **dead** | 13.7%/yr, −45% max DD vs SPY 14.6%/−32%; t 1.5, placebo 76th pct |
 | Monthly top 20 of 500 by 52w-high nearness / low vol / 1-month reversal (Lab-BO/BP/BQ, lab) | **dead** | excess −8.5 / −50 / +13bp per month, all fail 2x in a half; t ≤ 0.2 |
+| Monthly 12-1 momentum, top 20 of 500 (Lab-BR, lab) | **dead by t (watch)** | 22.6%/yr vs universe 12.2%, placebo 100, but t 1.5 and 2017-21 2x only +0.9bp/month with a worse Sharpe: the 2022-26 AI rally. A new registration needs pre-2016 history |
 | Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
 | IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
 | IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |

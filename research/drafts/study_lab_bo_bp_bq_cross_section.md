@@ -11,3 +11,16 @@ Stamp: round1_prose.md Lab Round 39 (commit f385248). Script `daytrade/research/
 
 **All DEAD.** In 2017-26 large caps, nearness to the 52-week high adds nothing. Low vol lags badly in a rising market
 (and its Sharpe is worse in 2022-26). Short-term reversal worked in 2017-21 but not after.
+
+## Lab-BR — 12-1 momentum (Lab Round 40): DEAD by t, the closest call of the lab
+| | 1x excess / month | 2x 2017-21 / 2022-26 | t | without best 5 | placebo | CAGR (1x) vs universe | Sharpe H1 / H2 (book vs universe) |
+|---|---|---|---|---|---|---|---|
+| Lab-BR | +131bp | +0.9 / **+225** | **1.5** | +16 | 100 | **22.6%** vs 12.2% | 0.52 vs 0.89 / higher in H2 |
+
+- It fails only t >= 2. Nearly all the excess is 2022-26 (the AI-led rally), and 2017-21's Sharpe was worse than the
+  universe's. That is the known momentum-factor profile (a priced risk with crash risk), not an anomaly that survives
+  the bar.
+- **Watch, not adopt.** A future look needs a NEW registration with longer history (pre-2016 data) and a crash-risk
+  bound. Nothing re-tuned.
+- (The first run printed t = NaN: an early month without a full 13-month signal gave an empty portfolio. Fixed by
+  skipping months without a full signal. BO/BP/BQ unchanged.)

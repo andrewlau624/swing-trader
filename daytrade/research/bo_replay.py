@@ -1,4 +1,4 @@
-"""Studies Lab-BO / BP / BQ: 52w-high, low-vol, 1-month reversal, monthly top 20 of the 500 most traded
+"""Studies Lab-BO / BP / BQ / BR: 52w-high, low-vol, 1-month reversal, 12-1 momentum (BR: Lab Round 40), monthly top 20 of the 500 most traded
 (round1_prose.md Lab Round 39). Lab-BJ's monthly bars and frame.
 
   python -m daytrade.research.bo_replay
@@ -29,7 +29,7 @@ def run():
     DV = (C * V).rolling(12, min_periods=10).mean()
     HI = C.rolling(12, min_periods=12).max()
     VOL = R.rolling(12, min_periods=10).std()
-    scores = {"Lab-BO": C / HI, "Lab-BP": -VOL, "Lab-BQ": -R}
+    scores = {"Lab-BO": C / HI, "Lab-BP": -VOL, "Lab-BQ": -R, "Lab-BR": C.shift(1) / C.shift(12) - 1}
     res = {}
     for name, S in scores.items():
         rows = []
@@ -39,6 +39,8 @@ def run():
             univ = list(DV.loc[prev, elig].dropna().sort_values(ascending=False).index[:UNIV])
             sc = S.loc[prev, univ].dropna()
             picks = list(sc.sort_values(ascending=False).index[:TOP])
+            if len(picks) < TOP:
+                continue                      # no full signal this month (history too short)
             ru = R.loc[m, univ]
             rows.append({"month": m, "port": float(ru[picks].fillna(0).mean()), "bench": float(ru.mean(skipna=True)),
                          "univ": ru.fillna(0).values})
