@@ -891,6 +891,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Closing-imbalance signal with a passive limit at the touch until 15:55 (Lab-BG, day-trading lab) | **dead** | adverse selection: filled trades −0.6bp mid -> close (H2); net +2.2bp t 1.6; a false pass came from counting TRF sub-penny prints |
 | Announcement-gap drift (gap >= 5% on 3x volume), long 5/20d; and the short+SPY hedge (Lab-BH/BI, lab) | **dead** | long −185bp 20d excess 2022-26; the short fails out of sample on 2017-21 (t 0.6; 2018, 2020 negative): a post-2021 regime |
 | Calendar-month return seasonality, top 20 of 500 most traded, monthly (Lab-BJ, lab) | **dead** | −69bp/month vs the EW universe 2021-26, placebo 3.9th pct |
+| Short both legs of a 3x LETF pair (TQQQ+SQQQ, UPRO+SPXU), weekly (Lab-BK, lab) | **dead** | weekly rebalancing keeps only daily-minus-weekly variance (~3.8%/yr gross on QQQ); shorts pay the bear ETFs' T-bill distributions; ~0 after 2-4% borrow, negative at HTB rates |
 | Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
 | IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
 | IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |
@@ -915,7 +916,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 - Multiple formation horizons (5/10/20d) simultaneously — the one remaining
   structural fix for 14% capital utilisation
 - Cross-sectional ranking instead of a binary z-threshold (always deployed)
-- Crypto sleeve (24/7, AVAX/DOT/LTC screen as tradable)
+- ~~Crypto sleeve~~ (already dead: RESULTS.md "crypto trend (BTC/ETH SMA...) = buy-and-hold Sharpe, −60% DDs; basket negative after 25bp fees")
 - Limit orders at the bid instead of market-on-open — bounded by addendum 13:
   paying 0 vs 20bps is worth ~+2pp CAGR, so the upside is real but modest
 
