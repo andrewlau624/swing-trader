@@ -213,7 +213,9 @@ def replay(latency: float, cost_bp: float, equity: float = 1e7, kind: str = "mar
            limits: Limits | None = None, keep_bars: bool = False):
     """Every day through the engine. Default: a huge margin account and no position cap, so the
     per-trade statistics are not shaped by sizing. Pass a small equity for the $/day runs."""
-    lim = limits or Limits(max_positions=99)
+    # per-trade statistics: no position cap and no daily loss limit (a sizing rule, applied in the
+    # $/day runs, which use the lab's default limits)
+    lim = limits or Limits(max_positions=99, daily_loss_pct=1e9)
     acct = AccountModel(equity, kind, lim.intraday_mult)
     trades, events, bars_by = [], [], {}
     days = list(load_days())
