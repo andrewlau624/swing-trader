@@ -19,6 +19,7 @@ TARGET_R = 2.0
 
 class GapVwapReclaim(Strategy):
     name = "gap_vwap_reclaim"
+    status = "dead: Study Lab-AS (−18.9bp/trade, gross −1.7bp)"
 
     def on_session_start(self, ctx) -> list:
         self.first_open: dict[str, float] = {}

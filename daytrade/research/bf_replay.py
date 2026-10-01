@@ -14,7 +14,6 @@ import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 
-import pandas as pd
 
 from ..settings import DATA
 from . import as_replay as A

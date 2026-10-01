@@ -5,7 +5,6 @@ closes; Alpaca SIP daily adjusted OPENS (the opening crosses) for SVXY, BIL, SPY
 """
 from __future__ import annotations
 
-import io
 import json
 import math
 import random

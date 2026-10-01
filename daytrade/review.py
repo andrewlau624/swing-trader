@@ -33,6 +33,10 @@ def _t(xs):
 
 
 def decide(strategy: str, mode: str, all_trades: list[dict], replay_edge_bp: float | None) -> tuple[str, str]:
+    from .strategies import REGISTRY
+    st = getattr(REGISTRY.get(strategy), "status", "")
+    if st.startswith("dead"):
+        return "drop", st                    # the registered study already failed; nothing trades it
     n = len(all_trades)
     net = _mean([t["net_bp"] for t in all_trades])
     drift = _mean([(t.get("entry_drift_bp") or 0) + (t.get("exit_drift_bp") or 0) for t in all_trades

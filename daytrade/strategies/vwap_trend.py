@@ -10,6 +10,7 @@ STOP_PCT = 0.02          # catastrophe stop; the signal is the real exit
 
 class VwapTrend(Strategy):
     name = "vwap_trend"
+    status = "dead: Study Lab-AW (16 switches/day cost more than +6.7bp/day gross)"
 
     def __init__(self, signal: str = "QQQ", trade: str = "QQQ"):
         self.signal, self.trade = signal, trade

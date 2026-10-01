@@ -16,6 +16,7 @@ STOP_ATR = 0.10
 
 class OrbInPlay(Strategy):
     name = "orb_in_play"
+    status = "dead: Study Lab-AU (−23.5bp/trade; optimistic bound below costs)"
 
     def __init__(self, long_only: bool = False):
         self.long_only = long_only

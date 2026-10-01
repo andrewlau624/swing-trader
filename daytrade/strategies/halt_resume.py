@@ -17,6 +17,7 @@ STOP_PCT = 0.10
 
 class HaltResume(Strategy):
     name = "halt_resume"
+    status = "dead: Studies Lab-AY (long) and Lab-BA (short)"
 
     def __init__(self, direction: str = "up", side: str = "buy", no_ssr: bool = False):
         self.direction = direction            # "up": act after a halt up; "down": after a halt down

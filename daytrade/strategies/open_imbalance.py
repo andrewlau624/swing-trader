@@ -16,6 +16,7 @@ QI_MIN, FLOW_MIN = 0.20, 0.10
 
 class OpenImbalance(Strategy):
     name = "open_imbalance"
+    status = "pending: Study Lab-AT first look after 40 clean recorded sessions (Lab-AV on SIP ticks: dead, underpowered)"
 
     def on_session_start(self, ctx) -> list:
         self.t0 = ctx.session.at(WINDOW_START)

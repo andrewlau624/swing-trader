@@ -509,12 +509,13 @@ def test_recorder_writes_only_its_own_token_copy(tmp_path, monkeypatch):
 # ------------------------------------------------------------------ review
 def test_review_drops_after_40_bad_paper_trades():
     bad = [{"net_bp": -3.0} for _ in range(40)]
-    assert decide("gap_vwap_reclaim", "paper", bad, 20.0)[0] == "drop"
-    assert decide("gap_vwap_reclaim", "paper", bad[:39], 20.0)[0] == "continue"
+    assert decide("open_imbalance", "paper", bad, 20.0)[0] == "drop"
+    assert decide("open_imbalance", "paper", bad[:39], 20.0)[0] == "continue"
     good = [{"net_bp": 15.0, "entry_drift_bp": 30.0} for _ in range(40)]
-    assert decide("gap_vwap_reclaim", "paper", good, 20.0)[0] == "drop"           # drift > edge
+    assert decide("open_imbalance", "paper", good, 20.0)[0] == "drop"           # drift > edge
     ok = [{"net_bp": 15.0, "entry_drift_bp": 2.0} for _ in range(40)]
-    assert decide("gap_vwap_reclaim", "paper", ok, 20.0)[0] == "continue"
+    assert decide("open_imbalance", "paper", ok, 20.0)[0] == "continue"
+    assert decide("gap_vwap_reclaim", "paper", ok, 20.0)[0] == "drop"         # its study is dead
 
 
 # ------------------------------------------------------------------ ORB on Stocks in Play
@@ -841,3 +842,8 @@ def test_gapper_sweep_skips_corporate_actions():
     q = {"CTVA": {"quote": {"lastPrice": 14.58, "closePrice": 77.65, "totalVolume": 3_313_483}},
          "REAL": {"quote": {"lastPrice": 21.0, "closePrice": 20.0, "totalVolume": 500_000}}}
     assert [g["sym"] for g in select_gappers(q)] == ["REAL"]
+
+
+def test_every_strategy_states_its_study_verdict():
+    for name, cls in REGISTRY.items():
+        assert cls.status.split(":")[0] in ("dead", "pending", "pass"), name

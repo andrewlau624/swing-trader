@@ -11,6 +11,7 @@ from pathlib import Path
 class Strategy:
     name = ""
     plan = ""        # daytrade/plans/<name>.md, written and committed before the first trade
+    status = ""      # the registered study's verdict ("dead: Study ...", "pending: ...", "pass: ...")
 
     def plan_path(self) -> Path:
         return Path(__file__).resolve().parent.parent / "plans" / f"{self.name}.md"

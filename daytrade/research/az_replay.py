@@ -43,7 +43,6 @@ def fetch() -> None:
     import databento as db
     from swingtrader.config import get_env
     from swingtrader.daily.brokers import regular_sessions
-    c = db.Historical(get_env("DATABENTO_API_KEY"))
     syms = universe()
     cal = regular_sessions(START, END + dt.timedelta(days=7))
     (OUT / "sessions.pkl").write_bytes(pickle.dumps(cal))

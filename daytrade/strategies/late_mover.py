@@ -14,6 +14,7 @@ STOP_PCT = 0.10
 
 class LateMover(Strategy):
     name = "late_mover"
+    status = "dead: Study Lab-AX (gross +6bp; the run-up is over by 15:00)"
 
     def on_session_start(self, ctx) -> list:
         self.dvol: dict[str, float] = {}
