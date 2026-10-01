@@ -36,25 +36,25 @@ PICKS = Path(__file__).with_name("news_judge_hist_picks.csv")
 OUT = ROOT / "state" / "news-judge-hist.jsonl"
 BDAY = CustomBusinessDay(calendar=USFederalHolidayCalendar())
 
-# (month, statement, truth). True events are well-documented public events; F rows are fabricated
-# controls: a model that calls any control true is guessing, and the probe is void.
+# Round 25b probe: OPEN questions with keyword-graded answers (v1's true/false/unknown format let
+# the model answer "unknown" to everything, even the 2024 election). (month, question, keywords);
+# "F" rows have no true answer: naming anything there is a hallucination and voids the probe.
 PROBES = [
-    ("2024-11", "Donald Trump won the November 2024 US presidential election.", True),
-    ("2025-01", "Nvidia's stock fell about 17% in one day in January 2025 after DeepSeek released its R1 model.", True),
-    ("2025-04", "In early April 2025 the US announced broad 'Liberation Day' tariffs and the S&P 500 fell more than 10% over the following days.", True),
-    ("2025-05", "In May 2025 the US and China agreed in Geneva to cut their reciprocal tariffs for 90 days.", True),
-    ("2025-06", "In June 2025 the United States carried out air strikes on Iranian nuclear facilities.", True),
-    ("2025-07", "In July 2025 Nvidia became the first public company to reach a $4 trillion market value.", True),
-    ("2025-09", "In September 2025 the Federal Reserve cut its policy rate by 25 basis points.", True),
-    ("2025-10", "A US federal government shutdown began on October 1, 2025.", True),
-    ("2025-10", "In late October 2025 Nvidia became the first company to reach a $5 trillion market value.", True),
-    ("F", "In March 2025 Apple agreed to acquire Netflix.", False),
-    ("F", "In August 2025 the Federal Reserve raised its policy rate to 6%.", False),
-    ("F", "Tesla was removed from the S&P 500 in 2025.", False),
+    ("2024-11", "Who won the November 2024 US presidential election?", ("trump",)),
+    ("2025-01", "Which Chinese AI lab's model release made Nvidia's stock fall about 17% in one day in late January 2025?", ("deepseek",)),
+    ("2025-04", "What name did the US administration give to its April 2, 2025 tariff announcement?", ("liberation",)),
+    ("2025-05", "In which city did US and Chinese officials agree in May 2025 to cut tariffs for 90 days?", ("geneva",)),
+    ("2025-06", "Which country's nuclear facilities did the United States bomb in June 2025?", ("iran",)),
+    ("2025-07", "Which company became the first to reach a $4 trillion market value, in July 2025?", ("nvidia",)),
+    ("2025-09", "What did the Federal Reserve do to its policy rate at its September 2025 meeting?", ("cut", "lower", "reduc")),
+    ("2025-10", "What started in the US federal government on October 1, 2025?", ("shutdown",)),
+    ("F", "Which streaming company did Apple acquire in March 2025?", ()),
+    ("F", "Which company replaced Tesla in the S&P 500 after Tesla was removed in 2025?", ()),
 ]
-PROBE_SYSTEM = ("For each numbered statement, answer true, false or unknown from your own training "
-                "knowledge only. Say unknown if the event is after what you know or you are not sure. "
-                "Reply with only a JSON object mapping each number (as a string) to true, false or unknown.")
+NOT_KNOWN = ("unknown", "none", "no ", "did not", "didn't", "not ", "never", "n/a", "no such", "unaware")
+PROBE_SYSTEM = ("Answer each numbered question from your own training knowledge in a few words. If you do not "
+                "know, or the event did not happen, answer unknown. Reply with only a JSON object mapping each "
+                "number (as a string) to your short answer.")
 
 
 def client_and_model():
@@ -68,7 +68,7 @@ def client_and_model():
 
 def probe() -> int:
     c, d = client_and_model()
-    body = "\n".join(f"{i + 1}. {s}" for i, (_, s, _) in enumerate(PROBES))
+    body = "\n".join(f"{i + 1}. {q}" for i, (_, q, _) in enumerate(PROBES))
     if hasattr(c, "chat"):
         j = c.chat({"model": d.news_judge_model, "temperature": 0, "max_tokens": 800,
                     "messages": [{"role": "system", "content": PROBE_SYSTEM}, {"role": "user", "content": body}]})
@@ -81,20 +81,22 @@ def probe() -> int:
     ans = json.loads(t[t.find("{"): t.rfind("}") + 1])
     known, void = [], False
     print(f"served by {served}")
-    for i, (m, s, truth) in enumerate(PROBES):
-        a = str(ans.get(str(i + 1), "?")).lower()
+    for i, (m, q, keys) in enumerate(PROBES):
+        a = str(ans.get(str(i + 1), "?")).strip().lower()
         flag = ""
-        if m == "F" and a == "true":
-            void, flag = True, "  <- CONTROL CALLED TRUE"
-        if m != "F" and a == "true":
-            known.append(m)
-        print(f"  [{m}] {a:8s} {s[:90]}{flag}")
+        if m == "F" and not any(a.startswith(x) or x in f" {a} " for x in NOT_KNOWN):
+            void, flag = True, "  <- HALLUCINATED A NON-EVENT"
+        if m != "F" and any(k in a for k in keys):
+            known.append(m); flag = "  ok"
+        print(f"  [{m}] {q[:70]:70s} -> {a[:40]}{flag}")
     if void:
-        print("\nprobe VOID: the model calls fabricated events true; the historical test does not run.")
+        print("\nprobe VOID: the model invents answers to fabricated events; the historical test does not run.")
         return 1
     if not known:
         print("\nthe model knows none of the dated events; cannot place the cutoff."); return 1
     last = max(known)
+    if last >= "2025-10":
+        print("\nthe model knows the latest probe (2025-10): cutoff not placed; BC does not run."); return 1
     start = (pd.Period(last, "M") + 3).start_time.date()      # two full months after the last known month
     print(f"\nlast month known: {last} -> pre-registered window starts {start} (run --start {start})")
     return 0

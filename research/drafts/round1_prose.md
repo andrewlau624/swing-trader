@@ -1360,3 +1360,18 @@ freed cash idles). Scored by `research/sim/news_judge_eval.py` on the official c
 open cross), 2 x 2.5bp; PASS only if: >= 300 scored picks, daily increment > 0 in both halves of the window (split
 at the median date), NW t >= 2, sign-flip and within-night flag-shuffle placebos >= 95th. A PASS here plus a PASS
 of BA (forward) would be needed to spec a live switch; BC alone moves BA's prior, not the book.
+
+
+## Amendment — Round 25b: Study BC's cutoff probe, re-specified before any historical verdict is scored (N unchanged, 691)
+
+`date`: Thu Oct 1 2026 (stamped by the commit). The v1 probe (true / false / unknown) returned "unknown" to all 12
+statements, including the 2024 US election: its instruction rewarded abstaining, so it measured caution, not
+knowledge, and placed no cutoff. Per Round 25, BC did not start. Verdicts the user began collecting from
+2025-08-01 are kept (each verdict depends only on that day's inputs, not on the window), but NONE is scored until
+the v2 probe sets the window; picks before the v2 start are excluded from scoring, and if the v2 start is earlier
+than 2025-08-01 the missing months are judged first.
+v2 probe (fixed now): 8 open questions with keyword-graded answers (2024-11 .. 2025-10) + 2 fabricated controls
+("which streaming company did Apple acquire in March 2025", "which company replaced Tesla in the S&P 500 in 2025").
+A control answered with anything but unknown / none / a denial voids the probe (BC does not run). Window start = the
+first day of the third month after the latest correctly answered month; if the 2025-10 question is answered, the
+cutoff is not placed and BC does not run. One v2 probe call; its printout is copied into the BC writeup.

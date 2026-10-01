@@ -31,12 +31,17 @@ def _probe_with(monkeypatch, answers):
     return H.probe()
 
 
-def test_probe_places_the_cutoff_and_voids_on_a_true_control(monkeypatch, capsys):
-    n = len(H.PROBES)
-    ans = {str(i + 1): ("true" if m in ("2024-11", "2025-01", "2025-04", "2025-05") else "unknown")
-           for i, (m, _, _) in enumerate(H.PROBES)}
+def test_probe_grades_open_answers_and_voids_on_a_hallucination(monkeypatch, capsys):
+    real = {"2024-11": "Donald Trump", "2025-01": "DeepSeek", "2025-04": "Liberation Day", "2025-05": "Geneva"}
+    ans = {str(i + 1): real.get(m, "unknown") for i, (m, _, _) in enumerate(H.PROBES)}
     assert _probe_with(monkeypatch, ans) == 0
     assert "starts 2025-08-01" in capsys.readouterr().out
-    ans[str(n)] = "true"                            # a fabricated control called true
+    ans[str(len(H.PROBES))] = "Rivian"                 # a named answer to a fabricated event
     assert _probe_with(monkeypatch, ans) == 1
     assert "VOID" in capsys.readouterr().out
+
+
+def test_probe_refuses_when_the_model_knows_the_latest_event(monkeypatch, capsys):
+    ans = {str(i + 1): (" ".join(k) if m != "F" else "unknown") for i, (m, _, k) in enumerate(H.PROBES)}
+    assert _probe_with(monkeypatch, ans) == 1
+    assert "cutoff not placed" in capsys.readouterr().out
