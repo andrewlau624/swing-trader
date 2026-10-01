@@ -1721,3 +1721,18 @@ risk premium (Carr & Wu 2009; Simon & Campasano 2014, the VIX futures basis).
 - Pass: monthly excess over BIL (net) > 0 at 2x in both halves; t >= 2 (monthly); max drawdown at 1x better than −50%;
   >= 95th pct of a placebo (random in/out days with the same in-market share, shuffled in 21-day blocks, 1,000 draws);
   without the best 5 months > 0. Reported beside SVXY buy-and-hold and SPY; Roth-compatible (long ETFs only).
+
+
+## Amendment — Lab Round 39, Studies Lab-BO / Lab-BP / Lab-BQ: three monthly cross-sectional anomalies on the 500 most-traded stocks (pre-register; 3 variants, program N 729 -> 732)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). The frame is Lab-BJ's (`daytrade/research/bj_replay.py`: monthly
+adjusted SIP bars for returns, raw closes for the $5 filter, top 500 by trailing-12-month dollar volume, long the top
+20 equal weight at month m-1's close to month m's close, excess vs the equal-weight universe, full-turnover costs
+10/20bp per side). Test months 2017-01 .. 2026-09; halves 2017-01..2021-12 / 2022-01..2026-09.
+grep: 52w-high only as a swing filter, a night tilt and SPY timing (dead); low-vol and 1-month reversal untested.
+- **Lab-BO 52-week-high momentum** (George & Hwang 2004): score = month m-1 close / max of the closes of months
+  m-12..m-1; long the 20 highest (nearest the high).
+- **Lab-BP low volatility** (Ang et al. 2006; Frazzini & Pedersen 2014): score = −std of monthly returns over months
+  m-12..m-1 (>= 10 obs); long the 20 lowest-vol. Also report the Sharpe of the long portfolio vs the universe.
+- **Lab-BQ 1-month reversal** (Jegadeesh 1990): score = −return of month m-1; long the 20 biggest losers.
+- Pass, each: 2x excess > 0 both halves; t >= 2 (monthly); >= 95th pct of a random-20 placebo; without the best 5 months
+  > 0. For Lab-BP the Sharpe of the long book must also beat the universe's in both halves.
