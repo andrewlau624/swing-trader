@@ -4,7 +4,8 @@ The server's .env holds the real-money switches (DAILY_LIVE, DAILY_ROTH, ROTH_LI
 DAILY_*_CAPITAL, DAILY_INTRADAY_MULT, ...), and Config.load() / get_env() read .env into
 os.environ. Tests that assert default behaviour then see the server's settings and fail there
 while passing on a laptop. Every test starts with no DAILY_* / ROTH_* variable, from the real
-environment or from .env; a test that needs one sets it with monkeypatch.setenv.
+environment or from .env (nor ANTHROPIC_*, so no test can spend API money); a test that needs one sets
+it with monkeypatch.setenv.
 """
 from __future__ import annotations
 
@@ -14,7 +15,7 @@ import pytest
 
 import swingtrader.config as C
 
-SWITCH_PREFIXES = ("DAILY_", "ROTH_")
+SWITCH_PREFIXES = ("DAILY_", "ROTH_", "ANTHROPIC_")    # ANTHROPIC_: no test may call the API
 
 
 @pytest.fixture(autouse=True)

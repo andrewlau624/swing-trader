@@ -863,8 +863,29 @@ class DailyExecutor:
     def phase_close(self, book: DailyBook, today: str, now, clock) -> None:
         # what the night leg planned tonight, for the shadows below (log only)
         self._night_plan = {"requested": 0.0, "planned": 0.0}
+        self._night_judge_picks = None
         self._phase_close_night(book, today, now, clock)
         self._close_shadows(book, today, now, clock)
+        self._news_judge(today, now)
+
+    def _news_judge(self, today: str, now) -> None:
+        """Round 23 BA: LLM verdict on each night pick's drop, AFTER the orders (shadow only)."""
+        picks = getattr(self, "_night_judge_picks", None)
+        if self.d.news_judge == "off" or self.dry_run or picks is None or picks.empty:
+            return
+        try:
+            from ..config import require_alpaca_keys
+            from . import news_judge as nj
+            elig = getattr(self, "_night_elig", None)
+            pdate = (elig["prev_date"].reindex(picks.index).dropna().max()
+                     if elig is not None and "prev_date" in elig.columns else None)
+            prev_close = (pd.Timestamp(f"{pdate} 16:00", tz=ET) if pdate
+                          else pd.Timestamp(now).tz_convert(ET).normalize() - pd.Timedelta(hours=8))
+            nj.run_shadow(picks, today, prev_close, pd.Timestamp(now).tz_convert(ET), self.state_dir,
+                          self.log, model=self.d.news_judge_model, effort=self.d.news_judge_effort,
+                          max_calls=self.d.news_judge_max_calls, keys=require_alpaca_keys())
+        except Exception as exc:                # a shadow must never cost the book anything
+            self.log(f"[news] skipped ({type(exc).__name__}: {str(exc)[:80]})")
 
     def _phase_close_night(self, book: DailyBook, today: str, now, clock) -> None:
         self._check_exit_cost(book, today)
@@ -929,6 +950,7 @@ class DailyExecutor:
                     if n_raw > self.d.night_crowd_n else ""))
         if picks.empty:
             return
+        self._night_judge_picks = picks[["day_ret", "price"]].copy()
         equity = self._sizing_equity(book)
         leg = self._w_night(book) * equity
         gs = sg.gap_scale(today, pd.Timestamp(clock.next_open).tz_convert(ET), self.d.night_weekend_scale)

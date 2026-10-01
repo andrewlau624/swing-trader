@@ -1286,3 +1286,28 @@ random non-ex nights (each event moved to a random session of the same name 20-6
 $10k), which separates the dividend gap from ordinary overnight drift (the index filler died on drift, add. 16).
 Also reported: per-event overnight return minus SPY's, the implied drop ratio per half, events/yr, idle share.
 DSR at N 688.
+
+
+## Amendment — Round 23: LLM news judge on the night picks, FORWARD test only — Study BA (pre-register; 1 variant, N 688 -> 689)
+
+`date`: Thu Oct 1 2026 (stamped by the commit), BEFORE any verdict exists (the logger ships in the same commit).
+Mechanism: the night leg is paid for absorbing selling that carries no information (liquidity); a drop on new
+information about value (fundamental) drifts instead (Savor JFE 2012; Chan 2003; Da-Liu-Schaumburg 2014).
+Headline CATEGORIES were dead (add. 12) and offering filings are a shadow (Study T); this asks a reader of the
+actual news and filings the direct question. Why forward only: an LLM knows how events before its training
+cutoff turned out, so any historical backtest is contaminated; every verdict is made at 15:40 on the day.
+
+Logger: `swingtrader/daily/news_judge.py`, after the 15:40 orders (shadow; never changes an order), at most 8
+new picks a night (deepest drops first), one verdict per (date, symbol) shared by all books, model
+`claude-opus-5-5`, effort low, inputs = Alpaca/Benzinga news since the previous close + SEC filings accepted
+since the previous close. Output: verdict in {fundamental, liquidity, unclear} + confidence.
+
+Variant (the only one; counted now so the look cannot be re-tuned):
+- BA1: weight 0.25 on picks judged fundamental with confidence >= 0.7 (freed cash idles), vs equal weight among
+  that night's judged picks.
+Scoring (`research/sim/news_judge_eval.py`, `make news-eval`): official crosses (close cross d -> next open cross,
+Study AW), net of 2 x 2.5bp. Read ONCE at >= 300 judged picks with a verdict. PASS (-> SHADOW, spec a switch)
+only if: the daily increment > 0 in both halves of the judged sample (split at the median date), NW t >= 2,
+sign-flip placebo >= 95th and within-night flag-shuffle placebo >= 95th. Also reported: net by verdict and by
+confidence. Model, prompt, effort and the 0.7 / 0.25 constants are frozen; changing any of them restarts the
+count from zero as a new registration.

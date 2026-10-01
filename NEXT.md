@@ -24,6 +24,20 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Round 23 (2026-10-01): LLM news judge — BUILT, SHADOW, forward test pre-registered (N 689)
+- After the 15:40 orders, Claude (`claude-opus-5-5`, effort low, server-side refusal fallback on) reads each night
+  pick's news + SEC filings since the previous close and logs fundamental / liquidity / unclear + confidence to
+  `state/news-judge.jsonl`. Never changes an order; failures are logged and swallowed. ≤ 8 new calls a night,
+  shared by all books (~$0.02 each, ~$30/yr). `daily.news_judge: shadow` (off = disable); no-op without
+  `ANTHROPIC_API_KEY` in .env.
+- **Server setup:** `pip install -r requirements.txt` (adds `anthropic`), add `ANTHROPIC_API_KEY=...` to .env,
+  then `make news-smoke SYM=<a ticker that fell today>`.
+- **Gate:** `make news-eval` prints progress; the BA1 verdict (fundamental conf ≥ 0.7 at x0.25) is read once at
+  300 judged picks (~2-4 months), scored on the official crosses. Forward only: a historical LLM backtest is
+  contaminated by the model's knowledge.
+
+---
+
 ## Round 22 (2026-10-01): Roth ex-dividend overnight capture — AZ DEAD (N 688)
 - Large caps going ex do drop by only 0.90-0.96 of the dividend (+7.4bp / +3.9bp vs SPY per event, 2021-23 / 2024-26),
   but that is one round trip: as a sleeve on idle Roth cash it is −0.1..−0.8pp/yr at 2.5bp/side, −5pp at 5bp,

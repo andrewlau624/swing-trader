@@ -1356,3 +1356,18 @@ def test_tow_gate_waits_then_turns_on_or_off():
     assert sg.tow_gate(t[:100], [0.0] * 100)["verdict"] == "wait"
     assert sg.tow_gate(t, [-0.001] * 150 + [0.002] * 150)["verdict"] == "on"
     assert sg.tow_gate(t, [0.002] * 150 + [-0.001] * 150)["verdict"] == "off"
+
+
+def test_news_judge_crash_never_touches_the_night_orders(tmp_path, monkeypatch):
+    from swingtrader.daily import news_judge as nj
+    _tow_rows(monkeypatch, {"LOWT": 1, "HIGHT": 12})
+    ex = _executor(tmp_path, monkeypatch)
+    ex.dry_run = False
+    def boom(*a, **k):
+        raise RuntimeError("llm down")
+    monkeypatch.setattr(nj, "run_shadow", boom)
+    lines = []; ex.log = lambda m: lines.append(m)
+    book = DailyBook(cash=100000, start_equity=100000)
+    ex.phase_close(book, "2026-09-23", dt.datetime(2026, 9, 23, 15, 40, tzinfo=ET), ex.broker.clock())
+    assert {r.symbol for r in ex.broker.client.submitted} == {"LOWT", "HIGHT"}, "orders placed first"
+    assert any("[news] skipped (RuntimeError" in m for m in lines)

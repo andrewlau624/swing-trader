@@ -214,6 +214,13 @@ class DailyCfg:
     # Round 19 AU3 (research/drafts/study_au_tow.md, SHADOW): also weight night names by the
     # 20-session tug-of-war count (overnight up, day down). False = only logged at 15:40.
     night_tilt_tow: bool = False
+    # Round 23 Study BA (swingtrader/daily/news_judge.py): after the 15:40 orders, Claude reads each
+    # night pick's news + SEC filings and logs fundamental / liquidity / unclear. SHADOW ONLY: never
+    # changes an order. "off" disables it; it also no-ops without ANTHROPIC_API_KEY in .env.
+    news_judge: str = "shadow"
+    news_judge_model: str = "claude-opus-5-5"
+    news_judge_effort: str = "low"
+    news_judge_max_calls: int = 8          # new verdicts per night, shared by every book (~$0.02 each)
     # Impact cap (research Study X): each night order <= ADV * (edge / (3 Y sigma))^2,
     # the size past which square-root impact eats more than the order adds. None = off
     # (Y is unmeasured: `make review` section 8 fits it from live fills as orders grow).

@@ -358,3 +358,10 @@ daytrade-review:
 
 daytrade-table:
 	@$(PY) scripts/daytrade.py table
+
+news-smoke:   ## one live LLM news verdict for SYM (Round 23 BA): make news-smoke SYM=XYZ
+	@test -n "$(SYM)" || { echo "usage: make news-smoke SYM=TICKER"; exit 1; }
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.news_judge $(SYM)
+
+news-eval:    ## forward test of the LLM news judge on state/news-judge.jsonl (verdict read once at 300)
+	@PYTHONPATH=. $(PY) -m research.sim.news_judge_eval

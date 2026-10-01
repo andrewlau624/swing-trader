@@ -122,6 +122,12 @@ daily:
   night_tilt_k: 0.25             # weight deeper drops more (addendum 16; fitted 2021-23, held out 2024-26). 0 = equal
   night_tilt_model: v1           # v2 adds yesterday's return: replay +$23k, but borderline (addendum 23)
   night_tilt_tow: false          # Round 19 AU3 tug-of-war tilt, SHADOW: logged only. Gate/kill rule: study_au_tow.md
+  news_judge: shadow             # Round 23 BA: Claude labels each night pick's drop fundamental/liquidity after
+                                 # the orders are placed; logged to state/news-judge.jsonl, never trades. off = disable.
+                                 # Needs ANTHROPIC_API_KEY in .env (no key = silently off). ~8 calls/night, ~$30/yr
+  news_judge_model: claude-opus-5-5
+  news_judge_effort: low
+  news_judge_max_calls: 8
   night_impact_y: null           # impact cap (Study X): order <= ADV (edge/(3 Y sigma))^2. null = off until
                                  # `make review` section 8 measures Y; 4 is the robust choice (Study X), 1-2
                                  # if fills show low impact. At ~$2k it binds only on ~300%-vol names.
