@@ -25,7 +25,9 @@ and state, and does not touch the live book.
     −23.5bp/trade at 5bp/side; the optimistic fill bound grosses ~+10bp, below costs. study_au_orb_in_play.md.
   - **Lab-AW (VWAP trend, QQQ/TQQQ): DEAD.** Real signal (+6.7bp/day gross, placebo 97th) but 16 switches/day
     cost more. study_aw_vwap_trend.md.
-  - **Lab-AV (AT's imbalance on historical SIP ticks, QQQ/SPY): running.** **Lab-AX (+25% movers held 15:00-15:55): running.**
+  - **Lab-AX (+25% movers held 15:00-15:55, long): DEAD.** −33.7bp/trade at 20bp/side, H2 −53.6; gross +6bp: the run-up
+    is over by 15:00. study_lab_ax_late_mover.md.
+  - **Lab-AV (Lab-AT's imbalance on historical SIP ticks, QQQ/SPY): running.**
   - **Lab-AT (opening L1 imbalance): waiting.** First look after 40 unflagged recorded sessions (~early Dec).
   - **Decision for the user:** Alpaca's free plan has historical SIP tick NBBO quotes and trades back to
     at least 2018 (verified). Lab-AT could be re-registered on that history now (+1 N) instead of waiting
@@ -812,6 +814,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | 5-min ORB on Stocks in Play, re-test at 5/10bp per side, 2022-26 (Lab-AU, day-trading lab) | **dead (again)** | −23.5bp/trade, 19k trades, t −16.7; even the optimistic fill bound grosses only ~+10bp: −9bp at 10bp/side both halves. Already dead in RESULTS.md (check RESULTS.md's dead tables too) |
 | VWAP trend on QQQ / TQQQ, flip on every 1-min VWAP cross (Lab-AW, day-trading lab) | **dead** | signal real (placebo 97th pct, +6.7bp/day gross on QQQ) but 16 switches/day cost 16bp: −9.3bp/day QQQ, −27.7 TQQQ; the band that fixes it is the live noise leg |
 
+| +25% movers at 15:00 held to 15:55, long only (Lab-AX, day-trading lab) | **dead** | gross +6bp/trade, −33.7 at 20bp/side, H2 −53.6; the run-up is done by 15:00 |
 | Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
 | IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
 | IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |
