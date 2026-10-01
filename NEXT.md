@@ -789,3 +789,11 @@ name), and names above ~$150 buy one share or none.
 - **Roth beats a held index to ~$2.5M; taxable only to ~$250k** (SPY same window 15%/yr,
   13.5% after deferred tax). Taxable money past ~$250k -> held index unless a new liquid edge.
 - Next candidate study: noise leg as an intraday overlay on an index-held account.
+
+## Round 17d (2026-09-30): brief #6 (0DTE) and #7 (tax location) — report, nothing to build
+- **#6 0DTE conviction trade: parked.** One QQQ 0DTE contract controls ~$60k notional (17x the
+  0.5-weight TQQQ trade's ~$3.45k QQQ exposure at $2.3k). Needs ~$30-40k equity to be sizable, and
+  ThetaData is $960/yr = ~42% of a $2.3k account. No options data in the repo. `study_ar_remaining.md`.
+- **#7 asset location: structural, no change.** Every leg is <= 1 session (all short-term); the only
+  lever is which account + the wash guard. Run IBS + night in the tax-free Roth (Study AQ), keep the
+  G4s guard (add. 39), F3 off in the Roth. `study_ar_remaining.md`.
