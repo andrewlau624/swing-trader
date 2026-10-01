@@ -13,3 +13,4 @@ adds to the program N. Results of the old variant are never deleted.
 | 2026-10-01 | open_imbalance | new variant Lab-AV: the same plan and code on historical SIP ticks, QQQ and SPY only (Lab-AT itself still waits for recordings) | Alpaca's free plan has historical SIP NBBO and trades | N 673 -> 674 |
 | 2026-10-01 | vwap_trend | created (Study Lab-AW1 QQQ, Lab-AW2 TQQQ) | published VWAP trend (SSRN 4631351) at real costs, out of sample | N 674 -> 676 |
 | 2026-10-01 | late_mover | created (Study Lab-AX) | the long mirror of a measured, untradable short effect (RESULTS.md: losers ≥ 25% by 15:00) | N 676 -> 677 |
+| 2026-10-01 | halt_resume | created (Study Lab-AY1 halt-up long, Lab-AY2 halt-down long) | untested event class where small size is an advantage | program N 697 -> 699 |

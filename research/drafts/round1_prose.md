@@ -1444,3 +1444,16 @@ program's Rounds 19-25. The lab's commits were not on origin when those rounds w
 been rejected and the errors hidden. The lab's files carry their own local N (671 -> 677); read them as **+6 on
 top of the main count**. The program N after both is **691 + 6 = 697**. Lab-AS and Lab-AT were already counted
 in 691 (see the Round 18 reconciliation note above).
+
+
+## Amendment — Lab Round 23, Study Lab-AY: trading LULD halt reopenings in big movers (pre-register; 2 variants, program N 697 -> 699)
+
+`date`: Thu Oct 1 ~04:15 PDT 2026 (the commit time is the stamp). Plan (part of this registration):
+`daytrade/plans/halt_resume.md`. The minute data is Lab-AX's (already fetched for other reasons); NO halt statistic
+has been computed. Grep of RESULTS.md / NEXT.md / this file: no halt-trading study.
+- Halt inferred from minute bars: >= 5 minutes without a bar between 09:45 and 15:00, the last bar >= +5% / <= -5%
+  vs 5 bars earlier, active in >= 8 of the 10 prior minutes. Market order during the halt, filled at the first
+  post-gap bar's open (the reopening auction); hold 30 minutes; 10% stop; flat 15:55; one per name per day.
+- Lab-AY1 = buy after a halt UP; Lab-AY2 = buy after a halt DOWN. Costs 20/40bp per side. Halves at 2024-06-01.
+- Pass per variant: 2x > 0 both halves; day-clustered t >= 2 at 1x; >= 95th pct of a random-minute placebo on the
+  same stock-days.
