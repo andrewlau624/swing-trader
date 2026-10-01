@@ -1639,3 +1639,24 @@ RESULTS.md/NEXT.md grep: earnings appears only as a news filter on the overnight
   Buy day 1's opening cross; sell at day H's official close (BH1 H=20, BH2 H=5). Long only. Adjusted prices for returns.
 - Costs 10/20bp per side. Excess over SPY on the same window. Month-clustered t. Random-date placebo on the same stocks.
 - Pass: 2x excess > 0 both halves; t >= 2 (1x excess); placebo >= 95th; without the top 20 > 0.
+
+
+## Amendment — Lab Round 32 result: Study Lab-BH DEAD (long), the drift is a REVERSAL; Lab Round 33, Study Lab-BI pre-registered on 2017-2021 (2 variants, program N 721 -> 723)
+`date`: Thu Oct 1 2026 (the commit time is the stamp).
+- **Lab-BH result.** Up gap >= 5% on >= 3x volume, buy the next open:
+  - 20-day excess over SPY −185bp at 1x (t −3.1, placebo 0th pct), negative EVERY year 2022-26 (−71..−300bp),
+    median −194bp;
+  - 5-day −85bp.
+  - DEAD as a long. study_lab_bh_event_drift.md.
+- **Lab-BI (the short side), judged ONLY on 2017-01-03 .. 2021-12-31.** That window has not been fetched or looked at
+  by anyone in this program for this question.
+  - Same events (common stock, prev close >= $5, ADV20 >= $20M, gap >= +5%, volume >= 3x ADV20 shares).
+  - SHORT at day 1's opening cross, cover at day 20's official close.
+  - Hedged with an equal-notional SPY long over the same window, so the P&L is the excess.
+  - Costs: 1x = 10bp/side on the stock + 0.5bp/side on SPY + borrow 0.5%/yr; 2x = 20bp/side + 1bp/side + 1%/yr.
+  - Lab-BI1: all events. Lab-BI2: only names Alpaca flags easy_to_borrow+shortable today. This is a disclosed
+    look-ahead proxy; delisted names have no flag and are excluded from BI2.
+  - Halves: 2017-2019 / 2020-2021.
+  - Pass, per variant: hedged net > 0 at 2x in both halves; month-clustered t >= 2 at 1x; >= 95th pct of a placebo
+    (the same stocks on random non-event dates, same short+hedge, 1,000 draws); mean without the 20 best events > 0.
+  - Shorts need a margin account (no Roth, no cash account under $2k): stated for any $ figures.
