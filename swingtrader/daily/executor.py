@@ -609,14 +609,11 @@ class DailyExecutor:
                 self.log(f"[wash-guard] skipped ({type(exc).__name__}: {str(exc)[:80]})")
 
         # night-leg universe for this afternoon (pays the ~30s SIP pull now)
-        if self.cash_account and self.d.roth_cash_ira:
-            self.log("[night] roth cash-IRA mode - no night leg")
-        else:
-            u = [s for s in all_assets().symbols if valid_symbol(s)]
-            elig = md.eligibility(u, dt.date.fromisoformat(today), price_min=self.d.night_price_min,
-                                  adv_min=self.d.night_adv_min, cache_dir=self.state_dir)
-            self.log(f"[night] {len(elig)} names eligible today "
-                     f"(close >= ${self.d.night_price_min:.0f}, 20d SIP $vol >= ${self.d.night_adv_min/1e6:.0f}M)")
+        u = [s for s in all_assets().symbols if valid_symbol(s)]
+        elig = md.eligibility(u, dt.date.fromisoformat(today), price_min=self.d.night_price_min,
+                              adv_min=self.d.night_adv_min, cache_dir=self.state_dir)
+        self.log(f"[night] {len(elig)} names eligible today "
+                 f"(close >= ${self.d.night_price_min:.0f}, 20d SIP $vol >= ${self.d.night_adv_min/1e6:.0f}M)")
 
     # ------------------------------------------------------ kill rules
     def _kill(self, book: DailyBook, leg: str, today: str, reason: str) -> None:
@@ -648,15 +645,11 @@ class DailyExecutor:
         return min(1.0, 1.0 / tot) if (self.cash_account and tot > 0) else 1.0
 
     def _w_night(self, book: DailyBook) -> float:
-        if self.cash_account and self.d.roth_cash_ira:
-            return 0.0                       # Study AL: no night leg in the cash IRA
         lw = self.d.lever_weight
         w = max(self.d.night_weight, lw) if (book.levered and lw) else self.d.night_weight
         return w * self._cash_scale()
 
     def _w_ibs(self, book: DailyBook) -> float:
-        if self.cash_account and self.d.roth_cash_ira:
-            return self.d.roth_cash_ira_ibs_weight
         lw = self.d.lever_weight
         w = max(self.d.ibs_weight, lw) if (book.levered and lw) else self.d.ibs_weight
         return w * self._cash_scale()
@@ -874,8 +867,6 @@ class DailyExecutor:
         self._close_shadows(book, today, now, clock)
 
     def _phase_close_night(self, book: DailyBook, today: str, now, clock) -> None:
-        if self.cash_account and self.d.roth_cash_ira:
-            self.log("[night] roth cash-IRA mode - no night leg"); return
         self._check_exit_cost(book, today)
         self._lever_gate(book)
         if self.d.oversold_mode != "off":

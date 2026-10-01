@@ -181,13 +181,14 @@ class DailyCfg:
     # leg 2: overnight loser bounce. Scan ~15:40 ET, buy at the close auction,
     # sell at the next open auction.
     night_weight: float = 0.5
-    # Roth cash-IRA mode (Round 17, Study AL): a plain cash IRA must not use
+    # Roth cash-IRA mode (Round 17, Studies AL/AQ): a plain cash IRA must not use
     # same-day sale proceeds for an intraday round trip; the IBS leg (buy open
     # d+1, sell open d+2) and the night leg (buy close d, sell open d+1) are
-    # GFV-safe, the 3x-ETF intraday leg is not. On a plain cash IRA run the IBS
-    # leg only. Default off; when on, the Roth trades without ROTH_LIMITED_MARGIN.
+    # GFV-safe, the 3x-ETF intraday leg is not. When on, the Roth runs IBS + night
+    # (the shipped overnight book) with NO intraday leg, without ROTH_LIMITED_MARGIN.
+    # Gate: live night round-trip cost <= ~5bp (2x measured; crossover ~6bp). If it
+    # drifts higher, run IBS-only. Default off.
     roth_cash_ira: bool = False
-    roth_cash_ira_ibs_weight: float = 0.75   # fraction of Roth equity for the IBS leg
     # Overnight leverage: BOTH overnight legs move to this weight once
     # signals.lever_ok passes on live fills (50 night exits at <= 10bp/side,
     # no kill, drawdown within 10%), and back when it stops passing.

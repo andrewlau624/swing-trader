@@ -1,5 +1,11 @@
 # Study AL — the idle Roth: what the limited-margin delay costs, and the best cash-IRA book (Round 17)
 
+> **Correction (Study AQ, Round 17c):** the IBS-only recommendation below used the repo's `tier_hi`
+> (15-50bp round trip), which is 5-10x the measured night cost, not the brief's "measured x2"
+> (~5bp). At the brief's stress the cash-IRA book **IBS .5 + night .5** earns 19.0%/yr (22.0% at
+> 2.5bp), t 3.06, and is the recommendation; IBS-only is the fallback if live costs exceed ~6bp.
+> See `study_aq_night_cost.md`. The rest of this file stands as the tier_hi stress case.
+
 `research/drafts/round1_prose.md` Round 17, Study AL (pre-registered before any number).
 Code: `research/sim/roth_cash.py` (`PYTHONPATH=. .venv/bin/python -m research.sim.roth_cash`).
 Output: `data/research/program/roth_cash_out.txt`. N = 642 -> 648 (6 variants).

@@ -9,30 +9,31 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
-## Round 17 (2026-09-30): more %/yr at $2-25k — AL Roth cash book, AM/AN/AO dead or report (N 642 -> 664)
+## Round 17 (2026-09-30): more %/yr at $2-25k — AL/AQ Roth cash book SHADOW, AP dead, AM/AN/AO dead or report (N 642 -> 669)
 
 Brief: `research/drafts/prompt_small_account_profit.md`. Pre-registration: round1_prose.md Round 17.
-- **AL: the idle Roth — SHADOW (the one new thing).** The Roth has never traded (blocked on
+- **AL + AQ: the idle Roth — SHADOW (the one new thing).** The Roth has never traded (blocked on
   `ROTH_LIMITED_MARGIN`). A plain cash IRA is GFV-safe on the IBS leg (buy open d+1, sell open d+2,
   the funding sale's T+1 date) and the night leg (buy close d, sell open d+1); only the 3x-ETF
-  intraday leg needs limited margin. **The cash-IRA book that clears the bar is IBS-only**: 17.9%/yr
-  at tier_hi (14.1/22.1 halves), NW t 2.41, placebo 99.3%, P(DD>50%) 0%, maxDD −16% (w 0.75: 11.1%,
-  −14%; w 0.5: 6.9%, −12%). IBS .5 + night .5 (AL1) is only 7.5%/yr — **the night leg is negative at
-  stressed costs** (night-only 1.0 = −3.4%/yr), so drop it from the Roth until limited margin. The
-  delay costs ~$890-1,010/mo vs idle (on the growing balance); the cash book recovers ~$350-500/mo
-  now. Starting the Roth now beats waiting: the $7.5k/yr deposits are the point. Spec: a
-  `cash_ira` Roth mode (IBS-only, weight-sized), default off, kill rule + tests. Next: build it.
+  intraday leg needs limited margin. **The cash-IRA book is IBS .5 + night .5**: at the brief's
+  stressed cost (measured x2 ~ 5bp round trip) it earns **19.0%/yr** (22.0% at 2.5bp), halves
+  13.0/26.0, NW t vs BIL 3.06, placebo 99%, P(DD>50%) 0%, maxDD −12% (= M3). **AQ corrected AL:**
+  the earlier "IBS-only" call used `tier_hi` (15-50bp), which is 5-10x measured, not the brief's 2x.
+  The night leg's **crossover is ~6bp round trip** (0bp: 31.3%; 5bp: 18.9%; tier_hi: −3.4%); the
+  taxable V7 book is 32.0%/yr at 5bp, 18.6% at tier_hi. So run IBS+night now with the cost gate;
+  IBS-only (17.9% at tier_hi) is the fallback above ~6bp. The delay costs ~$890-1,010/mo vs idle.
+  Spec: `daily.roth_cash_ira` (default off, IBS+night, no intraday) — BUILT + tested.
+- **AP: IBS selection — DEAD.** Cross-sectional rank-1 (threshold/always), all-18 rank-1, rank-2 and
+  a stricter 0.1 gate all lose −0.3..−7.6pp vs the shipped top-3/IBS<0.2 leg. The overnight-reversal
+  edge needs the shipped breadth.
 - **AM: night-leg limit orders — DEAD.** Best realistic close-buy (20bp below 15:50) is +0.96pp in
-  2021-23 but +0.15pp 2024-26, NW t 1.74. Sell-side limits lose (−1.6..−2.6pp). The "adverse
-  selection" is actually favourable (+33..41bp) but the fill loss eats it. The buy-at-the-low upper
-  bound (+7.6/+8.7pp) is look-ahead. add. 13's +2pp was optimistic; needs quotes (L1/ThetaData).
+  2021-23 but +0.15pp 2024-26, NW t 1.74. Sell-side limits lose (−1.6..−2.6pp). The buy-at-the-low
+  upper bound (+7.6/+8.7pp) is look-ahead. add. 13's +2pp was optimistic; needs quotes.
 - **AN: pick-quality classifier — DEAD.** A point-in-time EDGAR classifier (fixes Study U's mislabels)
   confirms FOREIGN ADR picks earn ~+5bp and US operating ~0, and LETF is not an edge (Study W). The
-  tilts are real but ≤1.3pp/yr at tier_hi and fail t ≥ 2 at planning cost (AN1 t 1.86; AN5 t 0.85 at
-  tier). FOREIGN is only 1.7% of picks.
-- **AO: whole-share drag — REPORT.** At $2.3k the whole-share drag is ~2.0pp/yr (tier) / ~1.5 (tier_hi);
-  ~0.2pp by $25k. IBS top2 recovers +0.63pp, cheaper look-alikes +0.48pp, top2+look (post-hoc) +1.0pp
-  — still short of the 2.0pp adopt bar. IBS top1 is worse (−2.45pp); the IBS probe is inert.
+  tilts are ≤1.3pp/yr at tier_hi and fail t ≥ 2. FOREIGN is only 1.7% of picks.
+- **AO: whole-share drag — REPORT.** ~2.0pp/yr at $2.3k (tier), ~0.2pp by $25k. IBS top2 +0.63pp,
+  cheaper look-alikes +0.48pp, top2+look (post-hoc) +1.0pp — short of the 2.0pp adopt bar.
 
 ---
 
