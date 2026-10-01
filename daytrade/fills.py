@@ -89,11 +89,15 @@ class SimBroker:
             if isinstance(ev, Bar):
                 hit = ev.low <= o.stop_px if o.side == "sell" else ev.high >= o.stop_px
                 if hit:
-                    # a gap fills at the open only if the order was resting when the bar opened;
-                    # one placed inside this bar (a stop after an entry fill) fills at its price
-                    gap = (ev.open <= o.stop_px if o.side == "sell" else ev.open >= o.stop_px) \
-                        and o.ts <= ev.start
-                    px = ev.open if gap else o.stop_px
+                    if o.ts > ev.start and o.ref_price:
+                        # placed inside this bar (a stop sent right after an entry fill): the market was at
+                        # ref_price then. Already through the stop -> fills there at once; else at the stop
+                        through = o.ref_price <= o.stop_px if o.side == "sell" else o.ref_price >= o.stop_px
+                        px = o.ref_price if through else o.stop_px
+                    else:
+                        # resting when the bar opened: a gap through the stop fills at the open
+                        gap = ev.open <= o.stop_px if o.side == "sell" else ev.open >= o.stop_px
+                        px = ev.open if gap else o.stop_px
                     return self._fill(o, qty, self._worse(px, o.side, self.cost), ev.ts, "stop")
             if isinstance(ev, Quote):
                 hit = ev.bid <= o.stop_px if o.side == "sell" else ev.ask >= o.stop_px

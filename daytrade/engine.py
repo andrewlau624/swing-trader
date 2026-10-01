@@ -200,8 +200,11 @@ class Engine:
         p = self.positions.get(f.sym)
         signed = f.qty if f.side == "buy" else -f.qty
         if p is None or p.qty == 0:
+            stop = o.stop
+            if o.stop_pct is not None:
+                stop = round(f.price * (1 - o.stop_pct) if signed > 0 else f.price * (1 + o.stop_pct), 2)
             p = Position(f.sym, o.strategy, signed, f.price, f.ts, o.reason,
-                         self.shadow_px.get(o.id), o.stop, o.target)
+                         self.shadow_px.get(o.id), stop, o.target)
             self.positions[f.sym] = p
             self.risk.account.on_open(f.qty * f.price)
             self._place_exits(p, o)
@@ -229,7 +232,7 @@ class Engine:
         orders = []
         if p.stop is not None:
             orders.append(Order(p.sym, side, "stop", stop_px=p.stop, entry=False, reason="stop",
-                                strategy=p.strategy, oco=group))
+                                strategy=p.strategy, oco=group, ref_price=p.avg))
         if p.target is not None:
             orders.append(Order(p.sym, side, "limit", limit=p.target, entry=False, reason="target",
                                 strategy=p.strategy, oco=group))

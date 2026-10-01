@@ -33,6 +33,6 @@ class LateMover(Strategy):
         if bar.ts != ctx.session.at(DECIDE_AT) or d is None or d.prev_close < PRICE_MIN:
             return []
         if bar.close / d.prev_close - 1 >= UP_MIN and self.dvol.get(s, 0.0) >= DOLLAR_VOL_MIN:
-            return [Order(s, "buy", ref_price=bar.close, stop=round(bar.close * (1 - STOP_PCT), 2),
+            return [Order(s, "buy", ref_price=bar.close, stop=round(bar.close * (1 - STOP_PCT), 2), stop_pct=STOP_PCT,
                           reason=f"up {bar.close / d.prev_close - 1:+.0%} at 15:00")]
         return []
