@@ -43,3 +43,4 @@ adds to the program N. Results of the old variant are never deleted.
 | 2026-10-01 | industry_momentum | new variant Lab-BZ: Lab-BW + Lab-BY trend filter, whole-sleeve bars | combine the two best long-history results | program N 740 -> 741 |
 | 2026-10-01 | levered_trend | created (Study Lab-CA: 3x daily-levered market with a 200-day exit, French daily 1963-2015) | the 2016-26 lesson is "index"; leverage + trend exit is the %/yr lever | program N 741 -> 742 |
 | 2026-10-01 | sentiment | created (Studies Lab-CB put/call contrarian, Lab-CC SKEW) as predictors of 20-day market returns | sizing input candidates; free Cboe data | program N 742 -> 744 |
+| 2026-10-01 | vol_managed | created (Study Lab-CD: Moreira-Muir vol-managed market, c fixed on 1927-62, cap 2x) | more %/yr at the same risk from the index | program N 744 -> 745 |
