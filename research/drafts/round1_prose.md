@@ -1202,3 +1202,36 @@ action and keeps ret. Report: coverage; mean and median (ret_auc - ret) in bp pe
 tier; the night-leg and both books' %/yr and $/yr at $2.3k / $10k / $25k with ret_auc substituted
 where available. Decision rule: if the per-trade mean differs by more than 3bp in either half, every
 night-leg level in NEXT.md is restated on auction prints. No variant, no N.
+
+## Amendment — Round 20: auction-share tilts on the night leg — Study AX (pre-register; 2 variants, N 682 -> 684) + AU3 robustness reports
+
+`date`: Thu Oct 1 2026 (stamped by the commit). Follow-on to Round 19 (candidate list rows #22/#40: the closing
+auction is the one mechanism with a named payer that was untested for lack of data). Alpaca's
+`/v2/stocks/auctions` (free, SIP) gives the SIZE of every opening and closing cross, so a trailing auction-share
+measure is computable before 15:50 without imbalance data. Nothing below computed; the per-symbol auction
+history is fetched after this commit.
+
+Features per night pick on d, from the 20 completed sessions before d (sessions with a missing cross or zero
+SIP daily volume skipped; < 15 valid -> unknown, z = 0):
+- CSH20 = mean of closing-cross shares / SIP daily volume (Bogousslavsky & Muravyev, JFM 2023: auction prints
+  deviate from the mid with passive/index flow and ~85% reverts by the next morning; names whose close is
+  dominated by the cross carry more temporary close pressure -> a larger overnight bounce). Payer: passive
+  and index flow at the close.
+- OSH20 = mean of opening-cross shares / SIP daily volume (Berkman, Koch, Tuttle & Zhang, JFQA 2012: attention
+  buyers concentrate at the open and pay too much; a heavier opening cross = more of that demand where the
+  night leg sells). Payer: retail/attention buyers at the open.
+z constants fixed from the 2021-23 picks. Weights as AU3: live v1 tilt x clip(1 + 0.25 z, 0.25, 2), renormalised.
+- AX1: CSH20 tilt (predicted sign +).
+- AX2: OSH20 tilt (predicted sign +).
+
+Judged as Round 19 (V7 and Roth cash books, $2.3k / $10k / $25k, whole shares, 2.5bp/side judged, tier_hi
+reported; increment > 0 both halves, NW t >= 2, sign-flip placebo >= 95th, within-night feature-shuffle placebo
+(200, V7 $10k) >= 95th, dDD >= -2pp, P(DD>50%) <= 5%), with one change: **every night return from the official
+crosses** (Study AW's standing rule). Also reported: per-pick net by 2021-23 terciles per half; Spearman corr
+with TOW, vol20, depth, log price, log ADV; DSR at N 684.
+
+Reports (0 variants, no N):
+- R1 AU3 with TOW computed from the crosses (open cross_t vs close cross_{t-1}; close cross_t vs open cross_t)
+  instead of vendor bars: same weights rule; does the tilt survive on official prices for its INPUT too?
+- R2 AU3 under the `moderate` profile's 15% name cap applied after the tilt, and AU3 on top of tilt v2 (both
+  flagged in study_au_tow.md as needing a check before combination).
