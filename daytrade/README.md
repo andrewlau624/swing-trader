@@ -201,8 +201,11 @@ Live is also long-only until a short plan passes paper.
   - capped at 3 positions;
   - the 2% daily loss limit fired at $25k on gap_vwap_reclaim.
 - open_imbalance fired 0 times (as Lab-AV predicted).
-- The one "held at end of data" was VWAP-trend's QQQ: the copy stopped mid-session, which is expected. The full-day
-  check (flat by 15:55) runs after the close.
+- The one "held at end of data" was VWAP-trend's QQQ: the copy stopped mid-session, which is expected.
+- **Full-day check after the close (`python -m daytrade.research.day_check`): PASSED.**
+  - 311,051 rows 09:30:00 -> 15:59:59.8 ET, no gaps, no reconnects, complete.
+  - All 6 strategies x ($2.3k cash, $25k margin): 0 rule breaks, 0 fills after the 15:55 flat, 0 positions left open.
+  - The 2% daily loss limit fired once (gap_vwap_reclaim, $25k).
 - (The strategies are research plug-ins, all DEAD in replay; this checks the plumbing, not the P&L.)
 
 ## Momentum sleeve: PAPER SHADOW (from Study Lab-BT)

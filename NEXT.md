@@ -25,7 +25,10 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   - compounding stats.
 - Two registrations were untestable (Nasdaq publishes near prices only from 09:28 / 15:55).
 - **Databento: lab $100.22 + main ~$16 = ~$116 of the $125 credit. No more pulls.**
-- **Recorder: live on the server since 2026-10-01 09:20 ET** (first session: ~97k rows by 11:30, no gaps, 106 MB).
+- **Recorder: live on the server since 2026-10-01 09:20 ET.** First full session: 311,051 rows, no gaps or
+  reconnects, ~106 MB RAM.
+  - Replayed through every lab strategy and the risk layer after the close: 0 rule breaks, everything flat by
+    15:55, nothing left open (`daytrade.research.day_check`).
   Note: the 09:25 gapper sweep picked a corporate action (CTVA −81%, a separation). **Fixed in 1ebf2c8** (it now skips
   |gap| >= 50% and split ratios); it reaches the server on the next `make pull` there (the timer picks it up the next
   morning, no reinstall needed).
