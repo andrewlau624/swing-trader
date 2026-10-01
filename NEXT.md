@@ -9,6 +9,28 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Round 19 (2026-10-01): outside-first scan — AU3 tug-of-war tilt SHADOW, AW restates the night leg, AV dead (N 675 -> 680)
+
+Brief: `research/drafts/prompt_max_edge.md`. 44 sourced candidates (`max_edge_candidates.md`); summary
+and ranked table `study_round19_summary.md`. Pre-registration dc53fcb (branch `round19-max-edge`).
+- **AU3 — SHADOW (the one new edge).** Tilt night picks by the 20-session "tug of war" count (overnight
+  up, day down; Akbas et al. JFE 2022). Monotone terciles in both halves (−13 / +11 / +24bp net 2024-26);
+  ~orthogonal to vol20/depth/prev. V7 +3.1 / +3.2 / +2.8pp/yr at $2.3k / $10k / $25k (+$70 / +$323 / +$705),
+  t 2.6-3.0, placebo 99-100%; Roth +$64 / +$296 / +$645. Holds on auction prints and in a second
+  implementation. Against it: DSR 0.46 at N 680, 2022-23 ≈ 0, and it needs the uncapped post-tilt weights
+  (a hard 10% cap after the tilt cuts it to +0.4pp). Spec `daily.night_tilt_tow` (off) in study_au_tow.md:
+  log the weights first; on after ≥ 300 picks if the high-TOW tercile out-earns the low one.
+- **AW — REPORT: the backtest's next open is the vendor first print, not the cross.** On Alpaca's official
+  auction prints the night leg earns 3.8bp/trade less (t −7.5; worst < $10). Every book with a night leg is
+  ~2pp/yr lower (V7 2.5bp: 34.6 → 32.3% at $10k; Roth cash: 23.0 → 20.9%). No verdict flips; AQ's
+  crossover is ~4bp/side, not ~6. New night studies should use `auction_audit_picks.pkl`.
+- **AV — IBS state exits DEAD.** IBS > 0.5 exit −5.9pp (t −2.3); close > prior high −0.8pp (t −0.1).
+- **AU1/AU2 DEAD.** 20d mean overnight return as a tilt t 1.6; as a filter −1.6pp at 2.5bp.
+- Not tested: closing imbalance (data: candidate-only Databento pull may fit the $125 credit; live NYSE
+  feed $588/yr via Massive) and HF forecasters (clean holdouts too short to have power).
+
+---
+
 ## Round 18 (2026-09-30): two ideas from a quant Discord — AS, AT both DEAD (N 669 -> 675)
 
 Triage, results and an AQ correction: `research/drafts/study_as_at_discord.md`. Most of the chat
@@ -707,6 +729,13 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
 | IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
 | IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |
+| Night leg: tug-of-war tilt (Round 19 AU3) | **shadow** | +2.8-3.2pp/yr at 2.5bp, t 2.6-3.0, holds on auction prints; DSR 0.46, 2022-23 ≈ 0; spec only (study_au_tow.md) |
+| Night leg: 20d mean overnight return as tilt / filter (Round 19 AU1, AU2) | **dead** | tilt t 1.5-1.7; filter −1.4..−1.7pp at 2.5bp (its tier_hi gain is the cost gate) |
+| IBS leg: hold until IBS > 0.5 or a close > prior high (Round 19 AV) | **dead** | IBS > 0.5 −5.9pp (t −2.3, both halves); prior-high exit −0.8pp (t −0.1): holds past the overnight bounce |
+| Night exit later than the open auction (9:35 / 10:00 / 10:30) | **dead** | add. 7: open auction +20.1bp vs +1.9 / −9.3 / −21.5 (was only in RESULTS.md) |
+| Night tilts on gap share, relative volume, late selling, idio move, 20d/52w distance, price | **dead** | add. 23: none monotone, most flip halves (was only in RESULTS.md) |
+| IBS leg decided at 15:50 and bought in the close auction | **dead** | add. 6: QQQ 13.9 → 8.8%; trade at the next open (V6 index version is separate, shadow) |
+| Zero-shot TS foundation models (Chronos/TimesFM/Moirai/Kronos) as filters | **not run: power** | clean post-release holdouts 11-30 months ≈ 1/6 of the trades needed; published: ~51% direction, net-negative at 11-21bp (Round 19 list #35-38) |
 
 ## Ideas not yet tested
 
