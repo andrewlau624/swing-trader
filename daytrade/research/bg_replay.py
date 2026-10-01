@@ -23,6 +23,7 @@ from .bb_replay import OUT as BB
 from .bc_replay import CUT
 
 OUT = DATA / "research" / "bg"
+TICK = 0.01
 
 
 def fills():
@@ -52,7 +53,12 @@ def fills():
             ts = tr[(tr.symbol == r.sym) & (tr.timestamp > qq.timestamp)].sort_values("timestamp") if len(tr) else tr
             filled = False
             for x in ts.itertuples(index=False):
-                through = x.price < limit if r.side > 0 else x.price > limit
+                # a lit limit fills only if the market trades a full tick THROUGH it, or its queue at the limit is
+                # used up by LIT prints. Off-exchange (TRF, exchange "D") prints are internalised retail flow at
+                # sub-penny prices: they never touch a resting lit order and are ignored.
+                if str(getattr(x, "exchange", "")) == "D":
+                    continue
+                through = x.price <= limit - TICK + 1e-9 if r.side > 0 else x.price >= limit + TICK - 1e-9
                 at = abs(x.price - limit) < 1e-9
                 if through:
                     filled = True; break
@@ -69,7 +75,7 @@ def fills():
 
 
 def run():
-    x = pd.read_parquet(OUT / "fills.parquet") if (OUT / "fills.parquet").exists() else fills()
+    x = fills()
     cal = pickle.loads((Z.OUT / "sessions.pkl").read_bytes())
     res = {}
     for label, part in (("H2 (judged)", x[x.day >= "2024-06-01"]), ("H1 (reference)", x[x.day < "2024-06-01"])):
