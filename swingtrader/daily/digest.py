@@ -39,10 +39,12 @@ INDEX_DIV_DRAG = 0.002                  # taxable: ~1.3% dividends taxed each ye
 LT_TAX = 0.20                           # long-term gains when the index fund is sold (federal 15% + state)
 # What the research backtest says (auction-corrected, Study AW; 2.5bp/side stress, fixed capital ~$2-25k):
 # V7 brokerage book ~31%/yr, Roth cash IBS+night ~20%/yr; daily vol from the same runs (Sharpe ~1.95 / ~1.5).
-BACKTEST = {"taxable": {"rate": 0.31, "sd_day": 0.010, "levers": 0.15},
+BACKTEST = {"taxable": {"rate": 0.39, "sd_day": 0.012, "levers": 0.37},
             "roth": {"rate": 0.20, "sd_day": 0.0085, "levers": 0.03}}
-# levers in backtest terms: brokerage 1.3x overnight +10pp (add. 29, measured costs), conviction + 4x intraday
-# +5pp (Study AI); Roth (no overnight margin/intraday): tug-of-war tilt ~+3pp (Study AU3).
+# Brokerage: ONE simulation of the live sizing map (research/sim/everything_on.py, auction returns, 2.5bp/side,
+# fixed $2-25k): live today 38-40%/yr (Sharpe 2.0); tug-of-war + 15% cap + conviction + 4x intraday + 1.3x
+# overnight 75-77% (Sharpe 2.2, maxDD -21%). At tier_hi costs: 22% -> 42%. Roth (cash IRA, no margin):
+# IBS + night 20% (Study AQ/AW), tug-of-war ~+3pp (Study AU3).
 # The edge SHRINKS with size (the night leg trades thin names; Study V/Y): rate multiplier by balance,
 # log-interpolated. Brokerage: Study Y book at central impact (31% -> 20% at $100k, 17.8% at $500k,
 # 15.9% at $1M). Roth (IBS + night, night capped near $250k): flat to $250k, then approx.
