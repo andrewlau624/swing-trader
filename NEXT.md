@@ -55,6 +55,9 @@ and state, and does not touch the live book.
 
   At $500 (cash, one turn a day) even a 20bp edge is ~$1/day: tuition.
 
+> **Read first (2026-10-01 overnight): `research/drafts/overnight_2026-10-01.md`.** The next switch, `moderate10c`
+> (conviction + 15% name cap), simulates at +16pp/yr (37.6 -> 54.0% at $2.3k, 2.5bp/side; +9pp at tier_hi), both halves.
+
 ## Round 26-27 (2026-10-01, overnight): Databento key -> closing imbalance (BD) and IBS opening gap (BE) running; everything-on simulated
 - **Everything-on as ONE simulation** (study_everything_on.md; live sizing map, official-cross night returns,
   2.5bp/side, fixed $10k): live today 39.4%/yr (Sharpe 2.0, maxDD −14%) -> + tug-of-war 42.7 -> + 15% name cap
