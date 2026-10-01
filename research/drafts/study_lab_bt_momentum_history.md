@@ -38,3 +38,12 @@ Weight = min(1, 12% / trailing 6-month vol of the momentum excess); the rest in 
 t 3.3; 2x positive both halves. **DEAD** only on bar (a): the 1963-89 Sharpe is 0.02 lower. Recorded for the shadow:
 scaling halves the worst historical crash at almost no cost to the mean. A live version would register it as its
 risk control.
+
+## Lab-BV — long-only long-term reversal, the bottom 60-13-month decile vs the market (Lab Round 44): DEAD
+| | judged 1963-2015 | 1963-89 | 1990-2015 | ref 1927-63 | ref 2016-26 |
+|---|---|---|---|---|---|
+| 1x excess bp/month | +27.9 | +18.1 | +38.0 | +60.1 | **−12.0** |
+| 2x | +17.9 | +8.1 | +28.0 | +50.1 | −22.0 |
+
+t **1.76** (fails 2.0); without best 5 +12; worst 12m −41% (to 2019-08). By decade: 1950s −35, 1980s −34, **2010s −56**,
+2020s +46. **DEAD**: positive on average but too noisy, and negative for the decade before this program's data.
