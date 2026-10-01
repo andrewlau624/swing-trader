@@ -67,7 +67,8 @@ def test_ten_year_lines_and_charts(tmp_path):
     assert len(yrs) == 121 and set(lines) == set(D.LINES)
     assert marks["Backtest, everything on"][1] > marks["Backtest"][1]
     assert marks["Backtest"][1] > marks["Everything on"][1], "the research rate is above every planning line"
-    assert marks["Everything on"][1] > marks["This bot"][1] > marks["Index fund"][1] > 75000, "deposits + growth"
+    assert marks["Everything on"][1] > marks["This bot"][1] > 75000, "deposits + growth"
+    assert marks["Backtest"][1] > marks["Index fund"][1]
     _, tl, tm = D.ten_year("live", 2000.0)
     assert tm["This bot"][1] < D.project(2000.0, D.PLAN["taxable"]["base"], 10), "brokerage lines are after tax"
     st, lg = _state(tmp_path)

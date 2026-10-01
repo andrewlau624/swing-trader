@@ -1494,3 +1494,24 @@ downloaded beyond a 70-second QQQ field sample.
 - Halves at 2024-06-01. Pass: 2x > 0 both halves; day-clustered t >= 2 at 1x; >= 95th pct of a random-side placebo.
 - Shared Databento credit: this pull (~$52) plus main Round 26 BD (night picks, 2-minute windows) stay inside the
   $125 free credit; each study prices its pull with `metadata.get_cost` first and stops above its estimate.
+
+
+## Amendment — Round 27: the IBS leg's entry vs the 09:28 indicative opening gap — Study BE (pre-register; 2 variants, program N 703 -> 705)
+
+`date`: Thu Oct 1 2026 (stamped by the commit), before any opening-imbalance record is downloaded. The IBS leg buys
+the month's top-3 ETFs at the next open after a close with IBS < 0.2; its return is open d+1 -> open d+2 (the
+overnight bounce d -> d+1 is NOT captured: that is V6). Mechanism: when the ETF is already indicated well above the
+prior close before the open, the oversold bounce has been paid out overnight and buy-side pressure sets a high open
+price, leaving less for the hold (short-term reversal decays within a day: Pagonidis 2014; overnight/intraday split:
+Lou-Polk-Skouras 2019). Payer of the shipped leg: short-horizon sellers; this asks whether the edge is gone on
+gap-up entries.
+Signal (knowable before the 09:30 market order): the opening auction's indicative price in the last opening
+imbalance message at or before 09:28:59 ET (Databento `imbalance`, auction_type 'O'; ARCX.PILLAR for the 16 Arca
+ETFs, XNAS.ITCH for QQQ/SMH; ind_match_price, else cont_book_clr_price, else ref_price), divided by the prior
+session's official closing cross (Alpaca auctions, raw, cached for the IBS audit) minus 1 = GAPI.
+- BE1: skip the entry (that slice idles in BIL) when GAPI >= +0.5%.
+- BE2: skip when GAPI >= +1.0%.
+Data from 2018-05 (the feed's start): judged on 2018-05..2023 (select) and 2024-26 (judge) halves on the unit IBS
+leg, and the books 2021-26 as Round 20 (V7 and Roth cash; $2.3k / $10k / $25k; 2.5bp/side judged, tier_hi
+reported; increment > 0 in both halves; NW t >= 2; sign-flip placebo and a within-day shuffle of the skip flags
+>= 95th; dDD >= -2pp). Also reported: per-entry open->open net by GAPI tercile per period. DSR at N 705.

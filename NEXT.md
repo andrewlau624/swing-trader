@@ -48,6 +48,19 @@ and state, and does not touch the live book.
 
   At $500 (cash, one turn a day) even a 20bp edge is ~$1/day: tuition.
 
+## Round 26-27 (2026-10-01, overnight): Databento key -> closing imbalance (BD) and IBS opening gap (BE) running; everything-on simulated
+- **Everything-on as ONE simulation** (study_everything_on.md; live sizing map, official-cross night returns,
+  2.5bp/side, fixed $10k): live today 39.4%/yr (Sharpe 2.0, maxDD −14%) -> + tug-of-war 42.7 -> + 15% name cap
+  51.4 -> + conviction 60.3 -> + 4x intraday 64.9 -> + 1.3x overnight **76.6%** (Sharpe 2.2, maxDD −21%,
+  P(DD>50%) 0%). At tier_hi: 22.3 -> 42.0%. Edge-halves (the program's standard haircut): 17.8 -> 31.1%.
+  Roth cash book: 20.9% (EH 10.0%), + tug-of-war + 15% cap 31.3% (EH 14.5%).
+- The weekly digest's plan lines are now exactly these edge-halves numbers (were judgment calls: 17% / 22% / Roth 15%,
+  the Roth one too high); its backtest lines are the simulation (were a sum of separate estimates, too low).
+- BD (closing imbalance, N 701) and BE (IBS entry vs 09:28 indicative gap, N 705) are pre-registered; data pulls
+  ~$15 total of the Databento credit shared with the lab (Lab-AZ ~$69).
+
+---
+
 ## Rounds 20-21 (2026-10-01): free-data night tilts — AX, AY DEAD; AU3 holds on cross prices and combines (N 682 -> 686)
 - **AX (Round 20): trailing closing-/opening-cross share of volume** (Alpaca auction sizes, free; the stand-in for
   closing imbalance, which stays parked: the user does not want a Databento account unless necessary). AX1

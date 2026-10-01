@@ -78,6 +78,24 @@ def main():
                 log(f"   {lab:24s} {h1[0]*100:5.1f}/{h1[1]:4.2f} | {h2[0]*100:5.1f}/{h2[1]:4.2f} | "
                     f"{fu[0]*100:5.1f}/{fu[1]:4.2f}/{fu[2]*100:4.0f}  AT {fu[0]*0.68*100:5.1f}{inc}{pdd}")
                 prev = fu[0]
+    # ---- edge-halves (the program's standard haircut, growth.eh): half of each leg's mean daily
+    # contribution taken away, costs and margin interest kept. The digest's PLAN lines use these.
+    log("\n== edge-halves (EH) at 2.5bp/side, fixed $10k: half of every leg's mean contribution removed")
+    for lab, g, conv, mult, tow, N, F in steps:
+        kw = G.cfg(g, conv, mult)
+        s.N = N
+        p = B.Params(**{**G.V7, **kw, "night_cost": 2.5})
+        if tow:
+            p = dataclasses.replace(p, tilt=M.make_tilt(N, F, "AU3", mu, sd))
+        legs = []
+        for d in s.days:
+            pl, info = s.day_pnl(10000.0, d, p)
+            legs.append((d, pl / 1e4, info["night"] / 1e4, info["ibs"] / 1e4, info["noise"] / 1e4))
+        L = pd.DataFrame(legs, columns=["d", "r", "n", "i", "z"]).set_index("d")
+        eh = L.r - 0.5 * (L.n.mean() + L.i.mean() + L.z.mean())
+        a, b = B.stats(L.r), B.stats(eh)
+        log(f"   {lab:24s} full {a[0]*100:5.1f}%  EH {b[0]*100:5.1f}% / Sharpe {b[1]:4.2f} / maxDD {b[2]*100:4.0f}%  "
+            f"AT {b[0]*0.68*100:5.1f}%")
     f.close()
 
 
