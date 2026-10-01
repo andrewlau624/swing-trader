@@ -54,6 +54,8 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 - **Lab-AT's registered first look is pre-built:** `make daytrade-at-look` refuses until 40 unflagged recorded sessions
   exist (on the server's `data/daytrade`), then runs the plan exactly once (recorded-spread costs, first/last 20
   sessions, sign-flip placebo).
+- **DSR audit of the lab's passes:** at N 745 the best is Lab-BW (industry momentum) at DSR 0.55; BT 0.43, BZ 0.16,
+  BY 0.11. None clears 0.95, even at the lab's own N ~50 (best 0.85). No lab finding is a confirmed edge.
 - **Nothing to switch on.** The live book is unchanged. The next real look is Lab-AT after 40 recorded sessions
   (~early Dec). Expect few signals (Lab-AV).
 
