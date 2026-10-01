@@ -9,7 +9,7 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
-## Day-trading lab (2026-10-01, Lab Rounds 18-31): 15 studies, NO edge found; recorder LIVE (lab variants counted in program N, now 719)
+## Day-trading lab (2026-10-01, Lab Rounds 18-38): 25 studies (intraday, events, multi-day, market-neutral, vol premium, cross-section), one registered PASS (Lab-BT, long-run momentum; faded since 2000, shadow only); recorder LIVE (program N 735)
 
 **Overnight bottom line (for the user, 2026-10-01 morning).**
 - Every intraday idea tested at real costs is dead. The recurring pattern:
@@ -27,6 +27,21 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 - **Databento: lab $100.22 + main ~$16 = ~$116 of the $125 credit. No more pulls.**
 - **Recorder: live on the server since 2026-10-01 09:20 ET** (first session: ~97k rows by 11:30, no gaps, 106 MB).
   Note: the 09:25 gapper sweep can pick up corporate actions (CTVA −81% was a separation, not a move).
+- **Lab-BH/BI (announcement-gap drift, daily, multi-day): DEAD.** In 2022-26 gappers UNDERPERFORM SPY by 185bp over
+  20 days (every year), but the short + hedge judged on unseen 2017-21 fails (t 0.6; 2018 and 2020 lose).
+  study_lab_bh_bi_event_drift.md.
+- **Lab-BJ (calendar-month seasonality, monthly top 20 of 500): DEAD** (−69bp/month vs the universe 2021-26).
+- **Waiting on the user: insider-purchase drift (not registered, no N).** Officer/director open-market buys
+  (Lakonishok & Lee 2001; Cohen, Malloy & Pomorski 2012) are the strongest untested multi-day idea with free data:
+  SEC quarterly Form 3/4/5 datasets. The SEC returns 403 without a contact email in the User-Agent. The repo's
+  convention (`swingtrader/daily/news_judge.sec_headers`) uses `NOTIFY_EMAIL` or `SEC_USER_AGENT` from `.env`, and
+  the Mac's `.env` has neither. Set one (your choice) to unblock; the lab will register and run it.
+- **Lab-BK (short LETF pairs), Lab-BL (stock pairs), Lab-BM (post-split drift), Lab-BN (SVXY in contango): DEAD.** Crypto was already dead in RESULTS.md.
+- **Lab-BT: PASS (with caveats).** Long top-decile momentum beat the market by +40bp/month 1963-2015 (t 3.0; 2x
+  positive both halves, the second only +4bp), but the excess was about 0 in the 2000s, the 2010s and 2016-26 after
+  costs, with crash risk (−50% worst 12 months). A priced risk factor, not a free edge.
+  -> **Built as a PAPER SHADOW**: `make daytrade-momentum` logs the monthly top 20 of 500 by 12-1 momentum (Lab-BR's
+  rule) and their realised return vs the universe. No orders. study_lab_bt_momentum_history.md.
 - **Nothing to switch on.** The live book is unchanged. The next real look is Lab-AT after 40 recorded sessions
   (~early Dec). Expect few signals (Lab-AV).
 
@@ -880,6 +895,16 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Nasdaq early closing imbalance (15:54) as an intraday trade to the close (Lab-AZ/BB/BC, day-trading lab) | **dead: real signal, spread-bound** | +6-7bp gross out of sample (placebo 100th) but the 15:54 spread eats it: H2 +0.3bp net 1x, −5.7bp 2x |
 | Nasdaq opening-cross imbalance, reversal by 10:00 (Lab-BE/BF, day-trading lab) | **dead** | wrong sign (−7.8bp gross, placebo 0.4th); continuation decayed from +13.5bp (H1) to +1.9bp (H2), below the exit spread |
 | Closing-imbalance signal with a passive limit at the touch until 15:55 (Lab-BG, day-trading lab) | **dead** | adverse selection: filled trades −0.6bp mid -> close (H2); net +2.2bp t 1.6; a false pass came from counting TRF sub-penny prints |
+| Announcement-gap drift (gap >= 5% on 3x volume), long 5/20d; and the short+SPY hedge (Lab-BH/BI, lab) | **dead** | long −185bp 20d excess 2022-26; the short fails out of sample on 2017-21 (t 0.6; 2018, 2020 negative): a post-2021 regime |
+| Calendar-month return seasonality, top 20 of 500 most traded, monthly (Lab-BJ, lab) | **dead** | −69bp/month vs the EW universe 2021-26, placebo 3.9th pct |
+| Short both legs of a 3x LETF pair (TQQQ+SQQQ, UPRO+SPXU), weekly (Lab-BK, lab) | **dead** | weekly rebalancing keeps only daily-minus-weekly variance (~3.8%/yr gross on QQQ); shorts pay the bear ETFs' T-bill distributions; ~0 after 2-4% borrow, negative at HTB rates |
+| Distance-method stock pairs on the top 100 (Gatev et al.), 6-month periods (Lab-BL, lab) | **dead** | −13bp/month, negative 8 of 10 years, placebo 68th pct |
+| Drift after forward-split ex-dates, 60 days (Lab-BM, lab) | **dead** | −250bp excess at 2x, both halves negative; the same stocks on random dates beat SPY by ~12%: splitters underperform right after the split |
+| SVXY only in VIX/VIX3M contango, else BIL (Lab-BN, lab) | **dead** | 13.7%/yr, −45% max DD vs SPY 14.6%/−32%; t 1.5, placebo 76th pct |
+| Monthly top 20 of 500 by 52w-high nearness / low vol / 1-month reversal (Lab-BO/BP/BQ, lab) | **dead** | excess −8.5 / −50 / +13bp per month, all fail 2x in a half; t ≤ 0.2 |
+| Monthly 12-1 momentum, top 20 of 500 (Lab-BR, lab) | **dead by t (watch)** | 22.6%/yr vs universe 12.2%, placebo 100, but t 1.5 and 2017-21 2x only +0.9bp/month with a worse Sharpe: the 2022-26 AI rally. A new registration needs pre-2016 history |
+| Sector-SPDR 12-1 momentum, top 3 monthly (Lab-BS, lab) | **dead** | 2017-21 −31bp/month at 2x; only 2022 (energy) helps; 13.6%/yr < SPY 15.1% |
+| Long top-decile momentum vs market, 1963-2015 French data (Lab-BT, lab) | **PASS (registered bar), shadow only** | +40bp/month, t 3.0, but ~0 in the 2000s/2010s and −3.5bp at 2x in 2016-26; −50% worst 12m. Paper shadow built; no live change |
 | Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
 | IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
 | IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |
@@ -904,7 +929,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 - Multiple formation horizons (5/10/20d) simultaneously — the one remaining
   structural fix for 14% capital utilisation
 - Cross-sectional ranking instead of a binary z-threshold (always deployed)
-- Crypto sleeve (24/7, AVAX/DOT/LTC screen as tradable)
+- ~~Crypto sleeve~~ (already dead: RESULTS.md "crypto trend (BTC/ETH SMA...) = buy-and-hold Sharpe, −60% DDs; basket negative after 25bp fees")
 - Limit orders at the bid instead of market-on-open — bounded by addendum 13:
   paying 0 vs 20bps is worth ~+2pp CAGR, so the upside is real but modest
 

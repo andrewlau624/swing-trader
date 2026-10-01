@@ -192,6 +192,17 @@ Live is also long-only until a short plan passes paper.
 - One bad day at the 2% limit costs $10.
 - The test's purpose is to measure real fills and drift, not to earn.
 
+## Momentum sleeve: PAPER SHADOW (from Study Lab-BT)
+The only registered PASS of the lab's first night, kept outside the intraday engine (it holds for a month):
+- Rule (Lab-BR): monthly top 20 of the 500 most-traded common stocks by 12-1 momentum, equal weight.
+- Evidence:
+  - Ken French's top momentum decile beat the market by +40bp/month 1963-2015 (t 3.0).
+  - That excess was about 0 in the 2000s and 2010s and slightly negative after costs in 2016-26.
+  - It carries crash risk: −50% worst 12 months. The current picks are concentrated in semiconductors/AI hardware.
+- `make daytrade-momentum` (once a month, after the first trading day): logs the next month's picks and scores
+  last month's realised return against the universe in `state/daytrade/momentum-shadow.jsonl`. **No orders.**
+- A live test would need its own registration with a crash-risk bound, the $500 gate and the user's approval.
+
 ## What does not work yet (plainly)
 - The recorder runs on the server (since 2026-10-01). Its first session was validated against SIP; see the feeds
   table. The 09:25 gapper sweep uses Schwab's unadjusted previous close, so it can select a corporate action as a

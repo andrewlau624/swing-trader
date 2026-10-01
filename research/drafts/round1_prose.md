@@ -1639,3 +1639,137 @@ RESULTS.md/NEXT.md grep: earnings appears only as a news filter on the overnight
   Buy day 1's opening cross; sell at day H's official close (BH1 H=20, BH2 H=5). Long only. Adjusted prices for returns.
 - Costs 10/20bp per side. Excess over SPY on the same window. Month-clustered t. Random-date placebo on the same stocks.
 - Pass: 2x excess > 0 both halves; t >= 2 (1x excess); placebo >= 95th; without the top 20 > 0.
+
+
+## Amendment — Lab Round 32 result: Study Lab-BH DEAD (long), the drift is a REVERSAL; Lab Round 33, Study Lab-BI pre-registered on 2017-2021 (2 variants, program N 721 -> 723)
+`date`: Thu Oct 1 2026 (the commit time is the stamp).
+- **Lab-BH result.** Up gap >= 5% on >= 3x volume, buy the next open:
+  - 20-day excess over SPY −185bp at 1x (t −3.1, placebo 0th pct), negative EVERY year 2022-26 (−71..−300bp),
+    median −194bp;
+  - 5-day −85bp.
+  - DEAD as a long. study_lab_bh_event_drift.md.
+- **Lab-BI (the short side), judged ONLY on 2017-01-03 .. 2021-12-31.** That window has not been fetched or looked at
+  by anyone in this program for this question.
+  - Same events (common stock, prev close >= $5, ADV20 >= $20M, gap >= +5%, volume >= 3x ADV20 shares).
+  - SHORT at day 1's opening cross, cover at day 20's official close.
+  - Hedged with an equal-notional SPY long over the same window, so the P&L is the excess.
+  - Costs: 1x = 10bp/side on the stock + 0.5bp/side on SPY + borrow 0.5%/yr; 2x = 20bp/side + 1bp/side + 1%/yr.
+  - Lab-BI1: all events. Lab-BI2: only names Alpaca flags easy_to_borrow+shortable today. This is a disclosed
+    look-ahead proxy; delisted names have no flag and are excluded from BI2.
+  - Halves: 2017-2019 / 2020-2021.
+  - Pass, per variant: hedged net > 0 at 2x in both halves; month-clustered t >= 2 at 1x; >= 95th pct of a placebo
+    (the same stocks on random non-event dates, same short+hedge, 1,000 draws); mean without the 20 best events > 0.
+  - Shorts need a margin account (no Roth, no cash account under $2k): stated for any $ figures.
+
+
+## Amendment — Lab Round 34, Study Lab-BJ: calendar-month return seasonality, top 20 of the 500 most traded stocks (pre-register; 1 variant, program N 723 -> 724)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Plan (part of this registration): `daytrade/plans/seasonality.md`.
+Heston & Sadka (2008); Keloharju, Linnainmaa & Nyberg (2016). grep: untested here.
+- Monthly adjusted SIP bars 2016-01 .. 2026-09. Universe: price >= $5, top 500 by trailing-12-month dollar volume.
+  Signal = mean same-calendar-month return over the prior 5 years (>= 3 obs). Long the top 20, equal weight, close to
+  close, rebalanced monthly. Excess vs the equal-weight universe.
+- Test 2021-01 .. 2026-09; halves at 2024-01. Costs 10/20bp per side, full turnover.
+- Pass: 2x excess > 0 both halves; t >= 2; >= 95th pct of a random-20 placebo; without the 5 best months > 0.
+
+
+## Amendment — Lab Round 35, Study Lab-BK: short both legs of a 3x LETF pair (volatility drag), weekly rebalanced (pre-register; 2 variants, program N 724 -> 726)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Plan (part of this registration): `daytrade/plans/letf_decay.md`.
+grep: untested here.
+- Lab-BK1 TQQQ+SQQQ; Lab-BK2 UPRO+SPXU. Short 0.5E each, rebalance at each week's last close (MOC). Adjusted SIP daily,
+  2016-01 .. 2026-09. No short rebate.
+- Costs 1x: 5bp/side + borrow 2%/4% (bull/bear); 2x: 10bp/side + 5%/10%.
+- Pass: 2x weekly net > 0 both halves (2016-20 / 2021-26); t >= 2; without the best 5 weeks > 0; max DD (1x) > -40%.
+  Reference: QQQ+PSQ shorted the same way.
+
+
+## Amendment — Lab Round 36, Study Lab-BL: distance-method stock pairs (Gatev, Goetzmann & Rouwenhorst 2006) on the 100 most-traded stocks (pre-register; 1 variant, program N 726 -> 727)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Prior: weak (Do & Faff 2010: the returns decayed after 2002).
+grep: ETF pairs dead (add. 27 R4); stock pairs untested.
+- Every 6 months from 2017-01: formation = the previous 12 months. Universe = common stock, price >= $5, the top 100 by
+  formation-period dollar volume (adjusted SIP daily, 2016-01 .. 2026-09). Normalise each price path to 1 at the
+  formation start; pick the 20 pairs with the smallest sum of squared differences.
+- Trading = the next 6 months, daily closes: open when the normalised spread diverges by > 2 formation SDs (long the
+  low leg, short the high leg, $1 each); close at the next crossing or the period's end. Re-open allowed.
+- Each pair gets 1/20 of capital (committed-capital returns). Costs: 1x 10bp per side per leg (4 legs per round trip),
+  2x 20bp.
+- Halves 2017-2021 / 2022-2026-09. Pass: 2x monthly net > 0 both halves; t >= 2 (monthly); without the best 3 months
+  > 0; >= 95th pct of a placebo (20 random pairs from the same universe, same rules, 200 draws).
+
+
+## Amendment — Lab Round 37, Study Lab-BM: post-split drift after FORWARD-split ex-dates (pre-register; 1 variant, program N 727 -> 728)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Source: Ikenberry, Rankine & Stice (1996); Desai & Jain (1997)
+(positive drift after splits). grep: untested here. Alpaca's corporate-announcement history is unusable before 2024,
+so ex-dates are inferred from raw SIP daily bars.
+- Event: a common stock whose raw open on day 0 / raw close on day -1 is within ±6% of 1/k for k in {2, 3, 4, 5, 10,
+  20} (a k-for-1 forward split; reverse splits excluded). Raw post-split day-0 open >= $5; 20-day ADV (pre-split $)
+  >= $5M. Raw SIP daily 2016-10 .. 2026-09 (Lab-BI's and Lab-AU's caches).
+- Buy at day 0's official close (market-on-close); sell at day 60's official close. Return on raw prices after day
+  0, adjusted by any further detected split in the window. Excess vs SPY (adjusted) on the same window.
+- Costs 10/20bp per side. Halves: event years 2017-2021 / 2022-2026.
+- Pass: 2x excess > 0 both halves; month-clustered t >= 2 (1x); >= 95th pct of a random-date placebo (same stocks, 60
+  days, 1,000 draws); without the best 10 events > 0 (fewer events than the other studies).
+
+
+## Amendment — Lab Round 38, Study Lab-BN: short-volatility (SVXY, −0.5x VIX futures) only in VIX term-structure contango, else T-bills (pre-register; 1 variant, program N 728 -> 729)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). grep: no SVXY / contango / VRP study here. Source: the volatility
+risk premium (Carr & Wu 2009; Simon & Campasano 2014, the VIX futures basis).
+- Signal: Cboe VIX close / VIX3M close on day t (cdn.cboe.com History CSVs) < 1 = contango.
+- Position from day t+1's opening cross to day t+2's opening cross: SVXY if contango, else BIL. A switch trades at the
+  opening cross (directed MOO-style order). Adjusted Alpaca SIP daily opens. 2018-03-01 .. 2026-09-30 (SVXY is −0.5x
+  from 2018-02-28). Halves: 2018-03..2021-12 / 2022-01..2026-09.
+- Costs: 1x 5bp/side per switch; 2x 10bp.
+- Pass: monthly excess over BIL (net) > 0 at 2x in both halves; t >= 2 (monthly); max drawdown at 1x better than −50%;
+  >= 95th pct of a placebo (random in/out days with the same in-market share, shuffled in 21-day blocks, 1,000 draws);
+  without the best 5 months > 0. Reported beside SVXY buy-and-hold and SPY; Roth-compatible (long ETFs only).
+
+
+## Amendment — Lab Round 39, Studies Lab-BO / Lab-BP / Lab-BQ: three monthly cross-sectional anomalies on the 500 most-traded stocks (pre-register; 3 variants, program N 729 -> 732)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). The frame is Lab-BJ's (`daytrade/research/bj_replay.py`: monthly
+adjusted SIP bars for returns, raw closes for the $5 filter, top 500 by trailing-12-month dollar volume, long the top
+20 equal weight at month m-1's close to month m's close, excess vs the equal-weight universe, full-turnover costs
+10/20bp per side). Test months 2017-01 .. 2026-09; halves 2017-01..2021-12 / 2022-01..2026-09.
+grep: 52w-high only as a swing filter, a night tilt and SPY timing (dead); low-vol and 1-month reversal untested.
+- **Lab-BO 52-week-high momentum** (George & Hwang 2004): score = month m-1 close / max of the closes of months
+  m-12..m-1; long the 20 highest (nearest the high).
+- **Lab-BP low volatility** (Ang et al. 2006; Frazzini & Pedersen 2014): score = −std of monthly returns over months
+  m-12..m-1 (>= 10 obs); long the 20 lowest-vol. Also report the Sharpe of the long portfolio vs the universe.
+- **Lab-BQ 1-month reversal** (Jegadeesh 1990): score = −return of month m-1; long the 20 biggest losers.
+- Pass, each: 2x excess > 0 both halves; t >= 2 (monthly); >= 95th pct of a random-20 placebo; without the best 5 months
+  > 0. For Lab-BP the Sharpe of the long book must also beat the universe's in both halves.
+
+
+## Amendment — Lab Round 39 result: Lab-BO / BP / BQ all DEAD (study_lab_bo_bp_bq_cross_section.md). Lab Round 40, Study Lab-BR: 12-1 momentum in the same frame (pre-register; 1 variant, program N 732 -> 733)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Jegadeesh & Titman (1993). grep: NEXT "Momentum sleeve at 25%:
+promising, unvalidated"; theme/breakout/top-1% momentum dead (add. 28); the IBS leg uses ETF momentum. The plain
+cross-sectional stock version is untested.
+- Score = close of month m-2 / close of month m-13 - 1 (skip the last month); long the top 20 of the 500, equal weight,
+  monthly. Lab-BJ's frame, costs and test months (2017-01 .. 2026-09; halves 2017-21 / 2022-26).
+- Pass: 2x excess > 0 both halves; t >= 2; >= 95th pct of the random-20 placebo; without the best 5 months > 0.
+
+
+## Amendment — Lab Round 41, Study Lab-BS: sector-ETF momentum rotation (Moskowitz & Grinblatt 1999) (pre-register; 1 variant, program N 733 -> 734)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). grep: no sector rotation / industry momentum study (the IBS leg
+uses ETF momentum only to choose mean-reversion entries).
+- Universe (fixed): the 11 Select Sector SPDRs XLB XLC XLE XLF XLI XLK XLP XLRE XLU XLV XLY (XLC from 2018-07, XLRE from
+  2015-10; a fund joins once it has 13 months). Monthly adjusted SIP bars 2015-11 .. 2026-09.
+- Score = 12-1 momentum (close m-2 / close m-13 - 1). Hold the top 3, equal weight, month-end close to month-end close.
+- Benchmark: equal-weight all available sector SPDRs (excess), and SPY reported.
+- Test 2017-01 .. 2026-09; halves 2017-21 / 2022-26. Costs 5/10bp per side, full turnover.
+- Pass: 2x excess > 0 both halves; t >= 2 (monthly); >= 95th pct of a random-3 placebo; without the best 5 months > 0.
+
+
+## Amendment — Lab Round 42, Study Lab-BT: long-only top-decile momentum vs the market on 1963-2015 (Kenneth French library) (pre-register; 1 variant, program N 734 -> 735)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Purpose: Lab-BR (12-1 momentum, top 20 of 500, 2017-26) failed only
+on t (1.5) with ~10 years of Alpaca history. This tests the same long-only idea on the decades this program has never
+used, survivorship-free.
+- Data: Ken French "10 Portfolios Formed on Prior (12-2) Return", value-weighted monthly (CRSP), and the FF factors
+  (market = Mkt-RF + RF). Downloaded 2026-10-01 (CRSP 202608); no return looked at before this registration.
+- Book: hold the value-weighted TOP decile (Hi PRIOR) each month. Excess = Hi PRIOR - market.
+- Judged on 1963-07 .. 2015-12 (the modern CRSP era, before this program's data). Halves 1963-07..1989-12 /
+  1990-01..2015-12.
+- Costs (full monthly turnover, conservative): 1x 20bp/month; 2x 40bp/month.
+- Pass: 2x excess > 0 in BOTH halves; t >= 2 (monthly, judged period); the mean without the best 5 months > 0.
+- Reported, not judged: 1927-1963 and 2016-2026-08, the worst 12-month excess (momentum crashes, e.g. 2009), CAGR vs
+  market.
+- If it passes: build a monthly momentum sleeve (Lab-BR's rule) in the lab as a PAPER SHADOW only. Its own live gate
+  stays the lab's $500 gate; nothing in the live book changes.

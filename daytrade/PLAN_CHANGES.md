@@ -25,3 +25,13 @@ adds to the program N. Results of the old variant are never deleted.
 | 2026-10-01 | open_cross_reversal | Lab-BE untestable (near price 0 before 09:28); new variant Lab-BF: decision 09:28:30, 30 names, top/bottom 2 | registration error; Databento budget | program N 714 -> 716 |
 | 2026-10-01 | close_imbalance | new variant Lab-BG: Lab-BC signals with a passive limit at the touch until 15:55 (queue-aware fills from SIP trades) | test whether passive entry captures the real +6bp | program N 716 -> 717 |
 | 2026-10-01 | event_drift | created (Study Lab-BH1 hold 20d, Lab-BH2 hold 5d) | multi-day drift after big announcement-day moves; costs paid once | program N 719 -> 721 |
+| 2026-10-01 | event_drift | Lab-BH DEAD long (20d excess −185bp, every year); new variant Lab-BI: short + SPY hedge, judged on unseen 2017-2021 | the drift is a reversal in 2022-26 | program N 721 -> 723 |
+| 2026-10-01 | seasonality | created (Study Lab-BJ: same-calendar-month seasonality, top 20 of 500, monthly) | long-documented multi-year anomaly, small-account and Roth friendly | program N 723 -> 724 |
+| 2026-10-01 | letf_decay | created (Study Lab-BK1 TQQQ+SQQQ, Lab-BK2 UPRO+SPXU short pairs) | mechanical volatility-drag harvest, untested here | program N 724 -> 726 |
+| 2026-10-01 | pairs | created (Study Lab-BL: distance-method stock pairs, top 100, 6-month periods) | sourced, market-neutral, untested on stocks here | program N 726 -> 727 |
+| 2026-10-01 | split_drift | created (Study Lab-BM: forward-split ex-date drift, 60 days) | sourced event, small-account friendly, untested | program N 727 -> 728 |
+| 2026-10-01 | vrp_contango | created (Study Lab-BN: SVXY in contango else BIL) | mechanical premium, long-only ETF, Roth-compatible | program N 728 -> 729 |
+| 2026-10-01 | cross_section | created (Studies Lab-BO 52w-high, Lab-BP low-vol, Lab-BQ 1-month reversal; monthly top 20 of 500) | classic anomalies, Roth/small-account friendly | program N 729 -> 732 |
+| 2026-10-01 | cross_section | Lab-BO/BP/BQ DEAD; new variant Lab-BR: 12-1 momentum, same frame | the classic left untested | program N 732 -> 733 |
+| 2026-10-01 | sector_momentum | created (Study Lab-BS: top-3 sector SPDRs by 12-1 momentum, monthly) | industry momentum, Roth-friendly | program N 733 -> 734 |
+| 2026-10-01 | momentum | new variant Lab-BT: top-decile momentum vs market on 1963-2015 (French library) | Lab-BR failed only on t with 10 years of data | program N 734 -> 735 |
