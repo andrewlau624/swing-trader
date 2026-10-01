@@ -52,8 +52,10 @@ and state, and does not touch the live book.
   Roth cash book: 20.9% (EH 10.0%), + tug-of-war + 15% cap 31.3% (EH 14.5%).
 - The weekly digest's plan lines are now exactly these edge-halves numbers (were judgment calls: 17% / 22% / Roth 15%,
   the Roth one too high); its backtest lines are the simulation (were a sum of separate estimates, too low).
-- BD (closing imbalance, N 701) and BE (IBS entry vs 09:28 indicative gap, N 705) are pre-registered; data pulls
-  ~$15 total of the Databento credit shared with the lab (Lab-AZ ~$69).
+- **BD (closing imbalance at 15:50, Databento): DEAD.** Sell/buy-imbalance buckets flip sign between halves; the
+  tilt is +0.3pp (t 0.6, shuffle 62%); dropping buy-imbalance picks is −6pp (lost exposure: shuffle 60%). The
+  imbalance feed is not worth buying for the night leg. study_bd_closing_imbalance.md.
+- BE (IBS entry vs 09:28 indicative gap, N 705) pre-registered; data pull running (~$1).
 
 ---
 
@@ -813,7 +815,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | SPX put-write overlay (Cboe PUT / WPUT / CNDR, k 0.5, Round 13 Z) | **dead** | PUT positive every period but NW t 1.93 and −15.5% worst 21d (2020); WPUT/CNDR negative after costs; in the Roth PUT < held index |
 | Fade QQQ inside the noise band while the noise leg is flat (Round 13 AB) | **dead** | in-band drift < one side of cost; −2..−4pp/yr, NW t ≈ −1.2, placebo 41-82 |
 | Box-spread financing of the overnight debit (Round 13 AA) | **report** | debit ~3.6% of equity at 1.3x: ~$320/yr at $100k; ~$1.7k at 2.0x; only with MAX leverage |
-| Closing-auction imbalance (Round 13 AC) | **untested: data** | needs Nasdaq/NYSE imbalance history (Databento 2018+) and a live feed |
+| Closing-auction imbalance (Round 13 AC) | **dead (Round 26 BD)** | tested on Databento history 2021-26: no ex-ante signal |
 | SPY held + noise overlay for the taxable account (Round 13 AD) | **report → switch at $100k (Round 14)** | beats B2 after tax, both halves; at the live cap 1.0 and a 10% index it ties at $100k, loses at $25k; more drawdown (−17% / −31% in 2020); taxable only |
 | High-frequency QQQ/SPY scalping (1-15 min momentum/reversal, ~100+ trades/day; diagnostic 2026-09-30, not pre-registered) | **dead** | minute autocorr ~0.01; non-overlapping 5-min reversal after a 2-sd move: −1.0..+0.3bp gross/trade, sign flips across periods, no t ≥ 2; QQQ's 0.13bp spread alone eats it. The pooled −0.47bp "reversal" was overlap + a full-sample sd threshold |
 | Anatomy of the biggest intraday swings -> a direction rule at the open (Round 15, Study AE) | **dead (nothing selected)** | gap size, yesterday's range and volume make a 3σ open->close move 2-2.7x likelier, equally up and down; no feature's extreme decile predicts sign (best t −2.5 on 2021-23, −3bp vs ~10-30bp cost); AE1-5 not run |
@@ -843,6 +845,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Night leg: FINRA off-exchange short-volume ratio, either sign (Round 21 AY) | **dead** | 2021-23 terciles flat; book ±0.4pp, t ≤ 0.6, feature shuffle 53% |
 | Roth: buy large caps the night before their ex-dividend date with idle cash (Round 22 AZ) | **dead** | drop ratio 0.90-0.96 = +4..+7bp/event vs SPY, about one round trip; book −0.1..−0.8pp at 2.5bp/side, matched placebo 87-90% |
 | Backtesting an LLM news judge on past picks (Round 25 BC) | **invalid by construction** | the model (OpenCode Go deepseek-v4-flash) knows events through 2025-10 and hallucinated a control; past verdicts can carry outcome memory. Test LLM signals forward only |
+| Night leg: closing-auction imbalance at 15:50 as tilt or buy-imbalance filter (Round 26 BD, Databento) | **dead** | side buckets flip halves (sell +27.5 -> −4.8bp); tilt t 0.6, shuffle 62%; filter = lost exposure (shuffle 60%). Do not buy a live imbalance feed for this leg |
 
 ## Ideas not yet tested
 
