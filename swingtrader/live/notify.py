@@ -11,6 +11,7 @@ Two rules, both load-bearing:
 from __future__ import annotations
 
 import datetime as dt
+import base64
 import hashlib
 import json
 import os
@@ -55,8 +56,10 @@ class Notifier:
         except Exception:
             pass
 
-    def send(self, subject: str, html: str, dedupe_key: str | None = None) -> str:
-        """Returns a short status string; never raises."""
+    def send(self, subject: str, html: str, dedupe_key: str | None = None,
+             images: list[tuple[str, bytes]] | None = None) -> str:
+        """Returns a short status string; never raises. images: (content_id, png bytes) pairs,
+        referenced in the html as <img src="cid:content_id"> (Resend inline attachments)."""
         if not self.enabled:
             return f"email skipped ({self.reason})"
         key = dedupe_key or hashlib.sha256((subject + html).encode()).hexdigest()[:16]
@@ -68,8 +71,11 @@ class Notifier:
                 ENDPOINT,
                 headers={"Authorization": f"Bearer {self.api_key}",
                          "Content-Type": "application/json"},
-                json={"from": self.sender, "to": [self.to],
-                      "subject": subject, "html": html},
+                json={"from": self.sender, "to": [self.to], "subject": subject, "html": html,
+                      **({"attachments": [{"filename": f"{cid}.png", "content_type": "image/png",
+                                           "content_id": cid,
+                                           "content": base64.b64encode(png).decode()}
+                                          for cid, png in images]} if images else {})},
                 timeout=15,
             )
             if r.status_code >= 300:
