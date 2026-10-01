@@ -23,8 +23,10 @@ and ranked table `study_round19_summary.md`. Pre-registration dc53fcb (branch `r
   on (`night_tilt_tow: true`) at ≥ 300 night round trips if high-TOW (≥ 6) out-earns low-TOW (< 4); same rule kills it.
 - **AW — REPORT: the backtest's next open is the vendor first print, not the cross.** On Alpaca's official
   auction prints the night leg earns 3.8bp/trade less (t −7.5; worst < $10). Every book with a night leg is
-  ~2pp/yr lower (V7 2.5bp: 34.6 → 32.3% at $10k; Roth cash: 23.0 → 20.9%). No verdict flips; AQ's
-  crossover is ~4bp/side, not ~6. New night studies should use `auction_audit_picks.pkl`.
+  ~2pp/yr lower (V7 2.5bp: 34.6 → 32.3% at $10k; Roth cash: 23.0 → 20.9%). No verdict flips.
+  **Re-run AQ on crosses: Roth cash IBS+night vs IBS-only crossover 3.7bp/side (vendor 5.4; 2021-23 1.9)** —
+  the `roth_cash_ira` gate is now live night cost ≤ ~3bp/side (measured ~0). IBS ETF opens audited too:
+  −0.3..−0.7bp/leg, immaterial. New night studies use `auction_audit_picks.pkl` (`auction_audit.with_rets`).
 - **AV — IBS state exits DEAD.** IBS > 0.5 exit −5.9pp (t −2.3); close > prior high −0.8pp (t −0.1).
 - **AU1/AU2 DEAD.** 20d mean overnight return as a tilt t 1.6; as a filter −1.6pp at 2.5bp.
 - Not tested: closing imbalance (data: candidate-only Databento pull may fit the $125 credit; live NYSE

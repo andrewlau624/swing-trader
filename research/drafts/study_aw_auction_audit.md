@@ -38,5 +38,16 @@ never audited**, and it sets every night-leg number.
 - **What it does not change:** no earlier verdict flips. Night-leg variant studies compare variants on
   the same returns, and AU3 re-judged on auction returns passes. The Roth cash book (IBS + night) still
   beats IBS-only at measured costs; re-check AQ's gate at ~4bp/side before switching it on.
+## Follow-ups run (2026-10-01, reports, no N)
+- **AQ's Roth gate on auction prints** (`research/sim/aq_auction.py`, `aq_auction_out.txt`; cash-IRA
+  replay, $3k, whole shares + probe). IBS-only 18.6%/yr. IBS .5 + night .5: 22.8% at 0bp/side, 19.9% at
+  2.5, 18.2% at 4, 17.0% at 5 (vendor: 25.0 / 22.0 / 20.2 / 19.0). **Crossover 3.7bp/side** (vendor 5.4;
+  2021-23 1.9, 2024-26 5.1). At measured live costs (~0bp/side, add. 29) IBS+night still wins by +4pp, but
+  the gate is now **≤ ~3bp/side**, not ~5. Updated in config comments (`roth_cash_ira`).
+- **IBS leg on opening crosses** (`research/sim/ibs_auction_audit.py`; 18 ETFs' crosses 2016-26, 1,385 of
+  1,386 legs): cross minus vendor per leg −0.27 / −0.34 / −0.74bp (2016-20 / 21-23 / 24-26), median ~0:
+  **immaterial** (liquid ETFs). Books with both legs on crosses, 2.5bp/side: V7 $10k 34.6 → 32.1%, Roth cash
+  23.0 → 20.7% (almost all of it the night leg).
+
 - **Follow-up:** run new night-leg studies on `auction_audit_picks.pkl` returns (cached, free). The IBS
   leg's ETF opens were not audited. Those ETFs are liquid, so the expected gap is < 1bp; checking it costs one more fetch.

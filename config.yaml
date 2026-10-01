@@ -101,8 +101,9 @@ daily:
   roth_cash_ira: false           # Round 17 Studies AL/AQ: on a plain cash IRA (no limited margin)
                                  # run the GFV-safe IBS+night legs, NO intraday leg. 19.0%/yr at
                                  # 5bp/side night cost, 22.0% at 2.5bp/side (t 3.06, P(DD50) 0%, SHADOW).
-                                 # Gate: live night cost <= ~5bp/side (crossover ~6bp/side); else
-                                 # run IBS-only (17.9% at tier_hi). Off = need ROTH_LIMITED_MARGIN.
+                                 # Gate: live night cost <= ~3bp/side (crossover 3.7bp/side on official
+                                 # auction prints, Round 19 AW; 5.4 on vendor opens); else run IBS-only
+                                 # (17.9% at tier_hi). Measured live ~0bp. Off = need ROTH_LIMITED_MARGIN.
   lever_weight: null             # 0.65 = both legs -> 0.65 (1.3x overnight) once signals.lever_ok passes
                                  # (50 night exits <= 10bp/side). null = never. Off 2026-09-29: the gate
                                  # proves costs, not edge; revisit at ~100 live night trades (NEXT.md)
