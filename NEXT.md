@@ -16,6 +16,9 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   study_ax_auction_share.md.
 - **AU3 robustness:** TOW built from the official crosses still +2.4-2.9pp, t 2.5-2.6 (R1); under the moderate
   15% name cap +4.4pp, t 3.0, and on top of tilt v2 +2.7pp, t 2.5 (R2). No conflict with either.
+- **Noise leg after publication (report, study_noise_decay.md):** SPY's rule went to Sharpe −0.4 after May 2024
+  (matches a public replication); QQQ ~halved (4.1 → 2.5bp/day, t 1.1 post); SMH intact (5.1bp/day). No action
+  (kill rule stands); plan QQQ at ~2.5bp/day.
 - **AY (Round 21): FINRA daily short-volume ratio, both signs: DEAD** (|inc| ≤ 0.4pp, t ≤ 0.6, shuffle 53%).
   study_ay_finra_short.md.
 
