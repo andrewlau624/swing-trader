@@ -1608,3 +1608,25 @@ $27.13 spent (MISTAKES.md). Lab-BE's 2 variants stay counted.
 - Judged on H2 (2024-06-03 .. 2026-09-30): net per FILLED trade > 0 at 2x; day-clustered t >= 2 at 1x; without the top
   20 > 0; and a placebo: random side on the same filled trades (sign-flip of mid -> close) >= 95th pct. Fill rate and
   $/day (fills x edge) reported; H1 for reference.
+
+
+## Amendment — Round 28: night picks that LULD-halted that day — Study BF (pre-register; 2 variants, program N 717 -> 719)
+
+`date`: Thu Oct 1 2026 (stamped by the commit), before any minute bar is downloaded. Source: the lab's halt studies
+(study_lab_ay_halts.md, study_lab_ba_halt_short.md): in big-mover stock-days 2022-26, after an inferred LULD halt
+the stock slides ~−130bp over the next 30 minutes whichever way the halt went (t −4..−5). Mechanism for the night
+leg: a halt marks a violent, information-driven move (or forced liquidation that is not over); such drops drift
+rather than revert (Savor 2012), unlike the liquidity-driven drops the night leg is paid to absorb. Payer of the
+shipped leg: liquidity demanders; this asks whether halted picks are a different, worse population. Against: news
+categories (add. 12) and depth/vol features (add. 23) are dead, and halts correlate with depth and vol20.
+
+Halt flag (the lab's rule, fixed now): from Alpaca SIP 1-minute bars of the pick day, 09:30-15:49 ET, a run of >= 5
+consecutive minutes with no bar (no trades) that starts within 2 minutes after a 5-minute window whose close moved
+>= 5% (either direction) from its start. Reported separately: halts whose triggering move was down. A pick with no
+minute data keeps flag = False (counted).
+- BF1: drop picks with any halt that day (their slice idles).
+- BF2: halted picks at half weight (live v1 tilt x 0.5, not renormalised).
+Judged exactly as Round 20 (official-cross night returns; V7 and Roth cash; $2.3k / $10k / $25k; 2.5bp/side judged,
+tier_hi reported; increment > 0 both halves; NW t >= 2; sign-flip and within-night flag-shuffle placebos >= 95th;
+dDD >= -2pp; P(DD>50%) <= 5%). Also: halt share by half, per-pick net halted vs not (and down-halts), Spearman of
+the flag with depth / vol20 / TOW. DSR at N 719.
