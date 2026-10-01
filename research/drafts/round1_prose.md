@@ -1773,3 +1773,16 @@ used, survivorship-free.
   market.
 - If it passes: build a monthly momentum sleeve (Lab-BR's rule) in the lab as a PAPER SHADOW only. Its own live gate
   stays the lab's $500 gate; nothing in the live book changes.
+
+
+## Amendment — Lab Round 43, Study Lab-BU: volatility-scaled top-decile momentum (Barroso & Santa-Clara 2015), 1963-2015 (pre-register; 1 variant, program N 735 -> 736)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Follows Lab-BT (PASS, crash-prone). Same French data and periods.
+- Each month m: realised vol = std of the top decile's EXCESS returns over months m-6..m-1, annualised. Weight w =
+  min(1, 12% / vol) in the top decile; 1 - w in the market. Excess = w x (Hi PRIOR - market) - cost x w.
+- Costs as Lab-BT (20 / 40bp per month on the momentum weight).
+- Judged on 1963-07 .. 2015-12, halves as Lab-BT. Pass (a risk fix, so risk-adjusted bars):
+  - (a) the Sharpe of the scaled excess beats the unscaled excess's in BOTH halves;
+  - (b) the worst 12-month excess is better than unscaled's;
+  - (c) 2x excess > 0 both halves;
+  - (d) t >= 2.
+- Reported: 1927-63 and 2016-26-08, the worst-12-month windows.
