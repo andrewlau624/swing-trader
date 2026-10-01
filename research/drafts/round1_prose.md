@@ -1680,3 +1680,17 @@ grep: untested here.
 - Costs 1x: 5bp/side + borrow 2%/4% (bull/bear); 2x: 10bp/side + 5%/10%.
 - Pass: 2x weekly net > 0 both halves (2016-20 / 2021-26); t >= 2; without the best 5 weeks > 0; max DD (1x) > -40%.
   Reference: QQQ+PSQ shorted the same way.
+
+
+## Amendment — Lab Round 36, Study Lab-BL: distance-method stock pairs (Gatev, Goetzmann & Rouwenhorst 2006) on the 100 most-traded stocks (pre-register; 1 variant, program N 726 -> 727)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Prior: weak (Do & Faff 2010: the returns decayed after 2002).
+grep: ETF pairs dead (add. 27 R4); stock pairs untested.
+- Every 6 months from 2017-01: formation = the previous 12 months. Universe = common stock, price >= $5, the top 100 by
+  formation-period dollar volume (adjusted SIP daily, 2016-01 .. 2026-09). Normalise each price path to 1 at the
+  formation start; pick the 20 pairs with the smallest sum of squared differences.
+- Trading = the next 6 months, daily closes: open when the normalised spread diverges by > 2 formation SDs (long the
+  low leg, short the high leg, $1 each); close at the next crossing or the period's end. Re-open allowed.
+- Each pair gets 1/20 of capital (committed-capital returns). Costs: 1x 10bp per side per leg (4 legs per round trip),
+  2x 20bp.
+- Halves 2017-2021 / 2022-2026-09. Pass: 2x monthly net > 0 both halves; t >= 2 (monthly); without the best 3 months
+  > 0; >= 95th pct of a placebo (20 random pairs from the same universe, same rules, 200 draws).
