@@ -9,6 +9,39 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Day-trading lab (2026-10-01, Lab Rounds 18-22): built; Lab-AS DEAD; Lab-AT waits for data (lab N +8: 669 -> 677 locally; program N 697 after the merge)
+
+Brief: `research/drafts/prompt_daytrade_lab.md`. Lab README: `daytrade/README.md`. It has its own package, account
+and state, and does not touch the live book.
+- **Recording: NOT YET RUNNING.** The recorder is built and tested against fake messages. This session could
+  not write to the server. On the server: `make pull && make daytrade-smoke && make daytrade-persist`, then
+  check `make daytrade-status` after the first session. It starts 09:20 ET, runs its own unit (350 MB cap)
+  and its own token copy, and records the core 5 ETFs + 10 gappers.
+- **In replay:**
+  - **Lab-AS (gap + premarket volume, VWAP reclaim): DEAD.** 3,308 trades 2022-26: −18.9bp/trade at 1x
+    (t −3.2), −36bp at 2x (both halves negative), gross −1.7bp, placebo 59th pct. $2.3k -> $568 through
+    the risk layer. `research/drafts/study_as_gap_vwap.md`.
+  - **Lab-AU (5-min ORB on Stocks in Play, Zarattini-Barbon-Aziz 2024): DEAD** (and already dead in RESULTS.md).
+    −23.5bp/trade at 5bp/side; the optimistic fill bound grosses ~+10bp, below costs. study_au_orb_in_play.md.
+  - **Lab-AW (VWAP trend, QQQ/TQQQ): DEAD.** Real signal (+6.7bp/day gross, placebo 97th) but 16 switches/day
+    cost more. study_aw_vwap_trend.md.
+  - **Lab-AV (AT's imbalance on historical SIP ticks, QQQ/SPY): running.** **Lab-AX (+25% movers held 15:00-15:55): running.**
+  - **Lab-AT (opening L1 imbalance): waiting.** First look after 40 unflagged recorded sessions (~early Dec).
+  - **Decision for the user:** Alpaca's free plan has historical SIP tick NBBO quotes and trades back to
+    at least 2018 (verified). Lab-AT could be re-registered on that history now (+1 N) instead of waiting
+    8 weeks.
+- **Paper: not started.** It needs a second Alpaca paper account (`ALPACA_DAYTRADE_API_KEY/_SECRET_KEY`), a
+  lab Schwab account (`SCHWAB_DAYTRADE_ACCOUNT_NUMBER`) and a strategy that passes replay. None exists yet.
+- **$500 gate** (README §8):
+  - replay > 0 at 2x costs in both halves, t ≥ 2, placebo ≥ 95th pct;
+  - ≥ 40 paper round trips, with drift < half the edge;
+  - 0 rule breaks;
+  - HALT tested on the live lab account at $0 risk;
+  - the guard proven on the server;
+  - the user's written approval.
+
+  At $500 (cash, one turn a day) even a 20bp edge is ~$1/day: tuition.
+
 ## Rounds 20-21 (2026-10-01): free-data night tilts — AX, AY DEAD; AU3 holds on cross prices and combines (N 682 -> 686)
 - **AX (Round 20): trailing closing-/opening-cross share of volume** (Alpaca auction sizes, free; the stand-in for
   closing imbalance, which stays parked: the user does not want a Databento account unless necessary). AX1
@@ -775,6 +808,10 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Conviction weight 0.75 / 1.0 in TQQQ (mult 2 or 4), 2.0 via MNQ (Round 16 AI) | **dead** | TQQQ's 75% margin comes out of the noise cap: +0..+2pp, t 0.5; MNQ 2.0 t 2.2 but maxDD −36%, P(DD>50%) 38% |
 | Conviction trade in MNQ instead of TQQQ (Round 16 AJ) | **shadow (AJ1 .5, AJ2 .75); AJ3 1.0 dead** | same trades, cheaper, frees the noise leg's margin, 60/40: +2.5..+5.3pp 2024-26, t 4+; Schwab API cannot trade futures, needs a second broker; ≥ ~$29k |
 | More conviction setups: second breakout after a failed first; SMH/SPY/IWM on no-TQQQ days (Round 16 AK) | **dead** | 2nd breakout +0.4..+0.9pp all halves but t 0.9; SPY = same bet (corr .75); SMH/SPY/IWM fill-ins 0..−7pp 2024-26 (IWM t −2.7) |
+| Gap ≥ 4% + premarket vol ≥ 250k, pullback to VWAP, reclaim, 2R target (Lab-AS, day-trading lab) | **dead** | gross −1.7bp/trade, −18.9 at 10bp/side (t −3.2), −36 at 2x both halves; placebo 59th pct; $2.3k -> $568 over 2022-26 |
+| 5-min ORB on Stocks in Play, re-test at 5/10bp per side, 2022-26 (Lab-AU, day-trading lab) | **dead (again)** | −23.5bp/trade, 19k trades, t −16.7; even the optimistic fill bound grosses only ~+10bp: −9bp at 10bp/side both halves. Already dead in RESULTS.md (check RESULTS.md's dead tables too) |
+| VWAP trend on QQQ / TQQQ, flip on every 1-min VWAP cross (Lab-AW, day-trading lab) | **dead** | signal real (placebo 97th pct, +6.7bp/day gross on QQQ) but 16 switches/day cost 16bp: −9.3bp/day QQQ, −27.7 TQQQ; the band that fixes it is the live noise leg |
+
 | Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
 | IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
 | IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |

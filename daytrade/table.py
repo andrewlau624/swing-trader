@@ -37,6 +37,14 @@ ROWS = [
         "RESULTS add. 35: plan on ~+2bp/day per unit of equity, 2016-26 (0DTE era +2.2)"),
     Row("conviction trade, TQQQ (live book, shadow)", 15.3, 0.29, 4.0,
         "Study AK: +15.3bp/trade at 3bp/side 2016-26 (0s delay; 1-min delay +12.9); ~73 trades/yr"),
+    Row("gap_vwap_reclaim (lab, Study Lab-AS: DEAD)", -18.9, 2.78, 0.139,
+        "Study Lab-AS 2022-26 replay at 1x (10bp/side), 1s; lev 0.14 = the risk layer's measured average "
+        "(0.5% risk per trade). Gross -1.7bp: no edge. At 2x costs -36.1bp"),
+    Row("orb_in_play (lab, Study Lab-AU1: DEAD)", -23.5, 2.37, 0.15,
+        "Study Lab-AU 2022-26 at 5bp/side: 19,016 trades; even the optimistic fill bound is ~0 at 5bp and "
+        "-9bp at 10bp/side. 2.4 trades/day and lev 0.15 as measured under the lab limits (3 slots, 0.5% risk)"),
+    Row("vwap_trend QQQ (lab, Study Lab-AW1: DEAD)", -9.3, 1.0, 1.0,
+        "Study Lab-AW 2022-26, per DAY at 0.5bp/side, whole equity: gross +6.7bp/day eaten by 16 switches"),
     Row("illustration only: 10bp x 5 trades", 10.0, 5.0, 4.0,
         "the brief's illustration, NOT a measured edge", measured=False),
 ]
@@ -60,8 +68,9 @@ def markdown(rows=ROWS) -> str:
     out = []
     for r in rows:
         need = needed_for(r)
-        cells = [f"${per_day(r, 2_300, 'cash'):,.2f}", f"${per_day(r, 2_300, 'margin'):,.2f}",
-                 f"${per_day(r, 10_000, 'margin'):,.2f}", f"${per_day(r, 25_000, 'margin'):,.2f}"]
+        money = lambda x: f"{'-' if x < 0 else ''}${abs(x):,.2f}"  # noqa: E731
+        cells = [money(per_day(r, 2_300, 'cash')), money(per_day(r, 2_300, 'margin')),
+                 money(per_day(r, 10_000, 'margin')), money(per_day(r, 25_000, 'margin'))]
         need_s = "never (edge <= 0)" if need == float("inf") else f"${need:,.0f}"
         name = r.name if r.measured else f"*{r.name}*"
         out.append(f"| {name} | {r.net_bp:+.1f} | {r.trades_per_day:.2f} | " + " | ".join(cells)

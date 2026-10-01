@@ -1,5 +1,5 @@
 """Gap + premarket volume, pullback to VWAP, reclaim entry. Plan: daytrade/plans/gap_vwap_reclaim.md
-(Study AS). Every threshold below is fixed by the plan; changing one is a new variant."""
+(Study Lab-AS). Every threshold below is fixed by the plan; changing one is a new variant."""
 from __future__ import annotations
 
 from ..events import TICK, Order

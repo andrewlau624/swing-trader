@@ -1,4 +1,4 @@
-"""Study AS: gap + premarket volume, pullback to VWAP, reclaim (daytrade/plans/gap_vwap_reclaim.md,
+"""Study Lab-AS: gap + premarket volume, pullback to VWAP, reclaim (daytrade/plans/gap_vwap_reclaim.md,
 round1_prose.md Round 18). Replays the lab's strategy code through the lab's engine on SIP minute
 history, 2022-01-03 .. 2026-09-30.
 
@@ -215,12 +215,15 @@ def replay(latency: float, cost_bp: float, equity: float = 1e7, kind: str = "mar
     per-trade statistics are not shaped by sizing. Pass a small equity for the $/day runs."""
     # per-trade statistics: no position cap and no daily loss limit (a sizing rule, applied in the
     # $/day runs, which use the lab's default limits)
+    stats = limits is None
     lim = limits or Limits(max_positions=99, daily_loss_pct=1e9)
     acct = AccountModel(equity, kind, lim.intraday_mult)
     trades, events, bars_by = [], [], {}
     days = list(load_days())
     for i, (day, rec, cal) in enumerate(days):
         st = session_times(day, cal, lim)
+        if stats:   # per-trade statistics: a fresh account each day, so losses never shrink later trades
+            acct = AccountModel(equity, kind, lim.intraday_mult)
         evs = day_events(rec)
         nxt = days[i + 1][0] if i + 1 < len(days) else day + dt.timedelta(days=1)
         eng = Engine([G.GapVwapReclaim()], SimBroker(latency_s=latency, cost_bp=cost_bp), equity=acct.equity,
@@ -259,7 +262,7 @@ def summary(trades, n_days) -> dict:
             "win": float(np.mean([v > 0 for v in x])) if x else float("nan"),
             "mean_r": float(np.mean([t.get("r", 0) for t in trades])) if x else float("nan"),
             "t_day": clustered_t(trades),
-            "exits": dict(pd.Series([t["exit_reason"] for t in trades]).value_counts()) if x else {}}
+            "exits": dict(pd.Series([t.get("exit_reason", "") for t in trades]).value_counts()) if x else {}}
 
 
 def sim_one(bars: list[Bar], i0: int, stop_pct: float, cost: float, flat_by,

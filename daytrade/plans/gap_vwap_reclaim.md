@@ -1,7 +1,7 @@
-# Plan: gap_vwap_reclaim (Study AS)
+# Plan: gap_vwap_reclaim (Study Lab-AS)
 
 Written 2026-10-01, before any replay, paper trade or computation. Code: `daytrade/strategies/gap_vwap_reclaim.py`.
-Pre-registration: `research/drafts/round1_prose.md`, Round 18, Study AS (1 variant, N 669 -> 670).
+Pre-registration: `research/drafts/round1_prose.md`, Lab Round 18, Study Lab-AS (1 variant, N 669 -> 670).
 Any change to a number below is a new variant: log it in `daytrade/PLAN_CHANGES.md` and add it to N.
 
 ## The idea
@@ -21,11 +21,11 @@ gap-and-go is crowded. Expected result: dead. It is run because it is the patter
 and the lab needs a first plug-in to exercise the engine.
 
 ## How it differs from the dead list
-- AE: direction of QQQ at the open from the gap/range/volume. AS trades single stocks selected by a gap,
+- AE: direction of QQQ at the open from the gap/range/volume. Lab-AS trades single stocks selected by a gap,
   and only after a pullback and reclaim, not at the open.
-- AB: fading QQQ inside the noise band. AS is a continuation entry, on stocks, with a stop.
-- AK: second breakouts of TQQQ out of the noise band. AS has no noise band and no index.
-- Add. 41: the noise-band rule on the top-by-dollar-volume stocks at 30-minute decisions. AS selects by
+- AB: fading QQQ inside the noise band. Lab-AS is a continuation entry, on stocks, with a stop.
+- AK: second breakouts of TQQQ out of the noise band. Lab-AS has no noise band and no index.
+- Add. 41: the noise-band rule on the top-by-dollar-volume stocks at 30-minute decisions. Lab-AS selects by
   gap and premarket volume (catalyst names, mostly not top-40 names), decides on 1-minute bars and has an
   intraday stop and target.
 
@@ -62,7 +62,7 @@ position notional limit and buying power. No adds, no averaging down.
 - Stop fills at the stop minus cost, or at the bar's open if the bar opens through the stop.
 - Recorded-seconds replay (once there are recorded days) uses the recorded bid/ask instead.
 
-## Replay (Study AS)
+## Replay (Study Lab-AS)
 - Data: SIP minute bars (regular session for every decision, 04:00-09:29 only for the premarket volume),
   2022-01-03 to 2026-09-30.
 - Halves: H1 2022-01-03 .. 2024-05-31, H2 2024-06-03 .. 2026-09-30.

@@ -8,7 +8,7 @@
   by a tick. On trades they fill on a print through the limit, or at the limit once the size
   queued ahead (the displayed size at the limit when placed) has traded.
 - Stop orders trigger on the bar's low/high (or the bid/ask) and fill at the stop, or at the bar's
-  open when it opens through the stop, worse by the cost.
+  open when it opens through the stop (only if the order was resting at the open), worse by the cost.
 - Orders sharing an `oco` group: the first fill cancels the rest. Within one bar the stop is
   checked before the limit (same bar hits both = the stop, conservatively).
 """
@@ -89,7 +89,10 @@ class SimBroker:
             if isinstance(ev, Bar):
                 hit = ev.low <= o.stop_px if o.side == "sell" else ev.high >= o.stop_px
                 if hit:
-                    gap = ev.open <= o.stop_px if o.side == "sell" else ev.open >= o.stop_px
+                    # a gap fills at the open only if the order was resting when the bar opened;
+                    # one placed inside this bar (a stop after an entry fill) fills at its price
+                    gap = (ev.open <= o.stop_px if o.side == "sell" else ev.open >= o.stop_px) \
+                        and o.ts <= ev.start
                     px = ev.open if gap else o.stop_px
                     return self._fill(o, qty, self._worse(px, o.side, self.cost), ev.ts, "stop")
             if isinstance(ev, Quote):

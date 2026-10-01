@@ -1375,3 +1375,72 @@ v2 probe (fixed now): 8 open questions with keyword-graded answers (2024-11 .. 2
 A control answered with anything but unknown / none / a denial voids the probe (BC does not run). Window start = the
 first day of the third month after the latest correctly answered month; if the 2025-10 question is answered, the
 cutoff is not placed and BC does not run. One v2 probe call; its printout is copied into the BC writeup.
+
+### Lab Round 18 results (2026-10-01)
+- **Lab-AS: DEAD.** 1x/1s: −18.9bp/trade (n 3,308, t −3.2); 2x: H1 −28.8, H2 −41.5; placebo 59th pct; gross
+  −1.7bp. Fails every bar. study_as_gap_vwap.md. N 670.
+- **Lab-AT: not yet looked at** (needs 40 unflagged recorded sessions). N 671 counted at registration.
+
+
+## Amendment — Lab Round 19, Study Lab-AU: 5-minute opening-range breakout on Stocks in Play (pre-register; 2 variants, N 671 -> 673)
+
+`date`: Thu Oct 1 01:05 PDT 2026. Source: Zarattini, Barbon & Aziz (2024), SSRN 4729284 (Sharpe 2.81 in 2016-23,
+commission-only costs, no held-out period). Full rules: `daytrade/plans/orb_in_play.md` (part of this
+registration). Nothing below computed; no data fetched.
+- Universe: common stock, 09:30 open > $5, 14d avg volume >= 1M, ATR14 > $0.50 (prior sessions). RVOL = 09:30-09:34
+  SIP volume / its 14-session average (>= 10 obs); RVOL >= 1, top 20. Direction = the 5-minute candle; stop entry at
+  the OR high/low from 09:35; stop 10% ATR14; flat 15:55; no target.
+- Lab-AU1 long+short (the paper); Lab-AU2 long only.
+- Costs 5bp/side (1x), 10bp/side (2x). SIP minutes 2022-01-03 .. 2026-09-30, halves split 2024-06-01 (H2 is
+  out-of-sample for the paper).
+- Pass (per variant): 2x net > 0 in both halves; day-clustered t >= 2.0 at 1x; >= 95th pct of a coin-flip-direction
+  placebo (1,000 draws). Otherwise dead; nothing re-tuned.
+
+
+## Amendment — Lab Round 20, Study Lab-AV: Study Lab-AT's opening imbalance on historical SIP ticks (pre-register; 1 variant, N 673 -> 674)
+
+`date`: Thu Oct 1 03:20 PDT 2026. Why: Alpaca's free plan serves historical SIP NBBO quotes and trades (verified
+back to 2018), so AT's idea need not wait 40 recorded sessions. Nothing below computed; no tick data fetched.
+- Rules: exactly `daytrade/plans/open_imbalance.md` and the lab's `OpenImbalance` strategy code (QI >= +0.20 and
+  FLOW >= +0.10 long; mirror short; window 09:30:00-09:34:59; enter 09:35 + 1s; exit 10:05:00; stop at the window
+  low/high -/+ $0.01). SIP NBBO replaces Schwab L1 (quote sizes in shares; NBBO, not one venue).
+- Symbols: **QQQ and SPY only** (the two cheapest instruments; the data budget, fixed before looking).
+- Data: SIP quotes (sampled to the last quote of each second, which is all the strategy reads) and every SIP trade in
+  the window; SIP quotes 09:35:00-09:35:05 and 10:05:00-10:05:05 for the fills; SIP minute bars 09:35-10:06 for the stop.
+- 2022-01-03 .. 2026-09-30, halves split 2024-06-01. Costs: fills at the NBBO + 0.5bp/side (1x); + 1.0bp/side plus
+  the half-spread again (2x). Stops on minute bars at 1bp/side (1x) / 2bp (2x).
+- Pass: 2x net > 0 in both halves, day-clustered t >= 2.0 at 1x, sign-flip placebo (random direction on the same
+  trades, gross mid-to-mid return minus the same cost) >= 95th pct. Otherwise dead; thresholds not re-tuned.
+- Pre-check done: RESULTS.md and NEXT.md have no opening-imbalance study (only closing-auction imbalance, AC/add. 35).
+
+
+## Amendment — Lab Round 21, Study Lab-AW: VWAP trend on QQQ / TQQQ (Zarattini & Aziz 2023) (pre-register; 2 variants, N 674 -> 676)
+
+`date`: Thu Oct 1 03:35 PDT 2026. Source SSRN 4631351 (QQQ 2018-23 Sharpe 2.1, commissions only). Full rules:
+`daytrade/plans/vwap_trend.md`. Nothing computed; no data fetched. RESULTS.md/NEXT.md grep: no VWAP-trend study.
+- QQQ 1-min close vs session VWAP from 09:31; long above, short below; reverse at the next minute's open on a cross;
+  flat 15:55; 2% catastrophe stop. Lab-AW1 QQQ, Lab-AW2 TQQQ on QQQ's signal.
+- Costs: QQQ 0.5/1.0bp per side, TQQQ 1.5/3.0bp per side (1x/2x). SIP minutes 2022-01-03 .. 2026-09-30, halves
+  at 2024-06-01. Unit = day.
+- Pass: 2x day-mean > 0 both halves; day t >= 2.0 at 1x; >= 95th pct of a segment-direction placebo. Report the
+  correlation with the noise leg.
+
+
+## Amendment — Lab Round 22, Study Lab-AX: late-day continuation of +25% movers, long only (pre-register; 1 variant, N 676 -> 677)
+
+`date`: Thu Oct 1 ~03:30 PDT 2026 (the commit time is the stamp). Plan: `daytrade/plans/late_mover.md`. Nothing computed; no data fetched.
+- Motivation: the RESULTS.md intraday-setups table's "stocks down >= 25% by 15:00 keep falling into the close (~-1.5% gross, both halves), untradable (Rule 201,
+  HTB)". The long mirror has never been tested (grep RESULTS.md/NEXT.md).
+- Rules: common stock, prev close >= $5; at 15:00 (14:59 bar close) day change >= +25% and 09:30-15:00 $ volume
+  >= $10M; buy at the next minute's open; sell at 15:55; 10% catastrophe stop; long only.
+- Costs 20/40bp per side (1x/2x). SIP minutes 2022-01-03 .. 2026-09-30, halves at 2024-06-01.
+- Pass: 2x > 0 both halves; day-clustered t >= 2 at 1x; >= 95th pct of a random-earlier-hour placebo on the same
+  stock-days. Diagnostic: the losers' mirror gross.
+
+
+## Note — reconciliation of the lab's Rounds 19-22 with the main Rounds 19-25 (merge of 2026-10-01, later)
+The lab registered Rounds 19-22 (Lab-AU 2, Lab-AV 1, Lab-AW 2, Lab-AX 1 = 6 variants) in parallel with the main
+program's Rounds 19-25. The lab's commits were not on origin when those rounds were numbered: its pushes had
+been rejected and the errors hidden. The lab's files carry their own local N (671 -> 677); read them as **+6 on
+top of the main count**. The program N after both is **691 + 6 = 697**. Lab-AS and Lab-AT were already counted
+in 691 (see the Round 18 reconciliation note above).

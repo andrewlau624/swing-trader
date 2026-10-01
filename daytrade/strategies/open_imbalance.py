@@ -1,5 +1,5 @@
 """Opening L1 quote imbalance + signed trade flow on the core ETFs. Plan:
-daytrade/plans/open_imbalance.md (Study AT). Needs the lab's own L1 recording; minute bars
+daytrade/plans/open_imbalance.md (Study Lab-AT). Needs the lab's own L1 recording; minute bars
 cannot drive it (it ignores bars)."""
 from __future__ import annotations
 

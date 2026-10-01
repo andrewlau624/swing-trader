@@ -309,7 +309,7 @@ def test_strategy_code_cannot_see_the_mode():
         mods = {n.module or "" for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)}
         assert not (names & FORBIDDEN), (f.name, names & FORBIDDEN)
         assert all(m in ("", "base", "events", "__future__", "math", "pathlib", "gap_vwap_reclaim",
-                                 "open_imbalance")
+                                 "open_imbalance", "orb_in_play", "vwap_trend", "late_mover")
                    or m.endswith(("events", "base")) for m in mods), (f.name, mods)
 
 
@@ -515,3 +515,86 @@ def test_review_drops_after_40_bad_paper_trades():
     assert decide("gap_vwap_reclaim", "paper", good, 20.0)[0] == "drop"           # drift > edge
     ok = [{"net_bp": 15.0, "entry_drift_bp": 2.0} for _ in range(40)]
     assert decide("gap_vwap_reclaim", "paper", ok, 20.0)[0] == "continue"
+
+
+# ------------------------------------------------------------------ ORB on Stocks in Play
+def orb_bars(sym, o, up=True, after=None):
+    """Five opening minutes trending one way, then a path."""
+    out, px = [], o
+    for i in range(5):
+        nxt = px + (0.10 if up else -0.10)
+        s = t("09:30") + dt.timedelta(minutes=i)
+        out.append(Bar(s + dt.timedelta(minutes=1), sym, px, max(px, nxt), min(px, nxt), nxt, 200_000, s))
+        px = nxt
+    for i, c in enumerate(after or []):
+        s = t("09:35") + dt.timedelta(minutes=i)
+        out.append(Bar(s + dt.timedelta(minutes=1), sym, px, max(px, c) + 0.01, min(px, c) - 0.01, c, 50_000, s))
+        px = c
+    return out
+
+
+def test_orb_long_breakout_stops_and_short_side_respects_long_only(tmp_path):
+    from daytrade.strategies.orb_in_play import OrbInPlay
+    info = {s: DayInfo(s, 20.0, 0, 0, atr14=1.0, avg_volume14=2e6, or_volume_avg14=200_000) for s in ("UP", "DN")}
+    up = orb_bars("UP", 20.0, True, [20.6, 20.4, 20.9, 21.5] + [21.5] * 30)      # breaks 20.50, runs
+    dn = orb_bars("DN", 20.0, False, [19.4, 19.6, 19.3, 18.9] + [18.9] * 30)
+    bars = sorted(up + dn, key=lambda b: (b.ts, b.sym))
+    e = engine([OrbInPlay()], tmp_path, equity=1e6, limits=Limits(max_positions=99), day_info=info).run(bars)
+    sides = {x["sym"]: x["side"] for x in e.trades}
+    assert sides == {"UP": "long", "DN": "short"}
+    up_t = next(x for x in e.trades if x["sym"] == "UP")
+    assert up_t["stop"] == pytest.approx(20.50 - 0.10) and up_t["entry_px"] == pytest.approx(20.50)
+    e2 = engine([OrbInPlay(long_only=True)], tmp_path, equity=1e6, limits=Limits(max_positions=99),
+                day_info=info).run(bars)
+    assert {x["sym"] for x in e2.trades} == {"UP"}
+
+
+def test_orb_needs_relative_volume(tmp_path):
+    from daytrade.strategies.orb_in_play import OrbInPlay
+    info = {"UP": DayInfo("UP", 20.0, 0, 0, atr14=1.0, avg_volume14=2e6, or_volume_avg14=5_000_000)}
+    e = engine([OrbInPlay()], tmp_path, day_info=info).run(orb_bars("UP", 20.0, True, [20.6] * 10))
+    assert not e.trades
+
+
+def test_pending_entries_hold_slots(tmp_path):
+    """Resting stop entries count toward max positions, so 20 orders cannot become 20 positions."""
+    from daytrade.strategies.orb_in_play import OrbInPlay
+    syms = [f"S{i}" for i in range(6)]
+    info = {s: DayInfo(s, 20.0, 0, 0, atr14=1.0, avg_volume14=2e6, or_volume_avg14=100_000) for s in syms}
+    bars = sorted([b for s in syms for b in orb_bars(s, 20.0, True, [20.6] + [20.7] * 20)],
+                  key=lambda b: (b.ts, b.sym))
+    e = engine([OrbInPlay()], tmp_path, equity=100_000, day_info=info).run(bars)
+    assert len(e.trades) == 3
+    assert sum("max 3 positions" in x["detail"] for x in e.events) == 3
+
+
+# ------------------------------------------------------------------ VWAP trend
+def test_vwap_trend_reverses_on_a_cross_and_is_flat_at_the_close(tmp_path):
+    from daytrade.strategies.vwap_trend import VwapTrend
+    path = lambda i: 100 + 0.05 * i if i < 60 else 103 - 0.05 * (i - 60)  # noqa: E731
+    e = engine([VwapTrend()], tmp_path, equity=100_000).run(minute_bars("QQQ", "09:30", "16:00", path=path))
+    sides = [x["side"] for x in e.trades]
+    assert sides[:2] == ["long", "short"] and not e.positions
+    assert e.trades[0]["exit_reason"] == "VWAP cross" and e.trades[-1]["exit_reason"] == "flat by close"
+    assert not [x for x in e.events if x["kind"] == "rejected" and "against" in x["detail"]]
+
+
+def test_vwap_trend_trades_tqqq_on_qqq_signal(tmp_path):
+    from daytrade.strategies.vwap_trend import VwapTrend
+    path = lambda i: 100 + 0.05 * i  # noqa: E731
+    bars = sorted(minute_bars("QQQ", "09:30", "11:00", path=path) + minute_bars("TQQQ", "09:30", "11:00", 50.0),
+                  key=lambda b: (b.ts, b.sym))
+    e = engine([VwapTrend(trade="TQQQ")], tmp_path, equity=100_000).run(bars)
+    assert {x["sym"] for x in e.trades} == {"TQQQ"} and e.trades[0]["side"] == "long"
+
+
+def test_late_mover_buys_big_up_movers_at_1500_and_exits_1555(tmp_path):
+    from daytrade.strategies.late_mover import LateMover
+    info = {"UPX": DayInfo("UPX", 10.0), "FLAT": DayInfo("FLAT", 10.0)}
+    bars = sorted(minute_bars("UPX", "09:30", "16:00", 13.0) + minute_bars("FLAT", "09:30", "16:00", 10.5),
+                  key=lambda b: (b.ts, b.sym))
+    bars = [Bar(b.ts, b.sym, b.open, b.high, b.low, b.close, 1_000_000, b.start) for b in bars]
+    e = engine([LateMover()], tmp_path, equity=100_000, day_info=info).run(bars)
+    assert [x["sym"] for x in e.trades] == ["UPX"]
+    assert dt.datetime.fromisoformat(e.trades[0]["entry_ts"]) == t("15:00")
+    assert e.trades[0]["exit_reason"] == "flat by close"
