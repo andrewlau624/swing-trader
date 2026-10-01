@@ -41,6 +41,7 @@ has replay numbers). The model:
 | conviction trade, TQQQ (live book, shadow) | +15.3 | 0.29 | $1.02 | $4.08 | $17.75 | $44.37 | $563,444 | Study AK: +15.3bp/trade at 3bp/side 2016-26 (0s delay; 1-min delay +12.9); ~73 trades/yr |
 | gap_vwap_reclaim (lab, Study AS: DEAD) | -18.9 | 2.78 | -$1.68 | -$1.68 | -$7.30 | -$18.26 | never (edge <= 0) | Study AS 2022-26 replay at 1x (10bp/side), 1s; lev 0.14 = the risk layer's measured average (0.5% risk per trade). Gross -1.7bp: no edge. At 2x costs -36.1bp |
 | orb_in_play (lab, Study AU1: DEAD) | -23.5 | 2.37 | -$1.92 | -$1.92 | -$8.35 | -$20.89 | never (edge <= 0) | Study AU 2022-26 at 5bp/side: 19,016 trades; even the optimistic fill bound is ~0 at 5bp and -9bp at 10bp/side. 2.4 trades/day and lev 0.15 as measured under the lab limits (3 slots, 0.5% risk) |
+| vwap_trend QQQ (lab, Study AW1: DEAD) | -9.3 | 1.00 | -$2.14 | -$2.14 | -$9.30 | -$23.25 | never (edge <= 0) | Study AW 2022-26, per DAY at 0.5bp/side, whole equity: gross +6.7bp/day eaten by 16 switches |
 | *illustration only: 10bp x 5 trades* | +10.0 | 5.00 | $2.30 | $46.00 | $200.00 | $500.00 | $50,000 | the brief's illustration, NOT a measured edge |
 
 Measured through the risk layer, Study AS lost −$1.46/day at $2.3k cash and −$18.23/day at $25k
@@ -101,6 +102,8 @@ pre-registration (a new variant, +1 N). That is the user's call; see NEXT.md.
 |---|---|---|
 | `gap_vwap_reclaim` | plans/gap_vwap_reclaim.md (Study AS) | **DEAD** (Study AS, `research/drafts/study_as_gap_vwap.md`): −18.9bp/trade at 1x, t −3.2, gross −1.7bp, placebo 59th pct; never traded on paper |
 | `orb_in_play` | plans/orb_in_play.md (Study AU) | **DEAD**: −23.5bp/trade at 5bp/side (19k trades); the optimistic fill bound grosses only ~+10bp, so −9bp at 10bp/side. Already dead in RESULTS.md |
+| `vwap_trend` | plans/vwap_trend.md (Study AW) | **DEAD**: VWAP side is informative (+6.7bp/day gross, placebo 97th) but 16 switches/day cost 16bp |
+| `late_mover` | plans/late_mover.md (Study AX) | replay running |
 | `open_imbalance` | plans/open_imbalance.md (Study AT; AV = the same on historical SIP ticks) | waiting: first look after 40 unflagged recorded sessions (or a new historical pre-registration, above) |
 
 ## 4. One engine, three modes

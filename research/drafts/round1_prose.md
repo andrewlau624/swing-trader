@@ -1149,7 +1149,7 @@ back to 2018), so AT's idea need not wait 40 recorded sessions. Nothing below co
 
 ## Amendment — Round 22, Study AX: late-day continuation of +25% movers, long only (pre-register; 1 variant, N 676 -> 677)
 
-`date`: Thu Oct 1 04:00 PDT 2026. Plan: `daytrade/plans/late_mover.md`. Nothing computed; no data fetched.
+`date`: Thu Oct 1 ~03:30 PDT 2026 (the commit time is the stamp). Plan: `daytrade/plans/late_mover.md`. Nothing computed; no data fetched.
 - Motivation: the RESULTS.md intraday-setups table's "stocks down >= 25% by 15:00 keep falling into the close (~-1.5% gross, both halves), untradable (Rule 201,
   HTB)". The long mirror has never been tested (grep RESULTS.md/NEXT.md).
 - Rules: common stock, prev close >= $5; at 15:00 (14:59 bar close) day change >= +25% and 09:30-15:00 $ volume
