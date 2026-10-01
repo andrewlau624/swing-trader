@@ -56,6 +56,17 @@ def vol_weight(rows, target: float = 0.12, months: int = 6) -> float | None:
     return round(min(1.0, target / vol), 3) if vol > 0 else 1.0
 
 
+def trend_on(last: str) -> bool | None:
+    """Lab-BY's crash filter, REPORTED only: SPY's month-end close above its 10-month average at `last`."""
+    try:
+        x = _monthly(["SPY"], "all", months_back=13)
+        c = x.set_index("month").close.sort_index()
+        c = c[c.index <= last]
+        return bool(c.iloc[-1] > c.iloc[-10:].mean()) if len(c) >= 10 else None
+    except Exception:
+        return None
+
+
 def _monthly(symbols, adjustment, months_back=15):
     from alpaca.data.requests import StockBarsRequest
     from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
@@ -118,7 +129,7 @@ def run(log: Path = LOG) -> int:
         p, u = picks(C, V, RAW, last)
         rows.append({"decided": dt.date.today().isoformat(), "signal_month": last, "hold_month": nxt,
                      "picks": p, "universe": u, "realised": None, "mode": "paper shadow (no orders)",
-                     "vol_scaled_weight": vol_weight(rows)})
+                     "vol_scaled_weight": vol_weight(rows), "trend_filter_on": trend_on(last)})
     log.parent.mkdir(parents=True, exist_ok=True)
     log.write_text("".join(json.dumps(r) + "\n" for r in rows))
     scored = [r for r in rows if r.get("realised")]

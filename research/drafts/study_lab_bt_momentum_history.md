@@ -69,3 +69,22 @@ granularity matters. Next: the implementable version on liquid US industry ETFs 
 By year (1x): 2020 +306, 2022 +187, 2025 +89; 2021 −130, 2023 −107. **DEAD**: momentum picks the better ETFs from the
 list (placebo 97th) but only ties SPY, as Lab-BW's weak post-2010 decades predicted. As registered, a PAPER SHADOW was
 built anyway (`make daytrade-momentum` now logs both shadows; first industry month, 2026-10: SMH, OIH, XBI, XPH, XOP).
+
+## Lab-BY — top-decile momentum only while the market is above its 10-month average, else T-bills (Lab Round 47): PASS on 1963-2015, poor since 2016
+| period (1x) | sleeve CAGR / Sharpe / max DD / worst 12m | market CAGR / Sharpe / max DD / worst 12m | time in |
+|---|---|---|---|
+| **judged 1963-2015** | **13.9% / 0.84 / −29% / −28%** | 10.1% / 0.71 / −50% / −43% | 74% |
+| 1963-89 | 14.7% / 0.87 / −28% | 10.7% / 0.73 / −47% | |
+| 1990-2015 | 13.0% / 0.80 / −29% | 9.4% / 0.68 / −50% | |
+| ref 1927-63 | 11.3% / 0.66 / −55% | 9.0% / 0.49 / −84% | |
+| **ref 2016-26** | **7.4% / 0.48 / −28%** | **15.0% / 0.98 / −25%** | 80% |
+
+At 2x: 11.9% vs 10.1% (judged); both halves beat the market. About 1.4 switches a year.
+
+**PASS on every registered bar** (CAGR >= market in both halves at 2x, a higher Sharpe in both, max DD and worst 12
+months far better). It is the best risk profile of the lab, but **in 2016-26 it made half the market's return**:
+- momentum's post-2000 fade (Lab-BT);
+- whipsaws (2018, 2020, 2022).
+
+As a small-account bot today it would most likely have lagged a plain index fund. Kept as a PAPER SHADOW signal: the
+stock momentum shadow now records whether the trend filter is on each month.
