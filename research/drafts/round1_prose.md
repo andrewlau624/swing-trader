@@ -1786,3 +1786,13 @@ used, survivorship-free.
   - (c) 2x excess > 0 both halves;
   - (d) t >= 2.
 - Reported: 1927-63 and 2016-26-08, the worst-12-month windows.
+
+
+## Amendment — Lab Round 44, Study Lab-BV: long-only long-term reversal, the bottom 60-13-month decile vs the market, 1963-2015 (pre-register; 1 variant, program N 736 -> 737)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). De Bondt & Thaler (1985). grep: untested here.
+- Data: Ken French "10 Portfolios Formed on Prior (60-13) Return", value-weighted monthly (downloaded 2026-10-01, CRSP
+  202608; no return looked at). Hold the LOW decile (Lo PRIOR); excess vs the market.
+- Judged 1963-07 .. 2015-12, halves as Lab-BT. Costs: this decile's turnover is low; to be conservative, 1x 10bp/month,
+  2x 20bp/month.
+- Pass: 2x excess > 0 both halves; t >= 2; without the best 5 months > 0; worst 12-month excess reported.
+- Reported: 1927-63, 2016-26-08, by decade.
