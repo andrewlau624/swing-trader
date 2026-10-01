@@ -51,6 +51,9 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 - **Forward evidence, automatic (after `make pull` on the server):** the recorder now logs, at the end of each
   session, Cboe SKEW's z-score (Lab-CC) and, on the first session of each month, both momentum shadows with the
   vol-scale and trend-filter fields, to `data/daytrade/forward-signals.jsonl`. No orders.
+- **Lab-AT's registered first look is pre-built:** `make daytrade-at-look` refuses until 40 unflagged recorded sessions
+  exist (on the server's `data/daytrade`), then runs the plan exactly once (recorded-spread costs, first/last 20
+  sessions, sign-flip placebo).
 - **Nothing to switch on.** The live book is unchanged. The next real look is Lab-AT after 40 recorded sessions
   (~early Dec). Expect few signals (Lab-AV).
 

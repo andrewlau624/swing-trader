@@ -868,3 +868,12 @@ def test_forward_log_skew_and_monthly_momentum(tmp_path):
                    log=tmp_path / "f.jsonl", momentum=lambda: calls.append(2))
     assert "skew_error" in row2 and calls == [1]                            # not the first session: no momentum
     assert len((tmp_path / "f.jsonl").read_text().splitlines()) == 2
+
+
+def test_lab_at_first_look_refuses_before_40_clean_sessions(tmp_path):
+    from daytrade.research.at_firstlook import run
+    (tmp_path / "meta").mkdir()
+    (tmp_path / "meta" / "2026-10-01.json").write_text(json.dumps({"complete": True, "flagged": False}))
+    (tmp_path / "meta" / "2026-10-02.json").write_text(json.dumps({"complete": True, "flagged": True}))
+    r = run(tmp_path)
+    assert r["status"] == "waiting" and r["clean_sessions"] == 1
