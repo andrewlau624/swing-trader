@@ -1630,3 +1630,12 @@ Judged exactly as Round 20 (official-cross night returns; V7 and Roth cash; $2.3
 tier_hi reported; increment > 0 both halves; NW t >= 2; sign-flip and within-night flag-shuffle placebos >= 95th;
 dDD >= -2pp; P(DD>50%) <= 5%). Also: halt share by half, per-pick net halted vs not (and down-halts), Spearman of
 the flag with depth / vol20 / TOW. DSR at N 719.
+
+
+## Amendment — Lab Round 32, Study Lab-BH: announcement-return drift proxy (up gap >= 5% on >= 3x volume), long at the next open, hold 20 / 5 sessions (pre-register; 2 variants, program N 719 -> 721)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Plan (part of this registration): `daytrade/plans/event_drift.md`.
+RESULTS.md/NEXT.md grep: earnings appears only as a news filter on the overnight leg; multi-day drift is untested.
+- Common stock, prev close >= $5, ADV20 >= $20M; day 0: open/prev close - 1 >= +5% and volume >= 3x ADV20 shares.
+  Buy day 1's opening cross; sell at day H's official close (BH1 H=20, BH2 H=5). Long only. Adjusted prices for returns.
+- Costs 10/20bp per side. Excess over SPY on the same window. Month-clustered t. Random-date placebo on the same stocks.
+- Pass: 2x excess > 0 both halves; t >= 2 (1x excess); placebo >= 95th; without the top 20 > 0.

@@ -75,7 +75,7 @@ day. T+1 settlement allows once, so the honest number is ~$2.30/day.
 
 | feed | has | lacks |
 |---|---|---|
-| Schwab streamer `LEVELONE_EQUITIES` (what the recorder uses) | real-time consolidated bid/ask, bid/ask size, last price and size, day volume, quote and trade times, per-field MIC ids | **conflated**: changes only, batched; not every quote or print. Sizes' units are as Schwab sends them (verify on the first recording) |
+| Schwab streamer `LEVELONE_EQUITIES` (what the recorder uses) | real-time consolidated bid/ask, bid/ask size (**shares**), last price and size, day volume, quote and trade times. **Verified on the first session (2026-10-01):** ~1 update per second per symbol, 12ms server->receive median (18ms p99), QQQ median spread 0.41bp. Minute bars rebuilt from it match SIP minute bars: close within 0.27bp median, volume ratio 0.99, highs/lows inside SIP's range | **conflated to ~1 Hz**: a snapshot each second, not every quote or print. "Trades" are last-trade snapshots with volume deltas, so trade-sign flow (Lab-AT) is coarse |
 | Schwab streamer, other services | `CHART_EQUITY` (1-minute bars), `NASDAQ_BOOK` / `NYSE_BOOK` (level 2), screeners | **no time-and-sales service** (TD's `TIMESALE_EQUITY` is not in the Schwab API: schwab-py 1.5.1 has no `timesale` subscription). "Trades" in the recording are last-trade updates; one row can stand for several prints |
 | Schwab REST | quote snapshots (incl. premarket last and volume), movers (top 10 per index), price history | no ticks; the movers list is 10 names per index |
 | Alpaca free plan, real time | IEX trades and quotes only | IEX is a few % of volume and its quote is not the NBBO (on 2026-09-29 09:30 the IEX "spread" was $44 wide on QQQ). Real-time SIP needs the paid plan |
@@ -193,9 +193,9 @@ Live is also long-only until a short plan passes paper.
 - The test's purpose is to measure real fills and drift, not to earn.
 
 ## What does not work yet (plainly)
-- **The recorder has not run against Schwab yet.** I could not start it on the server from this session:
-  remote writes were blocked. The stream logic is tested against fake messages only. The first real
-  morning will show whether Schwab's L1 fields and units match what the code expects.
+- The recorder runs on the server (since 2026-10-01). Its first session was validated against SIP; see the feeds
+  table. The 09:25 gapper sweep uses Schwab's unadjusted previous close, so it can select a corporate action as a
+  "gap" (CTVA −81% on 2026-10-01 was a separation). That is harmless for recording; strategies must not trust it.
 - **Paper mode has never run.** It needs a second Alpaca paper account (`ALPACA_DAYTRADE_API_KEY` /
   `_SECRET_KEY`) and `SCHWAB_DAYTRADE_ACCOUNT_NUMBER`. Neither exists yet, and the lab account is not
   opened.

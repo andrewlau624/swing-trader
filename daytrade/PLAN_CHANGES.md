@@ -24,3 +24,4 @@ adds to the program N. Results of the old variant are never deleted.
 | 2026-10-01 | open_cross_reversal | created (Study Lab-BE1 long+short, Lab-BE2 long only) | the cross is entered at no spread; auction pressure reverts | program N 712 -> 714 |
 | 2026-10-01 | open_cross_reversal | Lab-BE untestable (near price 0 before 09:28); new variant Lab-BF: decision 09:28:30, 30 names, top/bottom 2 | registration error; Databento budget | program N 714 -> 716 |
 | 2026-10-01 | close_imbalance | new variant Lab-BG: Lab-BC signals with a passive limit at the touch until 15:55 (queue-aware fills from SIP trades) | test whether passive entry captures the real +6bp | program N 716 -> 717 |
+| 2026-10-01 | event_drift | created (Study Lab-BH1 hold 20d, Lab-BH2 hold 5d) | multi-day drift after big announcement-day moves; costs paid once | program N 719 -> 721 |
