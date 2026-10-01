@@ -1592,3 +1592,19 @@ $27.13 spent (MISTAKES.md). Lab-BE's 2 variants stay counted.
 - Enter in the opening cross (official open); exit 10:00 at the NBBO. Costs and pass bar as Lab-BE (2x > 0 both
   halves; t >= 2 at 1x; placebo >= 95th; without the top 20 > 0). Lab-BF1 long+short; Lab-BF2 long only.
 - Gate in code: before the full pull, assert that >= 50% of 09:28:00-09:28:30 messages have near > 0 on 5 sample days.
+
+
+## Amendment — Lab Round 31, Study Lab-BG: Lab-BC's closing-imbalance signal with PASSIVE entry (pre-register; 1 variant, program N 716 -> 717)
+`date`: Thu Oct 1 2026 (the commit time is the stamp).
+- **Disclosure:** H2's gross for Lab-BC (+6.3bp mid -> close) is already known. What is NOT known is the outcome
+  conditional on a passive fill, which is what this tests (adverse selection).
+- Signals: Lab-BC's (Lab-BB1 names with |r| >= 1.6742; long r > 0, short r < 0), decided at 15:54:30.
+- Entry: a limit order at the 15:54:31 NBBO **bid** for a long (ask for a short), resting until 15:55:00 (Nasdaq's MOC
+  cutoff), then cancelled. Filled iff an SIP trade prints at or below the bid (long) / at or above the ask (short)
+  after 15:54:31 and before 15:55:00. Conservative: a print AT the limit counts only once the displayed size at the
+  limit at placement has traded (queue); a print through the limit fills at once. If filled, a market-on-close order is
+  sent (before 15:55) and the exit is the official close.
+- Costs: 1x 0.5bp in + 0.5bp out; 2x 1bp in + 1bp out (the fill is AT the limit, no spread paid).
+- Judged on H2 (2024-06-03 .. 2026-09-30): net per FILLED trade > 0 at 2x; day-clustered t >= 2 at 1x; without the top
+  20 > 0; and a placebo: random side on the same filled trades (sign-flip of mid -> close) >= 95th pct. Fill rate and
+  $/day (fills x edge) reported; H1 for reference.
