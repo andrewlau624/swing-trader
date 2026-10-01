@@ -64,7 +64,8 @@ def test_digest_numbers_from_books_and_logs(tmp_path):
 
 def test_ten_year_lines_and_charts(tmp_path):
     yrs, lines, marks = D.ten_year("roth", 1000.0)
-    assert len(yrs) == 121 and set(lines) == {"This bot", "Everything on", "Index fund"}
+    assert len(yrs) == 121 and set(lines) == {"This bot", "Everything on", "Backtest", "Index fund"}
+    assert marks["Backtest"][1] > marks["Everything on"][1], "the research rate is above every planning line"
     assert marks["Everything on"][1] > marks["This bot"][1] > marks["Index fund"][1] > 75000, "deposits + growth"
     _, tl, tm = D.ten_year("live", 2000.0)
     assert tm["This bot"][1] < D.project(2000.0, D.PLAN["taxable"]["base"], 10), "brokerage lines are after tax"
@@ -73,3 +74,20 @@ def test_ten_year_lines_and_charts(tmp_path):
     cids = [c for c, _ in images]
     assert cids == ["proj-live", "proj-roth"] and all(png[:4] == b"\x89PNG" for _, png in images)
     assert all(f"cid:{c}" in html for c in cids)
+
+
+def test_pace_compares_live_to_backtest_on_the_same_balances(tmp_path):
+    st, lg = _state(tmp_path)
+    a = D.load_account("live", st, 3000.0)
+    assert D.pace(a) is None, "fewer than 5 trades: no pace yet"
+    today = dt.date.today()
+    a.closed += [{"sym": "X", "leg": "night", "exit_date": (today - dt.timedelta(days=k)).isoformat(), "pnl": 1.0}
+                 for k in range(1, 6)]
+    a.equity_log = [{"date": (today - dt.timedelta(days=k)).isoformat(), "equity": 2000.0} for k in range(6, 0, -1)]
+    pc = D.pace(a)
+    assert pc["live"][-1] == pytest.approx(9.0), "10 - 6 + 5 x 1"
+    n = len(pc["days"])
+    assert pc["backtest"][-1] == pytest.approx(n * 2000 * D.BACKTEST["taxable"]["rate"] / 252)
+    assert pc["backtest"][-1] > pc["plan"][-1] > 0 and pc["sd"][-1] == pytest.approx(2000 * 0.010 * n ** 0.5)
+    _, html, _, imgs = D.render({**D.build(st, lg, 3000.0, 0.5), "accounts": {"live": a}}, charts=True)
+    assert "Backtest pace" in html and "normal range" in html and ("pnl-live" in [c for c, _ in imgs])
