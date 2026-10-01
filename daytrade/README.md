@@ -192,6 +192,19 @@ Live is also long-only until a short plan passes paper.
 - One bad day at the 2% limit costs $10.
 - The test's purpose is to measure real fills and drift, not to earn.
 
+## First real session through the bot (2026-10-01, dress rehearsal on 09:30-~13:00 ET)
+- 171,770 recorded Schwab L1 rows, no gaps, through every lab strategy and the risk layer at $2.3k cash and $25k
+  margin (SimBroker, 1s).
+- No errors. The risk layer did what it is for:
+  - refused shorts in the cash account;
+  - refused orders that round to 0 shares at $2.3k (one QQQ share is $741);
+  - capped at 3 positions;
+  - the 2% daily loss limit fired at $25k on gap_vwap_reclaim.
+- open_imbalance fired 0 times (as Lab-AV predicted).
+- The one "held at end of data" was VWAP-trend's QQQ: the copy stopped mid-session, which is expected. The full-day
+  check (flat by 15:55) runs after the close.
+- (The strategies are research plug-ins, all DEAD in replay; this checks the plumbing, not the P&L.)
+
 ## Momentum sleeve: PAPER SHADOW (from Study Lab-BT)
 The only registered PASS of the lab's first night, kept outside the intraday engine (it holds for a month):
 - Rule (Lab-BR): monthly top 20 of the 500 most-traded common stocks by 12-1 momentum, equal weight.
