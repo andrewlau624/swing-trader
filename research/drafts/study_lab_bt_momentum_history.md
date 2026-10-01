@@ -47,3 +47,16 @@ risk control.
 
 t **1.76** (fails 2.0); without best 5 +12; worst 12m −41% (to 2019-08). By decade: 1950s −35, 1980s −34, **2010s −56**,
 2020s +46. **DEAD**: positive on average but too noisy, and negative for the decade before this program's data.
+
+## Lab-BW — industry momentum, top 5 of French's 49 industries (Lab Round 45): PASS, durable
+| | judged 1963-2015 | 1963-89 | 1990-2015 | ref 1927-63 | ref 2016-26 |
+|---|---|---|---|---|---|
+| 1x excess bp/month | **+48.6** (t **3.3**; without best 5 +38.4) | +51.2 | +45.9 | +52.7 | +13.1 |
+| 2x | +38.6 | **+41.2** | **+35.9** | +42.7 | +3.1 |
+
+By decade (1x): 1920s +116, 1930s +46, 1940s +68, 1950s +24, 1960s +79, 1970s +64, 1980s +15, 1990s +47, **2000s +63**,
+2010s +6, 2020s +27. Worst 12m −41% (to 2009-06).
+
+**PASS.** Unlike stock momentum (Lab-BT), industry momentum stayed positive in every decade, including the 2000s. It
+is weaker since 2010 (+6 / +27bp, about +3bp at 2x in 2016-26). Lab-BS (11 broad sector SPDRs) failed in 2017-26, so
+granularity matters. Next: the implementable version on liquid US industry ETFs (Lab-BX), and a paper shadow.
