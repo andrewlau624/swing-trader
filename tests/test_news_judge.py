@@ -68,12 +68,49 @@ def test_api_failure_and_refusal_are_logged_not_raised(tmp_path):
     assert rec["verdict"] is None and rec["error"] == "refusal"
 
 
-def test_no_key_is_a_silent_no_op(tmp_path, monkeypatch):
-    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
-    monkeypatch.delenv("ANTHROPIC_AUTH_TOKEN", raising=False)
+import pytest
+
+
+@pytest.mark.parametrize("provider,var", [("opencode-go", "OPENCODE_API_KEY"), ("anthropic", "ANTHROPIC_API_KEY")])
+def test_no_key_is_a_silent_no_op(tmp_path, monkeypatch, provider, var):
     logs = []
     n = nj.run_shadow(_picks(), "2026-10-01", pd.Timestamp("2026-09-30 16:00", tz=ET),
                       pd.Timestamp("2026-10-01 15:40", tz=ET), tmp_path, logs.append,
-                      model="m", effort="low", max_calls=8, keys=("k", "s"))
-    assert n == 0 and "no ANTHROPIC_API_KEY" in logs[0]
+                      model="m", effort="low", max_calls=8, keys=("k", "s"), provider=provider)
+    assert n == 0 and f"no {var}" in logs[0]
     assert not (tmp_path / nj.LOG_NAME).exists()
+
+
+class FakeOpenCode:
+    provider = "opencode-go"
+
+    def __init__(self, content):
+        self.content, self.payloads = content, []
+
+    def chat(self, payload):
+        self.payloads.append(payload)
+        return {"id": "chatcmpl-1", "model": "deepseek-v4-flash", "usage": {"prompt_tokens": 90, "completion_tokens": 30},
+                "choices": [{"message": {"content": self.content}}]}
+
+
+def test_opencode_path_parses_json_mode_and_logs_the_served_model(tmp_path):
+    c = FakeOpenCode('```json\n{"verdict": "fundamental", "confidence": 1.4, "catalyst": "guidance cut", "reason": "8-K"}\n```')
+    _run(tmp_path, c, max_calls=1)
+    rec = json.loads((tmp_path / nj.LOG_NAME).read_text().splitlines()[0])
+    assert rec["verdict"] == "fundamental" and rec["confidence"] == 1.0, "fenced JSON parsed, confidence clipped"
+    assert rec["provider"] == "opencode-go" and rec["served_by"] == "deepseek-v4-flash" and rec["tokens_in"] == 90
+    p = c.payloads[0]
+    assert p["response_format"] == {"type": "json_object"} and p["temperature"] == 0
+    assert p["messages"][0]["role"] == "system" and "JSON object" in p["messages"][0]["content"]
+
+
+def test_opencode_invalid_verdict_is_logged_as_an_error(tmp_path):
+    _run(tmp_path, FakeOpenCode('{"verdict": "maybe", "confidence": 0.5, "catalyst": "", "reason": ""}'), max_calls=1)
+    rec = json.loads((tmp_path / nj.LOG_NAME).read_text().splitlines()[0])
+    assert rec["verdict"] is None and "bad verdict" in rec["error"]
+
+
+def test_default_provider_is_opencode_deepseek_flash():
+    from swingtrader.config import Config
+    d = Config.load().daily
+    assert (d.news_judge_provider, d.news_judge_model) == ("opencode-go", "deepseek-v4-flash")

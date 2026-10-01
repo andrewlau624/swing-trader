@@ -883,7 +883,8 @@ class DailyExecutor:
                           else pd.Timestamp(now).tz_convert(ET).normalize() - pd.Timedelta(hours=8))
             nj.run_shadow(picks, today, prev_close, pd.Timestamp(now).tz_convert(ET), self.state_dir,
                           self.log, model=self.d.news_judge_model, effort=self.d.news_judge_effort,
-                          max_calls=self.d.news_judge_max_calls, keys=require_alpaca_keys())
+                          max_calls=self.d.news_judge_max_calls, keys=require_alpaca_keys(),
+                          provider=self.d.news_judge_provider)
         except Exception as exc:                # a shadow must never cost the book anything
             self.log(f"[news] skipped ({type(exc).__name__}: {str(exc)[:80]})")
 

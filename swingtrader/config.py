@@ -218,9 +218,10 @@ class DailyCfg:
     # night pick's news + SEC filings and logs fundamental / liquidity / unclear. SHADOW ONLY: never
     # changes an order. "off" disables it; it also no-ops without ANTHROPIC_API_KEY in .env.
     news_judge: str = "shadow"
-    news_judge_model: str = "claude-opus-5-5"
-    news_judge_effort: str = "low"
-    news_judge_max_calls: int = 8          # new verdicts per night, shared by every book (~$0.02 each)
+    news_judge_provider: str = "opencode-go"   # opencode-go (OPENCODE_API_KEY) | anthropic (ANTHROPIC_API_KEY)
+    news_judge_model: str = "deepseek-v4-flash"
+    news_judge_effort: str = "low"             # Claude only
+    news_judge_max_calls: int = 20             # new verdicts per night, shared by every book
     # Impact cap (research Study X): each night order <= ADV * (edge / (3 Y sigma))^2,
     # the size past which square-root impact eats more than the order adds. None = off
     # (Y is unmeasured: `make review` section 8 fits it from live fills as orders grow).

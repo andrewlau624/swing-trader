@@ -1,14 +1,15 @@
 """LLM news judge for the night leg's picks — SHADOW ONLY (Round 23, Study BA; round1_prose.md).
 
 At 15:40, AFTER the night leg's close-auction orders are placed, each pick's news and SEC filings
-since the previous close are sent to Claude with one question: is today's drop FUNDAMENTAL (new
+since the previous close are sent to an LLM (default OpenCode Go `deepseek-v4-flash`, the user's choice;
+Claude via `daily.news_judge_provider: anthropic`) with one question: is today's drop FUNDAMENTAL (new
 information about the company's value, which tends to drift) or LIQUIDITY (forced/flow selling with
 no new information, which the night leg is paid to absorb)? The verdict is logged and never changes
 an order. It is judged later, forward only, by research/sim/news_judge_eval.py: an LLM knows how
 events before its training cutoff turned out, so a historical backtest would be contaminated.
 
 Cost control: one verdict per (date, symbol) shared by every book (cache file in state_dir), at most
-`max_calls` new calls a night, low effort. Every failure is logged and swallowed: the judge must never
+`max_calls` new calls a night. Every failure is logged and swallowed: the judge must never
 cost the night leg anything.
 """
 from __future__ import annotations
@@ -99,15 +100,66 @@ def filings(sym: str, start: pd.Timestamp, cache_dir: Path) -> list[dict]:
 
 
 # ---------------------------------------------------------------- the call
+OPENCODE_URL = "https://opencode.ai/zen/go/v1/chat/completions"     # OpenCode Go, OpenAI-compatible
+JSON_ONLY = ("\n\nReply with only a JSON object with exactly these keys: verdict (one of fundamental, "
+             "liquidity, unclear), confidence (number 0-1), catalyst (string), reason (string).")
+
+
+class OpenCodeClient:
+    """Minimal OpenAI-compatible chat client for OpenCode Go (key: OPENCODE_API_KEY)."""
+    provider = "opencode-go"
+
+    def __init__(self, key: str, url: str = OPENCODE_URL, timeout: float = 90.0):
+        self.key, self.url, self.timeout = key, url, timeout
+
+    def chat(self, payload: dict) -> dict:
+        last = None
+        for attempt in range(3):                       # 429 / 5xx / network: short backoff
+            try:
+                r = requests.post(self.url, json=payload, timeout=self.timeout,
+                                  headers={"Authorization": f"Bearer {self.key}"})
+                if r.status_code == 429 or r.status_code >= 500:
+                    last = RuntimeError(f"HTTP {r.status_code}"); time.sleep(2 * (attempt + 1)); continue
+                r.raise_for_status()
+                return r.json()
+            except requests.ConnectionError as exc:
+                last = exc; time.sleep(2 * (attempt + 1))
+        raise last
+
+
+def _parse(text: str) -> dict:
+    """The verdict JSON, validated against SCHEMA (OpenAI-style JSON mode guarantees JSON, not keys)."""
+    t = text.strip()
+    if t.startswith("```"):
+        t = t.strip("`").removeprefix("json").strip()
+    out = json.loads(t[t.find("{"): t.rfind("}") + 1])
+    if out.get("verdict") not in SCHEMA["properties"]["verdict"]["enum"]:
+        raise ValueError(f"bad verdict {out.get('verdict')!r}")
+    out["confidence"] = min(1.0, max(0.0, float(out["confidence"])))
+    out["catalyst"], out["reason"] = str(out.get("catalyst", ""))[:200], str(out.get("reason", ""))[:400]
+    return {k: out[k] for k in ("verdict", "confidence", "catalyst", "reason")}
+
+
 def judge(client, model: str, effort: str, sym: str, day_ret: float, price: float,
           news: list[dict], sec: list[dict]) -> dict:
-    """One Claude call; returns the parsed verdict plus usage, or {'verdict': None, 'error': ...}."""
+    """One LLM call (OpenCode Go or Claude, by the client); the parsed verdict plus usage, or
+    {'verdict': None, 'error': ...}."""
     body = (f"Symbol: {sym}\nToday's move at 15:40 ET: {day_ret * 100:+.1f}% (price {price:.2f})\n\n"
             f"News since the previous close ({len(news)}):\n"
             + ("\n".join(f"- [{n['time']}] {n['headline']} — {n['summary']}" for n in news) or "- none")
             + f"\n\nSEC filings since the previous close ({len(sec)}):\n"
             + ("\n".join(f"- [{s['time']}] {s['form']} {s['items']} {s['description']}".rstrip() for s in sec)
                or "- none"))
+    if hasattr(client, "chat"):
+        j = client.chat({"model": model, "temperature": 0, "max_tokens": 1000,
+                         "response_format": {"type": "json_object"},
+                         "messages": [{"role": "system", "content": SYSTEM + JSON_ONLY},
+                                      {"role": "user", "content": body}]})
+        out = _parse(j["choices"][0]["message"]["content"])
+        u = j.get("usage") or {}
+        out.update(request_id=j.get("id"), served_by=j.get("model"),
+                   tokens_in=u.get("prompt_tokens"), tokens_out=u.get("completion_tokens"))
+        return out
     resp = client.beta.messages.create(
         model=model,
         max_tokens=4000,
@@ -124,6 +176,24 @@ def judge(client, model: str, effort: str, sym: str, day_ret: float, price: floa
     out.update(request_id=resp._request_id, served_by=resp.model,
                tokens_in=resp.usage.input_tokens, tokens_out=resp.usage.output_tokens)
     return out
+
+
+KEY_VAR = {"opencode-go": "OPENCODE_API_KEY", "anthropic": "ANTHROPIC_API_KEY"}
+
+
+def make_client(provider: str):
+    """The provider's client, or None when its key is not in the environment / .env."""
+    if provider == "opencode-go":
+        key = os.environ.get("OPENCODE_API_KEY")
+        return OpenCodeClient(key) if key else None
+    if provider == "anthropic":
+        if not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")):
+            return None
+        import anthropic
+        c = anthropic.Anthropic(timeout=90.0, max_retries=2)
+        c.provider = "anthropic"
+        return c
+    raise ValueError(f"unknown news_judge_provider {provider!r}")
 
 
 # ---------------------------------------------------------------- shadow run
@@ -143,7 +213,8 @@ def load_log(path: Path) -> dict:
 
 def run_shadow(picks: pd.DataFrame, today: str, prev_close: pd.Timestamp, now: pd.Timestamp,
                cache_dir: Path, log, *, model: str, effort: str, max_calls: int, keys,
-               client=None, fetch_news=headlines, fetch_filings=filings) -> int:
+               provider: str = "opencode-go", client=None, fetch_news=headlines,
+               fetch_filings=filings) -> int:
     """Judge tonight's picks (index = symbol; columns day_ret, price), deepest drops first, at most
     `max_calls` new calls. Returns the number of new verdicts written."""
     path = cache_dir / LOG_NAME
@@ -152,11 +223,10 @@ def run_shadow(picks: pd.DataFrame, today: str, prev_close: pd.Timestamp, now: p
     if not todo:
         return 0
     if client is None:
-        if not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")):
-            log("[news] skipped: no ANTHROPIC_API_KEY in .env (shadow judge off)")
+        client = make_client(provider)
+        if client is None:
+            log(f"[news] skipped: no {KEY_VAR.get(provider, '?')} in .env (shadow judge off)")
             return 0
-        import anthropic
-        client = anthropic.Anthropic(timeout=90.0, max_retries=2)
     n = 0
     t0 = time.time()
     for sym in todo:
@@ -164,7 +234,8 @@ def run_shadow(picks: pd.DataFrame, today: str, prev_close: pd.Timestamp, now: p
             log("[news] time budget (10 min) spent; rest of tonight's picks not judged"); break
         r = picks.loc[sym]
         rec = {"date": today, "sym": str(sym), "day_ret": round(float(r.day_ret), 5),
-               "price": round(float(r.price), 4), "model": model, "effort": effort,
+               "price": round(float(r.price), 4), "provider": getattr(client, "provider", provider),
+               "model": model, "effort": effort,
                "judged_at": str(pd.Timestamp.now(tz="America/New_York"))[:19]}
         try:
             news = fetch_news(str(sym), prev_close, now, keys)
@@ -197,15 +268,16 @@ def main(argv=None) -> int:
     if not args:
         print("usage: python -m swingtrader.daily.news_judge SYM [DAY_RET, e.g. -0.10]"); return 2
     sym, day_ret = args[0].upper(), float(args[1]) if len(args) > 1 else -0.10
-    import anthropic
     now = pd.Timestamp.now(tz="America/New_York")
     start = now - pd.Timedelta(days=1)
     news = headlines(sym, start, now, require_alpaca_keys())
     sec = filings(sym, start, ROOT / "state")
     from ..config import Config
     d = Config.load().daily
-    out = judge(anthropic.Anthropic(timeout=90.0), d.news_judge_model, d.news_judge_effort, sym, day_ret,
-                0.0, news, sec)
+    client = make_client(d.news_judge_provider)
+    if client is None:
+        print(f"no {KEY_VAR[d.news_judge_provider]} in .env"); return 1
+    out = judge(client, d.news_judge_model, d.news_judge_effort, sym, day_ret, 0.0, news, sec)
     print(f"{sym}: {len(news)} news, {len(sec)} filings in the last 24h")
     print(json.dumps(out, indent=2))
     return 0

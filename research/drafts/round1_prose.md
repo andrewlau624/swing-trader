@@ -1327,3 +1327,15 @@ opposite). No historical L1 exists, so forward only.
 Scored by `research/sim/quote_imbalance_eval.py` (`make qi-eval`) on the official crosses, 2 x 2.5bp, one row per
 (date, symbol); read once at >= 300 picks with a snapshot; bars as Study BA (both halves, NW t >= 2, sign-flip
 and within-night shuffle >= 95th).
+
+
+## Amendment — Round 23b: Study BA's model changed BEFORE any verdict exists (N unchanged, 690)
+
+`date`: Thu Oct 1 2026 (stamped by the commit). The user prefers OpenCode Go's DeepSeek Flash. No verdict has been
+logged in production yet (the logger shipped hours ago and has not run a 15:40 session), so this replaces Round
+23's frozen model rather than restarting a count. Frozen from here: provider `opencode-go`
+(https://opencode.ai/zen/go/v1/chat/completions, OpenAI-compatible JSON mode), model `deepseek-v4-flash`,
+temperature 0, the same system prompt + a JSON-keys line, at most **20** new picks a night (the cheaper model lets
+the judge cover every pick instead of the 8 deepest). Every record logs the model that actually served it (a public
+issue reports this ID may serve DeepSeek V3.2, knowledge cutoff 2025-05; immaterial to a forward test, but logged).
+Variant BA1, scoring and bars unchanged. Changing provider/model/prompt again restarts the count.
