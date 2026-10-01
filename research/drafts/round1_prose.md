@@ -1824,3 +1824,18 @@ weaker after 2010. This tests the version a $2-25k account or the Roth can hold.
 - Pass: 2x excess vs SPY > 0 both halves; t >= 2; >= 95th pct of a random-5 placebo; without the best 5 months > 0.
 - Either way, a PAPER SHADOW of this rule is built (forward evidence for Lab-BW's durable premium). A live test would
   need its own registration, the $500 gate and the user's approval.
+
+
+## Amendment — Lab Round 47, Study Lab-BY: top-decile momentum with a market-trend crash filter (Faber 10-month SMA), 1963-2015 (pre-register; 1 variant, program N 739 -> 740)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). Faber (2007); Daniel & Moskowitz (2016) on momentum crashes
+after bear markets. Builds on Lab-BT (PASS, crash-prone) and Lab-BU (vol scaling; dead by bar). grep: no trend-filtered
+momentum here (TSMOM cross-asset dead, add. 26b, is a different book).
+- French data (CRSP 202608). Market index level = cumulative (Mkt-RF + RF). At the end of month m-1: if the market
+  level > its 10-month average (months m-10..m-1), hold the value-weighted top momentum decile (Hi PRIOR) in month m;
+  otherwise hold T-bills (RF). Cost: 20bp/month while in momentum (1x), 40bp (2x), plus 10bp per switch.
+- Judged as a WHOLE SLEEVE vs the market (buy and hold) on 1963-07 .. 2015-12, halves as Lab-BT. Pass:
+  - (a) CAGR at 2x costs >= the market's in BOTH halves;
+  - (b) Sharpe > the market's in both halves;
+  - (c) max drawdown better than the market's over the judged period;
+  - (d) the worst 12-month return better than −30%.
+- Reported: 1927-63 and 2016-26 (the recent, already-seen era), time in market, switches per year.
