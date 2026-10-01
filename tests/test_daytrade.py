@@ -745,3 +745,77 @@ def test_paper_session_halts_on_the_halt_file(tmp_path):
     eng = run_session("paper", s, AlpacaLabPaper(poll_s=0, trading=fake), 25_000, "margin", {}, [strat], rows,
                       journal_root=tmp_path, halt_path=tmp_path / "HALT")
     assert eng.halted and not eng.trades and not fake.orders
+
+
+# ------------------------------------------------------------------ live Schwab broker (fake client)
+class FakeSchwabLab:
+    def __init__(self):
+        self.placed = []
+
+    class _R:
+        def __init__(self, data=None, status=200, headers=None):
+            self._d, self.status_code, self.headers, self.text = data, status, headers or {}, ""
+
+        def json(self):
+            return self._d
+
+        def raise_for_status(self):
+            pass
+
+    def get_account_numbers(self):
+        return self._R([{"accountNumber": "11112222", "hashValue": "LIVEHASH"},
+                        {"accountNumber": "99994444", "hashValue": "LABHASH"}])
+
+    def get_account(self, h, fields=None):
+        return self._R({"securitiesAccount": {"type": "CASH", "accountNumber": "99994444",
+                                              "currentBalances": {"liquidationValue": 480.0, "cashBalance": 480.0}}})
+
+    def place_order(self, h, order):
+        self.placed.append((h, order))
+        return self._R(status=201, headers={"Location": f"/orders/{len(self.placed)}"})
+
+    def get_order(self, oid, h):
+        return self._R({"status": "FILLED", "orderActivityCollection": [
+            {"executionLegs": [{"quantity": 2, "price": 101.0, "time": "2026-10-01T14:00:00Z"}]}]})
+
+    def cancel_order(self, oid, h):
+        return self._R()
+
+
+def _live_env(monkeypatch, tmp_path, lab="4444", main="2222"):
+    from daytrade import brokers
+    monkeypatch.setenv("SCHWAB_DAYTRADE_ACCOUNT_NUMBER", lab)
+    monkeypatch.setenv("SCHWAB_ACCOUNT_NUMBER", main)
+    monkeypatch.setenv("SCHWAB_ROTH_ACCOUNT_NUMBER", "")
+    monkeypatch.setenv("SCHWAB_LEAP_ACCOUNT_NUMBER", "")
+    monkeypatch.setenv("DAYTRADE_LIVE", "on")
+    monkeypatch.setattr(brokers, "LIVE_APPROVAL", tmp_path / "LIVE_APPROVED")
+    (tmp_path / "LIVE_APPROVED").write_text("approved for test")
+
+
+def test_live_broker_trades_only_the_lab_account(monkeypatch, tmp_path):
+    from daytrade.brokers import SchwabLabLive
+    _live_env(monkeypatch, tmp_path)
+    c = FakeSchwabLab()
+    b = SchwabLabLive(500, client=c, poll_s=0)
+    assert b.a.hash == "LABHASH" and b.equity() == 480.0
+    b.submit(Order("QQQ", "buy", ref_price=100.0, stop=99.0), 2, t("10:00"))
+    b.submit(Order("QQQ", "sell", "limit", limit=105.0, entry=False), 2, t("10:00"))
+    b.submit(Order("QQQ", "sell", "stop", stop_px=99.0, entry=False), 2, t("10:00"))
+    assert {h for h, _ in c.placed} == {"LABHASH"}
+    kinds = [o["orderType"] for _, o in c.placed]
+    assert kinds == ["MARKET", "LIMIT", "STOP"]
+    assert c.placed[2][1]["stopPrice"] in ("99.00", "99.0", 99.0)
+    fills = b.on_event(Clock(t("10:01")))
+    assert fills and fills[0].price == 101.0 and fills[0].qty == 2
+
+
+def test_live_broker_refuses_the_live_books_account_and_short_entries(monkeypatch, tmp_path):
+    from daytrade.brokers import SchwabLabLive
+    _live_env(monkeypatch, tmp_path, lab="99994444", main="4444")      # main's last 4 = the lab's account
+    with pytest.raises(guard.AccountGuardError):
+        SchwabLabLive(500, client=FakeSchwabLab())
+    _live_env(monkeypatch, tmp_path)
+    b = SchwabLabLive(500, client=FakeSchwabLab(), poll_s=0)
+    with pytest.raises(guard.AccountGuardError, match="long-only"):
+        b.submit(Order("QQQ", "sell", ref_price=100.0, stop=101.0), 1, t("10:00"))
