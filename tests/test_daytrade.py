@@ -647,3 +647,22 @@ def test_halt_short_sells_the_reopening_with_a_stop_above(tmp_path):
     assert tr["exit_reason"] == "30-minute exit"
     e2 = engine([HaltResume("up", side="sell")], tmp_path, equity=1_500).run(evs)   # cash: no shorts
     assert not e2.trades
+
+
+def test_momentum_shadow_picks_rank_12_1_inside_the_liquid_universe():
+    import numpy as np
+    import pandas as pd
+    from daytrade.momentum import picks
+    months = [f"2025-{m:02d}" for m in range(1, 13)] + ["2026-01", "2026-02"]
+    syms = ["A", "B", "C", "D", "THIN", "CHEAP"]
+    C = pd.DataFrame(100.0, index=months, columns=syms)
+    C.loc[months[1]:months[-2], "A"] = np.linspace(100, 200, 12)      # strongest 12-1
+    C.loc[months[1]:months[-2], "B"] = np.linspace(100, 150, 12)
+    C.loc[months[1]:months[-2], "THIN"] = np.linspace(100, 400, 12)    # strongest, but illiquid
+    C.loc[months[1]:months[-2], "CHEAP"] = np.linspace(100, 300, 12)
+    C.loc[months[-1], "A"] = 50                                        # last month is skipped (12-1)
+    V = pd.DataFrame(1e6, index=months, columns=syms); V["THIN"] = 1.0
+    RAW = C.copy(); RAW["CHEAP"] = 3.0                                 # under $5 at the decision
+    p, u = picks(C, V, RAW, months[-1], top=2, univ=4)
+    assert "THIN" not in u and "CHEAP" not in u
+    assert p == ["A", "B"]

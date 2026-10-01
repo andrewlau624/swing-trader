@@ -16,7 +16,7 @@ UNAME := $(shell uname -s)
         results status positions slippage logs once dry digest notify-test \
         notify-setup doctor pull scan backtest clean stop persist-stop linger _lastlog pending \
         daytrade-record daytrade-smoke daytrade-status daytrade-halt daytrade-unhalt daytrade-review \
-        daytrade-table daytrade-replay daytrade-paper daytrade-persist daytrade-unpersist daytrade-logs
+        daytrade-table daytrade-momentum daytrade-replay daytrade-paper daytrade-persist daytrade-unpersist daytrade-logs
 
 help:
 	@echo "swing-trader"
@@ -361,6 +361,9 @@ daytrade-review:
 
 daytrade-table:
 	@$(PY) scripts/daytrade.py table
+
+daytrade-momentum:
+	@$(PY) scripts/daytrade.py momentum
 
 news-smoke:   ## one live LLM news verdict for SYM (Round 23 BA): make news-smoke SYM=XYZ
 	@test -n "$(SYM)" || { echo "usage: make news-smoke SYM=TICKER"; exit 1; }
