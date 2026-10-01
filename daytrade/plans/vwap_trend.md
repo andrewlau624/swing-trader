@@ -1,7 +1,7 @@
-# Plan: vwap_trend (Study AW)
+# Plan: vwap_trend (Study Lab-AW)
 
 Written 2026-10-01, before any data for it was fetched. Code: `daytrade/strategies/vwap_trend.py`.
-Pre-registration: `research/drafts/round1_prose.md`, Round 21, Study AW (2 variants, N 674 -> 676).
+Pre-registration: `research/drafts/round1_prose.md`, Lab Round 21, Study Lab-AW (2 variants, N 674 -> 676).
 
 ## Source
 Zarattini & Aziz, "Volume Weighted Average Price (VWAP) The Holy Grail for Day Trading Systems", SSRN 4631351
@@ -23,13 +23,13 @@ only. The authors say it is not a finished system.
 - When the desired side differs from the held side: exit and reverse, market, at the next minute's open
   (the 1s latency). Flat by 15:55 (the lab's rule; the paper holds to 16:00).
 - Protective catastrophe stop 2% from each entry (engine-managed); size from it.
-- Variants: AW1 trades QQQ; AW2 trades TQQQ on QQQ's signal.
+- Variants: Lab-AW1 trades QQQ; Lab-AW2 trades TQQQ on QQQ's signal.
 
 ## Costs
 - QQQ 0.5bp/side (1x), 1.0bp (2x).
 - TQQQ 1.5bp/side (1x), 3.0bp (2x).
 
-## Replay (Study AW)
+## Replay (Study Lab-AW)
 - SIP minute bars 2022-01-03 .. 2026-09-30, halves split at 2024-06-01 (H2 is out of sample for the paper).
 - The unit is the DAY: the day's summed net bp on a constant notional. t = day-level.
 - Placebo: each holding segment's direction flipped at random (same switch times and costs), 1,000 draws.

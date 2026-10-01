@@ -152,7 +152,7 @@ def status() -> int:
               f"gaps {len(m['gaps'])}  reconnects {len(m['reconnects'])}  "
               f"{'FLAGGED' if m.get('flagged') else 'clean'}{'' if m.get('complete') else ' (incomplete)'}")
     allclean = sum(1 for p in days if not json.loads(p.read_text()).get("flagged"))
-    print(f"recorded days: {len(days)}, unflagged: {allclean} (Study AT first look at 40)")
+    print(f"recorded days: {len(days)}, unflagged: {allclean} (Study Lab-AT first look at 40)")
     for mode in ("replay", "paper", "live"):
         n = len(load(STATE / f"journal-{mode}.jsonl"))
         if n:

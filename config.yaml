@@ -100,9 +100,10 @@ daily:
   night_weight: 0.5              #   backtest 21.8% CAGR/-11% DD -> 44.5%/-22%
   roth_cash_ira: false           # Round 17 Studies AL/AQ: on a plain cash IRA (no limited margin)
                                  # run the GFV-safe IBS+night legs, NO intraday leg. 19.0%/yr at
-                                 # 5bp night cost, 22.0% at 2.5bp (t 3.06, P(DD50) 0%, SHADOW).
-                                 # Gate: live night round-trip cost <= ~5bp (crossover ~6bp); else
-                                 # run IBS-only (17.9% at tier_hi). Off = need ROTH_LIMITED_MARGIN.
+                                 # 5bp/side night cost, 22.0% at 2.5bp/side (t 3.06, P(DD50) 0%, SHADOW).
+                                 # Gate: live night cost <= ~3bp/side (crossover 3.7bp/side on official
+                                 # auction prints, Round 19 AW; 5.4 on vendor opens); else run IBS-only
+                                 # (17.9% at tier_hi). Measured live ~0bp. Off = need ROTH_LIMITED_MARGIN.
   lever_weight: null             # 0.65 = both legs -> 0.65 (1.3x overnight) once signals.lever_ok passes
                                  # (50 night exits <= 10bp/side). null = never. Off 2026-09-29: the gate
                                  # proves costs, not edge; revisit at ~100 live night trades (NEXT.md)
@@ -120,6 +121,15 @@ daily:
                                  # book -17% -> -4% with the dedupe; 2021-26 Sharpe up, not down)
   night_tilt_k: 0.25             # weight deeper drops more (addendum 16; fitted 2021-23, held out 2024-26). 0 = equal
   night_tilt_model: v1           # v2 adds yesterday's return: replay +$23k, but borderline (addendum 23)
+  night_tilt_tow: false          # Round 19 AU3 tug-of-war tilt, SHADOW: logged only. Gate/kill rule: study_au_tow.md
+  news_judge: shadow             # Round 23 BA: Claude labels each night pick's drop fundamental/liquidity after
+                                 # the orders are placed; logged to state/news-judge.jsonl, never trades. off = disable.
+                                 # Needs OPENCODE_API_KEY in .env (no key = silently off). <= 20 calls/night,
+                                 # pennies a month on OpenCode Go. Claude: provider anthropic + ANTHROPIC_API_KEY
+  news_judge_provider: opencode-go
+  news_judge_model: deepseek-v4-flash
+  news_judge_effort: low
+  news_judge_max_calls: 20
   night_impact_y: null           # impact cap (Study X): order <= ADV (edge/(3 Y sigma))^2. null = off until
                                  # `make review` section 8 measures Y; 4 is the robust choice (Study X), 1-2
                                  # if fills show low impact. At ~$2k it binds only on ~300%-vol names.

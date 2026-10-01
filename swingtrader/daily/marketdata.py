@@ -16,6 +16,7 @@ import numpy as np
 import pandas as pd
 
 from ..data import _clients
+from . import signals as sg
 
 ET = "America/New_York"
 SNAP_BATCH = 1000
@@ -91,7 +92,7 @@ def eligibility(symbols: list[str], today: dt.date, *, price_min: float,
     path = cache_dir / f"daily-universe-{today.isoformat()}.json"
     if path.exists():
         d = json.loads(path.read_text())
-        if d and "vol20" in d[0] and "rets" in d[0]:   # older caches lack these: rebuild
+        if d and "vol20" in d[0] and "rets" in d[0] and "tow" in d[0]:   # older caches lack these: rebuild
             return pd.DataFrame(d).set_index("symbol")
     bars = sip_daily(symbols, pd.Timestamp(today) - pd.Timedelta(days=45),
                      pd.Timestamp(today))
@@ -104,8 +105,11 @@ def eligibility(symbols: list[str], today: dt.date, *, price_min: float,
         pc = float(b["close"].iloc[-1])
         lr = np.log(b["close"] / b["close"].shift(1)).iloc[-20:]
         vol20 = float(lr.std() * np.sqrt(252))
+        # tug of war (Round 19 AU3): SIP daily bars = the research panel's source; the 09:15
+        # daily_bar_check canary confirms they equal regular-hours minutes (09:30 / 16:00)
+        tow = sg.tug_of_war(b["open"].values[-21:], b["close"].values[-21:])
         if pc >= price_min and adv >= adv_min:
-            rows.append({"symbol": sym, "prev_close": pc, "adv20": adv,
+            rows.append({"tow": tow if np.isfinite(tow) else None, "symbol": sym, "prev_close": pc, "adv20": adv,
                          "vol20": vol20 if np.isfinite(vol20) else 0.0,
                          "rets": [round(float(v), 5) if np.isfinite(v) else 0.0 for v in lr.values],
                          "prev_date": str(b.index[-1].date())})
@@ -154,6 +158,11 @@ def schwab_rows(symbols: list[str], max_age_min: float = 10.0, client=None) -> p
                          # cost model needs (daily-bar estimators confuse it with vol)
                          "bid": float(bid) if bid else float("nan"),
                          "ask": float(ask) if ask else float("nan"),
+                         # book depth at the touch + day volume: logged per night pick so a
+                         # quote-imbalance study can run forward (no historical L1 exists)
+                         "bid_size": float(q.get("bidSize") or "nan"),
+                         "ask_size": float(q.get("askSize") or "nan"),
+                         "day_volume": float(q.get("totalVolume") or "nan"),
                          "trade_age_min": age}
     return pd.DataFrame.from_dict(rows, orient="index")
 

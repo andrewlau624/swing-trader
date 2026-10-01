@@ -186,8 +186,9 @@ class DailyCfg:
     # d+1, sell open d+2) and the night leg (buy close d, sell open d+1) are
     # GFV-safe, the 3x-ETF intraday leg is not. When on, the Roth runs IBS + night
     # (the shipped overnight book) with NO intraday leg, without ROTH_LIMITED_MARGIN.
-    # Gate: live night round-trip cost <= ~5bp (2x measured; crossover ~6bp). If it
-    # drifts higher, run IBS-only. Default off.
+    # Gate: live night cost <= ~3bp/side (crossover 3.7bp/side on official auction
+    # prints, Round 19 Study AW; it was ~5-6 on vendor opens). If it drifts higher, run
+    # IBS-only. Default off.
     roth_cash_ira: bool = False
     # Overnight leverage: BOTH overnight legs move to this weight once
     # signals.lever_ok passes on live fills (50 night exits at <= 10bp/side,
@@ -210,6 +211,17 @@ class DailyCfg:
     # v1 = depth + vol20 (shipped); v2 adds yesterday's return (addendum 23).
     # Under v1 the 15:40 log still prints the v2 weights for comparison.
     night_tilt_model: str = "v1"
+    # Round 19 AU3 (research/drafts/study_au_tow.md, SHADOW): also weight night names by the
+    # 20-session tug-of-war count (overnight up, day down). False = only logged at 15:40.
+    night_tilt_tow: bool = False
+    # Round 23 Study BA (swingtrader/daily/news_judge.py): after the 15:40 orders, Claude reads each
+    # night pick's news + SEC filings and logs fundamental / liquidity / unclear. SHADOW ONLY: never
+    # changes an order. "off" disables it; it also no-ops without ANTHROPIC_API_KEY in .env.
+    news_judge: str = "shadow"
+    news_judge_provider: str = "opencode-go"   # opencode-go (OPENCODE_API_KEY) | anthropic (ANTHROPIC_API_KEY)
+    news_judge_model: str = "deepseek-v4-flash"
+    news_judge_effort: str = "low"             # Claude only
+    news_judge_max_calls: int = 20             # new verdicts per night, shared by every book
     # Impact cap (research Study X): each night order <= ADV * (edge / (3 Y sigma))^2,
     # the size past which square-root impact eats more than the order adds. None = off
     # (Y is unmeasured: `make review` section 8 fits it from live fills as orders grow).

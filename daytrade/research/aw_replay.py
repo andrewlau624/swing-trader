@@ -1,4 +1,4 @@
-"""Study AW: VWAP trend on QQQ / TQQQ (daytrade/plans/vwap_trend.md, round1_prose.md Round 21). The lab's
+"""Study Lab-AW: VWAP trend on QQQ / TQQQ (daytrade/plans/vwap_trend.md, round1_prose.md Lab Round 21). The lab's
 VwapTrend code through the lab's engine on SIP minute bars, regular session only (calendar), 2022-26.
 
   python -m daytrade.research.aw_replay run      # fetches (cached) then runs
@@ -102,7 +102,7 @@ def run() -> None:
         days.append((o.date(), session_times(o.date(), cal, Limits()), day_events(groups[o.date()], o, c)))
     n1 = sum(1 for d, _, _ in days if d < SPLIT)
     out = {"n_days": len(days), "n_h1": n1}
-    for name, trade in (("AW1", "QQQ"), ("AW2", "TQQQ")):
+    for name, trade in (("Lab-AW1", "QQQ"), ("Lab-AW2", "TQQQ")):
         c1, c2 = COSTS[trade]
         r1, r2 = run_variant(trade, c1, days), run_variant(trade, c2, days)
         d1, d2 = day_rows(r1), day_rows(r2)

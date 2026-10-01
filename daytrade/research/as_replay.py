@@ -1,4 +1,4 @@
-"""Study AS: gap + premarket volume, pullback to VWAP, reclaim (daytrade/plans/gap_vwap_reclaim.md,
+"""Study Lab-AS: gap + premarket volume, pullback to VWAP, reclaim (daytrade/plans/gap_vwap_reclaim.md,
 round1_prose.md Round 18). Replays the lab's strategy code through the lab's engine on SIP minute
 history, 2022-01-03 .. 2026-09-30.
 

@@ -863,8 +863,30 @@ class DailyExecutor:
     def phase_close(self, book: DailyBook, today: str, now, clock) -> None:
         # what the night leg planned tonight, for the shadows below (log only)
         self._night_plan = {"requested": 0.0, "planned": 0.0}
+        self._night_judge_picks = None
         self._phase_close_night(book, today, now, clock)
         self._close_shadows(book, today, now, clock)
+        self._news_judge(today, now)
+
+    def _news_judge(self, today: str, now) -> None:
+        """Round 23 BA: LLM verdict on each night pick's drop, AFTER the orders (shadow only)."""
+        picks = getattr(self, "_night_judge_picks", None)
+        if self.d.news_judge == "off" or self.dry_run or picks is None or picks.empty:
+            return
+        try:
+            from ..config import require_alpaca_keys
+            from . import news_judge as nj
+            elig = getattr(self, "_night_elig", None)
+            pdate = (elig["prev_date"].reindex(picks.index).dropna().max()
+                     if elig is not None and "prev_date" in elig.columns else None)
+            prev_close = (pd.Timestamp(f"{pdate} 16:00", tz=ET) if pdate
+                          else pd.Timestamp(now).tz_convert(ET).normalize() - pd.Timedelta(hours=8))
+            nj.run_shadow(picks, today, prev_close, pd.Timestamp(now).tz_convert(ET), self.state_dir,
+                          self.log, model=self.d.news_judge_model, effort=self.d.news_judge_effort,
+                          max_calls=self.d.news_judge_max_calls, keys=require_alpaca_keys(),
+                          provider=self.d.news_judge_provider)
+        except Exception as exc:                # a shadow must never cost the book anything
+            self.log(f"[news] skipped ({type(exc).__name__}: {str(exc)[:80]})")
 
     def _phase_close_night(self, book: DailyBook, today: str, now, clock) -> None:
         self._check_exit_cost(book, today)
@@ -929,6 +951,7 @@ class DailyExecutor:
                     if n_raw > self.d.night_crowd_n else ""))
         if picks.empty:
             return
+        self._night_judge_picks = picks[["day_ret", "price"]].copy()
         equity = self._sizing_equity(book)
         leg = self._w_night(book) * equity
         gs = sg.gap_scale(today, pd.Timestamp(clock.next_open).tz_convert(ET), self.d.night_weekend_scale)
@@ -955,6 +978,17 @@ class DailyExecutor:
             w_other, other = w2, "v2"
         self.log(f"[night] tilt {self.d.night_tilt_model} (would be {other}: "
                  + ", ".join(f"{s} {a:.2f}" for s, a in zip(picks.index[:8], w_other)) + ")")
+        # Round 19 AU3 tug-of-war tilt: always logged (the shadow record its gate needs),
+        # applied only when daily.night_tilt_tow is on
+        tow = (pd.to_numeric(elig["tow"].reindex(picks.index), errors="coerce").values.astype(float)
+               if "tow" in elig.columns else np.full(len(picks), np.nan))
+        w_tow = sg.night_tilt_tow(w, tow, self.d.night_tilt_k)
+        self.log(f"[night] tow {'on' if self.d.night_tilt_tow else 'shadow'}: "
+                 + ", ".join(f"{s} tow {'na' if not np.isfinite(t) else int(t)} w {a:.2f}"
+                             for s, t, a in zip(picks.index[:8], tow, w_tow)))
+        tow_of = dict(zip(picks.index, tow))
+        if self.d.night_tilt_tow:
+            w = w_tow
         probe_usd = self.d.night_probe_max_usd if self.live else None
         adv = (picks["adv20"].values if "adv20" in picks else np.full(len(picks), np.nan))
         cap = (sg.night_impact_cap(adv, v20, self.d.night_impact_edge_bps, self.d.night_impact_y)
@@ -987,12 +1021,12 @@ class DailyExecutor:
             self.log(f"  {sym}: day {r.day_ret*100:+.1f}%  ibs {r.ibs:.2f}  px {r.price:.2f}  w {wi:.2f}"
                      + (f"  spread {spread:.0f}bp" if np.isfinite(spread) else "")
                      + (f"  PROBE 1 sh (target ${target:.0f})" if probe else ""))
-            self._log_decision(today, sym, r, spread, qty, ai)
+            self._log_decision(today, sym, r, spread, qty, ai, tow_of.get(sym, float("nan")))
             self._order(book, today, sym, "buy", "night", qty=qty, tif="cls",
                         ref_px=float(r.price), kind="entry")
 
     def _log_decision(self, today: str, sym: str, r, spread_bps: float, qty: int,
-                      adv20: float = float("nan")) -> None:
+                      adv20: float = float("nan"), tow: float = float("nan")) -> None:
         """One line per night pick with what was known at 15:40, including the
         quoted spread. This is the dataset a per-name cost model will be fitted
         on once fills accumulate (research/sim uses a price/volume tier until then)."""
@@ -1005,7 +1039,18 @@ class DailyExecutor:
                # participation, for fitting the impact coefficient (review section 8)
                "adv20": None if not np.isfinite(adv20) else round(float(adv20)),
                "pct_adv": None if not np.isfinite(adv20) or adv20 <= 0
-               else round(qty * float(r.price) / adv20 * 100, 5)}
+               else round(qty * float(r.price) / adv20 * 100, 5),
+               # tug-of-war count (Round 19 AU3): the shadow gate joins this to the fills
+               "tow": None if not np.isfinite(tow) else int(tow)}
+        # 15:40 book snapshot (Schwab quotes only): bid/ask sizes and day volume, for a forward
+        # quote-imbalance study; the open is the gap reference
+        for k in ("bid", "ask", "bid_size", "ask_size", "day_volume", "open"):
+            v = r.get(k, np.nan) if hasattr(r, "get") else np.nan
+            try:
+                v = float(v)
+            except (TypeError, ValueError):
+                v = float("nan")
+            rec[k] = None if not np.isfinite(v) else round(v, 4)
         with open(self.log_dir / f"daily-decisions{self.tag}.jsonl", "a") as fh:
             fh.write(json.dumps(rec) + "\n")
 

@@ -1067,6 +1067,49 @@ sensitivity on registered variants. If IBS+night beats IBS-only at <= 5bp in bot
 cash-IRA spec becomes IBS .5 + night .5 (not IBS-only) with the cost level named as the gate.
 
 
+## Amendment — Round 18: two ideas from a quant Discord (MemLabs server) — Studies AS, AT (pre-register; 6 variants, N 669 -> 675)
+
+`date`: Wed Sep 30 23:54:33 PDT 2026. Source: chat logs the user pasted. Most ideas there are already
+in NEXT.md's do-not-redo table (order-book / auction imbalance: data; decay monitors / CUSUM de-risk:
+add. 37; regime & 200dma gates; inverse-vol name sizing; ML/XGBoost: Study E; parameter
+sensitivity / DSR). Two are concrete and untested here. Nothing below computed.
+
+### Study AS — allocate the overnight budget between legs by trailing metrics ("softmax of metrics")
+MemLabs: "pass your metrics as a vector into the softmax function and that gives a weight
+allocation"; sxssion: allocate by vol or expectancy. The shipped book splits the overnight budget
+IBS .5 / night .5, fixed. Each variant keeps night_w + ibs_w = 1.0 (no added leverage, cash-IRA
+compatible), clips each weight to [0.2, 0.8], and leaves the noise leg unchanged. Signals use each
+leg's per-unit daily return (fractional $100k replay, IBS unit includes its idle BIL), lagged 2
+sessions (an IBS signal on d-2 is realised at open d; nothing later is known at d's decisions).
+- AS1 softmax of trailing 63-session annualised Sharpe, temperature 1.
+- AS2 inverse trailing 63-session vol (risk parity between the two legs).
+- AS3 softmax of trailing 252-session annualised Sharpe, temperature 1.
+Books: V7 (night .5 + IBS .5 + QQQ/SMH noise cap .75, live tilt, weekend x.5, no conviction) and
+IBS+night with noise off (the cash-IRA mix, approximated in B.Sim: no GFV timing), fixed capital
+$2.3k / $10k / $25k, whole shares. Night cost: 5bp flat round trip (the brief's measured x2, Study
+AQ) and tier_hi as the stress. Window 2021-02..2026-09 (the honest night pool); no 2016-20 holdout,
+so the verdict caps at SHADOW.
+
+### Study AT — vol-contraction and trend-slope conditioning for the IBS (mean-reversion) leg
+Whiskey: filter "false mean-reversion signals" when short-term vol is regressing toward the
+medium-term regime (20-bar vs 100-bar), and/or take MR trades only when a regression slope agrees.
+Per IBS pick s on signal day d (d's close; known before the d+1 open buy):
+VR = stdev of s's log close returns over the last 10 sessions / over the last 60 sessions.
+- AT1 skip the pick if VR < 0.8 (vol contracting).
+- AT2 skip the pick if VR > 1.25 (vol expanding) — the opposite sign, registered so a one-sided
+  look can't pass by choosing the sign after the fact.
+- AT3 skip the pick unless the OLS slope of s's log close over the last 50 sessions is > 0.
+Skipped picks leave their slice of the IBS half in BIL (the shipped idle rule).
+Holdout: the IBS leg alone exists 2016-01..2020-12; report per-trade mean gross (open->open, 1bp
+side) of kept vs skipped picks in 2016-20, 2021-23, 2024-26. Books as Study AS, night 5bp and tier_hi.
+
+### Pass bar (both studies, SHADOW at most)
+At the stressed cost (tier_hi) and at 5bp: book increment > 0 in both halves (2021-23, 2024-26) at
+every size; NW t (5 lags) of the daily increment >= 2.0; sign-flip placebo of the daily increment
+>= 95th pct (1,000 draws); max DD not worse by > 2pp. AT also needs the kept-minus-skipped per-trade
+gap to have the passing sign in 2016-20. DSR reported at N 675. A variant that fails any clause is
+DEAD.
+
 ## Amendment — Round 18: the day-trading lab's first two strategies, Studies AS and AT (pre-register; 2 variants, N 669 -> 671)
 
 `date`: Thu Oct 1 00:14 PDT 2026. Brief: `research/drafts/prompt_daytrade_lab.md`. The lab is a separate package
@@ -1097,13 +1140,249 @@ costs and drop conditions are in the plans, which are part of this registration:
   (2x both halves, t >= 2 at 1x, sign-flip placebo >= 95th pct). Counted in N now so the look cannot be
   re-tuned.
 
-### Round 18 results (2026-10-01)
-- **AS: DEAD.** 1x/1s: −18.9bp/trade (n 3,308, t −3.2); 2x: H1 −28.8, H2 −41.5; placebo 59th pct; gross
+## Note — reconciliation of two parallel "Round 18" registrations (merge of 2026-10-01)
+
+Two sessions registered a "Round 18" from N 669 without seeing each other: the Discord ideas (Studies
+AS/AT above them in this file's history, 6 variants, N 669 -> 675) and the day-trading lab (Studies AS/AT,
+2 variants, below). The letters collide; from here the lab's are cited as **Lab-AS / Lab-AT**. Both sets
+count: the program N before Round 19 is 669 + 6 + 2 = **677**, and Round 19's 5 variants make **682**
+(Round 19's files say 675 -> 680; read +2). AU3's DSR at N 682 is reported in study_au_tow.md.
+
+
+## Amendment — Round 19: max edge from outside sources — Studies AU, AV, AW (pre-register; 5 variants, N 675 -> 680)
+
+`date`: Thu Oct  1 2026 (stamped by the commit). Brief: `research/drafts/prompt_max_edge.md`. Candidate
+list (44 rows, sources, decay, counterparty, dead-list check): `research/drafts/max_edge_candidates.md`,
+committed in the same commit as this amendment, before any number below was computed.
+
+Common to AU and AV. `load_sim(raw_price=True)`, night pool `night_days(raw_price=True, max_corr=0.7)`.
+Two books: **V7** (night .5 + IBS .5, QQQ/SMH noise .5/.5 cap .75, live tilt, weekend x.5, no
+conviction) and **Roth cash** (IBS .5 + night .5, noise off, live tilt, weekend x.5). Fixed capital
+$2.3k / $10k / $25k, whole shares. Costs: night **2.5bp per side** (the brief's 2x of measured; the
+judged cost) and `tier_hi` (reported, not judged); IBS 1bp/side. Halves 2021-23 (select) / 2024-26
+(judge). **Pass bar (SHADOW)**, at 2.5bp/side, in BOTH books at ALL three sizes: increment > 0 in
+both halves; Newey-West t (5 lags) of the daily increment >= 2.0; sign-flip placebo (1,000 draws) >=
+95th pct; book maxDD not worse by > 2pp; 5y P(maxDD > 50%) <= 5% (stationary block bootstrap of the
+variant's daily book returns, 21-day blocks, 1,000 paths, at $10k). DSR reported at N 680.
+
+### Study AU — night picks tilted by trailing overnight-return persistence (3 variants)
+Sources: Aboody et al. JFQA 2018; Akbas-Boehmer-Jiang-Koch JFE 2022; CXO "overnight momentum".
+Mechanism: names with persistent retail demand at the open are bid up again at the next open, which
+is where the night leg sells. Different from add. 7 (overnight momentum as a standalone strategy):
+a weight inside picks that already pay the cost. Features from the SIP daily panel (raw ratios, so
+split-neutral), all known at 15:50 on d:
+- ON20 = mean of open_t / close_{t-1} - 1 over t = d-19..d (20 gaps, including d's own open);
+- TOW = count of t in d-20..d-1 with open_t/close_{t-1} > 1 and close_t/open_t < 1 (tug of war).
+z = (feature - mean) / sd with mean and sd fixed from the 2021-23 night picks (select half only).
+- AU1: weight = live tilt x clip(1 + 0.25 z(ON20), 0.25, 2), renormalised to the live tilt's mean that night.
+- AU2: drop picks with ON20 < 0 (their slice stays in cash; no redeployment).
+- AU3: weight = live tilt x clip(1 + 0.25 z(TOW), 0.25, 2), renormalised as AU1.
+Extra placebo for AU1/AU3: the feature shuffled across picks within the same night (200 draws), V7
+$10k 2.5bp: the actual increment must beat the 95th pct. Picks with no panel history keep z = 0.
+Also reported: per-pick net by feature tercile per half (monotone or not).
+
+### Study AV — the IBS leg's exit: hold until a state exit (2 variants)
+Sources: Pagonidis (NAAIM 2014) IBS > 0.5 / 0.8 exits; idousse/mean-reversion-strategy (clean,
+costed) exit close > yesterday's high. Shipped: entry when IBS_d < 0.2 on the month's top-3, held
+open d+1 -> open d+2 and re-held while IBS < 0.2. Variants change only the exit; an entered name is
+held (open -> open, re-evaluated each close) until the condition, a 5-session cap, or the name
+leaving the month's top-3; legs are equal-weighted across held names as shipped.
+- AV1: sell at the next open after the first close with IBS > 0.5.
+- AV2: sell at the next open after the first close above the prior session's high.
+Also judged: the 2016-20 holdout of the unit IBS leg (open->open, -2bp) must not be negative for a
+variant to pass (the book sim starts 2021).
+
+### Study AW — audit: night-leg returns on the official auction prints (report, 0 variants)
+Source: Quantpedia 2025 (OHLC open = first trade, not the cross; GDX overnight 30%/yr vs 8.6%).
+For every night pick 2021-26 (raw pool, corr .7), fetch Alpaca `/v2/stocks/auctions` (SIP): the
+official closing cross on d and opening cross on d+1 (the largest-size print of each list). Compute
+ret_auc = open_cross(d+1) / close_cross(d) - 1 vs the pool's ret (close -> next open from the vendor
+daily bars). Prints are unadjusted: a pick whose |ret_auc - ret| > 20% is treated as a corporate
+action and keeps ret. Report: coverage; mean and median (ret_auc - ret) in bp per half and by price
+tier; the night-leg and both books' %/yr and $/yr at $2.3k / $10k / $25k with ret_auc substituted
+where available. Decision rule: if the per-trade mean differs by more than 3bp in either half, every
+night-leg level in NEXT.md is restated on auction prints. No variant, no N.
+
+## Amendment — Round 20: auction-share tilts on the night leg — Study AX (pre-register; 2 variants, N 682 -> 684) + AU3 robustness reports
+
+`date`: Thu Oct 1 2026 (stamped by the commit). Follow-on to Round 19 (candidate list rows #22/#40: the closing
+auction is the one mechanism with a named payer that was untested for lack of data). Alpaca's
+`/v2/stocks/auctions` (free, SIP) gives the SIZE of every opening and closing cross, so a trailing auction-share
+measure is computable before 15:50 without imbalance data. Nothing below computed; the per-symbol auction
+history is fetched after this commit.
+
+Features per night pick on d, from the 20 completed sessions before d (sessions with a missing cross or zero
+SIP daily volume skipped; < 15 valid -> unknown, z = 0):
+- CSH20 = mean of closing-cross shares / SIP daily volume (Bogousslavsky & Muravyev, JFM 2023: auction prints
+  deviate from the mid with passive/index flow and ~85% reverts by the next morning; names whose close is
+  dominated by the cross carry more temporary close pressure -> a larger overnight bounce). Payer: passive
+  and index flow at the close.
+- OSH20 = mean of opening-cross shares / SIP daily volume (Berkman, Koch, Tuttle & Zhang, JFQA 2012: attention
+  buyers concentrate at the open and pay too much; a heavier opening cross = more of that demand where the
+  night leg sells). Payer: retail/attention buyers at the open.
+z constants fixed from the 2021-23 picks. Weights as AU3: live v1 tilt x clip(1 + 0.25 z, 0.25, 2), renormalised.
+- AX1: CSH20 tilt (predicted sign +).
+- AX2: OSH20 tilt (predicted sign +).
+
+Judged as Round 19 (V7 and Roth cash books, $2.3k / $10k / $25k, whole shares, 2.5bp/side judged, tier_hi
+reported; increment > 0 both halves, NW t >= 2, sign-flip placebo >= 95th, within-night feature-shuffle placebo
+(200, V7 $10k) >= 95th, dDD >= -2pp, P(DD>50%) <= 5%), with one change: **every night return from the official
+crosses** (Study AW's standing rule). Also reported: per-pick net by 2021-23 terciles per half; Spearman corr
+with TOW, vol20, depth, log price, log ADV; DSR at N 684.
+
+Reports (0 variants, no N):
+- R1 AU3 with TOW computed from the crosses (open cross_t vs close cross_{t-1}; close cross_t vs open cross_t)
+  instead of vendor bars: same weights rule; does the tilt survive on official prices for its INPUT too?
+- R2 AU3 under the `moderate` profile's 15% name cap applied after the tilt, and AU3 on top of tilt v2 (both
+  flagged in study_au_tow.md as needing a check before combination).
+
+
+## Amendment — Round 21: FINRA daily short-sale volume on the night picks — Study AY (pre-register; 2 variants, N 684 -> 686)
+
+`date`: Thu Oct 1 2026 (stamped by the commit). Data: FINRA Reg SHO daily short-sale volume, consolidated
+off-exchange (CNMS) files, public CDN, 2020-10..2026-09 (`research/sim/finra_short_fetch.py`). Not on the
+do-not-redo list (Study S shorted the picks; the SSR flag was not run). Nothing below computed.
+
+Feature per night pick on d: SVR5 = sum(ShortVolume) / sum(TotalVolume) over the 5 sessions d-5..d-1 (the
+file for t is published after t's close, so d itself is excluded); >= 3 sessions with TotalVolume > 0, else
+unknown (z = 0). z constants fixed from the 2021-23 picks; weights as AU3 (live v1 x clip(1 + 0.25 z, 0.25, 2),
+renormalised).
+
+The sign is genuinely ambiguous, so BOTH are registered and counted:
+- AY1: tilt toward HIGH SVR5. Reading: off-exchange "short" volume is mostly wholesalers/market makers
+  shorting to fill retail BUY orders, so a high ratio = a retail buying clientele (the AU3 mechanism: demand at
+  the next open, where the leg sells). Payer: retail buyers at the open.
+- AY2: tilt toward LOW SVR5. Reading: Diether-Lee-Werner (RFS 2009), Boehmer-Jones-Zhang (JF 2008): heavy short
+  selling is informed and predicts lower returns, so high-SVR drops are information and bounce less. Payer: the
+  liquidity demanders on the low-SVR picks.
+Judged exactly as Round 20 (auction returns, V7 and Roth cash, $2.3k / $10k / $25k, 2.5bp/side judged, tier_hi
+reported, both halves, NW t >= 2, sign-flip and feature-shuffle placebos >= 95th, dDD, P(DD>50%)), DSR at N 686.
+Also reported: tercile nets per half; Spearman with TOW, vol20, depth, log price, log ADV. AY1 and AY2 are
+mirror images; at most one can pass.
+
+
+## Amendment — Round 22: tax-exempt ex-dividend overnight capture in the Roth — Study AZ (pre-register; 2 variants, N 686 -> 688)
+
+`date`: Thu Oct 1 2026 (stamped by the commit). Brief topic: "tax placement between the accounts". Sources:
+Elton & Gruber (1970) and the clientele literature (the ex-day drop < the dividend because taxable holders
+value dividends less; a tax-exempt holder captures the gap); against it: Ruan & Ma (JFR 2012, ETF drops = the
+dividend, so ETFs excluded), Bali & Hite (JFE 1998, tick discreteness), Frank & Jagannathan (1998). A forum-grade
+2026 blog (mega-caps, overnight drop ~0.63 x dividend, no market adjustment) gets no credit. Payer: taxable
+holders who sell before the ex-date (or will not buy cum-dividend) and short-horizon arbitrage costs. Not on the
+do-not-redo list. Nothing below computed; dividend data (Alpaca /v1/corporate-actions, cash_dividend, free) is
+fetched after this commit.
+
+Universe on night d: common stocks (not ETFs) in the top 500 by 20-session SIP dollar volume through d-1, raw
+price >= $10, with a regular (non-special) cash dividend whose ex-date is the NEXT session (declared in advance).
+Trade (Roth cash book only; taxable excluded: a one-night dividend is non-qualified): the Roth's idle overnight
+cash at 15:50 (equity - IBS held tonight - night leg used) buys these names equally, whole shares, <= 25% of equity
+per name, MOC d -> MOO d+1. Return = the dividend-inclusive (adjusted) close -> open move from the SIP panel.
+- AZ1: dividend yield (rate / raw close d) >= 0.25%.
+- AZ2: dividend yield >= 0.50%.
+Judged on the Roth cash IBS+night book (auction night returns, 2.5bp/side on the night leg AND the sleeve; tier
+reported) at $2.3k / $10k / $25k: increment > 0 in both halves (2021-23 / 2024-26), NW t >= 2, sign-flip placebo
+>= 95th, dDD >= -2pp, P(DD>50%) <= 5%, AND a matched placebo >= 95th pct: the same rule fed the same names on
+random non-ex nights (each event moved to a random session of the same name 20-60 sessions away; 200 draws, Roth
+$10k), which separates the dividend gap from ordinary overnight drift (the index filler died on drift, add. 16).
+Also reported: per-event overnight return minus SPY's, the implied drop ratio per half, events/yr, idle share.
+DSR at N 688.
+
+
+## Amendment — Round 23: LLM news judge on the night picks, FORWARD test only — Study BA (pre-register; 1 variant, N 688 -> 689)
+
+`date`: Thu Oct 1 2026 (stamped by the commit), BEFORE any verdict exists (the logger ships in the same commit).
+Mechanism: the night leg is paid for absorbing selling that carries no information (liquidity); a drop on new
+information about value (fundamental) drifts instead (Savor JFE 2012; Chan 2003; Da-Liu-Schaumburg 2014).
+Headline CATEGORIES were dead (add. 12) and offering filings are a shadow (Study T); this asks a reader of the
+actual news and filings the direct question. Why forward only: an LLM knows how events before its training
+cutoff turned out, so any historical backtest is contaminated; every verdict is made at 15:40 on the day.
+
+Logger: `swingtrader/daily/news_judge.py`, after the 15:40 orders (shadow; never changes an order), at most 8
+new picks a night (deepest drops first), one verdict per (date, symbol) shared by all books, model
+`claude-opus-5-5`, effort low, inputs = Alpaca/Benzinga news since the previous close + SEC filings accepted
+since the previous close. Output: verdict in {fundamental, liquidity, unclear} + confidence.
+
+Variant (the only one; counted now so the look cannot be re-tuned):
+- BA1: weight 0.25 on picks judged fundamental with confidence >= 0.7 (freed cash idles), vs equal weight among
+  that night's judged picks.
+Scoring (`research/sim/news_judge_eval.py`, `make news-eval`): official crosses (close cross d -> next open cross,
+Study AW), net of 2 x 2.5bp. Read ONCE at >= 300 judged picks with a verdict. PASS (-> SHADOW, spec a switch)
+only if: the daily increment > 0 in both halves of the judged sample (split at the median date), NW t >= 2,
+sign-flip placebo >= 95th and within-night flag-shuffle placebo >= 95th. Also reported: net by verdict and by
+confidence. Model, prompt, effort and the 0.7 / 0.25 constants are frozen; changing any of them restarts the
+count from zero as a new registration.
+
+
+## Amendment — Round 24: 15:40 quote imbalance on the night picks, FORWARD test only — Study BB (pre-register; 1 variant, N 689 -> 690)
+
+`date`: Thu Oct 1 2026 (stamped by the commit), before any snapshot exists (the logging ships in the same commit).
+The free part of the closing-imbalance idea (AC, parked: no paid feed): the Schwab quote the night leg already
+pulls at 15:40 carries bid/ask sizes. QI = (bid_size - ask_size) / (bid_size + ask_size). Mechanism (order-book
+imbalance literature, e.g. Cont-Kukanov-Stoikov 2014; the lab's Lab-AT): a sell-heavy touch into the close marks
+remaining selling pressure that the close auction absorbs and the next open reverses; a buy-heavy touch says the
+pressure is already gone. Predicted sign: ambiguous in level, so ONE pre-committed direction is tested: buy-heavy
+up-weighted (pressure exhausted, the bounce has started; the add. 23 "late selling" null argues against the
+opposite). No historical L1 exists, so forward only.
+- BB1: weight clip(1 + 0.5 QI, 0.5, 1.5), renormalised within the night.
+Scored by `research/sim/quote_imbalance_eval.py` (`make qi-eval`) on the official crosses, 2 x 2.5bp, one row per
+(date, symbol); read once at >= 300 picks with a snapshot; bars as Study BA (both halves, NW t >= 2, sign-flip
+and within-night shuffle >= 95th).
+
+
+## Amendment — Round 23b: Study BA's model changed BEFORE any verdict exists (N unchanged, 690)
+
+`date`: Thu Oct 1 2026 (stamped by the commit). The user prefers OpenCode Go's DeepSeek Flash. No verdict has been
+logged in production yet (the logger shipped hours ago and has not run a 15:40 session), so this replaces Round
+23's frozen model rather than restarting a count. Frozen from here: provider `opencode-go`
+(https://opencode.ai/zen/go/v1/chat/completions, OpenAI-compatible JSON mode), model `deepseek-v4-flash`,
+temperature 0, the same system prompt + a JSON-keys line, at most **20** new picks a night (the cheaper model lets
+the judge cover every pick instead of the 8 deepest). Every record logs the model that actually served it (a public
+issue reports this ID may serve DeepSeek V3.2, knowledge cutoff 2025-05; immaterial to a forward test, but logged).
+Variant BA1, scoring and bars unchanged. Changing provider/model/prompt again restarts the count.
+
+
+## Amendment — Round 25: the LLM news judge on PAST night picks after the model's cutoff — Study BC (pre-register; 1 variant, N 690 -> 691)
+
+`date`: Thu Oct 1 2026 (stamped by the commit), before the probe or any historical verdict is run.
+Same judge as Study BA (Round 23b: OpenCode Go `deepseek-v4-flash`, temperature 0, same prompt; the date is never
+in the prompt). Script: `research/sim/news_judge_hist.py`; picks: the shipped night pool (raw, corr .7)
+2025-01-02..2026-09-18, 4,071 rows, `research/sim/news_judge_hist_picks.csv`.
+
+Contamination rule (fixed now): `probe` asks 9 dated true/false questions about public events (2024-11..2025-10)
+and 3 fabricated controls. If any control is answered true, the probe is void and BC does not run. Otherwise the
+window starts on the first day of the THIRD month after the latest month answered true (two full months of
+margin) and ends 2026-09-18. If the latest known month is 2025-10 (the last probe), the model's cutoff is not
+placed by the probe and BC does not run (a later probe would be a new registration).
+
+Inputs point-in-time per pick: news published from the previous session's 16:00 ET to 15:40 ET on d, SEC filings
+accepted in the same window. Variant BC1 = BA1 (weight 0.25 on picks judged fundamental with confidence >= 0.7,
+freed cash idles). Scored by `research/sim/news_judge_eval.py` on the official crosses (close cross d -> next
+open cross), 2 x 2.5bp; PASS only if: >= 300 scored picks, daily increment > 0 in both halves of the window (split
+at the median date), NW t >= 2, sign-flip and within-night flag-shuffle placebos >= 95th. A PASS here plus a PASS
+of BA (forward) would be needed to spec a live switch; BC alone moves BA's prior, not the book.
+
+
+## Amendment — Round 25b: Study BC's cutoff probe, re-specified before any historical verdict is scored (N unchanged, 691)
+
+`date`: Thu Oct 1 2026 (stamped by the commit). The v1 probe (true / false / unknown) returned "unknown" to all 12
+statements, including the 2024 US election: its instruction rewarded abstaining, so it measured caution, not
+knowledge, and placed no cutoff. Per Round 25, BC did not start. Verdicts the user began collecting from
+2025-08-01 are kept (each verdict depends only on that day's inputs, not on the window), but NONE is scored until
+the v2 probe sets the window; picks before the v2 start are excluded from scoring, and if the v2 start is earlier
+than 2025-08-01 the missing months are judged first.
+v2 probe (fixed now): 8 open questions with keyword-graded answers (2024-11 .. 2025-10) + 2 fabricated controls
+("which streaming company did Apple acquire in March 2025", "which company replaced Tesla in the S&P 500 in 2025").
+A control answered with anything but unknown / none / a denial voids the probe (BC does not run). Window start = the
+first day of the third month after the latest correctly answered month; if the 2025-10 question is answered, the
+cutoff is not placed and BC does not run. One v2 probe call; its printout is copied into the BC writeup.
+
+### Lab Round 18 results (2026-10-01)
+- **Lab-AS: DEAD.** 1x/1s: −18.9bp/trade (n 3,308, t −3.2); 2x: H1 −28.8, H2 −41.5; placebo 59th pct; gross
   −1.7bp. Fails every bar. study_as_gap_vwap.md. N 670.
-- **AT: not yet looked at** (needs 40 unflagged recorded sessions). N 671 counted at registration.
+- **Lab-AT: not yet looked at** (needs 40 unflagged recorded sessions). N 671 counted at registration.
 
 
-## Amendment — Round 19, Study AU: 5-minute opening-range breakout on Stocks in Play (pre-register; 2 variants, N 671 -> 673)
+## Amendment — Lab Round 19, Study Lab-AU: 5-minute opening-range breakout on Stocks in Play (pre-register; 2 variants, N 671 -> 673)
 
 `date`: Thu Oct 1 01:05 PDT 2026. Source: Zarattini, Barbon & Aziz (2024), SSRN 4729284 (Sharpe 2.81 in 2016-23,
 commission-only costs, no held-out period). Full rules: `daytrade/plans/orb_in_play.md` (part of this
@@ -1111,14 +1390,14 @@ registration). Nothing below computed; no data fetched.
 - Universe: common stock, 09:30 open > $5, 14d avg volume >= 1M, ATR14 > $0.50 (prior sessions). RVOL = 09:30-09:34
   SIP volume / its 14-session average (>= 10 obs); RVOL >= 1, top 20. Direction = the 5-minute candle; stop entry at
   the OR high/low from 09:35; stop 10% ATR14; flat 15:55; no target.
-- AU1 long+short (the paper); AU2 long only.
+- Lab-AU1 long+short (the paper); Lab-AU2 long only.
 - Costs 5bp/side (1x), 10bp/side (2x). SIP minutes 2022-01-03 .. 2026-09-30, halves split 2024-06-01 (H2 is
   out-of-sample for the paper).
 - Pass (per variant): 2x net > 0 in both halves; day-clustered t >= 2.0 at 1x; >= 95th pct of a coin-flip-direction
   placebo (1,000 draws). Otherwise dead; nothing re-tuned.
 
 
-## Amendment — Round 20, Study AV: Study AT's opening imbalance on historical SIP ticks (pre-register; 1 variant, N 673 -> 674)
+## Amendment — Lab Round 20, Study Lab-AV: Study Lab-AT's opening imbalance on historical SIP ticks (pre-register; 1 variant, N 673 -> 674)
 
 `date`: Thu Oct 1 03:20 PDT 2026. Why: Alpaca's free plan serves historical SIP NBBO quotes and trades (verified
 back to 2018), so AT's idea need not wait 40 recorded sessions. Nothing below computed; no tick data fetched.
@@ -1135,19 +1414,19 @@ back to 2018), so AT's idea need not wait 40 recorded sessions. Nothing below co
 - Pre-check done: RESULTS.md and NEXT.md have no opening-imbalance study (only closing-auction imbalance, AC/add. 35).
 
 
-## Amendment — Round 21, Study AW: VWAP trend on QQQ / TQQQ (Zarattini & Aziz 2023) (pre-register; 2 variants, N 674 -> 676)
+## Amendment — Lab Round 21, Study Lab-AW: VWAP trend on QQQ / TQQQ (Zarattini & Aziz 2023) (pre-register; 2 variants, N 674 -> 676)
 
 `date`: Thu Oct 1 03:35 PDT 2026. Source SSRN 4631351 (QQQ 2018-23 Sharpe 2.1, commissions only). Full rules:
 `daytrade/plans/vwap_trend.md`. Nothing computed; no data fetched. RESULTS.md/NEXT.md grep: no VWAP-trend study.
 - QQQ 1-min close vs session VWAP from 09:31; long above, short below; reverse at the next minute's open on a cross;
-  flat 15:55; 2% catastrophe stop. AW1 QQQ, AW2 TQQQ on QQQ's signal.
+  flat 15:55; 2% catastrophe stop. Lab-AW1 QQQ, Lab-AW2 TQQQ on QQQ's signal.
 - Costs: QQQ 0.5/1.0bp per side, TQQQ 1.5/3.0bp per side (1x/2x). SIP minutes 2022-01-03 .. 2026-09-30, halves
   at 2024-06-01. Unit = day.
 - Pass: 2x day-mean > 0 both halves; day t >= 2.0 at 1x; >= 95th pct of a segment-direction placebo. Report the
   correlation with the noise leg.
 
 
-## Amendment — Round 22, Study AX: late-day continuation of +25% movers, long only (pre-register; 1 variant, N 676 -> 677)
+## Amendment — Lab Round 22, Study Lab-AX: late-day continuation of +25% movers, long only (pre-register; 1 variant, N 676 -> 677)
 
 `date`: Thu Oct 1 ~03:30 PDT 2026 (the commit time is the stamp). Plan: `daytrade/plans/late_mover.md`. Nothing computed; no data fetched.
 - Motivation: the RESULTS.md intraday-setups table's "stocks down >= 25% by 15:00 keep falling into the close (~-1.5% gross, both halves), untradable (Rule 201,
@@ -1157,3 +1436,11 @@ back to 2018), so AT's idea need not wait 40 recorded sessions. Nothing below co
 - Costs 20/40bp per side (1x/2x). SIP minutes 2022-01-03 .. 2026-09-30, halves at 2024-06-01.
 - Pass: 2x > 0 both halves; day-clustered t >= 2 at 1x; >= 95th pct of a random-earlier-hour placebo on the same
   stock-days. Diagnostic: the losers' mirror gross.
+
+
+## Note — reconciliation of the lab's Rounds 19-22 with the main Rounds 19-25 (merge of 2026-10-01, later)
+The lab registered Rounds 19-22 (Lab-AU 2, Lab-AV 1, Lab-AW 2, Lab-AX 1 = 6 variants) in parallel with the main
+program's Rounds 19-25. The lab's commits were not on origin when those rounds were numbered: its pushes had
+been rejected and the errors hidden. The lab's files carry their own local N (671 -> 677); read them as **+6 on
+top of the main count**. The program N after both is **691 + 6 = 697**. Lab-AS and Lab-AT were already counted
+in 691 (see the Round 18 reconciliation note above).

@@ -318,6 +318,24 @@ def main(argv=None):
                 f"Gap {(g.ret.mean()-g.bt_ret.mean())*1e4:+.0f}bp/trade = buy cost {g.buy_cost_bps.mean():+.0f}bp "
                 f"+ sell cost {g.sell_cost_bps.mean():+.0f}bp vs the {2*NIGHT_COST_BPS:.0f}bp assumed")
 
+    say("\n## 9. Tug-of-war tilt gate (Round 19 AU3, `daily.night_tilt_tow`, study_au_tow.md)")
+    say(f"Turn on after >= {sg.TOW_GATE_N} night round trips if high-TOW (>= {sg.TOW_HIGH_FROM}) trades "
+        f"out-earn low-TOW (< {sg.TOW_LOW_BELOW}); the same rule switches it off.")
+    if not rt.empty:
+        try:
+            bars = md.sip_daily(sorted(rt.sym.unique()), rt.day.min() - pd.Timedelta(days=45), rt.day.max())
+            tw = []
+            for s_, d_ in zip(rt.sym, rt.day):
+                b = bars.get(s_)
+                h = b[b.index < d_].tail(21) if b is not None else None
+                tw.append(sg.tug_of_war(h.open.values, h.close.values) if h is not None and len(h) else np.nan)
+            for book, g in rt.assign(tow=tw).groupby("book"):
+                v = sg.tow_gate(g.tow, g.ret)
+                say(f"- {book:5s}: n {v['n']} (low {v['n_lo']}, high {v['n_hi']}), low {v['lo']*1e4:+.1f}bp, "
+                    f"high {v['hi']*1e4:+.1f}bp, spread {v['spread']*1e4:+.1f}bp -> {v['verdict']}")
+        except Exception as exc:
+            say(f"(TOW gate skipped: {str(exc)[:80]})")
+
     say("\n## 5. Pre-registered kill rules (signals.KILL_*, fixed 2026-09-24)")
     say(f"Night leg dies at >= {sg.KILL_MIN_TRADES['night']} round trips with a losing mean and "
         f"t < {sg.KILL_T}, or open sells > {sg.KILL_EXIT_COST_BPS:g}bp/side over "

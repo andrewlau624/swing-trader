@@ -1,6 +1,6 @@
-"""Study AX: late-day continuation of +25% movers (daytrade/plans/late_mover.md, round1_prose.md Round 22).
+"""Study Lab-AX: late-day continuation of +25% movers (daytrade/plans/late_mover.md, round1_prose.md Lab Round 22).
 
-Reads: SIP daily bars (raw, cached by Study AU) only as a PREFILTER. The previous REGULAR close comes from
+Reads: SIP daily bars (raw, cached by Study Lab-AU) only as a PREFILTER. The previous REGULAR close comes from
 completed sessions before the trade date. Today's daily HIGH >= 1.25 x prev close is a necessary
 condition for being +25% at 15:00, and losers use LOW <= 0.75 x prev close for the diagnostic. Every
 decision and fill uses SIP minute bars inside the calendar's regular session.

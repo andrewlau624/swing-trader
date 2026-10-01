@@ -1,7 +1,7 @@
-# Plan: orb_in_play (Study AU)
+# Plan: orb_in_play (Study Lab-AU)
 
 Written 2026-10-01, before any data for it was fetched. Code: `daytrade/strategies/orb_in_play.py`.
-Pre-registration: `research/drafts/round1_prose.md`, Round 19, Study AU (2 variants, N 671 -> 673).
+Pre-registration: `research/drafts/round1_prose.md`, Lab Round 19, Study Lab-AU (2 variants, N 671 -> 673).
 Any change to a number below is a new variant (PLAN_CHANGES.md, new N).
 
 ## Source
@@ -18,13 +18,13 @@ independent QuantConnect re-run reports Sharpe 2.4.
   large fraction of each trade's R. Ours charges 5bp/side (1x) and 10bp/side (2x). And 2024-26 is after
   the paper's sample and its publicity.
 - Unlike the dead list:
-  - AS: gap-selected, a VWAP pullback entry with a 2R target.
+  - Lab-AS: gap-selected, a VWAP pullback entry with a 2R target.
   - AK / add. 24: ETF ORBs (TQQQ, SOXL).
   - Add. 41: noise-band momentum on the top-by-dollar-volume names.
   - Here the selection is RELATIVE opening volume, on single stocks, and the trade is held to the close.
 
 ## Exact rules (regular-hours data; daily inputs from completed prior sessions)
-Universe each day (prior sessions only): US common stock (the AS name filter). Today's 09:30 open > $5;
+Universe each day (prior sessions only): US common stock (the Lab-AS name filter). Today's 09:30 open > $5;
 14-session average daily volume >= 1,000,000 shares; ATR(14) > $0.50 (true range on raw SIP daily bars).
 
 Stocks in play:
@@ -46,13 +46,13 @@ Size: the engine's risk layer.
 - $/day: the lab limits (0.5% risk, 3 positions, slots taken in RVOL order).
 - Also reported at the paper's sizing (1% risk, 4x, 20 positions).
 
-Variants: AU1 = long and short (the paper). AU2 = long only (what the lab could trade live first).
+Variants: Lab-AU1 = long and short (the paper). Lab-AU2 = long only (what the lab could trade live first).
 
 ## Costs
 1x: 5bp per side on entry and stop/flat exits (liquid names, $5+, >= 1M shares/day). 2x: 10bp per side.
 A stop that gaps fills at the bar's open.
 
-## Replay (Study AU)
+## Replay (Study Lab-AU)
 - SIP minute bars, 2022-01-03 .. 2026-09-30; halves split at 2024-06-01. H2 is entirely after the paper's
   2016-2023 sample.
 - Latency 1s (the next minute's open, the closest minute bars get). The stop entry triggers inside the bar

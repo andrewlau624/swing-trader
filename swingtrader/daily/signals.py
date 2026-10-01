@@ -496,6 +496,60 @@ def night_tilt(vol20, day_ret, k: float = 0.25) -> np.ndarray:
     return w / w.mean()
 
 
+# Tug-of-war tilt (Round 19, Study AU3, research/drafts/study_au_tow.md; SHADOW, off by
+# default). TOW = sessions among the last 20 completed ones with open > previous close and
+# close < open (Akbas-Boehmer-Jiang-Koch 2022). z constants frozen from the 2021-23 picks.
+TOW_MU, TOW_SD, TOW_MIN_SESSIONS = 5.14, 2.10, 15
+
+
+def tug_of_war(opens, closes, n: int = 20) -> float:
+    """Count of the last n sessions (oldest first; completed sessions only, today excluded)
+    with an up gap (open_t > close_{t-1}) and a down day (close_t < open_t). Sessions with
+    a missing price or a |move| > 100% (bad bar) are skipped; NaN if fewer than
+    TOW_MIN_SESSIONS of the last n are valid (needs n + 1 bars for n gaps)."""
+    o = np.asarray(opens, float); c = np.asarray(closes, float)
+    if len(o) < 2:
+        return float("nan")
+    gap = o[1:] / c[:-1] - 1
+    intr = c[1:] / o[1:] - 1
+    gap, intr = gap[-n:], intr[-n:]
+    ok = np.isfinite(gap) & np.isfinite(intr) & (np.abs(gap) <= 1) & (np.abs(intr) <= 1)
+    if ok.sum() < TOW_MIN_SESSIONS:
+        return float("nan")
+    return float(((gap > 0) & (intr < 0) & ok).sum())
+
+
+# The AU3 gate (pre-registered in study_au_tow.md): research tercile cut points (2021-23 picks:
+# low < 4, high >= 6). On after >= TOW_GATE_N live picks if high-TOW net > low-TOW net; same rule kills it.
+TOW_LOW_BELOW, TOW_HIGH_FROM, TOW_GATE_N = 4, 6, 300
+
+
+def tow_gate(tows, rets) -> dict:
+    """Live check of the AU3 tilt: mean net return of high- vs low-TOW night round trips."""
+    t = np.asarray(tows, float); r = np.asarray(rets, float)
+    ok = np.isfinite(t) & np.isfinite(r)
+    t, r = t[ok], r[ok]
+    lo, hi = r[t < TOW_LOW_BELOW], r[t >= TOW_HIGH_FROM]
+    n = int(len(r))
+    spread = float(hi.mean() - lo.mean()) if len(lo) and len(hi) else float("nan")
+    verdict = ("wait" if n < TOW_GATE_N or not np.isfinite(spread)
+               else ("on" if spread > 0 else "off"))
+    return dict(n=n, n_lo=int(len(lo)), n_hi=int(len(hi)), lo=float(lo.mean()) if len(lo) else float("nan"),
+                hi=float(hi.mean()) if len(hi) else float("nan"), spread=spread, verdict=verdict)
+
+
+def night_tilt_tow(base_w, tow, k: float = 0.25) -> np.ndarray:
+    """base_w x clip(1 + k z(TOW), 0.25, 2), renormalised to base_w's mean (the leg's
+    gross is unchanged). Unknown TOW -> z = 0 (no tilt from it)."""
+    base_w = np.asarray(base_w, float)
+    if len(base_w) == 0:
+        return base_w
+    t = np.asarray(tow, float)
+    z = np.where(np.isfinite(t), (t - TOW_MU) / TOW_SD, 0.0)
+    w = base_w * np.clip(1 + k * z, 0.25, 2.0)
+    return w * base_w.mean() / w.mean()
+
+
 # Tilt v2 (RESULTS.md addendum 23): adds YESTERDAY's return. A name that rose
 # hard yesterday and crashed today bounces more (+31bp per sd; t 2.0 / 2.6 per
 # half). Fitted on 2021-23 only, frozen, judged on 2024-26. OFF by default

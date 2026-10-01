@@ -1,7 +1,7 @@
-# Plan: late_mover (Study AX)
+# Plan: late_mover (Study Lab-AX)
 
 Written 2026-10-01, before any data for it was fetched. Code: `daytrade/strategies/late_mover.py`.
-Pre-registration: `research/drafts/round1_prose.md`, Round 22, Study AX (1 variant, N 676 -> 677).
+Pre-registration: `research/drafts/round1_prose.md`, Lab Round 22, Study Lab-AX (1 variant, N 676 -> 677).
 
 ## The idea
 A stock up 25% or more on the day by 15:00 keeps rising into the close. RESULTS.md (the intraday-setups table) found the
@@ -17,7 +17,7 @@ neither problem. It was never tested (grep of RESULTS.md / NEXT.md, 2026-10-01).
   had their squeeze). Spreads on +25% names are wide (20-40bp+).
 
 ## Exact rules (regular session from the calendar; SIP minute bars; daily inputs from prior sessions)
-- Universe: US common stock (the AS name filter); previous regular close >= $5.
+- Universe: US common stock (the Lab-AS name filter); previous regular close >= $5.
 - At the 14:59 minute bar's close (15:00): day change = close / previous close - 1 >= +25%, and the
   09:30-15:00 dollar volume >= $10M.
 - Entry: market at the next minute (latency 1s = the 15:00 bar's open). Exit: market at 15:55 (the lab's
@@ -27,7 +27,7 @@ neither problem. It was never tested (grep of RESULTS.md / NEXT.md, 2026-10-01).
 ## Costs
 1x: 20bp per side. 2x: 40bp per side (wide spreads on +25% movers). Latency 1s; 60s reported.
 
-## Replay (Study AX)
+## Replay (Study Lab-AX)
 - SIP minutes 2022-01-03 .. 2026-09-30, halves split at 2024-06-01.
 - Placebo: the same stock-days, entry at a random minute between 11:00 and 14:30, held 55 minutes (with the
   same costs and stop), 1,000 draws. This tests whether late day is special for these names.

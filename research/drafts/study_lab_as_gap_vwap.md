@@ -1,6 +1,6 @@
-# Study AS — gap + premarket volume, pullback to VWAP, reclaim: DEAD (N 669 -> 670)
+# Study Lab-AS — gap + premarket volume, pullback to VWAP, reclaim: DEAD (N 669 -> 670)
 
-Stamp: `round1_prose.md` Round 18 (commit b9ff156); plan `daytrade/plans/gap_vwap_reclaim.md`.
+Stamp: `round1_prose.md` Lab Round 18 (commit b9ff156); plan `daytrade/plans/gap_vwap_reclaim.md`.
 Script: `daytrade/research/as_replay.py` (the lab's own strategy code and engine; SIP minutes).
 Output: `data/daytrade/research/as/results.json`, `trades_1x_1s.csv` (not in git).
 

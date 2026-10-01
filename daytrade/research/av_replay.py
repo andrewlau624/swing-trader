@@ -1,5 +1,5 @@
-"""Study AV: Study AT's opening imbalance (daytrade/plans/open_imbalance.md) on historical SIP ticks,
-QQQ and SPY, 2022-01-03 .. 2026-09-30 (round1_prose.md Round 20). The lab's OpenImbalance strategy code
+"""Study Lab-AV: Study Lab-AT's opening imbalance (daytrade/plans/open_imbalance.md) on historical SIP ticks,
+QQQ and SPY, 2022-01-03 .. 2026-09-30 (round1_prose.md Lab Round 20). The lab's OpenImbalance strategy code
 runs through the lab's engine.
 
 Every read is inside the regular session (from the calendar): SIP NBBO and trades 09:30:00-09:34:59,

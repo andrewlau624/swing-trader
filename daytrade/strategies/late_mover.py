@@ -1,4 +1,4 @@
-"""Late-day continuation of +25% movers, long only. Plan: daytrade/plans/late_mover.md (Study AX).
+"""Late-day continuation of +25% movers, long only. Plan: daytrade/plans/late_mover.md (Study Lab-AX).
 The 15:55 exit is the engine's flat-by-close."""
 from __future__ import annotations
 

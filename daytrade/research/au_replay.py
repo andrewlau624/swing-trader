@@ -1,4 +1,4 @@
-"""Study AU: 5-minute ORB on Stocks in Play (daytrade/plans/orb_in_play.md, round1_prose.md Round 19).
+"""Study Lab-AU: 5-minute ORB on Stocks in Play (daytrade/plans/orb_in_play.md, round1_prose.md Lab Round 19).
 The lab's strategy code through the lab's engine on SIP minute history, 2022-01-03 .. 2026-09-30.
 
 Reads, and why each is regular-hours:
@@ -262,7 +262,7 @@ def dollars(long_only, cost_bp):
 def run(dollars_too: bool = True) -> None:
     res = {}
     n1 = sum(1 for d, _, _ in load_days() if d < SPLIT)
-    for name, lo in (("AU1", False), ("AU2", True)):
+    for name, lo in (("Lab-AU1", False), ("Lab-AU2", True)):
         base, _, keep_by, n = replay(lo, 5.0, keep=True)
         two, _, _, _ = replay(lo, 10.0)
         r = {"1x": {h: A.summary(x, m) for h, x, m in (("all", base, n), ("h1", A.half(base, 1), n1),

@@ -1,4 +1,4 @@
-"""VWAP trend (Zarattini & Aziz 2023). Plan: daytrade/plans/vwap_trend.md (Study AW). Long while the signal
+"""VWAP trend (Zarattini & Aziz 2023). Plan: daytrade/plans/vwap_trend.md (Study Lab-AW). Long while the signal
 instrument's 1-minute close is above its session VWAP, short below; reverse on a cross."""
 from __future__ import annotations
 

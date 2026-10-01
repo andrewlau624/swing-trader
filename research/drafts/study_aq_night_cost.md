@@ -1,5 +1,10 @@
 # Study AQ — the night leg's cost crossover, and the cash-IRA Roth at the brief's stressed cost (Round 17c)
 
+> **Correction (Round 18, `study_as_at_discord.md`):** the costs in this study are **per side**
+> (`B.cost_bps` is per side; both replays charge `ret − 2·c`), not round trip. "5bp (2x measured)"
+> is 10bp round trip; the brief's real 2x stress (5bp RT) is the 2.5 row (22.0%/yr). The crossover
+> is ~5-6bp per side. The verdict stands and the gate is about twice as wide.
+
 `research/drafts/round1_prose.md` Round 17c, Study AQ (pre-registered before any number).
 Code: `research/sim/night_cost.py`. Output: `data/research/program/night_cost_out.txt`. Report only.
 

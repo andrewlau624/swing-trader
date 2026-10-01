@@ -1,7 +1,7 @@
-# Plan: open_imbalance (Study AT)
+# Plan: open_imbalance (Study Lab-AT)
 
 Written 2026-10-01, before any data for it exists. Code: `daytrade/strategies/open_imbalance.py`.
-Pre-registration: `research/drafts/round1_prose.md`, Round 18, Study AT (1 variant, N 670 -> 671).
+Pre-registration: `research/drafts/round1_prose.md`, Lab Round 18, Study Lab-AT (1 variant, N 670 -> 671).
 Any change to a number below is a new variant: log it in `daytrade/PLAN_CHANGES.md` and add it to N.
 
 ## The idea
@@ -38,7 +38,7 @@ look cannot be tuned.
 - 1x: the recorded spread (buy at the ask, sell at the bid) + 0.5bp per side.
 - 2x: twice (half-spread + 0.5bp) per side.
 
-## First look (Study AT)
+## First look (Study Lab-AT)
 - Not before **40 unflagged recorded sessions** (a day with a recorder gap is excluded, not patched).
   At 5 symbols and an expected ~30-50% signal rate that is ~60-100 trades: the least that can tell a
   5bp edge from zero with a ~15bp per-trade SD (SE ~1.5-2bp). Expected around early December 2026.

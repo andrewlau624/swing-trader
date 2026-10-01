@@ -1,5 +1,5 @@
 """5-minute opening-range breakout on Stocks in Play (Zarattini, Barbon & Aziz 2024). Plan:
-daytrade/plans/orb_in_play.md (Study AU). Thresholds are fixed by the plan."""
+daytrade/plans/orb_in_play.md (Study Lab-AU). Thresholds are fixed by the plan."""
 from __future__ import annotations
 
 from ..events import Order

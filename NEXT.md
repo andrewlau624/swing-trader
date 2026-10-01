@@ -9,7 +9,7 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
-## Day-trading lab (2026-10-01, Round 18): built; AS DEAD; AT waits for data (N 669 -> 671)
+## Day-trading lab (2026-10-01, Lab Rounds 18-22): built; Lab-AS DEAD; Lab-AT waits for data (lab N +8: 669 -> 677 locally; program N 697 after the merge)
 
 Brief: `research/drafts/prompt_daytrade_lab.md`. Lab README: `daytrade/README.md`. It has its own package, account
 and state, and does not touch the live book.
@@ -18,17 +18,17 @@ and state, and does not touch the live book.
   check `make daytrade-status` after the first session. It starts 09:20 ET, runs its own unit (350 MB cap)
   and its own token copy, and records the core 5 ETFs + 10 gappers.
 - **In replay:**
-  - **AS (gap + premarket volume, VWAP reclaim): DEAD.** 3,308 trades 2022-26: −18.9bp/trade at 1x
+  - **Lab-AS (gap + premarket volume, VWAP reclaim): DEAD.** 3,308 trades 2022-26: −18.9bp/trade at 1x
     (t −3.2), −36bp at 2x (both halves negative), gross −1.7bp, placebo 59th pct. $2.3k -> $568 through
     the risk layer. `research/drafts/study_as_gap_vwap.md`.
-  - **AU (5-min ORB on Stocks in Play, Zarattini-Barbon-Aziz 2024): DEAD** (and already dead in RESULTS.md).
+  - **Lab-AU (5-min ORB on Stocks in Play, Zarattini-Barbon-Aziz 2024): DEAD** (and already dead in RESULTS.md).
     −23.5bp/trade at 5bp/side; the optimistic fill bound grosses ~+10bp, below costs. study_au_orb_in_play.md.
-  - **AW (VWAP trend, QQQ/TQQQ): DEAD.** Real signal (+6.7bp/day gross, placebo 97th) but 16 switches/day
+  - **Lab-AW (VWAP trend, QQQ/TQQQ): DEAD.** Real signal (+6.7bp/day gross, placebo 97th) but 16 switches/day
     cost more. study_aw_vwap_trend.md.
-  - **AV (AT's imbalance on historical SIP ticks, QQQ/SPY): running.** **AX (+25% movers held 15:00-15:55): running.**
-  - **AT (opening L1 imbalance): waiting.** First look after 40 unflagged recorded sessions (~early Dec).
+  - **Lab-AV (AT's imbalance on historical SIP ticks, QQQ/SPY): running.** **Lab-AX (+25% movers held 15:00-15:55): running.**
+  - **Lab-AT (opening L1 imbalance): waiting.** First look after 40 unflagged recorded sessions (~early Dec).
   - **Decision for the user:** Alpaca's free plan has historical SIP tick NBBO quotes and trades back to
-    at least 2018 (verified). AT could be re-registered on that history now (+1 N) instead of waiting
+    at least 2018 (verified). Lab-AT could be re-registered on that history now (+1 N) instead of waiting
     8 weeks.
 - **Paper: not started.** It needs a second Alpaca paper account (`ALPACA_DAYTRADE_API_KEY/_SECRET_KEY`), a
   lab Schwab account (`SCHWAB_DAYTRADE_ACCOUNT_NUMBER`) and a strategy that passes replay. None exists yet.
@@ -42,6 +42,92 @@ and state, and does not touch the live book.
 
   At $500 (cash, one turn a day) even a 20bp edge is ~$1/day: tuition.
 
+## Rounds 20-21 (2026-10-01): free-data night tilts — AX, AY DEAD; AU3 holds on cross prices and combines (N 682 -> 686)
+- **AX (Round 20): trailing closing-/opening-cross share of volume** (Alpaca auction sizes, free; the stand-in for
+  closing imbalance, which stays parked: the user does not want a Databento account unless necessary). AX1
+  closing share flips halves (t 0.1); AX2 opening share +1.2pp both halves but t 1.5, placebo 94%: DEAD.
+  study_ax_auction_share.md.
+- **AU3 robustness:** TOW built from the official crosses still +2.4-2.9pp, t 2.5-2.6 (R1); under the moderate
+  15% name cap +4.4pp, t 3.0, and on top of tilt v2 +2.7pp, t 2.5 (R2). No conflict with either.
+- **Noise leg after publication (report, study_noise_decay.md):** SPY's rule went to Sharpe −0.4 after May 2024
+  (matches a public replication); QQQ ~halved (4.1 → 2.5bp/day, t 1.1 post); SMH intact (5.1bp/day). No action
+  (kill rule stands); plan QQQ at ~2.5bp/day.
+- **AY (Round 21): FINRA daily short-volume ratio, both signs: DEAD** (|inc| ≤ 0.4pp, t ≤ 0.6, shuffle 53%).
+  study_ay_finra_short.md.
+
+---
+
+## Round 23 (2026-10-01): LLM news judge — BUILT, SHADOW, forward test pre-registered (N 689)
+- After the 15:40 orders, an LLM — **OpenCode Go `deepseek-v4-flash`** (user's choice, Round 23b; Claude available
+  via `news_judge_provider: anthropic`) — reads each night pick's news + SEC filings since the previous close and logs
+  fundamental / liquidity / unclear + confidence to `state/news-judge.jsonl`. Never changes an order; failures are
+  logged and swallowed. ≤ 20 new calls a night, shared by all books (pennies/month). `daily.news_judge: shadow`
+  (off = disable); no-op without `OPENCODE_API_KEY` in .env.
+- **Server setup:** add `OPENCODE_API_KEY=...` to .env (SEC contact = the Resend `NOTIFY_EMAIL`), then `make news-smoke SYM=<a ticker that fell today>`.
+- **Gate:** `make news-eval` prints progress; the BA1 verdict (fundamental conf ≥ 0.7 at x0.25) is read once at
+  300 judged picks (~2-4 months), scored on the official crosses. Forward only: a historical LLM backtest is
+  contaminated by the model's knowledge.
+
+- **Round 24 BB (forward): 15:40 quote imbalance.** The night leg now logs Schwab bid/ask sizes + day volume per
+  pick in `daily-decisions*.jsonl` (free stand-in for the parked imbalance feed). `make qi-eval`; verdict at 300.
+
+---
+
+## Round 25 (2026-10-01): LLM judge on PAST picks — BC does not run (probe void; model knows events through 2025-10)
+- Probe v2: `deepseek-v4-flash` answered all 8 dated questions through Oct 2025 correctly, and invented "Roku" for
+  a fabricated Apple acquisition. Every 2025 pick is inside the model's memory, and the clean 2026 window is too
+  short for 300 picks. Historical verdicts collected are not scored. study_bc_news_hist.md.
+- The forward test (BA, `make forward-status`) is the only valid test of the judge.
+
+---
+
+## Round 22 (2026-10-01): Roth ex-dividend overnight capture — AZ DEAD (N 688)
+- Large caps going ex do drop by only 0.90-0.96 of the dividend (+7.4bp / +3.9bp vs SPY per event, 2021-23 / 2024-26),
+  but that is one round trip: as a sleeve on idle Roth cash it is −0.1..−0.8pp/yr at 2.5bp/side, −5pp at 5bp,
+  matched placebo 87-90%. study_az_exdiv_roth.md.
+
+---
+
+## Round 19 (2026-10-01): outside-first scan — AU3 tug-of-war tilt SHADOW, AW restates the night leg, AV dead (N 677 -> 682, counting the lab's Round 18)
+
+Brief: `research/drafts/prompt_max_edge.md`. 44 sourced candidates (`max_edge_candidates.md`); summary
+and ranked table `study_round19_summary.md`. Pre-registration dc53fcb (branch `round19-max-edge`).
+- **AU3 — SHADOW (the one new edge).** Tilt night picks by the 20-session "tug of war" count (overnight
+  up, day down; Akbas et al. JFE 2022). Monotone terciles in both halves (−13 / +11 / +24bp net 2024-26);
+  ~orthogonal to vol20/depth/prev. V7 +3.1 / +3.2 / +2.8pp/yr at $2.3k / $10k / $25k (+$70 / +$323 / +$705),
+  t 2.6-3.0, placebo 99-100%; Roth +$64 / +$296 / +$645. Holds on auction prints and in a second
+  implementation. Against it: DSR 0.46 at N 680, 2022-23 ≈ 0, and it needs the uncapped post-tilt weights
+  (a hard 10% cap after the tilt cuts it to +0.4pp). **BUILT, OFF:** `daily.night_tilt_tow: false`; the
+  15:40 log prints `[night] tow shadow:` and decisions jsonl records `tow`. **Gate = `make review` §9:** turn
+  on (`night_tilt_tow: true`) at ≥ 300 night round trips if high-TOW (≥ 6) out-earns low-TOW (< 4); same rule kills it.
+- **AW — REPORT: the backtest's next open is the vendor first print, not the cross.** On Alpaca's official
+  auction prints the night leg earns 3.8bp/trade less (t −7.5; worst < $10). Every book with a night leg is
+  ~2pp/yr lower (V7 2.5bp: 34.6 → 32.3% at $10k; Roth cash: 23.0 → 20.9%). No verdict flips.
+  **Re-run AQ on crosses: Roth cash IBS+night vs IBS-only crossover 3.7bp/side (vendor 5.4; 2021-23 1.9)** —
+  the `roth_cash_ira` gate is now live night cost ≤ ~3bp/side (measured ~0). IBS ETF opens audited too:
+  −0.3..−0.7bp/leg, immaterial. New night studies use `auction_audit_picks.pkl` (`auction_audit.with_rets`).
+- **AV — IBS state exits DEAD.** IBS > 0.5 exit −5.9pp (t −2.3); close > prior high −0.8pp (t −0.1).
+- **AU1/AU2 DEAD.** 20d mean overnight return as a tilt t 1.6; as a filter −1.6pp at 2.5bp.
+- Not tested: closing imbalance (data: candidate-only Databento pull may fit the $125 credit; live NYSE
+  feed $588/yr via Massive) and HF forecasters (clean holdouts too short to have power).
+
+---
+
+## Round 18 (2026-09-30): two ideas from a quant Discord — AS, AT both DEAD (N 669 -> 675)
+
+Triage, results and an AQ correction: `research/drafts/study_as_at_discord.md`. Most of the chat
+was already covered (order-book imbalance: data; decay monitors: add. 37; ML: Study E; placebos =
+the "null model"). Two untested ideas, pre-registered (b025d63):
+- **AS: split the overnight budget IBS/night by trailing metrics (softmax of Sharpe, inverse vol)
+  — DEAD.** At 2.5bp/side, ~0 to −1.5pp/yr. The tier_hi "gains" (AS2 +2.5..+3.4pp, t 1.8) come only
+  from a lower mean night weight (0.40) when the night leg nets ~0. That is AQ's cost gate again, not timing.
+- **AT: vol-ratio (10d/60d) and 50d trend-slope filters on IBS picks — DEAD.** VR gates flip sign
+  vs the 2016-20 holdout. **Trend filter is harmful: −7pp/yr, t −3.1.** Downtrend dips revert the
+  most (+72bp vs −1bp in 2024-26). Never add a short trend filter to an MR leg.
+- **Correction to AQ:** its cost sweep is PER SIDE (`ret − 2·c`), not round trip. The brief's 2×
+  stress (5bp RT) is 22.0%/yr for the cash-IRA book, not 19.0%; the night crossover is ~5-6bp/side
+  (~10-12bp RT). Conservative error: the IBS+night Roth verdict stands, with a wider gate.
+
 ---
 
 ## Round 17 (2026-09-30): more %/yr at $2-25k — AL/AQ Roth cash book SHADOW, AP dead, AM/AN/AO dead or report (N 642 -> 669)
@@ -51,12 +137,13 @@ Brief: `research/drafts/prompt_small_account_profit.md`. Pre-registration: round
   `ROTH_LIMITED_MARGIN`). A plain cash IRA is GFV-safe on the IBS leg (buy open d+1, sell open d+2,
   the funding sale's T+1 date) and the night leg (buy close d, sell open d+1); only the 3x-ETF
   intraday leg needs limited margin. **The cash-IRA book is IBS .5 + night .5**: at the brief's
-  stressed cost (measured x2 ~ 5bp round trip) it earns **19.0%/yr** (22.0% at 2.5bp), halves
+  cost of 5bp/side (~10bp round trip, ~4x measured) it earns **19.0%/yr**; at the brief's real 2x
+  stress (2.5bp/side = 5bp RT) **22.0%** (Round 18: AQ's sweep is per side). At 5bp/side: halves
   13.0/26.0, NW t vs BIL 3.06, placebo 99%, P(DD>50%) 0%, maxDD −12% (= M3). **AQ corrected AL:**
   the earlier "IBS-only" call used `tier_hi` (15-50bp), which is 5-10x measured, not the brief's 2x.
-  The night leg's **crossover is ~6bp round trip** (0bp: 31.3%; 5bp: 18.9%; tier_hi: −3.4%); the
-  taxable V7 book is 32.0%/yr at 5bp, 18.6% at tier_hi. So run IBS+night now with the cost gate;
-  IBS-only (17.9% at tier_hi) is the fallback above ~6bp. The delay costs ~$890-1,010/mo vs idle.
+  The night leg's **crossover is ~6bp PER SIDE (~12bp round trip; Round 18 correction: AQ's sweep was per side)** (night-only: 0bp 31.3%; 5bp/side 18.9%; tier_hi −3.4%); the
+  taxable V7 book is 32.0%/yr at 5bp/side, 18.6% at tier_hi. So run IBS+night now with the cost gate;
+  IBS-only (17.9% at tier_hi) is the fallback above ~6bp/side. The delay costs ~$890-1,010/mo vs idle.
   Spec: `daily.roth_cash_ira` (default off, IBS+night, no intraday) — BUILT + tested.
 - **AP: IBS selection — DEAD.** Cross-sectional rank-1 (threshold/always), all-18 rank-1, rank-2 and
   a stricter 0.1 gate all lose −0.3..−7.6pp vs the shipped top-3/IBS<0.2 leg. The overnight-reversal
@@ -721,9 +808,25 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Conviction weight 0.75 / 1.0 in TQQQ (mult 2 or 4), 2.0 via MNQ (Round 16 AI) | **dead** | TQQQ's 75% margin comes out of the noise cap: +0..+2pp, t 0.5; MNQ 2.0 t 2.2 but maxDD −36%, P(DD>50%) 38% |
 | Conviction trade in MNQ instead of TQQQ (Round 16 AJ) | **shadow (AJ1 .5, AJ2 .75); AJ3 1.0 dead** | same trades, cheaper, frees the noise leg's margin, 60/40: +2.5..+5.3pp 2024-26, t 4+; Schwab API cannot trade futures, needs a second broker; ≥ ~$29k |
 | More conviction setups: second breakout after a failed first; SMH/SPY/IWM on no-TQQQ days (Round 16 AK) | **dead** | 2nd breakout +0.4..+0.9pp all halves but t 0.9; SPY = same bet (corr .75); SMH/SPY/IWM fill-ins 0..−7pp 2024-26 (IWM t −2.7) |
-| Gap ≥ 4% + premarket vol ≥ 250k, pullback to VWAP, reclaim, 2R target (Round 18 AS, day-trading lab) | **dead** | gross −1.7bp/trade, −18.9 at 10bp/side (t −3.2), −36 at 2x both halves; placebo 59th pct; $2.3k -> $568 over 2022-26 |
-| 5-min ORB on Stocks in Play, re-test at 5/10bp per side, 2022-26 (Round 19 AU, lab) | **dead (again)** | −23.5bp/trade, 19k trades, t −16.7; even the optimistic fill bound grosses only ~+10bp: −9bp at 10bp/side both halves. Already dead in RESULTS.md (check RESULTS.md's dead tables too) |
-| VWAP trend on QQQ / TQQQ, flip on every 1-min VWAP cross (Round 21 AW, lab) | **dead** | signal real (placebo 97th pct, +6.7bp/day gross on QQQ) but 16 switches/day cost 16bp: −9.3bp/day QQQ, −27.7 TQQQ; the band that fixes it is the live noise leg |
+| Gap ≥ 4% + premarket vol ≥ 250k, pullback to VWAP, reclaim, 2R target (Lab-AS, day-trading lab) | **dead** | gross −1.7bp/trade, −18.9 at 10bp/side (t −3.2), −36 at 2x both halves; placebo 59th pct; $2.3k -> $568 over 2022-26 |
+| 5-min ORB on Stocks in Play, re-test at 5/10bp per side, 2022-26 (Lab-AU, day-trading lab) | **dead (again)** | −23.5bp/trade, 19k trades, t −16.7; even the optimistic fill bound grosses only ~+10bp: −9bp at 10bp/side both halves. Already dead in RESULTS.md (check RESULTS.md's dead tables too) |
+| VWAP trend on QQQ / TQQQ, flip on every 1-min VWAP cross (Lab-AW, day-trading lab) | **dead** | signal real (placebo 97th pct, +6.7bp/day gross on QQQ) but 16 switches/day cost 16bp: −9.3bp/day QQQ, −27.7 TQQQ; the band that fixes it is the live noise leg |
+
+| Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
+| IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
+| IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |
+| Night leg: tug-of-war tilt (Round 19 AU3) | **shadow** | +2.8-3.2pp/yr at 2.5bp, t 2.6-3.0, holds on auction prints; DSR 0.46, 2022-23 ≈ 0; spec only (study_au_tow.md) |
+| Night leg: 20d mean overnight return as tilt / filter (Round 19 AU1, AU2) | **dead** | tilt t 1.5-1.7; filter −1.4..−1.7pp at 2.5bp (its tier_hi gain is the cost gate) |
+| IBS leg: hold until IBS > 0.5 or a close > prior high (Round 19 AV) | **dead** | IBS > 0.5 −5.9pp (t −2.3, both halves); prior-high exit −0.8pp (t −0.1): holds past the overnight bounce |
+| Night exit later than the open auction (9:35 / 10:00 / 10:30) | **dead** | add. 7: open auction +20.1bp vs +1.9 / −9.3 / −21.5 (was only in RESULTS.md) |
+| Night tilts on gap share, relative volume, late selling, idio move, 20d/52w distance, price | **dead** | add. 23: none monotone, most flip halves (was only in RESULTS.md) |
+| IBS leg decided at 15:50 and bought in the close auction | **dead** | add. 6: QQQ 13.9 → 8.8%; trade at the next open (V6 index version is separate, shadow) |
+| Zero-shot TS foundation models (Chronos/TimesFM/Moirai/Kronos) as filters | **not run: power** | clean post-release holdouts 11-30 months ≈ 1/6 of the trades needed; published: ~51% direction, net-negative at 11-21bp (Round 19 list #35-38) |
+| Night leg: trailing closing-cross share of volume (Round 20 AX1) | **dead** | flips sign between halves (+1.1 / −1.1pp), t 0.1; mostly a low-vol proxy |
+| Night leg: trailing opening-cross share of volume (Round 20 AX2) | **dead** | +1.2pp both halves but t 1.5, placebo 94%, terciles not monotone; do not retest with a new window |
+| Night leg: FINRA off-exchange short-volume ratio, either sign (Round 21 AY) | **dead** | 2021-23 terciles flat; book ±0.4pp, t ≤ 0.6, feature shuffle 53% |
+| Roth: buy large caps the night before their ex-dividend date with idle cash (Round 22 AZ) | **dead** | drop ratio 0.90-0.96 = +4..+7bp/event vs SPY, about one round trip; book −0.1..−0.8pp at 2.5bp/side, matched placebo 87-90% |
+| Backtesting an LLM news judge on past picks (Round 25 BC) | **invalid by construction** | the model (OpenCode Go deepseek-v4-flash) knows events through 2025-10 and hallucinated a control; past verdicts can carry outcome memory. Test LLM signals forward only |
 
 ## Ideas not yet tested
 

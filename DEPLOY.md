@@ -201,6 +201,9 @@ fresh: no restart needed after editing it.
 | weekly | `make daily-status`: no `KILLED` lines, intraday fills clean |
 | after any `git push` | `make pull` here |
 | decisions | `make pending` (NEXT.md) |
+| weekly (automatic) | the **weekly digest email**, Saturdays 09:13 ET (installed by `make persist`): balances, every gate, what each shadow idea would have made, 1/3/5-year projections with vs without the levers. Preview any time: `make weekly`; send now: `make weekly-send`. Optional `.env`: `DIGEST_TAXABLE_MONTHLY=<$ you add per month>` |
+| weekly | `make forward-status`: the forward-only shadows (LLM news judge, 15:40 quote imbalance); each verdict is read once at 300 picks |
+| once (LLM news judge) | add `OPENCODE_API_KEY=...` (OpenCode Go) to `.env` (SEC filings use your Resend `NOTIFY_EMAIL` as the required contact; `SEC_USER_AGENT` overrides), then `make news-smoke SYM=<a ticker down today>`; without the key the judge stays silently off. Claude instead: `news_judge_provider: anthropic` + `pip install -r requirements.txt` + `ANTHROPIC_API_KEY` |
 | once | `HEALTHCHECK_URL` in `.env` (see `.env.example`) and `make notify-test`: the 16:10 watchdog and the dead-man ping only help if alerts arrive |
 
 ## Stopping it
