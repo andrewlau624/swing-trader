@@ -16,7 +16,7 @@ from matplotlib.ticker import FuncFormatter  # noqa: E402
 
 INK, MUTE, GRID = "#1f2328", "#6e7781", "#e6e8eb"
 S1, S2, REF = "#2a78d6", "#eb6834", "#8c959f"
-W_IN, DPI = 5.2, 200                     # shown at 520px wide, 2x for sharp screens
+W_IN, DPI = 5.6, 200                     # shown at 560px wide, 2x for sharp screens
 
 
 def _usd(v, _=None) -> str:
@@ -37,7 +37,7 @@ def _axes(h_in: float):
     for s in ("top", "right", "left"):
         ax.spines[s].set_visible(False)
     ax.spines["bottom"].set_color(GRID)
-    ax.tick_params(colors=MUTE, labelsize=8, length=0)
+    ax.tick_params(colors=MUTE, labelsize=10, length=0)
     ax.grid(axis="y", color=GRID, linewidth=0.8)
     ax.set_axisbelow(True)
     return fig, ax
@@ -53,26 +53,27 @@ def _png(fig) -> bytes:
 
 def projection_png(years: list[float], lines: dict[str, list[float]]) -> bytes:
     """lines: {"This bot": [...], "Everything on": [...], "Index fund": [...]} on the same `years` grid."""
-    fig, ax = _axes(2.6)
+    fig, ax = _axes(3.3)
     style = {"This bot": (S1, "-"), "Everything on": (S2, "-"), "Index fund": (REF, (0, (4, 3)))}
     ends = []
     for name, ys in lines.items():
         c, ls = style.get(name, (REF, "-"))
-        ax.plot(years, ys, color=c, linewidth=2, linestyle=ls, solid_capstyle="round")
+        ax.plot(years, ys, color=c, linewidth=2.6, linestyle=ls, solid_capstyle="round")
         ends.append((ys[-1], name, c))
     # direct labels at the right end, nudged apart so they never overlap
     ends.sort()
-    gap = 0.075 * max(v for v, _, _ in ends)       # in axis units: ~one label height on a 0-based axis
+    gap = 0.085 * max(v for v, _, _ in ends)       # in axis units: one 10pt line + air on a 0-based axis
     placed = []
     for v, name, c in ends:
         y = v
         if placed and y - placed[-1] < gap:
             y = placed[-1] + gap
         placed.append(y)
-        ax.annotate(f"{name}  {_usd(v)}", xy=(years[-1], v), xytext=(years[-1] + 0.25, y),
-                    color=INK, fontsize=8, va="center", annotation_clip=False,
-                    arrowprops=None)
-        ax.plot([years[-1]], [v], "o", color=c, markersize=4)
+        # name only: the table under the chart carries the values, keyed by the same colored dots
+        ax.annotate(name, xy=(years[-1], v), xytext=(years[-1] + 0.3, y),
+                    color=INK, fontsize=10, fontweight="bold",
+                    va="center", annotation_clip=False)
+        ax.plot([years[-1]], [v], "o", color=c, markersize=6)
     ax.yaxis.set_major_formatter(FuncFormatter(_usd))
     ax.set_xticks([0, 2, 4, 6, 8, 10])
     ax.set_xticklabels(["now", "2y", "4y", "6y", "8y", "10y"])
@@ -87,9 +88,10 @@ def projection_png(years: list[float], lines: dict[str, list[float]]) -> bytes:
 
 def pnl_png(dates: list, cum: list[float]) -> bytes:
     """Cumulative P&L from closed trades (deposits excluded)."""
-    fig, ax = _axes(1.5)
+    fig, ax = _axes(2.0)
     c = "#1a7f37" if cum[-1] >= 0 else "#cf222e"
-    ax.plot(dates, cum, color=c, linewidth=2, solid_capstyle="round")
+    ax.plot(dates, cum, color=c, linewidth=2.4, solid_capstyle="round")
+    ax.fill_between(dates, cum, 0, color=c, alpha=0.08, linewidth=0)
     ax.axhline(0, color=GRID, linewidth=1)
     ax.yaxis.set_major_formatter(FuncFormatter(lambda v, _: ("-" if v < 0 else "") + f"${abs(v):,.0f}"))
     ax.xaxis.set_major_locator(matplotlib.dates.AutoDateLocator(maxticks=5))

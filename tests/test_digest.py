@@ -58,7 +58,7 @@ def test_digest_numbers_from_books_and_logs(tmp_path):
     assert "$3,260 total" in subj and "10 years" in text and images == []
     assert "+$4 from trades this week" in text and "+$4" in html, \
         "trades' P&L (10 - 6), not the equity change, which includes deposits"
-    assert "Next step" in html and "Conviction trade on" in html and "Index fund" in html
+    assert "NEXT STEP" in html and "Conviction trade on" in html and "Index fund" in html
     assert "Paper" not in html, "virtual book left out of the email"
 
 
