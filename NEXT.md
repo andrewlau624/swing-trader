@@ -9,7 +9,26 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
-## Day-trading lab (2026-10-01, Lab Rounds 18-22): built; Lab-AS DEAD; Lab-AT waits for data (lab N +8: 669 -> 677 locally; program N 697 after the merge)
+## Day-trading lab (2026-10-01, Lab Rounds 18-31): 15 studies, NO edge found; recorder LIVE (lab variants counted in program N, now 719)
+
+**Overnight bottom line (for the user, 2026-10-01 morning).**
+- Every intraday idea tested at real costs is dead. The recurring pattern:
+  - Single-stock intraday signals gross 0-10bp; the spread costs 5-40bp.
+  - The two strong effects found are untradable at retail:
+    - Post-halt slides (−130bp/30 min): shorts profit only on unborrowable names.
+    - The closing-imbalance signal (+6bp, real out of sample): the spread eats it, and passive entry is adversely
+      selected.
+  - The one cheap instrument (QQQ) carries the edge the live noise leg already trades.
+- Three false passes were caught by the outlier/fill checks (MISTAKES.md):
+  - a stop filled above the market;
+  - TRF sub-penny prints counted as fills;
+  - compounding stats.
+- Two registrations were untestable (Nasdaq publishes near prices only from 09:28 / 15:55).
+- **Databento: lab $100.22 + main ~$16 = ~$116 of the $125 credit. No more pulls.**
+- **Recorder: live on the server since 2026-10-01 09:20 ET** (first session: ~97k rows by 11:30, no gaps, 106 MB).
+  Note: the 09:25 gapper sweep can pick up corporate actions (CTVA −81% was a separation, not a move).
+- **Nothing to switch on.** The live book is unchanged. The next real look is Lab-AT after 40 recorded sessions
+  (~early Dec). Expect few signals (Lab-AV).
 
 Brief: `research/drafts/prompt_daytrade_lab.md`. Lab README: `daytrade/README.md`. It has its own package, account
 and state, and does not touch the live book.
