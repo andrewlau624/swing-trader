@@ -27,7 +27,7 @@ from . import as_replay as A
 from . import az_replay as Z
 
 OUT = DATA / "research" / "be"
-BUDGET = 10.0
+BUDGET = 28.0       # measured $0.023/day x 1,190 ~ $27; lab total ~$92 + main BD/BE ~$16 < $125
 TOP = 5
 
 
