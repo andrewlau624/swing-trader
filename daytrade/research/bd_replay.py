@@ -67,5 +67,49 @@ def build():
     A.log(f"rows {len(x)}")
 
 
+
+HI, LO = 0.2585, -0.2824          # H1 80th / 20th pct of QQQ's r (registered)
+
+
+def trades(x, mult):
+    x = x[(x.sym == "QQQ") & x.close.notna()].copy()
+    x["side"] = np.where(x.r >= HI, 1, np.where(x.r <= LO, -1, 0))
+    x = x[x.side != 0]
+    half = (x.ask - x.bid) / 2
+    extra = 0.5 if mult == 1 else 1.0
+    entry = np.where(x.side > 0, x.ask + (half if mult == 2 else 0), x.bid - (half if mult == 2 else 0))
+    entry = entry * (1 + x.side * extra / 1e4)
+    exit_ = x.close * (1 - x.side * extra / 1e4)
+    x["net_bp"] = x.side * (exit_ / entry - 1) * 1e4
+    x["gross_bp"] = x.side * x.fwd_bp
+    x["cost_bp"] = x.gross_bp - x.net_bp
+    return x
+
+
+def run():
+    x = pd.read_parquet(OUT / "daily.parquet")
+    res = {}
+    for label, part in (("H2 (holdout, judged)", x[x.day >= "2024-06-01"]), ("H1 (in-sample)", x[x.day < "2024-06-01"])):
+        t1, t2 = trades(part, 1), trades(part, 2)
+        n = part[part.sym == "QQQ"].day.nunique()
+        xs = np.sort(t1.net_bp.values)
+        rng = random.Random(37)
+        means = [np.mean([(g if rng.random() < 0.5 else -g) - c for g, c in zip(t1.gross_bp, t1.cost_bp)]) for _ in range(1000)]
+        res[label] = {"n": len(t1), "days": n, "gross": float(t1.gross_bp.mean()),
+                      "1x": A.summary(t1.to_dict("records"), n), "2x": A.summary(t2.to_dict("records"), n),
+                      "without_top20": float(xs[:-20].mean()) if len(xs) > 40 else None,
+                      "placebo_pct": float(np.mean(np.array(means) < t1.net_bp.mean()) * 100),
+                      "by_side_1x": {int(k): [float(g.net_bp.mean()), len(g)] for k, g in t1.groupby("side")},
+                      "by_year_1x": {y: float(g.net_bp.mean()) for y, g in t1.groupby(t1.day.str[:4])},
+                      "median_spread_bp": float(t1.spread_bp.median())}
+        if label.startswith("H2"):
+            t1.to_csv(OUT / "trades_H2_1x.csv", index=False)
+    h = res["H2 (holdout, judged)"]
+    res["verdict"] = ("PASS (to paper)" if h["2x"]["mean_bp"] > 0 and h["1x"]["t_day"] >= 2.0
+                      and h["placebo_pct"] >= 95 and (h["without_top20"] or -1) > 0 else "DEAD")
+    (OUT / "results.json").write_text(json.dumps(res, indent=1, default=str))
+    print(json.dumps(res, indent=1, default=str))
+
+
 if __name__ == "__main__":
-    {"build": build}[sys.argv[1]]()
+    {"build": build, "run": run}[sys.argv[1]]()

@@ -36,7 +36,8 @@ and state, and does not touch the live book.
   - **Lab-AZ/BB/BC (Nasdaq closing imbalance, Databento, $64.88): signal REAL, not tradable.** A big early imbalance
     predicts ~+6-7bp from 15:54 to the close, out of sample (H2 holdout, placebo 100th pct). But crossing the spread
     at 15:54 costs as much: Lab-BC H2 +0.3bp net at 1x, −5.7 at 2x. Lab-AZ was untestable (near price published only
-    from 15:55). study_lab_bb_close_imbalance.md. Best use: the night leg's closing-cross entry (main BD).
+    from 15:55). study_lab_bb_close_imbalance.md. Main BD found the effect already priced into night returns.
+  - **Lab-BD (QQQ only, every day, H2 holdout): DEAD.** Gross fell from +3.2bp (H1) to +1.3bp (H2): +0.17bp net.
   - **Lab-AV (Lab-AT's imbalance on historical SIP ticks, QQQ/SPY): running.**
   - **Lab-AT (opening L1 imbalance): waiting.** First look after 40 unflagged recorded sessions (~early Dec).
   - **Decision for the user:** Alpaca's free plan has historical SIP tick NBBO quotes and trades back to
