@@ -99,7 +99,10 @@ def instructions(r: dict) -> str:
              f"at least ${floor:.2f} (Dutch auction ${r.get('lo'):.2f}-${r.get('hi'):.2f}; odd lots get the final price, "
              f"which is never below ${floor:.2f})")
     gain = 99 * (floor - close)
+    oid = f"{tk}-{r.get('date', '')}"
     return f"""ODD-LOT TENDER: {tk} ({r['name']})
+ONE-COMMAND BUY (you approve it): ssh in, cd ~/llm-trader, run   make tender-buy ID={oid}
+  (it re-checks the deal, shows the plan, and buys only after you type {tk}; then do step 3 below.)
 Offer: {price}. Last close ${close:.2f} -> guaranteed floor +{r['floor_gain']:.1%}, about ${gain:,.0f} on 99 shares.
 Offer expires: {exp}.  Schwab's own deadline is usually 1 business day EARLIER - use that.
 
@@ -177,6 +180,12 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
     if hits and email:
         Notifier(Path(state_dir)).alert(f"odd-lot tender: {', '.join(r['ticker'] for r in hits)} (act today)",
                                         "\n\n".join(instructions(r) for r in hits))
+    try:                                   # bookkeeping for buys you approved (never places an order)
+        from .tender_buy import track
+        note = Notifier(Path(state_dir)) if email else None
+        track(state_dir, today, notify=(lambda subj, body: note.alert(subj, body)) if note else None, log=log)
+    except Exception as exc:
+        log(f"[tender] tracking failed: {str(exc)[:120]}")
     due = reminders(_read(path), today)
     if due and email:
         Notifier(Path(state_dir)).alert(

@@ -388,6 +388,10 @@ insider-shadow: ## Round 31 ID3: score + plan the insider-purchase session shado
 tender-watch: ## Round 31: new SC TO-I filings -> odd-lot tender alerts (email; manual tender at Schwab): make tender-watch [DATE=YYYY-MM-DD]
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.tender_watch $(DATE)
 
+tender-buy: ## Round 31: buy the odd lot for an alerted tender, after YOU confirm: make tender-buy ID=TICKER-YYYY-MM-DD
+	@test -n "$(ID)" || { echo "usage: make tender-buy ID=TICKER-YYYY-MM-DD (from the alert email)"; exit 2; }
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.tender_buy $(ID)
+
 forward-status: ## every forward-only shadow gate in one place (AU3 is in `make review` section 9)
 	@echo "== Round 23 BA: LLM news judge (verdict once at 300) =="
 	@PYTHONPATH=. $(PY) -m research.sim.news_judge_eval 2>/dev/null || echo "  no state/news-judge.jsonl yet"
