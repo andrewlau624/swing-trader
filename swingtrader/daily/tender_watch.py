@@ -57,7 +57,16 @@ def terms(text: str) -> dict:
     nav = bool(re.search(r"(?:\d{2}(?:\.\d+)?%|percent) of (?:the )?(?:\w+ )?(?:net asset value|NAV)", t, re.I))
     odd = "N" if NO.search(t) else "Y" if YES.search(t) else "none"
     floor = fixed if np.isfinite(fixed) else lo
-    return dict(lo=lo, hi=hi, fixed=fixed, nav=nav, odd_lot=odd, floor=floor)
+    exp = None
+    m = re.search(r"expire[sd]? (?:at|on) [^;]{0,120}?(?:on|,) (?:\w+day, )?(January|February|March|April|May|June|July|August|"
+                  r"September|October|November|December) (\d{1,2}), (\d{4})", t, re.I)
+    if m:
+        try:
+            exp = dt.datetime.strptime(f"{m.group(1)} {m.group(2)} {m.group(3)}", "%B %d %Y").date().isoformat()
+        except ValueError:
+            exp = None
+    return dict(lo=lo, hi=hi, fixed=fixed, nav=nav, odd_lot=odd, floor=floor, expires=exp,
+                kind="dutch" if np.isfinite(lo) else "fixed" if np.isfinite(fixed) else "unknown")
 
 
 def header_company(sub: str) -> tuple[str | None, str | None]:
@@ -80,6 +89,53 @@ def candidate(t: dict, last_close: float | None) -> dict:
     g = (t["floor"] / last_close - 1) if (last_close and np.isfinite(t["floor"])) else np.nan
     alert = bool(np.isfinite(g) and g >= MIN_FLOOR and t["odd_lot"] == "Y" and not t["nav"])
     return dict(floor_gain=None if not np.isfinite(g) else round(float(g), 4), alert=alert)
+
+
+def instructions(r: dict) -> str:
+    """The full how-to for one alert (plain text, goes in the email)."""
+    tk, floor, close = r["ticker"], r["floor"], r["last_close"]
+    exp = r.get("expires") or "see the offer document (link below)"
+    price = (f"${floor:.2f} cash per share (fixed)" if r.get("kind") == "fixed" else
+             f"at least ${floor:.2f} (Dutch auction ${r.get('lo'):.2f}-${r.get('hi'):.2f}; odd lots get the final price, "
+             f"which is never below ${floor:.2f})")
+    gain = 99 * (floor - close)
+    return f"""ODD-LOT TENDER: {tk} ({r['name']})
+Offer: {price}. Last close ${close:.2f} -> guaranteed floor +{r['floor_gain']:.1%}, about ${gain:,.0f} on 99 shares.
+Offer expires: {exp}.  Schwab's own deadline is usually 1 business day EARLIER - use that.
+
+HOW TO DO IT (each step matters):
+1. Check your TOTAL {tk} shares across Brokerage + Roth + anything else: you must own 99 or FEWER in total
+   (an odd lot is counted per person). If you already own some, buy only enough to reach 99.
+2. Buy up to 99 shares in ONE account - prefer the ROTH if it has the cash (the gain is tax-free there) - with a
+   LIMIT order at or below ${floor * 0.99:.2f} (keeps >= 1% of room). Do not chase: at ${floor:.2f} or above, skip it.
+   Buy at least 2 business days before Schwab's deadline: the shares must settle (T+1) before you can tender.
+3. Tender ALL of them once they settle (the next business day):
+   schwab.com > Accounts > Positions > {tk} > "Corporate actions"/"Voluntary reorganization" (or call Schwab
+   1-800-435-4000 and say "I want to tender my odd lot in the {tk} issuer tender offer").
+   - Tender ALL your shares (a partial tender loses odd-lot priority).
+   - Tick / say "ODD LOT certification: I own fewer than 100 shares".
+   - Dutch auction: choose "tender at the PURCHASE PRICE determined by the offer" (not a specific price).
+   - Do NOT make it a conditional tender.
+4. Write down Schwab's confirmation number. Fee should be $0 (voluntary reorganization).
+5. Do not sell or move the shares until the offer closes. Cash usually arrives 2-5 business days after expiry.
+
+What can go wrong: the company withdraws the offer (rare) -> you keep the shares at market price, so sell or hold;
+you hold >= 100 shares in total -> you are prorated like everyone else; you miss Schwab's deadline -> you hold
+the stock after the offer, which often drops. Taxable account: the gain is a short-term capital gain.
+
+Offer document: https://www.sec.gov/Archives/{r['path']}
+"""
+
+
+def reminders(rows: list[dict], today: dt.date) -> list[dict]:
+    """Alerted offers whose expiry is 1-3 days away (a reminder each of those days)."""
+    out = []
+    for r in rows:
+        if r.get("alert") and r.get("expires"):
+            left = (dt.date.fromisoformat(r["expires"]) - today).days
+            if 1 <= left <= 3:
+                out.append(r)
+    return out
 
 
 def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=print) -> list[dict]:
@@ -119,10 +175,13 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
             f.write(json.dumps(r) + "\n")
     hits = [r for r in new if r["alert"]]
     if hits and email:
-        body = "\n".join(f"{r['ticker']} ({r['name']}): guaranteed {r['floor']} vs last close {r['last_close']} "
-                         f"= {r['floor_gain']:+.1%}; buy <= 99 shares in TOTAL across accounts, tender all, certify odd lot. "
-                         f"https://www.sec.gov/Archives/{r['path']}" for r in hits)
-        Notifier(Path(state_dir)).alert(f"odd-lot tender: {', '.join(r['ticker'] for r in hits)}", body)
+        Notifier(Path(state_dir)).alert(f"odd-lot tender: {', '.join(r['ticker'] for r in hits)} (act today)",
+                                        "\n\n".join(instructions(r) for r in hits))
+    due = reminders(_read(path), today)
+    if due and email:
+        Notifier(Path(state_dir)).alert(
+            f"REMINDER odd-lot tender deadline: {', '.join(r['ticker'] for r in due)}",
+            "If you already tendered, ignore this.\n\n" + "\n\n".join(instructions(r) for r in due))
     log(f"[tender] {len(new)} new SC TO-I, {len(hits)} odd-lot alerts")
     return new
 

@@ -48,3 +48,18 @@ def test_idx_and_header():
     hdr = ("FILED BY:\n COMPANY DATA:\n COMPANY CONFORMED NAME: ABC CORP\n CENTRAL INDEX KEY: 0000000001\n"
            "SUBJECT COMPANY:\n COMPANY DATA:\n COMPANY CONFORMED NAME: ABC CORP\n CENTRAL INDEX KEY: 0000000001\n")
     assert w.header_company(hdr) == ("1", "ABC CORP")
+
+
+def test_expiry_kind_and_instructions():
+    import datetime as dt
+    t = w.terms(FIXED + " The offer will expire at 5:00 p.m., New York City time, on Friday, October 30, 2026, unless extended.")
+    assert t["expires"] == "2026-10-30" and t["kind"] == "fixed"
+    r = dict(ticker="ABC", name="ABC CORP", last_close=32.3, path="edgar/data/1/x.txt",
+             **t, **w.candidate(t, 32.3))
+    txt = w.instructions(r)
+    for must in ("99 or FEWER", "Tender ALL", "ODD LOT", "2026-10-30", "LIMIT", "conditional"):
+        assert must in txt
+    assert w.reminders([r], dt.date(2026, 10, 28)) == [r]
+    assert w.reminders([r], dt.date(2026, 10, 20)) == []
+    d = w.terms(DUTCH)
+    assert d["kind"] == "dutch"
