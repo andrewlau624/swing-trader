@@ -8,6 +8,7 @@ the first close < 0.85 x offer, else session 250.
 """
 from __future__ import annotations
 
+import html
 import pathlib
 import re
 import sys
@@ -21,7 +22,8 @@ from .roundup import alpaca_names, norm
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 OUTF = ROOT / "data/research/program/cash_tenders_out.txt"
 PRICE = re.compile(r"\$\s?(\d[\d,]*\.\d{2,4}) (?:per|for each) (?:share|Share)[^.]{0,120}?net to the seller in cash", re.I)
-SYM = re.compile(r"under the (?:trading |ticker )?symbols? [\"“”']{1,2}([A-Z][A-Z.]{0,6})[\"“”']{1,2}")
+SYM = re.compile(r"(?:under the (?:trading |ticker )?symbols?|ticker symbol)\s*[\"“”'‘’]{1,2}\s*([A-Z][A-Z.]{0,6})\s*[\"“”'‘’]{1,2}|"
+                 r"\((?:NASDAQ|Nasdaq|NYSE|NYSE American|NYSE MKT)\s*:\s*([A-Z][A-Z.]{0,6})\)")
 
 
 def offers() -> pd.DataFrame:
@@ -37,13 +39,13 @@ def offers() -> pd.DataFrame:
         name = next((n for c, n in zip(h0["ciks"], h0["names"]) if c.lstrip("0") == subj), h0["names"][0])
         price, sym = None, None
         for h in hs:
-            t = F.doc(h["ciks"][0], adsh, h["id"].split(":", 1)[1])
+            t = html.unescape(F.doc(h["ciks"][0], adsh, h["id"].split(":", 1)[1]))
             m = PRICE.search(t)
             if m and price is None:
                 price = float(m.group(1).replace(",", ""))
             s = SYM.search(t)
             if s and sym is None:
-                sym = s.group(1)
+                sym = s.group(1) or s.group(2)
         tk = F.ticker_of(name)
         rows.append(dict(adsh=adsh, date=pd.Timestamp(h0["date"]), subject=subj, name=name, price=price,
                          sym=sym or (tk[0] if tk else None), accepted=hd.get("accepted")))

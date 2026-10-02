@@ -23,6 +23,31 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   event net +27.3bp but daily-sleeve NW t **+1.85** (< 2); DSR 0.218. Select half +27.7bp/trade, t 2.42, hit 53%.
   `study_ev1_cluster_insider.md`. Session notes: `runbook_notes.md`.
 
+## Round 32 (2026-10-02): event and structural edges — two contractual PASSES with alerts (reverse-split round-up, split-off exchange offers), four dead; N 757 (760 after EV2)
+- **B1 reverse-split round-up (family B, no N): PASS as a free option.** Issuers that round fractional post-split shares
+  UP at the holder level turn 1 pre-split share into 1 post-split share (~N x). 344 splits 2016-26 (none at the DTC
+  "participant level"): **+$4.36 mean / +$3.56 median per account if rounded, ~$0 if cash in lieu**, median capital
+  $0.25, ~75 a year since 2023 -> **~$320/yr per account, ~$640 for taxable + Roth (+28% / +6% / +2.6% at $2.3k / $10k /
+  $25k) IF Schwab passes the round-up to a 1-share holder** (unknown from history: the first 2-3 live deals settle it).
+  -> `make roundup-watch` (`swingtrader/daily/roundup_watch.py`): Alpaca-announced reverse splits in the next 14 days
+  whose issuer's EDGAR filings say fractions "will be rounded up" (and never "participant level") -> email "buy 1 share in
+  each account by <session>"; a reminder on that day; scored from raw bars afterwards. **First hit: VIVK 1-for-15, ex
+  2026-10-05 -> buy by the close of 2026-10-02.**
+- **B2 split-off exchange offers with odd-lot priority (family B): PASS.** 14 offers 2016-25 (BAX, LMT, PG, CBS, FTV, LLY,
+  DHR, MCK, ECL, DD, MMM, JNJ, CMI, LEN), all oversubscribed, all odd-lot priority: buy <= 99 parent shares 5 sessions
+  before expiry, tender, value the received shares at the first close after expiry: **median +7.4%, mean +9.1%, 12 of 14
+  > 0, worst −8.8% (Neogen flowback), ~8-10 days, ~1.4/yr -> ~$280 / $1,100 / $2,000 a year (+12% / +11% / +8%)**,
+  capped at 99 shares. -> `make splitoff-watch` (`splitoff_watch.py`): detects new split-off SC TO-Is, parses terms from
+  the parent's 425 press releases, values open offers with the upper limit applied, emails in the entry window (3-5
+  sessions before expiry) when implied >= +1%; `make splitoff-add ARGS='PARENT RECV YYYY-MM-DD PER100 CAP [URL]'`.
+  **Live: MDT -> MMED, expires 2026-10-09, implied +4.2% at the 10-01 closes (upper limit binds).**
+- Dead: **B3** cash tender offers (spread ~+0.4% by the next close, failures −20..−42%); **B4** going-private odd-lot
+  cash-outs (11 listed in 10 years, one −89%); **A1** 13D originals next session (−46bp gross, t −3.0); **A2** 10%-owner
+  buys next session (2024-26 −6bp). UTMD's $75 odd-lot tender (expires 10-07) was +0.9% over the 10-01 close: below the
+  +1% rule.
+- Write-up and closing table: `research/drafts/study_round32_events.md`. Candidates: `event_edge_candidates.md` (36).
+  All three Round 31/32 alerts run in `research-shadows.timer` (weekdays 08:20 ET) and show in the weekly digest.
+
 ## Round 31 (2026-10-02): EDGAR unblocked — one registered PASS (ID3, shadow) and one small sure thing (odd-lot tenders, alert); N 755
 - **Study ID3 PASSES (registered b2cdc1c, judged on 2024-26): the session after an officer/director open-market
   purchase Form 4, buy the opening cross, sell the closing cross, 20d ADV$ >= $20M.** +16.6bp/trade net of
@@ -1035,6 +1060,11 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Night picks: EFFECT notice in 7d as a size-up (Round 31 L18) | **not registered** | +32 / +236bp but ex-top-5 0bp (DS5's failure mode) |
 | SPAC commons instead of BIL (Round 31 L16) | **closed** | only ~8% of equity idle for a month: ~+0.1%/yr; panel lacks the liquidated SPACs |
 | CEF NAV tender offers as an odd-lot trade (Round 31) | **dead** | 54 of 55 give odd lots no priority (BlackRock 98%-NAV series, Calamos prorates odd lots) |
+| 13D originals, next session open -> close (Round 32 A1) | **dead** | −45.8bp gross, t −3.0, every year but 2024 negative: the jump is in the announcement gap |
+| 10%-owner (non-insider) buys, next session open -> close (Round 32 A2) | **dead** | +16bp 2021-23 but 2024-26 −6bp net, t −0.4 |
+| Cash tender offers by acquirers / merger arb (Round 32 B3) | **dead** | spread ~+0.4% by the first close even in tiny deals; failures −20..−42% |
+| Going-private odd-lot cash-outs (Round 32 B4) | **dead** | ~1 listed/yr, 100-day holds, Anebulo −89% (split abandoned) |
+| Reverse-split round-up (Round 30 #12 "KILL") | **reopened -> PASS (alert)** | Round 32 B1: +$4.36/account/deal if rounded, ~$0 if not; Schwab behaviour is the live check |
 
 ## Ideas not yet tested
 
