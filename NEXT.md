@@ -9,6 +9,17 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Round 30 (2026-10-02): outside the box — 47 forced-trader ideas, 9 explored on select data, none survived; nothing registered (program N 752)
+- Ideas + kills: `research/drafts/outside_box_ideas.md` (e5fd4e2, before any number). Looks L1-L15:
+  `outside_box_explore_log.md`. Write-up and the three surprises: `study_outside_box_round30.md`.
+- **The near miss was lookahead.** Liquid LETFs closing ≥ 2σ below L × underlying recover +12bp overnight (t 10) on
+  official closes, but **0bp** when decided at 15:45-15:59: the closing cross makes the gap. Rule for every future
+  study: no feature from day d's official close may drive an order in day d's closing cross.
+- Forced sellers ($5 cliff, lockup day, sympathy peers) kept falling; the wash-sale day-31 rebuy and the Treasury
+  auction cycle leave nothing after costs.
+- 2024-26 untouched. **User:** `SEC_USER_AGENT` in this Mac's `.env` unblocks odd-lot tender offers (#11), the one
+  idea that pays more the smaller the account, plus SPAC trust (#13), supply shocks (#8) and NT filers (#44).
+
 ## Round 29 (2026-10-02): deep search — 23 candidates ranked, the best 4 studies (7 variants) all DEAD; nothing to switch on (program N 752)
 - List: `research/drafts/deep_search_candidates.md` (23 ideas; 13 were dead or done on the dead-list check). Results and
   final table: `research/drafts/study_ds_round29.md`. Pre-registration d4df5d1.
@@ -976,6 +987,13 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Noise leg: no new entries at 12:00-13:30 (Round 29 DS3) | **dead** | +0.4pp, t 0.12; 2024-26 and 2016-20 negative; slot placebo 92% |
 | Night tilt by FINRA days-to-cover (Round 29 DS4) | **dead** | terciles flip (hi +18 -> +5bp); inverse-vol proxy (rho −0.45); t 0.14, shuffle 42% |
 | Night ×1.5 on Dec last-10 / quarter-end last-3 sessions (Round 29 DS5) | **dead (holdout)** | registered bar met (+2.2pp, t 2.28, matched 99%) but 5 nights carry it (ex-top-5 −5.5bp) and 2019-20 reverses (−32 vs +13bp); do not retest other windows |
+| LETF close vs L × underlying, bought in the cross, sold at the open (Round 30 #3, exploration) | **dead (lookahead)** | +12bp/t 10 on official closes is made by the cross; decided at 15:45-15:59 it is 0bp; the LOC version (+1bp vs L × underlying) buys late selloffs |
+| Share-class twins / same-index ETF clones at the close (Round 30 #1-2, exploration) | **dead** | liquid pairs +5-7bp ≈ one round trip; big gross only in < $1M ADV classes (stale prints); same close-lookahead caveat |
+| Wash-sale day-31 rebuy after crash days (Round 30 #4) | **dead** | no bump; day 0 −19.5bp vs SPY |
+| Night tilt by retail trade size (volume / trade_count) (Round 30 #5) | **dead** | $/trade is price (ρ 0.83); shares/trade not monotone |
+| Buy names crossing below / above $5 (Round 30 #6) | **dead (long side)** | below: 5d −109bp ($4 placebo −31, $7 +2); above: −108bp |
+| Night picks on lockup-expiry days / SIC sympathy peers of a crash / by listing exchange (Round 30 #7, #9, #10) | **dead** | lockup −122bp (n 23); peers bounce less (−7.9 vs −2.8bp); exchange order flips |
+| IEF instead of BIL for 3 days after note/bond auctions (Round 30 #14) | **dead at the bar** | +2.7bp/day (t 2.0) ≈ 5bp switching × 38 auctions/yr; published |
 
 ## Ideas not yet tested
 

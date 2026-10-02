@@ -80,3 +80,17 @@ Parked for EDGAR (needs the user's UA): #8, #11, #13, #44.
 
 Exploration rule: select data only (panel ≤ 2023-12-31; night pool 2021-23). Every look is logged in
 `outside_box_explore_log.md`. 2024-26 is not read until the pre-registration is committed.
+
+## After exploration (2026-10-02; details `outside_box_explore_log.md`, write-up `study_outside_box_round30.md`)
+
+| # | idea | exploration verdict (select data only) |
+|---|---|---|
+| 1-3 | anchored twins (share classes, clones, LETF vs L × underlying) | thin pairs = stale prints; liquid class/clone +5-7bp < a round trip; LETF +12bp was **lookahead** (made by the cross; 0bp on a 15:45-15:59 decision; LOC version = leveraged beta) |
+| 4 | wash-sale day-31 rebuy | dead: no bump; day 0 −19.5bp |
+| 5 | retail trade size | dead: a price proxy (ρ 0.83) |
+| 6 | the $5 cliff | dead for a long-only book: crossers keep falling (5d −109bp) |
+| 7 | lockup-expiry night picks | dead: −122bp, n 23 |
+| 9 | sympathy losers | dead: peers bounce less (−7.9 vs −2.8bp) |
+| 10 | listing exchange | dead: flips |
+| 14 | Treasury auction cycle | dead at the bar: +2.7bp/day ≈ switching cost |
+| 8, 11, 13, 44 | EDGAR ideas (supply shocks, odd-lot tenders, SPAC trust, NT filers) | not explored: no SEC User-Agent in this Mac's `.env` |
