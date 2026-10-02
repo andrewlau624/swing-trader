@@ -1,7 +1,7 @@
 # Index-beat hunt log (session llm-trader-ee, prompt_index_beat.md)
 
 ## STATE (update after every idea)
-- program N: 761 (Jump J1 took 761; my next would be 762; none registered by this hunt)
+- program N: 762 (Jump J1 761, J2 762; my next would be 763; none registered by this hunt)
 - k (ideas judged): 0 · explored: 15 (C1 C2 C3 C4 C5 A1/DL-IB1 B3 A9 A18 A20 A2 R2-7 + A8 bound) · killed by bound: ~35 · idea rounds: 2 (55 + 27)
 - current: write ROUND 3 (method: death-dodges of the program's near misses + noise-leg structure + haircut-proof ideas)
 - WAITING: DL-IB1 FOUND only after 2 live rounded deals (VIVK ex 10-05, check ~10-07: state/roundup-orders.json on him, read-only)
@@ -84,3 +84,11 @@
   book (track C/B, the C2 logic inside the Roth; spec before run): same deposits, EH (noise mean halved; SPY as is),
   tier and tier_hi, halves restarted. Report-type: C2's bar (>= +2pp on the combined plan both halves) applied to Roth $ only.
 - R3-3 Roth 0.5 SPY + 3x noise vs Roth book: EH tier -0.1/-3.4pp (2021-23/2024-26), tier_hi +1.9/-0.1; as backtested -3..-17pp -> DEAD. NOTE: at EH all-SPY in the Roth ($86.2k full) beats the Roth book ($82.6k tier, $75.7k tier_hi): the HAIRCUT death applies to the Roth too. ib_r33.py
+- R3-2 special / >=3% dividends overnight in the Roth (select ex-dates 2021-23; one 50-name bar chunk lost to an invalid CVR symbol):
+  all >=3%: n 693 (231/yr), drop ratio median 0.98, net MEDIAN -35bp; flagged specials n 175, drop ratio 0.97, median -18bp,
+  ex-top-5 -39bp; the means (+4,000bp) are rate/raw-price mismatches (splits), not money -> DEAD (no shortfall: big dividends
+  drop ~fully at the open). ib_r32.py, r32_explore.txt
+- ROUND 4 written (index_beat_ideas_r4.md, small-holder contractual sweep): R4-1 round-lot top-up = DL-IB2 (registered 0f32a57,
+  EDGAR check running); R4-2 stock-dividend round-ups to recheck with that scanner; account-level money (bank/broker bonuses,
+  Saver's Match excludes students/dependents) = user notes, not research.
+- N now 762 (Jump J2); my next would be 763.

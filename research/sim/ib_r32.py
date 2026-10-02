@@ -92,14 +92,14 @@ def explore():
             continue
         net = (o1 + r.rate) / c0 - 1 - 2 * cost_side(adv)
         rows.append(dict(sym=r.symbol, ex=r.ex, y=y, special=r.special, adv=adv, gross=(o1 + r.rate) / c0 - 1, net=net,
-                         drop=(c0 - o1) / r.rate))
+                         dratio=(c0 - o1) / r.rate))
     T = pd.DataFrame(rows)
     T.to_pickle(ROOT / "data/research/program/ib/r32_events.pkl")
     for lab, s in (("all >= 3%", T), ("flagged special", T[T.special == True]), ("regular >= 3%", T[T.special != True])):
         if not len(s):
             continue
         n = s.net * 1e4; top5 = n.nlargest(5).index
-        print(f"{lab:16s}: n {len(s)} ({len(s) / 3:.0f}/yr), yield median {s.y.median():.1%}, drop ratio median {s.drop.median():.2f}, "
+        print(f"{lab:16s}: n {len(s)} ({len(s) / 3:.0f}/yr), yield median {s.y.median():.1%}, drop ratio median {s.dratio.median():.2f}, "
               f"gross {s.gross.mean() * 1e4:+.0f}bp, net {n.mean():+.0f}bp (median {n.median():+.0f}, t {n.mean() / n.std() * np.sqrt(len(n)):+.2f}), "
               f"ex-top-5 {n.drop(top5).mean():+.0f}bp; by year " + " ".join(f"{y}: {g.mean():+.0f}" for y, g in n.groupby(s.ex.dt.year)))
 
