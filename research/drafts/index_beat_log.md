@@ -112,3 +112,4 @@
   unchanged; select 2016-23 for the ETF legs (the IBS select window used by the program), bar: mean per trade higher with
   t >= 2 and both 2016-20? no -> 2016-20 is HOLDOUT: select = 2021-23 only; bar t >= 2, positive each year).
   R5-2 result (2021-23, 479 IBS trades): open->open +22.3bp vs open->close +13.6bp, diff -8.7bp, NW t -2.15, every year < 0 -> DEAD (the IBS edge needs the second overnight).
+- R5-5 night bounce by year x picks/night: no monotone bucket; signs flip by year; 2026 weak in every bucket (-55/+10/-27/+9bp) with more crowded nights -> diagnostic, no rule (HALF-FLIP). Next: ROUND 6 (method: brainstorm-partner agent briefed with the HAIRCUT finding, asked only for haircut-proof automatable ideas).
