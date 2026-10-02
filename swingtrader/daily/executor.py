@@ -684,7 +684,12 @@ class DailyExecutor:
 
     def _lever_gate(self, book: DailyBook) -> None:
         """Open or close the overnight leverage gate from live evidence."""
-        if not self.d.lever_weight or self.cash_account:
+        if self.cash_account:
+            book.levered = False; return
+        if not self.d.lever_weight:
+            # leverage switched off (null since 2026-09-29): the G1 shadow still
+            # logs, or it would never collect the evidence it exists for
+            self._log_lever_g1_safe()
             book.levered = False; return
         n, bps = getattr(self, "_exit_stats", (0, float("nan")))
         try:
@@ -701,12 +706,15 @@ class DailyExecutor:
             ucb = getattr(self, "_exit_ucb", float("nan"))
             self.log(f"[lever] {'on' if ok else 'off'} - {why}"
                      + (f" (95% upper bound on the mean {ucb:+.1f}bp)" if np.isfinite(ucb) else ""))
+        self._log_lever_g1_safe()
+        book.levered = ok
+
+    def _log_lever_g1_safe(self) -> None:
         if self.d.lever_g1_log != "off":
             try:
                 self._log_lever_g1()
             except Exception as exc:        # a shadow must never cost the live gate
                 self.log(f"[lever-g1] skipped ({type(exc).__name__}: {str(exc)[:80]})")
-        book.levered = ok
 
     def _log_lever_g1(self) -> None:
         """SHADOW (addendum 38): the sequential gate G1 -- open from 20 exits

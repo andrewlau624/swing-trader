@@ -258,8 +258,9 @@ def gates(accts: dict, logs: Path, state: Path) -> list[dict]:
             "make review §7", "days with live intraday fills; §7 must call them clean", "intraday days"),
         row("4x intraday margin", len(intraday_days), 15, "DAILY_INTRADAY_MULT=4 in .env",
             "Schwab.com Balances", "2 weeks after conviction, and Intraday BP >= 3.5x equity", "intraday days"),
-        row("Overnight 1.3x", len(night_sells), sg.LEVER_MIN_EXITS, "lever_weight: 0.65 in config.yaml",
-            "make review §2b", f"needs mean <= {sg.LEVER_MAX_EXIT_BPS:g}bp vs the auction (vs decision ref now {ms:+.1f}bp)", "night exits"),
+        row("Overnight 1.3x", rt, sg.LEVER_REARM_TRADES, "lever_weight: 0.65 in config.yaml",
+            "make review §4 + kill check", "off since 09-29; re-arm only if no kill fired and §4 live-minus-backtest "
+            f">= -10bp/trade (open-sell cost vs decision ref now {ms:+.1f}bp)", "live night trades"),
         row("Roth night cost check", len(roth_night), 20, "if > ~3bp/side vs auction: Roth IBS-only",
             "make review §2 (roth)", unit="Roth night fills"),
         row("Tug-of-war tilt", rt, sg.TOW_GATE_N, "night_tilt_tow: true in config.yaml (if §9 says on)",

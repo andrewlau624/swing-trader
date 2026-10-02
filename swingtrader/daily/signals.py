@@ -651,6 +651,10 @@ def oversold_trigger(closes, price: float) -> tuple[bool, str]:
 LEVER_MIN_EXITS = 50          # night open sells scored against the official open
 LEVER_MAX_EXIT_BPS = 10.0     # mean cost per side over those exits (backtest assumes 7.5)
 LEVER_MAX_DD = 0.10           # no leverage while realised drawdown is deeper than this
+# lever_weight is null since 2026-09-29: the exit-cost gate proves costs, not edge.
+# Re-arm (lever_weight: 0.65) at this many live night round trips IF no kill fired and
+# `make review` section 4's live-minus-backtest gap is >= -10bp/trade (NEXT.md)
+LEVER_REARM_TRADES = 100
 
 
 def lever_ok(n_exits: int, exit_bps: float, killed: dict, drawdown: float,
