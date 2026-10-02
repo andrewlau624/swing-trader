@@ -2081,3 +2081,23 @@ by year: 2020: -42.0bp (n 29)  2021: +21.2bp (n 198)  2022: +22.7bp (n 284)  202
 TRACK FREQUENT (>= 100/yr): net >= +10bp, hit >= 50%, t >= 2: MEETS -> may pre-register
 ```
 Judge: FREQUENT -> `event_runner run` (the registered Study ID bar, PASS/DEAD as printed).
+
+## Amendment — Round 33 (overnight runbook loop), Study EV2: first insider purchase in 2+ years, next session open -> close (pre-register; 1 variant, program N 758 -> 759)
+
+`date`: Fri Oct 2 2026 (the commit time is the stamp), before any 2024-26 number. Runbook: research/drafts/prompt_event_runbook.md.
+Event: officer/director open-market purchase filings from `insider_buys()` (`X[X.insider]`) at an issuer whose previous
+open-market purchase filing by any reporting owner is >= 730 days earlier (no purchase in the data, which starts
+2020-01-01, counts as none since 2020-01-01); events file data/research/program/events_firstbuy.parquet (snippet C,
+built by research/sim/events_firstbuy_build.py; 3,011 events 2022-01..2026-03). Trade: buy the opening cross of the
+first session after the filing date, sell the closing cross the same session; ADV >= $20M. Track: FREQUENT.
+Who pays: opening-cross sellers and market makers; later-session buyers are attention-limited screeners reading
+"first insider buy in years". Why it persists: a buy that breaks a 2-year silence is a rare, costly signal noticed
+slowly; too small/manual for funds. Subset of ID3's events (not independent of the ID3 pass).
+Select-half result (2022-23):
+```
+events 1449 -> trades 318  (159 per year)
+net per trade +41.8bp  median +20.0bp  hit rate 53%  t +2.44
+by year: 2022: +61.7bp (n 182)  2023: +15.0bp (n 136)
+TRACK FREQUENT (>= 100/yr): net >= +10bp, hit >= 50%, t >= 2: MEETS -> may pre-register
+```
+Judge: FREQUENT -> `event_runner run` (the registered Study ID bar, PASS/DEAD as printed).
