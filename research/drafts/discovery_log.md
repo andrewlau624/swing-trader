@@ -82,3 +82,5 @@ enrichment + contract probes are the ones already known: own-money (ID3/EV2) and
 
 
 
+
+- (session llm-trader-c5, second runner of this prompt) Looks, verdicts and the morning summary are in `discovery_log_c5.md`; ideas in `discovery_ideas_c5.md`. 8 verdicts: DL1 UMH DRIP 5% OCP **PAYS** (~$540/yr per person); DL2-DL7 and C6 dead or too rare. No N spent (760).

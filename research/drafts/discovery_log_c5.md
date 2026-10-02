@@ -23,3 +23,38 @@ Every look, one line. Peer session llm-trader-mid-01 logs in `discovery_log.md`.
 - 12:30 DL5 first pass (shared-report N-CSR sentences) mis-attributed dates (5 funds, BKT has no term): no prices were pulled. Second pass: FTS restricted to each term fund's own CIK (44 named funds), running.
 - 12:45 C6 (D): enrichment scan, discover 2020-10..2022-06 (2,646 events / 12,506 same-name controls), **K = 96** form types; no type with ratio > 2 and > 30 cases (max 1.44, S-1) -> nothing to confirm; explored-dead. Confirmation window computed by the script but no candidate to look up.
 - 12:55 DL5: per-CIK FTS dates for 21 of 44 named funds; final 23-deal table (`DEALS`, fallback name-year dates, CBH data fix); ran `term_cefs.run` once: median excess -0.77%, hit 35% -> DEAD.
+- 13:00-14:10 DL7 (F): FTS 424B4 IPOs 2019-26 (doc prefetch in 6 threads, bars batched); ran `ipo_access` once: 502 IPOs; pessimistic (cold-only) 30-session median -7.4%, hit 40% -> DEAD; optimistic +14.6% (unattainable).
+
+## Morning summary (session llm-trader-c5, 2026-10-02)
+
+Stop condition: 8 ideas taken to a verdict (not counting fast kills). No N spent (all deal rules, plus one guarded
+exploration); program N stays 760. Every deal rule was pushed to `round1_prose.md` before its list was computed.
+
+| idea | method | track | deals or trades per yr | verdict | $/yr at $2.3k / $10k / $25k | manual min/deal |
+|---|---|---|---|---|---|---|
+| **DL1 UMH DRIP optional cash purchases at 95%** | A | deal rule | 12 (monthly, $1,000 cap) | **PAYS** (203 months, mean +$47, hit 93%, 11/11 yrs) | **~$540 / $540 / $540 (+23% / +5% / +2%)** | ~15 |
+| DL2 issuer warrant exchange / cash offers | A | deal rule | 4.9 | DEAD (median +0.5%, hit 53%) | −$28 / −$94 / −$196 | 10 |
+| DL3 written-consent cash mergers (DEFM14C) | A, C | deal rule | 1.1 | DEAD (median +0.17%) | −$12 / −$52 / −$132 | 5 |
+| DL4 liquidations below the proxy's low estimate | A | deal rule | 0.1 | PAYS on n = 1 (OTIC +43%): too rare | ~$9 / $40 / $100 | 10 |
+| DL5 term / target-term CEFs, final year | A, B | deal rule | ~4 | DEAD (median excess −0.8%, 35% > 0) | −$9 / −$40 / −$101 | 5 |
+| DL6 closing ETFs, last week | A, B | deal rule | ~2 (with recorded proceeds) | DEAD (median −0.24%, hit 33%) | ~$0 | 5 |
+| C6 enrichment scan (forms before +30% 5-day moves) | D | statistical, explore only | — | explored-dead (K 96; max 1.44x) | — | — |
+| DL7 retail IPO-access allocations (a bound) | F | deal rule | 67 IPOs (28 cold) | DEAD (cold-only 30-session median −7.4%, hit 40%) | −$573/yr at $500/deal (optimistic all-filled +$8.9k is unattainable) | 5 |
+Fast kills (no verdict): C16 forward-split/stock-dividend round-ups (no listed non-integer case in 10 years), I10
+subsequent offering periods (5 in 10 years), I11 merger elections (no small-holder exemption), I3 odd-lot buyback
+programs (one premium program, SunLink 2017), I6 CEF rights, I12 CVRs, C7-C14 (data or shape).
+
+**What is new and real.** The UMH DRIP is a small-holder contract of the same kind as odd-lot tenders and split-offs.
+The issuer sells new shares at 95% of a 4-day (H+L)/2 average to anyone, but caps optional purchases at $1,000 a month,
+so only small holders can use it. It repeats every month, and 2016-26 lost money in only 7% of months. It's the
+largest dollar item found so far at $2.3k. Monmouth ran the same plan until 2022; ~90 other plans only discount
+waivers above $10k at their discretion.
+
+**What died, and the pattern.** Every payoff with no per-holder cap or priority was already priced by the first
+session the document was public: warrant offers, consent mergers, ETF closures, term CEFs, liquidations (15 of 16
+traded at or above the low estimate). The edge only exists where the contract *limits who can take it* (odd lots,
+monthly caps, round-ups). Contracts open to everyone at any size are arbitraged to roughly T-bill rates.
+
+**What to do first.** Open a UMH DRIP account at Equiniti (UMH plan, "optional cash payments"): either certify the
+Schwab shares (plan Q4) or enroll with the $500 minimum. Then send $1,000 before each 15th, and after it posts,
+DRS-transfer the shares to Schwab and sell (study_dl1_drip_ocp.md has the alert spec). Taxable account only.

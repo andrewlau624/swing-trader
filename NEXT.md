@@ -41,6 +41,9 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   2022-26: median −0.24%, hit 33%. Closing ETFs trade at NAV to the end. `study_dl6_etf_closures.md`.
 - **DL5 term / target-term CEFs bought a year before the charter date: DEAD** (deal rule 80cbcc8). 23 funds 2019-24:
   median excess vs a matched ETF −0.77%, 35% > 0; the discount has closed by the final year. `study_dl5_term_cefs.md`.
+- **DL7 retail IPO-access allocations (bound): DEAD** (deal rule 467d43e). 502 IPOs 2019-26: if filled only in cold debuts
+  (open <= 1.10x offer, where retail gets shares) the 30-session median is −7.4%, hit 40%; the +15% pop is in hot deals
+  that allocate little. `study_dl7_ipo_access.md`. Session summary: `discovery_log_c5.md` (morning summary).
 
 ## Round 33 (2026-10-02): event runbook — Study EV1 (cluster insider buys) DEAD; N 758
 - **EV2 first insider purchase in 2+ years: PASS** (registered faa96e8/ec9909b, N 760). ID3 day trade on officer/director
@@ -937,6 +940,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | idea | verdict | why |
 |---|---|---|
+| Retail IPO-access allocations, sold after 30 sessions (discovery DL7) | **dead (bound)** | cold debuts (where retail is filled) −7.4% median, hit 40%; pop is in hot deals |
 | Term / target-term CEFs bought 250 sessions before the termination date (discovery DL5) | **dead** | 23 funds, median excess −0.77% vs matched ETF, 35% > 0 |
 | Closing ETFs bought 5 sessions before the last trading day (discovery DL6) | **dead** | 9 liquidations, median −0.24%, hit 33%; NAV holds to the end |
 | Liquidations bought below the proxy's low estimate (discovery DL4) | **too rare** | 1 of 16 dissolutions 2016-26 traded below the low end (OTIC +43%); the rest at/above it |
