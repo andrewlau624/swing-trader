@@ -167,3 +167,10 @@ net -38.8bp, hit 42%. Deal report (select half, ADV >= $1M, 72 deals, 18/yr):
 hold 1: hit 39%, mean -0.53%, worst -7.0% | hold 5: hit 42%, mean +0.60%, worst -12.4% | hold 20: hit 57%, mean +2.08%,
 worst -23.9%. RARE gate FAILS at every hold. Explored-dead. The second phrase ("distribution of all of the
 outstanding") was not tried (same idea; trying it after this look would be a second variant).
+
+## 8. 25-NSE delisting notices (menu row 8) — explored-dead
+Event: full-index form "25-NSE" (filed by the exchange under the issuer's CIK), busy CIKs dropped, CIK -> ticker
+(`events_form_build.py 25nse`); 4,008 events. Most are a security class being removed (notes, preferreds, warrants,
+merger completions), not the common, so the common usually keeps trading. Select half, ADV >= $20M: 2573 -> 412
+trades (103/yr); net **-26.2bp**, median -9.0bp, hit 47%, t -1.54; by year +3.3 / -54.5 / +16.6 / -23.5bp. FREQUENT:
+FAILS. No other floor tried. Explored-dead.
