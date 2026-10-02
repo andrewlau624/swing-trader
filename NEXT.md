@@ -9,6 +9,26 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Round 31 (2026-10-02): EDGAR unblocked — one registered PASS (ID3, shadow) and one small sure thing (odd-lot tenders, alert); N 755
+- **Study ID3 PASSES (registered b2cdc1c, judged on 2024-26): the session after an officer/director open-market
+  purchase Form 4, buy the opening cross, sell the closing cross, 20d ADV$ >= $20M.** +16.6bp/trade net of
+  2.5bp/side, judge half alone +19.9bp t 2.31, feature placebo 100%, crosses match the panel (500 events, 0.0bp).
+  V7 + a 0.45x daytime sleeve: **+7.8pp (+$179) / +10.5pp (+$1,048) / +11.9pp (+$2,967) at $2.3k / $10k / $25k**.
+  But break-even is ~10.8bp/side (tier_hi 10.4: −5pp) and DSR 0.105. ID1 (all) / ID2 (thin) DEAD on the judge half.
+  -> **SHADOW**: `swingtrader/daily/insider_shadow.py`, `make insider-shadow` weekdays before 09:00 ET (no orders;
+  state/insider-day.jsonl; gate at 300 scored trades: mean > 0 and t >= 2, else KILL). The open question is the live
+  MOO/MOC cost in $20M+ names. `study_id_insider_day.md`.
+- **Odd-lot tenders (report, no N):** cash issuer tenders with odd-lot priority whose guaranteed price (fixed / Dutch
+  low end) is >= 1% over the market: ~1.3/yr, **all 14-15 profitable**, median +5.5-6.3%, ~$90-150 per deal on
+  <= 99 shares, ~10-day hold => **~$150-200/yr per person ≈ +6-9%/yr at $2.3k**, +1.5-2% at $10k. CEF NAV tenders
+  are NOT it (54/55 give odd lots no priority). Schwab voluntary-reorg fee is $0. Manual tender; the 99 shares count
+  across ALL accounts. -> `make tender-watch` (emails a qualifying offer). `study_oddlot_tenders.md`.
+- **To run on the server (user):** cron weekdays ~08:45 ET `make insider-shadow` and `make tender-watch`; NOTIFY_EMAIL
+  in the server .env is the SEC contact and the alert address.
+- Dead or closed (exploration, select data, `outside_box_explore_log.md` L16-L20): NT 10-K/Q filers, Form 144,
+  insider-buy night tilt and 20-day drift; EFFECT notices (outlier-driven, not registered); SPAC trust (only ~8% of
+  equity is idle for a month).
+
 ## Round 30 (2026-10-02): outside the box — 47 forced-trader ideas, 9 explored on select data, none survived; nothing registered (program N 752)
 - Ideas + kills: `research/drafts/outside_box_ideas.md` (e5fd4e2, before any number). Looks L1-L15:
   `outside_box_explore_log.md`. Write-up and the three surprises: `study_outside_box_round30.md`.
@@ -994,6 +1014,12 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Buy names crossing below / above $5 (Round 30 #6) | **dead (long side)** | below: 5d −109bp ($4 placebo −31, $7 +2); above: −108bp |
 | Night picks on lockup-expiry days / SIC sympathy peers of a crash / by listing exchange (Round 30 #7, #9, #10) | **dead** | lockup −122bp (n 23); peers bounce less (−7.9 vs −2.8bp); exchange order flips |
 | IEF instead of BIL for 3 days after note/bond auctions (Round 30 #14) | **dead at the bar** | +2.7bp/day (t 2.0) ≈ 5bp switching × 38 auctions/yr; published |
+| Insider-buy (Form 4 P) session open -> close, all names / ADV $1-20M (Round 31 ID1/ID2) | **dead (judge half)** | +17 / +14bp net but 2024-26 t 1.2 / 0.9; ID3 (ADV >= $20M) PASSES -> shadow |
+| Insider-buy 20-day drift / night-pick tilt (Round 31 L19) | **dead** | 20d ≈ 0 except 2020; tilt medians negative |
+| Night picks: NT 10-K/Q in 60d, Form 144 in 7d (Round 31 L17) | **dead** | NT flips (+41 / −71bp); 144 n tiny, mixed |
+| Night picks: EFFECT notice in 7d as a size-up (Round 31 L18) | **not registered** | +32 / +236bp but ex-top-5 0bp (DS5's failure mode) |
+| SPAC commons instead of BIL (Round 31 L16) | **closed** | only ~8% of equity idle for a month: ~+0.1%/yr; panel lacks the liquidated SPACs |
+| CEF NAV tender offers as an odd-lot trade (Round 31) | **dead** | 54 of 55 give odd lots no priority (BlackRock 98%-NAV series, Calamos prorates odd lots) |
 
 ## Ideas not yet tested
 

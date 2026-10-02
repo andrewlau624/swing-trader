@@ -382,6 +382,9 @@ qi-eval:      ## forward test of the 15:40 quote-imbalance tilt (Round 24 BB; ve
 insider-shadow: ## Round 31 ID3: score + plan the insider-purchase session shadow (weekdays before 09:00 ET; no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.insider_shadow $(DATE)
 
+tender-watch: ## Round 31: new SC TO-I filings -> odd-lot tender alerts (email; manual tender at Schwab): make tender-watch [DATE=YYYY-MM-DD]
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.tender_watch $(DATE)
+
 forward-status: ## every forward-only shadow gate in one place (AU3 is in `make review` section 9)
 	@echo "== Round 23 BA: LLM news judge (verdict once at 300) =="
 	@PYTHONPATH=. $(PY) -m research.sim.news_judge_eval 2>/dev/null || echo "  no state/news-judge.jsonl yet"
