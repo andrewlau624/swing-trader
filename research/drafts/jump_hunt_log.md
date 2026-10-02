@@ -260,3 +260,7 @@
   - **D10** (54 select -> 36 trades); hold1 x16.7 -0.7%/-1.7%/-1.0% P0.83; tp205 x1.2 -1.6%/-3.0%/-1.6% P0.89; hold20 x0.7 -4.4%/-7.7%/-3.2% P0.95; hold60 x0.8 -2.5%/-6.5%/+1.8% P0.73; tp2060 x1.2 +0.2%/-1.6%/+14.1% P0.47; all fail
   All dead (C9 theme news spike -> theme small caps loses 2-4%; R4-10, R4-17, D10 too rare). 87 explored. R3-7 (LLM extraction) restarted after a run where every call failed (no OpenCode key in this checkout's environment; the 2,020 cached failures were deleted, failures are no longer cached; the key is loaded from the llm-trader checkout's .env of the same repo); ~24 calls/min.
 - 16:37 PDT **R3-13** new-CEO-era insider buys (1,324 select -> 881): `hold60 +1.9% ex-top3 +1.2% median -0.8% P 0.04`, `tp2060 +1.3%`; too weak. **R3-6** 13F discovery (21,088 select -> 8,451): every cell negative (`hold60 -2.5%`). Both dead; 89 explored. (An empty R3-7 event file left by the crashed run was 'explored' by the queue with 0 events: deleted, not a look.)
+- 16:37 PDT:
+  - **R2-24** (33 select -> 26 trades); hold1 x0.0 -0.7%/-1.5%/-0.8% P0.87; tp205 x0.0 -3.2%/-4.3%/-2.0% P1.00; hold20 x1.1 +0.4%/-3.3%/-1.1% P0.46; hold60 x1.2 +4.5%/-1.8%/+2.4% P0.17; tp2060 x0.8 +1.1%/-1.4%/+2.4% P0.36; all fail
+  - **R4-7** (15 select -> 10 trades); hold1 x0.0 -2.3%/-3.6%/-2.1% P1.00; tp205 x0.0 -3.3%/-5.5%/-1.2% P0.99; hold20 x3.2 +12.2%/-0.2%/+4.5% P0.03; hold60 x1.5 +10.8%/-12.2%/-5.5% P0.23; tp2060 x1.7 +8.0%/+3.0%/+18.5% P0.09; all fail
+  Both too rare (26 / 10 trades). 91 explored.
