@@ -16,6 +16,10 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   per month, hit 93%, every year > 0** -> UMH alone ~**$540/yr per person (+23% / +5% / +2% at $2.3k / $10k / $25k)**;
   taxable only. **User: enroll in UMH's DRIP at Equiniti (certify the Schwab shares or buy 1 share), send $1,000 before
   each 15th, DRS-transfer the shares to Schwab and sell.** `study_dl1_drip_ocp.md`.
+- **DL2 issuer offers for its own warrants (SC TO-I share/cash exchanges): DEAD** (deal rule 6d89505). 38 offers 2019-25
+  with bars, bought 5 sessions before the last amendment: median +0.5%, mean −2.2%, hit 53%, worst −69% (DRCT's cash
+  offer failed). The warrant reprices on the announcement; there's no prorated holder to pay a small one.
+  `study_dl2_warrant_offers.md`.
 
 ## Round 33 (2026-10-02): event runbook — Study EV1 (cluster insider buys) DEAD; N 758
 - **EV2 first insider purchase in 2+ years: PASS** (registered faa96e8/ec9909b, N 760). ID3 day trade on officer/director
@@ -909,6 +913,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | idea | verdict | why |
 |---|---|---|
+| Issuer warrant exchange / cash offers (SC TO-I), bought 5 sessions before expiry (discovery DL2) | **dead** | median +0.5%, hit 53%, mean −2.2%; repriced on announcement, failures −20..−69% |
 | News sentiment filter | **dead** | mean P&L diff +0.97pp, p=0.63 |
 | FF3 residual z-score | **dead here** | FF3 explains only 22% of variance in this universe; strips little, adds 4 params of noise |
 | Bertram optimal thresholds | **dead** | prescribes −0.4σ entry; risk-matched return falls monotonically as entry loosens. −2.0 was already optimal |
