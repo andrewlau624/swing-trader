@@ -189,6 +189,25 @@ def whatif_realized(acct: Account, decisions: list[dict], verdicts: dict, convic
 
 
 # ---------------------------------------------------------------- gates
+def round31_whatif(state: Path, acct: Account) -> list[dict]:
+    """Round 31 shadows on the brokerage: ID3 insider-day sleeve (0.45 x that day's equity, equal split, official
+    open -> close, 2.5bp/side) and odd-lot tender alerts (99 shares x guaranteed price - close at the alert)."""
+    out = []
+    eq_on = {e["date"]: e["equity"] for e in acct.equity_log}
+    ins = [r for r in _jsonl(state / "insider-day.jsonl") if r.get("status") == "scored"]
+    if ins:
+        by: dict = {}
+        for r in ins:
+            by.setdefault(r["date"], []).append(float(r["ret_net"]))
+        usd = sum(0.45 * eq_on.get(d, acct.equity) * float(np.mean(x)) for d, x in by.items())
+        out.append(dict(idea="insider-day ID3 (0.45x daytime)", n=len(ins), usd=usd))
+    tw = [r for r in _jsonl(state / "tender-watch.jsonl") if r.get("alert")]
+    if tw:
+        usd = sum(99 * (float(r["floor"]) - float(r["last_close"])) for r in tw if r.get("floor") and r.get("last_close"))
+        out.append(dict(idea="odd-lot tenders (manual, <= 99 sh)", n=len(tw), usd=usd))
+    return out
+
+
 def gates(accts: dict, logs: Path, state: Path) -> list[dict]:
     live = accts.get("live")
     fl = _jsonl(logs / "daily-fills-live.jsonl")
@@ -218,6 +237,8 @@ def gates(accts: dict, logs: Path, state: Path) -> list[dict]:
             "make review §9", unit="night trades"),
         row("LLM news judge verdict", len(verdicts), 300, "verdict read once", "make forward-status", unit="picks judged"),
         row("Quote imbalance verdict", len(snaps), 300, "verdict read once", "make forward-status", unit="picks logged"),
+        row("Insider-day (ID3) verdict", sum(1 for r in _jsonl(state / "insider-day.jsonl") if r.get("status") == "scored"),
+            300, "verdict read once", "make forward-status", unit="shadow trades"),
     ]
 
 
@@ -233,7 +254,8 @@ def build(state: Path, logs: Path, start_equity: float, conviction_w: float, tax
     real = {n: a for n, a in accts.items() if n in ("live", "roth")}
     bal = {n: a.equity for n, a in real.items()}
     return dict(accounts=accts, gates=gates(accts, logs, state),
-                whatif={n: whatif_realized(a, decisions, verdicts, conviction_w) for n, a in accts.items()},
+                whatif={n: whatif_realized(a, decisions, verdicts, conviction_w)
+                        + (round31_whatif(state, a) if n == "live" else []) for n, a in accts.items()},
                 proj=projections(bal, taxable_monthly))
 
 

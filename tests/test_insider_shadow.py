@@ -77,3 +77,20 @@ def test_gate_rules():
 
 def test_config_key_defaults_to_shadow():
     assert Config.load().daily.insider_day == "shadow"
+
+
+def test_digest_counts_round31_shadows(tmp_path):
+    import json
+    from swingtrader.daily import digest
+    (tmp_path / "insider-day.jsonl").write_text(
+        json.dumps(dict(date="2026-10-05", sym="A", status="scored", ret_net=0.002)) + "\n"
+        + json.dumps(dict(date="2026-10-05", sym="B", status="scored", ret_net=0.0)) + "\n"
+        + json.dumps(dict(date="2026-10-06", sym="C", status="planned")) + "\n")
+    (tmp_path / "tender-watch.jsonl").write_text(json.dumps(dict(alert=True, floor=34.0, last_close=32.0)) + "\n"
+                                                 + json.dumps(dict(alert=False, floor=10.0, last_close=9.0)) + "\n")
+    acct = digest.Account("live", 2000.0, None, 0.0, [], [], [], [], [dict(date="2026-10-05", equity=2000.0)])
+    w = {r["idea"][:10]: r for r in digest.round31_whatif(tmp_path, acct)}
+    assert w["insider-da"]["n"] == 2 and abs(w["insider-da"]["usd"] - 0.45 * 2000 * 0.001) < 1e-9
+    assert w["odd-lot te"]["n"] == 1 and w["odd-lot te"]["usd"] == 99 * 2.0
+    g = {x["gate"]: x for x in digest.gates({}, tmp_path, tmp_path)}
+    assert g["Insider-day (ID3) verdict"]["n"] == 2
