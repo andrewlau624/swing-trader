@@ -90,3 +90,46 @@ Count: H 24 (quota 20; H24 added 13:05, before any outcome), D 11 (10), C 11 (10
 
 ## Ranking (filled after the reachability checks; no outcomes)
 Score = P(dodges its death) x signals/yr x payoff x novelty x P(data works), each 1-5, scored before any outcome.
+
+Written 13:45 (after H17 and D5 died; no other outcome seen). H17 taught a new death, **TWO-WAY** (attention with no
+direction raises the jump AND crash rates; the cost makes the mean negative), so ideas that carry a DIRECTION
+(own money, contracts, scheduled catalysts, squeezes) rank above pure attention counts.
+
+| rank | idea | P(dodge) | sig/yr | payoff | novelty | P(data) | note |
+|---|---|---|---|---|---|---|---|
+| 1 | D2 un-gapped big contracts | 4 | 4 | 4 | 4 | 3 | direction from $ size; needs news + XBRL shares |
+| 2 | S1 conference run-up | 3 | 5 | 3 | 3 | 5 | news headlines "to present at" |
+| 3 | S2 PDUFA run-up | 3 | 4 | 4 | 2 | 4 | dates in headline text |
+| 4 | D8 first insider buy + news drought (RIDE) | 3 | 4 | 3 | 3 | 4 | own money = direction |
+| 5 | H24 Yahoo trending first appearance | 2 | 4 | 3 | 4 | 5 | snapshot fetch running |
+| 6 | V1 small subs -> WSB | 2 | 4 | 4 | 4 | 4 | Reddit downloading |
+| 7 | H1 Reddit first mention | 2 | 5 | 3 | 3 | 4 | |
+| 8 | C4 Reddit velocity + days-to-cover | 3 | 3 | 4 | 3 | 3 | squeeze = direction |
+| 9 | D6 first profitable quarter | 3 | 3 | 3 | 3 | 5 | building |
+| 10 | D4 theme pivot 8-K | 2 | 4 | 3 | 3 | 5 | building |
+| 11 | H5 pageview spike, no move | 2 | 4 | 3 | 3 | 4 | TWO-WAY risk |
+| 12 | H2 Reddit velocity, no move | 2 | 4 | 3 | 3 | 4 | TWO-WAY risk |
+| 13 | H14 PR blitz | 3 | 3 | 3 | 4 | 4 | |
+| 14 | H11 unusual options headlines | 3 | 4 | 3 | 4 | 4 | |
+| 15 | D1 510(k) before the press release | 3 | 3 | 3 | 4 | 3 | name matching |
+| 16 | S4 medical-conference data run-up | 3 | 4 | 3 | 3 | 4 | |
+| 17 | S5 forward-split run-up | 3 | 3 | 3 | 3 | 4 | |
+| 18 | H22 big-name partnership, un-gapped | 3 | 3 | 3 | 3 | 4 | |
+| 19 | H7 first Benzinga coverage | 2 | 4 | 3 | 4 | 5 | |
+| 20 | H10 first-ever initiation, micro cap | 3 | 4 | 3 | 2 | 5 | |
+Order of work = data readiness within this ranking (news-based ideas wait for the archive's 2016-23 months).
+
+## Round 2 (early adds, 16:05, before any outcome of these): informed or forced buyers only
+Written after 12 explored ideas died of EXIT LIQUIDITY / TWO-WAY / LOTTERY. Each names the informed or forced party.
+
+| # | idea | track | tag | cause sentence | death dodged, how | data | sig/yr | novelty |
+|---|---|---|---|---|---|---|---|---|
+| R2-1 | **First executed buyback**: XBRL PaymentsForRepurchaseOfCommonStock > 0 (original 10-Q/10-K) after >= 8 reported periods with none, ADV$ < $20M | R | D | The company (the best-informed buyer) actually spends cash on its own stock; the cash-flow line is read by almost nobody, unlike an announcement | GAP + TEXTBOOK of buyback announcements (X3, Ikenberry): execution in a slow table, not a headline; EXIT LIQ: no crowd | E companyfacts | 50-150 | 4 (memory) |
+| R2-2 | **Going-concern doubt removed**: a 10-K without "substantial doubt" after the company's prior 10-K had it (FTS), small caps | R | D | The auditor (informed) signs off on survival; lenders, funds and screens that exclude going-concern names can own it again | LOTTERY (many events, survival is the bet), EXIT LIQ | E FTS + form.idx | 100+ | 3 (memory: going-concern withdrawal literature, older) |
+| R2-3 | **Net cash above market cap**: (cash + short-term investments − total liabilities) > market cap at a 10-Q/10-K filing, first time in 365 days, ADV$ < $20M | R | D/W | Arithmetic nobody does on tiny names; activists, acquirers and reverse-merger shells buy the cash at a discount | LOTTERY (a cash floor under the downside), EXIT LIQ (no crowd) | E frames/companyfacts + bars | 50-200 | 3 (memory: negative-EV biotech folklore) |
+| R2-4 | **Big own-money buy**: an officer/director buys >= $100k in the open market in a company with 20-day ADV$ < $5M (relative size: buy >= 20% of ADV$) | R | C | A large personal bet in an illiquid stock: the most informed money relative to the market's size | EXIT LIQ; LOTTERY (many events) | F4 | 100+ | 3 |
+| R2-5 | **Insider buys after a 30% fall**: officer/director buy when the stock is down >= 30% over 60 sessions | R | C | Insiders buy the panic; the price fall is the crowd leaving, insiders are the informed side | EXIT LIQ (the crowd already left); price is a filter, the Form 4 is the event | F4 + bars | 100+ | 2 (memory: insider contrarian, Lakonishok-Lee) |
+| R2-7 | **Strategic-alternatives review announced** (headline), RIDE: a sale process starts; a deal arrives in some months | R | H/D | The board (informed) invites bidders; acquirers pay premiums; most holders are bored by "review" headlines | GAP (headline is mild), LOTTERY (many deals) | N | 30-80 | 3 |
+| R2-9 | **Congress member buys a small cap** (STOCK Act periodic transaction reports, free dumps) | R | W | Possibly informed; disclosed with a lag, but small caps are thinly followed | EXIT LIQ | House/Senate watcher dumps (unverified) | 20-50 | 3 |
+| R2-13 | **Listing compliance regained** (8-K / headline: "regained compliance" with the minimum bid / equity rule) | R | D | Funds forced to avoid delisting-risk names can hold it again; the threat of forced selling is gone | EXIT LIQ (forced sellers done), GAP | E FTS | 100+ | 3 |
+| R2-14 | **Emergence from Chapter 11 with new listed equity** (headline) | R | D | Old creditors receive shares they must sell (forced), then the new equity re-rates | LOTTERY, forced sellers | N | 10-30 | 2 (memory: Eberhart-Altman-Aggarwal 1999) |
