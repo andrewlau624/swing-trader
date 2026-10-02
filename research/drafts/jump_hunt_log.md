@@ -1,8 +1,8 @@
 # Jump & ride hunt log (prompt_jump_hunt.md), session llm-trader-51
 
 ## STATE (update after every idea)
-- program N: 761 (J1 registered and judged DEAD). k (ideas judged): 1. Ideas explored: 12 (H17 D5 D9 D4 D6 H1 H2 H3
-  C4 H18 C7 C10). Rounds of idea generation: 1 (62 ideas).
+- program N: 762 (J1, J2 registered and judged DEAD). k (ideas judged): 2. Ideas explored: 14 (H17 D5 D9 D4 D6 H1 H2
+  H3 C4 H18 C7 C10 R2-4 R2-5). Rounds of idea generation: 1 (62 ideas) + 9 early round-2 adds.
 - current idea: none; next ideas need the news archive (40/96 select months at 15:55).
 - next 5 ideas (informed/forced buyers, per section 6): H11 option alerts, D8 first insider buy + no news, S2 PDUFA
   run-up, D2 un-gapped contracts, H10 first initiation. Then Wikipedia ideas when pageviews finish.
@@ -11,8 +11,9 @@
   USAspending, Form 345 2014-2026, FINRA SI 2020-06+ (public settle + 12 d), Wayback 2018+ Yahoo trending (slow fetch).
 - data sources broken: defense.gov (403); Yahoo trending 2016-17 snapshots (list loaded client-side).
 - why things die (running): EXIT LIQUIDITY (crowd attention: 4-14x one-day jump rate, then -5..-22% over 20-60
-  sessions: H1 H2 H3 C4 H18 C7 C10), TWO-WAY (attention without direction: H17 D4), LOTTERY (D5 D9 J1). Next ideas
-  need an informed or forced buyer AND many independent events.
+  sessions: H1 H2 H3 C4 H18 C7 C10), TWO-WAY (attention without direction: H17 D4), LOTTERY (D5 D9 J1), PRICE PROXY
+  + REGIME (J2: the fall, not the insider; 2020 bottom). Next ideas need an informed or forced buyer whose effect
+  survives a same-stock no-event control, AND many independent events.
 
 ## Log
 - 12:45 setup: the prompt names `swing-trader`; the session started in the `llm-trader` checkout (no data caches); work in
@@ -91,3 +92,14 @@
   buyers, not crowd attention: H11 option flow, D8/C6 insiders with no news, D2 un-gapped contracts, S2 PDUFA run-up,
   H10 initiations, D1 510(k), D11 predicted Russell adds, S5 forward splits, plus round-2 ideas.
 - 15:58 checkpoint (12 explored): tests pass; sections 0-2 re-read; why-things-die line updated in STATE.
+- 16:15 **R2-4** big own-money buy (>= $100k and >= 20% of ADV$, ADV$ < $5M; 2,552 select -> 1,568 trades), 1 look:
+  `tp205 x1.9 mean -0.0%`; `tp2020 mean +0.4% P 0.13`; `hold60 mean +2.4% ex-top3 +1.7% median -1.0% vs usual +4.8%
+  P 0.00` (< +3%). All fail. **Explored-dead: too weak** (own money is directional here, but < +3% at 60 and no lift).
+- 16:20 **R2-5** insider buy after a 30% fall (3,483 -> 2,379), 1 look: `tp205 jump 15.1% vs 5.8% (x2.6) mean +0.5%
+  ex-top3 +0.5% median +0.3% P 0.02 | jump MEETS`; RIDE MEETS at hold20 (+3.5%), tp2020 (+3.3%), hold60 (+8.7%),
+  tp2060 (+5.5%). Diagnostics (select only, no rule change): 2020 = 681 of 2,379 trades; **control** (same stocks,
+  falls without insider buys, 4,753) tp205 +0.93%, hold20 +4.8% = as good: the insider adds nothing (PRICE PROXY).
+- 16:25 Registered **J2** (JUMP tp205 by the shortest-hold rule; N 761 -> 762, bbdac52; peer told), control stated.
+- 16:27 **J2 judge** (once): `tp205 n 378 (189/yr) jump 9.5% vs base 7.2% (x1.3) mean net +0.5% ex-top3 +0.3% median
+  -0.2% vs stock's usual +1.4% hit 49% worst -38% best +20% P(mean<=0) 0.18` -> **JUMP VERDICT: DEAD**. k = 2.
+  Write-up `study_jump_r2_5_insider_after_fall.md`.
