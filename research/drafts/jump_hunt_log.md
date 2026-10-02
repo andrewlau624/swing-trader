@@ -258,3 +258,10 @@
   From here, stamps come from `date`.
 - 16:20 PDT **H19** theme Wikipedia spike -> theme small caps (`jump_more.py`; 14 theme pages, members = companies whose
   8-K/10-K named the theme in the prior 730 days; 1,051 select -> 628): `hold20 -1.5%`, `hold60 -2.5%`. Dead. 82 explored.
+- 16:29 PDT batch, 1 look each:
+  - **C9** (7066 select -> 4139 trades); hold1 x1.1 -0.8%/-0.8%/-0.9% P1.00; tp205 x1.0 -1.0%/-1.0%/-1.2% P1.00; hold20 x0.9 -3.9%/-4.1%/-2.8% P1.00; hold60 x1.1 -2.5%/-2.8%/-3.6% P1.00; tp2060 x1.0 -2.2%/-2.3%/+0.8% P1.00; all fail
+  - **R4-10** (21 select -> 16 trades); hold1 x0.0 -0.4%/-2.3%/-1.0% P0.61; tp205 x3.9 +1.3%/-3.5%/-1.4% P0.33; hold20 x1.3 +0.6%/-4.5%/-1.1% P0.46; hold60 x1.0 +5.2%/-4.9%/+1.0% P0.23; tp2060 x1.3 +6.3%/+2.6%/+15.7% P0.06; all fail
+  - **R4-13** (364 select -> 225 trades); hold1 x2.6 -0.8%/-1.1%/-0.8% P0.99; tp205 x2.2 +0.1%/-0.2%/-0.6% P0.44; hold20 x1.3 +2.2%/-2.1%/-1.9% P0.34; hold60 x1.0 -2.1%/-5.4%/-4.9% P0.79; tp2060 x1.1 -0.6%/-1.0%/+2.2% P0.67; all fail
+  - **R4-17** (1 select -> 0 trades); all fail
+  - **D10** (54 select -> 36 trades); hold1 x16.7 -0.7%/-1.7%/-1.0% P0.83; tp205 x1.2 -1.6%/-3.0%/-1.6% P0.89; hold20 x0.7 -4.4%/-7.7%/-3.2% P0.95; hold60 x0.8 -2.5%/-6.5%/+1.8% P0.73; tp2060 x1.2 +0.2%/-1.6%/+14.1% P0.47; all fail
+  All dead (C9 theme news spike -> theme small caps loses 2-4%; R4-10, R4-17, D10 too rare). 87 explored. R3-7 (LLM extraction) restarted after a run where every call failed (no OpenCode key in this checkout's environment; the 2,020 cached failures were deleted, failures are no longer cached; the key is loaded from the llm-trader checkout's .env of the same repo); ~24 calls/min.

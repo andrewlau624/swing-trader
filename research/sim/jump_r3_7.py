@@ -66,8 +66,9 @@ def extract(c, r) -> dict | None:
         out = json.loads(s[s.find("{"): s.rfind("}") + 1])
         vt, cp = out.get("value_text") or "", out.get("counterparty") or ""
         out["valid"] = bool(out.get("sells")) and bool(vt) and vt in t and bool(cp) and cp in t
-    except Exception as e:                                     # a failed call is logged and skipped
-        out = {"error": repr(e)[:200], "valid": False}
+    except Exception as e:                                     # a failed call is logged, skipped, and NOT cached
+        print("extract failed", r.adsh, repr(e)[:150], flush=True)
+        return None
     C.mkdir(parents=True, exist_ok=True)
     json.dump(out, open(f, "w"))
     return out
@@ -89,8 +90,15 @@ def revenue() -> pd.DataFrame:
 
 
 def build(max_calls: int = 3000) -> pd.DataFrame:
+    from swingtrader.config import get_env
     from swingtrader.daily.news_judge import make_client
+    get_env("OPENCODE_API_KEY")                                  # loads .env into the environment
+    if not get_env("OPENCODE_API_KEY"):                          # the llm-trader checkout of this repo holds the key
+        from dotenv import load_dotenv
+        load_dotenv(ROOT.parent / "llm-trader/.env", override=False)
     c = make_client("opencode-go")
+    if c is None:
+        raise RuntimeError("no OpenCode Go client (OPENCODE_API_KEY not set)")
     X = candidates()
     print(len(X), "candidate 8-Ks", flush=True)
     X = X.sample(min(max_calls, len(X)), random_state=0).sort_values("fd")      # a fixed sample across all years
@@ -105,7 +113,7 @@ def build(max_calls: int = 3000) -> pd.DataFrame:
         if float(o["value_usd"]) >= 0.25 * max(rv, 1e6):
             rows.append(dict(sym=r.sym, fd=r.fd))
     print(sum(1 for _ in C.glob("*.json")), "LLM calls cached", flush=True)
-    return pd.DataFrame(rows, columns=["sym", "fd"])
+    return pd.DataFrame(rows, columns=["sym", "fd"]).astype({"fd": "datetime64[ns]"})
 
 
 if __name__ == "__main__":
