@@ -73,6 +73,30 @@ def r2_20() -> pd.DataFrame:
     return small_only(first_in(E[["sym", "fd"]], 365), 20e6)
 
 
+# ---- round 4: sale-preparation footprints (8-K full text), first per company in 365 days, ADV$ < $20M ----------------
+R4 = {"r4_1": '"change in control severance" "Item 5.02"',
+      "r4_2": '"retention bonus" "change in control"',
+      "r4_3": '"Item 3.03" "rights agreement"',
+      "r4_4": '"special committee" "independent directors" "proposal"',
+      "r4_5": '"strategic alternatives" "financial advisor"',
+      "r4_6": '"confidentiality agreements" "strategic alternatives"'}
+
+
+def _r4(key: str) -> pd.DataFrame:
+    H = _fts(R4[key], "8-K", 2015)
+    H = H[H.form == "8-K"].rename(columns={"date": "fd"})
+    E = resolve(H[H.fd >= "2016-01-01"])
+    return small_only(first_in(E[["sym", "fd"]], 365), 20e6)
+
+
+def r4_1(): return _r4("r4_1")
+def r4_2(): return _r4("r4_2")
+def r4_3(): return _r4("r4_3")
+def r4_4(): return _r4("r4_4")
+def r4_5(): return _r4("r4_5")
+def r4_6(): return _r4("r4_6")
+
+
 if __name__ == "__main__":
     what = sys.argv[1]
     save(globals()[what](), what)

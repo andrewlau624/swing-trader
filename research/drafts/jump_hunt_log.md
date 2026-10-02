@@ -1,19 +1,21 @@
 # Jump & ride hunt log (prompt_jump_hunt.md), session llm-trader-51
 
 ## STATE (update after every idea)
-- program N: 762 (J1, J2 registered and judged DEAD). k (ideas judged): 2. Ideas explored: 14 (H17 D5 D9 D4 D6 H1 H2
-  H3 C4 H18 C7 C10 R2-4 R2-5). Rounds of idea generation: 1 (62 ideas) + 9 early round-2 adds.
-- current idea: none; next ideas need the news archive (40/96 select months at 15:55).
-- next 5 ideas (informed/forced buyers, per section 6): H11 option alerts, D8 first insider buy + no news, S2 PDUFA
-  run-up, D2 un-gapped contracts, H10 first initiation. Then Wikipedia ideas when pageviews finish.
-- data sources verified: Alpaca/Benzinga news (downloading), Arctic Shift (small subs complete; WSB 3 chunks running),
-  Wikipedia pageviews (downloading, ~40%), EDGAR (FTS, form.idx 2016-26, companyfacts), ClinicalTrials.gov, openFDA,
-  USAspending, Form 345 2014-2026, FINRA SI 2020-06+ (public settle + 12 d), Wayback 2018+ Yahoo trending (slow fetch).
-- data sources broken: defense.gov (403); Yahoo trending 2016-17 snapshots (list loaded client-side).
-- why things die (running): EXIT LIQUIDITY (crowd attention: 4-14x one-day jump rate, then -5..-22% over 20-60
-  sessions: H1 H2 H3 C4 H18 C7 C10), TWO-WAY (attention without direction: H17 D4), LOTTERY (D5 D9 J1), PRICE PROXY
-  + REGIME (J2: the fall, not the insider; 2020 bottom). Next ideas need an informed or forced buyer whose effect
-  survives a same-stock no-event control, AND many independent events.
+- program N: 762 (J1, J2 registered and judged DEAD). k (ideas judged): 2. Ideas explored: 36 (H17 D5 D9 D4 D6 H1
+  H2 H3 C4 H18 C7 C10 R2-4 R2-5 R2-13 R2-17 R2-2 R2-20 R2-15 R3-9 R3-5 R2-1 R3-2 R3-16 R3-3 H5 H6 H15 H16 C1 R3-17). Rounds of idea generation: 4 written (R1 62, R2 20, R3 20, R4 20 = 122 ideas).
+- dropped before a run (data): H11/C8 (option alerts end 2017), S1/S1v (rare), D7 (runner needs ADV), R3-4 (403).
+- current idea: R3-6 13F discovery (building), R4-1..R4-6 8-K footprints (building).
+- next: news ideas when the archive's select months land (~90/96 at 21:30): S2 PDUFA, D2 contracts, C5, R2-25, H10,
+  H12, H14, H21, H22, H7, H8, H9, S3, S4, S5, W2, W5, R2-7, R2-19, R2-22, R2-14, D1, D8, C6, C3, R3-11..R3-15, R3-20;
+  WSB ideas (H4, V1, H13) when WSB lands; H23 CEO pageviews (fetching).
+- data sources verified: news (downloading), Reddit (small subs done; WSB running), Wikipedia (done; CEOs fetching),
+  EDGAR FTS/form.idx/companyfacts/frames, CT.gov, openFDA, Federal Register, SEC FTD (2015-12..2026-09), SEC 13F data
+  sets (54 files), Form 345 2014-26, FINRA SI 2020-06+, Nasdaq earnings calendar (cached).
+- data sources broken: defense.gov (403), PatentsView bulk (403), Yahoo trending 2016-17 snapshots.
+- why things die (running): EXIT LIQUIDITY (crowd attention; 7 ideas), TWO-WAY (H17 D4 R3-5), LOTTERY (D5 D9 J1 C1),
+  PRICE PROXY/REGIME (J2; H16 and R3-17 = market timing vs a same-day control), TOO WEAK (informed buyers and filing
+  milestones earn the stock's usual +1-2%: R2-1 R2-2 R2-4 R2-15 R2-17 R3-16 H5 H6), TOO RARE (R2-20 R3-3).
+  Standing rule: any MEETS must beat a same-day control (and a same-stock no-event control) before registering.
 
 ## Log
 - 12:45 setup: the prompt names `swing-trader`; the session started in the `llm-trader` checkout (no data caches); work in
@@ -155,3 +157,22 @@
   fd 6 sessions before the meeting; 58 events, 53 select -> 35 trades), 1 look, all fail: `hold5 jump 5.7% vs 1.4%
   (x4.1) mean -5.7% median -1.2% worst -71%`; `hold60 +0.6%`. **Explored-dead: TOO RARE + GAP** (FDA posts briefing
   documents ~2 business days before the meeting, inside the run-up window).
+- 21:30 Wikipedia ideas (`jump_wiki.py`; 3,511 articles), 1 look each:
+  - **H5** spike without a move (1,585 -> 1,380): `hold60 mean +1.9% vs usual -0.6%`; `hold20 +0.7% P 0.04`. Dead.
+  - **H6** slow build (251 -> 223): `hold60 +1.2% P 0.17`; no lift. Dead.
+  - **H15** article born (222 -> 106): `hold60 mean -5.0%`. Dead.
+  - **C1** spike + insider buy (38 -> 33): `hold60 +6.9% ex-top3 -0.8% P 0.12`. Dead (too rare, lottery).
+  - **H16** weekend spike, Monday open (656 -> 377): `hold60 n 377 jump 20.4% vs base 14.9% (x1.4) mean net +5.4%
+    ex-top3 +4.2% median +3.5% vs stock's usual +2.9% hit 57% P(mean<=0) 0.00 | ride MEETS`.
+  - **R3-17** 2-year-high views within 30 d after an insider buy (119 -> 90): `hold60 n 90 mean net +6.5% ex-top3
+    +2.3% median +3.4% vs stock's usual +4.0% P 0.02 | ride MEETS`.
+- 21:40 select-only diagnostics for the two MEETS (no rule change): by year H16 +8/+9/0/+9/+12/-5/+5/0%; vs IWM over
+  the same 60 sessions +1.2% (median -0.1%); **same-day control** (600 random Wikipedia-universe stocks bought on the
+  same entry mornings, 60,915 trades): control +3.3%, **event minus control +0.4% (median -0.5%, 49% above,
+  bootstrap P 0.39)**. R3-17: event minus same-day control **-0.3% (P 0.56)**. Both "excesses" are market timing
+  (attention spikes cluster at sell-offs such as March 2020; anything bought those mornings rebounded).
+  **Not registered**: the RIDE judge gate (mean > 0, beats the stock's usual) would likely pass a pure timing artifact
+  in 2024-26 (April 2025 crash -> rebound), i.e. a fluke dressed up as FOUND. Logged as explored-dead (REGIME).
+  **Standing rule from here (tightening only, FOUND unchanged):** a MEETS is registered only if, on the select half,
+  it beats a same-day control (event minus same-entry-day control, bootstrap P < 0.10) and, for event types with a
+  price condition, a same-stock no-event control. J2 was registered before this rule (and died).

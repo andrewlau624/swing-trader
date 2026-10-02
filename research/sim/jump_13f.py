@@ -52,18 +52,30 @@ def fetch():
 
 
 def build() -> pd.DataFrame:
-    X = pd.concat([pd.read_parquet(f) for f in sorted(D.glob("*.parquet"))], ignore_index=True)
-    X = X.sort_values("filed").drop_duplicates(["cik", "period", "cusip"])
-    periods = sorted(X.period.unique())
-    prevp = {p: q for q, p in zip(periods, periods[1:])}
+    """Streamed: per file keep only (cusip, period) cells with <= 80 holders (the rule needs <= 30 at P-1 and new ones
+    at P, so busier cells can't qualify), plus every (cik, period) that filed at all."""
+    keep, filed, counts = [], [], []
+    for f in sorted(D.glob("*.parquet")):
+        X = pd.read_parquet(f)
+        filed.append(X[["cik", "period"]].drop_duplicates())
+        counts.append(X.groupby(["cusip", "period"]).cik.nunique())
+        n = X.groupby(["cusip", "period"]).cik.transform("nunique")
+        keep.append(X[n <= 80])
+    X = pd.concat(keep, ignore_index=True).sort_values("filed").drop_duplicates(["cik", "period", "cusip"])
+    filed_for = pd.concat(filed).drop_duplicates()
+    periods = sorted(filed_for.period.unique())
+    prevp = dict(zip(periods[1:], periods[:-1]))
     X["prev_period"] = X.period.map(prevp)
-    held = set(zip(X.cik, X.period, X.cusip))
-    filed_for = set(zip(X.cik, X.period))
-    nholders = X.groupby(["cusip", "period"]).cik.nunique()
-    new = X[[(c, p) in filed_for and (c, p, u) not in held for c, p, u in zip(X.cik, X.prev_period, X.cusip)]]
+    nh = pd.concat(counts).groupby(level=[0, 1]).sum().rename("n_prev").reset_index().rename(columns={"period": "prev_period"})
+    X = X.merge(filed_for.rename(columns={"period": "prev_period"}).assign(filed_prev=True), on=["cik", "prev_period"], how="left")
+    X = X[X.filed_prev.fillna(False).astype(bool)]
+    held = X[["cik", "period", "cusip"]].rename(columns={"period": "prev_period"}).assign(held=True)
+    X = X.merge(held, on=["cik", "prev_period", "cusip"], how="left")
+    new = X[X.held.isna()].merge(nh, on=["cusip", "prev_period"], how="left")
+    new = new[new.n_prev.fillna(0) <= 30]          # a cusip absent at P-1 had 0 holders there (all rows counted)
     rows = []
     for (u, p), g in new.groupby(["cusip", "period"]):
-        if len(g) >= 3 and nholders.get((u, prevp.get(p)), 0) <= 30:
+        if len(g) >= 3:
             rows.append(dict(cusip=u, fd=g.filed.sort_values().iat[2]))
     E = pd.DataFrame(rows)
     from .jump_ftd import D as FD
@@ -72,7 +84,6 @@ def build() -> pd.DataFrame:
     E["sym"] = E.cusip.map(cmap)
     E = first_in(E.dropna(subset=["sym"])[["sym", "fd"]], 120)
     return small_only(E[E.fd >= "2016-01-01"], 20e6)
-
 
 if __name__ == "__main__":
     if sys.argv[1:] == ["fetch"]:
