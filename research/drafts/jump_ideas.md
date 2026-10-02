@@ -133,3 +133,22 @@ Written after 12 explored ideas died of EXIT LIQUIDITY / TWO-WAY / LOTTERY. Each
 | R2-9 | **Congress member buys a small cap** (STOCK Act periodic transaction reports, free dumps) | R | W | Possibly informed; disclosed with a lag, but small caps are thinly followed | EXIT LIQ | House/Senate watcher dumps (unverified) | 20-50 | 3 |
 | R2-13 | **Listing compliance regained** (8-K / headline: "regained compliance" with the minimum bid / equity rule) | R | D | Funds forced to avoid delisting-risk names can hold it again; the threat of forced selling is gone | EXIT LIQ (forced sellers done), GAP | E FTS | 100+ | 3 |
 | R2-14 | **Emergence from Chapter 11 with new listed equity** (headline) | R | D | Old creditors receive shares they must sell (forced), then the new equity re-rates | LOTTERY, forced sellers | N | 10-30 | 2 (memory: Eberhart-Altman-Aggarwal 1999) |
+
+### Round 2, continued (17:20, before any outcome of these). New method: **filing arithmetic + own-money / forced
+buyers, each checked against a same-stock no-event control before registering** (J2's lesson).
+
+| # | idea | track | tag | cause sentence | death dodged, how | data | sig/yr | novelty |
+|---|---|---|---|---|---|---|---|---|
+| R2-15 | **Share count shrinks >= 3% in a quarter** (dei cover-page shares, original filings), ADV$ < $20M | R | D | The company retired stock with its own cash (informed); nobody reads the cover page | TEXTBOOK (buyback announcements) -> execution; EXIT LIQ | E companyfacts | 50-150 | 4 |
+| R2-16 | **Revenue doubles year on year for the first time** (XBRL Revenues, original filing) after >= 4 flat/down quarters, micro caps | R | D | A business inflects; screens and growth funds notice over weeks | TEXTBOOK (revenue drift: milestone, micro caps) | E | 50-150 | 3 |
+| R2-17 | **Insider buy into heavy shorts**: officer/director buy while the last published days-to-cover >= 5 | J | C | The informed side bets against the crowded short; covering creates the jump | EXIT LIQ (no crowd buying); LOTTERY (many) | F4 + SI | 50-150 | 3 |
+| R2-18 | **Double own money**: an officer/director buy in a quarter in which the company also repurchased stock (XBRL) | R | C | Both informed parties buy at once | EXIT LIQ | F4 + E | 30-80 | 4 |
+| R2-19 | **Two upgrades in 10 days** on a small cap (headlines "Upgrades ... to Buy/Outperform") | R | H/D | Analysts (semi-informed) move together; institutions follow over weeks | TEXTBOOK (single upgrades) -> clusters on small caps | N | 50-150 | 3 |
+| R2-20 | **Big-name counterparty in an 8-K exhibit** (FTS 8-K "Amazon.com Services" / "Walmart Inc." / "Apple Inc." / "Microsoft Corporation" / "NVIDIA Corporation" / "Department of Defense"), small caps | R | D | The contract sits in an exhibit; the press release (if any) undersells it | GAP (slow exhibit text) | E FTS | 50-150 | 4 |
+| R2-21 | **New major customer named in XBRL** (ConcentrationRiskPercentage on a customer member that never appeared before), micro caps | R | D/W | A new >10% customer is disclosed in a footnote, not a headline | GAP, EXIT LIQ | E companyfacts (dimension members: may be unavailable) | 30-80 | 5 |
+| R2-22 | **Dividend raised >= 50%** by a small cap (headline amounts) | R | D | The board (informed) commits cash; income funds add over weeks | TEXTBOOK (dividend initiation dead) -> big raises | N | 30-80 | 2 |
+| R2-23 | **Tiny-float de-SPAC**: first session after a business combination closes with >= 90% trust redemptions (8-K text) | J | W | The float is a few hundred thousand shares; any buying or short covering moves it | LOTTERY (many 2021-23 deals) | E FTS + LLM extraction | 30-80 | 4 |
+| R2-24 | **After an issuer's Dutch tender closes** (SC TO-I final amendment): RIDE once the supply is removed | R | D | The company (informed) bought a big block; remaining holders are sticky | GAP (after, not at, the announcement) | E | 20-40 | 3 |
+| R2-25 | **Buyback authorization >= 15% of market cap, un-gapped** (headline $ amount vs XBRL shares x price; next open gap < 3%) | R | D | The size relative to the company is missed by the market at the open | GAP (un-gapped only), TEXTBOOK | N + E | 30-80 | 3 |
+
+Round 2 total: 20 ideas (R2-1..R2-5, R2-7, R2-9, R2-13, R2-14, R2-15..R2-25).
