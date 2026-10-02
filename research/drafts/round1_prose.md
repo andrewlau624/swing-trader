@@ -2186,3 +2186,21 @@ plus the last close if the stock still trades on 2026-09-30, plus any cash-merge
 sale. If the plan was voted down or abandoned and the stock kept trading: the close 250 sessions after entry.
 Return = payoff / entry − 1; days = entry to the last payment. Stake 10% of equity (whole shares).
 **Verdict: PAYS if median return > +3%, mean > 0 and hit >= 70% on the traded deals; otherwise DEAD.** No rule change.
+
+## Amendment — Discovery loop (session llm-trader-c5), deal rule DL5: dated-term closed-end funds in their final year (no N; registered before any outcome)
+
+Source reading (2026-10-02): EDGAR company names with "Term Trust / Target Term / <year> Term" (N-CSR, N-2, 497,
+N-8F filers) and the funds' N-CSR text "will terminate on or about <date>". The charter sets a termination date on
+which the fund liquidates and pays NAV in cash (target-term funds also aim to return the original NAV); a board/vote
+can extend or convert the fund (the failure mode). A discount to NAV must close by that date.
+
+**Deal set (fixed now):** every exchange-listed CEF with a dated term whose scheduled termination date (from its own
+N-CSR/N-2 sentence; the name's year if no sentence) falls in 2017-01 .. 2025-12, with Alpaca bars 250 sessions before
+it. **Entry:** the close 250 sessions before the scheduled termination date. **Exit:** the fund's last close on or
+before the scheduled date (+30 calendar days grace) if it liquidated (bars end within 60 days after the date);
+otherwise (extended / converted) the close on the scheduled date. Fund return = exit / entry − 1 + cash
+distributions with ex-dates in (entry, exit] / entry (Alpaca corporate actions). Benchmark over the same window: the
+total return of a matched ETF (Alpaca all-adjusted closes): munis MUB, high yield HYG, loans BKLN, EM debt EMB,
+preferreds PFF, convertibles CWB, mortgages MBB, investment-grade corporates LQD. **Excess = fund − benchmark.**
+Stake 10% of equity, whole shares. **Verdict: PAYS if median excess > +2%, mean excess > 0 and excess > 0 in >= 70%
+of funds; otherwise DEAD.** No rule change afterwards.
