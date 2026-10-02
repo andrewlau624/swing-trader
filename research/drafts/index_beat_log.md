@@ -119,3 +119,12 @@
   taxable EH 22.1% vs SPY 15.3% (maxDD -27.8 vs -24.5); MC P(DD>50%) 0.3% -> NOT FOUND (2021-23 at $1k/mo), STRONGEST NEAR
   MISS; haircut-robust (beats the bot alone as backtested too). study_ib_r65_stacked.md
 - R6-5 COVID check: stacked 2020-02-19..03-23 -37.5% maxDD (SPY -33.8%, bot -11.5%); 2020 +51.4% (SPY +13.2%). No tuning of R6-5 toward the bar (it stays a near miss).
+- ROUND 7 (method: coverage audit of the live contractual alerts — haircut-proof by construction).
+  R7-1 B1 phrasing gaps (spec before run): FTS for alternative round-up wordings with "reverse stock split" ("round up any
+  fractional", "one whole share in lieu", "rounded up to one whole share", "issued one full share", "upward to the nearest whole
+  share"), 2023-26; keep hits whose ticker has an Alpaca reverse split within 90 days after the filing AND that B1's deal file
+  does not already mark ok/participant; read the sentences; count extra genuine deals/yr. Bar: >= +10 deals/yr (+$40/yr per account).
+  R7-1 result: 849 FTS hits, 18 reverse splits 2023-26 not in B1's deal file; ~10 genuine round-ups read by hand (SMTK, BPTH, TNXP,
+  CING, DFLI, ENSC, LVO, GNPX, PHGE; YHC 10-K after the fact) -> ~2.5 deals/yr (+$10/yr per account) -> FAILS the +10/yr bar.
+  Live-code note (user's call): roundup_watch's phrase list could add "automatically be entitled to receive an additional share
+  in lieu", "one whole share in lieu", "round up any fractional shares". r71_out.txt
