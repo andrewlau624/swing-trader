@@ -1963,3 +1963,40 @@ losers). Who pays: sellers dumping losers into the close for tax or reporting re
 
 Anything that passes becomes a default-off switch with shadow logging, a kill rule, tests and a digest gate; nothing
 goes live without the user.
+
+## Amendment — Round 31 (EDGAR unblocked), Study ID: the session after an insider purchase filing (pre-register; 3 variants, program N 752 -> 755)
+`date`: Fri Oct 2 2026 (the commit time is the stamp). Context: Round 30 (`study_outside_box_round30.md`) found
+nothing; the user added an SEC contact, which unblocked DS14 and the parked EDGAR ideas. Exploration looks on select
+data only (2020-23) are logged in `outside_box_explore_log.md` (L16-L20): NT filers, Form 144 and insider-buy
+night tilts / 20-day drift were dead; EFFECT notices on night picks were outlier-driven (ex-top-5 0bp, like DS5) and
+are **not** registered; SPAC trust (#13) was closed without a test (only ~8% of equity is idle for a month).
+2021-23 has been seen for this signal (L19-L20: +20bp, t 3.4), so **2024-26 is the judge** (rule (g)).
+
+**Mechanism.** An officer's or director's open-market purchase is public in a Form 4 by the next business day.
+Attention-limited buyers (screeners, alert apps, newsletters) arrive during the following session, after the open,
+so the stock drifts up from the opening cross to the closing cross. Not DS14's 20-day drift (dead in L19), not
+Lab-BH (announcement gaps, 5-20 days).
+
+- Events: SEC Form 3/4/5 data sets (quarterly, `insider_buys()`), document type 4 or 4/A with >= 1 non-derivative
+  code-P acquisition; a reporting owner who is a Director or Officer; total P dollars in the filing >= $10,000;
+  grouped by (symbol, filing date). Trade session = the first session strictly after the filing date (the filing is
+  public before that session's open). Data end: 2026-03-31 (the last published set), so 2024-26 = 2024-01 .. 2026-03.
+- Filters known before the open: 20-day ADV$ through the prior session >= $1M; raw prior close >= $5 (Alpaca raw daily
+  bars, never adjusted prices).
+- Trade: buy in the opening cross, sell in the closing cross of the same session. Unit = raw open -> close return (SIP
+  daily open/close; a random 500-event judge-half sample is checked against Alpaca official crosses and reported).
+- **ID1** all events; **ID2** ADV$ $1M-$20M; **ID3** ADV$ >= $20M.
+- Sleeve in V7 (taxable margin account; daytime only, no overnight debit): a fixed 0.45 x equity of daytime buying
+  power (fits beside the IBS half and the noise cap at the live 2.48 multiplier), split equally across the session's
+  events, at most 10% of equity and 1% of ADV$ per name, whole shares on the raw open. Night, IBS, noise unchanged.
+  Not for the Roth (cash account: same-day proceeds would fund the night buy unsettled).
+- Costs: 2.5bp/side judged; tier_hi (`book.cost_bps` on raw price and ADV) reported.
+- Pass (each variant): (a) book increment > 0 in 2021-23 and 2024-26 at $2.3k / $10k / $25k; (b) NW t >= 2 on the
+  daily increment ($10k, full window); (c) sign-flip >= 95th; (d) feature placebo: every event moved to a random
+  session of the same stock in the same calendar year with no purchase filing within 10 sessions, 200 draws, real
+  beats >= 95%; (e) maxDD not worse by > 2pp; (f) 5y P(DD>50%) <= 5%; (g) the judge half alone: event-level mean net
+  of 2.5bp/side > 0 with NW t >= 2 on the 2024-26 daily sleeve return. Reported: DSR at N 755, tier_hi, by year,
+  correlation with the noise leg, the 2020 pre-window.
+
+Anything that passes becomes a default-off switch with shadow logging, a kill rule, tests and a digest gate; nothing
+goes live without the user.

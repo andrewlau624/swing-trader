@@ -462,5 +462,140 @@ def explore():
         f(log)
 
 
+
+
+# ---------------------------------------------------------------- Round 31: EDGAR filters on night picks (#8, #44, #45)
+def edgar_events():
+    """{cik10: DataFrame(form, t)} with t = acceptance time in ET (naive)."""
+    import glob
+    import pickle
+    ev = {}
+    for f in glob.glob(str(NIGHT / "edgar/0*.pkl")):
+        x = pickle.load(open(f, "rb"))
+        F = x["filings"]
+        t = pd.to_datetime(F.acceptanceDateTime, utc=True, errors="coerce").dt.tz_convert("America/New_York").dt.tz_localize(None)
+        ev[pathlib.Path(f).stem] = (pd.DataFrame({"form": F.form.values, "t": t.values}).dropna(), x.get("entityType"), x.get("sic"))
+    return ev
+
+
+FLAGS = {"NT": (("NT 10-K", "NT 10-Q", "NT 10-K/A", "NT 10-Q/A", "NT 20-F"), 60),
+         "EFFECT": (("EFFECT",), 7),
+         "144": (("144", "144/A"), 7)}
+
+
+def flag_picks(T, ev, flags=FLAGS):
+    tk = json.load(open(NIGHT / "edgar/ticker_cik.json"))
+    out = {k: [] for k in flags}
+    for d, sym in zip(T.d, T.sym):
+        cik = tk.get(str(sym).upper().replace(".", "-")) or tk.get(str(sym).upper())
+        e = ev.get(str(cik).zfill(10)) if cik else None
+        cut = d + pd.Timedelta(hours=15, minutes=40)
+        for k, (forms, days) in flags.items():
+            if e is None:
+                out[k].append(np.nan); continue
+            F = e[0]
+            m = F.form.isin(forms) & (F.t <= cut) & (F.t > cut - pd.Timedelta(days=days))
+            out[k].append(float(m.any()))
+    for k in flags:
+        T[k] = out[k]
+    return T
+
+
+def explore4():
+    log = out("explore4")
+    log("Round 31 exploration (SELECT: night picks 2021-23): EDGAR flags on picks, within-night demeaned auction return")
+    T = picks(); ev = edgar_events()
+    T = flag_picks(T, ev)
+    log(f"  mapped picks {T.NT.notna().mean():.0%} of {len(T)}")
+    for k in FLAGS:
+        for lab, (a, z) in (("2021-22", ("2021", "2022-12-31")), ("2023", ("2023", "2023-12-31"))):
+            y = T[(T.d >= a) & (T.d <= z) & T[k].notna()]
+            f = y[y[k] == 1]
+            log(f"  {k} {lab}: flagged n {len(f)}  within-night {f.x.mean()*1e4:+.1f}bp (median {f.x.median()*1e4:+.1f})  vs unflagged {y[y[k] == 0].x.mean()*1e4:+.1f}bp")
+    T.to_pickle(ROOT / "data/research/program/outside_box_picks_edgar_sel.pkl")
+
+
+
+
+# ---------------------------------------------------------------- DS14: insider open-market purchases (SEC Form 345 data sets)
+def insider_buys():
+    """One row per Form 4 with open-market purchases (code P, acquired): filing date, issuer symbol, $ bought, n owners
+    that are officers/directors. Point in time: usable from the session AFTER the filing date."""
+    import glob
+    import zipfile
+    f = NIGHT / "insider/buys.parquet"
+    if f.exists():
+        return pd.read_parquet(f)
+    rows = []
+    for z in sorted(glob.glob(str(NIGHT / "insider/*_form345.zip"))):
+        Z = zipfile.ZipFile(z)
+        rd = lambda n: pd.read_csv(Z.open(n), sep="\t", dtype=str, low_memory=False, on_bad_lines="skip")
+        S = rd("SUBMISSION.tsv")[["ACCESSION_NUMBER", "FILING_DATE", "ISSUERTRADINGSYMBOL", "DOCUMENT_TYPE"]]
+        N = rd("NONDERIV_TRANS.tsv")[["ACCESSION_NUMBER", "TRANS_CODE", "TRANS_ACQUIRED_DISP_CD", "TRANS_SHARES", "TRANS_PRICEPERSHARE"]]
+        R = rd("REPORTINGOWNER.tsv")[["ACCESSION_NUMBER", "RPTOWNER_RELATIONSHIP"]]
+        N = N[(N.TRANS_CODE == "P") & (N.TRANS_ACQUIRED_DISP_CD == "A")].copy()
+        N["usd"] = pd.to_numeric(N.TRANS_SHARES, errors="coerce") * pd.to_numeric(N.TRANS_PRICEPERSHARE, errors="coerce")
+        g = N.groupby("ACCESSION_NUMBER").usd.sum().rename("usd").reset_index()
+        rel = R.groupby("ACCESSION_NUMBER").RPTOWNER_RELATIONSHIP.agg(lambda x: " ".join(map(str, x))).rename("rel").reset_index()
+        g = g.merge(S, on="ACCESSION_NUMBER").merge(rel, on="ACCESSION_NUMBER", how="left")
+        rows.append(g[g.DOCUMENT_TYPE.isin(["4", "4/A"])])
+    X = pd.concat(rows)
+    X["fd"] = pd.to_datetime(X.FILING_DATE, format="%d-%b-%Y", errors="coerce")
+    X["sym"] = X.ISSUERTRADINGSYMBOL.str.upper().str.strip().str.replace("-", ".", regex=False)
+    X["insider"] = X.rel.fillna("").str.contains("Director|Officer", case=False)
+    X = X.dropna(subset=["fd", "usd"])[["fd", "sym", "usd", "insider", "ACCESSION_NUMBER"]]
+    X.to_parquet(f)
+    return X
+
+
+def explore5():
+    log = out("explore5")
+    log("DS14 exploration (SELECT data only): insider open-market purchases")
+    X = insider_buys()
+    X = X[(X.fd <= SEL_END) & X.insider & (X.usd >= 1e4)]
+    log(f"  officer/director purchase filings >= $10k, 2020-23: {len(X)}; issuers {X.sym.nunique()}")
+    # (a) night picks: issuer had such a purchase filed in the 30 days before d (filing date < d)
+    T = picks()
+    by = X.groupby("sym").fd.apply(lambda s: np.sort(s.values))
+    def recent(d, s, days):
+        a = by.get(s)
+        if a is None:
+            return 0.0
+        return float(((a < np.datetime64(d)) & (a >= np.datetime64(d - pd.Timedelta(days=days)))).any())
+    for days in (30, 90):
+        T[f"ib{days}"] = [recent(d, s, days) for d, s in zip(T.d, T.sym)]
+        for lab, (a, z) in (("2021-22", ("2021", "2022-12-31")), ("2023", ("2023", "2023-12-31"))):
+            y = T[(T.d >= a) & (T.d <= z)]; f = y[y[f"ib{days}"] == 1]
+            log(f"  night picks with an insider buy in the prior {days}d, {lab}: n {len(f)} within-night {f.x.mean()*1e4:+.1f}bp "
+                f"(median {f.x.median()*1e4:+.1f}) vs others {y[y[f'ib{days}'] == 0].x.mean()*1e4:+.1f}")
+    # (b) event: buy at the open of the session after the filing date, hold 1/5/20 sessions; excess vs SPY
+    P = panel(); C, O, V = P["close"], P["open"], P["volume"]
+    adv = (C * V).rolling(20, min_periods=15).mean()
+    cal = C.index; cols = {s: j for j, s in enumerate(C.columns)}
+    Cv, Ov, Av = C.values, O.values, adv.values; sp = cols["SPY"]
+    E = X.groupby(["sym", "fd"]).usd.sum().reset_index()
+    rows = []
+    for s, fd, usd in zip(E.sym, E.fd, E.usd):
+        j = cols.get(s)
+        if j is None:
+            continue
+        i = cal.searchsorted(fd + pd.Timedelta(days=1))            # first session after the filing date
+        if i + 20 >= len(cal) or i < 1:
+            continue
+        o = Ov[i, j]; a = Av[i - 1, j]; pc = Cv[i - 1, j]
+        if not (np.isfinite(o) and np.isfinite(a) and o >= 5):
+            continue
+        r = [Cv[i + h - 1, j] / o - 1 - (Cv[i + h - 1, sp] / Ov[i, sp] - 1) for h in (1, 5, 20)]
+        rows.append((cal[i], s, usd, a, Cv[i - 1, j] / Cv[max(i - 21, 0), j] - 1, *r))
+    Y = pd.DataFrame(rows, columns=["d", "sym", "usd", "adv", "ret20", "x1", "x5", "x20"])
+    Y = Y[Y.x20.abs() < 1]
+    for lab, m in (("all", Y.adv > 0), ("ADV $1-20M", Y.adv.between(1e6, 2e7)), ("ADV >= $20M", Y.adv >= 2e7),
+                   ("after a 20d drop <= -15%", Y.ret20 <= -0.15), ("buy >= $100k", Y.usd >= 1e5)):
+        y = Y[m]
+        log(f"  event [{lab}]: n {len(y)}; excess vs SPY 1d {y.x1.mean()*1e4:+.1f}  5d {y.x5.mean()*1e4:+.1f}  20d {y.x20.mean()*1e4:+.1f}bp "
+            f"(median 20d {y.x20.median()*1e4:+.1f}); by year 20d " + " ".join(f"{k}:{v*1e4:+.0f}" for k, v in y.groupby(y.d.dt.year).x20.mean().items()))
+    Y.to_pickle(ROOT / "data/research/program/outside_box_insider_sel.pkl")
+
+
 if __name__ == "__main__":
-    {"explore": explore, "explore2": explore2, "explore3": explore3}[sys.argv[1]]()
+    {"explore": explore, "explore2": explore2, "explore3": explore3, "explore4": explore4, "explore5": explore5}[sys.argv[1]]()

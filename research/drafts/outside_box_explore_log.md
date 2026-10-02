@@ -27,3 +27,13 @@ known when a closing-auction order must be entered. Re-measured before the cross
 
 **Converge: nothing survived exploration.** No study is pre-registered; program N stays 752; 2024-26 was never read
 for any Round 30 idea (no judge-half minute bars or auction prints were fetched).
+
+## Round 31 looks (EDGAR unblocked; select data only)
+
+| # | look | what it showed | decision |
+|---|---|---|---|
+| L16 | #13 SPAC trust: does the book have money idle long enough? (V7/Roth sim, $10k) | overnight use 36% on average, but only **7.9%** of equity is idle for a whole 20-session window; the panel lacks the liquidated 2021-22 SPACs (survivorship) | **closed without a test**: +1-2pp of yield on ~8% of equity ≈ +0.1%/yr |
+| L17 | #44 / #8 / #45 flags on 2021-23 night picks (EDGAR cache, acceptance time <= 15:40 ET on d): NT 10-K/Q in 60d, EFFECT in 7d, Form 144 in 7d | NT +41 / −71bp (flips); 144 −19 (n 5) / +18; **EFFECT +32 (median +50) / +236bp (median +118), n 53 / 14** | NT, 144 dead |
+| L18 | EFFECT robustness | ex-top-3 +17.7bp, **ex-top-5 −0.0bp**; 60% positive; offering-overlap picks −28 vs pure EFFECT +99 | **not registered**: outlier-driven like DS5 |
+| L19 | DS14 insider buys (officer/director P >= $10k, SEC Form 345 sets): night tilt 30/90d; 1/5/20-day drift from the next open | tilt 30d +11 / +18 (medians −1 / −28); 90d +17 / +2; 20-day excess ≈ 0 except 2020 (+596bp; 2021 −58, 2023 −59) | tilt and 20-day drift dead |
+| L20 | same events, next session open -> close | **+20.2bp (median +4.1), every year + (2020 +49, 2021 +25, 2022 +26, 2023 +5), t 3.4**; ADV $1-20M +27.6 (median +10.9, t 2.6); ADV >= $20M +15.8 (t 2.2) | **registered as Study ID** (adjusted-price filter in this look; the registration uses raw prices) |
