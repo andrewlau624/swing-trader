@@ -230,3 +230,13 @@
   trades: **event minus control -1.0% (median -5.4%, 40% above, P 0.75) -> FAILS**; same stocks on same-size up days
   without an explainer: +4.7% (median -5.2%). Year means: 2020 +29%, 2021-23 -4..-8%: market timing (the 2020
   rebound). **Not registered; explored-dead (REGIME + price-first).**
+- 02:00 batch, 1 look each:
+  - **H8** (4072 select -> 3072 trades); hold1 x5.4 -0.8%/-0.8%/-0.7% P1.00; tp205 x1.5 -0.8%/-0.8%/-0.7% P1.00; hold20 x0.9 -1.0%/-1.1%/-1.0% P1.00; hold60 x0.9 -0.4%/-0.6%/-1.5% P0.82; tp2060 x0.8 -1.0%/-1.1%/+0.3% P1.00; all fail
+  - **H21** (817 select -> 370 trades); hold1 x7.7 -1.8%/-2.1%/-0.9% P1.00; tp205 x1.9 -1.9%/-2.1%/-1.1% P1.00; hold20 x0.7 -3.6%/-4.1%/-1.5% P1.00; hold60 x0.9 -5.2%/-5.5%/-2.4% P1.00; tp2060 x1.0 -2.2%/-2.4%/-0.9% P0.99; all fail
+  - **D1** (218 select -> 180 trades); hold1 x0.0 -0.4%/-0.5%/-0.4% P0.99; tp205 x0.4 -0.7%/-1.0%/-0.2% P0.90; hold20 x1.1 -0.5%/-1.2%/-0.1% P0.71; hold60 x1.0 +1.0%/-0.5%/+1.0% P0.30; tp2060 x1.0 +1.2%/+0.7%/+2.4% P0.20; all fail
+  - **D8** (982 select -> 673 trades); hold1 x3.1 -0.5%/-0.7%/-0.7% P1.00; tp205 x1.7 -0.2%/-0.3%/-0.5% P0.76; hold20 x1.4 -0.1%/-0.4%/+0.0% P0.59; hold60 x1.1 -0.2%/-1.0%/-0.4% P0.58; tp2060 x1.1 +0.6%/+0.5%/+1.8% P0.19; all fail
+  - **C6** (6107 select -> 4431 trades); hold1 x2.2 -0.4%/-0.5%/-0.8% P1.00; tp205 x1.5 -0.4%/-0.5%/-0.6% P1.00; hold20 x1.3 -0.0%/-0.1%/-0.3% P0.51; hold60 x1.2 +0.8%/+0.6%/-0.3% P0.03; tp2060 x1.1 +0.6%/+0.6%/+2.1% P0.01; all fail
+  - **C5** (218 select -> 109 trades); hold1 x0.0 -0.3%/-0.7%/-0.3% P0.80; tp205 x0.9 -1.4%/-2.0%/-1.1% P0.95; hold20 x1.1 -2.0%/-3.2%/-2.9% P0.92; hold60 x1.4 +6.4%/-0.5%/+1.2% P0.13; tp2060 x1.0 +0.8%/+0.1%/+6.2% P0.34; all fail
+  - **R4-18** (26 select -> 16 trades); hold1 x0.0 +1.0%/-0.7%/+0.1% P0.16; tp205 x1.0 -0.1%/-3.4%/-1.7% P0.56; hold20 x1.6 +3.2%/-1.3%/+3.1% P0.16; hold60 x1.4 -1.3%/-9.0%/+4.0% P0.57; tp2060 x1.2 +2.8%/-1.2%/+13.7% P0.30; all fail
+  - **R4-19** (297 select -> 216 trades); hold1 x5.3 -0.9%/-1.2%/-0.7% P0.99; tp205 x1.5 -0.4%/-0.7%/-0.8% P0.74; hold20 x0.9 +0.0%/-1.2%/-0.6% P0.50; hold60 x1.0 -1.0%/-2.7%/-1.7% P0.70; tp2060 x1.0 -0.3%/-0.6%/+3.7% P0.58; all fail
+  All dead (D1 510(k) before the press release: +1.0% at 60, no lift; D8/C6 insider buys with no news: ~ the stock's usual; C5 big contract in a small float: +6.4% at 60 but ex-top3 -0.5%).
