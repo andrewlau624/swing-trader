@@ -14,4 +14,4 @@
 | X3 inaugural share repurchase (8-K) | overnight | claimed 2026-10-02 06:44 | done: FAILS (explored-dead) |
 | X4 FDA has approved (8-K) | overnight | claimed 2026-10-02 06:45 | done: FAILS (explored-dead) |
 | X5 Breakthrough Therapy Designation (8-K) | overnight | claimed 2026-10-02 06:45 | done: FAILS (explored-dead, t 0.88) |
-| X6 met its primary endpoint (8-K) | overnight | claimed 2026-10-02 06:46 | in progress |
+| X6 met its primary endpoint (8-K) | overnight | claimed 2026-10-02 06:46 | done: FAILS (explored-dead, net -30.4bp) |

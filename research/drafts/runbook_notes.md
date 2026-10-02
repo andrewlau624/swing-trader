@@ -241,3 +241,46 @@ hold 5 hit 48% mean +2.58% worst -18.8% | hold 20 hit 50% mean -0.36% worst -33.
 2,284 hits -> 1,983 events (most are 8-Ks that merely mention an earlier designation). Select half, ADV >= $20M:
 1090 -> 141 trades (35/yr); net +39.3bp, median +17.8bp, hit 52%, t +0.88; 2021 -71.2 / 2022 +105.5 / 2023 +103.9bp.
 SEMI-RARE: FAILS. No other floor tried. Explored-dead.
+
+## X6. Positive topline, 8-K `"met its primary endpoint"` (extra row X6) — explored-dead
+936 hits -> 888 events. Select half, ADV >= $20M: 482 -> 114 trades (28/yr); net **-30.4bp**, median -6.9bp, hit 50%,
+t -0.54; 2021 -115.4 / 2022 +70.7 / 2023 -14.1bp. SEMI-RARE: FAILS. Explored-dead.
+
+---
+
+## Morning summary (overnight loop, session llm-trader-e4; stopped at 12 ideas, 2026-10-02)
+
+| idea | track | events/yr | verdict | $/yr at $2.3k / $10k / $25k |
+|---|---|---|---|---|
+| 2 first insider purchase in 2+ years (EV2, N 760) | FREQUENT | ~159 trades | **PASS** (judge +31.5bp, t 2.54, DSR 0.553) | +$144 / +$717 / +$1,867 (2.5bp/side); +$77 / +$369 / +$966 at tier_hi |
+| 3 SC 13G originals | FREQUENT | ~1,020 | FAILS (explore t 1.82) | — |
+| 10 S-8 filings | FREQUENT | ~464 | FAILS (net -12.7bp) | — |
+| 9 spin-off completion 8-Ks | RARE | ~18 | FAILS (rare gate, holds 1/5/20) | — |
+| 8 25-NSE delisting notices | FREQUENT | ~103 | FAILS (net -26.2bp) | — |
+| 7 ASR 8-Ks | FREQUENT | ~168 | FAILS (t 0.27) | — |
+| X1 dividend initiations | RARE | ~20 | FAILS | — |
+| X2 dividend reinstatements | RARE | ~4 | FAILS | — |
+| X3 first-ever buybacks | RARE | ~3.5 | FAILS | — |
+| X4 FDA approvals | RARE | ~12 | FAILS | — |
+| X5 Breakthrough Therapy 8-Ks | SEMI-RARE | ~35 | FAILS (t 0.88) | — |
+| X6 positive topline 8-Ks | SEMI-RARE | ~28 | FAILS (net -30.4bp) | — |
+
+(Rows 1 and 4-6 were run by another, unclaimed session in the same tree: EV1 DEAD, 13D/A, strategic alternatives,
+special dividends explored-dead. Its row-2 look, d4a0401, is why EV2 counts as 2 variants.)
+
+**In plain words.**
+- **What passed: EV2.** The ID3 insider day trade, only on companies where nobody has bought shares in the open market
+  for two years. It held up on 2024-26 (+31.5bp a trade after costs, t 2.54) and has the program's best DSR (0.553,
+  still under 0.95). Why it might be real: a first buy after a long silence is a rarer, more surprising signal, and
+  the same slow attention that pays ID3 pays it about twice as much (+35bp vs +17bp). **But it is a subset of ID3**,
+  which is already in shadow, so it is not a new edge. The useful step is a 2x weight for these names inside the ID3
+  shadow (spec in `study_ev2_first_insider_buy.md`; no live code built).
+- **What died:** every filing-type and 8-K-phrase event (13G, S-8, 25-NSE, ASR, spin-offs, dividend
+  initiations/reinstatements, first buybacks, FDA approvals, Breakthrough designations, topline data). Their
+  next-session drift is around zero, and the biotech events are lotteries (a few huge winners, median negative).
+  Pattern: news events move in the gap, not in the session after it. Insider purchases are the only family where the
+  session after still pays.
+- **Look at first:** EV2 as a weight inside the ID3 shadow. One fix found on the way: EDGAR renamed "SC 13D/G" to
+  "SCHEDULE 13D/G" in Dec 2024; `research/sim/events_form_build.py` takes both (filing_day.py's 13D reader already does).
+- Unused extra rows X7-X10 (regained compliance, strategic investment, guidance raises, contract awards) are left for
+  a later session (`runbook_menu_extra.md`).

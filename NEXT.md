@@ -14,6 +14,10 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   buys at issuers with no open-market purchase in 730 days. Judge half +31.5bp/trade, NW t 2.54; full +35.5bp net,
   t 3.57, DSR 0.553. +$144 / +$717 / +$1,867 a year at $2.3k / $10k / $25k (2.5bp/side). **A subset of ID3**: use it as a
   2x weight inside the ID3 shadow, not a new book. Spec: `study_ev2_first_insider_buy.md` (overnight loop).
+- Overnight loop explored-dead on select data (no N): SC 13G, S-8, 25-NSE, ASR, spin-off completions, and extra rows
+  X1-X6 (dividend initiations/reinstatements, first buybacks, FDA approvals, Breakthrough designations, topline 8-Ks).
+  News events move in the gap; the session after is ~0. X7-X10 untested (`runbook_menu_extra.md`). Summary:
+  `runbook_notes.md` (morning summary).
 - **EV1 cluster insider buys: DEAD** (registered f4d19c5, judged 2024-26). Buy the opening cross / sell the closing
   cross the session after a cluster of 2+ distinct officer/director Form 4 purchases <= 5 days apart. Judge-half
   event net +27.3bp but daily-sleeve NW t **+1.85** (< 2); DSR 0.218. Select half +27.7bp/trade, t 2.42, hit 53%.
