@@ -1,23 +1,24 @@
 # Jump & ride hunt log (prompt_jump_hunt.md), session llm-trader-51
 
 ## STATE (update after every idea)
-- program N: 764 (J1-J4 registered and judged DEAD). k (ideas judged): 4. Ideas explored: 42 (H17 D5 D9 D4 D6 H1
-  H2 H3 C4 H18 C7 C10 R2-4 R2-5 R2-13 R2-17 R2-2 R2-20 R2-15 R3-9 R3-5 R2-1 R3-2 R3-16 R3-3 H5 H6 H15 H16 C1 R3-17
-  R4-1 R4-2 R4-3 R4-4 R4-5 R4-6). Rounds of idea generation: 4 written (R1 62, R2 20, R3 20, R4 20 = 122 ideas).
-- dropped before a run (data): H11/C8 (option alerts end 2017), S1/S1v (rare), D7 (runner needs ADV), R3-4 (403).
-- current idea: R3-8 R3-10 R4-8 R4-11 R4-12 R4-14 R4-15 R4-16 R4-18 R4-19 (8-K/13D/RW full text, building + explore
-  queue), R3-18 (10-K themes, queued), R3-6 (13F, bars), R3-7 (LLM extraction, written, runs after the FTS builds).
-- next: news ideas when the archive's select months land (~90/96 at 21:30): S2 PDUFA, D2 contracts, C5, R2-25, H10,
-  H12, H14, H21, H22, H7, H8, H9, S3, S4, S5, W2, W5, R2-7, R2-19, R2-22, R2-14, D1, D8, C6, C3, R3-11..R3-15, R3-20;
-  WSB ideas (H4, V1, H13) when WSB lands; H23 CEO pageviews (fetching).
-- data sources verified: news (downloading), Reddit (small subs done; WSB running), Wikipedia (done; CEOs fetching),
-  EDGAR FTS/form.idx/companyfacts/frames, CT.gov, openFDA, Federal Register, SEC FTD (2015-12..2026-09), SEC 13F data
-  sets (54 files), Form 345 2014-26, FINRA SI 2020-06+, Nasdaq earnings calendar (cached).
+- program N: 768. k (ideas judged or registered): 8 — J1-J4 judged DEAD; **J5 (R2-25 buyback >= 15% of mcap,
+  un-gapped, JUMP tp205), J6 (S5 forward split, JUMP trail20), J7 (R2-19 two upgrades in 10 days, JUMP tp205), J8
+  (R3-15 initiation with a 2x target, RIDE hold60) registered, judges pending** the news archive reaching 2025-07
+  (rebuild with `jump_rebuild.py`: select-half hashes must match; they matched on the archive through 2024-03).
+- Ideas explored: 77 (see the log). Rounds of idea generation: 4 written (R1 62 + R2 20 + R3 20 + R4 20 = 122).
+- dropped before a run (data): H11/C8, S1/S1v, D7, R3-4, R3-20.
+- running / queued: R4-18, R4-19 (EDGAR builds + explore queue), H21 D1 D8 C6 C5 (explore queue), R3-18 (10-K
+  themes, queued), R3-7 (LLM extraction, after R3-18), R3-6 (13F; explore after the news download: 13k symbols of
+  bars), H4/V1/H13 (WSB 2021 still downloading: January 2021 alone is enormous).
+- data sources verified: news (at 2024-04, 3 threads till Sunday 16:47), Reddit (small subs; WSB 2016-20 + 2022-24),
+  Wikipedia (+ CEOs), EDGAR FTS/form.idx/companyfacts/frames, CT.gov, openFDA, Federal Register, SEC FTD, SEC 13F,
+  Form 345 2014-26, FINRA SI 2020-06+, Nasdaq earnings calendar.
 - data sources broken: defense.gov (403), PatentsView bulk (403), Yahoo trending 2016-17 snapshots.
-- why things die (running): EXIT LIQUIDITY (crowd attention; 7 ideas), TWO-WAY (H17 D4 R3-5), LOTTERY (D5 D9 J1 C1),
-  PRICE PROXY/REGIME (J2; H16 and R3-17 = market timing vs a same-day control), TOO WEAK (informed buyers and filing
-  milestones earn the stock's usual +1-2%: R2-1 R2-2 R2-4 R2-15 R2-17 R3-16 H5 H6), TOO RARE (R2-20 R3-3).
-  Standing rule: any MEETS must beat a same-day control (and a same-stock no-event control) before registering.
+- why things die (running): EXIT LIQUIDITY (crowd attention), TWO-WAY, LOTTERY (incl. J1, J3, J4), PRICE PROXY /
+  REGIME (J2; H16, R3-17, H9 = market timing vs a same-day control), TOO WEAK (informed buyers, filing milestones,
+  sale-preparation paperwork earn ~ the stock's usual), TOO RARE. What survives explore + control so far: company-
+  or analyst-driven events with a size condition (J5) or a retail-catalyst calendar (J6), and analyst clusters (J7, J8).
+  Standing rule: a MEETS must beat a same-day control (and a same-stock control when a price condition is involved).
 
 ## Log
 - 12:45 setup: the prompt names `swing-trader`; the session started in the `llm-trader` checkout (no data caches); work in
@@ -221,3 +222,11 @@
   - **C3** (43 select -> 17 trades); hold1 x0.0 -4.9%/-6.7%/-2.1% P1.00; tp205 x1.4 -8.1%/-13.9%/-7.2% P0.97; hold20 x0.0 -13.5%/-19.0%/-9.7% P1.00; hold60 x0.9 -10.8%/-26.1%/-11.5% P0.83; tp2060 x1.0 -7.1%/-12.9%/+12.5% P0.80; all fail
   - **H23** (678 select -> 429 trades); hold1 x4.9 -0.2%/-0.5%/-0.3% P0.80; tp205 x2.2 +0.8%/-0.1%/-0.2% P0.17; hold20 x0.9 +0.8%/+0.1%/-0.1% P0.13; hold60 x1.0 +4.4%/+2.4%/+1.5% P0.00; tp2060 x1.0 +2.6%/+1.7%/+2.9% P0.01; all fail
   MEETS (logged in detail with their registrations): **R2-25** (J5), **S5** (J6), **R2-19** (J7), **R3-15** (J8); each beat the standing-rule same-day control. **R3-20** dropped (dropped-coverage headlines ~1 a year: too rare in this feed).
+- 01:00 rebuild check (`jump_rebuild.py`): J5-J8 event files rebuilt on the archive through 2024-03 hash-MATCH their
+  registered select-half pins (r2_25 ee4fb4de291419c5, s5 8490e20097b8a31f, r2_19 0715cbe8f4bb7105, r3_15
+  95c3dafbbf6fdeb6): the rules use only past news, so the judge files can be built when the archive reaches 2025-07.
+- 01:05 **H9** first "why is X trading higher" explainer (1,141 select trades): `hold60 mean +6.1% ex-top3 +4.7%
+  median +0.1% vs usual +5.6% P 0.00 | ride MEETS` (also trail60). Standing-rule controls: same-day control 156,104
+  trades: **event minus control -1.0% (median -5.4%, 40% above, P 0.75) -> FAILS**; same stocks on same-size up days
+  without an explainer: +4.7% (median -5.2%). Year means: 2020 +29%, 2021-23 -4..-8%: market timing (the 2020
+  rebound). **Not registered; explored-dead (REGIME + price-first).**
