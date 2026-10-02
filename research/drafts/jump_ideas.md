@@ -152,3 +152,33 @@ buyers, each checked against a same-stock no-event control before registering** 
 | R2-25 | **Buyback authorization >= 15% of market cap, un-gapped** (headline $ amount vs XBRL shares x price; next open gap < 3%) | R | D | The size relative to the company is missed by the market at the open | GAP (un-gapped only), TEXTBOOK | N + E | 30-80 | 3 |
 
 Round 2 total: 20 ideas (R2-1..R2-5, R2-7, R2-9, R2-13, R2-14, R2-15..R2-25).
+
+## Round 3 (18:50, before any outcome of these): new data sources and LLM fact extraction
+Why things die so far: EXIT LIQUIDITY (crowd attention), TWO-WAY, LOTTERY, PRICE PROXY/REGIME, TOO WEAK (own money
+and filing milestones earn the stock's usual +1-2% over 60 sessions). Round 3 uses data and methods not used yet:
+SEC fails-to-deliver files, the Federal Register, SEC Form 13F data sets, USPTO grants, the cached Nasdaq earnings
+calendar, and LLM extraction of FACTS from filings (prompt section 3a). Every idea still needs an informed or forced
+buyer, and any MEETS gets a same-stock no-event control before registering.
+
+| # | idea | track | tag | cause sentence | death dodged, how | data | sig/yr | novelty |
+|---|---|---|---|---|---|---|---|---|
+| R3-1 | **First revenue ever**: XBRL revenue > 0 in an original filing after >= 4 reported quarters of zero/absent, micro caps | R | D | A pre-revenue company becomes a business; screens and funds that need revenue can own it | TOO WEAK? milestone with a forced buyer (revenue screens) | E companyfacts | 30-80 | 3 |
+| R3-2 | **Fails-to-deliver spike**: SEC FTD quantity >= 0.5% of shares outstanding for a small cap (file published ~2 weeks after) | J | W | Persistent fails force buy-ins (Reg SHO close-out); short covering then jumps | EXIT LIQ (forced buyers, not the crowd) | SEC FTD files (to verify) | 100+ | 4 |
+| R3-3 | **FDA advisory committee run-up**: Federal Register notice of an adcom naming a listed sponsor's product; buy 21 sessions before the meeting, sell the session before | R | S | Biotech traders buy into a dated binary event and sell before it | LOTTERY (exit before the binary), GAP (notice weeks ahead) | Federal Register API (to verify) | 20-40 | 3 |
+| R3-4 | **First patent ever granted** to a listed micro-cap assignee (USPTO weekly grants, public Tuesday) | R | D | A first patent is a moat milestone few holders see in the USPTO feed | GAP (slow database), EXIT LIQ | USPTO/PatentsView (to verify) | 30-80 | 4 |
+| R3-5 | **Earnings date moved earlier** by >= 7 days vs the same quarter last year (Nasdaq calendar snapshots) | J | D | Companies with good news report early (informed timing); bought when the date is known, held through the report | TEXTBOOK (published, but not on small caps with a daily calendar) | cached earn_cal | 100+ | 2 |
+| R3-6 | **13F discovery**: >= 3 different 13F filers open a new position in the same micro cap in one quarter (SEC 13F data sets; public at the filing deadline) | R | D | Institutions discover a name together; their next quarters of buying follow | EXIT LIQ (institutions, not retail); TEXTBOOK (herding papers use large caps) | SEC 13F data sets (to verify) | 50-150 | 3 |
+| R3-7 | **LLM-extracted big contract vs revenue**: 8-K Item 1.01 exhibit -> counterparty and contract value (verbatim) >= 25% of last-year revenue (XBRL) | R | D | The size vs the company is buried in an exhibit | GAP (slow text), TOO WEAK (big relative size only) | E + OpenCode Go (<= 3,000 calls) | 30-80 | 4 |
+| R3-8 | **Russell inclusion announced** by the company (8-K/PR "set to join the Russell 2000/3000/Microcap") in June; held to the recon | R | S | Index funds must buy at the June recon close | REGIME (published effect; small adds only) | E FTS | 100+ | 2 |
+| R3-9 | **Short interest collapses >= 50%** in one FINRA period with the price flat (+-10%) | R | D | Informed shorts leave; the overhang that capped the price is gone | PRICE PROXY (vs itself), EXIT LIQ | SI | 100+ | 3 |
+| R3-10 | **Unsolicited non-binding proposal made public** (FTS 8-K/SC 13D "non-binding proposal" / "unsolicited"), small caps; RIDE to a deal | R | D | A bidder (informed) names a price; boards often extract more or another bidder appears | GAP at the announcement (RIDE after it), LOTTERY | E FTS | 30-80 | 3 |
+| R3-11 | **Treasury in bitcoin** announced by a small cap (headline "adds/purchases bitcoin ... treasury") | J | W | Crypto buyers treat it as a proxy; 2020-21 and 2024-26 waves | REGIME (two waves), EXIT LIQ risk named | N | 20-60 | 3 |
+| R3-12 | **Special dividend >= 10% of price** announced (headline amount vs price), un-gapped | R | D | Income and dividend-capture buyers arrive before the ex-date | GAP (un-gapped), TOO WEAK | N | 20-50 | 2 |
+| R3-13 | **New CEO buys stock in the first 90 days** (8-K Item 5.02 new CEO + their Form 4 P) | R | C | A newcomer with fresh information puts money in | TOO WEAK (own money alone earns ~usual) -> only new-CEO buys | E FTS + F4 | 30-80 | 3 |
+| R3-14 | **Price target raised >= 50% in one note** on a small cap ("Raises PT from $a to $b") | R | H/D | A big target jump drags institutional estimates up over weeks | TEXTBOOK (revisions) -> only huge revisions on small caps | N | 100+ | 2 |
+| R3-15 | **Initiation with >= 100% upside** to the target on a micro cap | R | H | A broker sees double; the buyers it brings arrive over weeks | EXIT LIQ (institutional), TEXTBOOK | N | 100+ | 3 |
+| R3-16 | **Fails-to-deliver collapse after a spike** (FTD back under 0.05% of shares after >= 0.5%): buy-ins done | R | W | The forced buying is over and shorts that covered can't re-short easily | PRICE PROXY | SEC FTD | 50+ | 4 |
+| R3-17 | **Two-year high in Wikipedia views AND an insider buy within 30 days** | R | C | Attention arrives where insiders already bought | EXIT LIQ (only with own money) | WP + F4 | 10-30 | 4 |
+| R3-18 | **First 10-K risk factor naming a hot theme by a micro cap** (FTS 10-K, not 8-K: the slow venue) | R | D | Same as D4 but in the annual report, not a press 8-K | TWO-WAY (D4 died) -> quieter venue | E FTS | 50-150 | 3 |
+| R3-19 | **LLM-extracted "first commercial sale / first order" in a 10-Q MD&A** of a micro cap (verbatim sentence) | R | D | A product reaches its first customer; told in a 10-Q, not a headline | GAP, EXIT LIQ | E + OpenCode Go | 30-80 | 4 |
+| R3-20 | **Analyst coverage dropped by the last broker** (headline "Discontinues/Suspends Coverage") then an insider buy within 60 days | R | C | Orphaned stock, informed buyer, no analyst: maximum neglect + own money | EXIT LIQ, TOO WEAK | N + F4 | 10-30 | 4 |

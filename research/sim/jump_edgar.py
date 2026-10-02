@@ -54,6 +54,25 @@ def r2_13() -> pd.DataFrame:
     return small_only(first_in(E[["sym", "fd"]], 365), 20e6)
 
 
+BIG = {'"Amazon.com Services"': "1018724", '"Amazon Web Services"': "1018724", '"Walmart Inc."': "104169",
+       '"Apple Inc."': "320193", '"Microsoft Corporation"': "789019", '"NVIDIA Corporation"': "1045810",
+       '"Google LLC"': "1652044", '"Tesla, Inc."': "1318605", '"Meta Platforms"': "1326801",
+       '"Department of Defense"': ""}
+
+
+def r2_20() -> pd.DataFrame:
+    """8-K with "Item 1.01" (material definitive agreement) naming a big counterparty, filed by someone other than
+    that company; first per filer in 365 days; ADV$ < $20M."""
+    parts = []
+    for q, own in BIG.items():
+        H = _fts(f'"Item 1.01" {q}', "8-K", 2015)
+        H = H[(H.form == "8-K") & (H.cik != own)]
+        parts.append(H)
+    H = pd.concat(parts).rename(columns={"date": "fd"})
+    E = resolve(H[H.fd >= "2016-01-01"])
+    return small_only(first_in(E[["sym", "fd"]], 365), 20e6)
+
+
 if __name__ == "__main__":
     what = sys.argv[1]
     save(globals()[what](), what)

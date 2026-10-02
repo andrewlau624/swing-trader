@@ -83,6 +83,51 @@ def small_only(E: pd.DataFrame, max_adv: float) -> pd.DataFrame:
     return E[keep]
 
 
+def cik_sym() -> dict[str, str]:
+    """CIK -> ticker: EDGAR's current tickers, else any name the CIK filed under in form.idx 2016-2026 matched exactly
+    (normalized) to an Alpaca asset name (incl. inactive). Cached."""
+    f = ROOT / "data/research/jump/cik_sym.json"
+    if f.exists():
+        return json.load(open(f))
+    from . import event_fetch as F
+    alp = json.load(open(ROOT / "data/research/events/alpaca_asset_names.json"))
+    by_name: dict[str, str] = {}
+    for sym, nm in alp.items():
+        if re.fullmatch(r"[A-Z]{1,5}", sym):
+            by_name.setdefault(_norm(nm), sym)
+    out = {c: [t for t in ts if re.fullmatch(r"[A-Z]{1,5}", t)][0] for c, ts in F.company_tickers().items()
+           if any(re.fullmatch(r"[A-Z]{1,5}", t) for t in ts)}
+    I = pd.concat([F.full_index(y, q) for y in range(2016, 2027) for q in range(1, 5) if (y, q) <= (2026, 3)])
+    I = I[I.form.isin(["10-K", "10-Q", "8-K", "10-K405", "20-F", "S-1", "DEF 14A"])].drop_duplicates(["cik", "company"])
+    for cik, nm in zip(I.cik.astype(str), I.company):
+        if cik not in out:
+            s = by_name.get(_norm(nm))
+            if s:
+                out[cik] = s
+    json.dump(out, open(f, "w"))
+    return out
+
+
+def shares_hist() -> pd.DataFrame:
+    """(sym, end, shares): dei EntityCommonStockSharesOutstanding from XBRL frames CY2014Q1I..CY2026Q3I (cover-page
+    counts; `end` = the cover date, about the filing date). Cached."""
+    f = ROOT / "data/research/jump/shares_hist.parquet"
+    if f.exists():
+        return pd.read_parquet(f)
+    from .tender_fetch import get
+    cs = cik_sym()
+    rows = []
+    for q in pd.period_range("2014Q1", "2026Q3", freq="Q"):
+        j = get(f"https://data.sec.gov/api/xbrl/frames/dei/EntityCommonStockSharesOutstanding/shares/CY{q.year}Q{q.quarter}I.json") or {}
+        for x in j.get("data", []):
+            s = cs.get(str(x["cik"]))
+            if s:
+                rows.append((s, pd.Timestamp(x["end"]), float(x["val"])))
+    D = pd.DataFrame(rows, columns=["sym", "end", "shares"]).sort_values(["sym", "end"])
+    D.to_parquet(f)
+    return D
+
+
 def save(E: pd.DataFrame, name: str) -> pathlib.Path:
     E = E[["sym", "fd"]].drop_duplicates().sort_values("fd").reset_index(drop=True)
     f = PROG / f"events_jump_{name}.parquet"

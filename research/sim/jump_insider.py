@@ -114,6 +114,17 @@ def r2_5() -> pd.DataFrame:
     return X[X.ret <= -0.30][["sym", "fd"]]
 
 
+def r2_17() -> pd.DataFrame:
+    """Officer/director open-market buy (>= $1k; first per stock in 30 days) while the latest PUBLISHED FINRA
+    days-to-cover (settlement + 12 days <= fd) is >= 5."""
+    from .jump_reddit import _last_si
+    X = buys()
+    X = X[X.insider & (X.usd >= 1e3) & (X.fd >= "2020-07-01")].dropna(subset=["sym"])
+    E = first_in(X[["sym", "fd"]].drop_duplicates(), 30)
+    E = _last_si(E)
+    return small_only(E[E.dtc >= 5][["sym", "fd"]], 1e12)
+
+
 if __name__ == "__main__":
     what = sys.argv[1]
     save(globals()[what](), what)

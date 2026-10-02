@@ -294,6 +294,110 @@ def w5() -> pd.DataFrame:
     return _first(L, m, 365, 0, 1e12)
 
 
+# ---- $ amount vs market cap (D2, C5, R2-25, C3) ----------------------------------------------------------------------
+AMT = re.compile(r"\$\s?(\d+(?:,\d{3})*(?:\.\d+)?)\s*(Million|Mln|M|Billion|Bln|B)\b", re.I)
+
+
+def _amount(text: str) -> float | None:
+    m = AMT.search(text or "")
+    if not m:
+        return None
+    v = float(m.group(1).replace(",", ""))
+    return v * (1e9 if m.group(2).lower().startswith("b") else 1e6)
+
+
+def _mcap(E: pd.DataFrame) -> pd.DataFrame:
+    """Attach shares (latest XBRL cover count within 400 days before fd) and mcap = shares x raw close on/before fd."""
+    from .jump_common import shares_hist
+    S = shares_hist()
+    E = E.sort_values("fd")
+    m = pd.merge_asof(E, S.sort_values("end"), left_on="fd", right_on="end", by="sym", direction="backward",
+                      tolerance=pd.Timedelta(days=400))
+    bars = F.raw_bars(sorted(m.sym.unique()))
+    px = []
+    for r in m.itertuples():
+        b = bars.get(r.sym)
+        c = b.close[pd.to_datetime(b.index) <= r.fd] if b is not None and len(b) else []
+        px.append(float(c.iat[-1]) if len(c) else float("nan"))
+    m["mcap"] = m.shares * np.array(px)
+    return m
+
+
+def d2() -> pd.DataFrame:
+    """Contract/award/order headline (<= 2 tickers) with a $ amount >= 10% of market cap; next open gap < 3%."""
+    L = news()
+    X = L[(L.nsym <= 2) & L.headline.str.contains(r"contract|award|order|purchase agreement|supply agreement", case=False)
+          & ~L.headline.str.contains(r"buyback|repurchase|offering|financing|loan|credit facility|notes|dividend", case=False)].copy()
+    X["amt"] = X.headline.map(_amount)
+    X = _mcap(X.dropna(subset=["amt"]))
+    X = X[X.amt >= 0.10 * X.mcap]
+    E = first_in(X[["sym", "fd"]], 30)
+    return _gap_ok(E[E.fd >= "2016-01-01"], 0.03)
+
+
+def c5() -> pd.DataFrame:
+    """D2 events with fewer than 20M shares outstanding."""
+    E = _mcap(d2())
+    return E[E.shares < 20e6][["sym", "fd"]]
+
+
+def r2_25() -> pd.DataFrame:
+    """Buyback/repurchase authorization headline with a $ amount >= 15% of market cap; next open gap < 3%."""
+    L = news()
+    X = L[(L.nsym <= 2) & L.headline.str.contains(r"buyback|repurchase", case=False)].copy()
+    X["amt"] = X.headline.map(_amount)
+    X = _mcap(X.dropna(subset=["amt"]))
+    X = X[X.amt >= 0.15 * X.mcap]
+    E = first_in(X[["sym", "fd"]], 90)
+    return _gap_ok(E[E.fd >= "2016-01-01"], 0.03)
+
+
+def c3() -> pd.DataFrame:
+    """H7 first coverage with fewer than 10M shares outstanding."""
+    E = _mcap(h7())
+    return E[E.shares < 10e6][["sym", "fd"]]
+
+
+# ---- round 2 news ideas ----------------------------------------------------------------------------------------------
+def r2_7() -> pd.DataFrame:
+    """Strategic-alternatives review announced/explored (headline, <= 2 tickers); first per ticker in 365 days."""
+    L = news()
+    m = (L.nsym <= 2) & L.headline.str.contains(r"strategic alternatives|strategic review|explore (?:a )?sale|exploring (?:a )?sale",
+                                               case=False) & ~L.headline.str.contains(r"conclude|complet|ends|terminat", case=False)
+    return _first(L, m, 365, 0, 1e12)
+
+
+def r2_19() -> pd.DataFrame:
+    """Second upgrade within 10 days on a ticker (headline 'Upgrades <name> to ...'), ADV$ < $20M."""
+    L = news()
+    X = L[(L.nsym == 1) & L.headline.str.contains(r"\bUpgrades?\b", case=True)].sort_values("fd")
+    X = X.drop_duplicates(["sym", "fd"])
+    prev = X.groupby("sym").fd.shift(1)
+    E = X[(X.fd - prev).dt.days.between(0, 10)][["sym", "fd"]]
+    E = first_in(E, 60)
+    return small_only(E[E.fd >= "2016-01-01"], 20e6)
+
+
+DIV = re.compile(r"(?:Raises|Increases|Hikes|Boosts).*?Dividend.*?(?:from|From) \$?(\d*\.\d+|\d+)\s*(?:/Share|Per Share)?\s*(?:to|To) \$?(\d*\.\d+|\d+)")
+
+
+def r2_22() -> pd.DataFrame:
+    """Dividend raised >= 50% (headline 'raises ... dividend ... from $a to $b', b >= 1.5a), ADV$ < $20M."""
+    L = news()
+    X = L[(L.nsym == 1) & L.headline.str.contains("Dividend", case=False)].copy()
+    m = X.headline.str.extract(DIV)
+    X = X[m[0].notna()].assign(a=m[0].dropna().astype(float), b=m[1].dropna().astype(float))
+    X = X[(X.a > 0) & (X.b >= 1.5 * X.a)]
+    return _first(X, X.index == X.index, 180, 0, 20e6)
+
+
+def r2_14() -> pd.DataFrame:
+    """Emergence from Chapter 11 (headline 'emerges/emerged from Chapter 11/bankruptcy'), first per ticker."""
+    L = news()
+    m = (L.nsym <= 2) & L.headline.str.contains(r"emerg\w* from (?:Chapter 11|bankruptcy)", case=False)
+    return _first(L, m, 3650, 0, 1e12)
+
+
 if __name__ == "__main__":
     what = sys.argv[1]
     save(globals()[what](), what)
