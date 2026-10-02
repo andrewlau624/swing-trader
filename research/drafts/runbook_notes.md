@@ -226,3 +226,8 @@ mean +1.68% worst -20.6% | hold 20 hit 52% mean +2.45% worst -46.8%. RARE gate F
 trades -> RARE. Deal report, select, ADV >= $1M, 16 deals (4/yr): hold 1 hit 69% mean +0.21% worst -4.9% | hold 5
 hit 69% mean +2.26% worst -7.9% (closest; mean < +3%) | hold 20 hit 50% mean +0.73% worst -17.3%. RARE gate FAILS.
 Explored-dead.
+
+## X3. First-ever buyback, 8-K `"inaugural share repurchase"` (extra row X3) — explored-dead
+41 hits -> 41 events (2022-26). Explore ADV >= $20M: 1 trade (too few). Deal report, select, ADV >= $1M, 7 deals:
+hold 1 hit 29% mean -1.95% | hold 5 hit 29% mean -4.68% | hold 20 hit 43% mean -1.54%, worst -11.2%. RARE gate
+FAILS. Explored-dead.
