@@ -9,6 +9,17 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Discovery loop (2026-10-02, session llm-trader-mid-01): no new edge; N stays 760
+- 40 ideas written before any outcome (`discovery_ideas.md`), 8 killed; a 168-form-type enrichment census of 162,848
+  big 5-day moves (`discovery_enrich.py`, K=168); verdicts: **I26 insider exercise-and-hold (Form 4 M, no same-day S)
+  explored-dead** (9610 trades, net −0.3bp, t −0.11 — an exercise delivers shares at a strike, so no purchase signal);
+  **8-K12B successor/shell registration explored-dead** (~6/yr, hit 38%, worst −36%). Quick-kills: I14 Reg SHO
+  threshold list (no power), I29 CEF manager buys (58 in 6 yr), I37 same-issuer exchange offers (too few), I4/I39
+  rights offerings (text unidentifiable, payoff ~0), I1/I2/I15 round-up pre-announcement (B1's exact payoff; live
+  alert exists), I22 deregistration (OTC, wrong side). `study_discovery_round33b.md`, `discovery_log.md`.
+- Surviving families are unchanged: own-money purchases (ID3/EV2) and odd-lot/round-up/split-off contract payoffs
+  (B1/B2, live alerts). No N registered.
+
 ## Discovery loop (2026-10-02, session llm-trader-c5): contract payoffs, second session
 - **DL1 DRIP optional cash purchases at a fixed 5% discount: PAYS (deal rule, no N; registered 2f57a54).** UMH's plan
   sells new shares at max(95% x 4-day mean of (H+L)/2, 95% x ID-day (H+L)/2) on the 15th, $1,000/month cap. $1,000 a
