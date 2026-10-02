@@ -10,6 +10,25 @@ Both share a shape. **Find more of that shape.** Read their writeups first (grep
 odd-lot), then `CLAUDE.md`, NEXT.md (top + do-not-redo table), and the last amendment of
 `research/drafts/round1_prose.md` for the current program N (shared with the lab session).
 
+## What the user wants (rank by this)
+**Few, very high-confidence signals, sized up when they fire**, not weak signals spread over many trades. Prefer
+events where the reason someone pays is obvious and the win rate is high, even if they are rare (a handful a
+year is fine). For each candidate, report its hit rate, its average and worst outcome, and how many independent
+past events support it, not just its mean return.
+
+**Leverage the confident ones, with discipline:**
+- Size by shrunk Kelly. Compute the Kelly fraction from the edge's mean and variance, shrink it for the number
+  of past events (Baker-McHale), and use at most half of it. Report the size it implies at $2.3k / $10k / $25k.
+- Brokerage only for margin: the Roth cannot borrow or short, so a Roth version is cash-sized.
+- Hard caps:
+  - per-event loss at most ~2% of equity;
+  - per-event exposure at most the leg's cap;
+  - total open event exposure at most the account's buying power minus what the live legs need.
+- Show the sized-up version's 5y P(DD > 30% / > 50%) beside its gain. A big edge sized too big still fails
+  the P(DD > 50%) <= 5% bar.
+- For contractual deals with a bounded worst case (odd-lot tenders, SPAC trust redemptions), size to the
+  deal's cap. The size is set by the contract, not by Kelly.
+
 ## The shape (every candidate must have all four)
 1. **A public, timestamped event**: an SEC filing, an exchange notice or a corporate action, knowable before you
    trade (point-in-time: use EDGAR `acceptanceDateTime`, not the filing date).
