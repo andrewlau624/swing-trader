@@ -30,3 +30,4 @@
 | Discovery (c5) C16 forward splits / stock dividends whose fractions are ROUNDED UP (1 share -> 2 in a 3-for-2) | llm-trader-c5 | claimed 2026-10-02 12:00 | done: fast kill (0 listed non-integer round-ups 2016-26; only OTC shells, TRT 2-for-1) |
 | Discovery (c5) C15 term / target-term closed-end funds bought ~1 year before the charter termination date | llm-trader-c5 | claimed 2026-10-02 12:10 | done: DL5 DEAD (23 funds, median excess -0.77%) |
 | Jump hunt round 1: H1-H23, D1-D11, C1-C11, V1-V5, S1-S5, W1-W6 (jump_ideas.md; news/Reddit/Wikipedia attention, slow databases, collisions, run-ups) | llm-trader-51 (prompt_jump_hunt.md) | claimed 2026-10-02 12:55 | in progress |
+| Index beat round 1: C1-C16, A1-A19, B1-B14, W1-W6 (index_beat_ideas.md; after-tax/account structure, deal payoffs, robust-book) | llm-trader-ee (prompt_index_beat.md) | claimed 2026-10-02 13:40 | in progress |
