@@ -35,6 +35,11 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   `study_ev1_cluster_insider.md`. Session notes: `runbook_notes.md`.
 
 ## Round 32 (2026-10-02): event and structural edges — two contractual PASSES with alerts (reverse-split round-up, split-off exchange offers), four dead; N 757 (760 after EV2)
+- **ON (user, 2026-10-02):** round-up buys are AUTOMATIC on the server (`ROUNDUP_AUTO=1` in .env; `roundup_orders.py`): 1 share
+  per account (Brokerage + Roth) at Schwab's ask +2% before each qualifying split, sold once the post-split share shows
+  (>= 2 days after the ex-date); <= $25, <= 3/day; an account stops after 2 cash-in-lieu outcomes with none rounded (email).
+  State: state/roundup-orders.json. **First deal: VIVK 1-for-15, bought 1 + 1 at $0.3043 on 10-02, ex 10-05: the
+  Schwab check lands ~10-07.** Split-offs stay manual: `make splitoff-buy PARENT=MDT` (buys after you type the ticker).
 - **B1 reverse-split round-up (family B, no N): PASS as a free option.** Issuers that round fractional post-split shares
   UP at the holder level turn 1 pre-split share into 1 post-split share (~N x). 344 splits 2016-26 (none at the DTC
   "participant level"): **+$4.36 mean / +$3.56 median per account if rounded, ~$0 if cash in lieu**, median capital
