@@ -2130,3 +2130,24 @@ Reported: months/yr, hit rate, mean/median/worst per month, by year, $/yr for on
 so $/yr is the same at $2.3k / $10k / $25k; %/yr = $/yr over the balance), plus info-only lines for exit at ID+1 and
 ID+10 and for UMH's $5,000 pre-2021 cap. **Verdict: PAYS if mean P&L per month > 0 with hit rate >= 60% and the
 yearly sum > 0 in at least 2/3 of years; otherwise DEAD.** No change to the rule after the list is computed.
+
+## Amendment — Discovery loop (session llm-trader-c5), deal rule DL2: issuer offers for its own listed warrants (no N; registered before any outcome)
+
+Source reading (2026-10-02): FTS SC TO-I 2019-26 for "offer to exchange"/"offer to purchase" + "warrants" + "consent
+solicitation"/"warrant amendment". Read Vivid Seats 2022 (0.240 Class A shares per public warrant), Payoneer 2024
+($0.78 cash per warrant; warrants last $0.40) and AvePoint 2024 ($2.50 cash; last $1.87). The issuer pays a fixed
+consideration per tendered warrant and asks for a consent that lets it force the rest at a lower ratio; the offer
+usually needs that consent to close.
+
+**Deal set (fixed now):** every SC TO-I 2019-01 .. 2026-09 by an issuer for its own exchange-listed warrants with a
+fixed consideration per warrant (r shares, or $c cash, or both), terms parsed from the original offer text (ratio/cash,
+warrant symbol); a deal is dropped only if no warrant bars exist on Alpaca for the entry date.
+
+**Payoff (same template as Round 31's odd-lot study):** let L = the date of the last SC TO-I/A of the offer (the
+results/expiry amendment). **Entry = warrant close 5 sessions before L** (or the first session after the original
+SC TO-I if that is later). **Completed** if the warrant has no Alpaca bar more than 10 sessions after L (the amendment
+retired them); then value = c + r x (stock close 2 sessions after L). **Not completed** (warrants still trading):
+value = warrant close 2 sessions after L. Return = value / entry − 1. Whole warrants; at $2.3k/$10k/$25k the stake is
+min(10% of equity, 5% of the warrant's 20-session median dollar volume before entry). No fees (Schwab $0 voluntary
+reorg). Reported: deals/yr, hit, mean/median/worst return, $/yr at the three sizes, completed vs not, share vs cash.
+**Verdict: PAYS if the median return > +1%, the mean > 0 and hit >= 70%; otherwise DEAD.** No rule change after the list.
