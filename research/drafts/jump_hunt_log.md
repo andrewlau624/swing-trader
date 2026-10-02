@@ -184,3 +184,12 @@
   - **R4-4** special committee + proposal (142 -> 97): `tp205 x2.3 mean +0.1%`; `hold60 +2.2% ex-top3 -1.3%`. Dead.
   **Sale-preparation paperwork carries no takeover premium for a buyer at the next open.**
 - 22:10 `jump_control.py` committed: the standing rule's same-day control (idea's own stocks, same entry mornings).
+- 22:40 **R4-5** strategic alternatives + financial advisor (519 events; 303 select -> 155): `hold20 mean +3.5% ex-top3
+  +1.1% P 0.04 | ride MEETS` (also trail20, hold60 +7.3%, trail60). **R4-6** + confidentiality agreements (92; 50 ->
+  24): `hold20 jump 20.8% vs 8.0% (x2.6) mean +6.0% ex-top3 +1.7% P 0.04 | jump MEETS | ride MEETS`. Standing-rule
+  control (`jump_control.py`): R4-5 event minus same-day control +4.4% (P 0.004), R4-6 +4.9% (P 0.057) -> both pass.
+- 22:45 Registered **J3** (R4-5, RIDE hold20) and **J4** (R4-6, JUMP hold20), N 762 -> 764 (04a1c85); peer told.
+- 22:47 **J3 judge**: `hold20 n 54 (27/yr) jump 9.3% vs base 8.1% (x1.1) mean net -1.7% ex-top3 -6.3% median -2.5%
+  vs stock's usual +1.7% hit 33% worst -40% best +106% P(mean<=0) 0.71` -> **RIDE VERDICT: DEAD**.
+  **J4 judge**: `hold20 n 7 (4/yr) jump 0.0% vs base 4.5% (x0.0) mean net -4.9% ex-top3 -9.2% median -0.7% vs stock's
+  usual -3.0% hit 29% P(mean<=0) 0.96` -> **JUMP VERDICT: DEAD**. k = 4. Write-up `study_jump_r4_strategic_alternatives.md`.

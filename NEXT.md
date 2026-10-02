@@ -27,9 +27,10 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   of oversold/TOW/momentum all slice `< today`.
 
 ## Jump & ride hunt (2026-10-02, session llm-trader-51, `prompt_jump_hunt.md`): running
-- 62 ideas (`jump_ideas.md`), log + STATE in `jump_hunt_log.md`. N 761 (J1). Judged k = 2: **J1 first profitable
+- 62 ideas (`jump_ideas.md`), log + STATE in `jump_hunt_log.md`. N 761 (J1). Judged: **J1 first profitable
   quarter, RIDE hold60: DEAD** (judge +5.5%/trade but ex-top3 −1.8%, P 0.21; `study_jump_d6_first_profit.md`);
-  **J2 insider buy after a 30% fall, JUMP tp205: DEAD** (judge x1.3, P 0.18; the fall, not the insider, carried select).
+  **J2 insider buy after a 30% fall, JUMP tp205: DEAD** (judge x1.3, P 0.18; the fall, not the insider, carried select);
+  **J3/J4 8-K strategic alternatives + advisor / NDAs: DEAD** (judge −1.7%, P 0.71 / 7 trades). k = 4, N 764.
   Explored-dead: H17 trade-count spike (two-way), D4 theme 8-K (two-way), D5 hot-word renames (rare), D9 first
   Phase 3 (lottery).
 
@@ -968,6 +969,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Idle night cash in GLD close->open instead of T-bills (Reddit R6) | **dead** | 2021-23 −4.5pp/yr, NW t 0.27 |
 | Night leg x0.5 when Cboe COR1M z >= +1 (Reddit R7) | **dead** | lowers 2021-23 Sharpe, −2.4pp CAGR |
 | Congress (STOCK Act) trade copying (Reddit R8) | **no data** | free dumps 403 |
+| 8-K strategic alternatives + financial advisor (RIDE hold20) / + confidentiality agreements (JUMP hold20) (Jump hunt J3/J4, N 763-764) | **dead (judge half)** | select +3.5% / +6.0% and beat a same-day control, but the takeover tail did not repeat: judge −1.7% (P 0.71) / 7 trades |
 | Officer/director buy after a 30% 60-session fall, +20% limit in 5 sessions (Jump hunt J2, N 762) | **dead (judge half)** | select jump x2.6 / +0.5%, but a no-insider control of the same falls did as well (price proxy); judge jump x1.3, P 0.18 |
 | First profitable quarter after >= 6 losses, small caps, 60-day hold (Jump hunt J1, N 761) | **dead (judge half)** | select +7.3%/trade (survivorship + 2016/2020 timing), judge +5.5% but ex-top3 −1.8%, P 0.21: lottery |
 | Retail IPO-access allocations, sold after 30 sessions (discovery DL7) | **dead (bound)** | cold debuts (where retail is filled) −7.4% median, hit 40%; pop is in hot deals |
