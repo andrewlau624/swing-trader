@@ -130,6 +130,8 @@ daily:
   news_judge_model: deepseek-v4-flash
   news_judge_effort: low
   news_judge_max_calls: 20
+  insider_day: shadow            # Round 31 ID3: insider-purchase session, SHADOW ONLY (make insider-shadow, weekdays
+                                 # before 09:00 ET). Gate: 300 scored trades, mean net > 0, t >= 2 (study_id_insider_day.md)
   night_impact_y: null           # impact cap (Study X): order <= ADV (edge/(3 Y sigma))^2. null = off until
                                  # `make review` section 8 measures Y; 4 is the robust choice (Study X), 1-2
                                  # if fills show low impact. At ~$2k it binds only on ~300%-vol names.

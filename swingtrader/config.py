@@ -222,6 +222,10 @@ class DailyCfg:
     news_judge_model: str = "deepseek-v4-flash"
     news_judge_effort: str = "low"             # Claude only
     news_judge_max_calls: int = 20             # new verdicts per night, shared by every book
+    # Round 31 Study ID3 (swingtrader/daily/insider_shadow.py): the session after an officer/director open-market
+    # purchase Form 4, opening cross -> closing cross, ADV$ >= $20M. SHADOW ONLY (`make insider-shadow` before the
+    # open logs state/insider-day.jsonl); there is no live mode. "off" disables the log.
+    insider_day: str = "shadow"
     # Impact cap (research Study X): each night order <= ADV * (edge / (3 Y sigma))^2,
     # the size past which square-root impact eats more than the order adds. None = off
     # (Y is unmeasured: `make review` section 8 fits it from live fills as orders grow).

@@ -379,12 +379,18 @@ news-eval:    ## forward test of the LLM news judge on state/news-judge.jsonl (v
 qi-eval:      ## forward test of the 15:40 quote-imbalance tilt (Round 24 BB; verdict read once at 300)
 	@PYTHONPATH=. $(PY) -m research.sim.quote_imbalance_eval
 
+insider-shadow: ## Round 31 ID3: score + plan the insider-purchase session shadow (weekdays before 09:00 ET; no orders)
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.insider_shadow $(DATE)
+
 forward-status: ## every forward-only shadow gate in one place (AU3 is in `make review` section 9)
 	@echo "== Round 23 BA: LLM news judge (verdict once at 300) =="
 	@PYTHONPATH=. $(PY) -m research.sim.news_judge_eval 2>/dev/null || echo "  no state/news-judge.jsonl yet"
 	@echo ""
 	@echo "== Round 24 BB: 15:40 quote imbalance (verdict once at 300) =="
 	@PYTHONPATH=. $(PY) -m research.sim.quote_imbalance_eval
+	@echo ""
+	@echo "== Round 31 ID3: insider-purchase session (gate at 300 scored trades) =="
+	@PYTHONPATH=. $(PY) -c "from pathlib import Path; from swingtrader.daily import insider_shadow as s; print(' ', s.gate(s._read(Path('state')/s.LOG_NAME)))"
 	@echo ""
 	@echo "== Round 19 AU3 tug-of-war tilt: run  make review SINCE=2026-09-22 ARGS=--no-replay  (section 9) =="
 
