@@ -1,24 +1,18 @@
 # Jump & ride hunt log (prompt_jump_hunt.md), session llm-trader-51
 
 ## STATE (update after every idea)
-- program N: 768. k (ideas judged or registered): 8 — J1-J4 judged DEAD; **J5 (R2-25 buyback >= 15% of mcap,
-  un-gapped, JUMP tp205), J6 (S5 forward split, JUMP trail20), J7 (R2-19 two upgrades in 10 days, JUMP tp205), J8
-  (R3-15 initiation with a 2x target, RIDE hold60) registered, judges pending** the news archive reaching 2025-07
-  (rebuild with `jump_rebuild.py`: select-half hashes must match; they matched on the archive through 2024-03).
-- Ideas explored: 77 (see the log). Rounds of idea generation: 4 written (R1 62 + R2 20 + R3 20 + R4 20 = 122).
-- dropped before a run (data): H11/C8, S1/S1v, D7, R3-4, R3-20.
-- running / queued: R4-18, R4-19 (EDGAR builds + explore queue), H21 D1 D8 C6 C5 (explore queue), R3-18 (10-K
-  themes, queued), R3-7 (LLM extraction, after R3-18), R3-6 (13F; explore after the news download: 13k symbols of
-  bars), H4/V1/H13 (WSB 2021 still downloading: January 2021 alone is enormous).
-- data sources verified: news (at 2024-04, 3 threads till Sunday 16:47), Reddit (small subs; WSB 2016-20 + 2022-24),
-  Wikipedia (+ CEOs), EDGAR FTS/form.idx/companyfacts/frames, CT.gov, openFDA, Federal Register, SEC FTD, SEC 13F,
-  Form 345 2014-26, FINRA SI 2020-06+, Nasdaq earnings calendar.
-- data sources broken: defense.gov (403), PatentsView bulk (403), Yahoo trending 2016-17 snapshots.
-- why things die (running): EXIT LIQUIDITY (crowd attention), TWO-WAY, LOTTERY (incl. J1, J3, J4), PRICE PROXY /
-  REGIME (J2; H16, R3-17, H9 = market timing vs a same-day control), TOO WEAK (informed buyers, filing milestones,
-  sale-preparation paperwork earn ~ the stock's usual), TOO RARE. What survives explore + control so far: company-
-  or analyst-driven events with a size condition (J5) or a retail-catalyst calendar (J6), and analyst clusters (J7, J8).
-  Standing rule: a MEETS must beat a same-day control (and a same-stock control when a price condition is involved).
+- program N: 768 (peer sessions have since taken 769-772). k (ideas judged): 8 — J1-J8 all DEAD on the judge half.
+- Ideas explored: 89 (+ S2v as S2's second look). Rounds of idea generation: 4 (R1 62 + R2 20 + R3 20 + R4 20).
+  Stop-rule counts met (>= 4 rounds, >= 80 explored); finishing the feasible sources before the stop summary.
+- running: R3-7 (LLM fact extraction from 2,021 small-cap 8-K Item 1.01 filings, ~24 calls/min), R2-24 and R4-7 (EDGAR
+  builds), H20 (subreddit creation dates, Arctic Shift), H24 (Yahoo trending snapshots, Wayback, ~1 per 4 s),
+  WSB 2021 (for H4, V1, H13; ~7 more hours at January's pace).
+- dropped before a run (data/rarity): H11/C8 (option alerts end 2017), S1/S1v (rare), D7 (runner needs ADV), R3-4
+  (PatentsView 403), R3-20 (rare); not built (heavy / unavailable / very low prior, listed in the stop summary):
+  D3 D11 V3 V4 V5 W1 W3 W4 W6 R2-3 R2-9 R2-16 R2-18 R2-21 R2-23 R3-1 R3-19 R4-9 R4-20.
+- why things die: EXIT LIQUIDITY (crowd attention), TWO-WAY, LOTTERY (every judged idea died with its mean carried
+  by its top 3 trades or too few trades), REGIME/timing (H16, R3-17, H9, V2, C2 failed the same-day control), TOO WEAK
+  (informed buyers and filing milestones ~ the stock's usual), TOO RARE.
 
 ## Log
 - 12:45 setup: the prompt names `swing-trader`; the session started in the `llm-trader` checkout (no data caches); work in
@@ -265,3 +259,4 @@
   - **R4-17** (1 select -> 0 trades); all fail
   - **D10** (54 select -> 36 trades); hold1 x16.7 -0.7%/-1.7%/-1.0% P0.83; tp205 x1.2 -1.6%/-3.0%/-1.6% P0.89; hold20 x0.7 -4.4%/-7.7%/-3.2% P0.95; hold60 x0.8 -2.5%/-6.5%/+1.8% P0.73; tp2060 x1.2 +0.2%/-1.6%/+14.1% P0.47; all fail
   All dead (C9 theme news spike -> theme small caps loses 2-4%; R4-10, R4-17, D10 too rare). 87 explored. R3-7 (LLM extraction) restarted after a run where every call failed (no OpenCode key in this checkout's environment; the 2,020 cached failures were deleted, failures are no longer cached; the key is loaded from the llm-trader checkout's .env of the same repo); ~24 calls/min.
+- 16:37 PDT **R3-13** new-CEO-era insider buys (1,324 select -> 881): `hold60 +1.9% ex-top3 +1.2% median -0.8% P 0.04`, `tp2060 +1.3%`; too weak. **R3-6** 13F discovery (21,088 select -> 8,451): every cell negative (`hold60 -2.5%`). Both dead; 89 explored. (An empty R3-7 event file left by the crashed run was 'explored' by the queue with 0 events: deleted, not a look.)
