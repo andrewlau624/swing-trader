@@ -114,3 +114,11 @@ Because the idea was looked at twice, EV2 is registered as 2 variants: N 758 -> 
 
 **Judge (N 760): PASS.** Judge half event net +31.5bp, daily-sleeve NW t +2.54; full net +35.5bp, NW t +3.57,
 sign-flip 100%, placebo 100%, DSR 0.553. Writeup + shadow spec: research/drafts/study_ev2_first_insider_buy.md.
+
+## 3. SC 13G originals (menu row 3) — explored-dead
+Event: full-index form "SC 13G" or "SCHEDULE 13G" (EDGAR renamed it Dec 2024), filer CIKs with <= 50 of these a quarter
+dropped, CIK -> ticker via company_tickers (`research/sim/events_form_build.py 13g`); 50,499 events 2020-01..2026-09.
+Select half, ADV >= $20M: events 21545 -> trades 4082 (1020/yr); net +9.6bp, median +8.1bp, hit 51%, **t +1.82**;
+2020 -67.3 / 2021 -7.5 / 2022 +5.6 / 2023 +48.1bp. FREQUENT: FAILS.
+One other floor (ADV >= $1M): 8357 trades, net +6.1bp, hit 51%, t +1.59: FAILS. Explored-dead; 2024-26 never read.
+(One year, 2023, carries it all.)
