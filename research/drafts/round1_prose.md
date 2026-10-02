@@ -2469,3 +2469,13 @@ judge it. Insider data here starts 2020-01 (EV2 events 2022+); 2016-20 has never
 - **Causality:** every input dated <= fd (filing date) or <= the session before d (ADV, prior close, ticker guard).
   `tests/test_causality.py` style check: truncating bars after d-1 leaves the event list unchanged.
 - Runner: `research/sim/goal_g2.py` (to be written after this commit). k = 1 when judged.
+
+## Amendment — Goal hunt, G2-F: the one NEAR follow-up for Study G2 (forward only; no new N)
+
+G2 judged NEAR (`study_goal_g2.md`): every registered 2016-20 holdout bar passed for G2a at 2.5bp (+68.7bp/trade, NW t 3.48,
+lottery test passed, null 100th pct, +11.3pp/yr after tax vs SPY at $2.3k and $10k), but 2021 (untouched) was −10bp/trade
+and the size cut's 2024-26 judge half is contaminated. Follow-up, registered before any forward outcome: when the live
+ID3 shadow's "EV2 x buy >= $500k" gate (testing.py, `make forward-status`) reaches 60 scored trades, PASS iff mean net
+per trade at the measured live cost >= +30bp AND NW t >= 1.5 AND the G2a book on those trades (SPY core, 0.5x/event,
+cap 1.0x) beats SPY by >= +10pp/yr after tax at $2.3k and $10k; otherwise DEAD (EV2-big folds back into ID3). No interim
+decisions. Same rule as G2; no new variant, so N stays 772.

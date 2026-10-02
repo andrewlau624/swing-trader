@@ -286,7 +286,7 @@ def judge():
                 ex5t = (w * net).sort_values().iloc[:-5].sum()
                 log(f"   {lab}: overlay sum {dayp.sum():+.3f} NW t {TF.nw_t(dayp):+.2f} | ex best 5% days {ex5d:+.3f} | ex best 5 trades "
                     f"{ex5t:+.3f} | years>0 {(dayp.groupby(dayp.index.year).sum() > 0).sum()}/{dayp.index.year.nunique()} "
-                    f"| DSR(SPY+overlay, N {N_PROG}) {dsr(spy_r.reindex(days).fillna(0) + dayp, N_PROG):.3f}")
+                    f"| DSR N {N_PROG}: overlay {dsr(dayp, N_PROG)['dsr']:.3f}, SPY+overlay {dsr(spy_r.reindex(days).fillna(0) + dayp, N_PROG)['dsr']:.3f}")
                 if per == 0.5 and wl.startswith("holdout"):
                     P = null_pool(days)
                     rng = np.random.default_rng(7)

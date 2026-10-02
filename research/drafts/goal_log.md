@@ -1,11 +1,14 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 1 · ideas written 10 (G1-G10) · k (judged) 0 · program N 772 (G2 took 769-772; next free 773)
-- running: `goal_g2 build` (2014-21 Form 345 -> EV2-big events 2016-21, counts only)
-- track streak: T1 x1 (G2)
-- NEXT: read the build counts; if the holdout has >= 100 G2 trades, run `goal_g2 judge` once (the one look) and write
-  `study_goal_g2.md`. Then rotate to T5 (G1 contract stack) or T2 (G4 ADR terminations count).
+- round 1 · ideas written 10 (G1-G10) · k (judged) 1 · program N 772 (next free 773)
+- NEAR: **G2 EV2-big SPY-core overlay** (holdout 2016-20 all bars pass at 2.5bp; 2021 flat; no clean judge half) ->
+  follow-up G2-F = the forward ev2_big gate (60 trades). Nothing else running.
+- track streak: T1 x1 (G2) -> next must rotate if T1 hits 3
+- NEXT: T5 (G1 contract-payoff stack): gather per-event P&L for B1 / B2 / odd-lot tenders from their study files and
+  count judge-half (2024-26) events; then pre-register G1 as a book. Side note for a T1 idea: ID3 >= $500k without the
+  silence filter was +35.7bp x 358/yr on the holdout and +23.8bp in 2021 (reported row; needs its own registration;
+  the rule was seen on 2016-21 now, so its clean test would be forward or 2022-26 IF that cut was never computed there).
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -25,3 +28,12 @@
   (conditioned on a crash, 5-day jump target), different exit; the EV2-big open->close rule was never computed on 2016-21.
   Using llm-trader-51's 2014-19 Form 345 zips (data/research/jump/insider/, read-only); my own duplicate downloads in
   night/insider were deleted so `outside_box.insider_buys()` (which globs that folder) can't change.
+- 2026-10-02 17:00 **G2 judged: NEAR** (study_goal_g2.md). Holdout 2016-20, 195 trades: +68.7bp/trade (tier_hi +55.4),
+  every year > 0, NW t 3.48, ex-best-5%-days +0.33 / ex-best-5-trades +0.46 (lottery test passes), null 100th pct, G2a
+  after tax vs SPY +11.3pp ($2.3k and $10k, no deposits; +12.5 / +12.2 with $1k/mo), tier_hi +9.0-9.1pp, maxDD 31%,
+  worst month −9.5% (2020-03), worst trade SPG −5.9% of equity; G2b (1.0x) +16.5..+21pp, maxDD 33-34%. Missed bar: a
+  clean judge half (2024-26 saw the cut; untouched 2021 was −10bp/trade, t 0.09). DSR 0.553. Reported rows: EV2 all
+  sizes ~0 (+7.9bp), ID3 >= $500k without silence +35.7bp x 1,788 trades, 2021 +23.8bp: the SIZE cut carries it.
+  Follow-up G2-F registered (forward ev2_big gate, no new N). First judge run crashed on a dsr() dict print after the
+  per-trade lines; rerun = same code, print fixed. Checked a suspicious 2021 IRR (+10.5pp on a ~0 overlay): deposit
+  timing (all wins in Q4 on a larger account), not a bug; time-weighted numbers lead the write-up.

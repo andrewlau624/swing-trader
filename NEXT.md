@@ -9,6 +9,17 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Goal hunt (2026-10-02, session llm-trader-ec, `prompt_strategy_goal.md`): G2 NEAR; N 768 -> 772
+- **G2 EV2-big (officer/director buys >= $500k after 2+ years of no open-market buying) as an intraday overlay on a 100%
+  SPY core, taxable: NEAR.** Judged on the untouched 2016-20 holdout (2014-21 Form 345 sets, registered e6316e8): 195
+  trades, **+68.7bp/trade** net (tier_hi +55.4), every year > 0, NW t 3.48, passes the lottery test (ex best 5% days and
+  ex best 5 trades still > 0), random-pick null 100th pct. After tax vs SPY at 0.5x/event: **+11.3pp/yr at $2.3k and $10k**
+  (tier_hi +9.0pp), maxDD 31%, worst trade −5.9% of equity. **Not FOUND:** untouched 2021 was −10bp/trade, and the size cut
+  was found on 2022-26 so there is no clean judge half. Forward follow-up G2-F = the existing "EV2 x buy >= $500k" gate
+  (60 trades). If it passes: ~+$260 / +$1,130 / +$2,800 a year at $2.3k / $10k / $25k over SPY. `study_goal_g2.md`.
+- Side finding (reported row, not a verdict): ID3 >= $500k WITHOUT the silence filter, holdout +35.7bp x 358 trades/yr,
+  2021 +23.8bp. The buy SIZE, not the 2-year silence, carries the insider day trade.
+
 ## Reddit round (2026-10-02): r/algotrading + 5 subs swept, 6 registered variants, none PASS; N 761 -> 767
 - Full read of r/algotrading 2021-26 (41,472 posts via Arctic Shift; 1,807 substantive + comments, 10 readers vs this
   table). No new edge; nearly every recurring idea is already here. Pre-registered 96c777d; `study_reddit_round.md`.
