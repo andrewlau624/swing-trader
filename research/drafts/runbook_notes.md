@@ -80,6 +80,21 @@ No pre-registration. 2024-26 never read. One line: net +9.6bp (< 10) and t 1.82 
 
 ---
 
+## 4. SC 13D/A amendments: an activist adding shares (menu row 4) — explored-dead
+Event: EDGAR quarterly full index, form exactly `SC 13D/A` (snippet A), <= 50 filings/quarter per CIK, CIK ->
+current ticker. File `data/research/program/events_13da.parquet`. ADV >= $20M, 1-session hold.
+
+Select-half (<= 2023-12-31), ADV >= $20M:
+```
+events 14825 -> trades 2077  (519 per year)
+net per trade -21.1bp  median -21.8bp  hit rate 45%  t -2.82
+by year: 2020: +49.7bp (n 137)  2021: -33.4bp (n 729)  2022: -22.1bp (n 605)  2023: -21.2bp (n 606)
+TRACK FREQUENT (>= 100/yr): net >= +10bp, hit >= 50%, t >= 2: FAILS -> stop, record as explored-dead
+```
+No pre-registration. 2024-26 never read. One line: net −21.1bp, t −2.82 (sign wrong); not tested.
+
+---
+
 # Overnight loop (prompt_overnight_loop.md), session llm-trader-e4, started 2026-10-02 ~06:32 PT
 
 ## 2. First insider purchase in 2+ years (menu row 2) — Study EV2, track FREQUENT
