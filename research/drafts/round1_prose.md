@@ -2405,3 +2405,28 @@ the window AFTER the ex-date). Registered 2026-10-02 before any 2024+ outcome of
 - **Other side:** holders who sell into the announcement pop while retail and option buyers keep buying "cheaper
   shares" into the ex-date (2020-24 split wave: AAPL, TSLA, NVDA, AVGO, CMG, WMT). TEXTBOOK-adjacent (Ikenberry,
   Rankine & Stice 1996 post-announcement drift); REGIME risk: year means swing -5..+6%. k = 6.
+
+## Amendment — Jump hunt, Studies J7 and J8: two upgrades in 10 days on a small cap (JUMP tp205) / initiation with a target >= 2x the price on a micro cap (RIDE hold60) (pre-register; 1 look each, program N 766 -> 768)
+
+Session llm-trader-51, `prompt_jump_hunt.md`, ideas R2-19 and R3-15 (`jump_ideas.md`). Registered 2026-10-02 before
+any 2024+ outcome of either rule was computed. Builders in `research/sim/jump_news.py` (Alpaca/Benzinga headlines;
+fd = fd_of(story time)); event files built from the archive through 2024-01; select-half (fd <= 2023-12-31) subsets
+pinned by sha256 prefix of the (sym, fd) CSV sorted by (fd, sym); each judge runs on the same builder re-run on the
+complete archive, only if its select-half subset hashes the same. Trades by `jump_runner` (fixed costs, windows, gates).
+
+- **J7 (R2-19, `r2_19`)**: single-ticker headline matching "Upgrade(s)" whose previous upgrade headline on the same
+  ticker was 0-10 days earlier; first per ticker in 60 days; 20-day ADV$ < $20M. Select pin **0715cbe8f4bb7105** (310
+  events). Look: `tp205 n 277 (35/yr) jump 8.3% vs base 3.1% (x2.6) mean net +0.7% ex-top3 +0.5% median -0.1% vs
+  stock's usual +1.1% hit 49% worst -31% best +20% P(mean<=0) 0.09 | jump MEETS` (shortest hold; RIDE also met at
+  hold60 +5.9% and trail60). Control: event minus same-day control **+1.0%** (median +0.4%, 52% above, P 0.021); year
+  means +1.9/+0.2/+1.7/+0.1/-0.4/+1.0/+0.1/-0.5%. Judge: `jump_runner judge data/research/program/events_jump_r2_19.parquet 5 tp20 --track jump`.
+- **J8 (R3-15, `r3_15`)**: "Initiates Coverage" headline (<= 2 tickers) with a price target >= 2x the raw close on/before
+  fd; first per ticker in 365 days; ADV$ < $5M. Select pin **95c3dafbbf6fdeb6** (230 events). Look: `hold60 n 140
+  (18/yr) jump 27.9% vs base 21.1% (x1.3) mean net +6.1% ex-top3 +2.7% median +1.0% vs stock's usual +6.0% hit 52%
+  worst -85% best +170% P(mean<=0) 0.05 | ride MEETS` (only hold60 / tp2060 met; hold60 is the shorter... equal
+  holds, hold60 = the plain rule). Control: **+5.0%** (median -1.4%, 46% above, P 0.079): a right tail. Events fall
+  to 1-2 a year after 2020 (the headline format with a target appears less), so the judge half may have < 15 trades.
+  Judge: `jump_runner judge data/research/program/events_jump_r3_15.parquet 60 hold --track ride`.
+- On a PASS: `confirm` once with the same arguments. **Other side:** analysts (semi-informed) whose clients act over
+  weeks, vs. holders who ignore notes on tiny names. TEXTBOOK-adjacent (recommendation drift); REGIME risk.
+  k = 8 after these (J1-J8).
