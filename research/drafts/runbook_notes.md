@@ -137,3 +137,8 @@ Select half, ADV >= $20M: events 21545 -> trades 4082 (1020/yr); net +9.6bp, med
 2020 -67.3 / 2021 -7.5 / 2022 +5.6 / 2023 +48.1bp. FREQUENT: FAILS.
 One other floor (ADV >= $1M): 8357 trades, net +6.1bp, hit 51%, t +1.59: FAILS. Explored-dead; 2024-26 never read.
 (One year, 2023, carries it all.)
+
+## 10. S-8 filings (menu row 10, low prior) — explored-dead (overnight session; rows taken 10->7 to avoid the unclaimed in-order session)
+Event: full-index form "S-8", busy filers (> 50/quarter) dropped, CIK -> ticker (`events_form_build.py s8`); 16,468 events.
+Select half, ADV >= $20M: events 8533 -> trades 1855 (464/yr); net **-12.7bp**, median -10.2bp, hit 48%, t -1.43;
+2020 -22.8 / 2021 -25.9 / 2022 +1.9 / 2023 -10.6bp. FREQUENT: FAILS. No other floor tried. Explored-dead.
