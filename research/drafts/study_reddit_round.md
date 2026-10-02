@@ -52,3 +52,17 @@ Diagnostics (R2-R5) and engineering tests (R10) carry no N.
 ## Engineering (R10)
 - Causality test: the night-pick selector run on data truncated at the decision bar must return the same picks.
 - Cost monotonicity: doubling the cost input must lower every leg's net.
+
+---
+## Results (2026-10-02, after registration)
+| id | verdict | numbers |
+|---|---|---|
+| R1a 8-K bad items, prior session -> 15:40, DROP | **DEAD** | 166 tagged; excess +52.7bp (2021-23) / −39.1bp (2024-26), t +0.03, perm 62%, DROP −0.35/+0.43 pp/yr (tier) |
+| R1b same, 5 sessions | **DEAD** | 497 tagged; +31.6 / −16.7bp, t +0.21, perm 77% |
+| R6 GLD C->O for idle night cash | **DEAD** | increment +0.73 / −4.53 / +4.61 pp/yr (2016-20 / 21-23 / 24-26), NW t 0.27 |
+| R7 COR1M z >= 1 -> night x0.5 | **DEAD** | Sharpe 2020 1.78->1.92, 2021-23 2.60->2.49, 2024-26 2.27->2.32; CAGR 51.2->48.8% (3bp) |
+
+Diagnostics: R2 `reddit_r2_ev2_tail_out.txt`, R3 `reddit_r3_regime_cost_out.txt`, R4 in `reddit_books_out.txt`,
+R5 `reddit_r5_paper_split_out.txt` (all in data/research/program). Summary in NEXT.md "Reddit round".
+Timezone note: EDGAR acceptanceDateTime read as true UTC, as Study T found.
+Program N: 765.

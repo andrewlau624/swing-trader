@@ -9,6 +9,23 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Reddit round (2026-10-02): r/algotrading swept, 4 registered variants all DEAD; N 761 -> 765
+- Full read of r/algotrading 2021-26 (41,472 posts via Arctic Shift; 1,807 substantive + comments, 10 readers vs this
+  table). No new edge; nearly every recurring idea is already here. Pre-registered 96c777d; `study_reddit_round.md`.
+- **R1a/R1b 8-K bad-news items (5.02/4.02/4.01/3.01) -> DROP the night pick: DEAD.** 166 / 497 tagged picks; excess
+  vs night-mates flips sign (2021-23 +53bp, 2024-26 −39bp), t +0.03, perm pct 62. `reddit_8k.py`.
+- **R6 idle night cash in GLD close->open: DEAD** (−4.5 / +4.6 pp/yr by half, NW t 0.27). **R7 night x0.5 when COR1M
+  z >= 1: DEAD** (2021-23 Sharpe 2.60 -> 2.49, CAGR −2.4pp). `reddit_books.py`.
+- Diagnostics: **R4** legs do not lose together (corr ~0 overall, negative on the book's worst 10% days, worst-50 overlap
+  0-2 days). **R2** EV2 is tail-dependent (judge +31.5bp -> −1.6 without its best 5% days) but **EV2-big (>= $500k)
+  is not** (judge +75 -> +35bp, median +48, 12% of P&L in its top 1% days); ID3-rest without its best 5% days is
+  −9bp: when the ID3 shadow gate is judged, weight EV2-big, not ID3 as a whole. **R3** auction-vs-vendor gap is
+  −3..−5bp in every SPY/VIX tercile (no stress-day cost blow-up; SPY <= −2% days are the leg's best, +75bp).
+  **R5** no Alpaca paper position has crossed a split ex-date yet (paper mishandles reverse splits; watch it).
+- R8 Congress trades: the free House/Senate Stock Watcher dumps return 403 (no machine-readable source).
+  R10: `tests/test_causality.py` (truncate-vs-poisoned future bars for momentum_top; cost monotone); live callers
+  of oversold/TOW/momentum all slice `< today`.
+
 ## Jump & ride hunt (2026-10-02, session llm-trader-51, `prompt_jump_hunt.md`): running
 - 62 ideas (`jump_ideas.md`), log + STATE in `jump_hunt_log.md`. N 761 (J1). Judged k = 1: **J1 first profitable
   quarter, RIDE hold60: DEAD** (judge +5.5%/trade but ex-top3 −1.8%, P 0.21; `study_jump_d6_first_profit.md`).
@@ -946,6 +963,10 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | idea | verdict | why |
 |---|---|---|
+| Night picks with a bad-news 8-K (5.02/4.02/4.01/3.01) in the window, dropped (Reddit R1a/R1b) | **dead** | sign flips by half, t +0.03 |
+| Idle night cash in GLD close->open instead of T-bills (Reddit R6) | **dead** | 2021-23 −4.5pp/yr, NW t 0.27 |
+| Night leg x0.5 when Cboe COR1M z >= +1 (Reddit R7) | **dead** | lowers 2021-23 Sharpe, −2.4pp CAGR |
+| Congress (STOCK Act) trade copying (Reddit R8) | **no data** | free dumps 403 |
 | First profitable quarter after >= 6 losses, small caps, 60-day hold (Jump hunt J1, N 761) | **dead (judge half)** | select +7.3%/trade (survivorship + 2016/2020 timing), judge +5.5% but ex-top3 −1.8%, P 0.21: lottery |
 | Retail IPO-access allocations, sold after 30 sessions (discovery DL7) | **dead (bound)** | cold debuts (where retail is filled) −7.4% median, hit 40%; pop is in hot deals |
 | Term / target-term CEFs bought 250 sessions before the termination date (discovery DL5) | **dead** | 23 funds, median excess −0.77% vs matched ETF, 35% > 0 |
