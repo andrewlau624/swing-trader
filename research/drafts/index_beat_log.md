@@ -1,7 +1,7 @@
 # Index-beat hunt log (session llm-trader-ee, prompt_index_beat.md)
 
 ## STATE (update after every idea)
-- program N: 764 (Jump J1-J4 took 761-764; my next would be 765; none registered by this hunt)
+- program N: 765 (Jump J1-J5 took 761-765; my next would be 766; none registered by this hunt)
 - k (ideas judged): 0 · explored: 28 · killed by bound/dup: ~80 · idea rounds: 6 (r1 55, r2 27, r3 3, r4 21, r5 10, r6 20)
 - BEST RESULTS: (1) R6-5 stacked on SPY in taxable = near miss (+1.5pp 2021-23 at $1k/mo; +2.6/+6.9 at $2k/mo; EH 22.1%/yr vs
   SPY 15.3%; COVID -37.5% vs -33.8%), study_ib_r65_stacked.md; (2) DL-IB1 round-up in more accounts PAYS on history, conditional
@@ -128,3 +128,4 @@
   CING, DFLI, ENSC, LVO, GNPX, PHGE; YHC 10-K after the fact) -> ~2.5 deals/yr (+$10/yr per account) -> FAILS the +10/yr bar.
   Live-code note (user's call): roundup_watch's phrase list could add "automatically be entitled to receive an additional share
   in lieu", "one whole share in lieu", "round up any fractional shares". r71_out.txt
+  R7-2 spec: FTS '"distribution" "warrants" "rounded up"' / '"rights" "rounded up to the nearest whole" "distribution"' 2021-26, 8-K/424B/S-1; read sentences; bar >= 3 listed distributions/yr where 1 share -> 1 whole warrant/right.
