@@ -2,12 +2,18 @@
 
 ## STATE (update after every idea)
 - program N: 762 (Jump J1 761, J2 762; my next would be 763; none registered by this hunt)
-- k (ideas judged): 0 · explored: 15 (C1 C2 C3 C4 C5 A1/DL-IB1 B3 A9 A18 A20 A2 R2-7 + A8 bound) · killed by bound: ~35 · idea rounds: 2 (55 + 27)
-- current: write ROUND 3 (method: death-dodges of the program's near misses + noise-leg structure + haircut-proof ideas)
+- k (ideas judged): 0 · explored: 22 (C1 C2 C3 C4 C5 A1/DL-IB1 B3 A9 A18 A20 A2 R2-7 R3-1 R3-2 R3-3 R4-1/DL-IB2 R4-2 + A8 bound,
+  + rounds' quick checks) · killed by bound/dup: ~60 · idea rounds: 4 (r1 55, r2 27, r3 3 (thin), r4 21)
+- current: write ROUND 5 with a method not yet used (candidates: GitHub/practitioner repos audited for lookahead; LLM
+  extraction from filings for a contractual payoff; live server evidence for a track-B cost structure)
 - WAITING: DL-IB1 FOUND only after 2 live rounded deals (VIVK ex 10-05, check ~10-07: state/roundup-orders.json on him, read-only)
-- untested left from rounds 1-2: B1/B2/B5/B6 (23/5 forward ideas; A20 prior says thin), A3 (parked), reports A7/C9/C14/C15 (user questions)
-- data verified: repo sims, etf_daily (div-adj), raw night pool, roundup_deals.csv, Alpaca SIP daily + minute (pre-market cached ib/pm1), EDGAR FTS
-- why things die (running): HAIRCUT (taxable night+IBS ~= SPY at EH: C1/C2/C5) / LOTTERY (A20 V2, R2-7) / HALF-FLIP (C3, C4) / COST (A9) / bound too small / none exist (A2)
+- untested left: B1/B2/B5/B6 (23/5 forward; A20 prior says thin), A3 merger round-ups (rare), reports for the user
+  (A7 broker bonuses, C9 solo 401k, C14 TLH, C15 kiddie tax, R4-4 bank bonuses, R4-5 Saver's Match excludes students)
+- data verified: repo sims, etf_daily (div-adj), raw night pool, roundup_deals.csv, Alpaca SIP daily + minute (pre-market ib/pm1),
+  Alpaca corporate actions (cash dividends 2021-23 in ib/divs_all.json), EDGAR FTS + documents
+- why things die (running): HAIRCUT (at edge-halves the bot ~= SPY in BOTH accounts: C1/C2/C5/R3-3 -> only haircut-proof ideas
+  can beat the index widely: contractual payoffs) / TOO RARE (A2, DL-IB2, R4-2: per-holder round-up clauses outside reverse
+  splits barely exist) / LOTTERY (A20 V2, R2-7) / HALF-FLIP (C3, C4, R3-1) / COST (A9) / no shortfall (R3-2)
 
 ## Log
 - 2026-10-02 13:20 setup: merged, 356 tests pass, N 760 (last registered: EV2). Messaged llm-trader-51 (Jump hunt), 198-da.
@@ -94,3 +100,6 @@
 - N now 762 (Jump J2); my next would be 763.
 - R4-1 / DL-IB2 round-lot top-up: 16 matched splits, 12 are risk-factor boilerplate; genuine = AREB only (4 since 2022;
   +$102 / +$478 / +$622 if topped, on $7-93) -> DOES NOT PAY (too rare). study_ib_dl_ib2_roundlot.md
+  R4-2 spec (before any count): FTS '"stock dividend" "rounded up"' + '"share dividend" "rounded up"' 8-K/DEF 14A/424B 2016-26; sentence must contain dividend + fraction + rounded up and no cash alternative; read every hit by hand; PAYS-style bar as DL-IB1: >= 3 listed events/yr 2024-26 with payoff > 0 if rounded.
+- R4-2 stock-dividend round-ups (8-K 2022-26, 2,354 FTS hits, strict sentence): FCUV 2023 only (HCMC 2022 says "will not be
+  rounded up"); NXDT 2025 (sweep) not matched by 8-K wording -> <= ~1/yr -> DEAD (too rare; confirms C16).
