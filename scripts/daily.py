@@ -11,6 +11,7 @@ Paper always runs. Real money runs too when .env has DAILY_LIVE=on; switch
 with `make daily-live-on` / `make daily-live-off`.
 """
 import argparse, datetime as dt, json, sys
+from collections import Counter
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -57,8 +58,7 @@ def status(account: str):
     gate = ("gate ON" if b.levered else "gate off") if lw else "no gate"
     print(f"overnight size {wi + wn:.2f}x (ibs {wi:.2f} + night {wn:.2f}; {gate})"
           f"  night name cap {d.night_max_name_pct:.0%}"
-          + (f"; open-sell route {'Schwab default (directed refused ' + b.route_refused + ')' if b.route_refused else 'listing exchange'}"
-             if account in ("live", "roth") else ""))
+          + (f"; open-sell route {_open_routes(b)}" if account in ("live", "roth") else ""))
     for sig, n in [(d.noise_symbol, b.noise)] + sorted(b.noise_more.items()):
         if n.get("history"):
             h = [x["ret"] for x in n["history"]]
@@ -107,8 +107,23 @@ def status(account: str):
                 if v:
                     print(f"slippage {leg:6} {side:4} n={len(v):3} mean {np.mean(v):+7.1f}  "
                           f"median {np.median(v):+7.1f} bps (vs ref price at decision; + = worse)")
+        if account == "paper":
+            late = sum(1 for r in rows if r["leg"] == "night" and r["side"] == "sell"
+                       and str(r.get("coid", "")).endswith("-rest"))
+            print("   paper night numbers are the Alpaca simulator's: it does not run the open/close "
+                  f"auctions ({late} night sells missed the open and sold ~09:50); judge the night leg "
+                  "on live / roth")
     if len(b.equity_log) > 1:
         print("equity by day: " + "  ".join(f"{e['date'][5:]} {e['equity']:,.0f}" for e in b.equity_log[-10:]))
+
+
+def _open_routes(b) -> str:
+    """Where the recent open sells actually went (the orders' recorded route),
+    not where the config meant them to go."""
+    sent = [str(o.get("route") or "AUTO") for o in b.orders.values()
+            if o.get("tif") == "opg" and o.get("side") == "sell"][-10:]
+    used = ", ".join(f"{r} {n}" for r, n in Counter(sent).most_common()) if sent else "none yet"
+    return f"last {len(sent)}: {used}" + (f" (directed refused {b.route_refused})" if b.route_refused else "")
 
 
 def main(argv=None):

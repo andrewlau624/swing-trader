@@ -437,3 +437,30 @@ def test_open_sell_that_expires_part_filled_sells_the_rest(tmp_path):
     assert book.route_refused == "", "a partial auction fill is not a refused route"
     ex.reconcile(book, "2026-09-24")                            # no second resend
     assert sum(1 for x in a.c.placed if leg(x)["quantity"] == 10) == 1
+
+
+def test_submit_time_route_refusal_is_logged_and_persisted(tmp_path):
+    """Before 2026-10-02 a directed open sell Schwab refused at submit fell
+    back to AUTO silently: 46 of 46 real-money open sells went AUTO while the
+    status line said 'listing exchange'."""
+    from swingtrader.daily import executor as E
+    a = adapter(exchanges={"LOSER": "NASDAQ"}, positions=[("LOSER", 16, 9.5)])
+    a.c.refuse_routes = True
+    ex = E.DailyExecutor(Config.load(), account="live", broker=a, state_dir=tmp_path, log_dir=tmp_path)
+    ex.notifier.send = lambda *x, **k: "skipped"
+    book = DailyBook(cash=0, start_equity=152)
+    book.positions["LOSER"] = {"qty": 16, "avg_px": 9.5, "leg": "night", "entry_date": "2026-09-23"}
+    ex._order(book, "2026-09-24", "LOSER", "sell", "night", qty=16, tif="opg", ref_px=9.5, kind="exit")
+    (_, o), = book.orders.items()
+    assert o["route"] == "AUTO" and book.route_refused == "2026-09-24"
+    assert any("NASDAQ refused" in w for w in ex.warnings)
+
+
+def test_unrouted_open_sell_says_why(tmp_path):
+    from swingtrader.daily import executor as E
+    a = adapter(exchanges={"PINK": "OTC"}, positions=[("PINK", 3, 6.0)])
+    ex = E.DailyExecutor(Config.load(), account="live", broker=a, state_dir=tmp_path, log_dir=tmp_path)
+    book = DailyBook(cash=0, start_equity=152)
+    book.positions["PINK"] = {"qty": 3, "avg_px": 6.0, "leg": "night", "entry_date": "2026-09-23"}
+    ex._order(book, "2026-09-24", "PINK", "sell", "night", qty=3, tif="opg", ref_px=6.0, kind="exit")
+    assert book.route_refused == "" and any("'OTC' has no route" in l for l in ex.lines)

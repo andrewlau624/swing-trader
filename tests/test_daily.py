@@ -1393,3 +1393,40 @@ def test_decision_log_records_the_book_snapshot(tmp_path, monkeypatch):
     ex._log_decision("2026-10-01", "ABC", r, 22.0, 5, 1e7, 6.0)
     rec = json.loads((tmp_path / f"daily-decisions{ex.tag}.jsonl").read_text().splitlines()[-1])
     assert rec["bid_size"] == 300.0 and rec["ask_size"] == 1200.0 and rec["tow"] == 6 and rec["open"] == 9.8
+
+
+def test_tbill_dividend_is_credited_once_to_holders_at_the_ex_date():
+    from swingtrader.daily.book import DailyBook
+    b = DailyBook(cash=100.0, start_equity=3000)
+    # held over the 10-01 ex-date (bought 09-29, sold on the ex-date): gets it
+    b.closed.append({"sym": "SGOV", "leg": "tbill", "qty": 11.0, "entry_px": 100.67, "exit_px": 100.41,
+                     "entry_date": "2026-09-29", "exit_date": "2026-10-01", "pnl": -2.86, "ret": -0.0026})
+    # bought on the ex-date: does not
+    b.positions["SGOV"] = {"qty": 5.0, "avg_px": 100.4, "leg": "tbill", "entry_date": "2026-10-01"}
+    assert b.credit_dividend("SGOV", "tbill", "2026-10-01", 0.300547) == pytest.approx(3.31)
+    assert b.cash == pytest.approx(103.31)
+    assert b.credit_dividend("SGOV", "tbill", "2026-10-01", 0.300547) == 0.0      # once
+    assert b.trading_pnl(b.equity({}))["realised"] == pytest.approx(0.45)
+    assert b.held_at_ex("SGOV", "tbill", "2026-10-01") == 11.0, "the dividend row is not a holding"
+    assert b.closed[-1]["note"], "kill rules skip rows with `note`"
+
+
+def test_paper_exit_cost_never_kills_or_warns(tmp_path, monkeypatch):
+    """Alpaca paper does not run the opening auction (21 of 27 OPG sells
+    expired 2026-09-23..10-01); its +152bp must not kill the paper night leg."""
+    import json
+    from swingtrader.config import Config
+    from swingtrader.daily import executor as E
+    from swingtrader.daily.book import DailyBook
+    ex = E.DailyExecutor(Config.load(), account="paper", broker=FakeBroker(), state_dir=tmp_path,
+                         log_dir=tmp_path)
+    days = pd.bdate_range("2026-08-03", periods=40)
+    rows = [{"sym": "X", "leg": "night", "side": "sell", "fill_px": 9.8,
+             "filled_at": f"{d.date()} 13:50:00+00:00"} for d in days]
+    (tmp_path / "daily-fills.jsonl").write_text("\n".join(json.dumps(r) for r in rows))
+    bars = pd.DataFrame({"open": 10.0}, index=days)
+    monkeypatch.setattr(E.md, "sip_daily", lambda *a, **k: {"X": bars})
+    book = DailyBook(cash=3000, start_equity=3000)
+    ex._check_exit_cost(book, "2026-10-02")
+    assert not book.killed and not ex.warnings
+    assert any("Alpaca simulator" in l for l in ex.lines)

@@ -183,6 +183,8 @@ class DailyExecutor:
         trading_day = clock.is_open or (
             pd.Timestamp(clock.next_open).tz_convert(ET).date() == now.date())
         self.reconcile(book, today)
+        if phase in ("open", "reconcile"):
+            self._credit_dividends(book, today)
         if self.live:
             # AFTER reconcile: fresh fills must count as the bot's own, or they
             # are subtracted as "your holdings" and then again as spent cash
@@ -522,6 +524,32 @@ class DailyExecutor:
             self.log(f"[watchdog] all phases ran today ({len(hb['runs'])} runs)")
 
     # ------------------------------------------------------------ reconcile
+    DIVIDEND_LOOKBACK_DAYS = 45
+
+    def _credit_dividends(self, book: DailyBook, today: str) -> None:
+        """T-bill fund (SGOV) dividends: the price drops on the ex-date and the
+        cash arrives days later, outside any fill, so without this the leg books
+        a loss every month it holds over an ex-date (2026-10-01: -$2.86 booked,
+        +$3.31 paid). Credited on the ex-date. A real-money book re-syncs cash
+        to the broker, so there it only fixes realised P&L."""
+        sym = self.d.ibs_cash_symbol
+        if not sym:
+            return
+        start = (dt.date.fromisoformat(today) - dt.timedelta(days=self.DIVIDEND_LOOKBACK_DAYS))
+        if not any(c["sym"] == sym and c["exit_date"] >= start.isoformat() for c in book.closed) \
+                and sym not in book.positions:
+            return
+        try:
+            divs = md.cash_dividends([sym], start, dt.date.fromisoformat(today))
+        except Exception as exc:
+            self.log(f"[tbill] dividend check skipped ({type(exc).__name__}: {str(exc)[:80]})")
+            return
+        for d in divs:
+            usd = book.credit_dividend(d["sym"], "tbill", d["ex_date"], d["rate"])
+            if usd:
+                self.act(f"dividend {d['sym']} ex {d['ex_date']} ${d['rate']:.4f}/sh -> ${usd:,.2f}"
+                         + (f" (paid {d['payable_date']})" if d.get("payable_date") else ""))
+
     def reconcile(self, book: DailyBook, today: str) -> None:
         """Book any fills since the last run. Broker is the source of truth."""
         for coid, o in list(book.open_orders().items()):
@@ -852,6 +880,14 @@ class DailyExecutor:
         for r, (k, c, hit) in sorted(routes.items()):
             self.log(f"[night]   route {r or 'OPG'}: n {k}, {c:+.1f} bps/side, "
                      f"{hit:.0%} filled at the auction print")
+        if not self.live:
+            # Alpaca paper does not run the opening auction: most OPG sells of
+            # thin names expire and the rest is sold at ~09:50 after the fade
+            # (2026-09-23..10-01: 21 of 27, +152bp vs live -1bp on the same
+            # names). That measures the simulator, so it must not kill or warn.
+            self.log("[night]   paper fills are the Alpaca simulator's, not the auction: "
+                     "no warn / kill on this number (the real-money books carry the check)")
+            return
         if book is not None and n >= sg.KILL_EXIT_COST_MIN_N and bps > sg.KILL_EXIT_COST_BPS:
             self._kill(book, "night", today, f"open sells average {bps:+.1f}bp/side worse than the "
                                              f"official open over {n} exits (kill at {sg.KILL_EXIT_COST_BPS:g})")
@@ -1531,6 +1567,17 @@ class DailyExecutor:
                       submitted=dt.datetime.now().isoformat(timespec="seconds"))
         if route and route != "AUTO":
             desc += f" -> {route}"
+        elif route == "AUTO" and tif == "opg":
+            # an open sell that did not reach the listing auction: say why, and
+            # persist a refusal so the status line and the retry pause see it
+            # (before 2026-10-02 a submit-time refusal was silent: 46 of 46
+            # live/Roth open sells went AUTO while the status said "listing exchange")
+            refusal = getattr(self.broker, "refusal", "")
+            if refusal and book.route_refused != today:
+                book.route_refused = today
+                self.warn(f"{sym}: directed open sell {refusal}; sent with Schwab routing "
+                          f"(directed routing paused {self.ROUTE_RETRY_DAYS} days)")
+            desc += f" -> AUTO ({getattr(self.broker, 'route_note', '') or 'Schwab routing'})"
         # persist immediately: Schwab has no client order id, so the book is
         # the idempotency record -- a crash here must not lose the order
         book.save(self.state_dir, self.fname)

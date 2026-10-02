@@ -84,6 +84,20 @@ def _per_symbol(data, chunk, start, end):
     return pd.concat(parts) if parts else None
 
 
+def cash_dividends(symbols: list[str], start: dt.date, end: dt.date) -> list[dict]:
+    """Cash dividends with ex-date in [start, end] from Alpaca's corporate
+    actions: [{sym, ex_date 'YYYY-MM-DD', rate, payable_date}]."""
+    from alpaca.data.historical.corporate_actions import CorporateActionsClient
+    from alpaca.data.requests import CorporateActionsRequest
+    from ..config import require_alpaca_keys
+    k, s = require_alpaca_keys()
+    r = CorporateActionsClient(k, s).get_corporate_actions(CorporateActionsRequest(
+        symbols=sorted(symbols), types=["cash_dividend"], start=start, end=end))
+    return [{"sym": x.symbol, "ex_date": x.ex_date.isoformat(), "rate": float(x.rate),
+             "payable_date": str(getattr(x, "payable_date", "") or "")}
+            for v in (r.data or {}).values() for x in v]
+
+
 def eligibility(symbols: list[str], today: dt.date, *, price_min: float,
                 adv_min: float, cache_dir: Path) -> pd.DataFrame:
     """Names the night leg may trade today, from bars BEFORE today only:

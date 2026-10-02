@@ -201,17 +201,25 @@ class SchwabAdapter:
         self._exchanges: dict[str, str | None] = {}
         self.route_refused = False       # set once Schwab refuses a directed order
         self.last_route = ""             # route of the most recent submit, for the fill log
+        self.route_note = ""             # why the last open sell was NOT directed ("" = it was)
+        self.refusal = ""                # Schwab's answer when it refused a directed order
 
     def open_destination(self, sym: str) -> str | None:
         """Schwab destination for an open sell of `sym`, or None = default routing."""
-        if self.open_route != "primary" or self.route_refused:
-            return None
+        if self.open_route != "primary":
+            self.route_note = f"open_route {self.open_route}"; return None
+        if self.route_refused:
+            self.route_note = "directed routing paused after a refusal"; return None
         if sym not in self._exchanges:
             try:
                 self._exchanges[sym] = self._exchange_of(sym)
-            except Exception:
+            except Exception as exc:
                 self._exchanges[sym] = None
-        return OPEN_ROUTE.get(self._exchanges[sym] or "")
+                self.route_note = f"exchange lookup failed ({type(exc).__name__}: {str(exc)[:60]})"
+                return None
+        dest = OPEN_ROUTE.get(self._exchanges[sym] or "")
+        self.route_note = "" if dest else f"listing exchange {self._exchanges[sym]!r} has no route"
+        return dest
 
     # ------------------------------------------------------------- state
     def _pick_account(self) -> str:
@@ -353,8 +361,11 @@ class SchwabAdapter:
             if dest and r.status_code not in (200, 201):
                 # route refused (account not enabled for direct routing, or the
                 # venue): take Schwab's routing rather than stay in the position,
-                # and stop trying for the rest of this run
+                # and stop trying for the rest of this run. The executor logs
+                # `refusal` and persists it (book.route_refused)
                 self.route_refused = True
+                self.refusal = f"{dest} refused: {r.status_code} {r.text[:120]}"
+                self.route_note = self.refusal
                 order.pop("requestedDestination", None)
                 dest = None
                 r = self.c.place_order(self.hash, order)

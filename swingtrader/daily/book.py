@@ -38,6 +38,7 @@ class DailyBook:
     daytrade_live: bool = False
     noise_lev_cap: float = 0.0                      # set each morning from the broker's multiplier
     route_refused: str = ""                         # date Schwab last refused a directed open sell
+    dividends: dict = field(default_factory=dict)   # "SYM:ex_date" -> $ credited (once each)
     killed: dict = field(default_factory=dict)      # leg (or "all") -> {date, reason}: no new entries
     levered: bool = False                           # overnight leverage gate (signals.lever_ok) is open
     last_run: str = ""
@@ -135,6 +136,33 @@ class DailyBook:
         else:
             p["qty"] = q
         return new
+
+    def held_at_ex(self, sym: str, leg: str, ex_date: str) -> float:
+        """Shares of `sym` in `leg` held at the close before `ex_date` (bought
+        before it, and still held or sold on/after it): who gets the dividend."""
+        q = sum(float(c["qty"]) for c in self.closed
+                if c["sym"] == sym and c.get("leg") == leg and not c.get("dividend")
+                and c["entry_date"] < ex_date <= c["exit_date"])
+        p = self.positions.get(sym)
+        if p and p.get("leg") == leg and p["entry_date"] < ex_date:
+            q += float(p["qty"])
+        return q
+
+    def credit_dividend(self, sym: str, leg: str, ex_date: str, rate: float) -> float:
+        """Book a cash dividend once: cash, and a round trip marked `dividend`
+        (and `note`, so kill rules leave it out) so realised P&L includes it.
+        Returns the $ credited (0 if already booked or not held)."""
+        key = f"{sym}:{ex_date}"
+        q = self.held_at_ex(sym, leg, ex_date)
+        if key in self.dividends or q <= 0:
+            return 0.0
+        usd = round(q * rate, 2)
+        self.dividends[key] = usd
+        self.cash += usd
+        self.closed.append({"sym": sym, "leg": leg, "qty": q, "entry_px": 0.0, "exit_px": 0.0,
+                            "entry_date": ex_date, "exit_date": ex_date, "pnl": usd, "ret": 0.0,
+                            "dividend": rate, "note": f"cash dividend ${rate:.4f}/sh"})
+        return usd
 
     def is_killed(self, leg: str) -> bool:
         return leg in self.killed or "all" in self.killed
