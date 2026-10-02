@@ -2082,7 +2082,7 @@ TRACK FREQUENT (>= 100/yr): net >= +10bp, hit >= 50%, t >= 2: MEETS -> may pre-r
 ```
 Judge: FREQUENT -> `event_runner run` (the registered Study ID bar, PASS/DEAD as printed).
 
-## Amendment — Round 33 (overnight runbook loop), Study EV2: first insider purchase in 2+ years, next session open -> close (pre-register; 1 variant, program N 758 -> 759)
+## Amendment — Round 33 (overnight runbook loop), Study EV2: first insider purchase in 2+ years, next session open -> close (pre-register; 1 variant, program N 758 -> 759; renumbered below to 760)
 
 `date`: Fri Oct 2 2026 (the commit time is the stamp), before any 2024-26 number. Runbook: research/drafts/prompt_event_runbook.md.
 Event: officer/director open-market purchase filings from `insider_buys()` (`X[X.insider]`) at an issuer whose previous
@@ -2101,3 +2101,8 @@ by year: 2022: +61.7bp (n 182)  2023: +15.0bp (n 136)
 TRACK FREQUENT (>= 100/yr): net >= +10bp, hit >= 50%, t >= 2: MEETS -> may pre-register
 ```
 Judge: FREQUENT -> `event_runner run` (the registered Study ID bar, PASS/DEAD as printed).
+
+**EV2 renumbering (before the judge, same night):** another session explored a variant of this idea on the select
+half minutes earlier (commit d4a0401: it also counted every issuer's first buy in 2020-21 as "first in 2 years",
+which a 2-year lookback cannot observe since the data start 2020-01; select t +1.66, FAILS, not registered). EV2 is
+therefore the second construction of the same idea. Both count: **program N 758 -> 760**; the judge runs with N 760.
