@@ -2204,3 +2204,18 @@ total return of a matched ETF (Alpaca all-adjusted closes): munis MUB, high yiel
 preferreds PFF, convertibles CWB, mortgages MBB, investment-grade corporates LQD. **Excess = fund − benchmark.**
 Stake 10% of equity, whole shares. **Verdict: PAYS if median excess > +2%, mean excess > 0 and excess > 0 in >= 70%
 of funds; otherwise DEAD.** No rule change afterwards.
+
+## Amendment — Discovery loop (session llm-trader-c5), deal rule DL6: closing ETFs bought in their last week (no N; registered before any outcome)
+
+Source reading (2026-10-02): ETF closures are announced in a 497 supplement that fixes the last trading day and the
+liquidation (cash at NAV a few days later). Alpaca records the liquidation proceeds as a `cash_mergers` corporate
+action for many of them (probe: BEDZ $36.54; IZRL, CTRU have none). Holders who sell in the last days may give a
+discount to the cash that remaining holders receive.
+
+**Deal set (fixed now):** every Alpaca `cash_mergers` record 2016-01 .. 2026-09 whose symbol's Alpaca asset name
+contains "ETF", with raw bars. **Entry:** the close 5 sessions before the symbol's last bar (the announced last
+trading day). **Payoff:** the cash_mergers rate (liquidation proceeds) + cash dividends with ex-dates in
+(entry, last bar]. Return = payoff / entry − 1. Stake min(10% of equity, 5% of the 20-session median dollar volume
+before entry), whole shares. Reported: deals/yr, hit, mean/median/worst, $/yr at $2.3k/$10k/$25k, and the same with
+entry at the last close (info). **Verdict: PAYS if median > +0.5%, mean > 0 and hit >= 70%; otherwise DEAD.**
+Records where the rate is < 20% or > 500% of the entry close are listed as data errors and dropped. No rule change.
