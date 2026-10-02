@@ -6,7 +6,8 @@ Events file: parquet with `sym`, `fd` (the date the signal is public, after the 
 session). Trade: buy the OPENING cross of the first session after fd; exit at the CLOSE `hold` sessions later
 (rule "hold"), or earlier with a +20% limit sell (rule "tp20": filled at the limit, or at the open if the stock
 opens above it). Returns use split-adjusted bars (no fake jumps from reverse splits); the price/ADV filters use raw
-bars. Costs per side by 20-day ADV$ before entry: < $1M 75bp, < $5M 40bp, < $20M 15bp, else 5bp.
+bars. Rule "trail" (the RIDE track): exit at the close once it is 15% below the best close since entry, else at
+the hold's last close. Holds 1 / 5 / 20 / 60 sessions. Costs per side by 20-day ADV$ before entry: < $1M 75bp, < $5M 40bp, < $20M 15bp, else 5bp.
 Universe: raw prior close >= $1, ADV$ >= $250k (a $230 slot can fill).
 
 Matched base: for each event, the SAME stock on every other eligible session of the same half (excluding +-10
@@ -42,7 +43,7 @@ from . import event_fetch as F
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SELECT_END = pd.Timestamp("2023-12-31")
 DATA_START, DATA_END = pd.Timestamp("2016-01-01"), pd.Timestamp("2026-09-30")
-HOLDS, RULES, JUMP, TP = (1, 5, 20), ("hold", "tp20"), 0.20, 0.20
+HOLDS, RULES, JUMP, TP, TRAIL = (1, 5, 20, 60), ("hold", "tp20", "trail"), 0.20, 0.20, 0.15
 
 
 def cost_side(adv: float) -> float:
@@ -85,6 +86,13 @@ def _ret(a: pd.DataFrame, i: int, hold: int, rule: str) -> float:
     """Gross return buying the open of row i, exiting by rule within `hold` rows (split-adjusted frame)."""
     o = a.open.iat[i]
     j = i + hold - 1
+    if rule == "trail":                      # ride: exit at the close once it is 15% below the best close since entry
+        peak = a.close.iat[i]
+        for k in range(i, j + 1):
+            peak = max(peak, a.close.iat[k])
+            if a.close.iat[k] <= peak * (1 - TRAIL):
+                return a.close.iat[k] / o - 1
+        return a.close.iat[j] / o - 1
     if rule == "tp20":
         lim = o * (1 + TP)
         for k in range(i, j + 1):
@@ -153,7 +161,10 @@ def evaluate(T: pd.DataFrame, Bse: pd.DataFrame, col: str) -> dict:
     bj = Bse.groupby("sym")[col].apply(lambda x: (x >= JUMP).mean()) if len(Bse) else pd.Series(dtype=float)
     base_rate = float(T.sym.map(bj).dropna().mean()) if len(bj) else float("nan")
     srt = np.sort(net)
-    return dict(n=len(T), per_yr=len(T) / max(T.d.dt.year.nunique(), 1), jump=float(jump.mean()), base=base_rate,
+    bm = Bse.groupby("sym")[col].mean() if len(Bse) else pd.Series(dtype=float)
+    base_mean = float(T.sym.map(bm).dropna().mean()) if len(bm) else float("nan")
+    excess = float(T[col].mean() - base_mean) if base_mean == base_mean else float("nan")
+    return dict(base_mean=base_mean, excess=excess, n=len(T), per_yr=len(T) / max(T.d.dt.year.nunique(), 1), jump=float(jump.mean()), base=base_rate,
                 lift=float(jump.mean() / base_rate) if base_rate and base_rate > 0 else float("inf"),
                 mean=float(net.mean()), median=float(np.median(net)), ex3=float(srt[:-3].mean()) if len(net) > 3 else float("nan"),
                 worst=float(net.min()), best=float(net.max()), hit=float((net > 0).mean()), p0=_boot_p(net))
@@ -162,7 +173,8 @@ def evaluate(T: pd.DataFrame, Bse: pd.DataFrame, col: str) -> dict:
 def _line(col, e):
     return (f"{col:7s} n {e['n']:4d} ({e['per_yr']:.0f}/yr)  jump {e['jump']:5.1%} vs base {e['base']:5.1%} "
             f"(x{e['lift']:.1f})  mean net {e['mean']:+6.1%}  ex-top3 {e['ex3']:+6.1%}  median {e['median']:+6.1%}  "
-            f"hit {e['hit']:.0%}  worst {e['worst']:+.0%}  best {e['best']:+.0%}  P(mean<=0) {e['p0']:.2f}")
+            f"vs stock's usual {e['excess']:+6.1%}  hit {e['hit']:.0%}  worst {e['worst']:+.0%}  best {e['best']:+.0%}  "
+            f"P(mean<=0) {e['p0']:.2f}")
 
 
 def explore_gate(e: dict) -> bool:
@@ -174,9 +186,21 @@ def judge_gate(e: dict) -> bool:
     return e["n"] >= 15 and e["lift"] >= 1.5 and e["mean"] > 0 and e["ex3"] > 0 and e["p0"] < 0.10
 
 
-def confirm_gate(e: dict, T: pd.DataFrame, col: str) -> bool:
+def confirm_gate(e: dict, T: pd.DataFrame, col: str, track: str = "jump") -> bool:
     net = np.sort((T[col] - T.adv.map(cost_side) * 2).to_numpy())
-    return e["n"] >= 10 and e["mean"] > 0 and net[:-1].mean() > 0 and e["lift"] >= 1.2
+    edge = e["lift"] >= 1.2 if track == "jump" else e["excess"] > 0
+    return e["n"] >= 10 and e["mean"] > 0 and net[:-1].mean() > 0 and edge
+
+
+# RIDE track: enter before / while a stock is hot and keep a chunk of the run. Judged on money, not jump counts:
+# mean net >= +3% a trade AND >= +2% better than the same stock's usual return over the same hold and exit rule.
+def ride_explore_gate(e: dict) -> bool:
+    return (e["n"] >= 20 and e["mean"] >= 0.03 and e["excess"] >= 0.02 and e["ex3"] > 0
+            and e["median"] > -0.05 and e["p0"] < 0.10)
+
+
+def ride_judge_gate(e: dict) -> bool:
+    return e["n"] >= 15 and e["mean"] > 0 and e["excess"] > 0 and e["ex3"] > 0 and e["p0"] < 0.10
 
 
 def load(path: str) -> pd.DataFrame:
@@ -194,6 +218,7 @@ def main(argv=None):
     ap.add_argument("--start", default=str(DATA_START.date()))
     ap.add_argument("--split", default=str((SELECT_END + pd.Timedelta(days=1)).date()))
     ap.add_argument("--confirm", default="2025-07-01", help="confirm window start, or 'none' (forward shadow instead)")
+    ap.add_argument("--track", choices=["jump", "ride"], default="jump", help="the registered track (judge/confirm)")
     a = ap.parse_args(argv)
     X = load(a.events)
     start, split = pd.Timestamp(a.start), pd.Timestamp(a.split)
@@ -208,10 +233,11 @@ def main(argv=None):
         for h in HOLDS:
             for ru in RULES:
                 e = evaluate(T, B, f"{ru}{h}")
-                print(_line(f"{ru}{h}", e), "| GATE", "MEETS" if explore_gate(e) else "fails")
-        print("Pick ONE (rule, hold) that MEETS (shortest hold if several) and pre-register it before judging.")
+                print(_line(f"{ru}{h}", e), "| jump", "MEETS" if explore_gate(e) else "fails",
+                      "| ride", "MEETS" if ride_explore_gate(e) else "fails")
+        print("Pick ONE (track, rule, hold) that MEETS (shortest hold if several) and pre-register it before judging.")
     elif a.cmd == "judge":
-        assert a.hold in HOLDS and a.rule, "judge needs HOLD (1/5/20) and RULE (hold/tp20)"
+        assert a.hold in HOLDS and a.rule, "judge needs HOLD (1/5/20/60) and RULE (hold/tp20/trail)"
         T, B = trades(X, split, jend, holds=(a.hold,), rules=(a.rule,))
         col = f"{a.rule}{a.hold}"
         print(f"JUDGE HALF: events {split.date()}..{jend.date()} -> {len(T)} trades")
@@ -219,8 +245,10 @@ def main(argv=None):
             print("JUMP VERDICT: DEAD (no trades)"); return
         e = evaluate(T, B, col)
         print(_line(col, e))
-        print(f"JUMP VERDICT (>= 15 trades, jump >= 1.5x base, mean > 0, ex-top3 > 0, P(mean<=0) < 0.10): "
-              f"{'PASS' if judge_gate(e) else 'DEAD'}")
+        ok = judge_gate(e) if a.track == "jump" else ride_judge_gate(e)
+        bar = "jump >= 1.5x base" if a.track == "jump" else "beats the stock's usual return"
+        print(f"{a.track.upper()} VERDICT (>= 15 trades, {bar}, mean > 0, ex-top3 > 0, P(mean<=0) < 0.10): "
+              f"{'PASS' if ok else 'DEAD'}")
         T.to_pickle(ROOT / f"data/research/program/jump_{pathlib.Path(a.events).stem}_{col}_judge.pkl")
     else:
         assert a.hold in HOLDS and a.rule and conf is not None, "confirm needs HOLD, RULE and a confirm window"
@@ -231,8 +259,9 @@ def main(argv=None):
             print("CONFIRM VERDICT: NOT CONFIRMED (no trades)"); return
         e = evaluate(T, B, col)
         print(_line(col, e))
-        print(f"CONFIRM VERDICT (>= 10 trades, mean > 0, mean without the best > 0, jump >= 1.2x base): "
-              f"{'CONFIRMED' if confirm_gate(e, T, col) else 'NOT CONFIRMED'}")
+        bar = "jump >= 1.2x base" if a.track == "jump" else "beats the stock's usual return"
+        print(f"CONFIRM VERDICT (>= 10 trades, mean > 0, mean without the best > 0, {bar}): "
+              f"{'CONFIRMED' if confirm_gate(e, T, col, a.track) else 'NOT CONFIRMED'}")
         T.to_pickle(ROOT / f"data/research/program/jump_{pathlib.Path(a.events).stem}_{col}_confirm.pkl")
 
 

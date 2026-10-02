@@ -45,3 +45,17 @@ def test_confirm_gate_needs_more_than_one_winner():
     assert not J.confirm_gate(e, T, "c")                       # one +50% trade carries it
     T2 = T.assign(c=[0.3, 0.25] + [0.0] * 8)
     assert J.confirm_gate(e, T2, "c")
+
+
+def test_trail_exit_and_ride_gates():
+    a = _bars([(10, 10, 10, 10), (10, 13, 10, 13), (13, 14, 12, 14), (14, 14, 11, 11.8), (12, 20, 12, 20)])
+    assert abs(J._ret(a, 0, 5, "trail") - 0.18) < 1e-12      # peak close 14, 11.8 <= 14 x 0.85 = 11.9: out at 11.8
+    up = _bars([(10, 10, 10, 10), (10, 12, 10, 12), (12, 13, 12, 13)])
+    assert abs(J._ret(up, 0, 3, "trail") - 0.3) < 1e-12        # never trips: the hold's last close
+    good = dict(n=30, mean=0.05, excess=0.03, ex3=0.02, median=0.0, p0=0.02)
+    assert J.ride_explore_gate(good) and J.ride_judge_gate(good)
+    assert not J.ride_explore_gate({**good, "excess": 0.01})   # no better than the stock normally does
+    assert not J.ride_explore_gate({**good, "mean": 0.02})
+    T = pd.DataFrame(dict(adv=[1e8] * 10, c=[0.1, 0.08] + [0.01] * 8))
+    assert J.confirm_gate(dict(n=10, mean=0.02, lift=0.5, excess=0.01), T, "c", "ride")
+    assert not J.confirm_gate(dict(n=10, mean=0.02, lift=0.5, excess=-0.01), T, "c", "ride")
