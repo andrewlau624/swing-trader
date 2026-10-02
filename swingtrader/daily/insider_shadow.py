@@ -10,6 +10,13 @@ This module never places an order. Run once a weekday before the open (`make ins
   3. plan: today's would-be trades (ADV$ >= $20M, prior close >= $5) are appended to state/insider-day.jsonl.
 `gate()` reads the log: the switch may only be proposed to the user after 300 scored trades with mean net > 0
 and NW t >= 2; mean net <= 0 at 300 retires the shadow (kill rule).
+
+EV2 (Round 33, study_ev2_first_insider_buy.md; registered PASS at N 760): each planned trade also logs
+`silence_days`, the days since the issuer's previous Form 4 open-market purchase by ANY owner (None = none within
+1,095 days), and the $ bought. Two forward-only weights are scored inside the same log (no orders, no sizing):
+EV2 = silence >= 730 days, and EV2 x big = EV2 with >= $500k bought (found post-judge, so forward data only).
+Each gets its own gate at 60 scored trades: mean <= 0 -> drop the weight; mean > 0 and t >= 2 -> may propose a 2x
+weight inside ID3.
 """
 from __future__ import annotations
 
@@ -29,6 +36,7 @@ LOG_NAME = "insider-day.jsonl"
 MIN_USD, MIN_ADV, MIN_PRICE = 1e4, 2e7, 5.0
 COST_BPS = 2.5                     # per side, as judged in research; live MOO/MOC cost is the open question
 GATE_N = 300
+SILENCE_DAYS, BIG_USD, SILENCE_CAP, SUB_GATE_N = 730, 5e5, 1095, 60
 
 
 # ---------------------------------------------------------------- parsing (pure)
@@ -46,6 +54,7 @@ def parse_form4(text: str) -> dict | None:
     if (_tag(doc, "documentType") or "") not in ("4", "4/A"):
         return None
     sym = (_tag(doc, "issuerTradingSymbol") or "").upper().replace("-", ".").strip()
+    cik = _tag(doc, "issuerCik") or ""
     rel = " ".join(re.findall(r"<reportingOwnerRelationship>.*?</reportingOwnerRelationship>", doc, re.S))
     insider = bool(re.search(r"<(isDirector|isOfficer)>\s*(1|true)\s*</", rel, re.I))
     usd = 0.0
@@ -58,7 +67,7 @@ def parse_form4(text: str) -> dict | None:
             continue
     if usd <= 0 or not sym:
         return None
-    return dict(sym=sym, usd=usd, insider=insider)
+    return dict(sym=sym, usd=usd, insider=insider, issuer_cik=int(cik) if cik.strip().isdigit() else None)
 
 
 def form4_paths(idx_text: str) -> list[str]:
@@ -94,14 +103,57 @@ def plan_rows(buys: list[dict], bars: dict[str, pd.DataFrame], session: str) -> 
     return rows
 
 
+def silence_days(filings: list[tuple[dt.date, str]], fd: dt.date, has_purchase, cap: int = SILENCE_CAP) -> int | None:
+    """Days from `fd` back to the issuer's latest Form 4 filed BEFORE `fd` that has an open-market purchase by any
+    owner (Study EV2's definition). `filings` = [(filing date, url)]; `has_purchase(url)` reads one. Newest first,
+    stops at the first purchase; None when there is none within `cap` days."""
+    lo = fd - dt.timedelta(days=cap)
+    for d, url in sorted(filings, reverse=True):
+        if d >= fd:
+            continue
+        if d < lo:
+            break
+        if has_purchase(url):
+            return (fd - d).days
+    return None
+
+
+def ev2_flags(r: dict) -> tuple[bool, bool]:
+    """(EV2, EV2 x big) for a logged row; rows from before the EV2 fields existed are neither."""
+    if "silence_days" not in r:
+        return False, False
+    ev2 = r["silence_days"] is None or r["silence_days"] >= SILENCE_DAYS
+    return ev2, ev2 and float(r.get("usd", 0)) >= BIG_USD
+
+
+def _stats(x: pd.DataFrame) -> tuple[float, float]:
+    day = x.groupby("date").ret_net.mean()
+    t = float(day.mean() / day.std() * np.sqrt(len(day))) if len(day) > 2 and day.std() > 0 else float("nan")
+    return float(x.ret_net.mean()), t
+
+
+def _sub_gate(x: pd.DataFrame, rest: pd.DataFrame) -> dict:
+    if not len(x):
+        return dict(n=0, verdict=f"shadowing (0/{SUB_GATE_N})")
+    mean, t = _stats(x)
+    if len(x) < SUB_GATE_N:
+        v = f"shadowing ({len(x)}/{SUB_GATE_N})"
+    elif mean <= 0:
+        v = "KILL: drop the weight"
+    elif t >= 2:
+        v = "PASS: may propose a 2x weight inside ID3"
+    else:
+        v = "keep shadowing (t < 2)"
+    vs = float(rest.ret_net.mean()) * 1e4 if len(rest) else float("nan")
+    return dict(n=len(x), mean_bp=mean * 1e4, t=t, rest_bp=vs, verdict=v)
+
+
 def gate(records: list[dict]) -> dict:
     s = [r for r in records if r.get("status") == "scored"]
     if not s:
         return dict(n=0, verdict="no scored trades yet")
     x = pd.DataFrame(s)
-    day = x.groupby("date").ret_net.mean()
-    t = float(day.mean() / day.std() * np.sqrt(len(day))) if len(day) > 2 and day.std() > 0 else float("nan")
-    mean = float(x.ret_net.mean())
+    mean, t = _stats(x)
     if len(x) < GATE_N:
         v = f"shadowing ({len(x)}/{GATE_N})"
     elif mean > 0 and t >= 2:
@@ -110,7 +162,11 @@ def gate(records: list[dict]) -> dict:
         v = "KILL: retire the shadow"
     else:
         v = "keep shadowing (t < 2)"
-    return dict(n=len(x), mean_bp=mean * 1e4, t=t, verdict=v)
+    f = [ev2_flags(r) for r in s]
+    tagged = np.array(["silence_days" in r for r in s])
+    e2, big = np.array([a for a, _ in f]), np.array([b for _, b in f])
+    return dict(n=len(x), mean_bp=mean * 1e4, t=t, verdict=v,
+                ev2=_sub_gate(x[e2], x[tagged & ~e2]), ev2_big=_sub_gate(x[big], x[tagged & ~big]))
 
 
 # ---------------------------------------------------------------- I/O
@@ -136,6 +192,48 @@ def _sec_get(url: str) -> str | None:
         except requests.RequestException:
             time.sleep(2 * (k + 1))
     return None
+
+
+def issuer_form4s(cik: int, since: dt.date) -> list[tuple[dt.date, str]]:
+    """(filing date, .txt url) of every Form 4 / 4/A in the issuer's EDGAR submissions filed on or after `since`."""
+    base = "https://data.sec.gov/submissions/"
+    t = _sec_get(f"{base}CIK{cik:010d}.json")
+    if not t:
+        return []
+    j = json.loads(t)
+    pages = [j.get("filings", {}).get("recent", {})]
+    for f in j.get("filings", {}).get("files", []):
+        if f.get("filingTo", "9999") >= str(since):
+            more = _sec_get(base + f["name"])
+            if more:
+                pages.append(json.loads(more))
+    out = []
+    for p in pages:
+        for form, d, acc in zip(p.get("form", []), p.get("filingDate", []), p.get("accessionNumber", [])):
+            if form in ("4", "4/A") and d >= str(since):
+                out.append((dt.date.fromisoformat(d),
+                            f"https://www.sec.gov/Archives/edgar/data/{cik}/{acc.replace('-', '')}/{acc}.txt"))
+    return out
+
+
+def tag_silence(rows: list[dict], fd: dt.date, cik_of, log=print) -> None:
+    """Add silence_days to today's planned rows (EV2). Network: the issuer's Form 4 list, then filings newest first
+    until a purchase (~0.2 s each). Failures leave silence_days out (the row is then neither EV2 nor rest)."""
+    for r in rows:
+        try:
+            cik = cik_of(r["sym"])
+            if cik is None:
+                log(f"[insider] {r['sym']}: no CIK, EV2 silence not logged"); continue
+            fl = issuer_form4s(cik, fd - dt.timedelta(days=SILENCE_CAP))
+
+            def has_purchase(url, cik=cik):
+                t = _sec_get(url)
+                p = parse_form4(t) if t else None
+                return bool(p) and p.get("issuer_cik") in (None, cik)    # not a purchase the issuer made elsewhere
+            r["silence_days"] = silence_days(fl, fd, has_purchase)
+            r["ev2"], r["ev2_big"] = ev2_flags(r)
+        except Exception as exc:                                         # shadow only: never break the run
+            log(f"[insider] {r['sym']}: EV2 silence failed ({type(exc).__name__}: {str(exc)[:80]})")
 
 
 def fetch_buys(day: dt.date, log=print) -> list[dict]:
@@ -194,6 +292,11 @@ def run(state_dir: Path, today: dt.date | None = None, log=print) -> dict:
         syms = sorted({b["sym"] for b in buys if b["insider"]})
         bars = md.sip_daily(syms, pd.Timestamp(today) - pd.Timedelta(days=45)) if syms else {}
         new = plan_rows(buys, bars, str(today))
+        if new:
+            from .news_judge import _cik_map
+            cmap = _cik_map(Path(state_dir))
+            tag_silence(new, min(filing_days(prev, today)), lambda s: cmap.get(s.upper().replace(".", "-")), log)
+            log(f"[insider] EV2: " + ", ".join(f"{r['sym']} {r.get('silence_days', '?')}d ${r['usd']:,}" for r in new))
         rows += new
         log(f"[insider] {prev}: {len(buys)} code-P Form 4s, {len(syms)} officer/director symbols -> {len(new)} shadow trades for {today}")
     _write(path, rows)

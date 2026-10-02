@@ -22,7 +22,7 @@ def _form4(code="P", ad="A", shares="1000", px="25.50", director="1", officer="0
 
 def test_parse_purchase_and_rejects():
     r = s.parse_form4(_form4())
-    assert r == dict(sym="ABC", usd=25500.0, insider=True)
+    assert r == dict(sym="ABC", usd=25500.0, insider=True, issuer_cik=1)
     assert s.parse_form4(_form4(code="S")) is None              # a sale
     assert s.parse_form4(_form4(ad="D")) is None
     assert s.parse_form4(_form4(doc="5")) is None
@@ -94,3 +94,30 @@ def test_digest_counts_round31_shadows(tmp_path):
     assert w["odd-lot te"]["n"] == 1 and w["odd-lot te"]["usd"] == 99 * 2.0
     g = {x["gate"]: x for x in digest.gates({}, tmp_path, tmp_path)}
     assert g["Insider-day (ID3) verdict"]["n"] == 2
+
+
+# ------------------------------------------------------------ EV2 (Round 33): silence before the buy
+def test_silence_days_finds_the_latest_earlier_purchase():
+    fd = dt.date(2026, 10, 1)
+    fl = [(dt.date(2026, 10, 1), "same-day"), (dt.date(2026, 9, 1), "sale"), (dt.date(2025, 1, 1), "buy-old"),
+          (dt.date(2026, 3, 1), "buy")]
+    seen = []
+    buy = lambda u: seen.append(u) or u.startswith("buy")
+    assert s.silence_days(fl, fd, buy) == (fd - dt.date(2026, 3, 1)).days
+    assert seen == ["sale", "buy"]                         # newest first, same-day filing ignored, stops at a buy
+    assert s.silence_days([(dt.date(2023, 1, 1), "buy")], fd, buy) is None     # beyond the 1,095-day cap
+    assert s.silence_days([], fd, buy) is None
+
+
+def test_ev2_flags_and_sub_gates():
+    assert s.ev2_flags(dict(usd=1e6)) == (False, False)                       # logged before EV2 existed
+    assert s.ev2_flags(dict(silence_days=None, usd=1e4)) == (True, False)
+    assert s.ev2_flags(dict(silence_days=800, usd=6e5)) == (True, True)
+    assert s.ev2_flags(dict(silence_days=100, usd=6e5)) == (False, False)
+    rows = [dict(status="scored", date=f"d{i // 3}", ret_net=0.003 + (i % 3) * 1e-4, silence_days=None, usd=6e5)
+            for i in range(60)]
+    rows += [dict(status="scored", date=f"d{i}", ret_net=-0.001, silence_days=10, usd=1e4) for i in range(10)]
+    g = s.gate(rows)
+    assert g["ev2"]["n"] == 60 and g["ev2"]["verdict"].startswith("PASS") and g["ev2"]["rest_bp"] < 0
+    assert g["ev2_big"]["n"] == 60
+    assert s.gate(rows[:30])["ev2"]["verdict"].startswith("shadowing")

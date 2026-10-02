@@ -25,3 +25,11 @@
   clock or a vendor "day" (which may start at 21:00 the evening before). Label bars/fills by trade
   date (`marketdata.trade_date`). Anything new that reads a daily bar or quote open/high/low must say
   why it is regular-hours, or use regular-hours minutes (`marketdata.rth_minutes`).
+
+## Everything being tested goes on the weekly digest (user, 2026-10-02)
+- Any new shadow, watch, alert, log-only switch or forward-only weight gets an entry in
+  `swingtrader/daily/testing.py` REGISTRY **in the same commit** (name, what it tests, start date, gate count,
+  a one-line reader). The weekly digest's "Being tested" section and `make testing` list every entry with its
+  count, what's new this week and where it stands. `tests/test_testing_registry.py` fails if a module with a
+  `LOG_NAME` or a `shadow` key under `daily:` in config.yaml is not covered. When a test ends (passed and
+  switched on, or killed), remove its entry in the commit that ends it.

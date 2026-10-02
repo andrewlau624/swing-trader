@@ -261,7 +261,8 @@ def build(state: Path, logs: Path, start_equity: float, conviction_w: float, tax
     verdicts = {(v["date"], v["sym"]): v for v in _jsonl(state / "news-judge.jsonl") if v.get("verdict")}
     real = {n: a for n, a in accts.items() if n in ("live", "roth")}
     bal = {n: a.equity for n, a in real.items()}
-    return dict(accounts=accts, gates=gates(accts, logs, state),
+    from .testing import status as testing_status
+    return dict(accounts=accts, gates=gates(accts, logs, state), testing=testing_status(state, logs),
                 whatif={n: whatif_realized(a, decisions, verdicts, conviction_w)
                         + (round31_whatif(state, a) if n == "live" else []) for n, a in accts.items()},
                 proj=projections(bal, taxable_monthly))
@@ -372,8 +373,13 @@ def render(d: dict, charts: bool = True, taxable_monthly: float = 0.0) -> tuple[
     if step:
         T += ["", ("Ready: " if step["ready"] else "Next: ") + f"{step['gate']} — "
               f"{min(step['n'], step['need'])} of {step['need']} {step['unit']}", f"  then {step['action']}"]
-    for g in rest + tests:
-        T.append(f"  {g['gate'].replace(' verdict', ''):26s} {g['n']:>4} of {g['need']}")
+    for g in rest:
+        T.append(f"  {g['gate']:26s} {g['n']:>4} of {g['need']}")
+    if d.get("testing"):
+        T += ["", "Being tested (count / gate, new this week):"]
+        for r in d["testing"]:
+            prog = f"{r['n']} of {r['need']}" if r["need"] else f"{r['n']} {r['unit']}"
+            T.append(f"  {r['name'][:30]:30s} {prog:>12s}  +{r['week']}  {r['line'][:90]}")
     if ideas:
         T += ["", "If these had been on:"] + [f"  {NAME[n]:10s} {r['idea'][:34]:34s} {_signed(r['usd']):>7s}" for n, r in ideas]
     for n, _ in real:
@@ -438,14 +444,25 @@ def render(d: dict, charts: bool = True, taxable_monthly: float = 0.0) -> tuple[
                  + f"<div style='font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;background:#ffffff;"
                    f"border:1px solid {LINE};padding:8px 10px;margin-top:6px;word-break:break-all;color:{INK}'>{_esc(step['action'])}</div>"
                  + "</div>")
-    if rest or tests:
+    if rest:
         rr = "".join(
-            f"<tr><td style='{cell}width:44%'>{_esc(g['gate'].replace(' verdict', ''))}"
-            + (f"<div style='font-size:12px;color:{MUTE}'>experiment</div>" if g in tests else "")
-            + f"</td><td style='{cell}width:32%;padding-left:14px;padding-right:14px'>{bar(min(g['n'], g['need']) / g['need'], ACC if g in rest else '#8c959f')}</td>"
+            f"<tr><td style='{cell}width:44%'>{_esc(g['gate'])}"
+            + f"</td><td style='{cell}width:32%;padding-left:14px;padding-right:14px'>{bar(min(g['n'], g['need']) / g['need'])}</td>"
               f"<td style='{numc}'>{g['n']} <span style='font-weight:400;color:{MUTE}'>of {g['need']}</span></td></tr>"
-            for g in rest + tests)
+            for g in rest)
         B += [section("Also counting"), table(["", "", "Progress"], rr)]
+    if d.get("testing"):
+        rr = "".join(
+            f"<tr><td style='{cell}width:62%'><b>{_esc(r['name'])}</b>"
+            f"<div style='font-size:13px;color:{MUTE}'>{_esc(r['what'])} · since {_esc(r['started'])}</div>"
+            f"<div style='font-size:13px;color:{INK};margin-top:2px'>{_esc(r['line'])}</div>"
+            + (f"<div style='margin-top:6px'>{bar(min(r['n'], r['need']) / r['need'], '#8c959f')}</div>" if r["need"] else "")
+            + f"</td><td style='{numc}'>{r['n']}" + (f" <span style='font-weight:400;color:{MUTE}'>of {r['need']}</span>" if r["need"] else
+                                                     f" <span style='font-weight:400;color:{MUTE}'>{_esc(r['unit'])}</span>")
+            + f"<div style='font-size:12px;font-weight:400;color:{MUTE}'>+{r['week']} this week</div></td></tr>"
+            for r in d["testing"])
+        B += [section("Being tested", "every shadow, watch and forward-only idea, and where it stands"),
+              table(["", "Count"], rr)]
     for n, a in real:
         yrs, lines, mk = proj[n]
         dep = ROTH_DEPOSIT_YR / 12 if n == "roth" else taxable_monthly

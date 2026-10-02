@@ -13,7 +13,7 @@ UNAME := $(shell uname -s)
 
 .PHONY: help setup env test lint kill-old persist unpersist persist-status \
         daily-status daily-dry daily-once daily-logs daily-live-check daily-live-on daily-live-off daily-roth-check daily-roth-on daily-roth-off schwab-login schwab-quote-check schwab-reminder review support errors \
-        results status positions slippage logs once dry digest notify-test \
+        results status positions slippage logs once dry digest testing notify-test \
         notify-setup doctor pull scan backtest clean stop persist-stop linger _lastlog pending \
         daytrade-record daytrade-smoke daytrade-status daytrade-halt daytrade-unhalt daytrade-review \
         daytrade-table daytrade-at-look daytrade-momentum daytrade-replay daytrade-paper daytrade-persist daytrade-unpersist daytrade-logs
@@ -405,6 +405,9 @@ splitoff-buy: ## Round 32 B2: buy the odd lot for an open split-off offer, after
 splitoff-add: ## set an offer's terms by hand: make splitoff-add ARGS='PARENT RECV YYYY-MM-DD PER100 CAP [URL]'
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.splitoff_watch add $(ARGS)
 
+testing: ## everything being tested forward (the weekly digest's "Being tested" list, swingtrader/daily/testing.py)
+	@PYTHONPATH=. $(PY) -c "from swingtrader.daily import testing as t; [print(f\"{r['name'][:34]:34s} {r['n']:>5} / {r['need'] or '-':<4} +{r['week']:<3} {r['line']}\") for r in t.status('state', 'logs')]"
+
 forward-status: ## every forward-only shadow gate in one place (AU3 is in `make review` section 9)
 	@echo "== Round 23 BA: LLM news judge (verdict once at 300) =="
 	@PYTHONPATH=. $(PY) -m research.sim.news_judge_eval 2>/dev/null || echo "  no state/news-judge.jsonl yet"
@@ -412,7 +415,7 @@ forward-status: ## every forward-only shadow gate in one place (AU3 is in `make 
 	@echo "== Round 24 BB: 15:40 quote imbalance (verdict once at 300) =="
 	@PYTHONPATH=. $(PY) -m research.sim.quote_imbalance_eval
 	@echo ""
-	@echo "== Round 31 ID3: insider-purchase session (gate at 300 scored trades) =="
+	@echo "== Round 31 ID3: insider-purchase session (gate at 300 scored trades; ev2 / ev2_big = Round 33 EV2 weights, gate at 60) =="
 	@PYTHONPATH=. $(PY) -c "from pathlib import Path; from swingtrader.daily import insider_shadow as s; print(' ', s.gate(s._read(Path('state')/s.LOG_NAME)))"
 	@echo ""
 	@echo "== Round 19 AU3 tug-of-war tilt: run  make review SINCE=2026-09-22 ARGS=--no-replay  (section 9) =="
