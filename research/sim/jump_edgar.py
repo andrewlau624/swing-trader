@@ -97,6 +97,28 @@ def r4_5(): return _r4("r4_5")
 def r4_6(): return _r4("r4_6")
 
 
+# ---- rounds 3-4: more full-text footprints. key -> ([queries], form); first per company in 365 days, ADV$ < $20M ----
+MORE = {"r3_8": (['"join the Russell"', '"added to the Russell"'], "8-K"),
+        "r3_10": (['"unsolicited" "non-binding" "proposal"'], "8-K"),
+        "r4_8": (['"Schedule 13G"'], "SC 13D"),
+        "r4_11": (['"forbearance" "repaid in full"'], "8-K"),
+        "r4_12": (['"Item 4.01" "engaged Deloitte"', '"Item 4.01" "engaged Ernst & Young"', '"Item 4.01" "engaged KPMG"',
+                   '"Item 4.01" "engaged PricewaterhouseCoopers"'], "8-K"),
+        "r4_14": (['"approved the transfer" "Nasdaq Global"'], "8-K"),
+        "r4_15": (['"Form S-3"'], "RW"),
+        "r4_16": (['"going private transaction" "proposal"'], "8-K"),
+        "r4_18": (['"amendment to the agreement and plan of merger" "increase"'], "8-K"),
+        "r4_19": (['"privately negotiated" "repurchase" "shares from"'], "8-K")}
+
+
+def more(key: str) -> pd.DataFrame:
+    qs, form = MORE[key]
+    H = pd.concat([_fts(q, form, 2015) for q in qs])
+    H = H[H.form == form].rename(columns={"date": "fd"})
+    E = resolve(H[H.fd >= "2016-01-01"])
+    return small_only(first_in(E[["sym", "fd"]], 365), 20e6)
+
+
 if __name__ == "__main__":
     what = sys.argv[1]
-    save(globals()[what](), what)
+    save(more(what) if what in MORE else globals()[what](), what)

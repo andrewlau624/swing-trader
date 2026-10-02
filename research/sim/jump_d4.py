@@ -23,19 +23,20 @@ THEMES = ['"blockchain"', '"bitcoin"', '"metaverse"', '"artificial intelligence"
           '"uranium"', '"hydrogen fuel"', '"GLP-1"']
 
 
-def hits() -> pd.DataFrame:
+def hits(forms: str = "8-K") -> pd.DataFrame:
     rows = []
     for t in THEMES:
         for q in pd.period_range("2014Q1", "2026Q3", freq="Q"):
-            for h in F.fts(t, "8-K", str(q.start_time.date()), str(q.end_time.date())):
+            for h in F.fts(t, forms, str(q.start_time.date()), str(q.end_time.date())):
                 for cik, nm in zip(h["ciks"], h["names"]):
                     rows.append(dict(theme=t, cik=str(int(cik)), name=nm, date=pd.Timestamp(h["date"])))
         print(t, len(rows), flush=True)
     return pd.DataFrame(rows)
 
 
-def build() -> pd.DataFrame:
-    H = hits().sort_values(["theme", "cik", "date"])
+def build(forms: str = "8-K") -> pd.DataFrame:
+    """forms "8-K" = D4; forms "10-K" = R3-18 (the same rule on annual reports: the quieter venue)."""
+    H = hits(forms).sort_values(["theme", "cik", "date"])
     H["prev"] = H.groupby(["theme", "cik"]).date.shift(1)
     E = H[(H.date >= "2016-01-01") & (H.prev.isna() | ((H.date - H.prev).dt.days > 730))]
     E = E.drop_duplicates(["cik", "date"])
@@ -44,6 +45,10 @@ def build() -> pd.DataFrame:
 
 
 if __name__ == "__main__":
-    E = build()
-    E.to_csv(ROOT / "data/research/jump/d4_events.csv", index=False)
-    save(E, "d4")
+    import sys
+    if sys.argv[1:] == ["r3_18"]:
+        save(build("10-K"), "r3_18")
+    else:
+        E = build()
+        E.to_csv(ROOT / "data/research/jump/d4_events.csv", index=False)
+        save(E, "d4")

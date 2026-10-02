@@ -1,10 +1,12 @@
 # Jump & ride hunt log (prompt_jump_hunt.md), session llm-trader-51
 
 ## STATE (update after every idea)
-- program N: 762 (J1, J2 registered and judged DEAD). k (ideas judged): 2. Ideas explored: 36 (H17 D5 D9 D4 D6 H1
-  H2 H3 C4 H18 C7 C10 R2-4 R2-5 R2-13 R2-17 R2-2 R2-20 R2-15 R3-9 R3-5 R2-1 R3-2 R3-16 R3-3 H5 H6 H15 H16 C1 R3-17). Rounds of idea generation: 4 written (R1 62, R2 20, R3 20, R4 20 = 122 ideas).
+- program N: 764 (J1-J4 registered and judged DEAD). k (ideas judged): 4. Ideas explored: 42 (H17 D5 D9 D4 D6 H1
+  H2 H3 C4 H18 C7 C10 R2-4 R2-5 R2-13 R2-17 R2-2 R2-20 R2-15 R3-9 R3-5 R2-1 R3-2 R3-16 R3-3 H5 H6 H15 H16 C1 R3-17
+  R4-1 R4-2 R4-3 R4-4 R4-5 R4-6). Rounds of idea generation: 4 written (R1 62, R2 20, R3 20, R4 20 = 122 ideas).
 - dropped before a run (data): H11/C8 (option alerts end 2017), S1/S1v (rare), D7 (runner needs ADV), R3-4 (403).
-- current idea: R3-6 13F discovery (building), R4-1..R4-6 8-K footprints (building).
+- current idea: R3-8 R3-10 R4-8 R4-11 R4-12 R4-14 R4-15 R4-16 R4-18 R4-19 (8-K/13D/RW full text, building + explore
+  queue), R3-18 (10-K themes, queued), R3-6 (13F, bars), R3-7 (LLM extraction, written, runs after the FTS builds).
 - next: news ideas when the archive's select months land (~90/96 at 21:30): S2 PDUFA, D2 contracts, C5, R2-25, H10,
   H12, H14, H21, H22, H7, H8, H9, S3, S4, S5, W2, W5, R2-7, R2-19, R2-22, R2-14, D1, D8, C6, C3, R3-11..R3-15, R3-20;
   WSB ideas (H4, V1, H13) when WSB lands; H23 CEO pageviews (fetching).
