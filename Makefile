@@ -129,6 +129,7 @@ unpersist:
 	@-./scripts/sysd.sh disable --now daily-trader.timer 2>/dev/null
 	@-./scripts/sysd.sh disable --now schwab-reminder.timer 2>/dev/null
 	@-./scripts/sysd.sh disable --now weekly-digest.timer 2>/dev/null
+	@-./scripts/sysd.sh disable --now research-shadows.timer 2>/dev/null
 	@-rm -f $(HOME)/.config/systemd/user/swing-trader.service \
 	        $(HOME)/.config/systemd/user/swing-trader.timer \
 	        $(HOME)/.config/systemd/user/daily-trader.service \
@@ -136,7 +137,9 @@ unpersist:
 	        $(HOME)/.config/systemd/user/schwab-reminder.service \
 	        $(HOME)/.config/systemd/user/schwab-reminder.timer \
 	        $(HOME)/.config/systemd/user/weekly-digest.service \
-	        $(HOME)/.config/systemd/user/weekly-digest.timer
+	        $(HOME)/.config/systemd/user/weekly-digest.timer \
+	        $(HOME)/.config/systemd/user/research-shadows.service \
+	        $(HOME)/.config/systemd/user/research-shadows.timer
 	@-./scripts/sysd.sh daemon-reload 2>/dev/null
 	@-crontab -l 2>/dev/null | grep -v 'run-live.sh' | grep -v 'run-daily.sh' | grep -v 'schwab_reminder.py' | grep -v 'weekly_digest.py' \
 	  | grep -vE '^CRON_TZ=America/New_York|^# swing-trader|^# *[0-9]{2}:[0-9]{2} PT' \
@@ -145,8 +148,8 @@ unpersist:
 
 persist-status:
 	@echo "--- systemd user timer ---"
-	@./scripts/sysd.sh list-timers swing-trader.timer daily-trader.timer schwab-reminder.timer --no-pager 2>/dev/null \
-	  | grep -E "swing-trader|daily-trader|schwab-reminder|NEXT" || echo "  not installed"
+	@./scripts/sysd.sh list-timers swing-trader.timer daily-trader.timer schwab-reminder.timer research-shadows.timer --no-pager 2>/dev/null \
+	  | grep -E "swing-trader|daily-trader|schwab-reminder|research-shadows|NEXT" || echo "  not installed"
 	@$(PY) scripts/schwab_reminder.py 2>/dev/null | sed 's/^/  /' || true
 	@printf "  lingering: "; \
 	  if loginctl show-user $$(whoami) -p Linger 2>/dev/null | grep -q "Linger=yes"; \

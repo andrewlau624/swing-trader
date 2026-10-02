@@ -1,0 +1,12 @@
+# Weekdays 08:20 ET: yesterday's EDGAR daily index is posted; done well before the 09:15 daily trader.
+# The jobs skip non-sessions themselves (exchange calendar).
+[Unit]
+Description=swing-trader research shadows schedule
+
+[Timer]
+OnCalendar=Mon..Fri *-*-* 08:20:00 America/New_York
+Persistent=false
+Unit=research-shadows.service
+
+[Install]
+WantedBy=timers.target

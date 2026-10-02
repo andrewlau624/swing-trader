@@ -1,0 +1,13 @@
+# Installed by `make persist`. Round 31 forward logs, no orders: the insider-purchase session shadow (ID3) and the
+# odd-lot tender watch (emails a qualifying offer). Reads EDGAR at SEC's rate limit (~6-8 min).
+[Unit]
+Description=swing-trader research shadows (insider-day, tender watch)
+
+[Service]
+Type=oneshot
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=-__APP_DIR__/.env
+Environment=PYTHONPATH=__APP_DIR__
+ExecStart=__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.insider_shadow
+ExecStart=__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.tender_watch
+TimeoutStartSec=1800
