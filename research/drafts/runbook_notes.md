@@ -112,6 +112,41 @@ No pre-registration. 2024-26 never read. One line: t 0.71 (< 2), unstable by yea
 
 ---
 
+## 6. 8-K text "special dividend" (menu row 6) — explored-dead
+Event: EDGAR full-text search for the exact phrase "special dividend" in form 8-K, 2020-2026; ticker from the hit
+display name (first). File `data/research/program/events_specdiv.parquet`. ADV >= $20M, 1-session hold.
+
+Select-half (<= 2023-12-31), ADV >= $20M:
+```
+events 1491 -> trades 348  (87 per year)
+net per trade -10.6bp  median -3.4bp  hit rate 49%  t -0.60
+by year: 2020: +6.6bp (n 18)  2021: -34.7bp (n 104)  2022: -18.8bp (n 107)  2023: +15.2bp (n 119)
+TRACK SEMI-RARE (24-100/yr): net >= +50bp, hit >= 55%, t >= 2: FAILS -> stop, record as explored-dead
+```
+No pre-registration. 2024-26 never read. One line: net −10.6bp, t −0.60; not tested.
+
+---
+
+# End of session — closing table (Step 9)
+
+6 ideas run (the session maximum). None pre-registered beyond EV1; EV1 judged DEAD. 2024-26 was read only for EV1,
+after its pre-registration commit f4d19c5.
+
+| idea | track | events/yr | select result | judged? | verdict | $/yr at $2.3k / $10k / $25k |
+|---|---|---|---|---|---|---|
+| 1 cluster insider buys | FREQUENT | ~195 (ADV>=20M) | net +27.7bp, hit 53%, t 2.42 | yes (EV1) | **DEAD** (judge-half t 1.85 < 2) | +168 / +879 / +2,262 if real (not real) |
+| 2 first insider buy in 2+ yr | FREQUENT | ~140 | net +23.9bp, hit 52%, t 1.66 | no | explored-dead | — |
+| 3 SC 13G originals | FREQUENT | ~1,020 | net +9.6bp, hit 51%, t 1.82 | no | explored-dead | — |
+| 4 SC 13D/A amendments | FREQUENT | ~519 | net −21.1bp, hit 45%, t −2.82 | no | explored-dead | — |
+| 5 8-K "strategic alternatives" | (FREQUENT by count) | ~106 | net +11.2bp, hit 52%, t 0.71 | no | explored-dead | — |
+| 6 8-K "special dividend" | SEMI-RARE by count | ~87 | net −10.6bp, hit 49%, t −0.60 | no | explored-dead | — |
+
+Not reached this session (menu rows 7-10): ASR buybacks ("share repurchase" + "accelerated"), 25-NSE delistings,
+spin-off completion, S-8 filings. Program N: 758 (EV1 registered, one variant). Nothing to switch on.
+
+
+---
+
 # Overnight loop (prompt_overnight_loop.md), session llm-trader-e4, started 2026-10-02 ~06:32 PT
 
 ## 2. First insider purchase in 2+ years (menu row 2) — Study EV2, track FREQUENT
