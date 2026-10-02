@@ -1,14 +1,12 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 1 · ideas written 10 (G1-G10) · k (judged) 1 · program N 772 (next free 773)
-- NEAR: **G2 EV2-big SPY-core overlay** (holdout 2016-20 all bars pass at 2.5bp; 2021 flat; no clean judge half) ->
-  follow-up G2-F = the forward ev2_big gate (60 trades). Nothing else running.
-- track streak: T1 x1 (G2) -> next must rotate if T1 hits 3
-- NEXT: T5 (G1 contract-payoff stack): gather per-event P&L for B1 / B2 / odd-lot tenders from their study files and
-  count judge-half (2024-26) events; then pre-register G1 as a book. Side note for a T1 idea: ID3 >= $500k without the
-  silence filter was +35.7bp x 358/yr on the holdout and +23.8bp in 2021 (reported row; needs its own registration;
-  the rule was seen on 2016-21 now, so its clean test would be forward or 2022-26 IF that cut was never computed there).
+- round 1 · ideas written 10 (G1-G10) · k (judged) 2 · program N 772 (next free 773)
+- NEAR: G2 (forward follow-up G2-F); G1 bound NEAR at $10k (+8.8pp after tax judge), FOUND-level at $2.3k (+20.5pp) but
+  conditional on Schwab rounding B1 (VIVK ~10-07; check state/roundup-orders.json in llm-trader after 10-07).
+- track streak: T1, T5 -> next T2 or T3
+- NEXT: T2 G4 ADR terminations: count from documents (EDGAR full text "termination of the deposit agreement" /
+  Form F-6 POS / 25-NSE on ADRs) 2016-26, events/yr and the contractual payoff from terms only (no prices yet).
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -37,3 +35,6 @@
   Follow-up G2-F registered (forward ev2_big gate, no new N). First judge run crashed on a dsr() dict print after the
   per-trade lines; rerun = same code, print fixed. Checked a suspicious 2021 IRR (+10.5pp on a ~0 overlay): deposit
   timing (all wins in Q4 on a larger account), not a bug; time-weighted numbers lead the write-up.
+- 2026-10-02 17:15 **G1 bound (no N): NEAR at $10k.** From the registered deal tables: judge 2024-26 taxable deal $
+  $725 at $2.3k (+20.5pp after tax) / $1,356 at $10k (+8.8pp); holdout +17pp / +13pp; Roth +4.4pp (B1 only). B1 rounding
+  at Schwab unverified; without B1, $2.3k is ~+10pp. Nothing to build (all parts live). study_goal_g1.md.
