@@ -95,6 +95,23 @@ No pre-registration. 2024-26 never read. One line: net −21.1bp, t −2.82 (sig
 
 ---
 
+## 5. 8-K text "strategic alternatives" (menu row 5) — explored-dead
+Event: EDGAR full-text search (`fts_years`) for the exact phrase "strategic alternatives" in form 8-K, 2020-2026;
+ticker from the hit display name (`ticker_of`, first ticker). File `data/research/program/events_stratalt.parquet`.
+ADV >= $20M, 1-session hold. (Expected track was rare/big, but it selected > 100/yr names, so the tool applied the
+FREQUENT gate; the rare-deal gate is not used when the event flow is this high.)
+
+Select-half (<= 2023-12-31), ADV >= $20M:
+```
+events 2233 -> trades 424  (106 per year)
+net per trade +11.2bp  median +12.9bp  hit rate 52%  t +0.71
+by year: 2020: +25.4bp (n 26)  2021: -20.9bp (n 149)  2022: +50.6bp (n 124)  2023: +7.4bp (n 125)
+TRACK FREQUENT (>= 100/yr): net >= +10bp, hit >= 50%, t >= 2: FAILS -> stop, record as explored-dead
+```
+No pre-registration. 2024-26 never read. One line: t 0.71 (< 2), unstable by year; not tested.
+
+---
+
 # Overnight loop (prompt_overnight_loop.md), session llm-trader-e4, started 2026-10-02 ~06:32 PT
 
 ## 2. First insider purchase in 2+ years (menu row 2) — Study EV2, track FREQUENT
