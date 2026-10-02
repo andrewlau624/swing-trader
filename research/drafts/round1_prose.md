@@ -1902,3 +1902,64 @@ gains weak.
   - (c) max DD better than the market's;
   - (d) the mean weight in the judged period between 0.6 and 1.6 (a sanity bound on c).
 - Reported: 2016-26 simulated, and real SPY / SSO / BIL with the same weights.
+
+
+## Amendment — Round 29 (deep search), Studies DS1 / DS2-3 / DS4 / DS5 (pre-register; 7 variants, program N 745 -> 752)
+`date`: Fri Oct 2 2026 (the commit time is the stamp). Brief: `prompt_deep_search.md`; ranked list of 23 candidates
+with the dead-list check: `deep_search_candidates.md` (committed with this amendment, before any number). Common to all:
+night returns from the official crosses (`auction_audit.with_rets`, `ret_auc`); raw prices for any price filter; judged
+at 2.5bp/side, tier_hi reported; book = V7 live today (`growth.cfg(1.0, 0, 2.48)`, `growth.V7`) at fixed $2.3k / $10k /
+$25k unless stated; halves 2021-23 / 2024-26; NW t with 5 lags; sign-flip placebo 1,000 draws; DSR reported at N 752.
+
+### DS1 — earnings-announcement premium as an overnight sleeve (3 variants)
+Source: Frazzini-Lamont 2007; Barber-De George-Lehavy-Trueman 2013; Savor-Wilson 2016; Lou-Polk-Skouras 2019 (it
+accrues overnight). Who pays: a premium for announcement risk and attention-driven buyers at the post-news open.
+Not the same as add. 12 (earnings headlines on night picks).
+- Events: every symbol on the Nasdaq earnings calendar (`api.nasdaq.com/api/calendar/earnings?date=d`, free) for
+  announcement date d, 2020-10 .. 2026-09. History has no before-open/after-close time, so every window spans both
+  candidate nights. Excluded: symbols not in the SIP panel, ETFs/ETPs, |window return| > 50% (data/corporate action).
+- Liquidity from the panel, through d−1 only: ADV$ = 20-day mean of close × volume (split-invariant; no price filter).
+- **E1** liquid (ADV$ >= $20M), hold close d−1 -> open d+1 (one round trip, 2 sides).
+- **E2** thin (ADV$ $2M-$20M), same window.
+- **E3** liquid, the two overnights only (close d−1 -> open d, close d -> open d+1; 4 sides; day d in cash).
+- Unit: per-event return minus SPY's return over the same window, net of 2.5bp/side × sides. Series for t: by entry
+  date (d−1), the equal-weight mean of that day's events.
+- Pass (each variant): (a) mean net excess > 0 in both halves; (b) NW t >= 2 on the entry-date series; (c) sign-flip
+  placebo >= 95th pct; (d) **feature placebo**: the same events moved to a random non-announcement date of the same
+  stock in the same calendar year (>= 10 sessions from any announcement), 200 draws; the real mean must beat >= 95%;
+  (e) for a variant passing (a)-(d), confirmed on Alpaca official crosses (opening cross at d+1 / d, closing cross at
+  d−1 / d): mean net excess > 0 in both halves; (f) as a sleeve on the Roth cash book's idle night cash and on V7's,
+  book maxDD not worse by > 2pp and 5y P(DD>50%) <= 5%. Reported: 2019-10 .. 2020-09 (panel2020) where the calendar
+  covers it, tier_hi, correlation with the night / IBS / noise legs, by-year means.
+
+### DS2 / DS3 — the noise leg's decision grid (2 variants)
+Same rule, bands, sizing and 0.5bp/side noise cost (1.0bp reported); only the decision slots change.
+- **G1 (DS2)**: decisions every 15 minutes from 10:00 to 15:45 (live: every 30 from 10:00 to 15:30).
+- **G2 (DS3)**: the live 30-minute grid, but no new or reversed position at 12:00 / 12:30 / 13:00 / 13:30 (exits to
+  flat allowed there).
+- Pass: (a) V7 book increment > 0 in both halves at all three sizes; (b) the noise leg's unit return (QQQ/SMH 50/50)
+  increment > 0 in the 2016-20 holdout; (c) NW t >= 2 on the daily book increment ($10k); (d) sign-flip placebo
+  >= 95th; (e) G2 only: >= 95th pct of 100 placebos that block 4 random slots of the 12; (f) maxDD not worse by > 2pp,
+  5y P(DD>50%) <= 5% at $10k.
+
+### DS4 — night picks tilted by FINRA days-to-cover (1 variant)
+Source: Boehmer-Huszar-Jordan 2010 (heavily shorted stocks reverse); covering into the next open. Who pays: short
+sellers covering. Not AY (daily off-exchange short VOLUME). Data: FINRA consolidated short interest (free API), the
+latest settlement whose publication is known by d: settlement date + 10 business days <= d. Feature x = log(1 + DTC).
+- **Q1**: weights = live tilt × clip(1 + 0.25 z, 0.25, 2), renormalised to the live tilt's mean; z = (x − mu) / sd with
+  mu/sd from 2021-23 picks; missing DTC -> z = 0 (AU3's exact construction). Hypothesis: high DTC bounces more.
+- Pass: (a) increment > 0 in both halves at all three sizes; (b) NW t >= 2 ($10k); (c) sign-flip >= 95th; (d) feature
+  shuffle within each night (200 draws) >= 95th; (e) dDD >= −2pp; (f) P(DD>50%) <= 5%. Reported: tier_hi, DTC
+  coverage of picks, corr of DTC with vol20 / price / TOW.
+
+### DS5 — night leg ×1.5 on tax-loss / window-dressing nights (1 variant)
+Source: Grinblatt-Moskowitz 2004 (December tax-loss selling of losers); Ng-Wang 2004 (quarter-end selling of small
+losers). Who pays: sellers dumping losers into the close for tax or reporting reasons.
+- **S1**: the night leg's per-name size ×1.5 on entries made in the last 10 sessions of December and the last 3
+  sessions of March / June / September (calendar known in advance; ~19 nights a year). Overnight debit charged at 12%.
+- Pass: (a) increment > 0 in both halves at all three sizes; (b) NW t >= 2 ($10k); (c) sign-flip >= 95th;
+  (d) **matched placebo**: ×1.5 on the same number of random nights per calendar year, 200 draws, the real increment
+  must beat >= 95%; (e) dDD >= −2pp; (f) P(DD>50%) <= 5%. Low power expected (~110 nights): reported as such.
+
+Anything that passes becomes a default-off switch with shadow logging, a kill rule, tests and a digest gate; nothing
+goes live without the user.
