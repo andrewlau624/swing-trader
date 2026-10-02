@@ -2060,3 +2060,24 @@ positive in aggregate, the worst deal's loss small and explained, the rule mecha
   with a fixed cash price per pre-split share for holders below the ratio. Entry: buy (ratio − 1) shares or fewer at
   the close of the first session after the first SC 13E3. Exit: the cash price if an Alpaca reverse split with
   old_rate >= the ratio follows within 365 days (paid ~10 sessions after E), else the close 365 days later.
+
+## Amendment — Round 33 (event runbook, smaller-model session), Study EV1: cluster insider buys, next session open -> close (pre-register; 1 variant, program N 757 -> 758)
+
+`date`: Fri Oct 2 2026 (the commit time is the stamp). Runbook: research/drafts/prompt_event_runbook.md.
+Event: officer/director open-market purchases from `insider_buys()` (SEC Form 345 sets), `X[X.insider]`; per symbol,
+chain filings whose consecutive filing dates are <= 5 days apart (distinct accessions) and emit one event at the
+**completion date** of each chain of 2+ filings (known only once the cluster is visible), events file
+data/research/program/events_cluster.parquet (snippet C, rule above). Trade: buy the opening cross of the first
+session after the completion date, sell the closing cross the same session; ADV >= $20M; raw prior close >= $5;
+|ret| < 50%. Track: FREQUENT. Who pays: at the cross, market makers and early sellers; the later-session buyers are
+attention-limited screeners/newsletters reading "multiple insiders bought" lists. Why it persists: a cluster of two
+or more distinct officer/director buys is harder to fake than a single buy and attention diffuses slowly, so the
+open-to-close drift repeats; too small/manual/rare for funds to size into.
+Select-half result (2021-23):
+```
+events 9787 -> trades 780  (195 per year)
+net per trade +27.7bp  median +12.3bp  hit rate 53%  t +2.42
+by year: 2020: -42.0bp (n 29)  2021: +21.2bp (n 198)  2022: +22.7bp (n 284)  2023: +45.2bp (n 269)
+TRACK FREQUENT (>= 100/yr): net >= +10bp, hit >= 50%, t >= 2: MEETS -> may pre-register
+```
+Judge: FREQUENT -> `event_runner run` (the registered Study ID bar, PASS/DEAD as printed).
