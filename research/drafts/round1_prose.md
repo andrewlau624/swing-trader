@@ -2000,3 +2000,63 @@ Lab-BH (announcement gaps, 5-20 days).
 
 Anything that passes becomes a default-off switch with shadow logging, a kill rule, tests and a digest gate; nothing
 goes live without the user.
+
+## Amendment — Round 32 (event and structural edges): family A Studies A1 / A2 (pre-register; 2 variants, program N 755 -> 757) and family B deal-selection rules B1-B4 (no N)
+`date`: Fri Oct 2 2026 (the commit time is the stamp). Candidates: `event_edge_candidates.md` (e67e794, 36 ideas,
+before any number). No return of any of these events has been looked at, on any window.
+
+### Family A: the session after a filing, ID3's frame (2 variants)
+Mechanism as ID3: a filing public by the evening of day d draws attention-limited buyers during the next session, so
+the stock drifts up from the opening cross to the closing cross. Who pays: the filer's information (an activist about
+to push, an owner near control), bought late by screeners and alert readers.
+- **A1 — Schedule 13D (activist) original filings.** Forms `SC 13D` and `SCHEDULE 13D` (EDGAR's form name from
+  2024-12), not amendments, from EDGAR's quarterly full index 2020-07 .. 2026-09; subject company from each filing's
+  header (`SUBJECT COMPANY`), mapped CIK -> ticker by EDGAR's `company_tickers.json` (current map: names that changed
+  ticker or delisted are missed; reported as coverage). Grouped by (symbol, filing date).
+- **A2 — 10%-owner open-market purchases.** SEC Form 3/4/5 data sets, document type 4 or 4/A, >= 1 non-derivative
+  code-P acquisition, the reporting owners include a 10% owner and **none** is a director or officer (so A2 does not
+  overlap ID's events), total P dollars >= $10,000; grouped by (symbol, filing date). Data end 2026-03-31.
+- Common to both, exactly ID's construction (`research/sim/insider_day.py`): trade session = the first session
+  strictly after the filing date; filters known before the open: 20-day ADV$ through the prior session >= $1M, raw
+  prior close >= $5; buy the opening cross, sell the closing cross; unit = raw open -> close; |ret| < 50% (bad prints).
+  Sleeve: 0.45 x equity in V7, equal split across the session's events, <= 10% of equity and <= 1% of ADV$ per name,
+  whole shares on the raw open. Costs 2.5bp/side judged; tier_hi reported.
+- Pass (each variant), ID's bar: (a) book increment > 0 in 2021-23 and 2024-26 at $2.3k / $10k / $25k; (b) NW t >= 2
+  ($10k, full window); (c) sign-flip >= 95th; (d) feature placebo (same stock, same year, no event within 10
+  sessions, 200 draws) >= 95%; (e) dDD >= −2pp; (f) 5y P(DD>50%) <= 5%; (g) 2024-26 alone: event-level mean net > 0
+  and NW t >= 2 on the daily sleeve. Reported: DSR at N 757, tier_hi, by year, overlap with ID3 sessions, corr with
+  the noise leg. A pass becomes a default-off shadow beside ID3, with a kill rule and a digest gate.
+
+### Family B: deal-selection rules, written before any outcome (no N: contractual payoffs, judged deal by deal)
+Every deal the rule selects is listed with its P&L at whole-share size; nothing is dropped after looking. "Pass" =
+positive in aggregate, the worst deal's loss small and explained, the rule mechanical enough to alert on.
+- **B1 — reverse-split round-up.** Universe: every Alpaca `reverse_splits` corporate action with ex-date E in
+  2016-01 .. 2026-09, ratio N = old_rate / new_rate with 2 <= N < 1000 (>= 1000 belongs to B4), Alpaca SIP raw daily
+  bars on S (the last session before E) and on E. Qualifies when the issuer filed, between E − 90 days and S,
+  accepted before 15:30 ET on S, an EDGAR document (any form) that EDGAR full-text search returns for "reverse stock
+  split" with a round-up clause ("rounded up to the nearest whole share" / "round up ... whole share") and **no** such
+  document in the window says the rounding is at the participant / DTC level ("participant level", "DTC participant",
+  "Cede"). Issuer match: the ticker in the hit's display name equals the Alpaca symbol (else CIK -> ticker map).
+  Trade: buy 1 share at the raw close of S. Payoff per account: rounded up -> 1 post-split share, valued at the raw
+  close of E and of E+5 sessions (shares can arrive late); not rounded (cash in lieu) -> P_E / N. Reported: P&L of
+  every deal both ways, the break-even rounding probability, worst deal, deals/yr, $/yr per account and for two
+  accounts (taxable + Roth). Unknowable from history: whether Schwab passes a round-up to a 1-share holder; that is
+  the live check.
+- **B2 — split-off exchange offers with odd-lot priority.** Every SC TO-I 2016-26 that EDGAR full-text search returns
+  for "exchange offer" and "odd lot" in which an issuer offers shares of **another** company for its own shares, and
+  whose text grants odd-lot priority (Round 31's regex). Entry: buy 99 parent shares at the close 5 sessions before
+  expiry (Round 31's entry B). Payoff: the final exchange ratio (from the final-results filing; capped by the upper
+  limit) × the subsidiary's close on the first session after expiry, minus the entry cost; if odd lots are prorated
+  after all, the unaccepted shares are sold at the parent's close on that session.
+- **B3 — cash tender offers by acquirers.** Every original SC TO-T 2016-01 .. 2026-03 that EDGAR full-text search
+  returns for "net to the seller in cash", whose subject company has Alpaca bars and whose cover/offer text states a
+  fixed cash price per share (CVRs valued at 0). Entry: close of the first session after the filing date. Exit:
+  if the target's bars end within 250 sessions of entry, the last raw close (completion at the final, possibly raised,
+  price); otherwise the deal failed: the close 5 sessions after the first close < 0.85 × offer, else session 250.
+  Reported by pre-offer 20-day ADV$ (< $5M "small", $5-50M, > $50M), with holding days and the annualised return;
+  12%/yr financing shown.
+- **B4 — going-private odd-lot cash-outs.** Every SC 13E3 2016-26 that EDGAR full-text search returns for "reverse
+  stock split" with "cashed out" / "cash payment" / "in lieu of fractional", listed (Alpaca bars on the filing date),
+  with a fixed cash price per pre-split share for holders below the ratio. Entry: buy (ratio − 1) shares or fewer at
+  the close of the first session after the first SC 13E3. Exit: the cash price if an Alpaca reverse split with
+  old_rate >= the ratio follows within 365 days (paid ~10 sessions after E), else the close 365 days later.
