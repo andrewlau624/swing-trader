@@ -142,3 +142,11 @@ One other floor (ADV >= $1M): 8357 trades, net +6.1bp, hit 51%, t +1.59: FAILS. 
 Event: full-index form "S-8", busy filers (> 50/quarter) dropped, CIK -> ticker (`events_form_build.py s8`); 16,468 events.
 Select half, ADV >= $20M: events 8533 -> trades 1855 (464/yr); net **-12.7bp**, median -10.2bp, hit 48%, t -1.43;
 2020 -22.8 / 2021 -25.9 / 2022 +1.9 / 2023 -10.6bp. FREQUENT: FAILS. No other floor tried. Explored-dead.
+
+## 9. Spin-off completion (menu row 9) — explored-dead
+Event: 8-K full-text `"completed the spin-off"` 2020-26 (`research/sim/events_fts_build.py spinoff`), filer tickers
+(parent and/or spinco); 213 hits -> 237 events (~35/yr raw). Explore at ADV >= $20M: 64 trades (16/yr) -> RARE;
+net -38.8bp, hit 42%. Deal report (select half, ADV >= $1M, 72 deals, 18/yr):
+hold 1: hit 39%, mean -0.53%, worst -7.0% | hold 5: hit 42%, mean +0.60%, worst -12.4% | hold 20: hit 57%, mean +2.08%,
+worst -23.9%. RARE gate FAILS at every hold. Explored-dead. The second phrase ("distribution of all of the
+outstanding") was not tried (same idea; trying it after this look would be a second variant).
