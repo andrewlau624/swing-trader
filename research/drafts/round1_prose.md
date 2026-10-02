@@ -2323,3 +2323,30 @@ Session llm-trader-51, `prompt_jump_hunt.md`, idea R2-5 (`jump_ideas.md`, round 
   or nothing over the fall itself: this is mostly a fallen-small-cap reversal (PRICE PROXY), strongest at market
   bottoms (2020 hold20 +10%; 2018 tp205 -2.1%). A judge PASS would be a reversal effect, not an insider effect.
   k = 2 judged ideas in this hunt.
+
+## Amendment — Jump hunt, Studies J3 and J4: an 8-K saying the board engaged a financial advisor / signed confidentiality agreements to evaluate "strategic alternatives" (pre-register; J3 track RIDE cell hold20, J4 track JUMP cell hold20, 1 look each, program N 762 -> 764)
+
+Session llm-trader-51, `prompt_jump_hunt.md`, round-4 ideas R4-5 and R4-6 (`jump_ideas.md`). Registered 2026-10-02
+before any 2024+ outcome of either rule was computed. Builder `research/sim/jump_edgar.py` (`_r4`): EDGAR full-text
+search, forms 8-K, half-years 2015-2026; event = a company's first matching 8-K in 365 days, fd = the 8-K file date;
+20-day ADV$ < $20M; ticker via jump_common.resolve. Trade: buy the next open, `jump_runner` costs.
+
+- **J3 (R4-5)**: query `"strategic alternatives" "financial advisor"` -> `events_jump_r4_5.parquet` (sha256 prefix
+  cb47310a3a35bec9, 519 events). Select look: `hold20 n 155 (19/yr) jump 14.2% vs base 8.8% (x1.6) mean net +3.5%
+  ex-top3 +1.1% median -0.5% vs stock's usual +4.4% hit 47% worst -55% best +149% P(mean<=0) 0.04 | ride MEETS`
+  (also trail20 +3.9%, hold60 +7.3%, trail60 +7.4%; shortest hold = 20, hold20 chosen over trail20 as the plain rule).
+  Judge: `jump_runner judge data/research/program/events_jump_r4_5.parquet 20 hold --track ride`.
+- **J4 (R4-6)**: query `"confidentiality agreements" "strategic alternatives"` -> `events_jump_r4_6.parquet` (sha256
+  prefix 38492bb6e5c769cc, 92 events). Select look: `hold20 n 24 (3/yr) jump 20.8% vs base 8.0% (x2.6) mean net
+  +6.0% ex-top3 +1.7% median +3.5% vs stock's usual +6.9% hit 62% worst -30% best +41% P(mean<=0) 0.04 | jump MEETS
+  | ride MEETS`; registered on JUMP (the idea's track). Judge: `... judge data/research/program/events_jump_r4_6.parquet 20 hold --track jump`.
+- Judge window 2024-01-01..2025-06-30, once each; on PASS, `confirm` once with the same arguments (2025-07..2026-09).
+- **Standing-rule control (select only, before registering):** same-day control (`jump_control.py`: up to 400 of the
+  idea's own stocks bought on the same entry mornings without an event): J3 event minus control **+4.4%** (median
+  +0.0%, 51% above, bootstrap P 0.004); J4 **+4.9%** (median +1.8%, 59% above, P 0.057). Year means J3:
+  +10/+4/-5/-4/+6/+7/+6/+2% (2016..2023).
+- **Who is on the other side:** holders who read "strategic alternatives" as distress (many such companies are
+  struggling) and don't read the 8-K line that a bank was hired or that bidders signed NDAs; a sale process ends in a
+  premium for some of them within weeks. The edge is a right tail (median difference ~0), so ex-top-3 is the risk.
+- **Known weaknesses:** J4 is small (24 select trades; the judge half may have < 15 trades -> DEAD by count); J3 and J4
+  overlap (some events in both). k = 4 judged ideas in this hunt after these two.

@@ -176,3 +176,11 @@
   **Standing rule from here (tightening only, FOUND unchanged):** a MEETS is registered only if, on the select half,
   it beats a same-day control (event minus same-entry-day control, bootstrap P < 0.10) and, for event types with a
   price condition, a same-stock no-event control. J2 was registered before this rule (and died).
+- 22:10 round-4 8-K footprints (`jump_edgar.py`, FTS, first per company in 365 d, ADV$ < $20M), 1 look each, all fail:
+  - **R4-1** change-in-control severance (245 -> 190): `hold60 -0.1%`; no lift (x0.8-1.0). Dead.
+  - **R4-2** retention bonus + change in control (513 -> 335): `hold60 -2.7%`. Dead.
+  - **R4-3** poison pill, Item 3.03 (597 -> 365): `hold1 x7.1 mean -1.1% worst -100%`; `tp201 x8.4 mean -0.8%`;
+    `tp2060 median +12.3% mean -0.0%`. **TWO-WAY** (pills come with distress as often as with bids).
+  - **R4-4** special committee + proposal (142 -> 97): `tp205 x2.3 mean +0.1%`; `hold60 +2.2% ex-top3 -1.3%`. Dead.
+  **Sale-preparation paperwork carries no takeover premium for a buyer at the next open.**
+- 22:10 `jump_control.py` committed: the standing rule's same-day control (idea's own stocks, same entry mornings).
