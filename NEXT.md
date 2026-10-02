@@ -14,6 +14,9 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   buys at issuers with no open-market purchase in 730 days. Judge half +31.5bp/trade, NW t 2.54; full +35.5bp net,
   t 3.57, DSR 0.553. +$144 / +$717 / +$1,867 a year at $2.3k / $10k / $25k (2.5bp/side). **A subset of ID3**: use it as a
   2x weight inside the ID3 shadow, not a new book. Spec: `study_ev2_first_insider_buy.md` (overnight loop).
+  Diagnostics (post-judge, forward-only from here): EV2 beats the rest of ID3 in both halves, but only Welch t 1.1-1.5;
+  break-even 20bp/side (ID3 10.5); sensitive to its best days; **buy size >= $500k is the strongest cut (~+90bp, ~60/yr,
+  both halves)**, seen on 2024-26, so shadow-only. Log silence days + $ bought per trade in the ID3 shadow.
 - Overnight loop explored-dead on select data (no N): SC 13G, S-8, 25-NSE, ASR, spin-off completions, and extra rows
   X1-X6 (dividend initiations/reinstatements, first buybacks, FDA approvals, Breakthrough designations, topline 8-Ks).
   News events move in the gap; the session after is ~0. X7-X10 untested (`runbook_menu_extra.md`). Summary:

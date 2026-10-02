@@ -43,3 +43,26 @@ noticed slowly; one-day, small, manual, so funds can't size into it.
   events compete for the sleeve, EV2 names get 2x the plain weight.
 - **Kill rule:** after >= 60 scored EV2 trades, a losing mean -> off (fold back into plain ID3).
 - **Weekly digest line:** `EV2 first-buy-in-2y: n trades, mean net bp, hit %, t (vs ID3 rest: mean bp)`.
+
+## Post-judge diagnostics (2026-10-02; NOT a new verdict, and the PASS stands as printed)
+`research/sim/ev2_diagnostics.py`: every ID3 event 2022-01..2026-03 (ADV >= $20M) tagged with the days since the
+issuer's previous open-market purchase by anyone. **These cuts saw the 2024-26 half, so nothing below can be judged on
+2024-26 any more: a rule built from them is forward-only (shadow).**
+- **EV2 vs the rest of ID3:** +41.8 vs +14.6bp (select), +31.5 vs +17.2bp (judge). Same sign in both halves, but the
+  difference is Welch t 1.50 / 1.09 (all: +19.6bp, t 1.84). "About 2x ID3" is likely but **not proven**.
+- **Dose-response is not clean:** <7d +14.5, 7-30d -8.7, 30-90d +24.7, 90-180d +5.3, **180-365d +46.4**, 1-2y +23.3,
+  >=2y +35.0, none-since-2020 +36.0bp. Roughly "silence > 6 months beats recent", but 730 days is not a special
+  threshold.
+- **Robust to the market and trimming:** minus SPY open->close +32.3bp (day-t 3.35); trimmed 1/99% +31.8bp (t 3.86).
+  **Fragile to the best days:** without the 10 best trades +20.7bp (t 2.37); without the 20 best days (of ~450)
+  +13.8bp (day-t 0.81). It is positively skewed: part of the edge is occasional big up days.
+- **Buy size is the strongest cut** (also inside the rest of ID3: <$100k +5, $100-500k +17, $500k-1M +23, >= $1M
+  +35bp). In EV2: <$100k +19.8, $100-500k +0.7, **$500k-1M +71.9 (sel +119 / jdg +35), >= $1M +101.1 (sel +110 /
+  jdg +96)**. EV2 with a buy >= $500k: ~260 trades (~60/yr), ~+90bp net, day-t > 3, both halves positive.
+- **Cost:** EV2 gross +40.5bp -> break-even **20.3bp/side**, vs 10.5bp/side for the rest of ID3. That is the practical
+  win: ID3's open question is live MOO/MOC cost, and EV2 survives about twice the cost.
+- **Small accounts:** median price $66, median ADV $100M; at $2.3k (a $230 slot), 11% of EV2 trades can't buy one share
+  (the buyable rest: +33.7bp). No constraint at $10k+. Median 1 EV2 trade a day (90th pct 3, max 10).
+- Next step (forward only): log in the ID3 shadow, per trade, the silence days and $ bought, so EV2 and EV2 x big-buy
+  get scored on new data. Pre-register "EV2 & buy >= $500k" as a forward-only shadow gate (>= 60 trades), never as a
+  backtest.
