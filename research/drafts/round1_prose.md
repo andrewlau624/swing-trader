@@ -2234,3 +2234,22 @@ full; (pess) filled only when the first-session open <= 1.10 X (cold deals, wher
 Stake $500 per deal (a typical retail IPO-access request; capped by the platforms). Reported: deals/yr, mean/median/
 hit of the 30-session return under each model, $/yr. **Verdict on the pessimistic model: PAYS if its median > 0 and
 mean > 0 with hit >= 55%; otherwise DEAD.** No rule change afterwards.
+
+## Amendment — Index beat (session llm-trader-ee), deal rule DL-IB1: the reverse-split round-up in more accounts (no N; registered before any outcome)
+
+`date`: Fri Oct 2 2026, before any number below is computed. Prompt: research/drafts/prompt_index_beat.md, idea A1.
+Rule: B1 (Round 32) unchanged — for every reverse split whose issuer's filings say fractional post-split shares "will be
+rounded up" (never "participant level"), hold ONE pre-split share at the last pre-split close and sell the post-split
+share once it shows — run in each of K brokerage accounts the user owns (K-2 extra Schwab individual accounts beyond
+the taxable and the Roth; the Trader API sees every account under one login). Payoff per account and deal = (1 share's
+post-split value at the first post-split close) - (pre-split price) if rounded up, about -$0.02 if cash in lieu.
+Who pays: the issuer's other holders (a few dollars of dilution per round-up), because the issuer wants to keep small
+holders and avoid a cash-in-lieu process. Why a small account: the payoff is a fixed ~$4 per account per deal, so it is
+~1%/yr per account at $25k but ~14%/yr at $2.3k; capacity is 1 share per account.
+Measured (B1's deal file, roundup_deals.csv, no new outcome window): per account and year, deals 2023-26, $ if rounded
+and if cash; the share of round-up filings that switched to "participant level" by year (the issuer-adaptation trend);
+$/yr for K = 2 (today), 3, 5, at $2.3k / $10k / $25k as % of the taxable balance.
+PAYS if: mean $/deal > $0 if rounded (B1: yes) AND >= $150/yr per extra account in 2024-26 AND the participant-level
+share is not rising so fast that 2026's qualifying deals are < half of 2024's. Conditional on Schwab paying round-ups to
+a 1-share holder, which history cannot show: the first live deal (VIVK, ex 2026-10-05, check ~10-07) decides it, and
+this rule is NOT a FOUND until 2 live deals have been rounded in an account.
