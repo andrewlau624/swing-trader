@@ -138,13 +138,19 @@ def _sec_get(url: str) -> str | None:
     return None
 
 
-def fetch_buys(day: dt.date) -> list[dict]:
+def fetch_buys(day: dt.date, log=print) -> list[dict]:
     q = (day.month - 1) // 3 + 1
     idx = _sec_get(f"https://www.sec.gov/Archives/edgar/daily-index/{day.year}/QTR{q}/form.{day:%Y%m%d}.idx")
     if not idx:
+        log(f"[insider] {day}: no EDGAR daily index (weekend/holiday, or not posted yet)")
         return []
+    paths = form4_paths(idx)
+    print(f"[insider] {day}: reading {len(paths)} Form 4 filings from EDGAR "
+          f"(~{len(paths) * 0.18 / 60:.0f} min at SEC's rate limit)", flush=True)
     out = []
-    for p in form4_paths(idx):
+    for i, p in enumerate(paths):
+        if i and i % 250 == 0:
+            print(f"[insider]   {i}/{len(paths)} read, {len(out)} purchases so far", flush=True)
         t = _sec_get(f"https://www.sec.gov/Archives/{p}")
         r = parse_form4(t) if t else None
         if r:
@@ -184,7 +190,7 @@ def run(state_dir: Path, today: dt.date | None = None, log=print) -> dict:
     # 2-3. filings since the previous session -> today's plan (only on a session; once a day)
     if today in sess and len(sess) >= 2 and not any(r["date"] == str(today) for r in rows):
         prev = sess[-2]
-        buys = [b for d in filing_days(prev, today) for b in fetch_buys(d)]
+        buys = [b for d in filing_days(prev, today) for b in fetch_buys(d, log)]
         syms = sorted({b["sym"] for b in buys if b["insider"]})
         bars = md.sip_daily(syms, pd.Timestamp(today) - pd.Timedelta(days=45)) if syms else {}
         new = plan_rows(buys, bars, str(today))
