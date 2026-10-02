@@ -113,3 +113,12 @@
   t >= 2 and both 2016-20? no -> 2016-20 is HOLDOUT: select = 2021-23 only; bar t >= 2, positive each year).
   R5-2 result (2021-23, 479 IBS trades): open->open +22.3bp vs open->close +13.6bp, diff -8.7bp, NW t -2.15, every year < 0 -> DEAD (the IBS edge needs the second overnight).
 - R5-5 night bounce by year x picks/night: no monotone bucket; signs flip by year; 2026 weak in every bucket (-55/+10/-27/+9bp) with more crowded nights -> diagnostic, no rule (HALF-FLIP). Next: ROUND 6 (method: brainstorm-partner agent briefed with the HAIRCUT finding, asked only for haircut-proof automatable ideas).
+- ROUND 6 (method: brainstorm-partner agent briefed with the HAIRCUT finding; 20 ideas, index_beat_ideas_r6.md). Testable new: R6-5
+  "portable alpha" = C2 + the night and IBS legs stacked on overnight margin over a 100% SPY core (C2 had only the noise leg).
+  Spec (before run): taxable = SPY 1.0x + noise + night + IBS legs (EH, same fractions of equity as the live book) - margin
+  interest 12%/yr on the overnight debit (IBS notional 0.5E on IBS days + night notional = 0.5E x the leg's used share,
+  measured from the raw pool's frac x picks, capped 0.5E); tax as ib_c2 (legs' P&L ST 35% yearly, SPY LT at the end).
+  Roth as C2 (no QQQ/SMH IBS). Bar = C2's: >= +2pp combined IRR vs plan P, both halves, $1k and $2k/mo, EH; tier and tier_hi.
+- R6-5 stacked on SPY: combined vs P EH $1k/mo +1.50/+4.70pp (tier), +1.57/+4.87 (tier_hi); $2k/mo +2.62/+6.92, +2.67/+7.05;
+  taxable EH 22.1% vs SPY 15.3% (maxDD -27.8 vs -24.5); MC P(DD>50%) 0.3% -> NOT FOUND (2021-23 at $1k/mo), STRONGEST NEAR
+  MISS; haircut-robust (beats the bot alone as backtested too). study_ib_r65_stacked.md
