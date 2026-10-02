@@ -63,3 +63,20 @@
 - A2 spin-off round-ups: 41 Form 10 registrants with a round-up/fraction phrase 2016-26, 0 with a holder-level round-up of the distribution (strict_up) -> DEAD (none exist). A3 merger round-ups: hits are SPAC rights conversions; parked (not run).
 - ROUND 2 written (index_beat_ideas_r2.md, outside-literature sweep): 27 rows, 1 new testable (R2-7 spin-offs held > 1 year), the rest dup/live/killed by bound with reasons.
 - R2-7 spin-offs held 260 sessions (select entries 2021-22): d0+20: n 17, mean excess net +10.1%, median +1.5%, ex-top-3 -14.6% (MPTI +241%) -> FAILS (LOTTERY); d0+5 (2nd look): n 19, mean +2.4%, ex-top-3 -11.4% -> FAILS. DEAD. ib_r27.py, r27_explore.txt
+- ROUND 3 (method: death-dodges of near misses + noise-leg structure, the leg that survives the haircut):
+  R3-1 noise leg held overnight (track A, DD of "Last-half-hour intraday momentum: sign flips" — that was an entry rule;
+  this keeps the live leg's own end-of-day position): when the live noise rule is long/short at 15:59 in QQQ or SMH,
+  hold it to the next official open instead of flattening. Who pays: overnight liquidity takers (dealers re-hedging
+  gamma/LETF rebalances already pushed the close; continuation overnight would be the same flow finishing) — weak prior.
+  Explore spec (before any run): per symbol, increment = pos x min(lev, 0.75) x 0.5 x (open_{d+1} / close_d - 1) - 12%/252
+  margin on that notional; no extra trades (the 15:59 sell is replaced by a 09:30 sell). Select 2021-23 (plus 2016-20 is
+  HOLDOUT, not looked at). Bar: daily increment NW t >= 2, positive in each of 2021/2022/2023, and >= +6pp/yr pre-tax.
+- R3-1 noise leg held overnight (select 2021-23): QQQ long +2.0bp/short -2.1bp, SMH long +14.1/short +2.5bp; increment -0.03pp/yr, NW t -0.01, by year -3.21/+0.99/+2.13pp -> DEAD. ib_r31.py
+  R3-2 special dividends in the Roth (track A, DD of AZ "Roth ex-dividend overnight capture dead: drop ratio 0.90-0.96 =
+  +4..+7bp/event in large caps"; the change: only dividends >= 3% of the prior close, any listed US stock with ADV >= $1M,
+  where the shortfall (1 - drop ratio) x yield is 10x larger). Who pays: taxable holders who sell before the ex-date to
+  avoid ordinary-income tax on a special, and thin arbitrage in small names; the Roth pays no tax. Explore spec (before
+  any outcome): Alpaca cash_dividends (all symbols) with rate / close_{ex-1} >= 3%; buy the close before ex, sell the ex-date
+  open; payoff = (open_ex + D) / close_{ex-1} - 1 - 2 x cost_side(ADV) (raw prices; D received in the Roth, untaxed).
+  Select ex-dates 2021-23. Bar: >= 20 events/yr, mean net >= +30bp, median > 0, ex-top-5 > 0, t >= 2; then the Roth
+  increment on idle overnight cash.
