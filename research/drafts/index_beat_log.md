@@ -1,7 +1,7 @@
 # Index-beat hunt log (session llm-trader-ee, prompt_index_beat.md)
 
 ## STATE (update after every idea)
-- program N: 765 (Jump J1-J5 took 761-765; my next would be 766; none registered by this hunt)
+- program N: 766 (Jump J1-J6 took 761-766; my next would be 767; none registered by this hunt)
 - k (ideas judged): 0 · explored: 28 · killed by bound/dup: ~80 · idea rounds: 6 (r1 55, r2 27, r3 3, r4 21, r5 10, r6 20)
 - BEST RESULTS: (1) R6-5 stacked on SPY in taxable = near miss (+1.5pp 2021-23 at $1k/mo; +2.6/+6.9 at $2k/mo; EH 22.1%/yr vs
   SPY 15.3%; COVID -37.5% vs -33.8%), study_ib_r65_stacked.md; (2) DL-IB1 round-up in more accounts PAYS on history, conditional
