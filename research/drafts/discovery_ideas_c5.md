@@ -53,3 +53,9 @@ DEFM14C ~14/yr, PREM14C ~13/yr, N-8F ~100/yr, N-23C-2 ~110/yr, N-23C3A ~390/yr, 
 
 Every deal-rule idea: the selection rule and payoff formula go into `round1_prose.md` as an amendment (no N) and are
 pushed before the deal list is computed.
+
+## Added 2026-10-02 12:00 (before any outcome on it)
+| # | idea | method | contract sentence | source | est/yr | small-size edge | novelty | kill |
+|---|---|---|---|---|---|---|---|---|
+| C16 | **Forward splits and stock dividends whose fractional shares are ROUNDED UP** (3-for-2, 5-for-4, 5% stock dividends) | A | The issuer's 8-K says fractions are rounded up to a whole share; a holder of 1 share gets 2 in a 3-for-2 (+33% over the ratio), 2 in a 5% stock dividend (+95%). | 8-K / press release "stock split"/"stock dividend" + "rounded up" | ? | per account, 1-share positions only | 4 (B1 covered reverse splits only; grep) | live |
+| C17 | Bankruptcy convenience classes for small note claims | A | Small claims get paid more cash | court plans | rare | yes | 5 | **kill X**: court documents, noteholder claims usually a separate class |

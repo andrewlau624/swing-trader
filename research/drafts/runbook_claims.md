@@ -26,3 +26,4 @@
 | Discovery (c5) C3 DEFM14C written-consent cash mergers | llm-trader-c5 | claimed 2026-10-02 10:50 | done: DL3 DEAD (12 deals, median +0.17%) |
 | Discovery (c5) I8 liquidations below estimated distribution; I10 subsequent offering periods | llm-trader-c5 | claimed 2026-10-02 10:50 | I8 done: DL4 rule met once in 10y (OTIC +43%), too rare; I10 open |
 | Discovery (c5) C4 ETF liquidations in cash; I6 CEF rights offerings; C5 IPO retail access; C6 enrichment scan; I11; I3 | llm-trader-c5 | claimed 2026-10-02 10:50 | in progress |
+| Discovery (c5) C16 forward splits / stock dividends whose fractions are ROUNDED UP (1 share -> 2 in a 3-for-2) | llm-trader-c5 | claimed 2026-10-02 12:00 | in progress |
