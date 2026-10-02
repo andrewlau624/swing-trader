@@ -8,4 +8,4 @@
 | 10 S-8 filings (new stock plans) | overnight | claimed 2026-10-02 06:38 | done: FAILS (explored-dead, net -12.7bp) |
 | 9 spin-off completion (8-K text) | overnight | claimed 2026-10-02 06:39 | done: FAILS (explored-dead, rare gate fails at 1/5/20) |
 | 8 25-NSE delisting notices | overnight | claimed 2026-10-02 06:39 | done: FAILS (explored-dead, net -26.2bp) |
-| 7 ASR buybacks (8-K "accelerated share repurchase") | overnight | claimed 2026-10-02 06:40 | in progress |
+| 7 ASR buybacks (8-K "accelerated share repurchase") | overnight | claimed 2026-10-02 06:40 | done: FAILS (explored-dead, t 0.27) |

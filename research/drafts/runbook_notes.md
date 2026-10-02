@@ -174,3 +174,9 @@ Event: full-index form "25-NSE" (filed by the exchange under the issuer's CIK), 
 merger completions), not the common, so the common usually keeps trading. Select half, ADV >= $20M: 2573 -> 412
 trades (103/yr); net **-26.2bp**, median -9.0bp, hit 47%, t -1.54; by year +3.3 / -54.5 / +16.6 / -23.5bp. FREQUENT:
 FAILS. No other floor tried. Explored-dead.
+
+## 7. ASR buybacks (menu row 7) — explored-dead
+Event: 8-K full-text `"accelerated share repurchase"` 2020-26 (`events_fts_build.py asr`); 2,682 hits -> 2,595 events
+(includes earnings-release exhibits that mention an ASR, not just new ASR agreements). Select half, ADV >= $20M:
+1432 -> 670 trades (168/yr); net **+3.5bp**, median -5.0bp, hit 50%, t +0.27; by year -108.9 / -3.1 / +37.2 / -20.0bp.
+FREQUENT: FAILS. No other floor tried. Explored-dead.
