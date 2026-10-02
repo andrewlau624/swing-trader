@@ -2,7 +2,7 @@
 
 ## STATE (update after every idea)
 - program N: 774 (Jump J1-J8 761-768, Goal G2 769-772, G8 773-774; my next would be 775; none registered by this hunt). Goal hunt (llm-trader-ec) reports G2 EV2-big SPY-core overlay NEAR (+11.3pp after tax vs SPY, 2021 flat) and G1 contract stack on SPY +20.5pp at $2.3k (conditional on B1 rounding): overlaps my R6-5/DL-IB1, do not duplicate
-- k (ideas judged): 0 · explored: 30 · killed by bound/dup: ~80 · idea rounds: 6 (r1 55, r2 27, r3 3, r4 21, r5 10, r6 20)
+- k (ideas judged): 0 · explored: 31 · killed by bound/dup: ~80 · idea rounds: 6 (r1 55, r2 27, r3 3, r4 21, r5 10, r6 20)
 - BEST RESULTS: (1) R6-5 stacked on SPY in taxable = near miss (+1.5pp 2021-23 at $1k/mo; +2.6/+6.9 at $2k/mo; EH 22.1%/yr vs
   SPY 15.3%; COVID -37.5% vs -33.8%), study_ib_r65_stacked.md; (2) DL-IB1 round-up in more accounts PAYS on history, conditional
   on VIVK (check state/roundup-orders.json on him after 10-07; FOUND only after 2 live rounded deals).
@@ -131,3 +131,12 @@
   R7-2 spec: FTS '"distribution" "warrants" "rounded up"' / '"rights" "rounded up to the nearest whole" "distribution"' 2021-26, 8-K/424B/S-1; read sentences; bar >= 3 listed distributions/yr where 1 share -> 1 whole warrant/right.
   R7-2 result: 7,886 hits, 8 sentences matched, none a per-holder round-up of a distributed warrant/right (RFL/CYTH merger
   exchange; SLRX rounds to the NEAREST warrant; the rest charter boilerplate) -> DEAD (none exist). r72_out.txt
+- ROUND 8 (method: the R6-5 structure inside the Roth's rules + forward specs). R8-1 Roth idle cash in SPY (DD of "IBS idle half in
+  SPY/QQQ: dead, helps 2024-26 only" — re-asked at EH, the plan's haircut): Roth frame's ibs_idle and night_idle fractions earn
+  SPY close->close instead of BIL (approximation: idle share x (SPY - BIL) per day, no extra cost beyond 1bp/side on the
+  share that changes). Bar: Roth IRR +2pp vs the Roth book in BOTH halves at EH, tier and tier_hi.
+  R8-1 result: first run +42..+71pp was LOOKAHEAD (day d's idle share is set by d's close: no picks on up days; multiplied by
+  d's own SPY return). Correct timing (night idle x SPY close->next open; IBS idle x SPY next open->open after; 2bp round trip):
+  -6.64 / +0.79pp (2021-23 / 2024-26, tier), -6.50 / +0.80 (tier_hi) -> DEAD (HALF-FLIP, as the dead row). R6-5 checked: it
+  holds SPY 1.0x every day, so it has no pick-conditional exposure and no such lookahead (its margin interest uses same-day
+  usage, a cost only).
