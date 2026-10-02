@@ -220,3 +220,9 @@ FREQUENT: FAILS. No other floor tried. Explored-dead.
 618 hits -> 469 events (noisy phrase, see runbook_menu_extra.md). Explore at ADV >= $20M: 40 trades (10/yr) -> RARE.
 Deal report, select half, ADV >= $1M, 80 deals (20/yr): hold 1 hit 48% mean +0.23% worst -25.0% | hold 5 hit 54%
 mean +1.68% worst -20.6% | hold 20 hit 52% mean +2.45% worst -46.8%. RARE gate FAILS at every hold. Explored-dead.
+
+## X2. Dividend reinstatements, 8-K `"reinstates quarterly"` (extra row X2) — explored-dead
+26 hits -> 26 events (2020-25; only 1 after 2023, so untestable on the judge half anyway). Explore ADV >= $20M: 10
+trades -> RARE. Deal report, select, ADV >= $1M, 16 deals (4/yr): hold 1 hit 69% mean +0.21% worst -4.9% | hold 5
+hit 69% mean +2.26% worst -7.9% (closest; mean < +3%) | hold 20 hit 50% mean +0.73% worst -17.3%. RARE gate FAILS.
+Explored-dead.
