@@ -21,3 +21,10 @@ second phrase after a look.
 | X8 | `"strategic investment"` (a larger company buys a stake) | sellers who under-weight a validation signal | small caps, rare | semi-rare | new |
 | X9 | `"raises full-year"` (guidance raise in an 8-K) | under-reaction to guidance (PEAD-like, untested here: DS7 was not run) | the session trade only; small caps cheap to enter at the cross | frequent | new |
 | X10 | `"awarded a contract"` (government/commercial contract award 8-K) | attention-limited small-cap investors | thin names, one session | frequent | new |
+
+**Phrase fix by hit COUNT only (2026-10-02, before any return on these rows).** 2022 8-K counts: X1 9, X2 0, X3 0,
+X4 38, X5 327, X6 149, X7 346, X8 536, X9 245, X10 55. Counts 2021-23 for alternatives: "first quarterly dividend" 227
+(noisy: also "first quarterly dividend of 2023" declarations), "initiation of quarterly" 22, "reinstates quarterly" 19,
+"reinstatement of its quarterly" 8, "inaugural share repurchase" 11, "first share repurchase" 10, "first-ever share
+repurchase" 8. Final phrases: **X1 `"first quarterly dividend"`** (noisy, kept as the only phrase with enough events),
+**X2 `"reinstates quarterly"`**, **X3 `"inaugural share repurchase"`**. X4-X10 unchanged.
