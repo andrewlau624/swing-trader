@@ -392,6 +392,12 @@ tender-buy: ## Round 31: buy the odd lot for an alerted tender, after YOU confir
 	@test -n "$(ID)" || { echo "usage: make tender-buy ID=TICKER-YYYY-MM-DD (from the alert email)"; exit 2; }
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.tender_buy $(ID)
 
+splitoff-watch: ## Round 32 B2: split-off exchange offers (odd lots accepted in full) -> email on the entry day; never trades
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.splitoff_watch $(DATE)
+
+splitoff-add: ## set an offer's terms by hand: make splitoff-add ARGS='PARENT RECV YYYY-MM-DD PER100 CAP [URL]'
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.splitoff_watch add $(ARGS)
+
 forward-status: ## every forward-only shadow gate in one place (AU3 is in `make review` section 9)
 	@echo "== Round 23 BA: LLM news judge (verdict once at 300) =="
 	@PYTHONPATH=. $(PY) -m research.sim.news_judge_eval 2>/dev/null || echo "  no state/news-judge.jsonl yet"

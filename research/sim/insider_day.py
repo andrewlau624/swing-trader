@@ -94,13 +94,19 @@ def placebo_events(T, X, cal, rng):
 
 
 def main():
-    log = out()
-    s = base_sim()
-    days = s.days[s.days <= END]
     T, X, cal = events()
     RO, RC = raw_panel()
-    PADV = None
-    log(f"Study ID: {len(T)} trades on {T.d.nunique()} sessions, {T.d.min().date()}..{T.d.max().date()}; book window {days[0].date()}..{days[-1].date()}")
+    run(T, X, cal, RO, RC, VARIANTS, out(), END, N_PROG, "Study ID")
+    T.to_pickle(ROOT / "data/research/program/insider_day_trades.pkl")
+
+
+def run(T, X, cal, RO, RC, variants, log, end, n_prog, title, h2=H2):
+    """The registered evaluation (sleeve in V7, halves, NW t, sign-flip, feature placebo, judge half); X = all events
+    (sym, fd) for the placebo exclusion window. Shared by Round 32 A1/A2 (filing_day.py)."""
+    s = base_sim()
+    days = s.days[s.days <= end]
+    H2 = h2
+    log(f"{title}: {len(T)} trades on {T.d.nunique()} sessions, {T.d.min().date()}..{T.d.max().date()}; book window {days[0].date()}..{days[-1].date()}")
     # placebo pools: per (sym, year) eligible sessions
     near = {}
     for sym, fd in zip(X.sym, X.fd):
@@ -109,7 +115,7 @@ def main():
     P = pd.read_pickle(NIGHT / "panel.pkl")
     adv = ((P["close"] * P["volume"]).rolling(20, min_periods=15).mean()).shift(1)
     noise = sum(share * np.minimum(s.NZ[k]["lev"], 0.75) * s.NZ[k]["ret"] for k, share in {"QQQ": 0.5, "SMH": 0.5}.items()).reindex(days).fillna(0)
-    for lab, (lo, hi) in VARIANTS.items():
+    for lab, (lo, hi) in variants.items():
         V = T[(T.adv >= lo) & (T.adv < hi)]
         log(f"\n== {lab}: {len(V)} trades; per trade gross {V.ret.mean()*1e4:+.1f}bp (median {V.ret.median()*1e4:+.1f}); "
             f"net 2.5bp/side {V.ret.mean()*1e4-5:+.1f}; by year " + " ".join(f"{y}:{v*1e4:+.1f}" for y, v in V.groupby(V.d.dt.year).ret.mean().items()))
@@ -153,15 +159,14 @@ def main():
         extra = float((np.array(sims) < d.mean()).mean() * 100)
         halves_ok = all(min(res[(2.5, E)][2][a:z].mean() for a, z in (H1, H2)) > 0 for E in M.SIZES)
         ddd = (B.stats(r)[2] - B.stats(base)[2]) * 100
-        pdd = M.p_dd50(r); q = dsr(d, n_trials=N_PROG)
+        pdd = M.p_dd50(r); q = dsr(d, n_trials=n_prog)
         d2 = d[H2[0]:H2[1]]; t2 = M.nw_t(d2.values)
         ev2 = V[(V.d >= H2[0]) & (V.d <= H2[1])].ret.mean() * 1e4 - 5
         log(f"  [{lab}] $10k 2.5bp: NW t {t:+.2f}  sign-flip {pct:.0f}%  feature placebo {extra:.0f}% (placebo mean {np.mean(sims)*25200:+.2f}pp/yr)  "
-            f"dDD {ddd:+.1f}pp  P(DD>50) {pdd:.1%}  DSR {q['dsr']:.3f}  corr(inc, noise) {np.corrcoef(d.values, noise.values)[0,1]:+.2f}")
+            f"dDD {ddd:+.1f}pp  P(DD>50) {pdd:.1%}  DSR {q['dsr']:.3f} (N {n_prog})  corr(inc, noise) {np.corrcoef(d.values, noise.values)[0,1]:+.2f}")
         log(f"  [{lab}] judge half alone: event net {ev2:+.1f}bp, daily-sleeve NW t {t2:+.2f}")
         ok = halves_ok and t >= 2 and pct >= 95 and extra >= 95 and ddd >= -2 and pdd <= 0.05 and ev2 > 0 and t2 >= 2
         log(f"  [{lab}] -> {'PASS' if ok else 'DEAD'}")
-    T.to_pickle(ROOT / "data/research/program/insider_day_trades.pkl")
 
 
 if __name__ == "__main__":

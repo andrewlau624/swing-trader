@@ -205,6 +205,10 @@ def round31_whatif(state: Path, acct: Account) -> list[dict]:
     if tw:
         usd = sum(99 * (float(r["floor"]) - float(r["last_close"])) for r in tw if r.get("floor") and r.get("last_close"))
         out.append(dict(idea="odd-lot tenders (manual, <= 99 sh)", n=len(tw), usd=usd))
+    so = [r for r in _jsonl(state / "splitoff-watch.jsonl") if r.get("alert")]
+    if so:                                 # Round 32 B2: 99 parent shares x implied gain at the entry-day alert
+        usd = sum(99 * float(r["parent_px"]) * float(r["gain"]) for r in so)
+        out.append(dict(idea="split-off exchange offers (manual, <= 99 sh)", n=len(so), usd=usd))
     return out
 
 
