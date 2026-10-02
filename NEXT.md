@@ -9,6 +9,12 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Jump & ride hunt (2026-10-02, session llm-trader-51, `prompt_jump_hunt.md`): running
+- 62 ideas (`jump_ideas.md`), log + STATE in `jump_hunt_log.md`. N 761 (J1). Judged k = 1: **J1 first profitable
+  quarter, RIDE hold60: DEAD** (judge +5.5%/trade but ex-top3 −1.8%, P 0.21; `study_jump_d6_first_profit.md`).
+  Explored-dead: H17 trade-count spike (two-way), D4 theme 8-K (two-way), D5 hot-word renames (rare), D9 first
+  Phase 3 (lottery).
+
 ## Discovery loop (2026-10-02, session llm-trader-mid-01): no new edge; N stays 760
 - 40 ideas written before any outcome (`discovery_ideas.md`), 8 killed; a 168-form-type enrichment census of 162,848
   big 5-day moves (`discovery_enrich.py`, K=168); verdicts: **I26 insider exercise-and-hold (Form 4 M, no same-day S)
@@ -940,6 +946,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | idea | verdict | why |
 |---|---|---|
+| First profitable quarter after >= 6 losses, small caps, 60-day hold (Jump hunt J1, N 761) | **dead (judge half)** | select +7.3%/trade (survivorship + 2016/2020 timing), judge +5.5% but ex-top3 −1.8%, P 0.21: lottery |
 | Retail IPO-access allocations, sold after 30 sessions (discovery DL7) | **dead (bound)** | cold debuts (where retail is filled) −7.4% median, hit 40%; pop is in hot deals |
 | Term / target-term CEFs bought 250 sessions before the termination date (discovery DL5) | **dead** | 23 funds, median excess −0.77% vs matched ETF, 35% > 0 |
 | Closing ETFs bought 5 sessions before the last trading day (discovery DL6) | **dead** | 9 liquidations, median −0.24%, hit 33%; NAV holds to the end |

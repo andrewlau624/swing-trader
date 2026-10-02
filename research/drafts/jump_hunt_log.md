@@ -1,16 +1,17 @@
 # Jump & ride hunt log (prompt_jump_hunt.md), session llm-trader-51
 
 ## STATE (update after every idea)
-- program N: 760 (no registration yet). k (ideas judged): 0. Ideas explored (runner explore run): 0. Rounds of idea generation: 1.
-- current idea: none (idea list being written; no outcome computed)
-- next 5 ideas: (after ranking)
-- data sources verified: Alpaca/Benzinga news REST (2016+, ~900 items/day, downloading to data/research/jump/news), Arctic Shift
-  Reddit posts (pennystocks, smallstreetbets, shortsqueeze, RobinHoodPennyStocks, SPACs, biotechplays, weedstocks, stocks,
-  Daytrading, wallstreetbets; downloading), Wikipedia pageviews (3,524 tickers via Wikidata; downloading), EDGAR (sec_headers,
-  submissions formerNames, XBRL frames dei shares), openFDA 510(k), USAspending. Cached: night panel 2020-10..2026-09
-  (13,933 symbols, trade_count), EDGAR form.idx 2019Q1-2026Q3, Form 345 zips 2020+, FINRA short interest.
-- data sources broken: none yet.
-- why things die (running): GAP, LOTTERY, COST, REGIME, PRICE PROXY, TEXTBOOK, TOO RARE, LOOKAHEAD (death map); nothing new yet.
+- program N: 761 (J1 registered and judged DEAD). k (ideas judged): 1. Ideas explored (runner explore run): 6
+  (H17, D5, D9, D4, D6; D6 -> J1). Rounds of idea generation: 1 (62 ideas).
+- current idea: none; waiting for the news archive's 2016-23 months for the news ideas.
+- next 5 ideas: H1/V1/H3 (Reddit, as subs finish), H5/H6/H16 (Wikipedia, as pageviews finish), H11 option alerts,
+  S2 PDUFA run-up, D8 first insider buy + no news (news needed).
+- data sources verified: Alpaca/Benzinga news REST (downloading, ~3 months/10 min), Arctic Shift (downloading),
+  Wikipedia pageviews (downloading, slow), EDGAR (FTS, form.idx 2016-26, companyfacts), ClinicalTrials.gov v2, openFDA,
+  USAspending, Form 345 2014-2026 (data/research/jump/insider_buys_2014_2026.parquet).
+- data sources broken: defense.gov (403); Wayback snapshot fetch (refused at 3 threads; retry at 1 per 4 s pending).
+- why things die (running): TWO-WAY (attention raises the jump AND crash rate; H17, D4) and LOTTERY (D5, D9, J1:
+  three trades carry the mean) so far; next ideas must carry a direction AND many independent events.
 
 ## Log
 - 12:45 setup: the prompt names `swing-trader`; the session started in the `llm-trader` checkout (no data caches); work in
@@ -56,3 +57,11 @@
   S1/S3 primary = buy at the announcement if the date is >= 7 sessions later; S1v = fd 6 sessions before the date
   (hold5 ends the session before). S2 primary = fd 21 sessions before the PDUFA date (hold20 ends the session before);
   S2v = 6 sessions (hold5). Benzinga 2016-17 carries few PR-wire stories (S1: 20 conference stories in 2 years).
+- 14:55 **D6** first profitable quarter (`jump_d6.py`): 726 events, 473 select -> 299 trades. Explore (1 look):
+  `hold60 n 299 mean net +7.3% ex-top3 +4.5% median -0.6% vs usual +7.2% P 0.00 | ride MEETS`; `tp2060 mean +2.9%
+  median +18.5%`; `hold20 mean +2.3% P 0.03`; `hold1 x3.4 mean -0.8%`. Diagnostics on select only (no rule change):
+  ticker mapping 63% (2016) .. 92% (2025) = survivorship risk; year means +21/+14/-1/-8/+42/-5/-5/+14%.
+- 15:00 Registered **Study J1** (RIDE hold60, N 760 -> 761, b555a07); peers told (llm-trader-ee; llm-trader-9b gone).
+- 15:02 **J1 judge** (once): `hold60 n 48 (24/yr) jump 33.3% vs base 21.7% (x1.5) mean net +5.5% ex-top3 -1.8% median
+  +3.3% vs stock's usual +3.7% hit 52% worst -81% best +142% P(mean<=0) 0.21` -> **RIDE VERDICT: DEAD**. k = 1.
+  Write-up `study_jump_d6_first_profit.md`. LOTTERY (3 trades carry the mean) on too few trades.
