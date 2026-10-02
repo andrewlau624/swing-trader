@@ -2219,3 +2219,18 @@ trading day). **Payoff:** the cash_mergers rate (liquidation proceeds) + cash di
 before entry), whole shares. Reported: deals/yr, hit, mean/median/worst, $/yr at $2.3k/$10k/$25k, and the same with
 entry at the last close (info). **Verdict: PAYS if median > +0.5%, mean > 0 and hit >= 70%; otherwise DEAD.**
 Records where the rate is < 20% or > 500% of the entry close are listed as data errors and dropped. No rule change.
+
+## Amendment — Discovery loop (session llm-trader-c5), deal rule DL7: IPO allocations through retail IPO-access platforms, a bound (no N; registered before any outcome)
+
+Mechanism (method F, queueing): underwriters place a slice of each IPO with retail platforms (Robinhood IPO Access,
+SoFi, Public) at the offer price; Robinhood may restrict IPO access for accounts that sell within 30 days. Allocation
+sizes are not public and fall in hot deals (Rock 1986 winner's curse), so only a bound is possible.
+
+**Deal set (fixed now):** every 424B4 2019-01 .. 2026-06 with "initial public offering price of $X per share"
+(X parsed), an exchange ticker in the filer name, not a SPAC/unit/blank check/closed-end fund/ADS-only, X >= $4, with
+Alpaca bars starting within 5 sessions after the 424B4. **Payoff:** buy at X, sell at the close of the 30th session
+(the platforms' flipping window); info line: sell at the first close. **Fill models:** (opt) every deal filled in
+full; (pess) filled only when the first-session open <= 1.10 X (cold deals, where retail gets shares), zero otherwise.
+Stake $500 per deal (a typical retail IPO-access request; capped by the platforms). Reported: deals/yr, mean/median/
+hit of the 30-session return under each model, $/yr. **Verdict on the pessimistic model: PAYS if its median > 0 and
+mean > 0 with hit >= 55%; otherwise DEAD.** No rule change afterwards.
