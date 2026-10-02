@@ -2,11 +2,11 @@
 
 ## STATE (update after every idea)
 - program N: 768 (Jump J1-J8 took 761-768; my next would be 769; none registered by this hunt)
-- k (ideas judged): 0 · explored: 28 · killed by bound/dup: ~80 · idea rounds: 6 (r1 55, r2 27, r3 3, r4 21, r5 10, r6 20)
+- k (ideas judged): 0 · explored: 30 · killed by bound/dup: ~80 · idea rounds: 6 (r1 55, r2 27, r3 3, r4 21, r5 10, r6 20)
 - BEST RESULTS: (1) R6-5 stacked on SPY in taxable = near miss (+1.5pp 2021-23 at $1k/mo; +2.6/+6.9 at $2k/mo; EH 22.1%/yr vs
   SPY 15.3%; COVID -37.5% vs -33.8%), study_ib_r65_stacked.md; (2) DL-IB1 round-up in more accounts PAYS on history, conditional
   on VIVK (check state/roundup-orders.json on him after 10-07; FOUND only after 2 live rounded deals).
-- current: ROUND 7 (method not yet used: LLM extraction from filings, or option-contract mechanics with free data)
+- current: ROUND 8 (round 7 = coverage audit of live contract alerts: R7-1 +2.5 deals/yr, R7-2 none)
 - stop rule status: 6 rounds done; explored 28 of >= 120 -> continue
 - why things die (running): HAIRCUT (bot ~= SPY at EH in both accounts) / TOO RARE (per-holder clauses) / LOTTERY / HALF-FLIP /
   COST; the one thing that beats the index at EH is adding beta under the bot (R6-5), not replacing it
@@ -129,3 +129,5 @@
   Live-code note (user's call): roundup_watch's phrase list could add "automatically be entitled to receive an additional share
   in lieu", "one whole share in lieu", "round up any fractional shares". r71_out.txt
   R7-2 spec: FTS '"distribution" "warrants" "rounded up"' / '"rights" "rounded up to the nearest whole" "distribution"' 2021-26, 8-K/424B/S-1; read sentences; bar >= 3 listed distributions/yr where 1 share -> 1 whole warrant/right.
+  R7-2 result: 7,886 hits, 8 sentences matched, none a per-holder round-up of a distributed warrant/right (RFL/CYTH merger
+  exchange; SLRX rounds to the NEAREST warrant; the rest charter boilerplate) -> DEAD (none exist). r72_out.txt
