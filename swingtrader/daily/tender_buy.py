@@ -144,14 +144,26 @@ def track(state_dir: Path, today: dt.date, adapters=None, notify=None, log=print
         if s["status"] == "ordered" and q >= 1:
             s.update(status="bought", held=int(q), bought=str(today))
             if notify:
-                notify(f"BOUGHT {int(q)} {s['ticker']} in {s['account'].upper()} - TENDER NOW (expires {s['expires']})",
-                       "Your approved order filled. Do step 3 now: tender ALL shares, tick the odd-lot box.\n\n"
-                       + (instructions(r) if r else ""))
+                from ..live import mail as M
+                tk = s["ticker"]
+                notify(f"BOUGHT {int(q)} {tk} - TENDER NOW (expires {s['expires']})",
+                       M.page("Odd-lot tender", f"Tender your {int(q)} {tk} now", f"bought in {s['account'].upper()} · "
+                              f"offer expires {s['expires']}",
+                              [M.action("Do it now", f"Tender ALL {int(q)} {tk} shares at Schwab", lines=[
+                                  "schwab.com > Accounts > Positions > " + tk + " > Corporate actions / Voluntary "
+                                  "reorganization (or call 1-800-435-4000).",
+                                  "Tick the odd-lot certification. Dutch auction: 'at the purchase price'. Not conditional."]),
+                               M.para("Schwab's own deadline is usually 1 business day before the expiry. Keep the "
+                                      "confirmation number; this email stops once the shares are gone.", muted=True)]
+                              + ([M.link(f"https://www.sec.gov/Archives/{r['path']}", "Offer document (SEC)")] if r else [])))
         elif s["status"] == "ordered" and s.get("placed", "") < str(today):
             s.update(status="unfilled")
             if notify:
+                from ..live import mail as M
                 notify(f"odd-lot tender {s['ticker']}: yesterday's buy did not fill",
-                       f"Run again if it still qualifies:  make tender-buy ID={s['offer']}")
+                       M.page("Odd-lot tender", f"{s['ticker']}: the buy did not fill", f"offer expires {s['expires']}",
+                              [M.action("Run again if you still want it", "Re-check and buy", f"make tender-buy ID={s['offer']}",
+                                        ["It re-checks the deal first and refuses if it no longer qualifies."], tone="wait")]))
         elif s["status"] == "bought" and q < 1:
             s.update(status="tendered", tendered=str(today))
             log(f"[tender] {s['ticker']}: shares gone - tendered")

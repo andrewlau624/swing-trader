@@ -125,16 +125,25 @@ def track(state_dir: Path, today: dt.date, adapters=None, notify=None, log=print
         if s["status"] == "ordered" and q >= 1:
             s.update(status="bought", held=int(q), bought=str(today))
             if notify:
-                notify(f"BOUGHT {int(q)} {s['ticker']} in {s['account'].upper()} - TENDER NOW (expires {s['expires']})",
-                       f"Your approved order filled. Tender ALL {int(q)} {s['ticker']} shares in the exchange offer for "
-                       f"{s['recv']}: schwab.com > Accounts > Positions > {s['ticker']} > Corporate actions / Voluntary "
-                       f"reorganization (or 1-800-435-4000). Tick the odd-lot certification. Schwab's deadline is "
-                       f"usually 1-2 business days before {s['expires']}.")
+                from ..live import mail as M
+                tk = s["ticker"]
+                notify(f"BOUGHT {int(q)} {tk} - TENDER NOW (expires {s['expires']})",
+                       M.page("Split-off exchange offer", f"Tender your {int(q)} {tk} now",
+                              f"for {s['recv']} · bought in {s['account'].upper()} · expires {s['expires']}",
+                              [M.action("Do it now", f"Tender ALL {int(q)} {tk} shares at Schwab", lines=[
+                                  f"schwab.com > Accounts > Positions > {tk} > Corporate actions / Voluntary reorganization "
+                                  "(or call 1-800-435-4000).", "Tick the odd-lot certification. Fee $0."]),
+                               M.para("Schwab's own deadline is usually 1-2 business days before the expiry. Keep the "
+                                      "confirmation number; this stops once the shares are gone.", muted=True)]))
         elif s["status"] == "ordered" and s.get("placed", "") < str(today):
             s.update(status="unfilled")
             if notify:
+                from ..live import mail as M
                 notify(f"split-off {s['ticker']}: yesterday's buy did not fill",
-                       f"Run again if it still qualifies:  make splitoff-buy PARENT={s['ticker']}")
+                       M.page("Split-off exchange offer", f"{s['ticker']}: the buy did not fill", f"expires {s['expires']}",
+                              [M.action("Run again if you still want it", "Re-check and buy",
+                                        f"make splitoff-buy PARENT={s['ticker']}",
+                                        ["It re-checks the offer first and refuses if it no longer qualifies."], tone="wait")]))
         elif s["status"] == "bought" and q < 1:
             s.update(status="tendered", tendered=str(today))
             log(f"[splitoff] {s['ticker']}: shares gone - tendered")

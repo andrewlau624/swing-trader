@@ -1757,11 +1757,20 @@ class DailyExecutor:
     def _notify(self, book: DailyBook, equity: float, today: str) -> None:
         if not (self.actions or self.warnings):
             return
-        body = "<h3>daily book</h3>" + \
-            f"<p>equity ${equity:,.2f} &middot; {book.pnl_line(equity)}</p>" + \
-            ("<h4>actions</h4><ul>" + "".join(f"<li>{a}</li>" for a in self.actions) + "</ul>" if self.actions else "") + \
-            ("<h4>warnings</h4><ul>" + "".join(f"<li>{w}</li>" for w in self.warnings) + "</ul>" if self.warnings else "") + \
-            "<pre>" + "\n".join(self.lines[-40:]) + "</pre>"
+        from ..live import mail as M
+        name = {"live": "Brokerage", "roth": "Roth IRA"}.get(self.account, self.account)
+        blocks = []
+        if self.warnings:
+            blocks.append(M.action("Warning", f"{len(self.warnings)} warning(s) - read these", lines=self.warnings,
+                                   tone="warn"))
+        else:
+            blocks.append(M.action("Nothing to do", "The bot traded on its own", lines=[
+                "This is a record of what it did this run."], tone="info"))
+        if self.actions:
+            blocks.append(M.bullets(self.actions, "Orders and actions"))
+        blocks.append(M.code("\n".join(self.lines[-40:]), "Run log"))
+        body = M.page(f"Daily book · {name}", f"{len(self.actions)} action(s)",
+                      f"equity ${equity:,.2f} · {book.pnl_line(equity)}", blocks)
         subj = f"[daily{(' ' + self.account.upper() + ' $') if self.live else ''}] {'WARN ' if self.warnings else ''}{len(self.actions)} action(s), equity ${equity:,.0f}"
         try:
             self.log(self.notifier.send(subj, body,

@@ -106,6 +106,51 @@ Filing: {r.get('url', '')}
 """
 
 
+def entry_email(r: dict, gain: float, pp: float, pr: float) -> tuple[str, str]:
+    """(subject, html) for an open offer in its entry window, in the shared email look."""
+    from ..live import mail as M
+    par, rec = r["parent"], r["recv"]
+    capped = r["per100"] / 100 * pp / pr > r["cap"]
+    blocks = [
+        M.action("Act now", f"Buy up to 99 {par}, then tender for {rec}", f"make splitoff-buy PARENT={par}",
+                 [f"On the server (ssh in, cd ~/llm-trader) run the command below. It re-checks the offer live, shows the "
+                  f"plan and buys only after you type {par}. Then tender (step 2)."]),
+        M.facts([("Offer", f"${r['per100']:.2f} of {rec} per $100 of {par}"),
+                 ("Upper limit", f"{r['cap']} {rec} per {par} share" + (" (binding now)" if capped else "")),
+                 (f"Last close {par} / {rec}", f"${pp:.2f} / ${pr:.2f}"),
+                 ("Value per share now", f"{1 + gain:.3f}x ({gain:+.1%})"),
+                 ("On 99 shares", f"about ${99 * pp * gain:,.0f} on ${99 * pp:,.0f}"),
+                 ("Offer expires", r["expires"]), ("Schwab's deadline", "usually 1-2 business days earlier")]),
+        M.steps([f"Buy: the command above (99 or fewer {par} IN TOTAL across all your accounts).",
+                 f"The next business day (shares settled) tender ALL of them: schwab.com > Accounts > Positions > {par} > "
+                 "Corporate actions / Voluntary reorganization, or call 1-800-435-4000. Certify the odd lot. Fee $0.",
+                 f"{rec} shares arrive a few days after expiry. Sell them or keep them - from then on it's {rec} risk."], "Then"),
+        M.fine(f"History (2016-25, 14 offers): median +7.4%, 12 of 14 made money, worst -8.8% (the received stock fell "
+               f"after delivery: Neogen 2022). When the upper limit binds the offer may be extended 2 trading days. "
+               f"Holding 100+ {par} in total means you are prorated like everyone else.")]
+    if r.get("url"):
+        blocks.append(M.link(r["url"], "Offer filing (SEC)"))
+    return (f"Split-off: buy up to 99 {par} for {rec} ({gain:+.1%}) - act now",
+            M.page("Split-off exchange offer", f"Buy up to 99 {par}, then tender", f"for {rec} · expires {r['expires']}", blocks))
+
+
+def new_offer_email(r: dict) -> tuple[str, str]:
+    from ..live import mail as M
+    args = (f"{r['parent'] or 'PARENT'} RECV {r.get('expires') or 'YYYY-MM-DD'} {r.get('per100') or 'PER100'} "
+            f"{r.get('cap') or 'CAP'} {r['url']}")
+    return (f"New split-off offer: {r['name']} - set its ticker",
+            M.page("Split-off exchange offer", "New offer found", r["name"], [
+                M.action("One step so the bot can watch it", "Add the received company's ticker",
+                         f"make splitoff-add ARGS='{args}'",
+                         ["Replace RECV with the ticker of the shares you would receive (and any value left as a "
+                          "placeholder, from the offer's press release). The bot then values it daily and emails you "
+                          "with the buy command 3-5 sessions before expiry."], tone="info"),
+                M.facts([("Value per $100", f"${r['per100']:.2f}" if r.get("per100") else "not found"),
+                         ("Upper limit", str(r.get("cap") or "not found")), ("Expires", r.get("expires") or "not found"),
+                         ("Odd-lot priority", "yes" if r.get("odd_lot") == "Y" else "check the offer")]),
+                M.link(r["url"], "Offer filing (SEC)")]))
+
+
 def _closes(syms: list[str], today: dt.date) -> dict[str, float]:
     from . import marketdata as md
     b = md.sip_daily(syms, today - dt.timedelta(days=10))
@@ -188,14 +233,11 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
             f.write(json.dumps(r) + "\n")
     note = Notifier(Path(state_dir)) if email else None
     if new and note:
-        note.alert(f"split-off exchange offer: {', '.join(r['name'] for r in new)} (set the received ticker)",
-                   "\n\n".join(f"{r['name']}: parsed {dict((k, r.get(k)) for k in ('per100', 'cap', 'expires', 'odd_lot'))}.\n"
-                               f"To have it valued daily (entry-day email), on the server run:\n  make splitoff-add ARGS='"
-                               f"{r['parent'] or 'PARENT'} RECV {r.get('expires') or 'YYYY-MM-DD'} {r.get('per100') or 'PER100'} "
-                               f"{r.get('cap') or 'CAP'} {r['url']}'" for r in new))
+        for r in new:
+            note.mail(*new_offer_email(r))
     try:                                   # bookkeeping for buys you approved (never places an order)
         from .splitoff_buy import track
-        track(state_dir, today, notify=(lambda subj, body: note.alert(subj, body)) if note else None, log=log)
+        track(state_dir, today, notify=(lambda subj, html: note.mail(subj, html)) if note else None, log=log)
     except Exception as exc:
         log(f"[splitoff] tracking failed: {str(exc)[:120]}")
     for r in open_offers(_read(path), today):
@@ -211,8 +253,7 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
                 f.write(json.dumps(dict(entry=str(today), parent=r["parent"], expires=r["expires"], recv_px=px[r["recv"]],
                                         parent_px=px[r["parent"]], gain=round(g, 4), alert=True)) + "\n")
         if note and in_window(left) and g >= MIN_GAIN:
-            note.alert(f"split-off odd lot: {r['parent']} -> {r['recv']} implied {g:+.1%} (act now)",
-                       instructions(r, g, px[r["parent"]], px[r["recv"]]))
+            note.mail(*entry_email(r, g, px[r["parent"]], px[r["recv"]]))
     return new
 
 

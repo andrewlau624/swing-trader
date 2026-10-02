@@ -82,8 +82,10 @@ def place(ad, sym: str, side: str, limit: float | None = None) -> str:
 
 
 def manage(state_dir: Path, alerts: list[dict], today: dt.date, adapters: dict | None = None, prices: dict | None = None,
-           placer=place, notify=None, log=print) -> dict:
-    """Buy what is due, then follow each held deal to rounded/cash; returns the order state."""
+           placer=place, notify=None, log=print, events: list | None = None) -> dict:
+    """Buy what is due, then follow each held deal to rounded/cash; returns the order state. `events` collects
+    (kind, account, symbol, detail) for this run's email: bought / sold / cash."""
+    ev = events if events is not None else []
     st = _load(state_dir)
     if adapters is None:
         from .brokers import make_adapter
@@ -114,6 +116,7 @@ def manage(state_dir: Path, alerts: list[dict], today: dt.date, adapters: dict |
                 log(f"[roundup] {a} BUY 1 {r['ticker']} failed: {str(exc)[:120]}"); continue
             d[a] = dict(status="ordered", order_id=oid, limit=lim, placed=str(today), ex=r["trade_date"], ratio=r["ratio"])
             bought_today[a] += 1
+            ev.append(("bought", a, r["ticker"], f"1 share, limit ${lim:g}, split {r['trade_date'][5:]}"))
             log(f"[roundup] {a}: BUY 1 {r['ticker']} limit ${lim:.2f} (ex {r['trade_date']}, 1-for-{r['ratio']:g}) order {oid}")
     # 2. follow-up
     for key, d in st.items():
@@ -133,16 +136,25 @@ def manage(state_dir: Path, alerts: list[dict], today: dt.date, adapters: dict |
                     try:
                         s["sell_order"] = placer(adapters[a], sym, "sell")
                         s["status"] = "sold"
+                        ev.append(("sold", a, sym, f"round-up PAID: {q:g} post-split share(s); selling 1 at the open"))
                         log(f"[roundup] {a}: {sym} round-up PAID ({q:g} sh) -> SELL 1 at market")
                     except Exception as exc:
                         log(f"[roundup] {a}: {sym} rounded, sell failed: {str(exc)[:120]}")
                 elif (today - ex).days >= CASH_AFTER_DAYS:
                     s.update(status="cash", resolved=str(today))
+                    ev.append(("cash", a, sym, f"no post-split share {CASH_AFTER_DAYS} days after the split: cash in lieu"))
                     log(f"[roundup] {a}: {sym} no post-split share after {CASH_AFTER_DAYS} days -> cash in lieu")
                     if killed(st, a) and notify:
-                        notify(f"round-up auto-buy STOPPED in {a}",
-                               f"Schwab paid cash in lieu (no post-split share) on {KILL_CASH} deals and rounded none in "
-                               f"{a}. No more round-up buys there. Deals: " + ", ".join(k for k, x in st.items() if x.get(a, {}).get('status') == 'cash'))
+                        from ..live import mail as M
+                        deals = [k for k, x in st.items() if x.get(a, {}).get("status") == "cash"]
+                        notify(f"round-up auto-buy STOPPED in {a}", M.page(
+                            "Reverse-split round-up", f"Auto-buy stopped in {a}", "Schwab pays cash instead of a share",
+                            [M.action("Stopped", "No more round-up buys in this account", lines=[
+                                f"Schwab paid cash in lieu (no post-split share) on {len(deals)} deals and rounded none "
+                                f"up in {a}, so the edge does not exist there."], tone="warn"),
+                             M.bullets(deals, "Deals"),
+                             M.fine("To re-enable after checking with Schwab, remove those deals from "
+                                    "state/roundup-orders.json.")]))
                 else:
                     s["status"] = "waiting"
     _save(state_dir, st)

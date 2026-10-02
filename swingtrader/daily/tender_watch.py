@@ -130,6 +130,39 @@ Offer document: https://www.sec.gov/Archives/{r['path']}
 """
 
 
+def offer_email(r: dict, reminder: bool = False) -> tuple[str, str]:
+    """(subject, html) for one alerted offer, in the shared email look."""
+    from ..live import mail as M
+    tk, floor, close = r["ticker"], float(r["floor"]), float(r["last_close"])
+    exp = r.get("expires") or "see the offer document"
+    oid = f"{tk}-{r.get('date', '')}"
+    price = (f"${floor:.2f} cash (fixed)" if r.get("kind") == "fixed" else
+             f"at least ${floor:.2f} (Dutch ${r.get('lo'):.2f}-${r.get('hi'):.2f})")
+    blocks = [
+        M.action("Deadline soon - if you already tendered, ignore this" if reminder else "Act today",
+                 f"Buy up to 99 {tk}, then tender them",
+                 "make tender-buy ID=" + oid,
+                 [f"On the server (ssh in, cd ~/llm-trader) run the command below. It re-checks the deal, shows the plan "
+                  f"and buys only after you type {tk}. Then tender (step 2)."], tone="wait" if reminder else "act"),
+        M.facts([("Offer", price), ("Last close", f"${close:.2f}"), ("Guaranteed gain", f"+{r['floor_gain']:.1%}"),
+                 ("On 99 shares", f"about ${99 * (floor - close):,.0f}"), ("Offer expires", exp),
+                 ("Schwab's deadline", "usually 1 business day earlier")]),
+        M.steps([f"Buy: the command above (99 or fewer {tk} shares IN TOTAL across all your accounts; Roth first).",
+                 f"The next business day (shares settled) tender ALL of them: schwab.com > Accounts > Positions > {tk} > "
+                 "Corporate actions / Voluntary reorganization, or call 1-800-435-4000.",
+                 "Tick the odd-lot certification (fewer than 100 shares). Dutch auction: tender 'at the purchase price'. "
+                 "Not a conditional tender.",
+                 "Keep the confirmation number. Fee $0. Don't sell until the offer closes; cash arrives 2-5 business days "
+                 "after expiry."], "Then"),
+        M.fine("What can go wrong: the company withdraws the offer (you keep the shares at market); you hold 100+ shares "
+               "in total (prorated like everyone); you miss Schwab's deadline (you hold the stock after the offer, which "
+               "often drops). Taxable account: a short-term gain. History 2016-26: every qualifying offer made money."),
+        M.link(f"https://www.sec.gov/Archives/{r['path']}", "Offer document (SEC)")]
+    subj = (f"REMINDER {tk} odd-lot tender: deadline {exp}" if reminder else
+            f"Odd-lot tender: buy up to 99 {tk} (+{r['floor_gain']:.1%}) - act today")
+    return subj, M.page("Odd-lot tender", f"Buy up to 99 {tk}, then tender", f"{r['name']} · expires {exp}", blocks)
+
+
 def reminders(rows: list[dict], today: dt.date) -> list[dict]:
     """Alerted offers whose expiry is 1-3 days away (a reminder each of those days)."""
     out = []
@@ -178,19 +211,18 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
             f.write(json.dumps(r) + "\n")
     hits = [r for r in new if r["alert"]]
     if hits and email:
-        Notifier(Path(state_dir)).alert(f"odd-lot tender: {', '.join(r['ticker'] for r in hits)} (act today)",
-                                        "\n\n".join(instructions(r) for r in hits))
+        for r in hits:
+            Notifier(Path(state_dir)).mail(*offer_email(r))
     try:                                   # bookkeeping for buys you approved (never places an order)
         from .tender_buy import track
         note = Notifier(Path(state_dir)) if email else None
-        track(state_dir, today, notify=(lambda subj, body: note.alert(subj, body)) if note else None, log=log)
+        track(state_dir, today, notify=(lambda subj, html: note.mail(subj, html)) if note else None, log=log)
     except Exception as exc:
         log(f"[tender] tracking failed: {str(exc)[:120]}")
     due = reminders(_read(path), today)
     if due and email:
-        Notifier(Path(state_dir)).alert(
-            f"REMINDER odd-lot tender deadline: {', '.join(r['ticker'] for r in due)}",
-            "If you already tendered, ignore this.\n\n" + "\n\n".join(instructions(r) for r in due))
+        for r in due:
+            Notifier(Path(state_dir)).mail(*offer_email(r, reminder=True))
     log(f"[tender] {len(new)} new SC TO-I, {len(hits)} odd-lot alerts")
     return new
 

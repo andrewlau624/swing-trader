@@ -169,11 +169,17 @@ def main(argv=None):
             try:
                 import datetime as _dt
                 from swingtrader.live.notify import Notifier
+                from swingtrader.live import mail as M
+                login = acc in ("live", "roth") and any(w in str(exc) for w in ("invalid_grant", "revoked", "401"))
                 print(Notifier(ROOT / "state").send(
                     f"[daily{(' ' + acc.upper() + ' $') if acc in ('live', 'roth') else ''}] run FAILED: {type(exc).__name__}",
-                    f"<p>The {acc} daily book could not run.</p><pre>{exc}</pre>"
-                    + ("<p>If this mentions invalid_grant or revoked: run "
-                       "<code>make schwab-login</code> on the server.</p>" if acc in ("live", "roth") else ""),
+                    M.page("Daily book", f"The {acc} run FAILED", type(exc).__name__, [
+                        M.action("Check it", "Schwab login problem: log in again" if login else "The run stopped with an error",
+                                 "make schwab-login" if login else "make daily-status",
+                                 ["Run this on the server."] + ([] if login else
+                                 ["If the error mentions invalid_grant or revoked, run make schwab-login instead."]),
+                                 tone="warn"),
+                        M.code(str(exc), "Error")]),
                     dedupe_key=f"daily-fail:{acc}:{_dt.date.today()}:{type(exc).__name__}"))
             except Exception:
                 pass

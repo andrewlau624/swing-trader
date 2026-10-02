@@ -38,15 +38,20 @@ def token_times(path: Path | None = None) -> tuple[float, dt.datetime] | None:
     return created, dt.datetime.fromtimestamp(created + TOKEN_MAX_AGE_S, ET)
 
 
+LOGIN_STEPS = ["Open the link it prints and log in with your Schwab brokerage login.",
+               "You land on a \"can't connect\" page at https://127.0.0.1/?code=... - that is expected.",
+               "Copy that whole address and paste it back into the terminal within ~30 seconds."]
+
+
 def _body(headline: str, expires: dt.datetime) -> str:
-    return (f"<p>Your Schwab API login {headline} "
-            f"(<b>{expires:%a %b %d, %I:%M %p} ET</b>).</p>"
-            "<p>On the server, run:</p><pre>make schwab-login</pre>"
-            "<p>Open the link it prints, log in with your Schwab <i>brokerage</i> login, "
-            "then paste back the https://127.0.0.1/?code=... address you land on "
-            "(the \"can't connect\" page is expected). Paste it within ~30 seconds.</p>"
-            "<p>If it lapses: real-money trading stops and places nothing; paper keeps "
-            "running; the 15:40 scan uses Alpaca data instead of Schwab.</p>")
+    from ..live import mail as M
+    tone = "warn" if "EXPIRED" in headline or "HOURS" in headline else "wait"
+    return M.page("Schwab login", f"Schwab login {headline}", f"expires {expires:%a %b %-d, %I:%M %p} ET", [
+        M.action("Renew it", "Run this on the server", "make schwab-login",
+                 [f"The API login {headline} ({expires:%a %b %-d, %I:%M %p} ET)."], tone=tone),
+        M.steps(LOGIN_STEPS),
+        M.fine("If it lapses: real-money trading stops and places nothing; paper keeps running; the 15:40 scan uses "
+               "Alpaca data instead of Schwab.")])
 
 
 def probe(path: Path | None = None) -> str | None:
@@ -76,13 +81,17 @@ def check(notifier, now: dt.datetime | None = None, path: Path | None = None,
     if hours_left > 0:
         err = (probe_fn or (lambda: probe(path)))()
         if err:
+            from ..live import mail as M
             return "Schwab login REVOKED: " + notifier.send(
                 "[swing-trader] Schwab login was REVOKED - run make schwab-login on the server",
-                "<p>Schwab rejected the saved login before its 7 days were up. Most likely "
-                "cause: you logged in on another machine. Schwab keeps only ONE active login "
-                "per app, and the newest wins.</p><p>Real-money trading is stopped until you run "
-                "<code>make schwab-login</code> <b>on the server</b>. Paper keeps running.</p>"
-                f"<pre>{err}</pre>", dedupe_key=f"schwab-token:{int(created)}:revoked")
+                M.page("Schwab login", "Schwab login was REVOKED", "real-money trading is stopped", [
+                    M.action("Renew it now", "Run this on the server", "make schwab-login", [
+                        "Schwab rejected the saved login before its 7 days were up. Most likely you logged in on "
+                        "another machine: Schwab keeps only ONE active login per app, and the newest wins."], tone="warn"),
+                    M.steps(LOGIN_STEPS),
+                    M.code(err, "What Schwab said"),
+                    M.fine("Real-money trading is stopped until you log in again on the server. Paper keeps running.")]),
+                dedupe_key=f"schwab-token:{int(created)}:revoked")
     due = [s for s in STAGES if hours_left <= s[0]]
     if not due:
         return f"Schwab login OK: {hours_left/24:.1f} days left (expires {expires:%a %b %d %I:%M %p} ET)"
@@ -103,9 +112,11 @@ def confirm_login(notifier, path: Path | None = None) -> str:
         return "no token to confirm"
     created, expires = t
     when = lambda h: (expires - dt.timedelta(hours=h)).strftime("%a %b %d %I:%M %p")
-    html = (f"<p>Schwab API login renewed. It expires <b>{expires:%a %b %d, %I:%M %p} ET</b>.</p>"
-            f"<p>Reminders will arrive around: {when(48)}, {when(24)}, {when(6)} ET.</p>"
-            "<p>Tip: log in during the day, so the expiry, and the last reminder, "
-            "fall at a time you are awake.</p>")
+    from ..live import mail as M
+    html = M.page("Schwab login", "Schwab login renewed", f"expires {expires:%a %b %-d, %I:%M %p} ET", [
+        M.action("All set", "Nothing to do until the reminders", lines=[
+            f"It expires {expires:%a %b %-d, %I:%M %p} ET; Schwab allows 7 days."], tone="info"),
+        M.facts([("First reminder", f"{when(48)} ET"), ("Second", f"{when(24)} ET"), ("Last", f"{when(6)} ET")], "Reminders"),
+        M.fine("Tip: log in during the day, so the expiry, and the last reminder, fall at a time you are awake.")])
     return notifier.send(f"[swing-trader] Schwab login renewed - expires {expires:%a %b %d}",
                          html, dedupe_key=f"schwab-token:{int(created)}:renewed")

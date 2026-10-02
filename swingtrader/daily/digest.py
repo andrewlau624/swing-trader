@@ -291,9 +291,8 @@ def build(state: Path, logs: Path, start_equity: float, conviction_w: float, tax
 
 
 NAME = {"live": "Brokerage", "roth": "Roth IRA"}
-INK, MUTE, RULE, ACC, UP, DOWN = "#1f2328", "#6e7781", "#e6e8eb", "#0b5cad", "#1a7f37", "#cf222e"
-SANS = "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif"   # unquoted: inside style='...'
-SERIF = "Georgia,Times New Roman,serif"
+from ..live.mail import ACC, DOWN, INK, MUTE, SANS, SERIF, UP      # one palette for every email (live/mail.py)
+RULE = "#e6e8eb"
 
 
 def _esc(s) -> str:

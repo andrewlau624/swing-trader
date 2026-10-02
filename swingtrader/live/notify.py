@@ -91,68 +91,48 @@ class Notifier:
                  warnings: list[str], log_tail: list[str],
                  shadow: dict | None = None, dedupe_key: str | None = None) -> str:
         """The one alert that matters: something happened, here is everything."""
-        when = dt.datetime.now().astimezone().strftime("%Y-%m-%d %H:%M %Z")
+        from . import mail as M
         n_fill, n_act = len(fills), len(actions)
         # one prefix, not two -- the warning path used to prepend a second
         # "[swing-trader]" and produce a doubled subject line
         prefix = "[swing-trader] ⚠" if warnings else "[swing-trader]"
         subject = f"{prefix} {n_act} order(s), {n_fill} fill(s) — {_fmt_money(equity)}"
-
-        def rows(hdr, body):
-            return (f"<h3 style='margin:18px 0 6px;font:600 13px system-ui'>{hdr}</h3>"
-                    f"<div style='font:12px ui-monospace,Menlo,monospace;"
-                    f"white-space:pre-wrap;background:#f6f8fa;padding:10px;"
-                    f"border-radius:6px'>{body}</div>")
-
-        h = [f"<div style='font:14px system-ui;max-width:760px'>",
-             f"<h2 style='margin:0 0 4px'>swing-trader</h2>",
-             f"<div style='color:#57606a;font-size:12px'>{when} · equity "
-             f"<b>{_fmt_money(equity)}</b></div>"]
-
+        B = []
         if warnings:
-            h.append("<div style='background:#fff1e5;border-left:3px solid #d1242f;"
-                     "padding:8px 10px;margin:12px 0;font-size:13px'><b>Warnings</b><br>"
-                     + "<br>".join(warnings) + "</div>")
-
+            B.append(M.action("Warning", f"{len(warnings)} warning(s)", lines=warnings, tone="warn"))
         if actions:
-            h.append(rows("Orders this run", "\n".join(actions)))
+            B.append(M.code("\n".join(actions), "Orders this run"))
         if fills:
-            body = "\n".join(
+            B.append(M.code("\n".join(
                 f"{f.side.upper():4} {f.qty:>6.0f} {f.symbol:<6} @ {f.fill_px:>9.4f}  "
-                f"ref {f.ref_px:>9.4f}  slippage {f.slippage_bps:+7.1f} bps"
-                for f in fills)
-            h.append(rows("Fills", body))
-
+                f"ref {f.ref_px:>9.4f}  slippage {f.slippage_bps:+7.1f} bps" for f in fills), "Fills"))
         if slippage and slippage.get("n"):
             verdict = ("holding up vs the 20bps the backtest assumed"
                        if slippage["mean"] <= 25 else
                        "WORSE than the 20bps the backtest assumed — edge shrinks")
-            h.append(rows("Measured slippage (the number this all rests on)",
-                          f"n={slippage['n']}  mean {slippage['mean']:+.1f} bps  "
-                          f"median {slippage['median']:+.1f}  p90 {slippage['p90']:+.1f}\n"
-                          f"{verdict}"))
-
-        if positions:
-            body = "\n".join(
-                f"{s:<6} {float(p.get('qty',0)):>6.0f} sh @ {float(p.get('entry_px',0)):>8.2f}  "
-                f"stop {float(p.get('stop_px',0)):>8.2f}  held {int(p.get('bars_held',0)):>2}d"
-                for s, p in positions.items())
-            h.append(rows(f"Open positions ({len(positions)})", body))
-        else:
-            h.append(rows("Open positions", "flat"))
+            B.append(M.facts([("Fills measured", str(slippage["n"])), ("Mean", f"{slippage['mean']:+.1f} bps"),
+                              ("Median", f"{slippage['median']:+.1f} bps"), ("p90", f"{slippage['p90']:+.1f} bps")],
+                             "Measured slippage") + M.para(verdict, muted=True))
+        B.append(M.code("\n".join(
+            f"{s:<6} {float(p.get('qty',0)):>6.0f} sh @ {float(p.get('entry_px',0)):>8.2f}  "
+            f"stop {float(p.get('stop_px',0)):>8.2f}  held {int(p.get('bars_held',0)):>2}d"
+            for s, p in positions.items()) or "flat", f"Open positions ({len(positions)})"))
         if pending:
-            h.append(rows(f"Working orders ({len(pending)})",
-                          "\n".join(f"{s:<6} {v.get('qty',0)} sh  ref {v.get('ref_px',0):.2f}"
-                                    for s, v in pending.items())))
+            B.append(M.code("\n".join(f"{s:<6} {v.get('qty',0)} sh  ref {v.get('ref_px',0):.2f}"
+                                      for s, v in pending.items()), f"Working orders ({len(pending)})"))
         if shadow:
-            h.append(rows("Momentum book (shadow, no orders)",
-                          f"holding {shadow.get('holding',0)}  "
-                          f"closed {shadow.get('closed',0)}"))
+            B.append(M.para(f"Momentum book (shadow, no orders): holding {shadow.get('holding',0)}, "
+                            f"closed {shadow.get('closed',0)}", muted=True))
         if log_tail:
-            h.append(rows("Run log", "\n".join(log_tail[-40:])))
-        h.append("</div>")
+            B.append(M.code("\n".join(log_tail[-40:]), "Run log"))
+        h = [M.page("swing-trader", f"{n_act} order(s), {n_fill} fill(s)", f"equity {_fmt_money(equity)}", B)]
         return self.send(subject, "".join(h), dedupe_key=dedupe_key)
 
+    def mail(self, subject: str, html: str, dedupe_key: str | None = None) -> str:
+        """An email built with swingtrader.live.mail (the digest's look)."""
+        return self.send(f"[swing-trader] {subject}", html, dedupe_key=dedupe_key)
+
     def alert(self, subject: str, body: str) -> str:
-        return self.send(f"[swing-trader] {subject}",
-                         f"<pre style='font:12px ui-monospace'>{body}</pre>")
+        """Plain-text fallback, still in the shared look."""
+        from . import mail as M
+        return self.mail(subject, M.page("Alert", subject, blocks=[M.code(body)]))

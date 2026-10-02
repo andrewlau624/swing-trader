@@ -133,26 +133,51 @@ def score(r: dict, today: dt.date) -> dict | None:
                 gain_if_rounded=round(pe - ps, 4), split_in_prices=ok)
 
 
-def instructions(rows: list[dict]) -> str:
-    lines = ["REVERSE-SPLIT ROUND-UP: buy ONE share in EACH account (Brokerage and Roth) before the split.", ""]
-    for r in rows:
+def build_email(new: list[dict], due: list[dict], events: list, auto: bool) -> tuple[str, str] | None:
+    """(subject, html) for this run, or None. Auto: what the bot did. Manual: what to buy and by when."""
+    from ..live import mail as M
+    rows = {r["ticker"]: r for r in new + due}
+    split_facts = []
+    for r in rows.values():
         n = r.get("ratio")
-        val = f"~${(n - 1) * r['last_close']:.2f} per account if rounded up" if n and r.get("last_close") else ""
-        lines.append(f"- {r['ticker']}: 1-for-{n:g}; split-adjusted trading from {r['trade_date']} -> BUY BY THE CLOSE "
-                     f"OF {r['buy_by']}; last close ${r.get('last_close') or '?'}; {val}")
-        lines.append(f"    \"{r['sentence'][:220]}\"")
-        lines.append(f"    {r.get('form')} filed {r.get('filed')}: {r['url']}")
-    from .roundup_orders import enabled
-    if enabled():
-        lines += ["", "AUTOMATIC (ROUNDUP_AUTO=1): the bot buys 1 share in each account at the open and sells the",
-                  "post-split share once it shows up. Nothing to do. It stops in an account after 2 cash-in-lieu outcomes."]
-        return "\n".join(lines)
-    lines += ["", "HOW: buy exactly 1 share (market or a limit a cent above the ask) on or before the LAST session before",
-              "the split-adjusted date, in each account. Hold it through the split. A day or a few weeks later the",
-              "position should show 1 post-split share (worth about N x what you paid). If it shows 0 shares + a few",
-              "cents of cash, Schwab paid cash in lieu: you lost about nothing; note it - after 2-3 of those, stop.",
-              "Risk per deal: the price of 1 share (median $0.25). Taxable: a small short-term gain when you sell."]
-    return "\n".join(lines)
+        val = f", ~${(n - 1) * r['last_close']:.2f} if rounded up" if n and r.get("last_close") else ""
+        split_facts.append((f"{r['ticker']} 1-for-{n:g}", f"buy by {r['buy_by']}, splits {r['trade_date']}{val}"))
+    if auto:
+        if not events:
+            return None
+        verb = {"bought": "Bought", "sold": "Sold", "cash": "Cash in lieu"}
+        acts = [(f"{verb[k]} {sym} · {'Brokerage' if a == 'live' else 'Roth'}", d) for k, a, sym, d in events]
+        kinds = {k for k, *_ in events}
+        title = ("Bought 1 share for the round-up" if kinds == {"bought"} else "Round-up update")
+        blocks = [M.action("Nothing to do", title, lines=[
+                      "The bot buys 1 share per account before each qualifying reverse split and sells the post-split "
+                      "share once Schwab credits it. These are the orders it placed this morning."], tone="info"),
+                  M.facts(acts, "This morning")]
+        if split_facts:
+            blocks.append(M.facts(split_facts, "Splits"))
+        blocks.append(M.fine("If Schwab rounds up, each account ends with 1 post-split share worth about N x the price "
+                             "paid; if it pays cash in lieu instead, the loss is about the price of 1 share. After 2 "
+                             "cash-in-lieu outcomes with none rounded, an account stops buying (you get an email). "
+                             "Switch off: remove ROUNDUP_AUTO=1 from the server's .env."))
+        return (f"Round-up: {', '.join(sorted({e[2] for e in events}))} - {', '.join(sorted(kinds))}",
+                M.page("Reverse-split round-up", title, f"{len(events)} order(s)", blocks))
+    if not rows:
+        return None
+    first = min(r["buy_by"] for r in rows.values())
+    return (f"Round-up: buy 1 share of {', '.join(rows)} in each account by {first}",
+            M.page("Reverse-split round-up", f"Buy 1 share of {', '.join(rows)} in each account", f"by the close of {first}", [
+                M.action("Act by the buy-by date", "Buy exactly 1 share per account (Brokerage and Roth)", lines=[
+                    "Market order or a limit a cent above the ask, on or before the last session before the split. "
+                    "Hold it through the split."]),
+                M.facts(split_facts, "Splits"),
+                M.steps(["Buy 1 share in each account by the date above.",
+                         "A day to a few weeks after the split the position should show 1 post-split share (worth about "
+                         "N x what you paid). Sell it whenever you like.",
+                         "If it shows 0 shares and a few cents of cash, Schwab paid cash in lieu: you lost about nothing. "
+                         "After 2-3 of those, stop."], "Then"),
+                M.fine("Risk per deal: the price of 1 share (median $0.25). Turn on automatic buying with ROUNDUP_AUTO=1 "
+                       "in the server's .env.")] + [M.link(r["url"], f"{r['ticker']}: the round-up clause ({r.get('form')})")
+                                                   for r in rows.values()]))
 
 
 def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=print) -> list[dict]:
@@ -193,15 +218,14 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
             f.write(json.dumps(r) + "\n")
     due = [r for r in alerted.values() if r.get("buy_by") == str(today)]
     from . import roundup_orders as ro
+    events: list = []
+    note = Notifier(Path(state_dir)) if email else None
     if ro.enabled():                       # automatic 1-share buys/sells (user-approved 2026-10-02); ROUNDUP_AUTO=1
-        live_alerts = list(alerted.values()) + new
-        note = Notifier(Path(state_dir)) if email else None
-        ro.manage(state_dir, live_alerts, today,                  # prices: each account's own Schwab ask
-                  notify=(lambda s, b: note.alert(s, b)) if note else None, log=log)
-    if email and (new or due):
-        subj = ", ".join(r["ticker"] for r in new + due)
-        Notifier(Path(state_dir)).alert(f"reverse-split round-up: {subj} (buy 1 share in each account)",
-                                        instructions(new + due))
+        ro.manage(state_dir, list(alerted.values()) + new, today, events=events,   # prices: each account's Schwab ask
+                  notify=(lambda s, h: note.mail(s, h)) if note else None, log=log)
+    msg = build_email(new, due, events, ro.enabled())
+    if note and msg:
+        note.mail(*msg)
     log(f"[roundup] {len(new)} new round-up splits ({len(misses)} upcoming splits without a holder-level round-up), "
         f"{len(due)} due today, {len(scored)} scored")
     return new
