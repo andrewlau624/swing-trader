@@ -15,3 +15,9 @@
 | X4 FDA has approved (8-K) | overnight | claimed 2026-10-02 06:45 | done: FAILS (explored-dead) |
 | X5 Breakthrough Therapy Designation (8-K) | overnight | claimed 2026-10-02 06:45 | done: FAILS (explored-dead, t 0.88) |
 | X6 met its primary endpoint (8-K) | overnight | claimed 2026-10-02 06:46 | done: FAILS (explored-dead, net -30.4bp) |
+| Discovery I1/I2/I15 reverse-split round-up pre-announced window (DEF 14C/PRE 14C approved splits) | llm-trader-mid-01 (prompt_discovery_loop.md) | claimed 2026-10-02 | in progress |
+| Discovery I29 fund managers buying their own CEF (Form 4 on CEFs) | llm-trader-mid-01 | claimed 2026-10-02 | in progress |
+| Discovery I26/I28/I30 own-money: exercise-and-hold, CEO first 90d, buys in a rights offer | llm-trader-mid-01 | claimed 2026-10-02 | in progress |
+| Discovery I37 odd-lot debt-for-equity exchange offers | llm-trader-mid-01 | claimed 2026-10-02 | in progress |
+| Discovery I14 Reg SHO threshold-list close-out | llm-trader-mid-01 | claimed 2026-10-02 | in progress |
+| Discovery I4/I39 thrift + bank rights offerings (fixed-price subscription priority) | llm-trader-mid-01 | claimed 2026-10-02 | in progress |
