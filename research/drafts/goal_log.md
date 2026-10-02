@@ -1,12 +1,12 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 1 · ideas written 10 (G1-G10) · k (judged) 2 · program N 772 (next free 773)
-- NEAR: G2 (forward follow-up G2-F); G1 bound NEAR at $10k (+8.8pp after tax judge), FOUND-level at $2.3k (+20.5pp) but
-  conditional on Schwab rounding B1 (VIVK ~10-07; check state/roundup-orders.json in llm-trader after 10-07).
-- track streak: T1, T5 -> next T2 or T3
-- NEXT: T2 G4 ADR terminations: count from documents (EDGAR full text "termination of the deposit agreement" /
-  Form F-6 POS / 25-NSE on ADRs) 2016-26, events/yr and the contractual payoff from terms only (no prices yet).
+- round 1 · ideas written 10 (G1-G10) · k (judged) 3 · program N 772 (next free 773)
+- NEAR: G2 (forward follow-up G2-F); G1 bound NEAR at $10k, FOUND-level at $2.3k conditional on Schwab rounding B1
+  (VIVK ~10-07; check llm-trader state/roundup-orders.json after 10-07).
+- track streak: T1, T5, T2 -> next T3 (G7 424B2 barriers or G8 convert pricing) then T2 G5/G6 counts
+- NEXT: G8 convertible pricing-day: count from EDGAR FTS ("pricing of" "convertible senior notes" 8-K) 2016-26 per year,
+  and size / ADV from terms; pre-register before any price.
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -38,3 +38,9 @@
 - 2026-10-02 17:15 **G1 bound (no N): NEAR at $10k.** From the registered deal tables: judge 2024-26 taxable deal $
   $725 at $2.3k (+20.5pp after tax) / $1,356 at $10k (+8.8pp); holdout +17pp / +13pp; Roth +4.4pp (B1 only). B1 rounding
   at Schwab unverified; without B1, $2.3k is ~+10pp. Nothing to build (all parts live). study_goal_g1.md.
+- 2026-10-02 17:25 **G4 ADR terminations: KILLED at the count/mechanism step (no N).** EDGAR FTS 2016-26 (6-K/8-K/25/15F):
+  "terminate its ADR program" 6 hits, "termination of its American Depositary" 9 hits, and most are ADR -> ordinary-share
+  conversions (WNS, TotalEnergies, Cango: a 1:1 exchange onto a direct listing, no payoff). "termination of the deposit
+  agreement" is F-6 boilerplate (1,300-1,900 hits/yr, all F-6 POS/EF). Genuine cash terminations ~1-2/yr, and the contract
+  pays the depositary's FUTURE sale price of the local shares net of fees (months later, FX + local price risk): no fixed
+  payoff, so by pipeline step 2 it is a price pattern, not a contract. TOO RARE + no contractual payoff.
