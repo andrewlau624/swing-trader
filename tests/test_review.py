@@ -64,3 +64,29 @@ def test_impact_inputs_use_only_bars_before_the_fill(monkeypatch):
     assert r.adv20 == pytest.approx((h.close * h.volume).iloc[-20:].mean())
     sig = np.log(h.close).diff().iloc[-20:].std()
     assert r.x_bps == pytest.approx(sig * 1e4 * np.sqrt(1000 / r.adv20))
+
+
+def test_live_fills_reads_the_roth_account_and_labels_it(monkeypatch):
+    import datetime as dt
+    from types import SimpleNamespace
+    import scripts.review as R
+    import swingtrader.daily.brokers as BR
+    seen = {}
+    order = {"orderType": "MARKET_ON_CLOSE", "enteredTime": "2026-09-30T19:40:30+0000",
+             "orderActivityCollection": [{"executionLegs": [{"quantity": 3, "price": 10.0,
+                                                             "time": "2026-09-30T20:00:01+0000"}]}]}
+    client = SimpleNamespace(get_orders_for_account=lambda h, **k: SimpleNamespace(
+        raise_for_status=lambda: None, json=lambda: [order]))
+
+    class FakeAdapter:
+        def __init__(self, client=None, account_env="SCHWAB_ACCOUNT_NUMBER", **k):
+            seen["env"] = account_env; self.hash = "h"
+        def _leg(self, o):
+            return "ABC", "BUY", None
+    monkeypatch.setattr(BR, "schwab_client", lambda: client)
+    monkeypatch.setattr(BR, "SchwabAdapter", FakeAdapter)
+    cfg = SimpleNamespace(daily=SimpleNamespace(ibs_symbols=["QQQ"], ibs_cash_symbol="SGOV",
+                                                noise_symbol="QQQ", noise_alt_symbol="SMH"))
+    f = R.live_fills(dt.date(2026, 9, 29), cfg, book="roth")
+    assert seen["env"] == "SCHWAB_ROTH_ACCOUNT_NUMBER"
+    assert list(f.book) == ["roth"] and list(f.leg) == ["night"] and f.tif.iloc[0] == "cls"

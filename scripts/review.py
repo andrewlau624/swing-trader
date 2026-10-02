@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 import numpy as np
 import pandas as pd
 
-from swingtrader.config import Config, ROOT
+from swingtrader.config import Config, ROOT, get_env
 from swingtrader.daily import marketdata as md
 from swingtrader.daily import signals as sg
 
@@ -64,12 +64,14 @@ def paper_fills(since: dt.date) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
-def live_fills(since: dt.date, cfg) -> pd.DataFrame:
+def live_fills(since: dt.date, cfg, book: str = "live") -> pd.DataFrame:
     """Bot fills from Schwab. Schwab orders carry no client id, so bot orders
     are recognised by shape: the bot only sends MARKET / MARKET_ON_CLOSE at its
-    own run times; your manual trades (LIMIT, or other times) are excluded."""
+    own run times; your manual trades (LIMIT, or other times) are excluded.
+    book="roth" reads the Roth IRA account (SCHWAB_ROTH_ACCOUNT_NUMBER) instead."""
     from swingtrader.daily.brokers import SchwabAdapter, schwab_client
-    c = schwab_client(); a = SchwabAdapter(client=c)
+    c = schwab_client()
+    a = SchwabAdapter(client=c, account_env="SCHWAB_ROTH_ACCOUNT_NUMBER") if book == "roth" else SchwabAdapter(client=c)
     now = dt.datetime.now(ET)
     r = c.get_orders_for_account(a.hash, from_entered_datetime=dt.datetime.combine(since, dt.time(0), tzinfo=ET),
                                  to_entered_datetime=now); r.raise_for_status()
@@ -98,7 +100,7 @@ def live_fills(since: dt.date, cfg) -> pd.DataFrame:
         leg = ("noise" if sym in (cfg.daily.noise_symbol, cfg.daily.noise_alt_symbol) and 10 * 60 <= hm < 15 * 60 + 39
                else "tbill" if sym == cfg.daily.ibs_cash_symbol
                else "ibs" if sym in ibs_syms else "night")
-        rows.append(dict(book="live", sym=sym, leg=leg,
+        rows.append(dict(book=book, sym=sym, leg=leg,
                          side="buy" if ins in ("BUY", "BUY_TO_COVER") else "sell",
                          qty=fq, px=notional / fq, when=when,
                          tif="cls" if o["orderType"] == "MARKET_ON_CLOSE" else "day"))
@@ -260,6 +262,11 @@ def main(argv=None):
             frames.append(live_fills(since, cfg))
         except Exception as exc:
             say(f"(live/Schwab skipped: {exc})")
+        if get_env("SCHWAB_ROTH_ACCOUNT_NUMBER"):
+            try:
+                frames.append(live_fills(since, cfg, book="roth"))
+            except Exception as exc:
+                say(f"(roth/Schwab skipped: {exc})")
     f = pd.concat([x for x in frames if not x.empty], ignore_index=True) if any(
         not x.empty for x in frames) else pd.DataFrame()
     say(f"# Daily-book review since {since} (generated {dt.datetime.now(ET):%Y-%m-%d %H:%M} ET)")
