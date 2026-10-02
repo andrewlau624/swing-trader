@@ -2479,3 +2479,31 @@ ID3 shadow's "EV2 x buy >= $500k" gate (testing.py, `make forward-status`) reach
 per trade at the measured live cost >= +30bp AND NW t >= 1.5 AND the G2a book on those trades (SPY core, 0.5x/event,
 cap 1.0x) beats SPY by >= +10pp/yr after tax at $2.3k and $10k; otherwise DEAD (EV2-big folds back into ID3). No interim
 decisions. Same rule as G2; no new variant, so N stays 772.
+
+## Amendment — Goal hunt, Study G8: convertible pricing-day hedge shorting, buy after the hedge is set (pre-register; program N 772 -> 774)
+
+Session llm-trader-ec, `prompt_strategy_goal.md`, idea G8 (`goal_ideas.md`, track T3). Registered 2026-10-02 before any
+event list was built and before any price around a convertible pricing was looked at.
+
+- **Events:** 8-K (incl. exhibits) whose text says the issuer "announces pricing" / "prices" / "pricing of" an offering of
+  "convertible senior notes" or "convertible notes" (EDGAR full-text search, 2016-01..2026-09; queries listed in
+  `research/sim/goal_g8.py`). One event per issuer per 30 days (first filing). Parsed from the press release only:
+  ticker, principal ($ million, the base amount, not the option), whether it mentions a **capped call** or a **concurrent
+  repurchase / delta / share offering** (regex, no LLM). Filing date = fd.
+- **Filters known at entry:** prior raw close >= $5; size / (20-session mean raw close x volume, to the session before fd)
+  **>= 3** (the arbs' short is large vs normal flow).
+- **Trade:** buy the opening cross of the first session after fd (the press release lands after the close of the pricing
+  day or pre-market; the short-sale pressure is on the launch/pricing session), sell the closing cross of the 5th session
+  (hold 5). Return measured **minus SPY over the same window** (hedged excess; the book shorts nothing, the excess is what it
+  adds over the SPY it displaces). Costs `tier` and `tier_hi` per side (2 sides).
+  - **G8a:** all events passing the filters.
+  - **G8b:** only those with **no** capped call and **no** concurrent repurchase/share offering (pure hedge shorting).
+- **Halves:** select 2021-23 first (one look). Proceed to the judge (2024-26) only if a variant has, on select: n >= 20,
+  mean net excess >= +1.0% per trade at tier, t >= 2 (trade-level). Holdout 2016-20 is run with the judge and must not be
+  negative. Lottery test (ex best 5 trades, ex best 5% of event days) on the judge half. Random-event null on the judge
+  half: same count of (fd, sym) from names passing the same price/ADV filters, >= 95th pct.
+- **Goal bar if it gets that far:** an overlay at 0.25x equity per event funded from the SPY core, after tax, >= SPY +
+  10pp at $2.3k and $10k; expected ~10-30 events/yr, so this is likely an add-on (>= +5pp) at best.
+- **Why it might not work (written now):** modern deals often come with capped calls (dealers BUY stock at pricing) or
+  concurrent repurchases, which offset the arbs' short; the recovery may already be in the pricing-day close. TEXTBOOK risk
+  (Choi et al. 2010; de Jong et al. 2011 document the hedging pressure). k = 4 when judged.
