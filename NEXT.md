@@ -9,6 +9,14 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Discovery loop (2026-10-02, session llm-trader-c5): contract payoffs, second session
+- **DL1 DRIP optional cash purchases at a fixed 5% discount: PAYS (deal rule, no N; registered 2f57a54).** UMH's plan
+  sells new shares at max(95% x 4-day mean of (H+L)/2, 95% x ID-day (H+L)/2) on the 15th, $1,000/month cap. $1,000 a
+  month, sold at the close 5 sessions later: 203 months 2016-26 (UMH + Monmouth until 2022), **mean +$47 / median +$52
+  per month, hit 93%, every year > 0** -> UMH alone ~**$540/yr per person (+23% / +5% / +2% at $2.3k / $10k / $25k)**;
+  taxable only. **User: enroll in UMH's DRIP at Equiniti (certify the Schwab shares or buy 1 share), send $1,000 before
+  each 15th, DRS-transfer the shares to Schwab and sell.** `study_dl1_drip_ocp.md`.
+
 ## Round 33 (2026-10-02): event runbook — Study EV1 (cluster insider buys) DEAD; N 758
 - **EV2 first insider purchase in 2+ years: PASS** (registered faa96e8/ec9909b, N 760). ID3 day trade on officer/director
   buys at issuers with no open-market purchase in 730 days. Judge half +31.5bp/trade, NW t 2.54; full +35.5bp net,

@@ -21,7 +21,7 @@
 | Discovery I37 odd-lot debt-for-equity exchange offers | llm-trader-mid-01 | claimed 2026-10-02 | in progress |
 | Discovery I14 Reg SHO threshold-list close-out | llm-trader-mid-01 | claimed 2026-10-02 | in progress |
 | Discovery I4/I39 thrift + bank rights offerings (fixed-price subscription priority) | llm-trader-mid-01 | claimed 2026-10-02 | in progress |
-| Discovery (c5) I7 DRIP optional-cash-purchase discounts | llm-trader-c5 (prompt_discovery_loop.md) | claimed 2026-10-02 10:50 | in progress |
+| Discovery (c5) I7 DRIP optional-cash-purchase discounts | llm-trader-c5 (prompt_discovery_loop.md) | claimed 2026-10-02 10:50 | done: DL1 PAYS (UMH 5% OCP, ~$540/yr per person) |
 | Discovery (c5) C1/C2 warrant exchange offers + cashless warrant redemptions | llm-trader-c5 | claimed 2026-10-02 10:50 | in progress |
 | Discovery (c5) C3 DEFM14C written-consent cash mergers | llm-trader-c5 | claimed 2026-10-02 10:50 | in progress |
 | Discovery (c5) I8 liquidations below estimated distribution; I10 subsequent offering periods | llm-trader-c5 | claimed 2026-10-02 10:50 | in progress |
