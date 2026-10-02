@@ -25,8 +25,8 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   sells new shares at max(95% x 4-day mean of (H+L)/2, 95% x ID-day (H+L)/2) on the 15th, $1,000/month cap. $1,000 a
   month, sold at the close 5 sessions later: 203 months 2016-26 (UMH + Monmouth until 2022), **mean +$47 / median +$52
   per month, hit 93%, every year > 0** -> UMH alone ~**$540/yr per person (+23% / +5% / +2% at $2.3k / $10k / $25k)**;
-  taxable only. **User: enroll in UMH's DRIP at Equiniti (certify the Schwab shares or buy 1 share), send $1,000 before
-  each 15th, DRS-transfer the shares to Schwab and sell.** `study_dl1_drip_ocp.md`.
+  taxable only. **PARKED by the user (2026-10-02): not worth the monthly manual steps (Equiniti account, ACH, DRS
+  transfers). Don't build the reminder; revisit only if the account gets an automatable route.** `study_dl1_drip_ocp.md`.
 - **DL2 issuer offers for its own warrants (SC TO-I share/cash exchanges): DEAD** (deal rule 6d89505). 38 offers 2019-25
   with bars, bought 5 sessions before the last amendment: median +0.5%, mean −2.2%, hit 53%, worst −69% (DRCT's cash
   offer failed). The warrant reprices on the announcement; there's no prorated holder to pay a small one.

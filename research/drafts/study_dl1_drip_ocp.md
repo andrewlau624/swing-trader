@@ -1,4 +1,6 @@
-# Discovery DL1: DRIP optional cash purchases at a fixed 5% discount (deal rule, no N) — PAYS
+# Discovery DL1: DRIP optional cash purchases at a fixed 5% discount (deal rule, no N) — PAYS, PARKED by the user
+
+> 2026-10-02: the user decided the manual work (transfer-agent account, monthly ACH, DRS transfers) isn't worth ~$540/yr. Parked: no alert, no reminder. The result stands as research.
 
 Session llm-trader-c5, `prompt_discovery_loop.md`, 2026-10-02. Rule registered in `round1_prose.md` (amendment "deal
 rule DL1", commit 2f57a54) before any number. Script `research/sim/drip_ocp.py`; deals
