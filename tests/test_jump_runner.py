@@ -59,3 +59,19 @@ def test_trail_exit_and_ride_gates():
     T = pd.DataFrame(dict(adv=[1e8] * 10, c=[0.1, 0.08] + [0.01] * 8))
     assert J.confirm_gate(dict(n=10, mean=0.02, lift=0.5, excess=0.01), T, "c", "ride")
     assert not J.confirm_gate(dict(n=10, mean=0.02, lift=0.5, excess=-0.01), T, "c", "ride")
+
+
+def test_vectorized_returns_match_reference():
+    rng = np.random.default_rng(3)
+    n = 400
+    c = 10 * np.exp(np.cumsum(rng.normal(0, 0.06, n)))
+    o = c * np.exp(rng.normal(0, 0.05, n))
+    h = np.maximum(o, c) * np.exp(np.abs(rng.normal(0, 0.06, n)))
+    lo = np.minimum(o, c) * np.exp(-np.abs(rng.normal(0, 0.03, n)))
+    a = pd.DataFrame(dict(open=o, high=h, low=lo, close=c))
+    ii = np.arange(0, n - 60)
+    for hold in J.HOLDS:
+        for rule in J.RULES:
+            v = J._rets(a, ii, hold, rule)
+            ref = np.array([J._ret(a, int(i), hold, rule) for i in ii])
+            assert np.allclose(v, ref, rtol=0, atol=1e-12), (hold, rule)

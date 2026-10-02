@@ -103,6 +103,34 @@ def _ret(a: pd.DataFrame, i: int, hold: int, rule: str) -> float:
     return a.close.iat[j] / o - 1
 
 
+def _rets(a: pd.DataFrame, ii: np.ndarray, hold: int, rule: str) -> np.ndarray:
+    """Vectorized _ret for many entry rows `ii` (same results; _ret stays the reference, tests compare them)."""
+    ii = np.asarray(ii, dtype=int)
+    if not len(ii):
+        return np.zeros(0)
+    O, Hh, C = a.open.to_numpy(float), a.high.to_numpy(float), a.close.to_numpy(float)
+    w = ii[:, None] + np.arange(hold)[None, :]
+    o = O[ii]
+    if rule == "trail":
+        Cw = C[w]
+        peak = np.maximum.accumulate(Cw, axis=1)
+        hit = Cw <= peak * (1 - TRAIL)
+        f = np.where(hit.any(1), hit.argmax(1), hold - 1)
+        return Cw[np.arange(len(ii)), f] / o - 1
+    if rule == "tp20":
+        lim = o * (1 + TP)
+        Ow, Hw = O[w], Hh[w]
+        co = Ow >= lim[:, None]
+        co[:, 0] = False
+        ch = Hw >= lim[:, None]
+        any_ = co | ch
+        f = any_.argmax(1)
+        r = np.arange(len(ii))
+        out = np.where(co[r, f], Ow[r, f] / o - 1, TP)
+        return np.where(any_.any(1), out, C[ii + hold - 1] / o - 1)
+    return C[ii + hold - 1] / o - 1
+
+
 def trades(X: pd.DataFrame, lo, hi, holds=HOLDS, rules=RULES, base=True) -> tuple[pd.DataFrame, pd.DataFrame]:
     """Event trades with fd in [lo, hi] and their same-stock base, for every hold x rule."""
     X = X[(X.fd >= lo) & (X.fd <= hi)]
@@ -125,27 +153,27 @@ def trades(X: pd.DataFrame, lo, hi, holds=HOLDS, rules=RULES, base=True) -> tupl
         ev_i = sorted({int(idx.searchsorted(fd + pd.Timedelta(days=1))) for fd in g.fd})
         ok = lambda i: 0 < i and i + H - 1 < n and np.isfinite(advs.iat[i]) and pc.iat[i] >= 1 and advs.iat[i] >= 2.5e5 \
             and a.open.iat[i] > 0 and idx[i] <= DATA_END
-        for i in ev_i:
-            if not ok(i) or idx[i + H - 1] > hi:          # the whole window inside the half: no peeking past it
-                continue
-            row = dict(sym=s, d=idx[i], adv=advs.iat[i], price=pc.iat[i])
+        ev_ok = [i for i in ev_i if ok(i) and idx[i + H - 1] <= hi]   # the whole window inside the half: no peeking
+        if ev_ok:
+            E = pd.DataFrame(dict(sym=s, d=idx[ev_ok], adv=advs.to_numpy()[ev_ok], price=pc.to_numpy()[ev_ok]))
             for h in holds:
                 for ru in rules:
-                    row[f"{ru}{h}"] = _ret(a, i, h, ru)
-            ev_rows.append(row)
+                    E[f"{ru}{h}"] = _rets(a, np.array(ev_ok), h, ru)
+            ev_rows += E.to_dict("records")
         if not base:
             continue
         near = set()
         for i in ev_i:
             near.update(range(i - 10, i + 11))
         span = [i for i in range(1, n) if lo <= idx[i] and i + H - 1 < n and idx[i + H - 1] <= hi and i not in near and ok(i)]
-        for i in span[::3]:                                           # every 3rd session: plenty, and faster
-            row = dict(sym=s, d=idx[i], adv=advs.iat[i])
+        bi = np.array(span[::3], dtype=int)                           # every 3rd session: plenty, and faster
+        if len(bi):
+            Bf = pd.DataFrame(dict(sym=s, d=idx[bi], adv=advs.to_numpy()[bi]))
             for h in holds:
                 for ru in rules:
-                    row[f"{ru}{h}"] = _ret(a, i, h, ru)
-            base_rows.append(row)
-    return pd.DataFrame(ev_rows), pd.DataFrame(base_rows)
+                    Bf[f"{ru}{h}"] = _rets(a, bi, h, ru)
+            base_rows.append(Bf)
+    return pd.DataFrame(ev_rows), (pd.concat(base_rows, ignore_index=True) if base_rows else pd.DataFrame())
 
 
 def _boot_p(x: np.ndarray, B: int = 4000, seed: int = 0) -> float:
