@@ -45,3 +45,19 @@ event-level net is +27.3bp (the mean holds; the t fails). Everything else passes
 sign-flip 99%, feature placebo 100%, DSR 0.218). Verdict copied as printed: DEAD.
 
 Writeup: research/drafts/study_ev1_cluster_insider.md.
+
+---
+
+## 2. First insider purchase in 2+ years (menu row 2) — explored-dead
+Event: `insider_buys()`, `X[X.insider]`, real tickers only (`^[A-Z][A-Z0-9.]*$`). Rule: per symbol, an officer/
+director open-market purchase whose filing date is >= 730 days after the previous such filing (or the first ever).
+File `data/research/program/events_firstbuy.parquet`. ADV >= $20M, 1-session hold (runner default).
+
+Select-half (<= 2023-12-31), ADV >= $20M:
+```
+events 2973 -> trades 562  (140 per year)
+net per trade +23.9bp  median +11.4bp  hit rate 52%  t +1.66
+by year: 2020: +86.7bp (n 33)  2021: -22.4bp (n 203)  2022: +66.4bp (n 187)  2023: +19.3bp (n 139)
+TRACK FREQUENT (>= 100/yr): net >= +10bp, hit >= 50%, t >= 2: FAILS -> stop, record as explored-dead
+```
+No pre-registration (explore FAILS). 2024-26 never read. One line: t 1.66 < 2 on the select half; not tested.
