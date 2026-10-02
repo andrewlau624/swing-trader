@@ -29,6 +29,9 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   Diagnostics (post-judge, forward-only from here): EV2 beats the rest of ID3 in both halves, but only Welch t 1.1-1.5;
   break-even 20bp/side (ID3 10.5); sensitive to its best days; **buy size >= $500k is the strongest cut (~+90bp, ~60/yr,
   both halves)**, seen on 2024-26, so shadow-only. Log silence days + $ bought per trade in the ID3 shadow.
+  **LIVE (2d5de26, on the server):** the ID3 shadow logs silence_days + $ per trade; `make forward-status` shows
+  ev2 / ev2_big gates (60 trades each). New standing rule: every forward test is in `swingtrader/daily/testing.py`
+  (weekly digest "Being tested", `make testing`); a test fails if a shadow isn't registered.
 - Overnight loop explored-dead on select data (no N): SC 13G, S-8, 25-NSE, ASR, spin-off completions, and extra rows
   X1-X6 (dividend initiations/reinstatements, first buybacks, FDA approvals, Breakthrough designations, topline 8-Ks).
   News events move in the gap; the session after is ~0. X7-X10 untested (`runbook_menu_extra.md`). Summary:
