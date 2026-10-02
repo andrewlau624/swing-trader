@@ -197,11 +197,11 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
         g = implied_gain(r, px[r["parent"]], px[r["recv"]])
         left = _sessions_left(r["expires"], today)
         log(f"[splitoff] {r['parent']}->{r['recv']} expires {r['expires']} ({left} sessions): implied {g:+.2%}")
-        if in_window(left) and g >= MIN_GAIN and not any(x.get("entry") == str(today) and x.get("parent") == r["parent"]
-                                                        for x in _read(path)):
-            with path.open("a") as f:     # the alert of record (digest what-if: 99 x parent x gain); no terms -> never reopened
-                f.write(json.dumps(dict(entry=str(today), parent=r["parent"], recv_px=px[r["recv"]], parent_px=px[r["parent"]],
-                                        gain=round(g, 4), alert=True)) + "\n")
+        if in_window(left) and g >= MIN_GAIN and not any(x.get("entry") and x.get("parent") == r["parent"]
+                                                        and x.get("expires") == r["expires"] for x in _read(path)):
+            with path.open("a") as f:     # one alert of record per offer (digest what-if: 99 x parent x gain)
+                f.write(json.dumps(dict(entry=str(today), parent=r["parent"], expires=r["expires"], recv_px=px[r["recv"]],
+                                        parent_px=px[r["parent"]], gain=round(g, 4), alert=True)) + "\n")
         if note and in_window(left) and g >= MIN_GAIN:
             note.alert(f"split-off odd lot: {r['parent']} -> {r['recv']} implied {g:+.1%} (act now)",
                        instructions(r, g, px[r["parent"]], px[r["recv"]]))
