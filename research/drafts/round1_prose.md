@@ -2430,3 +2430,42 @@ complete archive, only if its select-half subset hashes the same. Trades by `jum
 - On a PASS: `confirm` once with the same arguments. **Other side:** analysts (semi-informed) whose clients act over
   weeks, vs. holders who ignore notes on tiny names. TEXTBOOK-adjacent (recommendation drift); REGIME risk.
   k = 8 after these (J1-J8).
+
+## Amendment — Goal hunt, Study G2: EV2-big as a SPY-core intraday overlay, judged on an untouched 2016-20 holdout (pre-register; program N 768 -> 772)
+
+Session llm-trader-ec, `prompt_strategy_goal.md`, idea G2 (`goal_ideas.md`, track T1). Registered 2026-10-02 before any
+2014-2021 Form 345 file was downloaded and before any outcome on 2016-21 was computed. **Why a holdout replaces the judge
+half:** the >= $500k size cut was found on 2022-26 data (`study_ev2_first_insider_buy.md` diagnostics), so 2024-26 can't
+judge it. Insider data here starts 2020-01 (EV2 events 2022+); 2016-20 has never been looked at for any insider rule.
+
+- **Data:** SEC insider-transactions data sets 2014q1..2021q4 (`/files/structureddata/data/insider-transactions-data-sets/`),
+  parsed exactly as `outside_box.insider_buys()` (Form 4 / 4-A, code P, acquired; $ = shares x price; officer/director by
+  RPTOWNER_RELATIONSHIP). Bars: Alpaca SIP daily raw (`event_fetch.raw_bars`), session-labelled.
+- **Event (EV2-big):** a filing date fd with officer/director code-P purchases at issuer `sym`, summed over that (sym, fd)
+  **>= $500,000**, where no code-P purchase filing by anyone at that issuer has a filing date in the 730 days before fd.
+  Trade session d = first regular session after fd. Filters known before the open: prior raw close >= $5; 20-session
+  mean raw close x volume >= $20M; **ticker-reuse guard:** the dollar-weighted Form 4 price is within 0.67-1.5x the raw
+  close of the session before d (else dropped; count reported). |open->close| >= 50% dropped (as ID3).
+- **Trade:** buy the 09:30 opening cross (raw open), sell the 16:00 closing cross (raw close) of d. Costs per side:
+  2.5bp (primary) and `tier_hi` (reported). Whole shares at the stated equity.
+- **Book (taxable, the account that has intraday margin):** 100% SPY held (dividend-adjusted), plus the overlay:
+  - **G2a (primary):** each event gets 0.5x equity; on a day with k events each gets min(0.5, 1.0/k) (overlay gross <= 1.0x,
+    total intraday gross <= 2.0x Reg T).
+  - **G2b:** 1.0x per event, overlay gross <= 1.0x... (k events: min(1.0, 1.0/k)): the concentrated version.
+  - Margin interest: none (intraday only). Tax: `taxable_frontier.after_tax` short-term on the overlay, SPY unrealised.
+  - $2.3k and $10k start, +$1k/month (the frontier default) and a no-deposit run; whole shares on the overlay.
+- **Reported, not judged (counted in N):** EV2 all sizes (no $ floor) and ID3 >= $500k (no silence filter) on the same
+  holdout, same G2a sizing, to show whether the size cut or the silence filter carries it.
+- **Pass (all on 2016-01-01..2020-12-31):** (1) per-trade net mean > 0 at 2.5bp and at tier_hi; (2) overlay daily P&L NW t
+  >= 2; (3) lottery test: overlay total > 0 without its best 5% of event days AND without its best 5 trades; (4) random-pick
+  null: 1,000 draws of the same count of (session, sym) from names with ADV >= $20M and price >= $5 on each event's
+  session, holdout total at >= the 95th percentile; (5) each of the 5 years' overlay sum > 0 in >= 4 of 5; (6) **Goal
+  FOUND bar:** G2a CAGR after tax >= SPY + 10pp/yr at $2.3k AND $10k (whole shares), max DD <= 35%, worst month and worst
+  single event named; >= 100 trades in the holdout. 2021 (also untouched for EV2-big) is reported as a sixth year; 2022-26
+  is printed as in-sample context only. DSR reported at N 772.
+- **Expected count (written before download):** unknown; EV2 had ~159 trades/yr in 2022-23 at ADV >= $20M before any $
+  floor, and the >= $500k buckets are ~15-25% of those, so ~25-40/yr -> 125-200 in 2016-20. If < 100, the FOUND bar (6) fails
+  by count and the verdict is at most NEAR.
+- **Causality:** every input dated <= fd (filing date) or <= the session before d (ADV, prior close, ticker guard).
+  `tests/test_causality.py` style check: truncating bars after d-1 leaves the event list unchanged.
+- Runner: `research/sim/goal_g2.py` (to be written after this commit). k = 1 when judged.
