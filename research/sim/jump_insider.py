@@ -80,6 +80,40 @@ def c6() -> pd.DataFrame:
     return small_only(_no_news(E, 90), 1e12)
 
 
+def _adv_ret(E: pd.DataFrame, n: int) -> pd.DataFrame:
+    """Attach 20-session ADV$ and the n-session return to fd (raw bars, sessions on/before fd)."""
+    from . import event_fetch as F
+    bars = F.raw_bars(sorted(E.sym.unique()))
+    adv, ret = [], []
+    for r in E.itertuples():
+        b = bars.get(r.sym)
+        if b is None or not len(b):
+            adv.append(float("nan")); ret.append(float("nan")); continue
+        b = b[pd.to_datetime(b.index) <= r.fd]
+        adv.append(float((b.close * b.volume).tail(20).mean()) if len(b) >= 15 else float("nan"))
+        ret.append(float(b.close.iat[-1] / b.close.iat[-1 - n] - 1) if len(b) > n else float("nan"))
+    return E.assign(adv=adv, ret=ret)
+
+
+def r2_4() -> pd.DataFrame:
+    """Officer/director open-market buy >= $100k that is >= 20% of the 20-day ADV$, with ADV$ < $5M."""
+    X = buys()
+    X = X[X.insider & (X.usd >= 1e5) & (X.fd >= "2016-01-01")]
+    X = X.groupby(["sym", "fd"]).usd.sum().reset_index()
+    X = _adv_ret(X, 1)
+    X = X[(X.adv < 5e6) & (X.usd >= 0.2 * X.adv)]
+    return first_in(X[["sym", "fd"]], 30)
+
+
+def r2_5() -> pd.DataFrame:
+    """Officer/director open-market buy (>= $1k) while the stock is down >= 30% over the prior 60 sessions."""
+    X = buys()
+    X = X[X.insider & (X.usd >= 1e3) & (X.fd >= "2016-01-01")].dropna(subset=["sym"])
+    X = first_in(X[["sym", "fd"]].drop_duplicates(), 30)
+    X = _adv_ret(X, 60)
+    return X[X.ret <= -0.30][["sym", "fd"]]
+
+
 if __name__ == "__main__":
     what = sys.argv[1]
     save(globals()[what](), what)

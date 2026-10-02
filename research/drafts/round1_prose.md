@@ -2296,3 +2296,30 @@ Measured: events per year 2016-26, payoff if topped up and if not, worst, capita
 being paid. PAYS if: >= 3 events/yr in 2024-26, mean if topped up >= +$100/account/event, and break-even probability
 <= 25%. Like DL-IB1 it is conditional on the broker allocating the top-up to a beneficial account: not FOUND before a
 live event has been topped up in an account.
+
+## Amendment — Jump hunt, Study J2: insider buy after a 30% fall (pre-register; track JUMP, cell tp205, 1 look, program N 761 -> 762)
+
+Session llm-trader-51, `prompt_jump_hunt.md`, idea R2-5 (`jump_ideas.md`, round 2). Registered 2026-10-02 before any
+2024+ outcome of this rule was computed.
+
+- **Event** (`research/sim/jump_insider.py r2_5`, file `data/research/program/events_jump_r2_5.parquet`, sha256 prefix
+  33ba9bed7bfdcdf7, 4,370 events 2016-2026): an officer/director open-market purchase (Form 4 code P, >= $1k; SEC
+  insider data sets 2014-2026; first per stock in 30 days) filed on fd while the stock's raw close is >= 30% below its
+  close 60 sessions earlier.
+- **Trade** (`jump_runner`, fixed): buy the open of the first session after fd; sell at a +20% limit within 5 sessions,
+  else at the 5th close (rule `tp20`, hold 5). Track JUMP. Chosen by the runner's rule "shortest hold if several":
+  tp205 (JUMP) and hold20 / tp2020 / hold60 / tp2060 (RIDE) all met.
+- **Select-half look (2016-2023, the only look):** `tp205 n 2379 (297/yr) jump 15.1% vs base 5.8% (x2.6) mean net +0.5%
+  ex-top3 +0.5% median +0.3% vs stock's usual +1.2% hit 51% worst -74% best +38% P(mean<=0) 0.02 | jump MEETS`.
+- **Judge (once):** `PYTHONPATH=. .venv/bin/python -m research.sim.jump_runner judge data/research/program/events_jump_r2_5.parquet 5 tp20 --track jump`
+  (events 2024-01-01..2025-06-30; PASS = >= 15 trades, jump >= 1.5x base, mean > 0, ex-top3 > 0, P < 0.10). If PASS:
+  `confirm` once with the same arguments (2025-07..2026-09; CONFIRMED = >= 10 trades, mean > 0, mean without the best >
+  0, jump >= 1.2x base).
+- **Other side / why it might persist:** holders who sell a small cap after a 30% fall (tax, risk limits, retail
+  capitulation) vs. the insiders who buy it; small caps after a crash bounce more often than they normally jump.
+- **Known weakness, stated before judging:** a select-only control — the same stocks on dates with a >= 30% 60-session
+  fall and NO officer/director buy within -30..+5 days (4,753 trades) — did as well: tp205 mean +0.93% (insider
+  +0.61% on the same code path), hold20 +4.8% (insider +3.7%); jump rate 12.1% vs 15.1%. So the insider adds little
+  or nothing over the fall itself: this is mostly a fallen-small-cap reversal (PRICE PROXY), strongest at market
+  bottoms (2020 hold20 +10%; 2018 tp205 -2.1%). A judge PASS would be a reversal effect, not an insider effect.
+  k = 2 judged ideas in this hunt.
