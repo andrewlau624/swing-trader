@@ -92,3 +92,5 @@
   EDGAR check running); R4-2 stock-dividend round-ups to recheck with that scanner; account-level money (bank/broker bonuses,
   Saver's Match excludes students/dependents) = user notes, not research.
 - N now 762 (Jump J2); my next would be 763.
+- R4-1 / DL-IB2 round-lot top-up: 16 matched splits, 12 are risk-factor boilerplate; genuine = AREB only (4 since 2022;
+  +$102 / +$478 / +$622 if topped, on $7-93) -> DOES NOT PAY (too rare). study_ib_dl_ib2_roundlot.md
