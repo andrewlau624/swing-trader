@@ -7,7 +7,8 @@ a mean $4.36 (median $3.56) per account when the round-up was paid, on a median 
 cash in lieu instead, the result is about $0 (mean −$0.02). ~75 deals a year. Unknown from history: whether Schwab
 passes the extra share to a 1-share holder. The first deals are the live check.
 
-Run once a weekday before the open (`make roundup-watch`): Alpaca's corporate-action announcements list the reverse
+With ROUNDUP_AUTO=1 in .env the bot also places the 1-share buys and sells itself (`roundup_orders.py`; caps and a
+kill switch there). Run once a weekday before the open (`make roundup-watch`): Alpaca's corporate-action announcements list the reverse
 splits with an ex-date in the next 14 days (ratio included). For each, the issuer's EDGAR filings of the last 180 days
 are searched (full-text search by CIK) for a sentence about the split's fractional shares that rounds them up (no cash
 alternative in it), and none may say the rounding is at the "participant level" / "DTC participant" / "Cede". Each
@@ -141,6 +142,11 @@ def instructions(rows: list[dict]) -> str:
                      f"OF {r['buy_by']}; last close ${r.get('last_close') or '?'}; {val}")
         lines.append(f"    \"{r['sentence'][:220]}\"")
         lines.append(f"    {r.get('form')} filed {r.get('filed')}: {r['url']}")
+    from .roundup_orders import enabled
+    if enabled():
+        lines += ["", "AUTOMATIC (ROUNDUP_AUTO=1): the bot buys 1 share in each account at the open and sells the",
+                  "post-split share once it shows up. Nothing to do. It stops in an account after 2 cash-in-lieu outcomes."]
+        return "\n".join(lines)
     lines += ["", "HOW: buy exactly 1 share (market or a limit a cent above the ask) on or before the LAST session before",
               "the split-adjusted date, in each account. Hold it through the split. A day or a few weeks later the",
               "position should show 1 post-split share (worth about N x what you paid). If it shows 0 shares + a few",
@@ -186,6 +192,18 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
         for r in new + misses + scored:
             f.write(json.dumps(r) + "\n")
     due = [r for r in alerted.values() if r.get("buy_by") == str(today)]
+    from . import roundup_orders as ro
+    if ro.enabled():                       # automatic 1-share buys/sells (user-approved 2026-10-02); ROUNDUP_AUTO=1
+        live_alerts = list(alerted.values()) + new
+        px = {}
+        try:
+            q = md.live_rows([r["ticker"] for r in live_alerts if r.get("buy_by", "") >= str(today)])
+            px = {s: float(q.at[s, "price"]) for s in q.index}
+        except Exception:
+            pass
+        note = Notifier(Path(state_dir)) if email else None
+        ro.manage(state_dir, live_alerts, today, prices=px,
+                  notify=(lambda s, b: note.alert(s, b)) if note else None, log=log)
     if email and (new or due):
         subj = ", ".join(r["ticker"] for r in new + due)
         Notifier(Path(state_dir)).alert(f"reverse-split round-up: {subj} (buy 1 share in each account)",

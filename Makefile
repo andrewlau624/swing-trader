@@ -392,11 +392,15 @@ tender-buy: ## Round 31: buy the odd lot for an alerted tender, after YOU confir
 	@test -n "$(ID)" || { echo "usage: make tender-buy ID=TICKER-YYYY-MM-DD (from the alert email)"; exit 2; }
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.tender_buy $(ID)
 
-roundup-watch: ## Round 32 B1: upcoming reverse splits that round fractions UP -> email "buy 1 share per account by <date>"; never trades
+roundup-watch: ## Round 32 B1: upcoming reverse splits that round fractions UP -> email; with ROUNDUP_AUTO=1 the bot buys/sells the 1 share per account itself
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.roundup_watch $(DATE)
 
 splitoff-watch: ## Round 32 B2: split-off exchange offers (odd lots accepted in full) -> email on the entry day; never trades
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.splitoff_watch $(DATE)
+
+splitoff-buy: ## Round 32 B2: buy the odd lot for an open split-off offer, after YOU confirm: make splitoff-buy PARENT=MDT
+	@test -n "$(PARENT)" || { echo "usage: make splitoff-buy PARENT=TICKER (from the alert email)"; exit 2; }
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.splitoff_buy $(PARENT)
 
 splitoff-add: ## set an offer's terms by hand: make splitoff-add ARGS='PARENT RECV YYYY-MM-DD PER100 CAP [URL]'
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.splitoff_watch add $(ARGS)

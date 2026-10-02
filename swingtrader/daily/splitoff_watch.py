@@ -89,6 +89,9 @@ At the last closes ({r['parent']} ${pp:.2f}, {r['recv']} ${pr:.2f}) one {r['pare
 implied gain {gain:+.1%}, about ${99 * pp * gain:,.0f} on 99 shares (capital ${99 * pp:,.0f}). Expires {r['expires']}.
 History (2016-25, 14 offers): median +7.4%, 12 of 14 > 0, worst -8.8% (the received stock fell after delivery).
 
+ONE-COMMAND BUY (you approve it): ssh in, cd ~/llm-trader, run   make splitoff-buy PARENT={r['parent']}
+  (it re-checks the offer live, shows the plan, and buys only after you type {r['parent']}; then tender, step 3.)
+
 HOW TO DO IT:
 1. Own 99 or FEWER {r['parent']} shares IN TOTAL across all accounts (odd lots are counted per person).
 2. Buy up to 99 {r['parent']} shares in ONE account (Roth first if it has the cash) with a limit near the last price.
@@ -190,6 +193,11 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
                                f"To have it valued daily (entry-day email), on the server run:\n  make splitoff-add ARGS='"
                                f"{r['parent'] or 'PARENT'} RECV {r.get('expires') or 'YYYY-MM-DD'} {r.get('per100') or 'PER100'} "
                                f"{r.get('cap') or 'CAP'} {r['url']}'" for r in new))
+    try:                                   # bookkeeping for buys you approved (never places an order)
+        from .splitoff_buy import track
+        track(state_dir, today, notify=(lambda subj, body: note.alert(subj, body)) if note else None, log=log)
+    except Exception as exc:
+        log(f"[splitoff] tracking failed: {str(exc)[:120]}")
     for r in open_offers(_read(path), today):
         px = _closes([r["parent"], r["recv"]], today)
         if r["parent"] not in px or r["recv"] not in px:

@@ -1,0 +1,127 @@
+"""Reverse-split round-up: the automatic 1-share buys and sells (Round 32 B1; user-approved 2026-10-02).
+
+Runs inside `roundup_watch.run` every weekday morning, only when ROUNDUP_AUTO=1 in .env. For every alerted split
+whose buy-by session is today or later, it places ONE 1-share DAY limit buy in each account in ROUNDUP_ACCOUNTS
+(default "live,roth"), so the share is held at the last pre-split close. After the ex-date it watches the position:
+1+ share from 2 days after the ex-date (never earlier: an unprocessed split still shows the old share) -> "rounded" (the round-up was paid) and a 1-share DAY market sell is placed; still 0 shares 21
+days after the ex-date -> "cash" (Schwab paid cash in lieu). Kill switch per account: once 2 deals are "cash" and none
+"rounded", that account stops buying and an email says so.
+
+Caps: price <= $25, at most 3 buys per account per day, never a symbol the account already holds (the daily book's
+or anyone's). The executor treats these shares as foreign (never trades or sizes on them).
+"""
+from __future__ import annotations
+
+import datetime as dt
+import json
+import math
+import os
+from pathlib import Path
+
+ORDERS_NAME = "roundup-orders.json"
+MAX_PRICE, MAX_PER_DAY, CASH_AFTER_DAYS, KILL_CASH, SETTLE_DAYS = 25.0, 3, 21, 2, 2
+
+
+def enabled() -> bool:
+    return os.environ.get("ROUNDUP_AUTO", "0").strip() == "1"
+
+
+def accounts() -> list[str]:
+    return [a.strip() for a in os.environ.get("ROUNDUP_ACCOUNTS", "live,roth").split(",") if a.strip()]
+
+
+def buy_limit(price: float) -> float:
+    """A little above the market so a 1-share order fills at the open; penny names get a full cent of room."""
+    return math.ceil(round(price * 1.05 * 100, 6)) / 100 + 0.01
+
+
+def killed(st: dict, acct: str) -> bool:
+    res = [d[acct]["status"] for d in st.values() if acct in d and d[acct].get("status") in ("rounded", "cash", "sold")]
+    return res.count("cash") >= KILL_CASH and not any(s in ("rounded", "sold") for s in res)
+
+
+def _load(state_dir: Path) -> dict:
+    p = Path(state_dir) / ORDERS_NAME
+    return json.loads(p.read_text()) if p.exists() else {}
+
+
+def _save(state_dir: Path, st: dict) -> None:
+    (Path(state_dir) / ORDERS_NAME).write_text(json.dumps(st, indent=1))
+
+
+def place(ad, sym: str, side: str, limit: float | None = None) -> str:
+    from schwab.orders.common import Duration, Session
+    from schwab.orders.equities import equity_buy_limit, equity_sell_market
+    o = (equity_buy_limit(sym, 1, f"{limit:.2f}") if side == "buy" else equity_sell_market(sym, 1))
+    resp = ad.c.place_order(ad.hash, o.set_duration(Duration.DAY).set_session(Session.NORMAL).build())
+    if resp.status_code not in (200, 201):
+        raise RuntimeError(f"Schwab rejected {side} 1 {sym}: {resp.status_code} {resp.text[:160]}")
+    return resp.headers.get("Location", "").rstrip("/").split("/")[-1]
+
+
+def manage(state_dir: Path, alerts: list[dict], today: dt.date, adapters: dict | None = None, prices: dict | None = None,
+           placer=place, notify=None, log=print) -> dict:
+    """Buy what is due, then follow each held deal to rounded/cash; returns the order state."""
+    st = _load(state_dir)
+    if adapters is None:
+        from .brokers import make_adapter
+        adapters = {}
+        for a in accounts():
+            try:
+                adapters[a] = make_adapter(a)
+            except Exception as exc:
+                log(f"[roundup] {a} unavailable: {str(exc)[:80]}")
+    held = {a: ad.positions() for a, ad in adapters.items()}
+    # 1. buys: alerted, buy-by today or later, not after the ex-date
+    bought_today = {a: 0 for a in adapters}
+    for r in alerts:
+        key = f"{r['ticker']}-{r['trade_date']}"
+        if r["buy_by"] < str(today) or r["trade_date"] <= str(today):
+            continue
+        px = (prices or {}).get(r["ticker"]) or r.get("last_close")
+        if not px or px > MAX_PRICE:
+            continue
+        for a, ad in adapters.items():
+            d = st.setdefault(key, {})
+            if a in d or killed(st, a) or bought_today[a] >= MAX_PER_DAY or r["ticker"] in held[a]:
+                continue
+            lim = buy_limit(float(px))
+            try:
+                oid = placer(ad, r["ticker"], "buy", lim)
+            except Exception as exc:
+                log(f"[roundup] {a} BUY 1 {r['ticker']} failed: {str(exc)[:120]}"); continue
+            d[a] = dict(status="ordered", order_id=oid, limit=lim, placed=str(today), ex=r["trade_date"], ratio=r["ratio"])
+            bought_today[a] += 1
+            log(f"[roundup] {a}: BUY 1 {r['ticker']} limit ${lim:.2f} (ex {r['trade_date']}, 1-for-{r['ratio']:g}) order {oid}")
+    # 2. follow-up
+    for key, d in st.items():
+        sym = key.rsplit("-", 3)[0]
+        for a, s in d.items():
+            if a not in adapters:
+                continue
+            q = float(getattr(held[a].get(sym), "qty", 0.0) or 0.0)
+            ex = dt.date.fromisoformat(s["ex"])
+            if s["status"] == "ordered" and today < ex:
+                s["status"] = "held" if q >= 1 else ("ordered" if s["placed"] == str(today) else "unfilled")
+            elif s["status"] in ("ordered", "held", "waiting") and today < ex + dt.timedelta(days=SETTLE_DAYS):
+                s["status"] = "waiting"          # the broker may not have processed the split yet: decide nothing
+            elif s["status"] in ("ordered", "held", "waiting"):
+                if q >= 1:
+                    s.update(status="rounded", rounded=str(today), post_qty=q)
+                    try:
+                        s["sell_order"] = placer(adapters[a], sym, "sell")
+                        s["status"] = "sold"
+                        log(f"[roundup] {a}: {sym} round-up PAID ({q:g} sh) -> SELL 1 at market")
+                    except Exception as exc:
+                        log(f"[roundup] {a}: {sym} rounded, sell failed: {str(exc)[:120]}")
+                elif (today - ex).days >= CASH_AFTER_DAYS:
+                    s.update(status="cash", resolved=str(today))
+                    log(f"[roundup] {a}: {sym} no post-split share after {CASH_AFTER_DAYS} days -> cash in lieu")
+                    if killed(st, a) and notify:
+                        notify(f"round-up auto-buy STOPPED in {a}",
+                               f"Schwab paid cash in lieu (no post-split share) on {KILL_CASH} deals and rounded none in "
+                               f"{a}. No more round-up buys there. Deals: " + ", ".join(k for k, x in st.items() if x.get(a, {}).get('status') == 'cash'))
+                else:
+                    s["status"] = "waiting"
+    _save(state_dir, st)
+    return st
