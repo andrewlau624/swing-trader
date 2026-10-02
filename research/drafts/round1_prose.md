@@ -2106,3 +2106,27 @@ Judge: FREQUENT -> `event_runner run` (the registered Study ID bar, PASS/DEAD as
 half minutes earlier (commit d4a0401: it also counted every issuer's first buy in 2020-21 as "first in 2 years",
 which a 2-year lookback cannot observe since the data start 2020-01; select t +1.66, FAILS, not registered). EV2 is
 therefore the second construction of the same idea. Both count: **program N 758 -> 760**; the judge runs with N 760.
+
+## Amendment — Discovery loop (session llm-trader-c5), deal rule DL1: DRIP optional cash purchases at a fixed discount (no N; registered before any outcome)
+
+Source reading (2026-10-02): FTS for discounted OCP language in S-3D/S-3/S-3ASR/424B 2016-26 found ~90 issuers; almost
+all say "a discount of 0-5% **at our discretion**, may vary each month" (Chatham, Hannon Armstrong, ONEOK, NNN, INDB,
+Old National ...). Their monthly discounts are not in any filing, so they cannot be simulated. York Water's 5% is on
+reinvested dividends only (OCP at 100%); TDS's 5% is dividends only. **Fixed OCP discounts written into the plan:
+UMH Properties (UMH) and Monmouth REIT (MNR, acquired 2022)**, both "95% of market", $500 minimum. UMH's FY2025 10-K
+confirms the plan is live ($5.8M of OCPs in 2025; $1,000 monthly cap since 2021-02-11, $5,000 before). Street-name
+holders may join the OCP by certifying they are shareholders (UMH plan Q4).
+
+**Payoff formula (UMH plan Q15-16, MNR the same template):** Investment Date (ID) = the 15th of each month (the
+dividend payment date in dividend months, also ~15th), next NYSE trading day if closed. Price
+P = max(0.95 x mean over the 4 sessions ending on ID of (high+low)/2, 0.95 x (high+low)/2 on ID), Alpaca SIP raw bars.
+Shares = cash / P (fractional, as the plan credits).
+
+**Deal rule (fixed now):** every month 2016-01 .. 2026-09 in which the plan was in force (UMH all months; MNR through
+its last full month before the ILPT merger), invest **$1,000** (the current cap) at P. Exit at the **official close of
+the 5th session after ID** (DRS transfer to Schwab, then sell in the closing auction). P&L = shares x close(ID+5) − $1,000.
+No dividends added (an ex-date inside the hold makes it conservative). No fees (Schwab $0; DRS transfer $0).
+Reported: months/yr, hit rate, mean/median/worst per month, by year, $/yr for one person (the cap is per participant,
+so $/yr is the same at $2.3k / $10k / $25k; %/yr = $/yr over the balance), plus info-only lines for exit at ID+1 and
+ID+10 and for UMH's $5,000 pre-2021 cap. **Verdict: PAYS if mean P&L per month > 0 with hit rate >= 60% and the
+yearly sum > 0 in at least 2/3 of years; otherwise DEAD.** No change to the rule after the list is computed.
