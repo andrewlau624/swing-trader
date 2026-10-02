@@ -57,3 +57,9 @@
   - C13, C16: duplicates of C1/C2/C3 (done).
   - W2 Roth basis for April tax: allowed (contributions out tax-free) but no re-contribution: shrinks the tax-free account -> negative. W4 (price pattern, banned), W6 (#14 dead).
 - A8 ID3 in the Roth's idle daytime cash: REPORT by bound (ID3's 2024-26 is already judged, so never FOUND): EH ~+3.5pp tax-free on $8.5k (~$300/yr) vs taxable ~+3.4pp after tax on $2.3k (~$80/yr); run ID3 in ONE account (wash) -> the Roth first, if ID3 passes its forward gate
+- A20 pre-market exit explore (690 select nights, 4,177 picks; median pre-market $ per pick $239k, 88% >= $1k):
+  V1 late pre-market VWAP -10bp: filled 77%, +5.6bp/night book-weighted, NW t +1.81, ex-top-5 +2.6bp; 2021 +10.7, 2022 -4.5, 2023 +11.1 -> FAILS (t < 2, 2022 < +5).
+  V2 resting limit close x 1.03: filled 32%, +88.1bp/night but NW t +1.15, ex-top-5 +6.9bp, 2023 +256 vs 2022 -4.3 -> FAILS (LOTTERY: a few pre-market spikes that crashed by the open).
+  -> DEAD. The 23/5 forward specs B1/B2 inherit this prior (the bounce is not sitting in the pre-market for most picks); B1/B2/B5 stay ideas, no testing.py row. ib_a20.py, a20_explore.txt
+- A2 spin-off round-ups: 41 Form 10 registrants with a round-up/fraction phrase 2016-26, 0 with a holder-level round-up of the distribution (strict_up) -> DEAD (none exist). A3 merger round-ups: hits are SPAC rights conversions; parked (not run).
+- ROUND 2 written (index_beat_ideas_r2.md, outside-literature sweep): 27 rows, 1 new testable (R2-7 spin-offs held > 1 year), the rest dup/live/killed by bound with reasons.
