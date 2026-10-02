@@ -80,3 +80,7 @@
   open; payoff = (open_ex + D) / close_{ex-1} - 1 - 2 x cost_side(ADV) (raw prices; D received in the Roth, untaxed).
   Select ex-dates 2021-23. Bar: >= 20 events/yr, mean net >= +30bp, median > 0, ex-top-5 > 0, t >= 2; then the Roth
   increment on idle overnight cash.
+  R3-3 Roth = 0.5 SPY held + the 3x-ETF noise leg on the other half's daytime cash (SGOV overnight), vs the proposed Roth
+  book (track C/B, the C2 logic inside the Roth; spec before run): same deposits, EH (noise mean halved; SPY as is),
+  tier and tier_hi, halves restarted. Report-type: C2's bar (>= +2pp on the combined plan both halves) applied to Roth $ only.
+- R3-3 Roth 0.5 SPY + 3x noise vs Roth book: EH tier -0.1/-3.4pp (2021-23/2024-26), tier_hi +1.9/-0.1; as backtested -3..-17pp -> DEAD. NOTE: at EH all-SPY in the Roth ($86.2k full) beats the Roth book ($82.6k tier, $75.7k tier_hi): the HAIRCUT death applies to the Roth too. ib_r33.py
