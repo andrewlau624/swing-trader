@@ -9,7 +9,7 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
-## Goal hunt (2026-10-02, session llm-trader-ec, `prompt_strategy_goal.md`): G2 NEAR; N 768 -> 772
+## Goal hunt (2026-10-02, session llm-trader-ec, `prompt_strategy_goal.md`): G2 NEAR, G1 bound NEAR, G4/G8 dead; N 768 -> 774
 - **G2 EV2-big (officer/director buys >= $500k after 2+ years of no open-market buying) as an intraday overlay on a 100%
   SPY core, taxable: NEAR.** Judged on the untouched 2016-20 holdout (2014-21 Form 345 sets, registered e6316e8): 195
   trades, **+68.7bp/trade** net (tier_hi +55.4), every year > 0, NW t 3.48, passes the lottery test (ex best 5% days and
@@ -19,6 +19,8 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   (60 trades). If it passes: ~+$260 / +$1,130 / +$2,800 a year at $2.3k / $10k / $25k over SPY. `study_goal_g2.md`.
 - Side finding (reported row, not a verdict): ID3 >= $500k WITHOUT the silence filter, holdout +35.7bp x 358 trades/yr,
   2021 +23.8bp. The buy SIZE, not the 2-year silence, carries the insider day trade.
+- **G1 bound (no N):** the shipped contract stack (B1 + B2 + odd-lot tenders) with idle taxable cash in SPY = +20.5pp/yr after
+  tax at $2.3k, +8.8pp at $10k (2024-26), IF Schwab rounds B1 (VIVK ~10-07). Nothing to build. `study_goal_g1.md`.
 
 ## Reddit round (2026-10-02): r/algotrading + 5 subs swept, 6 registered variants, none PASS; N 761 -> 767
 - Full read of r/algotrading 2021-26 (41,472 posts via Arctic Shift; 1,807 substantive + comments, 10 readers vs this
@@ -978,6 +980,8 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | idea | verdict | why |
 |---|---|---|
+| Convertible pricing-day hedge shorting: buy the next open, hold 5, vs SPY; size/ADV >= 3, with/without capped call (Goal G8, N 773-774) | **dead (select)** | 2021-23 −0.76% / −0.66% per trade, t −0.9 / −0.7; no post-hedge recovery |
+| ADR program terminations bought before the depositary sells (Goal G4) | **killed (count)** | ~1-2 genuine cash terminations/yr; payoff is a future market sale, not a contract |
 | Night picks with a bad-news 8-K (5.02/4.02/4.01/3.01) in the window, dropped (Reddit R1a/R1b) | **dead** | sign flips by half, t +0.03 |
 | Idle night cash in GLD close->open instead of T-bills (Reddit R6) | **dead** | 2021-23 −4.5pp/yr, NW t 0.27 |
 | Night leg x0.5 when Cboe COR1M z >= +1 (Reddit R7) | **dead** | lowers 2021-23 Sharpe, −2.4pp CAGR |

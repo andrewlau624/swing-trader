@@ -1,12 +1,12 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 1 · ideas written 10 (G1-G10) · k (judged) 3 · program N 772 (next free 773)
+- round 1 · ideas written 10 (G1-G10) · k (judged) 4 · program N 774 (next free 775)
 - NEAR: G2 (forward follow-up G2-F); G1 bound NEAR at $10k, FOUND-level at $2.3k conditional on Schwab rounding B1
-  (VIVK ~10-07; check llm-trader state/roundup-orders.json after 10-07).
-- track streak: T1, T5, T2 -> next T3 (G7 424B2 barriers or G8 convert pricing) then T2 G5/G6 counts
-- NEXT: G8 convertible pricing-day: count from EDGAR FTS ("pricing of" "convertible senior notes" 8-K) 2016-26 per year,
-  and size / ADV from terms; pre-register before any price.
+  (VIVK ~10-07; check llm-trader state/roundup-orders.json after 10-07). Dead: G4 (count), G8 (select).
+- track streak: T1, T5, T2, T3 -> next T2 (G5 class collapses / G6 odd-lot programs count) or T3 G9
+- NEXT: G6 odd-lot buy-back / round-up programs: EDGAR FTS count ("odd-lot" "program" with premium language), 2016-26.
+  Then G5 count, G9 bound (S&P 400/600 replacement prediction hit rate from S&P press releases), G7 424B2 sample.
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -44,3 +44,10 @@
   agreement" is F-6 boilerplate (1,300-1,900 hits/yr, all F-6 POS/EF). Genuine cash terminations ~1-2/yr, and the contract
   pays the depositary's FUTURE sale price of the local shares net of fees (months later, FX + local price risk): no fixed
   payoff, so by pipeline step 2 it is a price pattern, not a contract. TOO RARE + no contractual payoff.
+- 2026-10-02 17:40 **G8 convertible pricing-day hedge shorting: DEAD on select** (registered ff2c554, N 772 -> 774).
+  3,157 FTS hits -> 578 pricing press releases with an amount -> 327 events with bars, price >= $5; G8a (size/ADV >= 3)
+  222 events 2016-26, G8b (no capped call / concurrent repurchase) 108. Select 2021-23, buy next open, hold 5, minus SPY:
+  G8a n 63 mean −0.76% (tier) t −0.92; G8b n 26 −0.66% t −0.65. Gate (>= +1%, t >= 2) fails both: no recovery after the
+  hedge is set; the pressure is in the pricing-day close or offset. Judge / holdout never run. 44% of deals carry a
+  capped call, 19% a concurrent repurchase/share offering. Coverage: ~30 events/yr vs a market of ~100-200 deals/yr
+  (only press releases with the exact phrases); a caveat, not a reason to rerun.
