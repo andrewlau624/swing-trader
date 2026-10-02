@@ -215,3 +215,8 @@ Event: 8-K full-text `"accelerated share repurchase"` 2020-26 (`events_fts_build
 (includes earnings-release exhibits that mention an ASR, not just new ASR agreements). Select half, ADV >= $20M:
 1432 -> 670 trades (168/yr); net **+3.5bp**, median -5.0bp, hit 50%, t +0.27; by year -108.9 / -3.1 / +37.2 / -20.0bp.
 FREQUENT: FAILS. No other floor tried. Explored-dead.
+
+## X1. Dividend initiations, 8-K `"first quarterly dividend"` (extra row X1) — explored-dead
+618 hits -> 469 events (noisy phrase, see runbook_menu_extra.md). Explore at ADV >= $20M: 40 trades (10/yr) -> RARE.
+Deal report, select half, ADV >= $1M, 80 deals (20/yr): hold 1 hit 48% mean +0.23% worst -25.0% | hold 5 hit 54%
+mean +1.68% worst -20.6% | hold 20 hit 52% mean +2.45% worst -46.8%. RARE gate FAILS at every hold. Explored-dead.
