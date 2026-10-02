@@ -398,6 +398,76 @@ def r2_14() -> pd.DataFrame:
     return _first(L, m, 3650, 0, 1e12)
 
 
+# ---- round 3 news ideas ----------------------------------------------------------------------------------------------
+def r3_11() -> pd.DataFrame:
+    """Small company adds/buys bitcoin (or crypto) for its treasury (headline), first per ticker in 365 days, ADV$ < $20M."""
+    L = news()
+    m = (L.nsym <= 2) & L.headline.str.contains(r"bitcoin|BTC|crypto", case=False) & \
+        L.headline.str.contains(r"treasury|purchas|acquir|adds|buys|bought|reserve", case=False)
+    return _first(L, m, 365, 0, 20e6)
+
+
+SPEC = re.compile(r"Special (?:Cash )?Dividend of \$(\d*\.\d+|\d+)", re.I)
+
+
+def r3_12() -> pd.DataFrame:
+    """Special dividend >= 10% of the last close (headline amount), next open gap < 3%."""
+    L = news()
+    X = L[(L.nsym == 1) & L.headline.str.contains("Special", case=False)].copy()
+    m = X.headline.str.extract(SPEC)
+    X = X[m[0].notna()].assign(amt=m[0].dropna().astype(float))
+    X = _mcap(X)                                        # attaches the raw close via mcap / shares
+    px = X.mcap / X.shares
+    X = X[X.amt >= 0.10 * px]
+    E = first_in(X[["sym", "fd"]], 180)
+    return _gap_ok(E, 0.03)
+
+
+PT = re.compile(r"(?:Raises|Boosts|Lifts) .*?(?:PT|Price Target).*?(?:from|From) \$(\d*\.?\d+) (?:to|To) \$(\d*\.?\d+)")
+
+
+def r3_14() -> pd.DataFrame:
+    """A price target raised >= 50% in one note ('Raises PT from $a to $b', b >= 1.5a), ADV$ < $20M."""
+    L = news()
+    X = L[(L.nsym == 1)].copy()
+    m = X.headline.str.extract(PT)
+    X = X[m[0].notna()].assign(a=m[0].dropna().astype(float), b=m[1].dropna().astype(float))
+    X = X[(X.a > 0) & (X.b >= 1.5 * X.a)]
+    return _first(X, X.index == X.index, 60, 0, 20e6)
+
+
+INIT = re.compile(r"Initiates Coverage .*?(?:Announces|With|,).*?\$(\d*\.?\d+)\s*(?:PT|Price Target)", re.I)
+
+
+def r3_15() -> pd.DataFrame:
+    """Initiation with a price target >= 2x the last close on a micro cap (ADV$ < $5M)."""
+    L = news()
+    X = L[(L.nsym <= 2) & L.headline.str.contains("Initiates Coverage", case=False)].copy()
+    m = X.headline.str.extract(INIT)
+    X = X[m[0].notna()].assign(pt=m[0].dropna().astype(float))
+    X = _mcap(X)
+    px = X.mcap / X.shares
+    X = X[X.pt >= 2 * px]
+    return _first(X, X.index == X.index, 365, 0, 5e6)
+
+
+def r3_20() -> pd.DataFrame:
+    """Coverage discontinued/suspended/terminated, then an officer/director buy within 60 days: fd = the buy."""
+    from .jump_insider import buys
+    L = news()
+    D = L[(L.nsym <= 2) & L.headline.str.contains(r"(?:Discontinues|Suspends|Terminates|Drops) Coverage", case=False)]
+    dd = D.groupby("sym").fd.apply(lambda x: x.sort_values().to_numpy())
+    X = buys()
+    X = X[X.insider & (X.usd >= 1e3)].dropna(subset=["sym"])
+    out = []
+    for r in X.itertuples():
+        a = dd.get(r.sym)
+        if a is not None and ((a <= r.fd.to_datetime64()) & (a >= (r.fd - pd.Timedelta(days=60)).to_datetime64())).any():
+            out.append(dict(sym=r.sym, fd=r.fd))
+    E = first_in(pd.DataFrame(out), 60)
+    return small_only(E[E.fd >= "2016-01-01"], 1e12)
+
+
 if __name__ == "__main__":
     what = sys.argv[1]
     save(globals()[what](), what)

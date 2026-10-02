@@ -2350,3 +2350,35 @@ search, forms 8-K, half-years 2015-2026; event = a company's first matching 8-K 
   premium for some of them within weeks. The edge is a right tail (median difference ~0), so ex-top-3 is the risk.
 - **Known weaknesses:** J4 is small (24 select trades; the judge half may have < 15 trades -> DEAD by count); J3 and J4
   overlap (some events in both). k = 4 judged ideas in this hunt after these two.
+
+## Amendment — Jump hunt, Study J5: buyback authorization >= 15% of market cap, bought only if the next open gaps < 3% (pre-register; track JUMP, cell tp205, 1 look, program N 764 -> 765)
+
+Session llm-trader-51, `prompt_jump_hunt.md`, round-2 idea R2-25 (`jump_ideas.md`). Registered 2026-10-02 before any
+2024+ outcome of this rule was computed.
+
+- **Event** (`research/sim/jump_news.py r2_25`): an Alpaca/Benzinga story (<= 2 tickers) whose headline contains
+  "buyback" or "repurchase" and a $ amount (`AMT` regex: $N million/billion) >= 15% of market cap (XBRL dei cover-page
+  shares, latest within 400 days before fd, x the raw close on/before fd: `jump_news._mcap`); first per ticker in 90
+  days; fd = fd_of(story time); kept only if the trade's opening print is < 3% above the prior raw close (`_gap_ok`:
+  in practice a limit-on-open order at prior close x 1.03).
+- **Event file:** select-half events (fd <= 2023-12-31) sha256 prefix **ee4fb4de291419c5** over the CSV of (sym, fd)
+  sorted by (fd, sym), 214 events; built from the news archive through 2024-01. The judge/confirm file is the SAME
+  builder re-run on the complete archive (2016-01..2026-09) when the download finishes; the judge runs only if that
+  file's select-half subset hashes to ee4fb4de291419c5 (same rule, same select events).
+- **Trade** (`jump_runner`, fixed): buy the open of the first session after fd; sell at +20% limit within 5 sessions,
+  else at the 5th close (`tp20`, hold 5). Track JUMP (shortest hold that met; RIDE also met at tp2060).
+- **Select-half look (2016-2023, the only look):** `tp205 n 162 (20/yr) jump 6.2% vs base 2.4% (x2.6) mean net +2.1%
+  ex-top3 +1.8% median +1.7% vs stock's usual +2.3% hit 63% worst -25% best +26% P(mean<=0) 0.00 | jump MEETS`.
+- **Standing-rule control (select only):** same-day control (`jump_control.py`, 21,402 trades): event minus control
+  **+1.9%** a trade (median +1.4%, 59% above, bootstrap P 0.001). Year means +4.9/+1.0/+2.2/+1.5/+0.5/+3.5/+2.1/+0.6%
+  (2016..2023), medians positive in 7 of 8.
+- **Judge (once):** `PYTHONPATH=. .venv/bin/python -m research.sim.jump_runner judge data/research/program/events_jump_r2_25.parquet 5 tp20 --track jump`
+  (2024-01-01..2025-06-30; PASS = >= 15 trades, jump >= 1.5x base, mean > 0, ex-top3 > 0, P < 0.10). If PASS:
+  `confirm` once with the same arguments (2025-07..2026-09).
+- **Other side / why it might persist:** opening-auction sellers who read "buyback" as boilerplate (most authorizations
+  are small or never executed) and don't scale the dollar amount by the company's size; when the authorization is
+  15%+ of a small company, the company itself is a large, price-insensitive, informed buyer over the next weeks.
+  TEXTBOOK-adjacent (buyback-announcement drift, Ikenberry et al.), dodged by the relative size and the un-gapped
+  entry; a 3% gap filter keeps us out of names the market already repriced.
+- **Known weaknesses:** 20 events a year; the $ amount is parsed from headlines (no LLM), so missed/garbled amounts
+  shrink the sample; some events may be issuer tender offers (price converges to the tender range). k = 5.

@@ -195,3 +195,10 @@
   vs stock's usual +1.7% hit 33% worst -40% best +106% P(mean<=0) 0.71` -> **RIDE VERDICT: DEAD**.
   **J4 judge**: `hold20 n 7 (4/yr) jump 0.0% vs base 4.5% (x0.0) mean net -4.9% ex-top3 -9.2% median -0.7% vs stock's
   usual -3.0% hit 29% P(mean<=0) 0.96` -> **JUMP VERDICT: DEAD**. k = 4. Write-up `study_jump_r4_strategic_alternatives.md`.
+- 23:50 batch (1 look each unless noted; summary = cell x(jump lift) mean/ex-top3/median P):
+  - **R3-8** (178 select -> 137 trades); hold1 x0.0 -2.8%/-3.1%/-2.2% P1.00; tp205 x0.4 -3.9%/-4.4%/-2.8% P1.00; hold20 x0.2 -7.0%/-7.7%/-6.3% P1.00; hold60 x0.9 -9.8%/-11.6%/-12.9% P1.00; tp2060 x0.7 -8.4%/-9.1%/-9.9% P1.00; all fail
+  - **R3-10** (158 select -> 107 trades); hold1 x0.0 -0.4%/-0.7%/-0.7% P0.82; tp205 x1.8 -0.8%/-1.3%/-0.9% P0.82; hold20 x0.3 -2.7%/-3.9%/-1.4% P0.99; hold60 x0.7 -1.2%/-3.4%/-1.2% P0.72; tp2060 x0.7 -0.2%/-0.9%/-0.2% P0.55; all fail
+  - **S2** (95 select -> 89 trades); hold1 x0.0 -0.2%/-0.5%/-0.3% P0.75; tp205 x2.1 +1.1%/+0.1%/+0.3% P0.18; hold20 x1.5 +2.9%/+0.0%/-0.2% P0.11; hold60 x0.8 -1.6%/-6.2%/-4.7% P0.66; tp2060 x1.0 +0.2%/-1.2%/+4.0% P0.45; all fail
+  - **S2V** (100 select -> 93 trades); hold1 x11.7 -0.1%/-0.6%/-0.2% P0.60; tp205 x2.5 +0.1%/-0.6%/-1.2% P0.45; hold20 x1.1 -5.5%/-7.5%/-3.4% P0.99; hold60 x0.8 -3.2%/-6.3%/-3.9% P0.84; tp2060 x0.9 -2.5%/-3.4%/+0.3% P0.84; all fail
+  - **D2** (871 select -> 588 trades); hold1 x2.3 -0.2%/-0.3%/-0.2% P0.89; tp205 x1.1 -0.3%/-0.4%/+0.1% P0.84; hold20 x0.9 -0.1%/-0.5%/+0.3% P0.60; hold60 x1.0 +2.4%/+0.3%/+0.6% P0.06; tp2060 x1.0 +1.0%/+0.8%/+3.9% P0.12; all fail
+  R3-8 (Russell inclusion announced) is strongly NEGATIVE (-7% at 20 sessions, -10% at 60: sell the news after the run-up into the recon) - long-only can't use it. S2v is S2's pre-registered second look (fd 6 sessions before the PDUFA date). All dead.
