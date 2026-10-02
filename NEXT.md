@@ -37,6 +37,8 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 - **DL4 liquidations below the proxy's low estimate: rule met once in 10 years** (deal rule aa91261). 16 dissolution proxies
   with a range and bars; only Otonomy (2023) closed below the low end ($0.077 vs $0.11; paid $0.11, +43%). The rest
   traded at or above the low estimate. PAYS on n = 1, 0.1/yr: too rare to matter. `study_dl4_liquidations.md`.
+- **DL6 closing ETFs bought in the last week: DEAD** (deal rule 6c872de). 9 liquidations with Alpaca-recorded proceeds
+  2022-26: median −0.24%, hit 33%. Closing ETFs trade at NAV to the end. `study_dl6_etf_closures.md`.
 
 ## Round 33 (2026-10-02): event runbook — Study EV1 (cluster insider buys) DEAD; N 758
 - **EV2 first insider purchase in 2+ years: PASS** (registered faa96e8/ec9909b, N 760). ID3 day trade on officer/director
@@ -933,6 +935,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | idea | verdict | why |
 |---|---|---|
+| Closing ETFs bought 5 sessions before the last trading day (discovery DL6) | **dead** | 9 liquidations, median −0.24%, hit 33%; NAV holds to the end |
 | Liquidations bought below the proxy's low estimate (discovery DL4) | **too rare** | 1 of 16 dissolutions 2016-26 traded below the low end (OTIC +43%); the rest at/above it |
 | Written-consent cash mergers (DEFM14C), bought the session after (discovery DL3) | **dead** | 12 deals, median +0.17%; vote locked, spread ~T-bill |
 | Issuer warrant exchange / cash offers (SC TO-I), bought 5 sessions before expiry (discovery DL2) | **dead** | median +0.5%, hit 53%, mean −2.2%; repriced on announcement, failures −20..−69% |
