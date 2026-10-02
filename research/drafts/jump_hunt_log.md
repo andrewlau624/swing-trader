@@ -251,3 +251,10 @@
   - **C2** (345 select -> 222 trades); hold1 x4.1 -0.3%/-0.9%/-0.7% P0.67; tp205 x3.1 +0.1%/-0.4%/-0.1% P0.44; hold20 x1.8 +5.0%/+1.6%/-1.4% P0.03; hold60 x1.6 +14.7%/+10.0%/+2.7% P0.00; tp2060 x1.5 +5.7%/+5.3%/+19.2% P0.00; MEETS: hold20 ride MEETS, hold60 ride MEETS, tp2060 ride MEETS
   - **C11** (10 select -> 6 trades); hold1 x0.0 -4.1%/-7.5%/-2.4% P1.00; tp205 x0.0 -12.2%/-19.2%/-10.5% P1.00; hold20 x2.3 -3.9%/-16.2%/-5.8% P0.73; hold60 x1.4 -7.4%/-24.3%/-6.1% P0.80; tp2060 x0.9 -5.6%/-24.3%/-6.1% P0.72; all fail
   V2 and C2 MEET (RIDE hold20 the shortest) but **FAIL the standing-rule same-day control**: V2 event minus control +2.9% (median +0.7%, P 0.164; 2021 carries it, +13%); C2 +3.0% (median -2.2%, P 0.123; 2018 and 2020 carry it, 2021-23 negative). Not registered: meme-era timing. C11 too rare (6 trades). 81 explored.
+- **Clock correction (real time 2026-10-02 16:25 PDT):** the HH:MM stamps on entries after ~13:10 in this log were
+  written from a wrong mental clock, not read from the system (entries stamped 18:00-04:10 all happened between
+  ~13:10 and 16:25 PDT on 2026-10-02). Order of entries is correct; times are not. The "Friday 21:00 ET" note on the
+  3-thread news download was really ~18:10 ET, still after the US close (no production trading runs until Monday).
+  From here, stamps come from `date`.
+- 16:20 PDT **H19** theme Wikipedia spike -> theme small caps (`jump_more.py`; 14 theme pages, members = companies whose
+  8-K/10-K named the theme in the prior 730 days; 1,051 select -> 628): `hold20 -1.5%`, `hold60 -2.5%`. Dead. 82 explored.
