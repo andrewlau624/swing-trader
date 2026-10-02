@@ -39,6 +39,8 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   traded at or above the low estimate. PAYS on n = 1, 0.1/yr: too rare to matter. `study_dl4_liquidations.md`.
 - **DL6 closing ETFs bought in the last week: DEAD** (deal rule 6c872de). 9 liquidations with Alpaca-recorded proceeds
   2022-26: median −0.24%, hit 33%. Closing ETFs trade at NAV to the end. `study_dl6_etf_closures.md`.
+- **DL5 term / target-term CEFs bought a year before the charter date: DEAD** (deal rule 80cbcc8). 23 funds 2019-24:
+  median excess vs a matched ETF −0.77%, 35% > 0; the discount has closed by the final year. `study_dl5_term_cefs.md`.
 
 ## Round 33 (2026-10-02): event runbook — Study EV1 (cluster insider buys) DEAD; N 758
 - **EV2 first insider purchase in 2+ years: PASS** (registered faa96e8/ec9909b, N 760). ID3 day trade on officer/director
@@ -935,6 +937,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | idea | verdict | why |
 |---|---|---|
+| Term / target-term CEFs bought 250 sessions before the termination date (discovery DL5) | **dead** | 23 funds, median excess −0.77% vs matched ETF, 35% > 0 |
 | Closing ETFs bought 5 sessions before the last trading day (discovery DL6) | **dead** | 9 liquidations, median −0.24%, hit 33%; NAV holds to the end |
 | Liquidations bought below the proxy's low estimate (discovery DL4) | **too rare** | 1 of 16 dissolutions 2016-26 traded below the low end (OTIC +43%); the rest at/above it |
 | Written-consent cash mergers (DEFM14C), bought the session after (discovery DL3) | **dead** | 12 deals, median +0.17%; vote locked, spread ~T-bill |
