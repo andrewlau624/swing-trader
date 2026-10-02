@@ -43,3 +43,13 @@ SPY median $78.6k (p10 $65.7k, P(DD>30%) 6%, P(DD>50%) 0%); bot $75.5k ($64.9k, 
   executor would need a "core" position it never sells and margin-aware sizing. A user decision.
 - NEXT line: "R6-5 (index beat): stack the bot on a 100% SPY core in taxable: EH 22.1%/yr vs SPY 15.3% (2021-26 pre-tax,
   maxDD −27.8% vs −24.5%); combined plan +1.5/+4.7pp at $1k/mo (2021-23 misses +2), +2.6/+6.9 at $2k/mo; near miss."
+
+## COVID check (2020 rebuild, growth.covid_legs, live-today weights, as backtested — not haircut)
+| 2020-02-19..03-23 | return | max DD | worst day |
+|---|---|---|---|
+| SPY | −33.5% | −33.8% | −10.8% |
+| bot | −4.2% | −11.5% | −4.4% |
+| stacked | −36.5% | **−37.5%** | −10.3% |
+Over all of 2020: SPY +13.2%, bot +33.2%, stacked +51.4% (max DD −37.5%). At ~1.4x overnight the debit (≈0.4E) stays far
+from a Reg-T maintenance call at a −37% equity drawdown (SPY 25% maintenance; the night names' house requirements are the
+unknown). The stacked book's crash risk is the index's plus ~4pp, not the 1.5x-leverage profiles' tail.

@@ -2,18 +2,14 @@
 
 ## STATE (update after every idea)
 - program N: 762 (Jump J1 761, J2 762; my next would be 763; none registered by this hunt)
-- k (ideas judged): 0 · explored: 22 (C1 C2 C3 C4 C5 A1/DL-IB1 B3 A9 A18 A20 A2 R2-7 R3-1 R3-2 R3-3 R4-1/DL-IB2 R4-2 + A8 bound,
-  + rounds' quick checks) · killed by bound/dup: ~60 · idea rounds: 4 (r1 55, r2 27, r3 3 (thin), r4 21)
-- current: write ROUND 5 with a method not yet used (candidates: GitHub/practitioner repos audited for lookahead; LLM
-  extraction from filings for a contractual payoff; live server evidence for a track-B cost structure)
-- WAITING: DL-IB1 FOUND only after 2 live rounded deals (VIVK ex 10-05, check ~10-07: state/roundup-orders.json on him, read-only)
-- untested left: B1/B2/B5/B6 (23/5 forward; A20 prior says thin), A3 merger round-ups (rare), reports for the user
-  (A7 broker bonuses, C9 solo 401k, C14 TLH, C15 kiddie tax, R4-4 bank bonuses, R4-5 Saver's Match excludes students)
-- data verified: repo sims, etf_daily (div-adj), raw night pool, roundup_deals.csv, Alpaca SIP daily + minute (pre-market ib/pm1),
-  Alpaca corporate actions (cash dividends 2021-23 in ib/divs_all.json), EDGAR FTS + documents
-- why things die (running): HAIRCUT (at edge-halves the bot ~= SPY in BOTH accounts: C1/C2/C5/R3-3 -> only haircut-proof ideas
-  can beat the index widely: contractual payoffs) / TOO RARE (A2, DL-IB2, R4-2: per-holder round-up clauses outside reverse
-  splits barely exist) / LOTTERY (A20 V2, R2-7) / HALF-FLIP (C3, C4, R3-1) / COST (A9) / no shortfall (R3-2)
+- k (ideas judged): 0 · explored: 28 · killed by bound/dup: ~80 · idea rounds: 6 (r1 55, r2 27, r3 3, r4 21, r5 10, r6 20)
+- BEST RESULTS: (1) R6-5 stacked on SPY in taxable = near miss (+1.5pp 2021-23 at $1k/mo; +2.6/+6.9 at $2k/mo; EH 22.1%/yr vs
+  SPY 15.3%; COVID -37.5% vs -33.8%), study_ib_r65_stacked.md; (2) DL-IB1 round-up in more accounts PAYS on history, conditional
+  on VIVK (check state/roundup-orders.json on him after 10-07; FOUND only after 2 live rounded deals).
+- current: ROUND 7 (method not yet used: LLM extraction from filings, or option-contract mechanics with free data)
+- stop rule status: 6 rounds done; explored 28 of >= 120 -> continue
+- why things die (running): HAIRCUT (bot ~= SPY at EH in both accounts) / TOO RARE (per-holder clauses) / LOTTERY / HALF-FLIP /
+  COST; the one thing that beats the index at EH is adding beta under the bot (R6-5), not replacing it
 
 ## Log
 - 2026-10-02 13:20 setup: merged, 356 tests pass, N 760 (last registered: EV2). Messaged llm-trader-51 (Jump hunt), 198-da.
@@ -122,3 +118,4 @@
 - R6-5 stacked on SPY: combined vs P EH $1k/mo +1.50/+4.70pp (tier), +1.57/+4.87 (tier_hi); $2k/mo +2.62/+6.92, +2.67/+7.05;
   taxable EH 22.1% vs SPY 15.3% (maxDD -27.8 vs -24.5); MC P(DD>50%) 0.3% -> NOT FOUND (2021-23 at $1k/mo), STRONGEST NEAR
   MISS; haircut-robust (beats the bot alone as backtested too). study_ib_r65_stacked.md
+- R6-5 COVID check: stacked 2020-02-19..03-23 -37.5% maxDD (SPY -33.8%, bot -11.5%); 2020 +51.4% (SPY +13.2%). No tuning of R6-5 toward the bar (it stays a near miss).
