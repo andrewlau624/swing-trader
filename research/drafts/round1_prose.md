@@ -2151,3 +2151,19 @@ value = warrant close 2 sessions after L. Return = value / entry − 1. Whole wa
 min(10% of equity, 5% of the warrant's 20-session median dollar volume before entry). No fees (Schwab $0 voluntary
 reorg). Reported: deals/yr, hit, mean/median/worst return, $/yr at the three sizes, completed vs not, share vs cash.
 **Verdict: PAYS if the median return > +1%, the mean > 0 and hit >= 70%; otherwise DEAD.** No rule change after the list.
+
+## Amendment — Discovery loop (session llm-trader-c5), deal rule DL3: written-consent cash mergers (DEFM14C) (no N; registered before any outcome)
+
+Source reading (2026-10-02): DEFM14C information statements ("per share in cash" + "written consent" + "merger"),
+2016-26: 57 issuers. Read Datto 2022 ($35.50, NYSE "MSP"), Ocean Bio-Chem 2022 ($13.08, controller consent), Sterling
+Check 2024 (cash OR 0.979 FA shares, prorated). The vote is already won; the merger can't close until 20 calendar
+days after mailing (Rule 14c-2), and the open conditions are HSR / regulatory approvals and financing.
+
+**Deal set (fixed now):** first DEFM14C per issuer 2016-01 .. 2026-09 whose text (a) names a single cash price
+"$X per share in cash" (the most frequent such figure) and (b) has no stock leg (no "exchange ratio", "stock
+consideration" or "at your election"); ticker parsed from "under the symbol “…”"; dropped if no Alpaca bars at entry.
+**Entry:** the official close of the first session after the DEFM14C filing date. **Completed** if the stock's last
+Alpaca bar is within 250 sessions of entry: value = X (cash at closing). **Otherwise:** value = the close 250 sessions
+after entry. Return = value / entry − 1; days held = entry to last bar (or 250 sessions). Stake 10% of equity (whole
+shares). Reported: deals/yr, hit, mean/median/worst return, mean annualised, $/yr at $2.3k/$10k/$25k.
+**Verdict: PAYS if median return > +1%, mean > 0 and hit >= 80%; otherwise DEAD.** No rule change afterwards.
