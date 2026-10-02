@@ -214,6 +214,17 @@ def test_lever_g1_log_leaves_the_live_gate_alone(tmp_path):
     assert any("[lever-g1] SHADOW n 25 (1 days)" in l and "would_open no" in l for l in ex.lines)
 
 
+def test_lever_g1_logs_while_leverage_is_switched_off(tmp_path):
+    """lever_weight: null (2026-09-29) returned before the G1 shadow: 0 lines a week."""
+    ex = _ex(tmp_path, account="live")
+    ex.d.lever_weight = None
+    book = DailyBook(cash=3000.0, start_equity=3000.0, levered=True)
+    ex._exit_g1 = sg.lever_g1([("2026-09-01", 50.0)] * 25)
+    ex._lever_gate(book)
+    assert not book.levered
+    assert any("[lever-g1] SHADOW n 25" in l for l in ex.lines)
+
+
 # ------------------------------------------------------------ wash guard G4s
 def _taxable_book():
     return {"positions": {"HELD": {"qty": 1, "avg_px": 10, "leg": "night"}},
