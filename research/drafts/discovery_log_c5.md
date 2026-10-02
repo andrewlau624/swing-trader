@@ -11,3 +11,5 @@ Every look, one line. Peer session llm-trader-mid-01 logs in `discovery_log.md`.
 - 11:15 registered DL2 (6d89505). 11:25 ran `warrant_offers.run` once: 38 deals, mean -2.2%, median +0.5%, hit 53% -> DEAD.
 - 11:30 C3 (A, C): FTS DEFM14C "per share in cash"+"written consent"+"merger" 2016-26 -> 57 issuers; read Datto, Ocean Bio-Chem, Sterling Check. Registered DL3 (f47fa76).
 - 11:38 ran `consent_mergers` once: 12 cash deals, median +0.17%, hit 58% -> DEAD. Price parse errors (DWA, FOGO, TWKS) found after; corrected line (data fix, same rule) median +0.17%, hit 67% -> still DEAD.
+- 11:45 I8 (A): FTS DEF 14A plan of dissolution + estimate 2016-26 -> 76 issuers; read Actua, Merrimack, Third Harmonic; Alpaca CA probe (liquidating payouts recorded as cash_mergers / special dividends, incomplete). Registered DL4 (aa91261).
+- 11:52 ran `liquidations.entries` (+ a ticker lookup for 10 old names): 1 of 16 below the low estimate (OTIC); read OTIC 8-Ks: $0.11 paid -> +43%. Rule PAYS on n=1, 0.1/yr -> too rare.

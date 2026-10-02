@@ -23,6 +23,9 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 - **DL3 written-consent all-cash mergers (DEFM14C): DEAD** (deal rule f47fa76). 12 cash deals 2016-26 bought the session
   after the information statement: median +0.17%, hit 58-67%; the vote is locked and the spread is T-bill-like.
   `study_dl3_consent_mergers.md`.
+- **DL4 liquidations below the proxy's low estimate: rule met once in 10 years** (deal rule aa91261). 16 dissolution proxies
+  with a range and bars; only Otonomy (2023) closed below the low end ($0.077 vs $0.11; paid $0.11, +43%). The rest
+  traded at or above the low estimate. PAYS on n = 1, 0.1/yr: too rare to matter. `study_dl4_liquidations.md`.
 
 ## Round 33 (2026-10-02): event runbook — Study EV1 (cluster insider buys) DEAD; N 758
 - **EV2 first insider purchase in 2+ years: PASS** (registered faa96e8/ec9909b, N 760). ID3 day trade on officer/director
@@ -919,6 +922,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | idea | verdict | why |
 |---|---|---|
+| Liquidations bought below the proxy's low estimate (discovery DL4) | **too rare** | 1 of 16 dissolutions 2016-26 traded below the low end (OTIC +43%); the rest at/above it |
 | Written-consent cash mergers (DEFM14C), bought the session after (discovery DL3) | **dead** | 12 deals, median +0.17%; vote locked, spread ~T-bill |
 | Issuer warrant exchange / cash offers (SC TO-I), bought 5 sessions before expiry (discovery DL2) | **dead** | median +0.5%, hit 53%, mean −2.2%; repriced on announcement, failures −20..−69% |
 | News sentiment filter | **dead** | mean P&L diff +0.97pp, p=0.63 |
