@@ -103,3 +103,12 @@
   R4-2 spec (before any count): FTS '"stock dividend" "rounded up"' + '"share dividend" "rounded up"' 8-K/DEF 14A/424B 2016-26; sentence must contain dividend + fraction + rounded up and no cash alternative; read every hit by hand; PAYS-style bar as DL-IB1: >= 3 listed events/yr 2024-26 with payoff > 0 if rounded.
 - R4-2 stock-dividend round-ups (8-K 2022-26, 2,354 FTS hits, strict sentence): FCUV 2023 only (HCMC 2022 says "will not be
   rounded up"); NXDT 2025 (sweep) not matched by 8-K wording -> <= ~1/yr -> DEAD (too rare; confirms C16).
+- ROUND 5 (method: live server evidence, read-only scp of logs/daily-fills-*.jsonl from him, 2026-09-23..10-02):
+  taxable night round trips 37 (6 nights): mean +31.6bp, median 0, $-weighted +172bp, hit 41%; buy slippage vs ref median 0bp.
+  Roth night trips 9: mean +46.6bp; Roth buy fills median +45bp ABOVE the 15:40 ref (n 21) vs taxable 0bp -> watch item (too few).
+  Power: telling the full edge (~+20bp/pick) from edge-halves (~+10bp) at ~2% per-night sd needs ~1,600 nights -> live data
+  will not settle the HAIRCUT for years; the plan's choice of EH is a prior, not a measurement.
+  R5-2 IBS exit at the close of d+1 instead of the open of d+2 (spec before run: same picks/sizing as book.ibs_days, cost
+  unchanged; select 2016-23 for the ETF legs (the IBS select window used by the program), bar: mean per trade higher with
+  t >= 2 and both 2016-20? no -> 2016-20 is HOLDOUT: select = 2021-23 only; bar t >= 2, positive each year).
+  R5-2 result (2021-23, 479 IBS trades): open->open +22.3bp vs open->close +13.6bp, diff -8.7bp, NW t -2.15, every year < 0 -> DEAD (the IBS edge needs the second overnight).
