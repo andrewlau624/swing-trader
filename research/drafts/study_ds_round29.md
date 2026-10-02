@@ -42,3 +42,64 @@ The post-hoc checks (no new variant) say it is not an edge:
   the holdout where the leg exists, so this fails.
 - Verdict: **DEAD**. Do not retest by changing the window (December only, last 5 sessions, ...): that would be the
   search the matched placebo cannot protect against.
+
+## DS1: earnings-announcement premium as an overnight sleeve — all three DEAD
+
+Data: the Nasdaq earnings calendar (free), 111,505 rows for 2019-10 .. 2026-09 and 4,944 symbols, plus the SIP daily panel.
+108,808 events have clean windows. The unit is the event's return minus SPY's over the same window, net of 2.5bp/side.
+
+| variant | n | mean net excess (median) | 21-23 / 24-26 | gross | NW t | sign-flip | moved-date placebo |
+|---|---|---|---|---|---|---|---|
+| E1 liquid, close d−1 -> open d+1 | 40,798 | −4.7bp (−3.4) | −9.7 / −8.7 | +0.3bp | −1.95 | 3% | 7% |
+| E2 thin ($2-20M ADV), same | 32,792 | −0.9bp (−3.1) | −8.0 / −17.8 | +4.1bp | −1.32 | 10% | 84% |
+| E3 liquid, two overnights only | 40,798 | −4.1bp (+3.6) | −5.4 / −12.0 | +5.9bp | −0.33 | 36% | 70% |
+
+- **There is no announcement premium left to harvest at retail costs.** The window grosses +0 to +6bp over SPY in
+  2021-26, below one round trip. Only 2020 was positive (+25 to +83bp), which was the post-COVID rebound in exactly
+  these names. The published premium (1970s-2000s samples) is not there in the window this book can use.
+- The crosses (e) and the book (f) were not run: nothing passed (a)-(d).
+
+## DS4: night picks tilted by FINRA days-to-cover — DEAD
+
+Data: FINRA consolidated short interest (free), 151 settlement dates 2020-06 .. 2026-09, lagged to publication
+(settlement + 10 business days). It covers 94% of the 9,546 picks.
+
+| | $2.3k | $10k | $25k |
+|---|---|---|---|
+| inc, 2.5bp/side | +0.1pp (+$2/yr) | +0.2pp (+$22) | +0.2pp (+$44) |
+| halves 21-23 / 24-26 | +0.1 / −0.1 | +0.4 / −0.2 | +0.3 / −0.2 |
+
+NW t 0.14, sign-flip 55%, feature shuffle within the night 42%.
+- **The tercile order flips between halves.** By DTC tercile, low / mid / high: 2021-23 earns +0.0 / +15.1 / +18.0bp,
+  2024-26 earns +18.7 / +12.2 / +5.0bp.
+- DTC is mostly an inverse-volatility proxy (Spearman −0.45 with vol20), so the tilt only moves exposure toward the
+  calmer picks.
+- This matches AY (the daily short-volume ratio): **short-selling data carries no night-leg information here.**
+
+## Final table
+
+| idea | verdict | %/yr and $/yr at $2.3k / $10k / $25k (V7, 2.5bp/side) | capacity ($100k / $500k) | what live evidence would change it |
+|---|---|---|---|---|
+| DS5 night ×1.5 on tax-loss / quarter-end nights | **DEAD**: passes the registered 2021-26 bar (t 2.28, matched placebo 99%) but rests on 5 nights (without them −5.5bp) and reverses in 2019-20 (−32bp vs +13bp) | +1.8pp +$42 / +2.2pp +$215 / +2.2pp +$539 (in-sample only) | as the night leg (breaks ~$250k) | the live night log's December nights: at ~10 a year it would take 5+ Decembers. Not worth waiting for |
+| DS3 noise leg: no midday entries | **DEAD** (t 0.12; 2024-26 and 2016-20 negative) | +0.4pp +$9 / +$38 / +$95 | QQQ/SMH: none | none |
+| DS4 night tilt by days-to-cover | **DEAD** (terciles flip halves, t 0.14) | +0.1pp +$2 / +0.2pp +$22 / +0.2pp +$44 | — | none |
+| DS1 E2 earnings premium, thin names | **DEAD** (−0.9bp net, both halves negative) | ~0 to negative | thin names: none at this size | none |
+| DS1 E3 earnings premium, overnights only | **DEAD** (−4.1bp net) | negative | — | none |
+| DS1 E1 earnings premium, liquid | **DEAD** (−4.7bp net, t −1.95) | negative | — | none |
+| DS2 noise leg every 15 minutes | **DEAD** (−4.8pp, t −2.29) | −4.7pp −$109 / −4.8pp −$480 / −4.8pp −$1,203 | — | none: confirms the 30-minute grid |
+
+**What failed, plainly:** all four studies (7 variants) failed. Two were clean nulls (DS1, DS4). One confirmed the
+live setting is the better one (DS2). One was a fat-tailed in-sample pass that the only older data reverses (DS5).
+Program N is now 752. Two things carry over:
+1. The noise leg's 30-minute grid is now tested in both directions (finer, and with midday slots removed).
+2. Two more free data sources produce nothing for this book: the earnings calendar and FINRA short interest. With
+   the short-volume ratio (AY), the closing imbalance (BD) and the news headlines (add. 12), the night leg has now
+   been conditioned on every cheap public event and positioning feed tried, and none adds selection.
+
+**What is left from the 23** (`deep_search_candidates.md`):
+- **DS6, the Roth's IBS leg in 2x ETFs.** It is a leverage choice, like the UPRO sleeve, not an edge. It is listed
+  for the user.
+- **DS14, insider purchases.** Blocked on an SEC User-Agent contact in `.env` (the user's choice).
+- **Two engineering items, no N:** DS22, a running live-vs-research pick scorecard, and DS23, Study Y re-run on cross
+  returns.
+- The rest were dead on the dead-list check before any test.

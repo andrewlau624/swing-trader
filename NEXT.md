@@ -9,6 +9,22 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Round 29 (2026-10-02): deep search — 23 candidates ranked, the best 4 studies (7 variants) all DEAD; nothing to switch on (program N 752)
+- List: `research/drafts/deep_search_candidates.md` (23 ideas; 13 were dead or done on the dead-list check). Results and
+  final table: `research/drafts/study_ds_round29.md`. Pre-registration d4df5d1.
+- **DS1 earnings-announcement premium (Nasdaq calendar, free): DEAD.** Gross +0..+6bp over SPY per window 2021-26, below
+  one round trip; only 2020 was positive.
+- **DS2 noise leg every 15 min: DEAD** (−4.8pp/yr, t −2.3); **DS3 no midday entries: DEAD** (t 0.1). The live 30-min
+  grid is the right one.
+- **DS4 night tilt by FINRA days-to-cover: DEAD** (terciles flip halves; an inverse-vol proxy).
+- **DS5 night ×1.5 on December tax-loss / quarter-end nights: DEAD.** It passed the registered 2021-26 bar (+2.2pp, t 2.28,
+  matched placebo 99%), but without its 5 best nights it is −5.5bp, and the 2019-20 reconstruction has the opposite
+  sign (−32bp vs +13bp).
+- **Left for the user:** DS6 (the Roth's IBS leg in 2x ETFs) is a leverage choice, not an edge. DS14 (insider buys)
+  still needs `SEC_USER_AGENT` in .env.
+
+---
+
 ## Day-trading lab (2026-10-01, Lab Rounds 18-38): 25 studies (intraday, events, multi-day, market-neutral, vol premium, cross-section), four momentum-family PASSES on 1963-2015 (BT, BW, BY, BZ) that all lag the index in 2016-26; paper shadows only; recorder LIVE (program N 745)
 
 **Overnight bottom line (for the user, 2026-10-01 morning).**
@@ -955,6 +971,11 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Night leg: drop / halve picks that LULD-halted that day (Round 28 BF) | **dead (too rare)** | 0.6% of picks halt; +0.6pp, t 0.5, shuffle 80%; ~9 halted picks a year |
 | Roth sleeve: UPRO when SPY > 200d SMA else BIL (lab's Lab-CA follow-up, not registered) | **user decision, not research** | leverage, not edge (1963-2015 Sharpe ≈ market, maxDD −75%; 2016-26 24.5%/yr but −51% DD); competes with IBS+night for the cash IRA's money; would fail P(DD>50%) ≤ 5%. Only as a deliberate risk choice by the user |
 | Size the legs down when Cboe SKEW z >= +1 (lab's Lab-CC follow-up, not registered) | **declined** | SKEW forecasts 20-day market direction, which the legs don't earn (night = idiosyncratic overnight bounce, IBS = next-day reversal, noise = two-way intraday); market-regime size dials are dead here (add. 26a: every leg earns MORE on stressed days); t −2.34 at N 744 with clustered signal days |
+| Earnings-announcement premium, close d−1 -> open d+1 or two overnights, liquid / thin (Round 29 DS1, Nasdaq calendar) | **dead** | gross +0..+6bp over SPY 2021-26, net −1..−5bp; both halves negative; only 2020 positive |
+| Noise leg decisions every 15 min (Round 29 DS2) | **dead** | −4.8pp/yr, t −2.29, 8 of 11 years negative: early entries are false breakouts |
+| Noise leg: no new entries at 12:00-13:30 (Round 29 DS3) | **dead** | +0.4pp, t 0.12; 2024-26 and 2016-20 negative; slot placebo 92% |
+| Night tilt by FINRA days-to-cover (Round 29 DS4) | **dead** | terciles flip (hi +18 -> +5bp); inverse-vol proxy (rho −0.45); t 0.14, shuffle 42% |
+| Night ×1.5 on Dec last-10 / quarter-end last-3 sessions (Round 29 DS5) | **dead (holdout)** | registered bar met (+2.2pp, t 2.28, matched 99%) but 5 nights carry it (ex-top-5 −5.5bp) and 2019-20 reverses (−32 vs +13bp); do not retest other windows |
 
 ## Ideas not yet tested
 
