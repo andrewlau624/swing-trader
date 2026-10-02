@@ -2382,3 +2382,26 @@ Session llm-trader-51, `prompt_jump_hunt.md`, round-2 idea R2-25 (`jump_ideas.md
   entry; a 3% gap filter keeps us out of names the market already repriced.
 - **Known weaknesses:** 20 events a year; the $ amount is parsed from headlines (no LLM), so missed/garbled amounts
   shrink the sample; some events may be issuer tender offers (price converges to the tender range). k = 5.
+
+## Amendment — Jump hunt, Study J6: forward stock split announced, bought at the next open (pre-register; track JUMP, cell trail20, 1 look, program N 765 -> 766)
+
+Session llm-trader-51, `prompt_jump_hunt.md`, round-1 idea S5 (`jump_ideas.md`; death-dodge of Lab-BM, which tested
+the window AFTER the ex-date). Registered 2026-10-02 before any 2024+ outcome of this rule was computed.
+
+- **Event** (`research/sim/jump_news.py s5`): an Alpaca/Benzinga story whose headline says "Stock Split" / "Share
+  Split", not "Reverse", with an "N-for-M" ratio where N > M; first per ticker in 180 days; fd = fd_of(story time). No
+  ADV cap (the runner's $1 / $250k floors apply).
+- **Event file:** select-half events (fd <= 2023-12-31) sha256 prefix and count **8490e20097b8a31f 92** over the CSV of (sym, fd)
+  sorted by (fd, sym); built from the archive through 2024-01. The judge file is the same builder on the complete
+  archive; the judge runs only if its select-half subset hashes the same.
+- **Trade** (`jump_runner`, fixed): buy the next open; exit at the close once it is 15% below the best close since
+  entry, else at the 20th close (`trail`, hold 20). Track JUMP (the only cell that met).
+- **Select-half look (the only look):** `trail20 n 78 (10/yr) jump 9.0% vs base 4.1% (x2.2) mean net +2.2% ex-top3 +0.8%
+  median +2.6% vs stock's usual +1.0% hit 62% worst -22% best +48% P(mean<=0) 0.06 | jump MEETS`.
+- **Standing-rule control (select only):** same-day control 4,650 trades: event minus control **+2.0%** (median +1.5%,
+  58% above, bootstrap P 0.054). Year means -4.7/+6.4/+0.7/-3.0/+2.6/+5.6/-0.1/-2.4% (2016..2023).
+- **Judge (once):** `PYTHONPATH=. .venv/bin/python -m research.sim.jump_runner judge data/research/program/events_jump_s5.parquet 20 trail --track jump`;
+  on PASS, `confirm` once with the same arguments.
+- **Other side:** holders who sell into the announcement pop while retail and option buyers keep buying "cheaper
+  shares" into the ex-date (2020-24 split wave: AAPL, TSLA, NVDA, AVGO, CMG, WMT). TEXTBOOK-adjacent (Ikenberry,
+  Rankine & Stice 1996 post-announcement drift); REGIME risk: year means swing -5..+6%. k = 6.

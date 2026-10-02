@@ -66,7 +66,7 @@ def _no_news(E: pd.DataFrame, days: int) -> pd.DataFrame:
 
 def d8() -> pd.DataFrame:
     X = buys()
-    X = X[X.insider & (X.usd >= 1e3)]
+    X = X[X.insider & (X.usd >= 1e3)].dropna(subset=["sym"])
     E = first_in(X[["sym", "fd"]], 730)
     E = E[E.fd >= "2016-01-01"]
     return small_only(_no_news(E, 60), 1e12)
@@ -74,7 +74,7 @@ def d8() -> pd.DataFrame:
 
 def c6() -> pd.DataFrame:
     X = buys()
-    X = X[X.insider & (X.usd >= 1e3)]
+    X = X[X.insider & (X.usd >= 1e3)].dropna(subset=["sym"])
     E = first_in(X[["sym", "fd"]], 30)
     E = E[E.fd >= "2016-04-01"]
     return small_only(_no_news(E, 90), 1e12)

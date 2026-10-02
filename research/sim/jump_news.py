@@ -464,7 +464,7 @@ def r3_20() -> pd.DataFrame:
         a = dd.get(r.sym)
         if a is not None and ((a <= r.fd.to_datetime64()) & (a >= (r.fd - pd.Timedelta(days=60)).to_datetime64())).any():
             out.append(dict(sym=r.sym, fd=r.fd))
-    E = first_in(pd.DataFrame(out), 60)
+    E = first_in(pd.DataFrame(out, columns=["sym", "fd"]), 60)
     return small_only(E[E.fd >= "2016-01-01"], 1e12)
 
 
