@@ -9,3 +9,5 @@ Every look, one line. Peer session llm-trader-mid-01 logs in `discovery_log.md`.
 - 11:05 registered DL1 (2f57a54). 11:07 ran `research/sim/drip_ocp.py` once: 203 months, mean +$47.40/$1,000, hit 93%, 11/11 years > 0 -> PAYS. UMH only ~$540/yr.
 - 11:12 C1 (A): FTS 4 phrases SC TO-I 2019-26 -> 57 offers; read Vivid Seats, Payoneer, AvePoint in full; hand-read the ratio/cash sentence of every offer (12 excluded as not warrant offers). Probe: Alpaca has warrant bars (OPENW, SOFIW, CLOVW 2021) — availability only.
 - 11:15 registered DL2 (6d89505). 11:25 ran `warrant_offers.run` once: 38 deals, mean -2.2%, median +0.5%, hit 53% -> DEAD.
+- 11:30 C3 (A, C): FTS DEFM14C "per share in cash"+"written consent"+"merger" 2016-26 -> 57 issuers; read Datto, Ocean Bio-Chem, Sterling Check. Registered DL3 (f47fa76).
+- 11:38 ran `consent_mergers` once: 12 cash deals, median +0.17%, hit 58% -> DEAD. Price parse errors (DWA, FOGO, TWKS) found after; corrected line (data fix, same rule) median +0.17%, hit 67% -> still DEAD.
