@@ -16,7 +16,7 @@ UNAME := $(shell uname -s)
         results status positions slippage logs once dry digest notify-test \
         notify-setup doctor pull scan backtest clean stop persist-stop linger _lastlog pending \
         daytrade-record daytrade-smoke daytrade-status daytrade-halt daytrade-unhalt daytrade-review \
-        daytrade-table daytrade-momentum daytrade-replay daytrade-paper daytrade-persist daytrade-unpersist daytrade-logs
+        daytrade-table daytrade-at-look daytrade-momentum daytrade-replay daytrade-paper daytrade-persist daytrade-unpersist daytrade-logs
 
 help:
 	@echo "swing-trader"
@@ -60,7 +60,7 @@ help:
 	@echo ""
 	@echo "  daytrade-*     the separate day-trading lab (daytrade/README.md):"
 	@echo "                 persist | unpersist | logs | status | smoke | record | replay DAY=YYYY-MM-DD"
-	@echo "                 halt | unhalt | review | table | paper"
+	@echo "                 halt | unhalt | review | table | paper | momentum | at-look (Lab-AT, after 40 sessions)"
 	@echo ""
 	@echo "  scan           what looks tradable today"
 	@echo "  backtest       full walk-forward (slow; writes out/)"
@@ -361,6 +361,9 @@ daytrade-review:
 
 daytrade-table:
 	@$(PY) scripts/daytrade.py table
+
+daytrade-at-look:
+	@$(PY) -m daytrade.research.at_firstlook
 
 daytrade-momentum:
 	@$(PY) scripts/daytrade.py momentum

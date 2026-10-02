@@ -1885,3 +1885,20 @@ return looked at) and the French daily market (CRSP 202608).
 - Test: forward 20-day return on signal days minus on all other days, Newey-West t (20 lags), in each half (CB:
   2006-11..2012-12 / 2013-01..2019-10; CC: 1990-2007 / 2008-2026-08). Pass: the hypothesised sign in BOTH halves AND
   NW |t| >= 2 over the whole sample. Overlapping windows are handled by the NW lags.
+
+
+## Amendment — Lab Round 51, Study Lab-CD: volatility-managed market exposure (Moreira & Muir 2017), French daily 1963-2015 (pre-register; 1 variant, program N 744 -> 745)
+`date`: Thu Oct 1 2026 (the commit time is the stamp). grep: portfolio vol targeting of the LIVE BOOK is dead (add. 9);
+a vol-managed index sleeve is untested. Critique noted: Cederburg, O'Doherty, Wang & Yan (2020) find out-of-sample
+gains weak.
+- Monthly: weight w_m = c / RV_{m-1}, where RV is the realised variance of daily market returns in month m-1, capped
+  at 2.0 (a 2x ETF's reach), floor 0. **c is fixed from 1927-1962 data** (the value making the mean weight 1 there), so
+  nothing is fitted on the judged period.
+- Return: w x market + (1 - w) x RF for w <= 1; for w > 1 the extra (w - 1) is financed at RF + 0.5%/yr, plus a
+  0.9%/yr fee on the levered part. Turnover cost |dw| x 5bp (1x) / 10bp (2x).
+- Judged on 1963-07 .. 2015-12 (halves 1963-89 / 1990-2015) vs the market. Pass:
+  - (a) Sharpe > the market's in BOTH halves;
+  - (b) CAGR at 2x costs >= the market's in BOTH halves;
+  - (c) max DD better than the market's;
+  - (d) the mean weight in the judged period between 0.6 and 1.6 (a sanity bound on c).
+- Reported: 2016-26 simulated, and real SPY / SSO / BIL with the same weights.

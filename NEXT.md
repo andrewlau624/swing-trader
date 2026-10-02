@@ -9,7 +9,7 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
-## Day-trading lab (2026-10-01, Lab Rounds 18-38): 25 studies (intraday, events, multi-day, market-neutral, vol premium, cross-section), four momentum-family PASSES on 1963-2015 (BT, BW, BY, BZ) that all lag the index in 2016-26; paper shadows only; recorder LIVE (program N 744)
+## Day-trading lab (2026-10-01, Lab Rounds 18-38): 25 studies (intraday, events, multi-day, market-neutral, vol premium, cross-section), four momentum-family PASSES on 1963-2015 (BT, BW, BY, BZ) that all lag the index in 2016-26; paper shadows only; recorder LIVE (program N 745)
 
 **Overnight bottom line (for the user, 2026-10-01 morning).**
 - Every intraday idea tested at real costs is dead. The recurring pattern:
@@ -25,7 +25,10 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   - compounding stats.
 - Two registrations were untestable (Nasdaq publishes near prices only from 09:28 / 15:55).
 - **Databento: lab $100.22 + main ~$16 = ~$116 of the $125 credit. No more pulls.**
-- **Recorder: live on the server since 2026-10-01 09:20 ET** (first session: ~97k rows by 11:30, no gaps, 106 MB).
+- **Recorder: live on the server since 2026-10-01 09:20 ET.** First full session: 311,051 rows, no gaps or
+  reconnects, ~106 MB RAM.
+  - Replayed through every lab strategy and the risk layer after the close: 0 rule breaks, everything flat by
+    15:55, nothing left open (`daytrade.research.day_check`).
   Note: the 09:25 gapper sweep picked a corporate action (CTVA −81%, a separation). **Fixed in 1ebf2c8** (it now skips
   |gap| >= 50% and split ratios); it reaches the server on the next `make pull` there (the timer picks it up the next
   morning, no reinstall needed).
@@ -45,6 +48,20 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   -> **Built as PAPER SHADOWS**: `make daytrade-momentum` logs, monthly, the top 20 of 500 stocks by 12-1 momentum
   (Lab-BR) with Lab-BU's vol-scaled weight, and the top 5 of 20 industry ETFs (Lab-BW passed 1963-2015 in every
   decade; the ETF version Lab-BX tied SPY in 2017-26). No orders. study_lab_bt_momentum_history.md.
+- **Forward evidence, automatic (after `make pull` on the server):** the recorder now logs, at the end of each
+  session, Cboe SKEW's z-score (Lab-CC) and, on the first session of each month, both momentum shadows with the
+  vol-scale and trend-filter fields, to `data/daytrade/forward-signals.jsonl`. No orders.
+- **Lab-AT's registered first look is pre-built:** `make daytrade-at-look` refuses until 40 unflagged recorded sessions
+  exist (on the server's `data/daytrade`), then runs the plan exactly once (recorded-spread costs, first/last 20
+  sessions, sign-flip placebo).
+- **DSR audit of the lab's passes:** at N 745 the best is Lab-BW (industry momentum) at DSR 0.55; BT 0.43, BZ 0.16,
+  BY 0.11. None clears 0.95, even at the lab's own N ~50 (best 0.85). No lab finding is a confirmed edge.
+- **Daily new-data loop (this Claude session, weekdays 13:23 PT, expires after 7 days):**
+  - replays each recorded session through every lab strategy and the risk layer (`daytrade.research.day_check`);
+  - runs Lab-AT's registered first look once 40 clean sessions exist;
+  - updates the momentum shadows on the first session of each month;
+  - commits the results.
+  It stops when this session ends. For a permanent version, add the same steps to a server timer after `make pull`.
 - **Nothing to switch on.** The live book is unchanged. The next real look is Lab-AT after 40 recorded sessions
   (~early Dec). Expect few signals (Lab-AV).
 
@@ -916,7 +933,8 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Industry momentum + 10-month market filter, 1963-2015 (Lab-BZ, lab) | **PASS (registered), recent era poor** | 14.6%/yr Sharpe 0.91 max DD −28% vs market 10.1%/0.71/−50%; but 2016-26 5.6% vs 15.0%. Momentum family: 4 long-history passes, all lag the index since 2016: do not deploy on the 60-year record |
 | 3x daily-levered market with a 200-day exit (Gayed & Bilello), French daily 1963-2015 (Lab-CA, lab) | **dead (risk bars)** | 17.4%/yr vs 10.0% but Sharpe ≈ market's (fails 1990-2015), max DD −75%, worst 12m −55%; real UPRO 2016-26 24.5% vs SPY 15.0% with −51% DD: leverage, not edge |
 | Equity put/call (10d mean) high -> higher 20-day market returns, 2006-19 (Lab-CB, lab) | **dead** | right sign both halves (+49/+58bp) but NW t 0.9 |
-| Cboe SKEW high -> lower 20-day market returns, 1990-2026 (Lab-CC, lab) | **PASS (predictive), sizing input only** | −30bp (1990-2007) / −110bp (2008-26), NW t −2.34; clustered signal, marginal at N 744; handed to the main program as a sizing candidate |
+| Cboe SKEW high -> lower 20-day market returns, 1990-2026 (Lab-CC, lab) | **PASS (predictive), not adopted** | −30bp (1990-2007) / −110bp (2008-26), NW t −2.34; main declined it as a sizing input (its legs don't earn market direction; add. 26a); logged forward daily by the recorder |
+| Volatility-managed market exposure (Moreira & Muir), c fixed on 1927-62, cap 2x (Lab-CD, lab) | **dead** | lower CAGR than the market in every period (8.8% vs 10.0% 1963-2015; 9.3% vs 15.1% 2016-26); 1963-89 Sharpe below the market's; only cuts drawdowns |
 | Overnight budget IBS/night by trailing Sharpe softmax (63/252d) or inverse vol (Round 18 AS) | **dead** | ~0..−1.5pp at 2.5bp/side; tier_hi gains are just a lower night weight when night ≈ 0 (AQ's cost gate), t ≤ 1.8 |
 | IBS picks gated on 10d/60d vol ratio, either sign (Round 18 AT1/AT2) | **dead** | 2016-20 holdout has the opposite sign; −0.5 / −3.4pp/yr |
 | IBS picks only when the ETF's 50d slope > 0 (MR "aligned with trend", Round 18 AT3) | **dead, harmful** | −7pp/yr, t −3.1; downtrend dips revert most in every period |

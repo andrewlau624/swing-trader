@@ -109,3 +109,19 @@ Lab-BY it **lagged the market by ~9 points a year in 2016-26**.
 - **Do not deploy on the 60-year record alone.** The recent decade is the relevant regime and it says "index".
 - The paper shadows (stock and industry, with the vol-scale and trend-filter fields) collect forward evidence. Any
   live use needs a new registration judged on forward shadow months, the $500 gate and the user's approval.
+
+## Deflated Sharpe audit of the lab's passes (2026-10-01, no new variant)
+Bailey & López de Prado (2014), the program's formula (`research/sim/program_books.dsr`), on each pass's monthly 1x excess
+over the market in its judged period (1963-07 .. 2015-12, T = 630), null V[SR] = 1/T:
+
+| pass | Sharpe of excess (ann.) | SR0 at N 745 | DSR at N 745 | DSR at N 50 (the lab alone) |
+|---|---|---|---|---|
+| Lab-BW industry momentum | 0.46 | 0.44 | **0.55** | 0.85 |
+| Lab-BT stock momentum | 0.41 | 0.44 | 0.43 | 0.76 |
+| Lab-BZ industry momentum + trend filter | 0.30 | 0.44 | 0.16 | 0.46 |
+| Lab-BY momentum + trend filter | 0.27 | 0.44 | 0.11 | 0.38 |
+
+**None clears DSR 0.95**, the program's standard for a real edge, at the program's N, and not even at the lab's own ~50
+trials. Read with the 2016-26 lag, the momentum findings are textbook factor premia that this search cannot
+distinguish from luck at the required confidence. They stay paper shadows. (Lab-CC, SKEW, is a 20-day regression with
+heavily overlapping windows; its NW t −2.34 is likewise below any multiple-testing bar at N 745.)
