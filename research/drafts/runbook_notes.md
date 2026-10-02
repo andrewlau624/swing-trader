@@ -64,6 +64,22 @@ No pre-registration (explore FAILS). 2024-26 never read. One line: t 1.66 < 2 on
 
 ---
 
+## 3. SC 13G originals: a new passive 5% holder (menu row 3) — explored-dead
+Event: EDGAR quarterly full index (`full_index`), form exactly `SC 13G` (snippet A), filer CIK with <= 50 such
+filings a quarter (drops banks/funds), CIK -> current ticker via `company_tickers()`. File
+`data/research/program/events_13g.parquet`. ADV >= $20M, 1-session hold.
+
+Select-half (<= 2023-12-31), ADV >= $20M:
+```
+events 21545 -> trades 4082  (1020 per year)
+net per trade +9.6bp  median +8.1bp  hit rate 51%  t +1.82
+by year: 2020: -67.3bp (n 92)  2021: -7.5bp (n 1626)  2022: +5.6bp (n 1322)  2023: +48.1bp (n 1042)
+TRACK FREQUENT (>= 100/yr): net >= +10bp, hit >= 50%, t >= 2: FAILS -> stop, record as explored-dead
+```
+No pre-registration. 2024-26 never read. One line: net +9.6bp (< 10) and t 1.82 (< 2); not tested.
+
+---
+
 # Overnight loop (prompt_overnight_loop.md), session llm-trader-e4, started 2026-10-02 ~06:32 PT
 
 ## 2. First insider purchase in 2+ years (menu row 2) — Study EV2, track FREQUENT
