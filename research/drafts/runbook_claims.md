@@ -12,4 +12,5 @@
 | X1 first quarterly dividend (8-K) | overnight | claimed 2026-10-02 06:43 | done: FAILS (explored-dead) |
 | X2 reinstates quarterly (8-K) | overnight | claimed 2026-10-02 06:44 | done: FAILS (explored-dead) |
 | X3 inaugural share repurchase (8-K) | overnight | claimed 2026-10-02 06:44 | done: FAILS (explored-dead) |
-| X4 FDA has approved (8-K) | overnight | claimed 2026-10-02 06:45 | in progress |
+| X4 FDA has approved (8-K) | overnight | claimed 2026-10-02 06:45 | done: FAILS (explored-dead) |
+| X5 Breakthrough Therapy Designation (8-K) | overnight | claimed 2026-10-02 06:45 | in progress |

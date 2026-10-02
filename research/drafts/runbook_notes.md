@@ -231,3 +231,8 @@ Explored-dead.
 41 hits -> 41 events (2022-26). Explore ADV >= $20M: 1 trade (too few). Deal report, select, ADV >= $1M, 7 deals:
 hold 1 hit 29% mean -1.95% | hold 5 hit 29% mean -4.68% | hold 20 hit 43% mean -1.54%, worst -11.2%. RARE gate
 FAILS. Explored-dead.
+
+## X4. FDA approvals, 8-K `"Food and Drug Administration (FDA) has approved"` (extra row X4) — explored-dead
+257 hits -> 216 events. Explore ADV >= $20M: 24 trades (6/yr) -> RARE (net +154bp but median -29bp, hit 50%, t 0.78:
+a few lottery winners). Deal report, select, ADV >= $1M, 46-48 deals (12/yr): hold 1 hit 48% mean +0.64% worst -15.1% |
+hold 5 hit 48% mean +2.58% worst -18.8% | hold 20 hit 50% mean -0.36% worst -33.2%. RARE gate FAILS. Explored-dead.
