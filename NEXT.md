@@ -30,7 +30,9 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 - 62 ideas (`jump_ideas.md`), log + STATE in `jump_hunt_log.md`. N 761 (J1). Judged: **J1 first profitable
   quarter, RIDE hold60: DEAD** (judge +5.5%/trade but ex-top3 −1.8%, P 0.21; `study_jump_d6_first_profit.md`);
   **J2 insider buy after a 30% fall, JUMP tp205: DEAD** (judge x1.3, P 0.18; the fall, not the insider, carried select);
-  **J3/J4 8-K strategic alternatives + advisor / NDAs: DEAD** (judge −1.7%, P 0.71 / 7 trades). k = 4, N 764.
+  **J3/J4 8-K strategic alternatives + advisor / NDAs: DEAD** (judge −1.7%, P 0.71 / 7 trades); **J5-J8 (big buybacks,
+  forward splits, upgrade clusters, big-target initiations): DEAD** (`study_jump_j5_j8_news_events.md`; closest J5:
+  jump x4.8, +0.8%/trade, ex-top3 −0.1%). k = 8, N 768.
   Explored-dead: H17 trade-count spike (two-way), D4 theme 8-K (two-way), D5 hot-word renames (rare), D9 first
   Phase 3 (lottery).
 
@@ -970,6 +972,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Night leg x0.5 when Cboe COR1M z >= +1 (Reddit R7) | **dead** | lowers 2021-23 Sharpe, −2.4pp CAGR |
 | Congress (STOCK Act) trade copying (Reddit R8) | **no data** | free dumps 403 |
 | Night picks with a reverse split in the last 90 / 365 days, dropped (Reddit R11a/b) | **dead / borderline** | 365d: right sign both halves, t −1.21, perm 7% |
+| Big buyback (>= 15% of cap, un-gapped) / forward split / two upgrades in 10 days / initiation with a 2x target (Jump hunt J5-J8, N 765-768) | **dead (judge half)** | all beat a same-day control on select; judge: jump rates held (x4.8 / x1.8 / x2.4) but ex-top3 −0.1 / −1.1 / −1.5%, P 0.16-0.34; J8 no 2024+ events |
 | 8-K strategic alternatives + financial advisor (RIDE hold20) / + confidentiality agreements (JUMP hold20) (Jump hunt J3/J4, N 763-764) | **dead (judge half)** | select +3.5% / +6.0% and beat a same-day control, but the takeover tail did not repeat: judge −1.7% (P 0.71) / 7 trades |
 | Officer/director buy after a 30% 60-session fall, +20% limit in 5 sessions (Jump hunt J2, N 762) | **dead (judge half)** | select jump x2.6 / +0.5%, but a no-insider control of the same falls did as well (price proxy); judge jump x1.3, P 0.18 |
 | First profitable quarter after >= 6 losses, small caps, 60-day hold (Jump hunt J1, N 761) | **dead (judge half)** | select +7.3%/trade (survivorship + 2016/2020 timing), judge +5.5% but ex-top3 −1.8%, P 0.21: lottery |

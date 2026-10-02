@@ -240,3 +240,9 @@
   - **R4-18** (26 select -> 16 trades); hold1 x0.0 +1.0%/-0.7%/+0.1% P0.16; tp205 x1.0 -0.1%/-3.4%/-1.7% P0.56; hold20 x1.6 +3.2%/-1.3%/+3.1% P0.16; hold60 x1.4 -1.3%/-9.0%/+4.0% P0.57; tp2060 x1.2 +2.8%/-1.2%/+13.7% P0.30; all fail
   - **R4-19** (297 select -> 216 trades); hold1 x5.3 -0.9%/-1.2%/-0.7% P0.99; tp205 x1.5 -0.4%/-0.7%/-0.8% P0.74; hold20 x0.9 +0.0%/-1.2%/-0.6% P0.50; hold60 x1.0 -1.0%/-2.7%/-1.7% P0.70; tp2060 x1.0 -0.3%/-0.6%/+3.7% P0.58; all fail
   All dead (D1 510(k) before the press release: +1.0% at 60, no lift; D8/C6 insider buys with no news: ~ the stock's usual; C5 big contract in a small float: +6.4% at 60 but ex-top3 -0.5%).
+- 03:20 news archive complete through 2025-09; `jump_rebuild.py`: J5-J8 select-half hashes all **MATCH** the pins.
+- 03:25 judges (once each), all **DEAD**: J5 `tp205 n 68 jump 8.8% vs base 1.8% (x4.8) mean net +0.8% ex-top3 -0.1%
+  median +0.4% P 0.23`; J6 `trail20 n 28 (x1.8) mean +2.6% ex-top3 -1.1% median -0.1% P 0.16`; J7 `tp205 n 25 (x2.4)
+  mean +1.0% ex-top3 -1.5% median +1.7% P 0.34`; J8 `0 trades` (headline format gone after 2020). k = 8.
+  Write-up `study_jump_j5_j8_news_events.md`.
+- 03:30 **R3-18** first 10-K naming a hot theme (1,066 select -> 684): `hold20 -3.0%`, `hold60 -5.3%`. Dead. 78 explored.
