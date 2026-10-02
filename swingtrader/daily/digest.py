@@ -189,31 +189,52 @@ def whatif_realized(acct: Account, decisions: list[dict], verdicts: dict, convic
 
 
 # ---------------------------------------------------------------- gates
-def round31_whatif(state: Path, acct: Account) -> list[dict]:
-    """Round 31 shadows on the brokerage: ID3 insider-day sleeve (0.45 x that day's equity, equal split, official
-    open -> close, 2.5bp/side) and odd-lot tender alerts (99 shares x guaranteed price - close at the alert)."""
+ODD_LOT_MAX = 99                        # odd-lot priority: <= 99 shares tendered are accepted in full
+
+
+def odd_lot_shares(equity: float, px: float) -> int:
+    """Whole shares an account can buy for an odd-lot tender: its own cash (no margin), at most 99.
+    A flat 99 overstated the brokerage 3.8x on MDT -> MMED (99 x $86.89 = $8.6k on $2.3k)."""
+    return int(min(ODD_LOT_MAX, equity // px)) if px and px > 0 and equity > 0 else 0
+
+
+def round31_whatif(state: Path, acct: Account, manual_only: bool = False) -> list[dict]:
+    """Round 31-32 shadows. Brokerage: ID3 insider-day sleeve (0.45 x that day's equity, equal split, official
+    open -> close, 2.5bp/side) and the reverse-split round-up (both accounts, booked once here). Every account:
+    the manual odd-lot tenders and split-off offers, at the whole shares THIS account could buy that day
+    (`odd_lot_shares`), x the guaranteed price (tender) or the implied gain (split-off) at the alert.
+    `manual_only` = just those two (the Roth)."""
     out = []
     eq_on = {e["date"]: e["equity"] for e in acct.equity_log}
-    ins = [r for r in _jsonl(state / "insider-day.jsonl") if r.get("status") == "scored"]
+    eq = lambda d: float(eq_on.get(d, acct.equity))
+    ins = [] if manual_only else [r for r in _jsonl(state / "insider-day.jsonl") if r.get("status") == "scored"]
     if ins:
         by: dict = {}
         for r in ins:
             by.setdefault(r["date"], []).append(float(r["ret_net"]))
-        usd = sum(0.45 * eq_on.get(d, acct.equity) * float(np.mean(x)) for d, x in by.items())
+        usd = sum(0.45 * eq(d) * float(np.mean(x)) for d, x in by.items())
         out.append(dict(idea="insider-day ID3 (0.45x daytime)", n=len(ins), usd=usd))
-    tw = [r for r in _jsonl(state / "tender-watch.jsonl") if r.get("alert")]
+    tw = [r for r in _jsonl(state / "tender-watch.jsonl") if r.get("alert") and r.get("floor") and r.get("last_close")]
     if tw:
-        usd = sum(99 * (float(r["floor"]) - float(r["last_close"])) for r in tw if r.get("floor") and r.get("last_close"))
-        out.append(dict(idea="odd-lot tenders (manual, <= 99 sh)", n=len(tw), usd=usd))
+        sh = [odd_lot_shares(eq(r.get("date", "")), float(r["last_close"])) for r in tw]
+        usd = sum(n * (float(r["floor"]) - float(r["last_close"])) for n, r in zip(sh, tw))
+        out.append(dict(idea=f"odd-lot tenders (manual, {_sh(sh)})", n=len(tw), usd=usd))
     so = [r for r in _jsonl(state / "splitoff-watch.jsonl") if r.get("alert")]
-    if so:                                 # Round 32 B2: 99 parent shares x implied gain at the entry-day alert
-        usd = sum(99 * float(r["parent_px"]) * float(r["gain"]) for r in so)
-        out.append(dict(idea="split-off exchange offers (manual, <= 99 sh)", n=len(so), usd=usd))
-    ru = [r for r in _jsonl(state / "roundup-watch.jsonl") if r.get("scored") and r.get("split_in_prices")]
+    if so:                                 # Round 32 B2: parent shares x implied gain at the entry-day alert
+        sh = [odd_lot_shares(eq(r.get("entry", "")), float(r["parent_px"])) for r in so]
+        usd = sum(n * float(r["parent_px"]) * float(r["gain"]) for n, r in zip(sh, so))
+        out.append(dict(idea=f"split-off exchange offers (manual, {_sh(sh)})", n=len(so), usd=usd))
+    ru = [] if manual_only else [r for r in _jsonl(state / "roundup-watch.jsonl")
+                                 if r.get("scored") and r.get("split_in_prices")]
     if ru:                                 # Round 32 B1: 1 share in each of 2 accounts, IF Schwab rounds up
         out.append(dict(idea="reverse-split round-up (1 sh x 2 accts, if rounded)", n=len(ru),
                         usd=sum(2 * float(r["gain_if_rounded"]) for r in ru)))
     return out
+
+
+def _sh(shares: list[int]) -> str:
+    lo, hi = min(shares), max(shares)
+    return f"{lo} sh" if lo == hi else f"{lo}-{hi} sh"
 
 
 def gates(accts: dict, logs: Path, state: Path) -> list[dict]:
@@ -264,7 +285,8 @@ def build(state: Path, logs: Path, start_equity: float, conviction_w: float, tax
     from .testing import status as testing_status
     return dict(accounts=accts, gates=gates(accts, logs, state), testing=testing_status(state, logs),
                 whatif={n: whatif_realized(a, decisions, verdicts, conviction_w)
-                        + (round31_whatif(state, a) if n == "live" else []) for n, a in accts.items()},
+                        + (round31_whatif(state, a, manual_only=n != "live") if n in ("live", "roth") else [])
+                        for n, a in accts.items()},
                 proj=projections(bal, taxable_monthly))
 
 
@@ -381,7 +403,7 @@ def render(d: dict, charts: bool = True, taxable_monthly: float = 0.0) -> tuple[
             prog = f"{r['n']} of {r['need']}" if r["need"] else f"{r['n']} {r['unit']}"
             T.append(f"  {r['name'][:30]:30s} {prog:>12s}  +{r['week']}  {r['line'][:90]}")
     if ideas:
-        T += ["", "If these had been on:"] + [f"  {NAME[n]:10s} {r['idea'][:34]:34s} {_signed(r['usd']):>7s}" for n, r in ideas]
+        T += ["", "If these had been on:"] + [f"  {NAME[n]:10s} {r['idea'][:44]:44s} {_signed(r['usd']):>7s}" for n, r in ideas]
     for n, _ in real:
         _, _, mk = proj[n]
         T += ["", f"{NAME[n]}{' (after tax; index as if sold)' if n == 'live' else ''}:     5 years    10 years"]

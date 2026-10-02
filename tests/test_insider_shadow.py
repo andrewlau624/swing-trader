@@ -91,7 +91,9 @@ def test_digest_counts_round31_shadows(tmp_path):
     acct = digest.Account("live", 2000.0, None, 0.0, [], [], [], [], [dict(date="2026-10-05", equity=2000.0)])
     w = {r["idea"][:10]: r for r in digest.round31_whatif(tmp_path, acct)}
     assert w["insider-da"]["n"] == 2 and abs(w["insider-da"]["usd"] - 0.45 * 2000 * 0.001) < 1e-9
-    assert w["odd-lot te"]["n"] == 1 and w["odd-lot te"]["usd"] == 99 * 2.0
+    # $2,000 buys 62 shares at $32, not 99
+    assert w["odd-lot te"]["n"] == 1 and w["odd-lot te"]["usd"] == 62 * 2.0
+    assert "62 sh" in w["odd-lot te"]["idea"]
     g = {x["gate"]: x for x in digest.gates({}, tmp_path, tmp_path)}
     assert g["Insider-day (ID3) verdict"]["n"] == 2
 
@@ -121,3 +123,20 @@ def test_ev2_flags_and_sub_gates():
     assert g["ev2"]["n"] == 60 and g["ev2"]["verdict"].startswith("PASS") and g["ev2"]["rest_bp"] < 0
     assert g["ev2_big"]["n"] == 60
     assert s.gate(rows[:30])["ev2"]["verdict"].startswith("shadowing")
+
+
+def test_splitoff_whatif_is_sized_by_what_each_account_can_buy(tmp_path):
+    """MDT -> MMED 2026-10-02: a flat 99 shares showed +$371 on a $2.3k brokerage."""
+    import json
+    import pytest
+    from swingtrader.daily import digest
+    (tmp_path / "splitoff-watch.jsonl").write_text(json.dumps(dict(
+        entry="2026-10-02", parent="MDT", parent_px=86.89, gain=0.0431, alert=True)) + "\n")
+    acct = lambda name, eq: digest.Account(name, eq, None, 0.0, [], [], [], [], [dict(date="2026-10-02", equity=eq)])
+    live = digest.round31_whatif(tmp_path, acct("live", 2263.09))
+    roth = digest.round31_whatif(tmp_path, acct("roth", 1000.0), manual_only=True)
+    big = digest.round31_whatif(tmp_path, acct("live", 25000.0))
+    assert live[0]["usd"] == pytest.approx(26 * 86.89 * 0.0431) and "26 sh" in live[0]["idea"]
+    assert roth[0]["usd"] == pytest.approx(11 * 86.89 * 0.0431) and len(roth) == 1
+    assert big[0]["usd"] == pytest.approx(99 * 86.89 * 0.0431), "odd-lot priority caps at 99"
+    assert digest.odd_lot_shares(50.0, 86.89) == 0
