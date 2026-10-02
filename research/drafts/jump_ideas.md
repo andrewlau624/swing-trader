@@ -182,3 +182,32 @@ buyer, and any MEETS gets a same-stock no-event control before registering.
 | R3-18 | **First 10-K risk factor naming a hot theme by a micro cap** (FTS 10-K, not 8-K: the slow venue) | R | D | Same as D4 but in the annual report, not a press 8-K | TWO-WAY (D4 died) -> quieter venue | E FTS | 50-150 | 3 |
 | R3-19 | **LLM-extracted "first commercial sale / first order" in a 10-Q MD&A** of a micro cap (verbatim sentence) | R | D | A product reaches its first customer; told in a 10-Q, not a headline | GAP, EXIT LIQ | E + OpenCode Go | 30-80 | 4 |
 | R3-20 | **Analyst coverage dropped by the last broker** (headline "Discontinues/Suspends Coverage") then an insider buy within 60 days | R | C | Orphaned stock, informed buyer, no analyst: maximum neglect + own money | EXIT LIQ, TOO WEAK | N + F4 | 10-30 | 4 |
+
+## Round 4 (21:10, before any outcome of these): sale-preparation footprints and other takeover predictors (EDGAR)
+Why: 30 explored ideas died of EXIT LIQUIDITY, TWO-WAY, LOTTERY, PRICE PROXY and TOO WEAK (informed buyers earn the
+stock's usual +1-2%). The JUMP gate needs events that raise the up-jump rate WITHOUT raising the crash rate, and a
+takeover is exactly that. Boards leave paperwork when they prepare a sale, filed in 8-Ks nobody reads. Method (new):
+**corporate-governance footprints in 8-K text (FTS)**, plus three other new families.
+
+| # | idea | track | tag | cause sentence | death dodged, how | data | sig/yr | novelty |
+|---|---|---|---|---|---|---|---|---|
+| R4-1 | **Change-in-control severance plan adopted** (8-K Item 5.02 "change in control severance" + "adopted"), small caps | J | D | Boards protect executives before a sale; an acquirer pays a premium months later | GAP (a quiet 5.02 filing), TWO-WAY (sale = up only) | E FTS | 50-150 | 4 |
+| R4-2 | **Retention bonus / retention plan adopted** (8-K "retention bonus" OR "retention agreement" + "change in control") | J | D | Retention plans keep staff through a deal process | as R4-1 | E FTS | 30-100 | 4 |
+| R4-3 | **Poison pill adopted** (8-K Item 3.03 "rights agreement" + "adopted"), small caps | J | D | A pill means someone is circling (activist or bidder); bids follow | GAP (the pill is not a bid), LOTTERY (many) | E FTS | 30-80 | 3 |
+| R4-4 | **Special committee of independent directors formed** to evaluate a proposal or transaction (8-K text) | J | D | A going-private / controller bid is being reviewed; bumps are common | GAP (the proposal may already be public: test) | E FTS | 20-60 | 3 |
+| R4-5 | **Financial advisor engaged** to evaluate "strategic alternatives" in an 8-K (EDGAR, not headline) | J | D | The board hired a banker: a sale process | GAP (8-K vs headline) | E FTS | 50-150 | 3 |
+| R4-6 | **Confidentiality / standstill agreements signed** ("entered into confidentiality agreements with" N parties, 8-K/proxy) | J | D | Bidders are inside the data room | GAP | E FTS | 10-40 | 4 |
+| R4-7 | **Bylaw amendment: exclusive forum / advance notice** right after a 13D (activist defense) | J | C | The board fortifies against an activist who wants a sale | EXIT LIQ | E FTS + form.idx 13D | 20-60 | 4 |
+| R4-8 | **Large holder files 13D after holding a 13G** (13G -> 13D switch: passive turns active) | J | D | A big holder now wants change (often a sale) | GAP of fresh 13Ds (A1 died): this is a known holder switching | E form.idx | 50-150 | 3 |
+| R4-9 | **Corporate (non-fund) filer takes a 5%+ stake** (13D/13G filer is an operating company with SIC not 6xxx) | J | D | A strategic investor's toehold precedes acquisitions | GAP | E form.idx + subm SIC | 20-60 | 4 |
+| R4-10 | **Insider sells nothing for 12 months, then 3+ insiders buy in one window in a company with a pending strategic review** | J | C | Insiders buy when they expect a premium | TOO WEAK alone (EV), combined | F4 + E FTS | 10-30 | 4 |
+| R4-11 | **Debt covenant waiver / forbearance ends with a refinancing** (8-K "forbearance" then "refinanc") | R | D | A distress overhang is lifted by a lender (informed) | EXIT LIQ | E FTS | 20-60 | 3 |
+| R4-12 | **Auditor change to a Big-4 firm from a small auditor** (8-K Item 4.01, new auditor in a Big-4 list) | R | D | Upgrading the auditor precedes uplisting/capital raises/sales; the auditor accepted the risk | TOO WEAK? informed party | E FTS | 30-80 | 4 |
+| R4-13 | **CFO hired from a big company** (8-K 5.02 text "previously served as ... at <Fortune 500 name>") | R | D | Talent arrival signals a growth plan | TOO WEAK | E FTS | 30-80 | 3 |
+| R4-14 | **Nasdaq/NYSE transfer of listing** from NYSE American / Nasdaq CM to Nasdaq GS/GM (8-K "transfer" "Global Select") | R | D | A listing upgrade opens the stock to more funds (forced eligibility) | EXIT LIQ | E FTS | 20-60 | 3 |
+| R4-15 | **S-3 shelf WITHDRAWN** (form RW on an S-3) by a small cap | R | D | Withdrawing a shelf removes dilution overhang; the company (informed) doesn't need cash | TOO WEAK | E form.idx | 30-80 | 4 |
+| R4-16 | **Going-private proposal by management / controller** made public (SC 13D/A or 8-K "going private" "proposal"), RIDE to the final price | J | D | Controllers usually raise their first bid | GAP at the proposal, then bumps | E FTS | 10-30 | 3 |
+| R4-17 | **Tender offer by a non-controlling holder for >= 10% at a premium** (SC TO-T, not a full acquisition) | J | D | A partial tender signals the buyer's value view and often leads to a full bid | GAP | E FTS | 10-30 | 3 |
+| R4-18 | **Merger agreement amendment raising the price** (8-K "amendment to the agreement and plan of merger" + "increase") | J | W | Bumps signal competition; a second bump follows sometimes | GAP | E FTS | 10-30 | 3 |
+| R4-19 | **Company buys back a block from a departing big holder** (8-K "repurchase" + "from" a named fund, privately negotiated) | R | D | The overhang is removed by the informed buyer (the company) | TOO WEAK | E FTS | 10-30 | 4 |
+| R4-20 | **Merger-of-equals target in a sector consolidating** (two sale announcements in the same 4-digit SIC within 30 days -> other small peers) | J | V | Consolidation waves: bidders look at the remaining peers | GAP (peers, not targets), TOO RARE | E form.idx + news | 20-60 | 4 |

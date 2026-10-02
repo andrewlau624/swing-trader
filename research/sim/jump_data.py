@@ -96,11 +96,12 @@ def reddit_month(sub: str, m: pd.Period) -> pathlib.Path:
     return f
 
 
-def wiki_views() -> pathlib.Path:
-    """Daily en.wikipedia user pageviews 2016-01-01..2026-09-30 for every article in wikidata_tickers.parquet
-    (Wikidata: NASDAQ/NYSE/NYSE American/Cboe tickers with an enwiki article; tickers as of today)."""
-    W = pd.read_parquet(OUT / "wikidata_tickers.parquet")
-    d = OUT / "wiki"
+def wiki_views(src: str = "wikidata_tickers.parquet", sub: str = "wiki") -> pathlib.Path:
+    """Daily en.wikipedia user pageviews 2016-01-01..2026-09-30 for every article (`title`) in `src`
+    (wikidata_tickers.parquet: NASDAQ/NYSE/NYSE American/Cboe tickers with an enwiki article, tickers as of today;
+    wikidata_ceos.parquet: those companies' CEOs' articles)."""
+    W = pd.read_parquet(OUT / src)
+    d = OUT / sub
     d.mkdir(parents=True, exist_ok=True)
     from urllib.parse import quote
     from urllib.parse import unquote
@@ -144,7 +145,7 @@ def main(argv=None):
     ap.add_argument("args", nargs="*")
     a = ap.parse_args(argv)
     if a.what == "wiki":
-        wiki_views()
+        wiki_views(*a.args) if a.args else wiki_views()
     elif a.what == "news":
         from concurrent.futures import ThreadPoolExecutor
         with ThreadPoolExecutor(int(a.args[2]) if len(a.args) > 2 else 3) as ex:   # ~3 x 50 req/min, under 200/min

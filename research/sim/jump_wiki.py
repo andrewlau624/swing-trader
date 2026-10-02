@@ -118,6 +118,46 @@ def c1() -> pd.DataFrame:
     return H[keep]
 
 
+def h23() -> pd.DataFrame:
+    """The CEO's article (Wikidata P169, tenure started) at >= 10x its trailing-60-day median views (median >= 20)."""
+    from urllib.parse import quote, unquote
+    W = pd.read_parquet(OUT / "wikidata_ceos.parquet")
+    W["start"] = pd.to_datetime(W.start, errors="coerce", utc=True).dt.tz_localize(None)
+    out = []
+    for r in W.itertuples():
+        f = OUT / "wiki_ceo" / (quote(unquote(r.title), safe="")[:150] + ".parquet")
+        if not f.exists():
+            continue
+        D = pd.read_parquet(f)
+        if not len(D):
+            continue
+        v = pd.Series(D.views.to_numpy(), index=pd.to_datetime(D.date)).sort_index().asfreq("D", fill_value=0)
+        med = v.rolling(60, min_periods=60).median().shift(1)
+        for d in v.index[(v >= 10 * med) & (med >= 20)]:
+            if pd.isna(r.start) or r.start <= d:
+                out.append(dict(sym=r.ticker, fd=d))
+    return first_in(pd.DataFrame(out), 30)
+
+
+def r3_17() -> pd.DataFrame:
+    """Daily views at a 2-year high (>= the max of the prior 730 days, >= 100 views) within 30 days after an
+    officer/director open-market buy (Form 4)."""
+    from .jump_insider import buys
+    X = buys()
+    X = X[X.insider & (X.usd >= 1e3)].dropna(subset=["sym"])
+    ib = X.groupby("sym").fd.apply(lambda x: x.sort_values().to_numpy())
+    out = []
+    for s_, v in views().items():
+        a = ib.get(s_)
+        if a is None:
+            continue
+        hi = v.rolling(730, min_periods=730).max().shift(1)
+        for d in v.index[(v >= hi) & (v >= 100)]:
+            if ((a <= d.to_datetime64()) & (a >= (d - pd.Timedelta(days=30)).to_datetime64())).any():
+                out.append(dict(sym=s_, fd=d))
+    return first_in(pd.DataFrame(out), 60)
+
+
 if __name__ == "__main__":
     what = sys.argv[1]
     save(globals()[what](), what)
