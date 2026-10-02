@@ -1,14 +1,13 @@
 # Index-beat hunt log (session llm-trader-ee, prompt_index_beat.md)
 
 ## STATE (update after every idea)
-- program N: 761 (Jump hunt J1 took 761 on 2026-10-02; my next would be 762; none registered by this hunt yet)
-- k (ideas judged): 0 · ideas explored: 10 (C1 C3 C5 C4 C2 reports; A1 = DL-IB1 conditional PAYS; B3 A9 A18 dead) · idea rounds: 1 (55 ideas)
-- current idea: A2/A3 (spin-off / merger fractional round-ups, EDGAR FTS probe running)
-- WAITING: DL-IB1 is FOUND only after 2 live rounded deals (VIVK ex 10-05, check ~10-07: state/roundup-orders.json on him)
-- next 5: B8 -> killed as dup of AS (trailing-Sharpe budget, dead); A4 CEF->ETF conversions; A6 SPAC redemption; A13 13F first buys; B1/B2/B5 23/5 forward specs
-- data sources verified: repo sims (program_books, taxable_frontier.after_tax, roth_opt), etf_daily (dividend-adjusted), night raw pool, roundup_deals.csv, Alpaca SIP daily bars (raw + 'all' adj, CEFs cached in data/research/program/ib/cef), EDGAR FTS (event_fetch.fts_years)
-- data sources broken/unverified: E-mini overnight history (not free), option NBBO (paid), 23/5 quotes (forward only)
-- why things die (running): HAIRCUT (C1/C2/C5: at edge-halves the taxable night+IBS legs ~= SPY pre-tax; placement wins only if the edge is half the backtest, loses if it is the backtest) / HALF-FLIP (C3, C4) / COST (A9 CEFs) / bound too small (A18) / no sign (B3); plus the prompt's map
+- program N: 761 (Jump J1 took 761; my next would be 762; none registered by this hunt)
+- k (ideas judged): 0 · explored: 15 (C1 C2 C3 C4 C5 A1/DL-IB1 B3 A9 A18 A20 A2 R2-7 + A8 bound) · killed by bound: ~35 · idea rounds: 2 (55 + 27)
+- current: write ROUND 3 (method: death-dodges of the program's near misses + noise-leg structure + haircut-proof ideas)
+- WAITING: DL-IB1 FOUND only after 2 live rounded deals (VIVK ex 10-05, check ~10-07: state/roundup-orders.json on him, read-only)
+- untested left from rounds 1-2: B1/B2/B5/B6 (23/5 forward ideas; A20 prior says thin), A3 (parked), reports A7/C9/C14/C15 (user questions)
+- data verified: repo sims, etf_daily (div-adj), raw night pool, roundup_deals.csv, Alpaca SIP daily + minute (pre-market cached ib/pm1), EDGAR FTS
+- why things die (running): HAIRCUT (taxable night+IBS ~= SPY at EH: C1/C2/C5) / LOTTERY (A20 V2, R2-7) / HALF-FLIP (C3, C4) / COST (A9) / bound too small / none exist (A2)
 
 ## Log
 - 2026-10-02 13:20 setup: merged, 356 tests pass, N 760 (last registered: EV2). Messaged llm-trader-51 (Jump hunt), 198-da.
@@ -63,3 +62,4 @@
   -> DEAD. The 23/5 forward specs B1/B2 inherit this prior (the bounce is not sitting in the pre-market for most picks); B1/B2/B5 stay ideas, no testing.py row. ib_a20.py, a20_explore.txt
 - A2 spin-off round-ups: 41 Form 10 registrants with a round-up/fraction phrase 2016-26, 0 with a holder-level round-up of the distribution (strict_up) -> DEAD (none exist). A3 merger round-ups: hits are SPAC rights conversions; parked (not run).
 - ROUND 2 written (index_beat_ideas_r2.md, outside-literature sweep): 27 rows, 1 new testable (R2-7 spin-offs held > 1 year), the rest dup/live/killed by bound with reasons.
+- R2-7 spin-offs held 260 sessions (select entries 2021-22): d0+20: n 17, mean excess net +10.1%, median +1.5%, ex-top-3 -14.6% (MPTI +241%) -> FAILS (LOTTERY); d0+5 (2nd look): n 19, mean +2.4%, ex-top-3 -11.4% -> FAILS. DEAD. ib_r27.py, r27_explore.txt
