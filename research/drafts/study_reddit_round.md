@@ -79,3 +79,11 @@ Source: r/pennystocks sweep (all three slices): in serial diluters the dip is su
   Unlike R1 the tag does not need an EDGAR map, so all picks are eligible.
 - If PASS: live filter is cheap (the bot already reads Alpaca corporate actions for roundup_watch); shadow first,
   testing.py registry entry.
+
+### R11 results
+| id | verdict | numbers (tier; tier_hi similar) |
+|---|---|---|
+| R11a reverse split in 90d, DROP | **DEAD** | 380 tagged; excess −60bp (2021-23, n 57) / +9bp (2024-26, n 310); t −0.04; perm 46% |
+| R11b reverse split in 365d, DROP | **fail (borderline)** | 900 tagged; excess −12 / −34bp (right sign both halves), raw net −19 / −40bp; t −1.21 (bar −2), perm 7% (bar 2.5); DROP book +0.87 / +3.61 pp/yr (tier_hi +1.19 / +4.88) |
+R11b misses on significance, not direction. Note the drift: tagged share of picks 4% (2021-23) -> 13% (2024-26).
+Not adopted. Candidate for a forward-only log (tag each live night pick; judge after N picks) if wanted.

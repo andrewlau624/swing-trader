@@ -9,7 +9,7 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
-## Reddit round (2026-10-02): r/algotrading swept, 4 registered variants all DEAD; N 761 -> 765
+## Reddit round (2026-10-02): r/algotrading + 5 subs swept, 6 registered variants, none PASS; N 761 -> 767
 - Full read of r/algotrading 2021-26 (41,472 posts via Arctic Shift; 1,807 substantive + comments, 10 readers vs this
   table). No new edge; nearly every recurring idea is already here. Pre-registered 96c777d; `study_reddit_round.md`.
 - **R1a/R1b 8-K bad-news items (5.02/4.02/4.01/3.01) -> DROP the night pick: DEAD.** 166 / 497 tagged picks; excess
@@ -969,6 +969,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Idle night cash in GLD close->open instead of T-bills (Reddit R6) | **dead** | 2021-23 −4.5pp/yr, NW t 0.27 |
 | Night leg x0.5 when Cboe COR1M z >= +1 (Reddit R7) | **dead** | lowers 2021-23 Sharpe, −2.4pp CAGR |
 | Congress (STOCK Act) trade copying (Reddit R8) | **no data** | free dumps 403 |
+| Night picks with a reverse split in the last 90 / 365 days, dropped (Reddit R11a/b) | **dead / borderline** | 365d: right sign both halves, t −1.21, perm 7% |
 | 8-K strategic alternatives + financial advisor (RIDE hold20) / + confidentiality agreements (JUMP hold20) (Jump hunt J3/J4, N 763-764) | **dead (judge half)** | select +3.5% / +6.0% and beat a same-day control, but the takeover tail did not repeat: judge −1.7% (P 0.71) / 7 trades |
 | Officer/director buy after a 30% 60-session fall, +20% limit in 5 sessions (Jump hunt J2, N 762) | **dead (judge half)** | select jump x2.6 / +0.5%, but a no-insider control of the same falls did as well (price proxy); judge jump x1.3, P 0.18 |
 | First profitable quarter after >= 6 losses, small caps, 60-day hold (Jump hunt J1, N 761) | **dead (judge half)** | select +7.3%/trade (survivorship + 2016/2020 timing), judge +5.5% but ex-top3 −1.8%, P 0.21: lottery |
