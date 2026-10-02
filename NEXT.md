@@ -9,6 +9,12 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Round 33 (2026-10-02): event runbook — Study EV1 (cluster insider buys) DEAD; N 758
+- **EV1 cluster insider buys: DEAD** (registered f4d19c5, judged 2024-26). Buy the opening cross / sell the closing
+  cross the session after a cluster of 2+ distinct officer/director Form 4 purchases <= 5 days apart. Judge-half
+  event net +27.3bp but daily-sleeve NW t **+1.85** (< 2); DSR 0.218. Select half +27.7bp/trade, t 2.42, hit 53%.
+  `study_ev1_cluster_insider.md`. Session notes: `runbook_notes.md`.
+
 ## Round 31 (2026-10-02): EDGAR unblocked — one registered PASS (ID3, shadow) and one small sure thing (odd-lot tenders, alert); N 755
 - **Study ID3 PASSES (registered b2cdc1c, judged on 2024-26): the session after an officer/director open-market
   purchase Form 4, buy the opening cross, sell the closing cross, 20d ADV$ >= $20M.** +16.6bp/trade net of
@@ -1015,6 +1021,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Night picks on lockup-expiry days / SIC sympathy peers of a crash / by listing exchange (Round 30 #7, #9, #10) | **dead** | lockup −122bp (n 23); peers bounce less (−7.9 vs −2.8bp); exchange order flips |
 | IEF instead of BIL for 3 days after note/bond auctions (Round 30 #14) | **dead at the bar** | +2.7bp/day (t 2.0) ≈ 5bp switching × 38 auctions/yr; published |
 | Insider-buy (Form 4 P) session open -> close, all names / ADV $1-20M (Round 31 ID1/ID2) | **dead (judge half)** | +17 / +14bp net but 2024-26 t 1.2 / 0.9; ID3 (ADV >= $20M) PASSES -> shadow |
+| Cluster insider buys (2+ officer/director buys <= 5d), next session open -> close (Round 33 EV1) | **dead** | select +27.7bp t 2.42, but judge-half daily-sleeve t +1.85 (< 2), DSR 0.218; event mean +27.3bp (N 758) |
 | Insider-buy 20-day drift / night-pick tilt (Round 31 L19) | **dead** | 20d ≈ 0 except 2020; tilt medians negative |
 | Night picks: NT 10-K/Q in 60d, Form 144 in 7d (Round 31 L17) | **dead** | NT flips (+41 / −71bp); 144 n tiny, mixed |
 | Night picks: EFFECT notice in 7d as a size-up (Round 31 L18) | **not registered** | +32 / +236bp but ex-top-5 0bp (DS5's failure mode) |

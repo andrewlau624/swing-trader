@@ -32,3 +32,16 @@ Why it should work (before registering):
   a large book cannot size into. The event is also short-horizon and cannot absorb size without moving the cross.
 
 (If judged DEAD, this section still stands as the pre-registered reasoning.)
+
+**Judge (2024-01..2026-03), pre-registered commit f4d19c5, N 758: DEAD.**
+```
+== EV1 cluster insider buys: 1415 trades; per trade gross +32.5bp (median +15.9); net 2.5bp/side +27.5; by year 2020:-37.0 2021:+26.2 2022:+27.7 2023:+50.2 2024:+35.3 2025:+19.9 2026:+63.4
+  $10k 2.5bp: NW t +2.61  sign-flip 99%  feature placebo 100%  dDD +0.3pp  P(DD>50) 0.0%  DSR 0.218 (N 758)  corr(inc, noise) -0.04
+  judge half alone: event net +27.3bp, daily-sleeve NW t +1.85
+  -> DEAD
+```
+Died **only** on the pre-registered judge-half bar (g): the judge-half daily-sleeve NW t is +1.85 < 2 even though the
+event-level net is +27.3bp (the mean holds; the t fails). Everything else passes (halves positive at all three sizes,
+sign-flip 99%, feature placebo 100%, DSR 0.218). Verdict copied as printed: DEAD.
+
+Writeup: research/drafts/study_ev1_cluster_insider.md.
