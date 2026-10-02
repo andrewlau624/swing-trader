@@ -108,7 +108,11 @@ MORE = {"r3_8": (['"join the Russell"', '"added to the Russell"'], "8-K"),
         "r4_15": (['"Form S-3"'], "RW"),
         "r4_16": (['"going private transaction" "proposal"'], "8-K"),
         "r4_18": (['"amendment to the agreement and plan of merger" "increase"'], "8-K"),
-        "r4_19": (['"privately negotiated" "repurchase" "shares from"'], "8-K")}
+        "r4_19": (['"privately negotiated" "repurchase" "shares from"'], "8-K"),
+        "r4_13": ([f'"Item 5.02" "Chief Financial Officer" "{b}"' for b in
+                   ("Amazon", "Google", "Apple Inc", "Microsoft", "Goldman Sachs", "General Electric")], "8-K"),
+        "r4_17": (['"partial tender offer"'], "SC TO-T"),
+        "d10": (['"acquired additional"'], "SC 13D/A")}
 
 
 def more(key: str) -> pd.DataFrame:
@@ -117,6 +121,21 @@ def more(key: str) -> pd.DataFrame:
     H = H[H.form == form].rename(columns={"date": "fd"})
     E = resolve(H[H.fd >= "2016-01-01"])
     return small_only(first_in(E[["sym", "fd"]], 365), 20e6)
+
+
+def r3_13() -> pd.DataFrame:
+    """An officer/director open-market buy (Form 4 P, >= $1k) within 90 days after the company's 8-K appointing a
+    Chief Executive Officer (FTS "Item 5.02" "appointed" "Chief Executive Officer"); fd = the buy's filing date."""
+    from .jump_insider import buys
+    H = _fts('"Item 5.02" "appointed" "Chief Executive Officer"', "8-K", 2015)
+    H = resolve(H[H.form == "8-K"].rename(columns={"date": "fd"}))
+    ceo = {s: g.fd.sort_values().to_numpy() for s, g in H.groupby("sym")}
+    B = buys()
+    B = B[B.insider & (B.usd >= 1e3) & (B.fd >= "2016-01-01")].dropna(subset=["sym"])
+    keep = [((a := ceo.get(r.sym)) is not None) and ((a <= r.fd.to_datetime64()) & (a >= (r.fd - pd.Timedelta(days=90)).to_datetime64())).any()
+            for r in B.itertuples()]
+    E = first_in(B[keep][["sym", "fd"]], 365)
+    return small_only(E, 20e6)
 
 
 if __name__ == "__main__":

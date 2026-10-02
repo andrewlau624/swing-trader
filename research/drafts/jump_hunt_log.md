@@ -246,3 +246,8 @@
   mean +1.0% ex-top3 -1.5% median +1.7% P 0.34`; J8 `0 trades` (headline format gone after 2020). k = 8.
   Write-up `study_jump_j5_j8_news_events.md`.
 - 03:30 **R3-18** first 10-K naming a hot theme (1,066 select -> 684): `hold20 -3.0%`, `hold60 -5.3%`. Dead. 78 explored.
+- 04:10 collisions on finished data (`jump_combo.py`), 1 look each:
+  - **V2** (78 select -> 33 trades); hold1 x0.0 -0.1%/-1.1%/-0.7% P0.57; tp205 x2.4 +1.1%/-0.7%/+0.4% P0.27; hold20 x1.7 +4.5%/+1.3%/+4.4% P0.04; hold60 x1.1 -0.8%/-7.9%/-6.9% P0.57; tp2060 x1.4 +7.8%/+6.6%/+19.2% P0.01; MEETS: hold20 ride MEETS, tp2020 ride MEETS, trail20 ride MEETS, tp2060 ride MEETS
+  - **C2** (345 select -> 222 trades); hold1 x4.1 -0.3%/-0.9%/-0.7% P0.67; tp205 x3.1 +0.1%/-0.4%/-0.1% P0.44; hold20 x1.8 +5.0%/+1.6%/-1.4% P0.03; hold60 x1.6 +14.7%/+10.0%/+2.7% P0.00; tp2060 x1.5 +5.7%/+5.3%/+19.2% P0.00; MEETS: hold20 ride MEETS, hold60 ride MEETS, tp2060 ride MEETS
+  - **C11** (10 select -> 6 trades); hold1 x0.0 -4.1%/-7.5%/-2.4% P1.00; tp205 x0.0 -12.2%/-19.2%/-10.5% P1.00; hold20 x2.3 -3.9%/-16.2%/-5.8% P0.73; hold60 x1.4 -7.4%/-24.3%/-6.1% P0.80; tp2060 x0.9 -5.6%/-24.3%/-6.1% P0.72; all fail
+  V2 and C2 MEET (RIDE hold20 the shortest) but **FAIL the standing-rule same-day control**: V2 event minus control +2.9% (median +0.7%, P 0.164; 2021 carries it, +13%); C2 +3.0% (median -2.2%, P 0.123; 2018 and 2020 carry it, 2021-23 negative). Not registered: meme-era timing. C11 too rare (6 trades). 81 explored.
