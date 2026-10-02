@@ -18,7 +18,7 @@ class Fake:
 
 def run(tmp, day, ads, alerts=(ALERT,)):
     calls = []
-    st = ro.manage(tmp, list(alerts), dt.date.fromisoformat(day), adapters=ads, prices={},
+    st = ro.manage(tmp, list(alerts), dt.date.fromisoformat(day), adapters=ads, prices={"VIVK": 0.2983},
                    placer=lambda ad, sym, side, lim=None: calls.append((sym, side, lim)) or "id", log=lambda *a: None)
     return st, calls
 
@@ -27,7 +27,7 @@ def test_buys_one_share_per_account_once(tmp_path):
     ads = {"live": Fake(), "roth": Fake()}
     st, calls = run(tmp_path, "2026-10-02", ads)
     assert [(c[0], c[1]) for c in calls] == [("VIVK", "buy"), ("VIVK", "buy")]
-    assert 0.33 < calls[0][2] < 0.36                      # a few % over the close, whole cents
+    assert calls[0][2] == 0.3043                          # ask + 2%, 4 decimals under $1 (Schwab rejects far limits)
     _, again = run(tmp_path, "2026-10-02", ads)
     assert again == []                                    # never twice
 
@@ -52,7 +52,8 @@ def test_sell_only_after_split_settles_then_cash_and_kill(tmp_path):
     # two later deals paid in cash -> the account is not killed because one was rounded
     for t, ex in (("AAA", "2026-11-02"), ("BBB", "2026-11-09")):
         a = dict(ALERT, ticker=t, trade_date=ex, buy_by="2026-10-30")
-        run(tmp_path, "2026-10-30", {"live": Fake()}, alerts=(a,))
+        ro.manage(tmp_path, [a], dt.date(2026, 10, 30), adapters={"live": Fake()}, prices={t: 0.5},
+                  placer=lambda *k, **kw: "id", log=lambda *k: None)
     st, _ = run(tmp_path, "2026-12-15", {"live": Fake()}, alerts=())
     assert st["AAA-2026-11-02"]["live"]["status"] == "cash" and not ro.killed(st, "live")
 

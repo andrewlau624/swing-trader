@@ -31,8 +31,20 @@ def accounts() -> list[str]:
 
 
 def buy_limit(price: float) -> float:
-    """A little above the market so a 1-share order fills at the open; penny names get a full cent of room."""
-    return math.ceil(round(price * 1.05 * 100, 6)) / 100 + 0.01
+    """Just above the ask so a 1-share order fills. Schwab rejects limits far from the last trade, so stay within ~2%;
+    sub-$1 names are priced to 4 decimals."""
+    if price < 1:
+        return math.ceil(round(price * 1.02 * 1e4, 6)) / 1e4
+    return math.ceil(round(price * 1.01 * 100, 6)) / 100
+
+
+def ask(ad, sym: str) -> float | None:
+    """Schwab's own ask (falls back to the last trade); None when there is no quote."""
+    try:
+        q = ad.c.get_quote(sym).json()[sym]["quote"]
+        return float(q.get("askPrice") or q.get("lastPrice") or 0) or None
+    except Exception:
+        return None
 
 
 def killed(st: dict, acct: str) -> bool:
@@ -52,11 +64,21 @@ def _save(state_dir: Path, st: dict) -> None:
 def place(ad, sym: str, side: str, limit: float | None = None) -> str:
     from schwab.orders.common import Duration, Session
     from schwab.orders.equities import equity_buy_limit, equity_sell_market
-    o = (equity_buy_limit(sym, 1, f"{limit:.2f}") if side == "buy" else equity_sell_market(sym, 1))
+    px = (f"{limit:.4f}" if limit < 1 else f"{limit:.2f}") if limit is not None else None
+    o = (equity_buy_limit(sym, 1, px) if side == "buy" else equity_sell_market(sym, 1))
     resp = ad.c.place_order(ad.hash, o.set_duration(Duration.DAY).set_session(Session.NORMAL).build())
     if resp.status_code not in (200, 201):
         raise RuntimeError(f"Schwab rejected {side} 1 {sym}: {resp.status_code} {resp.text[:160]}")
-    return resp.headers.get("Location", "").rstrip("/").split("/")[-1]
+    oid = resp.headers.get("Location", "").rstrip("/").split("/")[-1]
+    try:                                   # Schwab accepts the request, then may reject the order itself
+        r = ad.c.get_order(oid, ad.hash).json()
+        if r.get("status") == "REJECTED":
+            raise RuntimeError(f"Schwab rejected {side} 1 {sym} @ {px}: {r.get('statusDescription', '')[:120]}")
+    except RuntimeError:
+        raise
+    except Exception:
+        pass
+    return oid
 
 
 def manage(state_dir: Path, alerts: list[dict], today: dt.date, adapters: dict | None = None, prices: dict | None = None,
@@ -78,13 +100,13 @@ def manage(state_dir: Path, alerts: list[dict], today: dt.date, adapters: dict |
         key = f"{r['ticker']}-{r['trade_date']}"
         if r["buy_by"] < str(today) or r["trade_date"] <= str(today):
             continue
-        px = (prices or {}).get(r["ticker"]) or r.get("last_close")
-        if not px or px > MAX_PRICE:
-            continue
         for a, ad in adapters.items():
             d = st.setdefault(key, {})
             if a in d or killed(st, a) or bought_today[a] >= MAX_PER_DAY or r["ticker"] in held[a]:
                 continue
+            px = (prices or {}).get(r["ticker"]) if prices is not None else ask(ad, r["ticker"])
+            if not px or px > MAX_PRICE:
+                log(f"[roundup] {a}: no usable quote for {r['ticker']} ({px}) - retry next run"); continue
             lim = buy_limit(float(px))
             try:
                 oid = placer(ad, r["ticker"], "buy", lim)

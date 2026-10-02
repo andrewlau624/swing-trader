@@ -195,14 +195,8 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
     from . import roundup_orders as ro
     if ro.enabled():                       # automatic 1-share buys/sells (user-approved 2026-10-02); ROUNDUP_AUTO=1
         live_alerts = list(alerted.values()) + new
-        px = {}
-        try:
-            q = md.live_rows([r["ticker"] for r in live_alerts if r.get("buy_by", "") >= str(today)])
-            px = {s: float(q.at[s, "price"]) for s in q.index}
-        except Exception:
-            pass
         note = Notifier(Path(state_dir)) if email else None
-        ro.manage(state_dir, live_alerts, today, prices=px,
+        ro.manage(state_dir, live_alerts, today,                  # prices: each account's own Schwab ask
                   notify=(lambda s, b: note.alert(s, b)) if note else None, log=log)
     if email and (new or due):
         subj = ", ".join(r["ticker"] for r in new + due)
