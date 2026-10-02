@@ -2253,3 +2253,32 @@ PAYS if: mean $/deal > $0 if rounded (B1: yes) AND >= $150/yr per extra account 
 share is not rising so fast that 2026's qualifying deals are < half of 2024's. Conditional on Schwab paying round-ups to
 a 1-share holder, which history cannot show: the first live deal (VIVK, ex 2026-10-05, check ~10-07) decides it, and
 this rule is NOT a FOUND until 2 live deals have been rounded in an account.
+
+## Amendment — Jump hunt, Study J1: first profitable quarter after >= 6 losing quarters (pre-register; track RIDE, cell hold60, 1 look, program N 760 -> 761)
+
+Session llm-trader-51, `prompt_jump_hunt.md`, idea D6 (`research/drafts/jump_ideas.md`). Registered 2026-10-02 before
+any 2024+ outcome of this rule was computed.
+
+- **Event** (`research/sim/jump_d6.py`, file `data/research/program/events_jump_d6.parquet`, sha256 prefix
+  718a23ae3cfa6c97, 726 events 2016-2026): a company's first ORIGINALLY reported positive quarterly NetIncomeLoss (XBRL
+  companyfacts, ~90-day duration, 10-Q/10-K, earliest `filed` per quarter end) after >= 6 consecutive negative
+  reported quarters; fd = that filing's date; 20-day ADV$ < $20M (raw bars); ticker via EDGAR tickers or exact
+  name match to Alpaca assets incl. inactive.
+- **Trade** (`jump_runner`, fixed): buy the open of the first session after fd, hold 60 sessions (rule `hold`), ADV-tiered
+  small-cap costs. Track RIDE.
+- **Select-half look (2016-2023, the only look):** `hold60 n 299 (37/yr) jump 25.8% vs base 20.5% (x1.3) mean net
+  +7.3% ex-top3 +4.5% median -0.6% vs stock's usual +7.2% hit 49% worst -84% best +409% P(mean<=0) 0.00 | ride MEETS`.
+  No other cell met (tp2060 mean +2.9%, hold20 +2.3%).
+- **Judge (once):** `PYTHONPATH=. .venv/bin/python -m research.sim.jump_runner judge data/research/program/events_jump_d6.parquet 60 hold --track ride`
+  on events 2024-01-01..2025-06-30. PASS = the runner's RIDE judge gate (>= 15 trades, mean net > 0, beats the stock's
+  usual return, ex-top3 > 0, bootstrap P(mean <= 0) < 0.10). If PASS: `confirm` once, same arguments, window
+  2025-07-01..2026-09 (CONFIRMED = >= 10 trades, mean > 0, mean without the best > 0, beats the stock's usual).
+- **Who is on the other side, and why it might persist:** holders and screens that exclude loss-makers (positive-EPS
+  screens, P/E sorts, index rules needing positive GAAP earnings, quant value/quality factors) only start to own a
+  small company after its first profit; the milestone is in a 10-Q table, not a headline, so the new demand arrives
+  over weeks, not at the open.
+- **Known weaknesses, stated before judging:** (1) survivorship in the select half: only 63-70% of 2016-18 events
+  map to a ticker (vs ~90% in 2024-25), likely missing delisted firms, so the select mean may be flattered; (2) regime:
+  select-year means +21/+14/-1/-8/+42/-5/-5/+14% (2016..2023), i.e. 60-day small-cap timing; median by year positive
+  in 4 of 8; (3) TEXTBOOK-adjacent (post-earnings drift family). The judge half is the test of all three. k = 1 judged
+  idea in this hunt so far.

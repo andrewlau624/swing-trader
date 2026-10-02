@@ -40,22 +40,28 @@ def snapshots() -> list[str]:
 
 
 def fetch():
+    from concurrent.futures import ThreadPoolExecutor
     for ts in snapshots():
-        f = D / f"{ts}.json"
-        if f.exists():
-            continue
-        syms = None
-        for k in range(4):
-            try:
-                r = requests.get(f"http://web.archive.org/web/{ts}id_/https://{URL}", headers=UA, timeout=60)
-                if r.ok:
-                    syms = sorted(set(re.findall(r'/quote/([A-Z]{1,5})[?/"]', r.text)))
-                    break
-            except requests.RequestException:
-                pass
-            time.sleep(5 * (k + 1))
-        json.dump(syms or [], open(f, "w"))
-        time.sleep(0.8)
+        _one(ts)
+        time.sleep(4)          # archive.org refused connections at 3 threads: one request every ~4 s
+
+
+def _one(ts: str):
+    f = D / f"{ts}.json"
+    if f.exists():
+        return
+    syms = None
+    for k in range(4):
+        try:
+            r = requests.get(f"http://web.archive.org/web/{ts}id_/https://{URL}", headers=UA, timeout=60)
+            if r.ok:
+                syms = sorted(set(re.findall(r'/quote/([A-Z]{1,5})[?/"]', r.text)))
+                break
+        except requests.RequestException:
+            pass
+        time.sleep(5 * (k + 1))
+    if syms is not None:
+        json.dump(syms, open(f, "w"))
 
 
 def build() -> pd.DataFrame:
