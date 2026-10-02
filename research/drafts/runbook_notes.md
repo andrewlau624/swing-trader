@@ -95,3 +95,6 @@ Why it should work (before registering):
 **Duplicate-look note:** d4a0401 (another session, pushed 06:32 without a claim) explored a variant of row 2 that
 counted 2020-21 first buys (left-censored) and FAILED (t 1.66). EV2 above excludes those (events start 2022-01).
 Because the idea was looked at twice, EV2 is registered as 2 variants: N 758 -> 760 (amendment note in round1_prose.md).
+
+**Judge (N 760): PASS.** Judge half event net +31.5bp, daily-sleeve NW t +2.54; full net +35.5bp, NW t +3.57,
+sign-flip 100%, placebo 100%, DSR 0.553. Writeup + shadow spec: research/drafts/study_ev2_first_insider_buy.md.

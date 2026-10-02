@@ -1,0 +1,13 @@
+######## EV2 first insider purchase in 2y: 3011 events -> 1317 trades (ADV >= $20M judged)
+EV2 first insider purchase in 2y: 1317 trades on 652 sessions, 2022-01-11..2026-03-31; book window 2021-02-01..2026-03-31
+
+== EV2 first insider purchase in 2y: 809 trades; per trade gross +40.5bp (median +28.8); net 2.5bp/side +35.5; by year 2022:+66.7 2023:+20.0 2024:+28.3 2025:+48.0 2026:+14.6
+  [EV2 first insider purchase in 2y] 2.5/side $2.3k base  39.7%/2.16/  -8  var  46.0%/2.39/  -7  inc +6.28pp ($+144/yr)  halves +3.89/+5.19pp  dDD +1.1
+  [EV2 first insider purchase in 2y] 2.5/side $10.0k base  40.5%/2.09/ -10  var  47.7%/2.34/  -8  inc +7.17pp ($+717/yr)  halves +4.35/+5.94pp  dDD +2.0
+  [EV2 first insider purchase in 2y] 2.5/side $25.0k base  40.7%/2.07/ -11  var  48.1%/2.33/  -9  inc +7.47pp ($+1,867/yr)  halves +4.47/+6.26pp  dDD +2.0
+  [EV2 first insider purchase in 2y] tier_hi/side $2.3k base  24.9%/1.47/ -11  var  28.3%/1.60/ -10  inc +3.36pp ($+77/yr)  halves +2.67/+2.77pp  dDD +1.2
+  [EV2 first insider purchase in 2y] tier_hi/side $10.0k base  24.2%/1.36/ -14  var  27.9%/1.51/ -13  inc +3.69pp ($+369/yr)  halves +2.93/+3.07pp  dDD +1.2
+  [EV2 first insider purchase in 2y] tier_hi/side $25.0k base  24.0%/1.34/ -15  var  27.9%/1.49/ -14  inc +3.87pp ($+966/yr)  halves +3.01/+3.30pp  dDD +1.2
+  [EV2 first insider purchase in 2y] $10k 2.5bp: NW t +3.57  sign-flip 100%  feature placebo 100% (placebo mean -0.59pp/yr)  dDD +2.0pp  P(DD>50) 0.0%  DSR 0.553 (N 760)  corr(inc, noise) +0.03
+  [EV2 first insider purchase in 2y] judge half alone: event net +31.5bp, daily-sleeve NW t +2.54
+  [EV2 first insider purchase in 2y] -> PASS
