@@ -2282,3 +2282,17 @@ any 2024+ outcome of this rule was computed.
   select-year means +21/+14/-1/-8/+42/-5/-5/+14% (2016..2023), i.e. 60-day small-cap timing; median by year positive
   in 4 of 8; (3) TEXTBOOK-adjacent (post-earnings drift family). The judge half is the test of all three. k = 1 judged
   idea in this hunt so far.
+
+## Amendment — Index beat (session llm-trader-ee), deal rule DL-IB2: reverse splits with a round-lot top-up (no N; registered before any outcome)
+
+`date`: Fri Oct 2 2026, before any event is counted or priced. Source of the idea: round-4 contractual-payoff sweep
+(index_beat_log.md), example AREB 1-for-20 (Feb 2026 8-K: "no current owner of 100 or more shares will be reduced to
+less than 100"). Rule: for a reverse split whose issuer's filings (8-K, DEF 14A, PRE/DEF 14C, 424B) in the 90 days before
+the ex-date say holders of 100+ (a round lot) will not fall below 100 shares, hold exactly 100 pre-split shares at the
+last pre-split close (S) in each account and sell the post-split position at the first close on/after ex + 2 sessions
+(E2). Payoff per account = 100 x P_E2 - 100 x P_S if topped up, = (100/N) x P_E2 - 100 x P_S if not (the split alone).
+Filters: price at S <= $3 (capital <= $300), no "participant level" / "Cede" restriction on the top-up sentence.
+Measured: events per year 2016-26, payoff if topped up and if not, worst, capital; break-even probability of the top-up
+being paid. PAYS if: >= 3 events/yr in 2024-26, mean if topped up >= +$100/account/event, and break-even probability
+<= 25%. Like DL-IB1 it is conditional on the broker allocating the top-up to a beneficial account: not FOUND before a
+live event has been topped up in an account.
