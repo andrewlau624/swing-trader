@@ -66,3 +66,16 @@ Diagnostics: R2 `reddit_r2_ev2_tail_out.txt`, R3 `reddit_r3_regime_cost_out.txt`
 R5 `reddit_r5_paper_split_out.txt` (all in data/research/program). Summary in NEXT.md "Reddit round".
 Timezone note: EDGAR acceptanceDateTime read as true UTC, as Study T found.
 Program N: 765.
+
+---
+## R11 — recent reverse split on the night picks (registered 2026-10-02, before any outcome; N 765 -> 767)
+Source: r/pennystocks sweep (all three slices): in serial diluters the dip is supply, not an overreaction.
+- Picks: as R1 (V7 night pool, raw prices). Tag: the symbol has a reverse split (Alpaca corporate actions,
+  `data/research/events/alpaca_reverse_splits.parquet`, old/new >= 1.5) with ex-date in
+  **R11a** (d − 90 calendar days, d], **R11b** (d − 365 days, d]. Ex-dates are announced before they happen, so the
+  tag is known at the 15:40 decision.
+- Rule: DROP the tagged pick. Pass bar identical to R1 (>= 100 tagged picks; excess vs night-mates < 0 in both halves;
+  night-clustered t <= −2; within-night permutation pct <= 2.5; DROP book − baseline > 0 in both halves; tier AND tier_hi).
+  Unlike R1 the tag does not need an EDGAR map, so all picks are eligible.
+- If PASS: live filter is cheap (the bot already reads Alpaca corporate actions for roundup_watch); shadow first,
+  testing.py registry entry.
