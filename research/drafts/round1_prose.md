@@ -2167,3 +2167,22 @@ Alpaca bar is within 250 sessions of entry: value = X (cash at closing). **Other
 after entry. Return = value / entry − 1; days held = entry to last bar (or 250 sessions). Stake 10% of equity (whole
 shares). Reported: deals/yr, hit, mean/median/worst return, mean annualised, $/yr at $2.3k/$10k/$25k.
 **Verdict: PAYS if median return > +1%, mean > 0 and hit >= 80%; otherwise DEAD.** No rule change afterwards.
+
+## Amendment — Discovery loop (session llm-trader-c5), deal rule DL4: liquidations trading below the proxy's low estimate (no N; registered before any outcome)
+
+Source reading (2026-10-02): DEF 14A 2016-26 with "plan of dissolution" + "liquidating distributions" + "per share" +
+"estimate": 76 issuers (most are SPACs or failed biotechs). Read Actua 2018 ($0.80-2.07 after a $14.89 special
+dividend), Merrimack 2024 ($14.68-15.30), Third Harmonic 2025 ($5.13-5.33). The board estimates total
+distributions per share as a range; stockholders vote; then cash goes out in one or more distributions (often an
+initial one within weeks of approval, a final one after the wind-down, sometimes through a liquidating trust).
+
+**Deal set (fixed now):** first DEF 14A per issuer 2016-01 .. 2026-06 with an estimate range parsed from
+"between/from $A and/to $B ... per share" near the plan; SPACs excluded (blank-check trust redemptions, not
+estimates); exchange-listed with Alpaca bars on the entry date. **Entry:** the official close of the first session
+after the DEF 14A filing date, **only if entry < A** (the low estimate); others are listed, not traded.
+**Payoff:** the total cash actually distributed per share after entry (special/liquidating dividends and
+liquidating-trust payments from the issuer's 8-Ks and press releases, cross-checked with Alpaca corporate actions),
+plus the last close if the stock still trades on 2026-09-30, plus any cash-merger price if the plan was replaced by a
+sale. If the plan was voted down or abandoned and the stock kept trading: the close 250 sessions after entry.
+Return = payoff / entry − 1; days = entry to the last payment. Stake 10% of equity (whole shares).
+**Verdict: PAYS if median return > +3%, mean > 0 and hit >= 70% on the traded deals; otherwise DEAD.** No rule change.
