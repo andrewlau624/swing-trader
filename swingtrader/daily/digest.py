@@ -209,6 +209,10 @@ def round31_whatif(state: Path, acct: Account) -> list[dict]:
     if so:                                 # Round 32 B2: 99 parent shares x implied gain at the entry-day alert
         usd = sum(99 * float(r["parent_px"]) * float(r["gain"]) for r in so)
         out.append(dict(idea="split-off exchange offers (manual, <= 99 sh)", n=len(so), usd=usd))
+    ru = [r for r in _jsonl(state / "roundup-watch.jsonl") if r.get("scored") and r.get("split_in_prices")]
+    if ru:                                 # Round 32 B1: 1 share in each of 2 accounts, IF Schwab rounds up
+        out.append(dict(idea="reverse-split round-up (1 sh x 2 accts, if rounded)", n=len(ru),
+                        usd=sum(2 * float(r["gain_if_rounded"]) for r in ru)))
     return out
 
 

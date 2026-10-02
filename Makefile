@@ -392,6 +392,9 @@ tender-buy: ## Round 31: buy the odd lot for an alerted tender, after YOU confir
 	@test -n "$(ID)" || { echo "usage: make tender-buy ID=TICKER-YYYY-MM-DD (from the alert email)"; exit 2; }
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.tender_buy $(ID)
 
+roundup-watch: ## Round 32 B1: upcoming reverse splits that round fractions UP -> email "buy 1 share per account by <date>"; never trades
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.roundup_watch $(DATE)
+
 splitoff-watch: ## Round 32 B2: split-off exchange offers (odd lots accepted in full) -> email on the entry day; never trades
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.splitoff_watch $(DATE)
 

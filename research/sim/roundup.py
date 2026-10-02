@@ -30,6 +30,18 @@ PL_Q = ['"participant level" "reverse stock split" "rounded up"',
 UP = re.compile(r"round(?:ed)? up[^.]{0,80}?(?:whole|full|next|nearest) (?:share|number)|"
                 r"(?:fraction|fractional)[^.]{0,200}?round(?:ed)? up", re.I)
 PL = re.compile(r"participant level|DTC participant|at the participant|Cede ?& ?Co", re.I)
+CASH = re.compile(r"cash (?:in lieu|payment)|paid in cash|receive (?:a )?cash|or to entitle", re.I)
+
+
+def strict_up(text: str) -> bool:
+    """A sentence about the split's fractional shares that rounds them up, with no cash alternative in it. The
+    FTS phrase alone also hits REIT ownership limits, convertible notes and board-seat counts (spot check, 5 of 5
+    of the largest 'deals' were such text)."""
+    for sen in re.split(r"(?<=[.;])\s+", text):
+        if (re.search(r"fraction", sen, re.I) and re.search(r"round(?:ed|ing)? up", sen, re.I)
+                and re.search(r"split", sen, re.I) and not CASH.search(sen)):
+            return True
+    return False
 
 
 def hits(qs):
@@ -124,10 +136,10 @@ def deals(E: pd.DataFrame) -> pd.DataFrame:
                 pl = True
             if k == "up":
                 up_ok = True
-                txt_up |= bool(UP.search(body))
+                txt_up |= strict_up(body)
         ps, pe = float(pre.close.iloc[-1]), float(post.close.iloc[0])
         pe5 = float(post.close.iloc[min(5, len(post) - 1)])
-        status = ("participant level" if pl else "ok") if up_ok else "filed too late"
+        status = ("participant level" if pl else "ok" if txt_up else "no split round-up sentence") if up_ok else "filed too late"
         out.append(dict(symbol=r.symbol, ex=r.ex, S=S, N=r.N, status=status, regex_up=txt_up, ps=ps, pe=pe, pe5=pe5,
                         ratio_chk=pe / ps / r.N, up=pe - ps, up5=pe5 - ps, cash=pe / r.N - ps))
     return pd.DataFrame(out)
@@ -148,7 +160,7 @@ def report():
     log(f"price check P_E / P_S / N outside [0.33, 3] (split not in raw bars or wrong ratio): {len(bad)} -> listed, excluded")
     ok = ok[(ok.ratio_chk >= 0.33) & (ok.ratio_chk <= 3)]
     ok["y"] = ok.ex.dt.year
-    log(f"\nqualifying deals: {len(ok)} (doc regex confirms a round-up clause in {ok.regex_up.mean():.0%})")
+    log(f"\nqualifying deals: {len(ok)}")
     g = ok.groupby("y").agg(n=("up", "size"), up_mean=("up", "mean"), up_med=("up", "median"), up_sum=("up", "sum"),
                             up5_sum=("up5", "sum"), cash_sum=("cash", "sum"), pos=("up", lambda x: (x > 0).mean()),
                             cost=("ps", "sum"))
