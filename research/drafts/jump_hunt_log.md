@@ -1,17 +1,18 @@
 # Jump & ride hunt log (prompt_jump_hunt.md), session llm-trader-51
 
 ## STATE (update after every idea)
-- program N: 761 (J1 registered and judged DEAD). k (ideas judged): 1. Ideas explored (runner explore run): 6
-  (H17, D5, D9, D4, D6; D6 -> J1). Rounds of idea generation: 1 (62 ideas).
-- current idea: none; waiting for the news archive's 2016-23 months for the news ideas.
-- next 5 ideas: H1/V1/H3 (Reddit, as subs finish), H5/H6/H16 (Wikipedia, as pageviews finish), H11 option alerts,
-  S2 PDUFA run-up, D8 first insider buy + no news (news needed).
-- data sources verified: Alpaca/Benzinga news REST (downloading, ~3 months/10 min), Arctic Shift (downloading),
-  Wikipedia pageviews (downloading, slow), EDGAR (FTS, form.idx 2016-26, companyfacts), ClinicalTrials.gov v2, openFDA,
-  USAspending, Form 345 2014-2026 (data/research/jump/insider_buys_2014_2026.parquet).
-- data sources broken: defense.gov (403); Wayback snapshot fetch (refused at 3 threads; retry at 1 per 4 s pending).
-- why things die (running): TWO-WAY (attention raises the jump AND crash rate; H17, D4) and LOTTERY (D5, D9, J1:
-  three trades carry the mean) so far; next ideas must carry a direction AND many independent events.
+- program N: 761 (J1 registered and judged DEAD). k (ideas judged): 1. Ideas explored: 12 (H17 D5 D9 D4 D6 H1 H2 H3
+  C4 H18 C7 C10). Rounds of idea generation: 1 (62 ideas).
+- current idea: none; next ideas need the news archive (40/96 select months at 15:55).
+- next 5 ideas (informed/forced buyers, per section 6): H11 option alerts, D8 first insider buy + no news, S2 PDUFA
+  run-up, D2 un-gapped contracts, H10 first initiation. Then Wikipedia ideas when pageviews finish.
+- data sources verified: Alpaca/Benzinga news (downloading), Arctic Shift (small subs complete; WSB 3 chunks running),
+  Wikipedia pageviews (downloading, ~40%), EDGAR (FTS, form.idx 2016-26, companyfacts), ClinicalTrials.gov, openFDA,
+  USAspending, Form 345 2014-2026, FINRA SI 2020-06+ (public settle + 12 d), Wayback 2018+ Yahoo trending (slow fetch).
+- data sources broken: defense.gov (403); Yahoo trending 2016-17 snapshots (list loaded client-side).
+- why things die (running): EXIT LIQUIDITY (crowd attention: 4-14x one-day jump rate, then -5..-22% over 20-60
+  sessions: H1 H2 H3 C4 H18 C7 C10), TWO-WAY (attention without direction: H17 D4), LOTTERY (D5 D9 J1). Next ideas
+  need an informed or forced buyer AND many independent events.
 
 ## Log
 - 12:45 setup: the prompt names `swing-trader`; the session started in the `llm-trader` checkout (no data caches); work in
@@ -65,3 +66,28 @@
 - 15:02 **J1 judge** (once): `hold60 n 48 (24/yr) jump 33.3% vs base 21.7% (x1.5) mean net +5.5% ex-top3 -1.8% median
   +3.3% vs stock's usual +3.7% hit 52% worst -81% best +142% P(mean<=0) 0.21` -> **RIDE VERDICT: DEAD**. k = 1.
   Write-up `study_jump_d6_first_profit.md`. LOTTERY (3 trades carry the mean) on too few trades.
+- 15:20 survivorship fix before any Reddit/news outcome: `stock_symbols()` now keeps symbols Alpaca lists as OTC (names
+  delisted to OTC keep their ticker); Reddit bare words use exchange symbols + OTC symbols of >= 4 letters; added
+  SSB/LINE/RHPS and common words to STOP after a 20k-title extraction check (top: PLTR GME NOK TSLA SNDL NIO).
+- 15:25 H24 data check: Yahoo trending-tickers snapshots 2016-17 load the list client-side (no tickers in the HTML);
+  2019/2021 snapshots carry it (`/quote/XXX?p=`). Fetcher restarted at one request per ~4 s.
+- 15:40 Reddit mentions (5 subs incl. WSB to 2018-06 so far; H1-H3 use the small subs only) -> **H1, H2, H3** explored
+  (1 look each), all 12 cells fail:
+  - **H1** first small-sub mention after a year (603 select events -> 374 trades): `hold1 jump 5.3% vs 0.5% (x10.7)
+    mean net -0.7% ex-top3 -2.3% median -2.2%`; `tp205 x2.8 mean -1.5%`; `hold60 mean -9.6% median -15.8%`.
+  - **H2** velocity without a move (524 -> 294): `hold1 x2.1 mean -1.3%`; `hold60 mean -7.1% median -17.9%`.
+  - **H3** shortsqueeze DD (168 -> 112): `tp201 x4.3 mean -1.3%`; `hold20 mean -13.2%`; `hold60 mean -18.3%`.
+  **DEAD: new death EXIT LIQUIDITY** — Reddit attention gives a 4-10x one-day jump rate, but the names then slide
+  (−7..−18% over 60 sessions vs the stock's usual −0..−9%): a long-only buyer of crowd hype is the crowd's exit.
+  Dodge: buyers who are informed or forced (insiders, options flow, contracts, index rules), not the crowd itself.
+- 15:55 Reddit collisions, 1 look each, all fail (SI = FINRA, public settle + 12 days):
+  - **C4** velocity + days-to-cover >= 5 (250 -> 188): `hold1 x9.1 mean -1.0%`; `hold5 x2.2 mean -0.3% ex-top3 -2.8%`;
+    `hold60 mean -7.2% median -18.4%`.
+  - **H18** first "squeeze" post + DTC >= 7 (193 -> 148): `tp201 x6.9 mean -0.1%`; `hold20 mean -6.0%`.
+  - **C7** velocity within 60 days after a reverse split (55 -> 44): `hold1 x14.0 mean -6.4%`; `hold20 mean -22.1%
+    median -35.3%`.
+  - **C10** short position +50% + velocity (237 -> 146): `tp201 x6.1 mean -0.5%`; `hold5 mean -5.4%`.
+  **DEAD: EXIT LIQUIDITY** (4 more; 7 of the last 10 ideas). Per section 6, the next 10 ideas are informed or forced
+  buyers, not crowd attention: H11 option flow, D8/C6 insiders with no news, D2 un-gapped contracts, S2 PDUFA run-up,
+  H10 initiations, D1 510(k), D11 predicted Russell adds, S5 forward splits, plus round-2 ideas.
+- 15:58 checkpoint (12 explored): tests pass; sections 0-2 re-read; why-things-die line updated in STATE.

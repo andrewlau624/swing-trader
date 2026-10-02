@@ -40,7 +40,6 @@ def snapshots() -> list[str]:
 
 
 def fetch():
-    from concurrent.futures import ThreadPoolExecutor
     for ts in snapshots():
         _one(ts)
         time.sleep(4)          # archive.org refused connections at 3 threads: one request every ~4 s

@@ -24,9 +24,12 @@ def fd_of(ts) -> pd.Series:
     return (t - pd.Timedelta(hours=9, minutes=30)).dt.normalize()
 
 
-def stock_symbols() -> set[str]:
+def stock_symbols(otc: bool = True) -> set[str]:
+    """Alpaca assets (incl. inactive) that don't look like funds. `otc` keeps symbols Alpaca now lists as OTC: names
+    delisted to OTC keep their ticker, so dropping them would drop failed companies' listed years (survivorship)."""
     m = json.load(open(ROOT / "data/research/night/asset_meta.json"))
-    return {s for s, v in m.items() if v.get("exchange") in ("NASDAQ", "NYSE", "AMEX")
+    ex = ("NASDAQ", "NYSE", "AMEX") + (("OTC",) if otc else ())
+    return {s for s, v in m.items() if v.get("exchange") in ex
             and not FUNDISH.search(v.get("name") or "") and re.fullmatch(r"[A-Z]{1,5}", s)}
 
 
