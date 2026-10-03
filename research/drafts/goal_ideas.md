@@ -218,3 +218,87 @@ Same events as G11 (2006-15, the clean window), but rank by the buy as a share o
 director and trivial for a large-cap CEO.
 1-4: as G2. 5. Death dodged: STACKING / overfit, by registering one scaled measure only, on the clean window.
 Source: (1). Needs G11's data step.
+
+## Round 2, part 2 (written 2026-10-02, before any outcome): G21-G30
+Tracks short of quota: T4, T5, then T1/T2. Every idea still answers the five questions; brief where it builds on an
+earlier idea.
+
+### G21 (T5) The whole small-account book in one number
+A report, not a new edge: index-beat's FOUND stack (taxable SPY 1.0x + legs on margin; Roth 1/3 UPRO + 2/3 Roth book),
+plus the G1 contract stack (B1 both accounts, B2 + tenders in the better account), plus G2 / `id3_big` as a forward add-on.
+After tax, both accounts, at $2.3k / $10k / $25k, with deposits. Each part sized by its own risk; correlation on bad days
+from R4. Answers "how far over the index is everything we have, if the forward tests pass".
+Source: (5) combine. Death dodged: STACKING (contract payoffs and index beta don't share returns).
+
+### G22 (T5) Put the per-holder contract payoffs in the Roth
+B2 split-offs and odd-lot tenders cap at 99 shares ACROSS accounts, so the account that holds them is a free choice. In
+the Roth, their short-term gains are untaxed: at $10k taxable that is ~35% of ~$1,000/yr = ~$350/yr (+3.5pp). Constraint:
+the Roth must have the cash for 99 parent shares (~$5-15k) for ~8-10 days, i.e. pull the Roth book's cash out for the
+hold. Model the Roth book's lost days vs the tax saved.
+1. Who pays: the IRS's 35% ST rate is avoided. 2-4: as B2 / tenders. 5. Death dodged: TAX (by construction).
+Source: (5).
+
+### G23 (T5/T1) The insider day sleeve in the Roth's idle daytime cash
+The Roth night book sells at the opening cross and buys at the closing cross, so the Roth's cash sits idle 09:30-15:59.
+An open->close insider trade (ID3 / `id3_big`, when the forward gate passes) fits in that window with no margin, which
+the Roth can't use for an overlay on an index core anyway. Tax-free, and it uses capital that earns nothing intraday.
+1-4: as ID3. 5. Death dodged: WHOLE SHARES (Roth $8.5k+ buys whole shares in $20M+ ADV names), TAX.
+Source: (1)+(5). Depends on the forward gate.
+
+### G24 (T4) Deep-ITM SPY LEAPs instead of UPRO for the Roth's levered beta
+Index-beat's FOUND stack puts 1/3 of the Roth in UPRO (3x daily). UPRO pays ~0.9% expense, swap financing and daily-reset
+drag (~L(L-1)/2 x var = ~3 x var a year, ~8-10% in a 17%-vol year). A 0.8-delta 12-18-month SPY call gives ~2.5-4x
+exposure per dollar with financing at the implied rate, no reset drag, and a capped loss. The Roth allows long options.
+1. Who pays: nobody is mispricing. It's an instrument-cost comparison, valid only if the option bid/ask (SPY LEAPs: a few
+cents on $100+) beats UPRO's drag. 3. Capacity: unlimited. 4. Repeat: listed SPY LEAPs. 5. Death dodged: the "leap book"
+(addendum 24, shadow) was a leap *strategy*; this is a cheaper wrapper for exposure already chosen.
+Source: (2)+(4). Data: SPY option history before 2024 isn't free; bound with a conservative IV and the quoted spread.
+
+### G25 (T4/T2) Listed CVRs that index funds receive and must dump
+When an acquirer pays partly in contingent value rights (pays $X if an FDA approval or sales milestone happens by a date),
+index funds holding the target receive CVRs they can't hold or price, and sell them in the first weeks. The payoff is
+written in the CVR agreement; the milestone odds can be bounded from public data (FDA base rates by phase, sales guidance).
+1. Who pays: mandate sellers (index funds, ETFs). 2. Why: no mandate to hold an unlisted / odd instrument. 3. Capacity:
+thin, small. 4. Repeat: 8-K / S-4 "contingent value right" with a listing (Nasdaq: the -RT, -CVR symbols). 5. Death dodged:
+LOTTERY (binary payoff) is the risk; only buy below expected value at the base rate. Count first: listed CVRs ~2-5/yr.
+Source: (4) convex + (3) contract.
+
+### G26 (T4) Index puts to buy back drawdown room for the levered overlay
+G2b (1.0x per event) cleared +16-21pp on the holdout, but its max DD was 33-34% against the 35% bar. A rolling 3-month 10%-OTM
+SPY put on the core costs ~1.5-3%/yr and cuts crash-month DD. If it lets the overlay run at 1.0x with DD <= 30%, the trade
+is ~2pp of insurance for ~+5-10pp of overlay. Convexity as a risk budget, not as the return source.
+5. Death dodged: REGIME DIAL (no de-risking by signal), TAX (puts on SPY are equity options, short-term). Source: (4) + (2).
+Depends on G2-F passing forward.
+
+### G27 (T2) Mutual savings bank conversions: subscribe as a depositor
+When a mutual savings bank converts to stock form, eligible depositors (account open before the eligibility record date,
+often 12-18 months earlier) get priority subscription at $10/share. The price comes from a regulated pro-forma appraisal
+that is conservative by design. First-day and first-month returns of standard and second-step conversions have been
+positive on average.
+1. Who pays: the mutual's other members and the regulator's appraisal rule (OCC / FDIC / Fed). 2. Why: regulation sets the
+price conservatively to protect depositors. 3. Capacity: per-person subscription caps ($X per depositor), so funds can't take
+it, and it needs a deposit account opened 1+ year early. 4. Repeat: S-1 / Form AC "plan of conversion", "subscription
+offering", ~5-15 a year. 5. Death dodged: DL7 retail IPO access (cold IPOs, retail filled only in bad deals) is the risk.
+Here eligibility is guaranteed by being a depositor, not by an allocation. Manual: opening bank accounts early
+(> 5 min, once per bank). Source: (3)+(D).
+
+### G28 (T1) Lever B2 split-offs with Reg T margin at small sizes
+At $2.3k, B2 fills only ~20 of the 99 allowed parent shares. 2x overnight margin for the ~8-10 day hold doubles the
+position to ~40-50 shares: ~+$180/yr -> ~+$360/yr at $2.3k (+16pp pre-tax) for ~$10 of margin interest. Worst historical
+event −8.8% x 2 = −17.6% of the position's equity share.
+1-4: as B2 (contract payoff with odd-lot priority). 5. Death dodged: TOO RARE (unchanged, ~1.4/yr); it only scales the
+dollars of a payoff that already passed. Taxable only (Roth: no margin). Source: (2) leverage on a contract payoff.
+
+### G29 (T4) Long-dated calls on split-off parents to hold through the exchange? KILLED at writing
+The odd-lot priority requires tendering SHARES; a call holder can't tender. Written down only so it isn't re-proposed.
+
+### G30 (T3) Transfer agents selling aggregated fractional shares after reverse splits
+After a cash-in-lieu reverse split, the transfer agent aggregates every holder's fractions and SELLS them in the market
+over the following days: a forced, price-insensitive seller. In heavy-retail micro caps (many small holders), the aggregate
+can be a meaningful share of ADV. Buy once the sale window ends (the 8-K or the agent's notice often gives it, else d+5),
+hold 5 sessions, minus the stock's usual post-split drift.
+1. Who pays: the agent (it must sell; it reports the average price). 2. Why: the split terms require cash in lieu.
+3. Capacity: micro caps, a few days. 4. Repeat: 8-K Item 5.03 / press releases "in lieu of fractional shares ... aggregated
+and sold". 5. Death dodged: B1 (the same splits, holder-level round-ups) is a different mechanism. The known post-reverse-split
+DRIFT (night picks with a recent reverse split were borderline) is the risk: measure vs matched reverse-split names that
+round up (no agent sale) as the control. Source: (1) concentration in forced flow.

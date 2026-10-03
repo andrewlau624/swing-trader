@@ -1,15 +1,15 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 2 · ideas written 20 (G1-G20) · k (judged) 17 · program N 775 (G12 took 775; next free 776)
+- round 2 · ideas written 30 (G1-G30) · k (judged) 17 · program N 775 (G12 took 775; next free 776)
 - NEAR: G2 (forward G2-F = ev2_big gate); G1 bound NEAR at $10k / FOUND-level at $2.3k if Schwab rounds B1 (VIVK ~10-07;
   check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = `id3_big` gate.
 - BLOCKED: G11 / G20 (2006-15 insider window) need pre-2016 daily bars incl. delisted names. Stooq is behind a JS bot
   wall; Alpaca SIP starts 2016; the live Schwab token shouldn't be used for bulk research and has no delisted names.
   User item: a Tiingo (paid tier) / Norgate / CRSP source would unlock the cleanest test this hunt has.
 - running: nothing
-- round-2 quota: G21-G30 need T1 3, T2 3, T3 2, T4 5, T5 3
-- NEXT: write G21-G30 (quota: T1 3, T2 3, T3 2, T4 5, T5 3 short of 40), then G13 data check.
+- round-2 quota after G30: T1 7/8 (+G28), T2 6/8 (+G27, G25 half), T3 7/8 (+G30), T4 7/8 (+G24-G26, G29), T5 4/4 (+G21-G23) -> G31-G40: T1 1, T2 2, T3 1, T4 1 + free
+- NEXT: G21 report (combine) — cheapest and most useful to the user; then G22 bound, G28 bound, G30 count, G27 count.
   Old next list:
   G18/G19 warrant counts, then write G21-G30.
 
@@ -135,3 +135,4 @@ second-tier indexes where flow/ADV is large).
   SAVA 2023, GME / OPEN / ENVX / BBBY 2025, XRX / PSKY 2026), the rest SPAC / REIT boilerplate. TOO RARE for a book. Each
   outcome is option-like (OXY warrants went ~10x, others to 0): LOTTERY by construction. The 2025-26 uptick (meme-stock
   warrant dividends) is noted, not acted on.
+- 2026-10-02 20:05 Round 2 part 2: G21-G30 written before any outcome (G29 killed at writing: calls cannot tender).
