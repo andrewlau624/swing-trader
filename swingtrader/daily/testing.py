@@ -67,6 +67,15 @@ def _insider(key: str | None):
     return read
 
 
+def _cef_activist(state: Path, logs: Path) -> dict:
+    from . import cef_activist_watch as c
+    rows = _jsonl(state / c.LOG_NAME)
+    g = c.gate(rows)
+    wk = sum(1 for r in rows if str(r.get("seen", "")) >= _week_ago())
+    line = (f"{g['verdict']}; mean {g['mean_excess']:+.2%} vs PCEF" if g["n"] else g["verdict"]) + f"; {len(rows)} logged"
+    return dict(n=g["n"], week=wk, line=line)
+
+
 def _alerts(log_name: str, label: str):
     def read(state: Path, logs: Path) -> dict:
         rows = _jsonl(state / log_name)
@@ -136,6 +145,8 @@ REGISTRY: list[Test] = [
          "2026-10-02", 60, "scored trades", _insider("ev2_big"), "make forward-status; study_ev2_first_insider_buy.md"),
     Test("ID3 x buy >= $500k (any silence)", "Goal G3: does the buy SIZE alone carry ID3? (holdout report row +35.7bp)",
          "2026-10-02", 60, "scored trades", _insider("id3_big"), "make forward-status; study_goal_g2.md"),
+    Test("CEF activist 13D (G45-F)", "does the first activist 13D on a closed-end fund beat PCEF by >= 1.5% over 60 sessions?",
+         "2026-10-02", 30, "scored events", _cef_activist, "make cef-activist-watch; study_goal_g45.md", ["cef_activist_watch"]),
     Test("Odd-lot tenders", "issuer tenders with odd-lot priority >= 1% over market (manual, <= 99 shares)",
          "2026-10-02", 0, "alerts", _alerts("tender-watch.jsonl", "tenders"), "make tender-watch",
          ["tender_watch", "tender_buy"]),

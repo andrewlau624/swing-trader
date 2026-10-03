@@ -6,7 +6,8 @@
   log-only watcher, to build next). Open: G2 (NEAR; forward G2-F = `ev2_big` gate), G3 (forward `id3_big` gate), G21 (combined ~+21pp at today's balances;
   waits on Schwab rounding B1: VIVK ~10-07, check llm-trader state/roundup-orders.json after 10-07), G23 / G26 (wait on
   the forward gates). BLOCKED: G11 / G20 (pre-2016 bars). Everything else dead (see Log + NEXT.md dead rows).
-- NEXT: build the G45-F log-only watcher (swingtrader/daily, alert-style, + testing.py REGISTRY entry), then G44 count. Check VIVK as soon as it settles (~10-07).
+- NEXT: G44 count (OTC -> exchange uplistings); then round 3 part 2 ideas aimed at G45's lesson (CEF / fund structures
+  where an activist or a charter forces a NAV payoff). G45-F watcher LIVE in code (server needs a pull + `make persist`). Check VIVK as soon as it settles (~10-07).
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -217,3 +218,8 @@ absorbed.
   judge 2024-26 n 40 +3.57%, median +1.36%, hit 75%, t 2.67, ex best 5 +1.25%; holdout 2016-20 n 51 +2.01%, t 1.74. As a
   sleeve (12.5%/position from SPY): judge +3.4%/yr vs SPY (t 1.0), hedged vs PCEF +6.0%/yr (~+3.9pp after tax): below +5pp.
   First new mechanism of this hunt to pass its own test. Follow-up G45-F registered (forward, 30 events, no new N).
+- 2026-10-02 23:10 **G45-F forward watcher built (log only):** swingtrader/daily/cef_activist_watch.py (`make
+  cef-activist-watch`, added to deploy/research-shadows.service.in as a non-fatal step), testing.py REGISTRY entry "CEF
+  activist 13D (G45-F)" (gate 30 scored events), tests/test_cef_activist_watch.py. A live dry run on 2026-10-02 found ZTR
+  (Saba); a dedupe bug (same pair from several queries) was fixed before commit. tests/ pass (the research/daily-strategies
+  news_test.py collection error is pre-existing, not from this commit).

@@ -391,6 +391,9 @@ pick-cost: ## Pick-quality lead: live night auction cost + bounce by price bucke
 stack-shadow: ## Index-beat FOUND: log the book stacked on index beta (taxable SPY core + legs; Roth 1/3 UPRO) vs live and SPY (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.stack_shadow $(DATE)
 
+cef-activist-watch: ## Goal G45-F: first activist 13Ds on closed-end funds, logged and scored at 60 sessions vs PCEF (log only, no orders)
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.cef_activist_watch
+
 tender-watch: ## Round 31: new SC TO-I filings -> odd-lot tender alerts (email; manual tender at Schwab): make tender-watch [DATE=YYYY-MM-DD]
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.tender_watch $(DATE)
 
