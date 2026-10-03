@@ -385,6 +385,9 @@ qi-eval:      ## forward test of the 15:40 quote-imbalance tilt (Round 24 BB; ve
 insider-shadow: ## Round 31 ID3: score + plan the insider-purchase session shadow (weekdays before 09:00 ET; no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.insider_shadow $(DATE)
 
+pick-cost: ## Pick-quality lead: live night auction cost + bounce by price bucket from the fill logs (no orders)
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.pick_cost_watch
+
 stack-shadow: ## Index-beat FOUND: log the book stacked on index beta (taxable SPY core + legs; Roth 1/3 UPRO) vs live and SPY (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.stack_shadow $(DATE)
 

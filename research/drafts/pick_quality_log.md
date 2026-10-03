@@ -76,3 +76,4 @@ SSR days) are all rows of the dead list; no new source left in hand. What was le
    (second look). At $2.3k whole shares already skip most of them; it starts to matter at ~$10k+.
 4. Headline category, fails-to-deliver, same-story clusters, ex-dividend days, market cap, turnover: no separation.
 Program N used by this hunt: 777-778 (PQ1).
+- TRACKING (2026-10-02): swingtrader/daily/pick_cost_watch.py (make pick-cost, state/pick-cost.jsonl, testing.py REGISTRY 'Night auction cost by price bucket', gate 100 live $5-10 trips, read: median cost <= 5bp/side -> register a cheap-name tilt test); runs first in research-shadows weekdays 08:20 ET.

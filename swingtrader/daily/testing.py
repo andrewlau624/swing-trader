@@ -114,8 +114,18 @@ def _stack(state: Path, logs: Path) -> dict:
     return dict(n=len(rows), week=wk, line=s.line(rows) if rows else "no sessions logged yet (make stack-shadow)")
 
 
+def _pick_cost(state: Path, logs: Path) -> dict:
+    from . import pick_cost_watch as w
+    rows = [r for r in w._jsonl(state / w.LOG_NAME) if "buy_cost_bp" in r]
+    cheap = sum(1 for r in rows if r["bucket"] == "$5-10")
+    wk = sum(1 for r in rows if r["buy_at"] >= _week_ago())
+    return dict(n=cheap, week=wk, line=w.line(rows) if rows else "no live night trips scored yet (make pick-cost)")
+
+
 # ---------------------------------------------------------------- the list
 REGISTRY: list[Test] = [
+    Test("Night auction cost by price bucket (pick-quality lead)", "do $5-10 night names really cost ~15bp/side live, or ~0 in the auctions? (gross bounce $5-10 +40bp vs $50+ ~0)",
+         "2026-10-02", 100, "$5-10 live trips", _pick_cost, "make pick-cost; pick_quality_log.md", ["pick_cost_watch"]),
     Test("Book stacked on index beta (index-beat FOUND)", "taxable = SPY 1.0x + live legs on margin; Roth = 1/3 UPRO + 2/3 book: does it beat both the live accounts and SPY?",
          "2026-10-02", 250, "sessions", _stack, "make stack-shadow; study_ib_found_stack.md", ["stack_shadow"]),
     Test("Insider-day (ID3)", "buy the open / sell the close the session after an officer/director buy",
