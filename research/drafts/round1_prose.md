@@ -2601,3 +2601,18 @@ Seen before registering: FTS hit counts only (~190-270 a year).
   2016-20 (mean >= 0).
 - **Goal bar:** an overlay at 0.25x per event (taxable, funded from the SPY core), after tax, >= +5pp/yr at $2.3k and $10k.
 - Runner `research/sim/goal_g31.py`. k = 28 when judged.
+
+## Amendment — Goal hunt, Study G36: RSU vest-date selling marked by officer code-F clusters (pre-register; program N 779 -> 780)
+
+Session llm-trader-ec, idea G36 (`goal_ideas.md`, track T3). Registered 2026-10-02 before any code-F event was built.
+- **Events:** Form 345 data sets 2014q1..latest (`data/research/jump/insider/` + `night/insider/`): Form 4 transactions with
+  TRANS_CODE F (tax withholding on vesting). A **cluster** = >= 5 distinct reporting owners with code F at one issuer whose
+  filing dates span <= 2 calendar days. Cluster date = the last filing date. One cluster per issuer per 20 sessions.
+- **Trade:** buy the opening cross of the 2nd session after the cluster date (the vest-day selling is over; Form 4s are due
+  within 2 business days), sell the 5th session's close. Return minus SPY over the same window. Filters: prior raw close
+  >= $5, 20d ADV$ >= $50M. Costs tier per side.
+- **Halves:** select 2021-23 (one look), with the t-stat computed on DATE-level means (vest dates cluster across issuers).
+  Proceed only if mean net excess >= +0.30% per trade and date-level t >= 2. Then judge 2024-26 and holdout 2016-20 as in G31.
+- **Goal bar:** an add-on at 0.25x per event (taxable), after tax, >= +5pp/yr at $2.3k and $10k. Expected: large caps, so
+  most likely small; that's why the bar is two round trips.
+- Runner `research/sim/goal_g36.py`. k = 31 when judged.
