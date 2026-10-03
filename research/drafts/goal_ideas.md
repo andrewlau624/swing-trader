@@ -302,3 +302,63 @@ hold 5 sessions, minus the stock's usual post-split drift.
 and sold". 5. Death dodged: B1 (the same splits, holder-level round-ups) is a different mechanism. The known post-reverse-split
 DRIFT (night picks with a recent reverse split were borderline) is the risk: measure vs matched reverse-split names that
 round up (no agent sale) as the control. Source: (1) concentration in forced flow.
+
+## Round 2, part 3 (written 2026-10-02 after the 20-judged paragraph, before any outcome): G31-G36
+Aim: breadth (>= 50 events a year) from broad free data, payoffs that scale with capital. Only six were written: the
+remaining T1/T4 slots would have been filler (T1's clean ideas are blocked on pre-2016 bars, G11/G20; T4 keeps dying on
+option costs). The shortfall is deliberate.
+
+### G31 (T3) Follow-on offerings: the underwriter's stabilizing bid as a floor
+Overnight-priced follow-ons (424B4/424B7, "bought deals") are priced at a discount to the last close. Under Reg M Rule 104
+the syndicate may post a stabilizing bid at or below the offer price and holds a greenshoe to cover. The stock tends to
+open near the offer price. Buy at the open of the day after pricing when it opens within 1% of the offer price, sell at
+the close of day 3, stop at offer −3% (stabilization abandoned).
+1. Who pays: the selling holder (PE sponsor, insider), who accepts a discount for size. 2. Why: size and certainty.
+3. Capacity: retail gets no allocation, but the aftermarket floor is open to anyone. 4. Repeat: 424B4/424B7 + 8-K pricing
+press releases, several hundred a year. 5. Death dodged: GAP (we don't buy the reaction; we buy at the contractual
+stabilization level). Study T (offering filings as a night-pick tilt) was a different trade.
+Source: (1) breadth. Big only if the floor is real (median >= +1% by day 3 with a small left tail).
+
+### G32 (T3) At-the-market program exhaustion: the issuer stops selling
+Issuers with ATM programs (424B5 "at the market offering") sell into the market daily until the program is used up; the
+10-Q states how much was sold vs authorized. When a filing shows >= 90% of the program sold and no new ATM supplement
+has been filed, the steady seller is gone. Buy the session after that filing, hold 20 sessions, vs a matched control of
+ATM issuers with < 50% sold.
+1. Who pays: the issuer, a price-insensitive scheduled seller while the program runs. 2. Why: raising capital, not timing.
+3. Capacity: small caps (biotech, REITs, miners). 4. Repeat: 424B5 + 10-Q ATM disclosures, hundreds of programs a year.
+5. Death dodged: forced sellers kept falling (Round 30) because those had no end date; an ATM has a cap.
+Source: (1) breadth. Risk: issuers usually file a new ATM right away (count first).
+
+### G33 (T5) Tax-loss harvest the taxable SPY core against the legs' short-term gains
+In index-beat's stack, the taxable account holds SPY 1.0x and the legs realize short-term gains taxed at 35%. When SPY is
+>= 5% below the core's basis, sell it and buy IVV/VOO (a different fund on a different index provider's product; the IRS
+hasn't ruled them substantially identical, and the practice is widespread), realizing a short-term capital loss that
+offsets the legs' gains. Swap back after 31 days. Tax alpha scales with the core.
+1. Who pays: the tax code's capital-loss offset rules. 2-4: mechanical, every drawdown >= 5%. 5. Death dodged: TAX (it
+uses tax rules, not a signal), REGIME (it just harvests in drawdowns). Source: (5). Risk: the "substantially identical"
+judgment is the user's (and their tax adviser's), not research.
+
+### G34 (T2) Listed preferreds below par after a change-of-control merger
+Many REIT, bank and utility preferreds must be redeemed at $25 + accrued dividends on a change of control (or convert at a
+formula). After a merger announcement, thin retail-held preferreds can trade below $25 + accrued even though the contract
+pays par at closing. Buy when price <= par + accrued − 1.5%, hold to redemption.
+1. Who pays: inattentive preferred holders who sell. 2. Why: they don't read change-of-control clauses. 3. Capacity: thin
+$25 issues, $10-50k per name. 4. Repeat: merger 8-Ks of issuers with listed preferreds + the preferred's prospectus
+(424B5) "change of control" redemption clause, ~10-20 deals a year. 5. Death dodged: GAP (contract, not reaction); B3
+merger arb was dead because the common spread was T-bill-like; preferred holders are a different, thinner crowd.
+Source: (3).
+
+### G35 (T2) Exchange-traded $25 notes with a 101% change-of-control put
+The same mechanism for baby bonds: many $25-par notes carry a holder put at 101% on a change of control with a rating
+downgrade. If a deal triggers it and the note trades below 101% of par + accrued, the payoff is contractual (the put window
+opens after closing).
+1-5: as G34. Count first (FTS 8-K "change of control repurchase event" + "notes"). Source: (3).
+
+### G36 (T3) RSU vest-date selling by employees, detected from Form 4 code F clusters
+Large-cap tech employees' RSUs vest on fixed dates; a cluster of officer Form 4 code F (tax withholding) filings marks a
+company vest date, and rank-and-file employees sell on and after those dates (indifferent sellers taking cash). Buy the
+company 2 sessions after a code-F cluster (>= 5 officers within 2 days), hold 5 sessions, vs SPY.
+1. Who pays: employees selling vested shares. 2. Why: diversification and taxes, price-insensitive. 3. Capacity: large
+caps (big capacity, so it's probably arbitraged; the sign could be tiny). 4. Repeat: Form 345 code F, quarterly per
+issuer, thousands of events a year. 5. Death dodged: the calendar isn't the signal; the filing cluster is.
+Source: (1) breadth. Expected small; kill early if select mean < 2 round trips.
