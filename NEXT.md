@@ -1009,6 +1009,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | idea | verdict | why |
 |---|---|---|
+| Insider buys >= $500k in ADV $1-20M names / >= 0.5% of market cap, hold 5 vs SPY (Goal G42 / G43, N 781-782) | **dead (select)** | 2021-23 −0.13% (t 0.2) / +0.89% (t 0.96, 2023 only); the size effect is a liquid-name effect |
 | RSU vest-date selling: >= 5 officer code-F Form 4s in 2 days, buy day+2, hold 5 vs SPY, ADV >= $50M (Goal G36, N 780) | **dead (select)** | 2021-23 n 2,979, +0.03%/trade, date-level t −1.0 |
 | Repurchase / ATM / tax-loss / preferred change-of-control ideas (Goal G32-G35) | **killed (count / bound)** | ~10/yr or ~1pp; `goal_log.md` |
 | Follow-on offerings bought at the open when within 1% of the offer price, stop −3%, exit day 3 (Goal G31, N 779) | **dead (select)** | 2021-23 n 34, −1.22%/trade, t −1.5; at-the-offer opens are the weak deals |

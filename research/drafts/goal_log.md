@@ -1,12 +1,11 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 3 · ideas written 46 (G1-G46) · k (judged) 31 · program N 780 (next free 781)
+- round 3 · ideas written 46 (G1-G46) · k (judged) 33 · program N 782 (next free 783)
 - Open: G2 (NEAR; forward G2-F = `ev2_big` gate), G3 (forward `id3_big` gate), G21 (combined ~+21pp at today's balances;
   waits on Schwab rounding B1: VIVK ~10-07, check llm-trader state/roundup-orders.json after 10-07), G23 / G26 (wait on
   the forward gates). BLOCKED: G11 / G20 (pre-2016 bars). Everything else dead (see Log + NEXT.md dead rows).
-- NEXT: register G42 + G43 together (insider size effect in thin names / relative to market cap; untouched windows),
-  then G41/G46 (13F cache), G45 (CEF activist FTS count), G44 count. Check VIVK as soon as it settles (~10-07).
+- NEXT: G41/G46 (13F cache), G45 (CEF activist FTS count), G44 count. Check VIVK as soon as it settles (~10-07).
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -204,3 +203,8 @@ small concentrated funds; issuer self-tenders; director buys in other documents)
 size effect (pre-2016 data; a paid source). (2) Small names where flow / ADV is large: every liquid-name flow idea was
 absorbed.
 - 2026-10-02 22:20 Round 3 part 1: G41-G46 written before any outcome.
+- 2026-10-02 22:40 **G42 / G43 insider size in thin names / vs market cap: both DEAD on select** (registered c1e1259,
+  N 781-782). 19,507 officer/director buy events with bars (2016-26). **G42** (>= $500k, ADV $1-20M, hold 5 vs SPY): n 842,
+  mean −0.13%, median −0.49%, date-t +0.23 (next-session report +0.05%). **G43** (>= 0.5% of market cap, ADV >= $2M): n 181,
+  mean +0.89%, median +0.70%, date-t +0.96 (2021 −0.06 / 2022 +0.18 / 2023 +3.35%). The insider size effect lives in
+  liquid names (ADV >= $20M: G2's holdout +68.7bp next session) and doesn't extend to thin names; G43's mean is one year.
