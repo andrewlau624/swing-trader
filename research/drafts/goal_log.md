@@ -1,7 +1,7 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 2 · ideas written 30 (G1-G30) · k (judged) 17 · program N 775 (G12 took 775; next free 776)
+- round 2 · ideas written 30 (G1-G30) · k (judged) 20 · program N 775 (G12 took 775; next free 776)
 - NEAR: G2 (forward G2-F = ev2_big gate); G1 bound NEAR at $10k / FOUND-level at $2.3k if Schwab rounds B1 (VIVK ~10-07;
   check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = `id3_big` gate.
 - BLOCKED: G11 / G20 (2006-15 insider window) need pre-2016 daily bars incl. delisted names. Stooq is behind a JS bot
@@ -9,7 +9,8 @@
   User item: a Tiingo (paid tier) / Norgate / CRSP source would unlock the cleanest test this hunt has.
 - running: nothing
 - round-2 quota after G30: T1 7/8 (+G28), T2 6/8 (+G27, G25 half), T3 7/8 (+G30), T4 7/8 (+G24-G26, G29), T5 4/4 (+G21-G23) -> G31-G40: T1 1, T2 2, T3 1, T4 1 + free
-- NEXT: G21 report (combine) — cheapest and most useful to the user; then G22 bound, G28 bound, G30 count, G27 count.
+- NEXT: G30 count (cash-in-lieu agent sales: share of reverse splits with cash in lieu, size vs ADV), G27 count (thrift
+  conversions), G25 count (listed CVRs), G24 bound (LEAP vs UPRO cost), G23/G26 wait on forward gates.
   Old next list:
   G18/G19 warrant counts, then write G21-G30.
 
@@ -136,3 +137,9 @@ second-tier indexes where flow/ADV is large).
   outcome is option-like (OXY warrants went ~10x, others to 0): LOTTERY by construction. The 2025-26 uptick (meme-stock
   warrant dividends) is noted, not acted on.
 - 2026-10-02 20:05 Round 2 part 2: G21-G30 written before any outcome (G29 killed at writing: calls cannot tender).
+- 2026-10-02 20:20 **G21 combine: conditional FOUND-level (report, no N), study_goal_g21.md.** At today's balances (~$10.8k
+  combined), 2024-26 after tax over SPY: index-beat stack +6.6pp + B1 round-ups +5.6pp + B2/tenders in the Roth +9.1pp =
+  ~+21pp (+2.3pp more if G2 passes forward). Without the best 5 contract events ~+13pp. Conditional on (1) Schwab rounding
+  B1 (VIVK ~10-07; without B1 ~+16pp) and (2) index-beat's edge-halves assumption (break-even 25%). Falls to ~+13-17pp at
+  $25k and ~+10-15pp at $50k (per-holder caps). **G22 (contract payoffs in the Roth): already the default** in
+  splitoff_buy.py / tender_buy.py (Roth cash first). **G28 (margin on B2 in taxable): dominated** by G22, dropped.
