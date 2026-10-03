@@ -1,7 +1,7 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 2 · ideas written 30 (G1-G30) · k (judged) 20 · program N 775 (G12 took 775; next free 776)
+- round 2 · ideas written 30 (G1-G30) · k (judged) 22 · program N 775 (G12 took 775; next free 776)
 - NEAR: G2 (forward G2-F = ev2_big gate); G1 bound NEAR at $10k / FOUND-level at $2.3k if Schwab rounds B1 (VIVK ~10-07;
   check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = `id3_big` gate.
 - BLOCKED: G11 / G20 (2006-15 insider window) need pre-2016 daily bars incl. delisted names. Stooq is behind a JS bot
@@ -9,8 +9,8 @@
   User item: a Tiingo (paid tier) / Norgate / CRSP source would unlock the cleanest test this hunt has.
 - running: nothing
 - round-2 quota after G30: T1 7/8 (+G28), T2 6/8 (+G27, G25 half), T3 7/8 (+G30), T4 7/8 (+G24-G26, G29), T5 4/4 (+G21-G23) -> G31-G40: T1 1, T2 2, T3 1, T4 1 + free
-- NEXT: G30 count (cash-in-lieu agent sales: share of reverse splits with cash in lieu, size vs ADV), G27 count (thrift
-  conversions), G25 count (listed CVRs), G24 bound (LEAP vs UPRO cost), G23/G26 wait on forward gates.
+- NEXT: G25 count (listed CVRs), G24 bound (LEAP vs UPRO cost), G13 data check; G23/G26 wait on forward gates.
+  Then write G31-G40 and the 20-judged paragraph.
   Old next list:
   G18/G19 warrant counts, then write G21-G30.
 
@@ -143,3 +143,11 @@ second-tier indexes where flow/ADV is large).
   B1 (VIVK ~10-07; without B1 ~+16pp) and (2) index-beat's edge-halves assumption (break-even 25%). Falls to ~+13-17pp at
   $25k and ~+10-15pp at $50k (per-holder caps). **G22 (contract payoffs in the Roth): already the default** in
   splitoff_buy.py / tender_buy.py (Roth cash first). **G28 (margin on B2 in taxable): dominated** by G22, dropped.
+- 2026-10-02 20:40 **G30 transfer-agent fractional-share sales: KILLED (bound).** The aggregate fraction is < 1 post-split
+  share per beneficial account (often netted at the DTC participant), ~$0.1-0.3M even in heavy-retail micro caps: a few % of
+  ONE day's ADV, spread over days. No forced flow worth trading.
+- **DL-G27 mutual bank conversions at $10: PAYS on its history but not usable as a bot strategy** (study_goal_dl27.md).
+  18 standard/second-step conversions with data (2019-25): day-1 median +21.2%, hit 83%, worst −9.2%; 2023-25 weak. Fails
+  >= 5/yr on the deals with data (~2.6/yr; ~7-12/yr exist), and eligibility needs a deposit account 1-2 years ahead at each
+  mutual (residency limits, proration). A human project for the user, not a FOUND. First run had a bug (second steps'
+  old minority shares counted as the IPO); fixed before the write-up.

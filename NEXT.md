@@ -24,6 +24,10 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   events). Conditional on Schwab rounding B1 (VIVK ~10-07; without it ~+16pp) and the stack's edge-halves assumption.
   Shrinks to ~+13-17pp at $25k (per-holder caps). Nothing to build: splitoff_buy / tender_buy already use the Roth first.
   `study_goal_g21.md`.
+- **DL-G27 (deal rule, no N): mutual savings bank conversions bought at $10 as an eligible depositor PAY on their history**
+  (18 deals 2019-25, day-1 median +21%, hit 83%, worst −9%; weak in 2023-25), but eligibility needs a deposit account at
+  that bank 1-2 years ahead (residency limits). User's call: a human side project (open $50-100 accounts at mutuals that
+  accept online out-of-state applicants), not a bot feature. `study_goal_dl27.md`.
 - **G1 bound (no N):** the shipped contract stack (B1 + B2 + odd-lot tenders) with idle taxable cash in SPY = +20.5pp/yr after
   tax at $2.3k, +8.8pp at $10k (2024-26), IF Schwab rounds B1 (VIVK ~10-07). Nothing to build. `study_goal_g1.md`.
 
