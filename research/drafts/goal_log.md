@@ -1,7 +1,7 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 2 · ideas written 30 (G1-G30) · k (judged) 24 · program N 775 (G12 took 775; next free 776)
+- round 2 · ideas written 30 (G1-G30) · k (judged) 25 · program N 778 (G13 = 776; ee PQ1 = 777-778; next free 779)
 - NEAR: G2 (forward G2-F = ev2_big gate); G1 bound NEAR at $10k / FOUND-level at $2.3k if Schwab rounds B1 (VIVK ~10-07;
   check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = `id3_big` gate.
 - BLOCKED: G11 / G20 (2006-15 insider window) need pre-2016 daily bars incl. delisted names. Stooq is behind a JS bot
@@ -9,9 +9,9 @@
   User item: a Tiingo (paid tier) / Norgate / CRSP source would unlock the cleanest test this hunt has.
 - running: nothing
 - round-2 quota after G30: T1 7/8 (+G28), T2 6/8 (+G27, G25 half), T3 7/8 (+G30), T4 7/8 (+G24-G26, G29), T5 4/4 (+G21-G23) -> G31-G40: T1 1, T2 2, T3 1, T4 1 + free
-- NEXT: G13 via SEC XBRL frames (us-gaap StockRepurchasedDuringPeriodShares / TreasuryStockSharesAcquired per quarter,
-  all filers, free): count coverage 2014-26, then pre-register (top decile repurchase intensity, entry at quarter end +
-  46/91 days, hold 1 quarter, vs SPY). G23/G26 wait on forward gates. Then G31-G40.
+- NEXT: write G31-G40 aimed at the 20-judged gap (breadth >= 50/yr from broad free data; payoffs that scale). New free
+  caches from the stopped Jump hunt (data/research/jump/): SEC FTD, 13F, Form 345 2014-26, XBRL shares history, news,
+  Reddit/WSB, Wikipedia pageviews. G23/G26 wait on forward gates.
   Old next list:
   G18/G19 warrant counts, then write G21-G30.
 
@@ -168,3 +168,9 @@ conversions: +21% median per deal, but needs depositor eligibility years ahead).
 REGIME (G18), BLOCKED (G11/G20, pre-2016 bars). **Gap for G31-G40:** (1) breadth: mechanisms that fire >= 50 times a
 year (only the insider family does so far), from broad free data (SEC XBRL frames, Form 345, FTS); (2) payoffs that scale
 with capital, since every contract payoff caps per holder; (3) no more one-event-a-year index ideas.
+- 2026-10-02 21:05 **G13 repurchase intensity >= 2%/quarter: DEAD on select** (registered dbb87bc, N 776). XBRL companyfacts
+  for 8,008 CIKs -> 8,711 reported repurchase quarters (1,422 filers) -> 811 events with bars, price >= $5, ADV >= $5M.
+  Filings 2021-23, hold 63 vs SPY, calendar-time: 260 positions, monthly excess +0.20%, NW t +0.34; per trade mean +0.26%,
+  median −1.43%, hit 45% (2021 +0.78%/mo, 2022 +0.66, 2023 −0.71). Gate (>= +0.5%/mo, t >= 2) fails: the published
+  actual-repurchase effect isn't there after 2020 (TEXTBOOK). Caveats: current filers only (company_tickers), split-hold
+  events skipped. Program N is now 778 (llm-trader-ee PQ1 took 777-778). Jump hunt (llm-trader-51) STOPPED, not found.
