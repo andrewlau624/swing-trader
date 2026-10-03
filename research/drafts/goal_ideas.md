@@ -461,3 +461,10 @@ smaller activists, funds of funds crossing 5%)? If yes, the event count roughly 
 if no, G45 is specific to the activists who can force a NAV exit (the mechanism claim).
 1. Who pays: as G45. 3. Capacity: as G45. 4. Repeat: SC 13D in the EDGAR quarterly form index, subject = a fund-like
 company with a ticker. 5. Death dodged: STACKING / overlap with G45, by excluding the six activists. Source: (3)+(1).
+
+### G54 (T1/T3) Officers/directors of a closed-end fund buying the fund with their own money
+The two families that worked here, combined: own-money insider buying (ID3/EV2) and a discounted fund with a NAV anchor (G45).
+A fund insider buying at a discount is buying NAV at a discount, and knows the board's plans (tenders, mergers, open-ending).
+Event: officer/director code-P Form 4 at a fund-like issuer (the G45 regex on the issuer name), first per fund in 90 days.
+Buy the next open, hold 60, vs PCEF. 5. Death dodged: ID2 thin-name (dead) was operating companies at next-session holds;
+here the anchor is NAV. Source: (1)+(3).

@@ -2697,3 +2697,10 @@ Session llm-trader-ec, idea G53. Registered 2026-10-02 before any outcome. Event
 activists (Saba, Karpus, Bulldog, City of London, 1607, Almitas). First filing per (subject, filer). Trade, benchmark,
 costs, hold (60), halves and gates exactly as G45 (select n >= 30, mean >= +2.0%, date-level t >= 2). Runner
 `research/sim/goal_g53.py`. k = 43 when judged.
+
+## Amendment — Goal hunt, Study G54: closed-end fund insiders buying their own fund (pre-register; program N 787 -> 788)
+Session llm-trader-ec, idea G54. Registered 2026-10-03 before any outcome. Events: officer/director code-P Form 4 accessions
+(`goal_g12.buys()`, 2016-26, $ >= $10k summed per (issuer, filing date)) whose issuer symbol's name (EDGAR company_tickers /
+FTS display) matches the G45 fund regex AND that symbol has an adjusted Alpaca bar history; first event per fund per 90 days.
+Trade/benchmark/costs/hold/halves/gates exactly as G45 (60 sessions vs PCEF, select n >= 30, mean >= +2.0%, date-level t >= 2;
+judge mean > 0, t >= 2, ex-best-5 > 0; holdout >= 0). Runner `research/sim/goal_g54.py`. k = 44 when judged.
