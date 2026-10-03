@@ -264,3 +264,6 @@
   - **R2-24** (33 select -> 26 trades); hold1 x0.0 -0.7%/-1.5%/-0.8% P0.87; tp205 x0.0 -3.2%/-4.3%/-2.0% P1.00; hold20 x1.1 +0.4%/-3.3%/-1.1% P0.46; hold60 x1.2 +4.5%/-1.8%/+2.4% P0.17; tp2060 x0.8 +1.1%/-1.4%/+2.4% P0.36; all fail
   - **R4-7** (15 select -> 10 trades); hold1 x0.0 -2.3%/-3.6%/-2.1% P1.00; tp205 x0.0 -3.3%/-5.5%/-1.2% P0.99; hold20 x3.2 +12.2%/-0.2%/+4.5% P0.03; hold60 x1.5 +10.8%/-12.2%/-5.5% P0.23; tp2060 x1.7 +8.0%/+3.0%/+18.5% P0.09; all fail
   Both too rare (26 / 10 trades). 91 explored.
+- 17:08 PDT:
+  - **H20** (185 select -> 128 trades); hold1 x3.7 -1.3%/-2.0%/-1.0% P0.96; tp205 x1.5 -1.7%/-2.5%/-2.1% P0.90; hold20 x1.2 -3.7%/-7.5%/-6.7% P0.89; hold60 x1.0 -5.6%/-13.0%/-14.0% P0.83; tp2060 x1.0 -2.4%/-4.0%/+13.3% P0.82; all fail
+  **H20** (a subreddit created for the ticker; Arctic Shift subreddit metadata for 1,610 tickers with >= 20 mentions): dead, EXIT LIQUIDITY (median -14% over 60 sessions). 92 explored.
