@@ -1,7 +1,7 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 3 · ideas written 49 (G1-G49; G47-G49 aimed at G45's lesson) · k (judged) 42 · program N 786 (next free 787)
+- round 3 · ideas written 49 (G1-G49; G47-G49 aimed at G45's lesson) · k (judged) 43 · program N 787 (next free 788)
 - NEAR: **G45** (activist 13D on CEFs: passes its study bars, misses the Goal add-on bar; forward G45-F needs a
   log-only watcher, to build next). Open: G2 (NEAR; forward G2-F = `ev2_big` gate), G3 (forward `id3_big` gate), G21 (combined ~+21pp at today's balances;
   waits on Schwab rounding B1: VIVK ~10-07, check llm-trader state/roundup-orders.json after 10-07), G23 / G26 (wait on
@@ -243,3 +243,9 @@ absorbed.
   proxy-contest filing): 90 events, select n 17, mean +0.37%, date-t −0.25: dead. Read: the edge is the activist's
   accumulation (the 13D and the 15% stake), not the proxy fight. Forward-only option, not acted on: G45-F's watcher could also
   log 15% crossings (no verdict from history).
+- 2026-10-03 00:10 **G53 first 13D on a fund-like subject by non-G45 filers: DEAD on select** (N 787). EDGAR quarterly form
+  index 2016-26: 436 first 13Ds (top filers BofA, Sit, Wells Fargo, TD, GAMCO), 289 with bars; select n 96, mean −8.14% vs
+  PCEF, median −6.82%, hit 31%, date-t −1.93. Caveat: the G45 fund regex admits operating companies whose names contain
+  "Capital / Global / Trust / Income", so this is not a clean "non-activist on CEFs" test. It does show the G45 effect is
+  not a generic 13D effect: it belongs to activists who can force a NAV exit (the mechanism claim holds). First build crashed
+  (index entries for subject and filer have different paths; grouped by accession instead), fixed before any outcome.
