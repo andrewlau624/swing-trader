@@ -2528,3 +2528,19 @@ window, from acceptance to the same session's close, has never been computed on 
 - **Goal bar (add-on):** as a 0.5x-per-event intraday overlay on a SPY core, after tax, >= +5pp/yr at $2.3k and $10k on
   the judge half. Expected ~40-50 events a year.
 - Runner `research/sim/goal_g12.py`. k = 11 when judged.
+
+## Deal rule DL-G27 (Goal hunt, no N): mutual savings bank conversions bought at $10 in the subscription offering
+
+Session llm-trader-ec, idea G27 (`goal_ideas.md`). Registered 2026-10-02 before any post-IPO price of these deals was looked at.
+- **Events:** S-1 filings 2016-01..2026-09 containing "plan of conversion", "subscription offering" and "eligible account
+  holders" (EDGAR FTS), one per issuer. Standard conversions and second-step conversions; ticker from the FTS display name
+  or the issuer's later filings; offering price $10.00 (the norm; any other stated price is used as-is).
+- **Payoff (as an eligible depositor, order filled):** buy at the offering price; sell (a) at the close of the first
+  trading day, (b) at the 20th session's close. Raw Alpaca SIP bars. No commission (subscription), sell-side cost tier.
+- **PAYS if** on (a): median > 0, hit >= 60%, worst case survivable (no single deal below −30%); and >= 5 deals/yr. Report
+  both exits, by year; worst deal named. Dollars: $2,000 per deal per account holder (assume full fill; note that
+  oversubscribed deals prorate above minimums).
+- **Logistics (written now; this decides whether it can be used):** eligibility requires a deposit account at the mutual
+  BEFORE the eligibility record date (typically 1-2 years before the offering), and many mutuals restrict account opening
+  or the community offering to state / county residents. Even if it PAYS, it can be used only for mutuals that open
+  accounts to non-residents online; the manual setup is > 5 minutes per bank (one-time).
