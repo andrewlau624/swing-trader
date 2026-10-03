@@ -1,14 +1,13 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 3 · ideas written 49 (G1-G49; G47-G49 aimed at G45's lesson) · k (judged) 44 · program N 788 (next free 789)
-- NEAR: **G45** (activist 13D on CEFs: passes its study bars, misses the Goal add-on bar; forward G45-F needs a
-  log-only watcher, to build next). Open: G2 (NEAR; forward G2-F = `ev2_big` gate), G3 (forward `id3_big` gate), G21 (combined ~+21pp at today's balances;
-  waits on Schwab rounding B1: VIVK ~10-07, check llm-trader state/roundup-orders.json after 10-07), G23 / G26 (wait on
-  the forward gates). BLOCKED: G11 / G20 (pre-2016 bars). Everything else dead (see Log + NEXT.md dead rows).
-- NEXT (round 4 cont.): write more round-4 ideas; the CEF-activist family is now mapped ( first 13D works, 15% crossings look strong but rare, proxy
-  filings don't). Ideas for round 4: other NAV-exit vehicles (BDCs below NAV with activists, SPAC-like trusts, royalty trusts,
-  holding-company discounts with an activist). VIVK check after 10-07. VIVK settles ~10-07: check llm-trader state/roundup-orders.json (G21's open fact). G45-F watcher LIVE in code (server needs a pull + `make persist`). Check VIVK as soon as it settles (~10-07).
+- round 4 · ideas written 54 · k (judged) 44 · program N 788 (next free 789)
+- NEAR: **G2** (EV2-big overlay; forward `ev2_big` gate, 60 trades), **G45** (CEF activist 13D; forward G45-F watcher, 30
+  events; also logs 15% crossings). Forward-only: G3 (`id3_big` gate). Conditional: **G21** combined ~+21pp at today's
+  balances, waits on Schwab rounding B1 (VIVK ex 10-05, settles ~10-07: check llm-trader state/roundup-orders.json).
+  BLOCKED: G11/G20 (pre-2016 bars), G41/G46 (13F values), G59 (CEF universe).
+- MODE: maintenance cadence (hourly): each tick pull, check VIVK / forward gates, and every few ticks write + test one new
+  idea. New rounds aim at the after-40 paragraph below.
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -258,3 +257,12 @@ absorbed.
   80 fund-like issuers (the regex also admits a few REITs: Pebblebrook, PennyMac), 286 with bars; select n 96, mean +1.25%
   vs PCEF, median +0.83%, date-t 0.80, ex-best-5 −1.05% (2021 +1.9 / 2022 −1.3 / 2023 +3.4). Positive but weak: a fund
   insider's buy is small vs the fund and carries no NAV-exit power; the activist is the mechanism, not the insider.
+
+### After 40+ judged (rounds 3-4): what came closest and why it failed
+**G45** (first activist 13D on a closed-end fund) is the only new mechanism in 44 judged ideas to pass its own registered
+study (select, judge and holdout all positive vs PCEF). It failed only at the book level, because ~30 events a year keep
+~35% of the account in the trade and CEFs lag SPY in bull years. Its neighbours mapped the mechanism: 15% crossings strong
+but rare (G50), proxy fights nothing (G51), non-activist 13Ds negative (G53), fund insiders weak (G54). The edge belongs to
+an activist who can force a NAV exit. **Gap for the next ideas:** more vehicles where someone can force a NAV/book exit
+on a discounted claim (BDCs, holding companies, trust structures, SPAC-like trusts with a deadline), or a way to raise G45's
+capital use without re-tuning it (only by forward data: G45-F).
