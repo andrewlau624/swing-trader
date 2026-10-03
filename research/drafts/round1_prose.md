@@ -2544,3 +2544,25 @@ Session llm-trader-ec, idea G27 (`goal_ideas.md`). Registered 2026-10-02 before 
   BEFORE the eligibility record date (typically 1-2 years before the offering), and many mutuals restrict account opening
   or the community offering to state / county residents. Even if it PAYS, it can be used only for mutuals that open
   accounts to non-residents online; the manual setup is > 5 minutes per bank (one-time).
+
+## Amendment — Goal hunt, Study G13: issuers that actually repurchased >= 2% of their shares last quarter (pre-register; program N 775 -> 776)
+
+Session llm-trader-ec, idea G13 (`goal_ideas.md`, track T3). Registered 2026-10-02 before any repurchase data was joined to
+prices. Seen before registering: only the SEC XBRL frames API's coverage count (140-210 filers per quarter for the 3-month
+frames), no returns.
+
+- **Data:** SEC XBRL companyfacts (data.sec.gov/api/xbrl/companyfacts) for every CIK in company_tickers.json. Shares
+  repurchased in a fiscal quarter = `us-gaap:StockRepurchasedDuringPeriodShares`, else `TreasuryStockSharesAcquired`,
+  using facts whose duration is 80-100 days (a reported quarter). Denominator = `dei:EntityCommonStockSharesOutstanding`,
+  the latest value filed on or before that filing. `filed` = the fact's filing date (point in time).
+- **Event:** intensity = repurchased / outstanding **>= 2.0%** in one quarter; first filing of that fact (10-Q or 10-K).
+- **Trade:** buy the opening cross of the first session after `filed`, hold 63 sessions, sell at that close. Return minus
+  SPY (total return, same window). Filters at entry: prior raw close >= $5, 20d ADV$ >= $5M. Costs tier per side.
+- **Portfolio for the test:** calendar-time, equal weight across open positions, monthly excess returns vs SPY.
+- **Halves:** select = events filed 2021-23 (one look). Proceed only if monthly excess mean >= +0.5% and NW t >= 2. Then
+  judge (2024-26: mean > 0, NW t >= 2, lottery test ex best 5% of months and ex best 5 trades, random-filer null: same
+  count of 10-Q filers per month, >= 95th pct) and holdout (2016-20: mean >= 0).
+- **Goal bar:** as a taxable sleeve replacing SPY, after tax, >= SPY + 10pp at $2.3k and $10k (whole shares; ~1 position
+  per $500 at $2.3k), or as an add-on >= +5pp.
+- **Why it might fail (written now):** TEXTBOOK. Actual-repurchase predictability is published (Stephens & Weisbach 1998;
+  Ben-Rephael, Oded & Wohl 2014) and may have decayed. One variant. k = 25 when judged.
