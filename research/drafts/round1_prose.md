@@ -2653,3 +2653,11 @@ was looked at. Seen: FTS counts only (Saba SC 13D: 42 filings / 14 funds in 2017
 - **Goal bar:** an add-on sleeve (a few % of equity per fund, 60-session holds; Roth-friendly, since CEF distributions are
   income), after tax where it applies, >= +5pp/yr at $2.3k and $10k.
 - Runner `research/sim/goal_g45.py`. k = 34 when judged.
+
+## Amendment — Goal hunt, G45-F: the one NEAR follow-up for Study G45 (forward only; no new N)
+G45 passed every registered study bar (select +2.55% t 2.48; judge +3.57% t 2.67, ex-best-5 +1.25%; holdout +2.01%) but missed
+the Goal add-on bar (+3.4pp/yr vs SPY long-only, ~+3.9pp hedged after tax; `study_goal_g45.md`). Follow-up, registered before
+any forward outcome: a log-only watcher records every new first 13D by the same six activists on a listed closed-end fund and
+scores it at 60 sessions (dividend-adjusted, vs PCEF). After 30 forward events: PASS iff mean excess vs PCEF >= +1.5% AND the
+hedged sleeve (long fund / short PCEF, 12.5% of equity per position, taxable, after tax) >= +5pp/yr on those events; else DEAD.
+No interim decisions; no re-run of history with new sizing. N stays 783.

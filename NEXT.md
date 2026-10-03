@@ -24,6 +24,11 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   events). Conditional on Schwab rounding B1 (VIVK ~10-07; without it ~+16pp) and the stack's edge-halves assumption.
   Shrinks to ~+13-17pp at $25k (per-holder caps). Nothing to build: splitoff_buy / tender_buy already use the Roth first.
   `study_goal_g21.md`.
+- **G45 activist 13D on closed-end funds: PASSES its registered study (N 783), NEAR at the book level.** First 13D by Saba /
+  Karpus / Bulldog / City of London on a CEF, bought next open, held 60 sessions: vs the CEF index (PCEF) +2.55% (2021-23,
+  t 2.5), **+3.57% (2024-26, hit 75%, t 2.7, ex-best-5 +1.25%)**, +2.01% (2016-20). But ~30 events/yr at 12.5% each keeps only
+  ~35% of the account in the trade: +3.4%/yr vs SPY long-only, ~+3.9pp hedged after tax (needs +5pp). Forward follow-up
+  G45-F (30 events, log-only watcher). `study_goal_g45.md`.
 - **DL-G27 (deal rule, no N): mutual savings bank conversions bought at $10 as an eligible depositor PAY on their history**
   (18 deals 2019-25, day-1 median +21%, hit 83%, worst −9%; weak in 2023-25), but eligibility needs a deposit account at
   that bank 1-2 years ahead (residency limits). User's call: a human side project (open $50-100 accounts at mutuals that

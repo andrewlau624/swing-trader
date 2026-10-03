@@ -1,11 +1,12 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 3 · ideas written 46 (G1-G46) · k (judged) 33 · program N 782 (next free 783)
-- Open: G2 (NEAR; forward G2-F = `ev2_big` gate), G3 (forward `id3_big` gate), G21 (combined ~+21pp at today's balances;
+- round 3 · ideas written 46 (G1-G46) · k (judged) 36 · program N 783 (next free 784)
+- NEAR: **G45** (activist 13D on CEFs: passes its study bars, misses the Goal add-on bar; forward G45-F needs a
+  log-only watcher, to build next). Open: G2 (NEAR; forward G2-F = `ev2_big` gate), G3 (forward `id3_big` gate), G21 (combined ~+21pp at today's balances;
   waits on Schwab rounding B1: VIVK ~10-07, check llm-trader state/roundup-orders.json after 10-07), G23 / G26 (wait on
   the forward gates). BLOCKED: G11 / G20 (pre-2016 bars). Everything else dead (see Log + NEXT.md dead rows).
-- NEXT: G41/G46 (13F cache), G45 (CEF activist FTS count), G44 count. Check VIVK as soon as it settles (~10-07).
+- NEXT: build the G45-F log-only watcher (swingtrader/daily, alert-style, + testing.py REGISTRY entry), then G44 count. Check VIVK as soon as it settles (~10-07).
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -208,3 +209,11 @@ absorbed.
   mean −0.13%, median −0.49%, date-t +0.23 (next-session report +0.05%). **G43** (>= 0.5% of market cap, ADV >= $2M): n 181,
   mean +0.89%, median +0.70%, date-t +0.96 (2021 −0.06 / 2022 +0.18 / 2023 +3.35%). The insider size effect lives in
   liquid names (ADV >= $20M: G2's holdout +68.7bp next session) and doesn't extend to thin names; G43's mean is one year.
+- 2026-10-02 22:55 G41 / G46 BLOCKED: the jump 13F cache holds (cik, period, filed, cusip) only: no values, no shares, no
+  tickers, so portfolio weights and % of shares can't be computed without re-downloading the full 13F INFOTABLEs + a
+  CUSIP map. Parked.
+- **G45 activist 13D on closed-end funds: PASSES its registered study bars -> NEAR at the Goal book level**
+  (study_goal_g45.md; registered cd548ad, N 783). 151 events (Saba 116). Select 2021-23 n 60 +2.55% vs PCEF, date-t 2.48;
+  judge 2024-26 n 40 +3.57%, median +1.36%, hit 75%, t 2.67, ex best 5 +1.25%; holdout 2016-20 n 51 +2.01%, t 1.74. As a
+  sleeve (12.5%/position from SPY): judge +3.4%/yr vs SPY (t 1.0), hedged vs PCEF +6.0%/yr (~+3.9pp after tax): below +5pp.
+  First new mechanism of this hunt to pass its own test. Follow-up G45-F registered (forward, 30 events, no new N).
