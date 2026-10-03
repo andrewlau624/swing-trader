@@ -1,12 +1,13 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 1 · ideas written 10 (G1-G10) · k (judged) 4 · program N 774 (next free 775)
+- round 1 · ideas written 10 (G1-G10) · k (judged) 6 · program N 774 (next free 775)
 - NEAR: G2 (forward follow-up G2-F); G1 bound NEAR at $10k, FOUND-level at $2.3k conditional on Schwab rounding B1
-  (VIVK ~10-07; check llm-trader state/roundup-orders.json after 10-07). Dead: G4 (count), G8 (select).
-- track streak: T1, T5, T2, T3 -> next T2 (G5 class collapses / G6 odd-lot programs count) or T3 G9
-- NEXT: G6 odd-lot buy-back / round-up programs: EDGAR FTS count ("odd-lot" "program" with premium language), 2016-26.
-  Then G5 count, G9 bound (S&P 400/600 replacement prediction hit rate from S&P press releases), G7 424B2 sample.
+  (VIVK ~10-07; check llm-trader state/roundup-orders.json after 10-07). Dead: G4, G5, G6 (counts), G8 (select).
+- track streak: T2 x2 (G6, G5) -> next T4 (G10 bound) then T3 (G9 bound, G7 sample)
+- NEXT: G10 bound: option spreads / weekly availability on the 2022-26 EV2-big names (Alpaca options snapshot or a
+  conservative IV bound) to see if calls can beat shares after the quoted bid/ask. Then G9, G7, then write round 2
+  (30 more ideas, aimed at the 10-judged paragraph's gap).
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -51,3 +52,11 @@
   hedge is set; the pressure is in the pricing-day close or offset. Judge / holdout never run. 44% of deals carry a
   capped call, 19% a concurrent repurchase/share offering. Coverage: ~30 events/yr vs a market of ~100-200 deals/yr
   (only press releases with the exact phrases); a caveat, not a reason to rerun.
+- 2026-10-02 17:50 **G6 issuer odd-lot programs: KILLED (count).** FTS 2016-26 "odd-lot program" 26 hits, mostly CEF
+  N-2/POS 8C boilerplate and Canadian issuers (TELUS 2016, Advantage 2018) whose programs let < 100-share holders sell or
+  round up AT MARKET without commission: no premium in the terms, ~1/yr. "odd lot sales program" / "small shareholder
+  selling program" 0 hits, "odd-lot buyback" 1 issuer. No contract payoff; TOO RARE.
+- 2026-10-02 17:55 **G5 dual-class collapses: KILLED (count).** FTS 8-K/proxies "eliminate the dual-class" 15 hits = ~12
+  issuers in 10 years (AMSWA, CIX, Ford 2026, Forest City, GoPro, Lionsgate, Lyft, Monro, Nxu ...); "collapse of the dual
+  class" 2 issuers. Most have only one listed class (the B class can't be bought), and where both trade (LGF.A/B, Forest
+  City) the ratio-implied spread reprices on the announcement (GAP). ~1/yr tradable: TOO RARE.
