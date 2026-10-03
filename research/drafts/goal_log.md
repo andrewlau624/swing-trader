@@ -1,7 +1,7 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 2 · ideas written 20 (G1-G20) · k (judged) 10 · program N 775 (G12 took 775; next free 776)
+- round 2 · ideas written 20 (G1-G20) · k (judged) 13 · program N 775 (G12 took 775; next free 776)
 - NEAR: G2 (forward G2-F = ev2_big gate); G1 bound NEAR at $10k / FOUND-level at $2.3k if Schwab rounds B1 (VIVK ~10-07;
   check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = `id3_big` gate.
 - BLOCKED: G11 / G20 (2006-15 insider window) need pre-2016 daily bars incl. delisted names. Stooq is behind a JS bot
@@ -9,7 +9,8 @@
   User item: a Tiingo (paid tier) / Norgate / CRSP source would unlock the cleanest test this hunt has.
 - running: G12 build (pre-registered, N 775)
 - round-2 quota: G21-G30 need T1 3, T2 3, T3 2, T4 5, T5 3
-- NEXT: build + select-look G12; then G16 RSP rebalance count / G17 SCHD history check.
+- NEXT: G12 select look when the build finishes (hdr fetch ~12k); then G14 spin-off WI availability, G13 data check,
+  G18/G19 warrant counts, then write G21-G30.
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -105,3 +106,11 @@ second-tier indexes where flow/ADV is large).
 - Index-beat hunt (llm-trader-ee) reports FOUND (structure, no N): SPY 1.0x + live legs on margin in taxable, Roth 1/3
   UPRO + 2/3 book; shadow swingtrader/daily/stack_shadow.py. My G1/G2 SPY-core overlays should be read as add-ons to
   that stack, not a second core.
+- 2026-10-02 19:10 **G16 RSP equal-weight rebalance: KILLED (bound).** 4 events a year x a 5-session hold. Even at +1% per
+  event on full equity, that is +4%/yr pre-tax, ~+2.6pp after tax: below the +5pp add-on bar, before any test. The flow is
+  real (the biggest quarterly losers need ~10-20% of a day's ADV from RSP at ~$60B AUM) but too infrequent to matter at
+  the book level. Also confounded with quad-witching closes (witching-day nights dead).
+- **G17 SCHD reconstitution prediction: KILLED (bound).** One event a year: +5% on full equity once a year would be ~+3.3pp
+  after tax with perfect prediction, below the add-on bar; prediction error and the GAP at announcement cut it further.
+- **G15 due-bill specials: KILLED (count).** FTS 8-K "due bill" + "special dividend" 2016-26: 42 filings, ~25 issuers,
+  ~3/yr. TOO RARE.
