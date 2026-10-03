@@ -410,3 +410,31 @@ When a 13F shows a fund holding >= 5% of a small cap's shares has gone to zero, 
 1. Who pays: the liquidating fund (redemptions, closure). 2. Why: forced. 3. Capacity: small caps, slow. 4. Repeat: 13F
 quarterly. 5. Death dodged: "forced sellers kept falling" (Round 30) bought DURING forced selling; this buys after it is
 reported complete. Source: (1).
+
+## Round 3, part 2 (written 2026-10-02, after G45 passed its study bars): G47-G49, aimed at G45's lesson
+G45 worked because a specialist activist with a NAV-linked exit (tender at NAV, liquidation, open-ending) bought into a
+discounted vehicle. Look for the same shape elsewhere.
+
+### G47 (T3) Specialist small-bank activists (Stilwell, PL Capital, Driver, Basswood): 13D on a small bank
+Small banks trade below book; specialist activists push for a sale, a buyback or a second-step conversion: a book-value-linked
+exit like G45's NAV exit. First 13D by one of these activists on a bank/thrift; buy the next open, hold 120 sessions, vs KRE.
+1. Who pays: the bank's board/acquirer (control premium). 2. Why: proxy pressure. 3. Capacity: micro-cap banks. 4. Repeat:
+SC 13D by named filers (FTS). 5. Death dodged: A1 (all 13D originals next session) was dead; this is named specialists with a
+book-value exit and a 120-session hold. Source: (1)+(3).
+
+### G48 (T2) Closed-end fund mergers at NAV: buy the target trading at the wider discount
+In a CEF reorganization (N-14), target shares convert into acquirer shares at the NAV ratio. If the target trades at a bigger
+discount than the acquirer, buying the target captures (target discount − acquirer discount) at closing. Contractual, ~3-6
+months.
+1. Who pays: target holders selling at the wider discount. 2. Why: inattention; thin funds. 3. Capacity: thin. 4. Repeat: N-14 /
+DEF 14A "Agreement and Plan of Reorganization", ~10-20 a year. 5. Death dodged: DL5/DL6 (term CEFs, ETF closures) traded the
+discount closing on its own; here the NAV-for-NAV exchange is in the contract. Source: (3). Blocker: needs NAV at entry (fund
+NAV history isn't in Alpaca); the N-14 text states NAVs at a date, which may be enough.
+
+### G49 (T2) CEFs announcing open-ending, conversion to an ETF, or liquidation
+After the announcement, the discount usually shrinks but not to zero: the last 1-3% is paid at conversion/liquidation months
+later. Buy the session after the announcement, hold to conversion; payoff = the NAV at conversion (contract) minus the price.
+1. Who pays: holders who sell after the announcement rather than wait. 2. Why: time preference, rotation. 3. Capacity: per
+fund small. 4. Repeat: 8-K / N-CSR "convert to an open-end", "liquidat", "reorganize into an ETF", ~5-15 a year (more since the
+2023-25 Saba campaigns). 5. Death dodged: DL5 term CEFs (no event, a year out) dead; this is a dated conversion at NAV.
+Source: (3). Often the tail of G45 events: count overlap.

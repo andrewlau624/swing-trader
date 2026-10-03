@@ -1,13 +1,13 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 3 · ideas written 46 (G1-G46) · k (judged) 36 · program N 783 (next free 784)
+- round 3 · ideas written 49 (G1-G49; G47-G49 aimed at G45's lesson) · k (judged) 37 · program N 783 (next free 784)
 - NEAR: **G45** (activist 13D on CEFs: passes its study bars, misses the Goal add-on bar; forward G45-F needs a
   log-only watcher, to build next). Open: G2 (NEAR; forward G2-F = `ev2_big` gate), G3 (forward `id3_big` gate), G21 (combined ~+21pp at today's balances;
   waits on Schwab rounding B1: VIVK ~10-07, check llm-trader state/roundup-orders.json after 10-07), G23 / G26 (wait on
   the forward gates). BLOCKED: G11 / G20 (pre-2016 bars). Everything else dead (see Log + NEXT.md dead rows).
-- NEXT: G44 count (OTC -> exchange uplistings); then round 3 part 2 ideas aimed at G45's lesson (CEF / fund structures
-  where an activist or a charter forces a NAV payoff). G45-F watcher LIVE in code (server needs a pull + `make persist`). Check VIVK as soon as it settles (~10-07).
+- NEXT: G47 count (13D by Stilwell / PL Capital / Driver / Basswood on banks) -> register if >= ~10/yr; G49 count; G48
+  NAV-data check. G45-F watcher LIVE in code (server needs a pull + `make persist`). Check VIVK as soon as it settles (~10-07).
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -223,3 +223,7 @@ absorbed.
   activist 13D (G45-F)" (gate 30 scored events), tests/test_cef_activist_watch.py. A live dry run on 2026-10-02 found ZTR
   (Saba); a dedupe bug (same pair from several queries) was fixed before commit. tests/ pass (the research/daily-strategies
   news_test.py collection error is pre-existing, not from this commit).
+- 2026-10-02 23:20 **G44 OTC -> exchange uplistings: KILLED (count + mechanism).** FTS 8-K "uplisting" + "approved for
+  listing": 7-24 filings / 6-13 issuers a year; most uplistings are paired with an underwritten offering on the same day
+  (the G31 / dilution shape, dead). Round 3 part 2: G47-G49 written (specialist bank activists, CEF mergers at NAV, CEF
+  open-ending / liquidation).
