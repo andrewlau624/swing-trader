@@ -1,15 +1,15 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 2 · ideas written 20 (G1-G20) · k (judged) 14 · program N 775 (G12 took 775; next free 776)
+- round 2 · ideas written 20 (G1-G20) · k (judged) 15 · program N 775 (G12 took 775; next free 776)
 - NEAR: G2 (forward G2-F = ev2_big gate); G1 bound NEAR at $10k / FOUND-level at $2.3k if Schwab rounds B1 (VIVK ~10-07;
   check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = `id3_big` gate.
 - BLOCKED: G11 / G20 (2006-15 insider window) need pre-2016 daily bars incl. delisted names. Stooq is behind a JS bot
   wall; Alpaca SIP starts 2016; the live Schwab token shouldn't be used for bulk research and has no delisted names.
   User item: a Tiingo (paid tier) / Norgate / CRSP source would unlock the cleanest test this hunt has.
-- running: G12 build (pre-registered, N 775)
+- running: nothing
 - round-2 quota: G21-G30 need T1 3, T2 3, T3 2, T4 5, T5 3
-- NEXT: G12 select look when the build finishes (hdr fetch ~12k); then G13 data check,
+- NEXT: G13 data check,
   G18/G19 warrant counts, then write G21-G30.
 
 ## Notes carried in from other hunts (read 2026-10-02)
@@ -119,3 +119,8 @@ second-tier indexes where flow/ADV is large).
   WI line almost never (GE.WD/GEWD/MMM.WD/DHR.WD none; JNJ.WD 3 bars). Without both legs the contractual sum can't be
   computed. Mechanism: both WI legs are shortable for arbs, so regular-way below the sum is arbitraged by people with
   capacity. A long-only small account has no advantage here (fails edge-test question 3).
+- 2026-10-02 19:45 **G12 same-session insider buys >= $500k filed during market hours: DEAD on select** (registered
+  41b08ed, N 775). 12,398 accessions >= $500k 2016-26 -> 1,286 accepted 09:30-15:20 -> 455 events with price >= $5 and
+  ADV >= $20M. Select 2021-23: n 128, mean **+32.6bp** net (tier_hi + 5bp entry), median −5.3bp, hit 48%, t **+1.75**
+  (2021 +24 / 2022 +91 / 2023 −5). The gate needs t >= 2: FAIL. The mean is carried by 2022 and a right tail; the typical
+  trade loses. Judge / holdout not run. The insider edge looks like a next-day attention effect, not an intraday one.

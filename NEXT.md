@@ -992,6 +992,8 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | idea | verdict | why |
 |---|---|---|
+| Insider buys >= $500k filed 09:30-15:20, bought 5 min after acceptance, sold at the close (Goal G12, N 775) | **dead (select)** | 2021-23 n 128, +32.6bp mean but median −5bp, t 1.75 |
+| S&P 400/600 replacement prediction, RSP / SCHD rebalance front-running, due-bill specials, spin-off WI vs regular-way, odd-lot programs, dual-class collapses, 424B2 barriers, calls instead of shares (Goal G5-G7, G9, G10, G14-G17) | **killed (count / bound)** | too rare, too small at the book level, no free data, or arbitraged; `goal_log.md` |
 | Convertible pricing-day hedge shorting: buy the next open, hold 5, vs SPY; size/ADV >= 3, with/without capped call (Goal G8, N 773-774) | **dead (select)** | 2021-23 −0.76% / −0.66% per trade, t −0.9 / −0.7; no post-hedge recovery |
 | ADR program terminations bought before the depositary sells (Goal G4) | **killed (count)** | ~1-2 genuine cash terminations/yr; payoff is a future market sale, not a contract |
 | Night picks with a bad-news 8-K (5.02/4.02/4.01/3.01) in the window, dropped (Reddit R1a/R1b) | **dead** | sign flips by half, t +0.03 |
