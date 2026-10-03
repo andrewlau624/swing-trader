@@ -17,13 +17,13 @@ from .exdiv_roth import _env
 from .jump_runner import cost_side
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-OUT = ROOT / "data/research/program/ib/divs_all.json"
+OUT = ROOT / ("data/research/program/ib/" + __import__("os").environ.get("DIVF", "divs_all.json"))
 RAWB = ROOT / "data/research/program/ib/divbars"
 
 
 def fetch():
     H = _env(); out = []
-    for y in range(2021, 2024):
+    for y in range(int(__import__('os').environ.get('Y0', 2021)), int(__import__('os').environ.get('Y1', 2024))):
         for a, z in ((f"{y}-01-01", f"{y}-06-30"), (f"{y}-07-01", f"{y}-12-31")):
             tok = None
             while True:

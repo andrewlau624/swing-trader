@@ -2,7 +2,7 @@
 
 ## STATE
 - program N: 778 (PQ1 took 777-778)
-- ideas tried: 5 (PQ1 dead (judged); PQ2, PQ6, PQ7, PQ7b explored-dead; PQ5 thresholds = already swept, plateau) · current: PQ3 same-story clusters
+- DONE: 10 ideas, no PASS (see Summary); next step = live auction cost by price bucket
 - facts so far (counts only, no 2024+ outcome by idea): leveraged/inverse ETF share of night picks 2021 3% / 2022 7% /
   2023 6% / 2024 10% / 2025 17% / 2026 24%; 2021-23 bounce LETF +20.6bp vs stocks +17.5bp (n 208 / 3,857).
 
@@ -42,3 +42,37 @@
   year negative (-33 / -9 / -15, t -1.47) -> misses only on 2022 (-9 > -15). Not registered (two looks used). WATCH: high-priced
   picks are consistently the weakest; at $2.3k whole shares already skip most of them (A18: whole shares earn +3.2 vs +1.4%/yr),
   at $10k+ the book buys them. A fresh registration needs a mechanism beyond this data (e.g. live fills by price bucket).
+- PQ3 same-story clusters (spec before any look): for each night pick, k = the number of OTHER picks that night whose 60-session
+  daily-return correlation with it (sessions before the pick day) is >= 0.5. Buckets k = 0 / 1-2 / 3+. Not the 0.7 pair cap
+  (that removes near-duplicates) and not the dead sympathy-peer row (peers that did NOT qualify); this is the theme-wide selloff
+  among the picks themselves. Prior: 3+ = sector news (informed) -> weaker. Bar: k=3+ vs rest <= -15bp in each of 2021/22/23,
+  |t| >= 2, n >= 150 (or the mirror for k = 0).
+- PQ3 clusters explore: k=0 +19.8bp vs rest (t 1.45; 2021 +65, 2022 +9, 2023 -12); k=3+ years -163/+7/+53 -> explored-dead.
+- PQ8 ex-dividend picks (spec before any look): a pick whose cash ex-date (Alpaca corporate actions) is the pick day with
+  dividend >= 2% of the prior close: its -8% day is partly a mechanical distribution (YieldMax-type income ETFs), not an
+  overreaction. Step 1 (counts, all years, no outcome). Step 2 explore 2021-23: bounce of these vs the rest; bar to register an
+  exclusion: n >= 100 and <= -15bp vs rest in each year with data, or if n in 2021-23 is too small, register directly on the
+  mechanism (like PQ1) with the judge half carrying the test.
+- PQ8 counts: ex-dividend picks (>= 2%) 0 / 0 / 1 / 0 / 1 / 1 in 2021..2026 -> DEAD (too rare: income ETFs drop at the open and
+  rarely close near the low, so the IBS <= 0.10 rule already screens them out).
+- PQ9 market cap and PQ10 turnover (specs before any look; shares = latest XBRL shares in jump/shares_hist.parquet dated before
+  the pick; mcap = shares x decision price; turnover = the pick's 20d ADV$ / mcap as a slow proxy, and the day's $ volume is not
+  in the pool so ADV is used). Terciles within 2021-23. Bar each: the extreme tercile vs the rest >= 15bp (either sign, same sign
+  every year 2021/22/23), |t| >= 2. Not ADV (killed: "skip high-cost names" / ADV $5-10M) and not price (PQ7): mcap mixes both.
+- PQ9 market cap / PQ10 turnover explore (2,586 picks with shares): every tercile flips sign across 2021/22/23, |t| <= 1.2 -> both
+  explored-dead. pq9_explore.txt
+
+## Summary (2026-10-02): stopped after 10 ideas, no PASS
+Stopped early (rule said 15): the remaining candidates (52w lows, prior run-up, down-day streaks, market/sector move that day,
+SSR days) are all rows of the dead list; no new source left in hand. What was learned:
+1. **Keep the leveraged / inverse ETF picks** (PQ1, judged): now ~24% of picks, and excluding them costs -7.2pp/yr (2024-26),
+   worse than random removal. They are not the cause of the weak 2026.
+2. **Cost decides the cheap picks.** Gross bounce rises steeply as price falls ($5-10 +40bp, $50+ ~0bp, 2021-23), but the tier
+   cost model charges $5-10 names 15bp/side and flattens it. The night leg trades only in the auctions, where live costs were
+   measured ~0bp (add. 29). The highest-value next step for pick quality is MEASURING live auction cost by price bucket
+   (make review's cost section on the live fills), not another feature: if $5-10 names cost <= ~5bp/side live, a cheap-name
+   tilt becomes worth a registered test.
+3. **$50+ picks are the weakest every year** (-33 / -9 / -15bp vs the rest at 2.5bp/side, 2021-23): a watch, not registered
+   (second look). At $2.3k whole shares already skip most of them; it starts to matter at ~$10k+.
+4. Headline category, fails-to-deliver, same-story clusters, ex-dividend days, market cap, turnover: no separation.
+Program N used by this hunt: 777-778 (PQ1).

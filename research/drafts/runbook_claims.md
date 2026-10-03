@@ -32,4 +32,4 @@
 | Jump hunt round 1: H1-H24, D1-D11, C1-C11, V1-V5, S1-S5, W1-W6 (jump_ideas.md; news/Reddit/Wikipedia attention, slow databases, collisions, run-ups) | llm-trader-51 (prompt_jump_hunt.md) | claimed 2026-10-02 12:55 | in progress: H17 D4 D5 D9 H1 H2 H3 C4 H18 C7 C10 R2-4 explored-dead; D6 = J1, R2-5 = J2, R4-5 = J3, R4-6 = J4, R2-25 = J5, S5 = J6, R2-19 = J7, R3-15 = J8 DEAD (judge); rounds 2-4 in jump_ideas.md |
 | Index beat round 2: R2-7 spin-offs held > 1y | llm-trader-ee | claimed 2026-10-02 14:00 | done: dead |
 | Index beat rounds 1-8 (index_beat_ideas*.md) | llm-trader-ee (prompt_index_beat.md) | claimed 2026-10-02 13:40 | done: FOUND (structure: book stacked on index beta, study_ib_found_stack.md); DL-IB1 conditional |
-| Pick quality PQ1-PQ4 (prompt_pick_quality.md; leveraged ETF picks, why-it-fell, same-story clusters, crowding) | llm-trader-ee | claimed 2026-10-02 18:00 | in progress |
+| Pick quality PQ1-PQ10 (prompt_pick_quality.md) | llm-trader-ee | claimed 2026-10-02 18:00 | done: no PASS; PQ1 dead (keep LETF picks) |

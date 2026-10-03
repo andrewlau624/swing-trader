@@ -58,6 +58,13 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   Explored-dead: H17 trade-count spike (two-way), D4 theme 8-K (two-way), D5 hot-word renames (rare), D9 first
   Phase 3 (lottery).
 
+## Pick-quality hunt (2026-10-02, session llm-trader-ee): 10 ideas, no PASS; keep LETF picks; cost decides cheap names
+- PQ1 (registered, N 778, judged): excluding leveraged/inverse ETF picks (24% of 2026 picks) costs −7.2pp/yr 2024-26 (placebo 4th
+  pct) -> keep them. Explored-dead on 2021-23: headline category, fails-to-deliver, same-story clusters, ex-dividend days, market
+  cap, turnover, raw-price tilt at tier cost.
+- Lead: gross bounce $5-10 +40bp vs $50+ ~0bp, but tier cost (15bp/side on $5-10) erases it; auctions cost ~0bp live. Next:
+  measure live auction cost by price bucket; $50+ picks weakest every year (watch). Log: `research/drafts/pick_quality_log.md`.
+
 ## Index-beat hunt (2026-10-02, session llm-trader-ee): FOUND (structure, track C) — stack the book on index beta; SHADOW
 - **Taxable = SPY 1.0x + the live legs on margin; Roth = 1/3 UPRO + 2/3 the Roth book (Roth IBS skips QQQ/SMH).** After tax,
   edge-halves, combined plan vs today's plan: **+3.5 / +11.1pp (2021-23 / 2024-26) at $1k/mo**, +4.0 / +11.4 at $2k/mo, tier_hi
