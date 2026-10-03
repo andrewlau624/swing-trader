@@ -2616,3 +2616,23 @@ Session llm-trader-ec, idea G36 (`goal_ideas.md`, track T3). Registered 2026-10-
 - **Goal bar:** an add-on at 0.25x per event (taxable), after tax, >= +5pp/yr at $2.3k and $10k. Expected: large caps, so
   most likely small; that's why the bar is two round trips.
 - Runner `research/sim/goal_g36.py`. k = 31 when judged.
+
+## Amendment — Goal hunt, Studies G42 and G43: big insider buys in thin names / relative to market cap, 5-session hold (pre-register; program N 780 -> 782)
+
+Session llm-trader-ec, ideas G42 / G43 (`goal_ideas.md`, track T1). Registered 2026-10-02 before any outcome of either rule.
+Never computed here before: the >= $500k cut in names with ADV < $20M (ID2 was all sizes, next session), and any
+market-cap-relative insider rule.
+
+- **Events:** officer/director code-P Form 4 accessions 2016-26 (`goal_g12.buys()`), summed per (sym, filing date).
+  Trade session d = first regular session after the filing date. Prior raw close >= $5.
+  - **G42:** $ bought >= $500,000 and 20d ADV$ in [$1M, $20M) (to d−1).
+  - **G43:** $ bought >= 0.5% of market cap (raw close at d−1 x the latest XBRL cover-page shares with end <= the filing
+    date, `jump_common.shares_hist()`), 20d ADV$ >= $2M.
+- **Trade (primary, both):** buy d's opening cross, sell the 5th session's closing cross (hold 5); reported: d open -> d close.
+  Return minus SPY (total return) over the same window. Costs `tier` per side (thin names pay the higher tiers).
+- **Halves:** select 2021-23 (one look each). Proceed only if n >= 40, mean net excess >= +1.0% (hold 5), date-level t >= 2.
+  Then judge 2024-26 (mean > 0, t >= 2, lottery test ex best 5 trades and ex best 5% of dates, random same-ADV-bucket null
+  >= 95th pct) and holdout 2016-20 (mean >= 0).
+- **Goal bar:** an overlay at 0.25x equity per event funded from the SPY core (taxable), after tax, >= +5pp/yr at $2.3k and
+  $10k (add-on), or >= SPY + 10pp as part of the G2 book.
+- Runner `research/sim/goal_g42.py`. k = 32-33 when judged.
