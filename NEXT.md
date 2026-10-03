@@ -9,7 +9,7 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
-## Goal hunt (2026-10-02, session llm-trader-ec, `prompt_strategy_goal.md`): G2 NEAR, G1 bound NEAR, G4/G8 dead; N 768 -> 774
+## Goal hunt (2026-10-02, session llm-trader-ec, `prompt_strategy_goal.md`): G2 NEAR, G21 combined ~+21pp (conditional), G8/G12 dead; N 768 -> 775
 - **G2 EV2-big (officer/director buys >= $500k after 2+ years of no open-market buying) as an intraday overlay on a 100%
   SPY core, taxable: NEAR.** Judged on the untouched 2016-20 holdout (2014-21 Form 345 sets, registered e6316e8): 195
   trades, **+68.7bp/trade** net (tier_hi +55.4), every year > 0, NW t 3.48, passes the lottery test (ex best 5% days and
@@ -19,6 +19,11 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   (60 trades). If it passes: ~+$260 / +$1,130 / +$2,800 a year at $2.3k / $10k / $25k over SPY. `study_goal_g2.md`.
 - Side finding (reported row, not a verdict): ID3 >= $500k WITHOUT the silence filter, holdout +35.7bp x 358 trades/yr,
   2021 +23.8bp. The buy SIZE, not the 2-year silence, carries the insider day trade.
+- **G21 (report): everything combined, at today's balances (~$10.8k across both accounts), 2024-26 after tax: ~+21pp/yr
+  over SPY** = index-beat stack +6.6 + round-ups +5.6 + split-offs/tenders in the Roth +9.1 (~+13pp without the best 5
+  events). Conditional on Schwab rounding B1 (VIVK ~10-07; without it ~+16pp) and the stack's edge-halves assumption.
+  Shrinks to ~+13-17pp at $25k (per-holder caps). Nothing to build: splitoff_buy / tender_buy already use the Roth first.
+  `study_goal_g21.md`.
 - **G1 bound (no N):** the shipped contract stack (B1 + B2 + odd-lot tenders) with idle taxable cash in SPY = +20.5pp/yr after
   tax at $2.3k, +8.8pp at $10k (2024-26), IF Schwab rounds B1 (VIVK ~10-07). Nothing to build. `study_goal_g1.md`.
 
