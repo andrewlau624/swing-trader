@@ -1,7 +1,7 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 2 · ideas written 20 (G1-G20) · k (judged) 13 · program N 775 (G12 took 775; next free 776)
+- round 2 · ideas written 20 (G1-G20) · k (judged) 14 · program N 775 (G12 took 775; next free 776)
 - NEAR: G2 (forward G2-F = ev2_big gate); G1 bound NEAR at $10k / FOUND-level at $2.3k if Schwab rounds B1 (VIVK ~10-07;
   check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = `id3_big` gate.
 - BLOCKED: G11 / G20 (2006-15 insider window) need pre-2016 daily bars incl. delisted names. Stooq is behind a JS bot
@@ -9,7 +9,7 @@
   User item: a Tiingo (paid tier) / Norgate / CRSP source would unlock the cleanest test this hunt has.
 - running: G12 build (pre-registered, N 775)
 - round-2 quota: G21-G30 need T1 3, T2 3, T3 2, T4 5, T5 3
-- NEXT: G12 select look when the build finishes (hdr fetch ~12k); then G14 spin-off WI availability, G13 data check,
+- NEXT: G12 select look when the build finishes (hdr fetch ~12k); then G13 data check,
   G18/G19 warrant counts, then write G21-G30.
 
 ## Notes carried in from other hunts (read 2026-10-02)
@@ -114,3 +114,8 @@ second-tier indexes where flow/ADV is large).
   after tax with perfect prediction, below the add-on bar; prediction error and the GAP at announcement cut it further.
 - **G15 due-bill specials: KILLED (count).** FTS 8-K "due bill" + "special dividend" 2016-26: 42 filings, ~25 issuers,
   ~3/yr. TOO RARE.
+- 2026-10-02 19:20 **G14 spin-off regular-way vs when-issued pieces: KILLED (data + mechanism).** Alpaca SIP has spinco WI
+  bars under mixed naming (GEHCV 12 bars, SOLV.WI 3, KD.WI 9, GEV.WI 3; VLTOV/SOLVV/KDWI none), and the parent's ex-distribution
+  WI line almost never (GE.WD/GEWD/MMM.WD/DHR.WD none; JNJ.WD 3 bars). Without both legs the contractual sum can't be
+  computed. Mechanism: both WI legs are shortable for arbs, so regular-way below the sum is arbitraged by people with
+  capacity. A long-only small account has no advantage here (fails edge-test question 3).
