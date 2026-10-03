@@ -2507,3 +2507,24 @@ event list was built and before any price around a convertible pricing was looke
 - **Why it might not work (written now):** modern deals often come with capped calls (dealers BUY stock at pricing) or
   concurrent repurchases, which offset the arbs' short; the recovery may already be in the pricing-day close. TEXTBOOK risk
   (Choi et al. 2010; de Jong et al. 2011 document the hedging pressure). k = 4 when judged.
+
+## Amendment — Goal hunt, Study G12: insider buys >= $500k filed during market hours, bought the same session (pre-register; program N 774 -> 775)
+
+Session llm-trader-ec, `prompt_strategy_goal.md`, idea G12 (`goal_ideas.md`, track T1). Registered 2026-10-02. Before
+this, only filing timestamps (a 300-filing sample, 2016-21: 7% pre-market, 13% accepted 09:30-15:30, 1% 15:30-16:00,
+79% after 16:00) were looked at. The same events' NEXT-session open->close was seen (G2 report row, EV2 diagnostics); this
+window, from acceptance to the same session's close, has never been computed on any period.
+
+- **Events:** Form 4 / 4-A accessions with officer/director code-P purchases >= $500k (summed per accession), parsed as in
+  `goal_g2.buys()` from Form 345 2016q1..latest. Acceptance datetime from the EDGAR header (`event_fetch.hdr`, ET). Keep
+  accessions accepted on a regular session day between 09:30 and 15:20 ET. One event per (sym, day): the earliest
+  acceptance. Filters at entry: prior raw close >= $5, 20d ADV$ >= $20M (to the prior session).
+- **Trade:** buy at the open of the first 1-minute SIP bar starting >= acceptance + 5 minutes (raw); sell at the session's
+  closing cross (raw daily close). Costs: `tier_hi` per side + **5bp extra on entry** (an intraday marketable order, not a
+  cross). One variant only.
+- **Halves:** select 2021-23 (one look) -> proceed only if n >= 40, mean net >= +30bp, trade-level t >= 2. Then judge
+  2024-26 (mean > 0, daily NW t >= 2, lottery test ex best 5% days and ex best 5 trades > 0, random-entry null: same
+  minute-of-day entries in random ADV >= $20M names that day, >= 95th pct) and holdout 2016-20 (mean >= 0).
+- **Goal bar (add-on):** as a 0.5x-per-event intraday overlay on a SPY core, after tax, >= +5pp/yr at $2.3k and $10k on
+  the judge half. Expected ~40-50 events a year.
+- Runner `research/sim/goal_g12.py`. k = 11 when judged.

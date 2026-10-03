@@ -1,13 +1,15 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 2 · ideas written 20 (G1-G20) · k (judged) 10 · program N 774 (next free 775)
+- round 2 · ideas written 20 (G1-G20) · k (judged) 10 · program N 775 (G12 took 775; next free 776)
 - NEAR: G2 (forward G2-F = ev2_big gate); G1 bound NEAR at $10k / FOUND-level at $2.3k if Schwab rounds B1 (VIVK ~10-07;
   check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = `id3_big` gate.
-- round-2 quota (40 = G1-G40): T1 5/8 (G2,G3,G11,G12,G20), T2 5/8 (G4,G5,G6,G14,G15), T3 6/8 (G7,G8,G9,G13,G16,G17),
-  T4 3/8 (G10,G18,G19), T5 1/4 (G1) -> G21-G30 need T1 3, T2 3, T3 2, T4 5, T5 3
-- NEXT: G11 data check (pre-2016 daily bars: Tiingo free tier key? Stooq? coverage of delisted names, raw vs adjusted),
-  since G11 + G20 hinge on it; then G12 acceptance-time count.
+- BLOCKED: G11 / G20 (2006-15 insider window) need pre-2016 daily bars incl. delisted names. Stooq is behind a JS bot
+  wall; Alpaca SIP starts 2016; the live Schwab token shouldn't be used for bulk research and has no delisted names.
+  User item: a Tiingo (paid tier) / Norgate / CRSP source would unlock the cleanest test this hunt has.
+- running: G12 build (pre-registered, N 775)
+- round-2 quota: G21-G30 need T1 3, T2 3, T3 2, T4 5, T5 3
+- NEXT: build + select-look G12; then G16 RSP rebalance count / G17 SCHD history check.
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -97,3 +99,9 @@ events/yr) or size that the mechanism itself sets (e.g. issuer buyback EXECUTION
 adoptions by insiders who then buy, issuer self-tenders at a premium sized for all holders, forced index-fund flow in
 second-tier indexes where flow/ADV is large).
 - 2026-10-02 18:35 Round 2 part 1: G11-G20 written before any outcome (goal_ideas.md).
+- 2026-10-02 18:50 G11/G20 data check: BLOCKED (see STATE). G12 count: of 300 random >= $500k officer/director buys
+  2016-21, 13% accepted 09:30-15:30 (7% pre-market, 79% after 16:00) -> ~46/yr same-session candidates. G12 registered
+  (N 774 -> 775).
+- Index-beat hunt (llm-trader-ee) reports FOUND (structure, no N): SPY 1.0x + live legs on margin in taxable, Roth 1/3
+  UPRO + 2/3 book; shadow swingtrader/daily/stack_shadow.py. My G1/G2 SPY-core overlays should be read as add-ons to
+  that stack, not a second core.
