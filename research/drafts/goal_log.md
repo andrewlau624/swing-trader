@@ -1,14 +1,13 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 1 done · ideas written 10 (G1-G10) · k (judged) 10 · program N 774 (next free 775)
+- round 2 · ideas written 20 (G1-G20) · k (judged) 10 · program N 774 (next free 775)
 - NEAR: G2 (forward G2-F = ev2_big gate); G1 bound NEAR at $10k / FOUND-level at $2.3k if Schwab rounds B1 (VIVK ~10-07;
-  check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = new `id3_big` gate (ID3 >= $500k, any silence).
-  Dead: G4, G5, G6 (counts), G7, G9, G10 (bounds), G8 (select).
-- track streak: T3 (G7), T1 (G3)
-- NEXT: write round 2 (G11-G40) aimed at the gap in the 10-judged paragraph below: own-money / forced-flow mechanisms
-  with (a) a window nobody here has looked at and (b) dollars that scale past per-holder caps. Quotas for the round of 40:
-  T1 >= 8 (have 2), T2 >= 8 (have 3), T3 >= 8 (have 3), T4 >= 8 (have 1), T5 >= 4 (have 1).
+  check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = `id3_big` gate.
+- round-2 quota (40 = G1-G40): T1 5/8 (G2,G3,G11,G12,G20), T2 5/8 (G4,G5,G6,G14,G15), T3 6/8 (G7,G8,G9,G13,G16,G17),
+  T4 3/8 (G10,G18,G19), T5 1/4 (G1) -> G21-G30 need T1 3, T2 3, T3 2, T4 5, T5 3
+- NEXT: G11 data check (pre-2016 daily bars: Tiingo free tier key? Stooq? coverage of delisted names, raw vs adjusted),
+  since G11 + G20 hinge on it; then G12 acceptance-time count.
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -97,3 +96,4 @@ find a free raw-ish source or CRSP-like data). (2) payoffs that scale with the a
 events/yr) or size that the mechanism itself sets (e.g. issuer buyback EXECUTION disclosed in 10-Q tables, 10b5-1
 adoptions by insiders who then buy, issuer self-tenders at a premium sized for all holders, forced index-fund flow in
 second-tier indexes where flow/ADV is large).
+- 2026-10-02 18:35 Round 2 part 1: G11-G20 written before any outcome (goal_ideas.md).
