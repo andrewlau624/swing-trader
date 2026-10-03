@@ -2582,3 +2582,22 @@ PASS (prompt_pick_quality.md): judge-half increment > 0 at tier AND tier_hi, NW 
 placebo >= 95th pct (50 draws dropping the same number of random picks per night, tier), select half not worse than -0.5pp.
 Because LETFs were rare in 2021-23 the select half can only show "not worse"; the judge half carries the test. DSR at N 778
 reported.
+
+## Amendment — Goal hunt, Study G31: follow-on offerings bought at the stabilization floor (pre-register; program N 778 -> 779)
+
+Session llm-trader-ec, idea G31 (`goal_ideas.md`, track T3). Registered 2026-10-02 before any event list or price was built.
+Seen before registering: FTS hit counts only (~190-270 a year).
+
+- **Events:** 8-K filings (incl. exhibits) matching "announces pricing" + "public offering" + "common stock" + "per share",
+  2016-01..2026-09. Offer price parsed from the press release (first "$X.XX per share" after "priced"/"pricing"). Drop IPOs
+  (the ticker has < 20 prior sessions of bars) and anything not common stock. One event per issuer per 30 days.
+- **Entry session:** if the EDGAR acceptance time is before 09:30 ET, the filing date's session; else the next session.
+- **Condition and trade:** if the entry session's raw open is within ±1% of the offer price, buy at the open. Exit: the close
+  of the first session (entry day included) whose close is < 0.97 x offer price, else the 3rd session's close. Costs: tier
+  per side. Primary = conditional trades; reported (counted in N 779, not a variant) = all events bought at the open
+  regardless of the condition.
+- **Halves:** select 2021-23 (one look) -> proceed only if n >= 40, mean net >= +0.75%, t >= 2. Then judge 2024-26 (mean > 0,
+  daily NW t >= 2, lottery test ex best 5 trades and ex best 5% of days, random-date null on the same issuers) and holdout
+  2016-20 (mean >= 0).
+- **Goal bar:** an overlay at 0.25x per event (taxable, funded from the SPY core), after tax, >= +5pp/yr at $2.3k and $10k.
+- Runner `research/sim/goal_g31.py`. k = 28 when judged.
