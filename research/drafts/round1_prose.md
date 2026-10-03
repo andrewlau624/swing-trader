@@ -2675,3 +2675,16 @@ Seen: FTS counts only (2016-26: PL Capital 68, Driver Management 127, Basswood 4
   (mean > 0, t >= 2, ex best 5 trades > 0) and holdout 2016-20 (mean >= 0).
 - **Goal bar:** sleeve at 12.5%/position from the SPY core, after tax, >= +5pp/yr vs SPY at $2.3k and $10k (add-on).
 - Runner `research/sim/goal_g47.py` (reuses goal_g45's adjusted-bar fetch). k = 38 when judged.
+
+## Amendment — Goal hunt, Studies G50 / G51: escalation points of CEF activist campaigns (pre-register; program N 784 -> 786)
+
+Session llm-trader-ec, ideas G50 / G51 (`goal_ideas.md`). Registered 2026-10-02 before any outcome of either rule. Same six
+activists, benchmark (PCEF, dividend-adjusted), costs, hold (60 sessions) and halves as Study G45; only the event changes.
+- **G50:** the first SC 13D or 13D/A (SCHEDULE 13D[/A]) by the activist on a fund whose cover page states >= 15.0% "percent of
+  class" (regex on the first 8,000 characters), where every earlier filing by that activist on that fund (in the data) states
+  < 15.0%. One event per (fund, activist).
+- **G51:** the first PREC14A / DEFC14A / DFAN14A by the activist naming a fund-like subject with a ticker. One per (fund, activist).
+- **Halves:** select 2021-23 (one look each). Proceed iff n >= 20, mean net excess >= +2.0%, date-level t >= 2; then judge 2024-26
+  (mean > 0, t >= 2, ex best 5 > 0) and holdout 2016-20 (mean >= 0). Overlap with G45's open windows reported.
+- **Goal bar:** combined with G45 in one sleeve (12.5%/position from the SPY core), after tax, >= +5pp/yr vs SPY at $2.3k and
+  $10k. Runner `research/sim/goal_g50.py`. k = 41-42 when judged.

@@ -438,3 +438,18 @@ later. Buy the session after the announcement, hold to conversion; payoff = the 
 fund small. 4. Repeat: 8-K / N-CSR "convert to an open-end", "liquidat", "reorganize into an ETF", ~5-15 a year (more since the
 2023-25 Saba campaigns). 5. Death dodged: DL5 term CEFs (no event, a year out) dead; this is a dated conversion at NAV.
 Source: (3). Often the tail of G45 events: count overlap.
+
+## Round 3, part 3 (written 2026-10-02, from the closest mechanism, G45): G50-G51
+The same NAV-exit mechanism with more events per fund: escalation points of an activist campaign, not just the first 13D.
+
+### G50 (T3) The activist's stake in a CEF crosses 15%
+In a CEF, an activist past ~15% can usually force a tender or win a proxy vote (most CEF votes are decided by a plurality
+of a low turnout). Event: the first 13D or 13D/A by the six G45 activists whose cover page shows >= 15.0% of the class, after
+filings below 15%. Buy the next open, hold 60 sessions, vs PCEF.
+1-4: as G45 (SC 13D/A cover-page "percent of class"). 5. Death dodged: STACKING on G45 (same funds, later dates); the
+crossing is a separate, later event. Report the overlap with open G45 windows. Source: (3)+(1).
+
+### G51 (T3) The activist files proxy materials against a CEF
+Event: the first PREC14A / DEFC14A / DFAN14A filed by the six activists naming a fund (a proxy contest, the escalation before
+a concession). Buy the next open, hold 60 sessions, vs PCEF.
+1-4: as G45 (EDGAR FTS on proxy forms). 5. Death dodged: as G50. Source: (3).
