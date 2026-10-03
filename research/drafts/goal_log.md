@@ -1,11 +1,12 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 2 closed · ideas written 36 (G1-G36) · k (judged) 31 · program N 780 (next free 781)
+- round 3 · ideas written 46 (G1-G46) · k (judged) 31 · program N 780 (next free 781)
 - Open: G2 (NEAR; forward G2-F = `ev2_big` gate), G3 (forward `id3_big` gate), G21 (combined ~+21pp at today's balances;
   waits on Schwab rounding B1: VIVK ~10-07, check llm-trader state/roundup-orders.json after 10-07), G23 / G26 (wait on
   the forward gates). BLOCKED: G11 / G20 (pre-2016 bars). Everything else dead (see Log + NEXT.md dead rows).
-- NEXT: round 3 ideas (G41-G50), aimed at the after-30 paragraph below; first check VIVK as soon as it settles.
+- NEXT: register G42 + G43 together (insider size effect in thin names / relative to market cap; untouched windows),
+  then G41/G46 (13F cache), G45 (CEF activist FTS count), G44 count. Check VIVK as soon as it settles (~10-07).
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -202,3 +203,4 @@ an effect is own-money insider buying. Find independent own-money signals with l
 small concentrated funds; issuer self-tenders; director buys in other documents) or a clean test window for the insider
 size effect (pre-2016 data; a paid source). (2) Small names where flow / ADV is large: every liquid-name flow idea was
 absorbed.
+- 2026-10-02 22:20 Round 3 part 1: G41-G46 written before any outcome.

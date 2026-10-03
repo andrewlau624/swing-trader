@@ -362,3 +362,51 @@ company 2 sessions after a code-F cluster (>= 5 officers within 2 days), hold 5 
 caps (big capacity, so it's probably arbitraged; the sign could be tiny). 4. Repeat: Form 345 code F, quarterly per
 issuer, thousands of events a year. 5. Death dodged: the calendar isn't the signal; the filing cluster is.
 Source: (1) breadth. Expected small; kill early if select mean < 2 round trips.
+
+## Round 3, part 1 (written 2026-10-02 after the after-30 paragraph, before any outcome): G41-G46
+Aim: own-money signals with breadth and windows nobody here has computed; small names where flow / ADV is large.
+
+### G41 (T1) Small concentrated 13F managers' new "best ideas" in small caps
+A first-time 13F position that is >= 5% of a fund's reported portfolio, at a fund with < $500M of 13F assets and < 40
+positions, in a stock with market cap < $2B. Buy at the 13F filing (45-day lag), hold 60 sessions, vs a size-matched ETF (IWM).
+1. Who pays: sellers in thin names who don't track small-fund conviction. 2. Why: attention. 3. Capacity: the funds
+themselves can't add more without moving the price, and a 45-day-old signal is useless to fast money. 4. Repeat: 13F-HR
+quarterly (jump cache 2013-26). 5. Death dodged: TEXTBOOK (Cohen-Polk-Silli "best ideas", large funds, 2010) is the risk;
+the small-fund / small-cap corner is less crowded. Source: (1).
+
+### G42 (T1) Officer/director buys >= $500k in THIN names, 5-session hold
+ID2 (all sizes, ADV $1-20M, next session) was dead, but the >= $500k cut was never computed in thin names in any period.
+A $500k buy in a $5M-ADV name is ~10% of a day's volume: a far stronger signal than in a large cap, and diffusion is slower.
+Buy the opening cross of the session after the filing, hold 5 sessions, tier costs (thin-name tiers), vs IWM.
+1-4: as ID3. 5. Death dodged: COST (thin-name tiers charged on both sides; a 5-day hold amortizes them), the J2 overlap
+(J2 required a 30% fall first). Source: (1). Big because thin-name signals are larger per trade.
+
+### G43 (T1) Insider buys scaled by market cap: $ bought >= 0.5% of market cap
+Scale-free conviction: an insider buying 0.5%+ of the company in one filing (XBRL shares history in the jump cache x raw
+price = market cap at the filing). Any ADV >= $2M, next-session open -> close and 5-day hold. Breaks the tie between "big $"
+and "big relative to the company".
+1-4: as ID3. 5. Death dodged: overfitting a $ threshold (a relative measure is set by the mechanism: the insider's stake
+in the company's float). Source: (1).
+
+### G44 (T3) OTC -> Nasdaq/NYSE uplistings: mandate buyers arrive
+When an OTC company uplists, funds barred from OTC names can buy for the first time; index eligibility (Russell) follows at
+the next reconstitution. Buy at the 5th listed session's close (after the first-days noise), hold 60 sessions, vs IWM.
+1. Who pays: nobody forced; the mandate change adds buyers. 2-3: small names, slow institutional entry. 4. Repeat: Form
+8-A12B / exchange approval notices for issuers with prior OTC bars, ~50-100 a year. 5. Death dodged: GAP (we skip the first
+days); the known risk is uplist-and-dilute (offerings right after the uplisting). Source: (1) small names.
+
+### G45 (T3/T2) Activist 13D on a closed-end fund -> tender or discount narrowing
+When a known CEF activist (Saba, Karpus, Bulldog, City of London ...) files a 13D on a CEF, boards often concede tender offers
+at 98-99% of NAV or liquidations within months (contract payoffs). Buy the CEF the session after the 13D, hold 120 sessions or
+until a tender is announced, vs a CEF index ETF (CEFS / PCEF).
+1. Who pays: the fund board / the remaining holders, via the concession. 2. Why: proxy-fight costs. 3. Capacity: small CEFs,
+thin. 4. Repeat: SC 13D on N-2 filers (EDGAR FTS), ~20-60 a year. 5. Death dodged: A1 (13D originals on operating companies,
+next session) is dead; this is CEFs, where the activist's demand is a NAV payoff, not a story. Source: (3)+(1).
+
+### G46 (T3) A large 13F holder's completed full exit in a small cap
+When a 13F shows a fund holding >= 5% of a small cap's shares has gone to zero, the selling is already over (13F reports
+45 days after quarter end). The forced or voluntary seller is gone; the price pressure it left should reverse. Buy at that
+13F filing, hold 60 sessions, vs IWM.
+1. Who pays: the liquidating fund (redemptions, closure). 2. Why: forced. 3. Capacity: small caps, slow. 4. Repeat: 13F
+quarterly. 5. Death dodged: "forced sellers kept falling" (Round 30) bought DURING forced selling; this buys after it is
+reported complete. Source: (1).
