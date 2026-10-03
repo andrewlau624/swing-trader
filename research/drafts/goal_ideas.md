@@ -453,3 +453,11 @@ crossing is a separate, later event. Report the overlap with open G45 windows. S
 Event: the first PREC14A / DEFC14A / DFAN14A filed by the six activists naming a fund (a proxy contest, the escalation before
 a concession). Buy the next open, hold 60 sessions, vs PCEF.
 1-4: as G45 (EDGAR FTS on proxy forms). 5. Death dodged: as G50. Source: (3).
+
+## Round 4 (written 2026-10-02, from the closest mechanism, G45): G53
+### G53 (T3) Any OTHER filer's first 13D on a closed-end fund
+G45 used six named activists. Does the effect generalize to every other 13D filer on a listed fund (wealth managers,
+smaller activists, funds of funds crossing 5%)? If yes, the event count roughly doubles and the book-level gap closes;
+if no, G45 is specific to the activists who can force a NAV exit (the mechanism claim).
+1. Who pays: as G45. 3. Capacity: as G45. 4. Repeat: SC 13D in the EDGAR quarterly form index, subject = a fund-like
+company with a ticker. 5. Death dodged: STACKING / overlap with G45, by excluding the six activists. Source: (3)+(1).

@@ -2688,3 +2688,12 @@ activists, benchmark (PCEF, dividend-adjusted), costs, hold (60 sessions) and ha
   (mean > 0, t >= 2, ex best 5 > 0) and holdout 2016-20 (mean >= 0). Overlap with G45's open windows reported.
 - **Goal bar:** combined with G45 in one sleeve (12.5%/position from the SPY core), after tax, >= +5pp/yr vs SPY at $2.3k and
   $10k. Runner `research/sim/goal_g50.py`. k = 41-42 when judged.
+
+## Amendment — Goal hunt, Study G53: first 13D on a closed-end fund by any filer OTHER than G45's six activists (pre-register; program N 786 -> 787)
+
+Session llm-trader-ec, idea G53. Registered 2026-10-02 before any outcome. Events from the EDGAR quarterly form index
+(2016Q1-2026Q3): every SC 13D / SCHEDULE 13D path; subject = the index entry whose CIK maps to a ticker
+(company_tickers.json) and whose name matches the G45 fund regex; filer = the other entry. Exclude filers matching the six
+activists (Saba, Karpus, Bulldog, City of London, 1607, Almitas). First filing per (subject, filer). Trade, benchmark,
+costs, hold (60), halves and gates exactly as G45 (select n >= 30, mean >= +2.0%, date-level t >= 2). Runner
+`research/sim/goal_g53.py`. k = 43 when judged.
