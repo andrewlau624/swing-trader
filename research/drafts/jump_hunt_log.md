@@ -267,3 +267,6 @@
 - 17:08 PDT:
   - **H20** (185 select -> 128 trades); hold1 x3.7 -1.3%/-2.0%/-1.0% P0.96; tp205 x1.5 -1.7%/-2.5%/-2.1% P0.90; hold20 x1.2 -3.7%/-7.5%/-6.7% P0.89; hold60 x1.0 -5.6%/-13.0%/-14.0% P0.83; tp2060 x1.0 -2.4%/-4.0%/+13.3% P0.82; all fail
   **H20** (a subreddit created for the ticker; Arctic Shift subreddit metadata for 1,610 tickers with >= 20 mentions): dead, EXIT LIQUIDITY (median -14% over 60 sessions). 92 explored.
+- 18:16 PDT **R3-7** LLM fact extraction (OpenCode Go deepseek-v4-flash, 2,019 calls of the 3,000 budget, 1 timeout skipped; prompt holds only the 8-K text; value and counterparty validated verbatim): 2,021 small-cap 8-K Item 1.01 filings -> 239 sales contracts, 244 with a stated value, 41 valid, 29 events with value >= 25% of revenue:
+  - **R3-7** (15 select -> 7 trades); hold1 x248.5 +12.4%/-0.3%/+3.0% P0.03; tp205 x2.4 +1.9%/-5.2%/-1.2% P0.32; hold20 x0.0 -2.5%/-13.3%/-6.0% P0.69; hold60 x1.7 +9.2%/-12.1%/+9.9% P0.20; tp2060 x1.6 +8.9%/+0.4%/+19.2% P0.09; all fail
+  Dead: TOO RARE (7 select trades). 93 explored.
