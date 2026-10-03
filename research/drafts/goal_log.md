@@ -1,13 +1,13 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 3 · ideas written 49 (G1-G49; G47-G49 aimed at G45's lesson) · k (judged) 38 · program N 784 (next free 785)
+- round 3 · ideas written 49 (G1-G49; G47-G49 aimed at G45's lesson) · k (judged) 40 · program N 784 (next free 785)
 - NEAR: **G45** (activist 13D on CEFs: passes its study bars, misses the Goal add-on bar; forward G45-F needs a
   log-only watcher, to build next). Open: G2 (NEAR; forward G2-F = `ev2_big` gate), G3 (forward `id3_big` gate), G21 (combined ~+21pp at today's balances;
   waits on Schwab rounding B1: VIVK ~10-07, check llm-trader state/roundup-orders.json after 10-07), G23 / G26 (wait on
   the forward gates). BLOCKED: G11 / G20 (pre-2016 bars). Everything else dead (see Log + NEXT.md dead rows).
-- NEXT: G49 count (CEF open-ending / ETF conversion / liquidation announcements) and G48 NAV-data check; then round 3
-  part 3. VIVK settles ~10-07: check llm-trader state/roundup-orders.json (G21's open fact). G45-F watcher LIVE in code (server needs a pull + `make persist`). Check VIVK as soon as it settles (~10-07).
+- NEXT: round 3 part 3 from the closest mechanism (G45): activist ownership CROSSING thresholds (13D/A to 15% / 20% /
+  25% of a CEF) as breadth; register as a new rule (not a G45 re-run). VIVK settles ~10-07: check llm-trader state/roundup-orders.json (G21's open fact). G45-F watcher LIVE in code (server needs a pull + `make persist`). Check VIVK as soon as it settles (~10-07).
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -230,3 +230,8 @@ absorbed.
 - 2026-10-02 23:30 **G47 specialist bank activists: DEAD by count** (registered, N 784). FTS gave 21 first 13Ds with a listed
   subject; 9 with bars and ADV >= $200k (2016-19: 6, 2024-25: 3), 0 in the 2021-23 select half (gate needs n >= 20). The
   specialists file mostly amendments on a handful of long campaigns. TOO RARE.
+- 2026-10-02 23:40 **G49 CEF open-ending / liquidation: KILLED (count + bound).** FTS "convert to an open-end" 48 filings /
+  25 funds in 10 years; "plan of liquidation" + "closed-end" mostly BDC / boilerplate: ~3-6 genuine announcements a year,
+  and the residual discount after the announcement is ~1-3% paid over months (T-bill-like, the DL3 shape). TOO RARE, too
+  small. **G48 CEF mergers at NAV: KILLED (data + bound).** No NAV history in Alpaca; the N-14 NAV snapshots are dated
+  months before closing; and the target-vs-acquirer discount gap is the same few % as G49.
