@@ -1014,6 +1014,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | idea | verdict | why |
 |---|---|---|
+| CEF activist escalations: stake first >= 15% / first proxy-contest filing, hold 60 vs PCEF (Goal G50 / G51, N 785-786) | **dead (select count / mean)** | G50 n 12 (+3.5%, t 3.7) below n >= 20; G51 +0.4%, t −0.3 |
 | Insider buys >= $500k in ADV $1-20M names / >= 0.5% of market cap, hold 5 vs SPY (Goal G42 / G43, N 781-782) | **dead (select)** | 2021-23 −0.13% (t 0.2) / +0.89% (t 0.96, 2023 only); the size effect is a liquid-name effect |
 | RSU vest-date selling: >= 5 officer code-F Form 4s in 2 days, buy day+2, hold 5 vs SPY, ADV >= $50M (Goal G36, N 780) | **dead (select)** | 2021-23 n 2,979, +0.03%/trade, date-level t −1.0 |
 | Repurchase / ATM / tax-loss / preferred change-of-control ideas (Goal G32-G35) | **killed (count / bound)** | ~10/yr or ~1pp; `goal_log.md` |

@@ -1,13 +1,14 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 3 · ideas written 49 (G1-G49; G47-G49 aimed at G45's lesson) · k (judged) 40 · program N 784 (next free 785)
+- round 3 · ideas written 49 (G1-G49; G47-G49 aimed at G45's lesson) · k (judged) 42 · program N 786 (next free 787)
 - NEAR: **G45** (activist 13D on CEFs: passes its study bars, misses the Goal add-on bar; forward G45-F needs a
   log-only watcher, to build next). Open: G2 (NEAR; forward G2-F = `ev2_big` gate), G3 (forward `id3_big` gate), G21 (combined ~+21pp at today's balances;
   waits on Schwab rounding B1: VIVK ~10-07, check llm-trader state/roundup-orders.json after 10-07), G23 / G26 (wait on
   the forward gates). BLOCKED: G11 / G20 (pre-2016 bars). Everything else dead (see Log + NEXT.md dead rows).
-- NEXT: round 3 part 3 from the closest mechanism (G45): activist ownership CROSSING thresholds (13D/A to 15% / 20% /
-  25% of a CEF) as breadth; register as a new rule (not a G45 re-run). VIVK settles ~10-07: check llm-trader state/roundup-orders.json (G21's open fact). G45-F watcher LIVE in code (server needs a pull + `make persist`). Check VIVK as soon as it settles (~10-07).
+- NEXT: write round 4 (the CEF-activist family is now mapped: first 13D works, 15% crossings look strong but rare, proxy
+  filings don't). Ideas for round 4: other NAV-exit vehicles (BDCs below NAV with activists, SPAC-like trusts, royalty trusts,
+  holding-company discounts with an activist). VIVK check after 10-07. VIVK settles ~10-07: check llm-trader state/roundup-orders.json (G21's open fact). G45-F watcher LIVE in code (server needs a pull + `make persist`). Check VIVK as soon as it settles (~10-07).
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -235,3 +236,10 @@ absorbed.
   and the residual discount after the announcement is ~1-3% paid over months (T-bill-like, the DL3 shape). TOO RARE, too
   small. **G48 CEF mergers at NAV: KILLED (data + bound).** No NAV history in Alpaca; the N-14 NAV snapshots are dated
   months before closing; and the target-vs-acquirer discount gap is the same few % as G49.
+- 2026-10-02 23:55 **G50 / G51 CEF activist escalations: both DEAD on the registered select gate** (846f336, N 785-786).
+  1,436 13D/13D-A filings on fund subjects (percent of class parsed on 48%). **G50** (stake first >= 15%): 37 events 2016-24,
+  select n 12, mean **+3.48%** vs PCEF, median +3.12%, hit 75%, date-t 3.66, ex-best-5 +1.09%: strong but fails n >= 20 (and
+  the parser misses half the cover pages; fixing it now would be a re-run after seeing the outcome, so no). **G51** (first
+  proxy-contest filing): 90 events, select n 17, mean +0.37%, date-t −0.25: dead. Read: the edge is the activist's
+  accumulation (the 13D and the 15% stake), not the proxy fight. Forward-only option, not acted on: G45-F's watcher could also
+  log 15% crossings (no verdict from history).
