@@ -32,7 +32,11 @@ LOG_NAME = "roundup-watch.jsonl"
 QUERIES = ['"rounded up to the nearest whole share" "reverse stock split"',
            '"rounded up to the next whole share" "reverse stock split"',
            '"round up to the nearest whole share" "reverse stock split"',
-           '"rounded up to the nearest whole number" "reverse stock split"']
+           '"rounded up to the nearest whole number" "reverse stock split"',
+           # index-beat R7-1 (2026-10-02): wordings the four phrases miss (~2.5 genuine deals/yr 2023-26)
+           '"round up any fractional" "reverse stock split"',
+           '"one whole share in lieu" "reverse stock split"',
+           '"additional fraction of a share" "reverse stock split" "round up"']
 PL = re.compile(r"participant level|DTC participant|at the participant|Cede ?& ?Co", re.I)
 CASH = re.compile(r"cash (?:in lieu|payment)|paid in cash|receive (?:a )?cash|or to entitle", re.I)
 
@@ -41,7 +45,7 @@ def round_up_sentence(text: str) -> str | None:
     """A forward-looking sentence ("will/shall/would be rounded up") about the split's fractional shares, with no cash
     alternative in it, else None. Past-tense sentences describe an earlier split (10-Q/10-K history)."""
     for sen in re.split(r"(?<=[.;])\s+", clean(text)):
-        if (re.search(r"fraction", sen, re.I) and re.search(r"round(?:ed|ing)? up", sen, re.I)
+        if (re.search(r"fraction", sen, re.I) and re.search(r"round(?:ed|ing)? up|(?:one )?whole share in lieu", sen, re.I)
                 and re.search(r"split|whole (?:share|number)", sen, re.I) and re.search(r"\b(?:will|shall|would)\b", sen, re.I)
                 and not CASH.search(sen)):
             return sen.strip()[:400]

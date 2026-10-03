@@ -28,3 +28,12 @@ def test_unrelated_round_up_text_does_not_qualify():
 def test_participant_level_language_is_caught():
     t = "fractional shares will be rounded up to the nearest whole share at the participant level"
     assert w.PL.search(t)
+
+
+def test_whole_share_in_lieu_wording_qualifies():
+    t = ("If as a result of the reverse stock split a stockholder would otherwise hold a fractional share, the stockholder "
+         "will receive one whole share in lieu of the issuance of any such fractional share.")
+    assert w.round_up_sentence(t) is not None
+    cash = ("Stockholders who would otherwise hold a fractional share as a result of the reverse stock split will receive "
+            "cash in lieu of the fractional share.")
+    assert w.round_up_sentence(cash) is None
