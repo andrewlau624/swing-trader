@@ -1,7 +1,7 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 4 · ideas written 54 · k (judged) 44 · program N 788 (next free 789)
+- round 4 · ideas written 55 · k (judged) 45 · program N 788 (next free 789)
 - NEAR: **G2** (EV2-big overlay; forward `ev2_big` gate, 60 trades), **G45** (CEF activist 13D; forward G45-F watcher, 30
   events; also logs 15% crossings). Forward-only: G3 (`id3_big` gate). Conditional: **G21** combined ~+21pp at today's
   balances, waits on Schwab rounding B1 (VIVK ex 10-05, settles ~10-07: check llm-trader state/roundup-orders.json).
@@ -266,3 +266,4 @@ but rare (G50), proxy fights nothing (G51), non-activist 13Ds negative (G53), fu
 an activist who can force a NAV exit. **Gap for the next ideas:** more vehicles where someone can force a NAV/book exit
 on a discounted claim (BDCs, holding companies, trust structures, SPAC-like trusts with a deadline), or a way to raise G45's
 capital use without re-tuning it (only by forward data: G45-F).
+- 2026-10-03 01:00 G55 (activist 13D on BDCs below NAV) KILLED at the count: 13 FTS filings / 7 filers in 10 years.

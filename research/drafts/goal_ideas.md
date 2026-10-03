@@ -468,3 +468,8 @@ A fund insider buying at a discount is buying NAV at a discount, and knows the b
 Event: officer/director code-P Form 4 at a fund-like issuer (the G45 regex on the issuer name), first per fund in 90 days.
 Buy the next open, hold 60, vs PCEF. 5. Death dodged: ID2 thin-name (dead) was operating companies at next-session holds;
 here the anchor is NAV. Source: (1)+(3).
+
+### G55 (T3) Activist 13D on a business development company trading below NAV (G45's mechanism, BDCs)
+Same NAV-exit shape (BDCs trade at discounts to NAV; activists push for buybacks, internalization or liquidation).
+KILLED at the count: EDGAR FTS SC 13D with "business development company" + "net asset value" + "discount", 2016-26:
+13 filings / 7 filers (Bulldog, Barings, Wynnefield ...). TOO RARE.
