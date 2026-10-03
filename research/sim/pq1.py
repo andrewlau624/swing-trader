@@ -104,3 +104,54 @@ def names_check():
 
 if __name__ == "__main__":
     names_check() if sys.argv[1] == "names" else None
+
+
+def run_study():
+    from . import book as B, growth as G
+    from .validate import load_sim
+    from .taxable_frontier import nw_t
+    from .program_books import dsr
+    s = load_sim(raw_price=True)
+    N = pool()[0.10]
+    cls = classify([x for nd in N.values() for x in nd.syms])
+    H = (("select 2021-23", "2021-02-01", "2023-12-31"), ("judge 2024-26", "2024-01-01", "2026-09-18"))
+    res = {}
+
+    def book(pool_, cost, a, b, E0=10000.0, whole=True):
+        s.N = pool_
+        p = B.Params(**{**G.V7, "night_cost": cost, "whole": whole})
+        d = s.days[(s.days >= a) & (s.days <= b)]
+        return s.replay(p, start=E0, monthly=0.0, dates=d).r
+
+    base = {}
+    for cost in ("tier", "tier_hi"):
+        for hl, a, b in H:
+            base[(cost, hl)] = book(N, cost, a, b)
+    for v in ("excl", "dedupe"):
+        P = filtered(N, cls, v)
+        nd = sum(len(x.syms) for x in N.values()) - sum(len(x.syms) for x in P.values())
+        print(f"== PQ1{'a' if v == 'excl' else 'b'} {v}: picks removed {nd}")
+        for cost in ("tier", "tier_hi"):
+            for hl, a, b in H:
+                r = book(P, cost, a, b); r0 = base[(cost, hl)]
+                inc = (r - r0).dropna()
+                yrs = len(inc) / 252
+                cg = lambda x: ((1 + x).prod() ** (1 / yrs) - 1) * 100
+                line = f"   {cost:8s} {hl}: book {cg(r0):5.1f}% -> {cg(r):5.1f}% ({cg(r) - cg(r0):+5.2f}pp), NW t {nw_t(inc):+.2f}"
+                if cost == "tier" and hl.startswith("judge"):
+                    pl = []
+                    for seed in range(50):
+                        rp = book(filtered(N, cls, f"placebo:{seed}:{v}"), cost, a, b)
+                        pl.append(cg(rp) - cg(r0))
+                    pct = (np.array(pl) < cg(r) - cg(r0)).mean() * 100
+                    line += f", placebo pct {pct:.0f} (median placebo {np.median(pl):+.2f}pp)"
+                    res[v] = (cg(r) - cg(r0), nw_t(inc), pct)
+                print(line, flush=True)
+        r23 = book(P, "tier", *H[1][1:], E0=2300.0); r23b = book(N, "tier", *H[1][1:], E0=2300.0)
+        yrs = len(r23) / 252
+        print(f"   $2.3k whole shares, judge, tier: {(((1 + r23).prod()) ** (1 / yrs) - 1) * 100 - (((1 + r23b).prod()) ** (1 / yrs) - 1) * 100:+.2f}pp")
+    print("results", res)
+
+
+if __name__ == "__main__" and sys.argv[1] == "run":
+    run_study()
