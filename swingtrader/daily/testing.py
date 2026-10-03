@@ -57,7 +57,7 @@ def _insider(key: str | None):
         sc = [r for r in rows if r.get("status") == "scored"]
         g = s.gate(rows)
         if key:
-            sub = [r for r in sc if s.ev2_flags(r)[0 if key == "ev2" else 1]]
+            sub = [r for r in sc if (s.id3_big(r) if key == "id3_big" else s.ev2_flags(r)[0 if key == "ev2" else 1])]
             g2 = g.get(key, dict(n=0, verdict="no scored trades yet"))
             line = (f"{g2['verdict']}; mean {_bp(g2.get('mean_bp'))} vs rest {_bp(g2.get('rest_bp'))}, "
                     f"t {g2.get('t', float('nan')):+.2f}" if g2["n"] else g2["verdict"])
@@ -115,6 +115,8 @@ REGISTRY: list[Test] = [
          "2026-10-02", 60, "scored EV2 trades", _insider("ev2"), "make forward-status; study_ev2_first_insider_buy.md"),
     Test("EV2 x buy >= $500k", "post-judge cut (forward data only): EV2 names with a big purchase",
          "2026-10-02", 60, "scored trades", _insider("ev2_big"), "make forward-status; study_ev2_first_insider_buy.md"),
+    Test("ID3 x buy >= $500k (any silence)", "Goal G3: does the buy SIZE alone carry ID3? (holdout report row +35.7bp)",
+         "2026-10-02", 60, "scored trades", _insider("id3_big"), "make forward-status; study_goal_g2.md"),
     Test("Odd-lot tenders", "issuer tenders with odd-lot priority >= 1% over market (manual, <= 99 shares)",
          "2026-10-02", 0, "alerts", _alerts("tender-watch.jsonl", "tenders"), "make tender-watch",
          ["tender_watch", "tender_buy"]),

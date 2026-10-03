@@ -1,14 +1,14 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 1 · ideas written 10 (G1-G10) · k (judged) 8 · program N 774 (next free 775)
-- NEAR: G2 (forward follow-up G2-F); G1 bound NEAR at $10k, FOUND-level at $2.3k conditional on Schwab rounding B1
-  (VIVK ~10-07; check llm-trader state/roundup-orders.json after 10-07). Dead: G4, G5, G6 (counts), G8 (select), G9 + G10 (bound).
-- track streak: T4 (G10), T3 (G9) -> next T3 G7 (424B2 sample)
-- NEXT: G7 424B2 autocallable barriers: FTS count of single-stock pricing supplements with a knock-in level, parse a
-  sample (underlying, barrier %, notional, dates), size notional / ADV; kill if the top decile is < ~10 names/yr with
-  notional >= 5% ADV. Then the 10-judged paragraph and round 2
-  (30 more ideas, aimed at the 10-judged paragraph's gap).
+- round 1 done · ideas written 10 (G1-G10) · k (judged) 10 · program N 774 (next free 775)
+- NEAR: G2 (forward G2-F = ev2_big gate); G1 bound NEAR at $10k / FOUND-level at $2.3k if Schwab rounds B1 (VIVK ~10-07;
+  check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = new `id3_big` gate (ID3 >= $500k, any silence).
+  Dead: G4, G5, G6 (counts), G7, G9, G10 (bounds), G8 (select).
+- track streak: T3 (G7), T1 (G3)
+- NEXT: write round 2 (G11-G40) aimed at the gap in the 10-judged paragraph below: own-money / forced-flow mechanisms
+  with (a) a window nobody here has looked at and (b) dollars that scale past per-holder caps. Quotas for the round of 40:
+  T1 >= 8 (have 2), T2 >= 8 (have 3), T3 >= 8 (have 3), T4 >= 8 (have 1), T5 >= 4 (have 1).
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -74,3 +74,26 @@
   is dead because the move is in the announcement gap). Prediction prior is poor: an acquired SmallCap 600 member is
   replaced from hundreds of eligible names (often a MidCap 400 drop or a recent IPO); with 3 picks and P(hit) ~10%, the
   expected basket gain is ~1/3 x 10% x ~+5% pop = ~+0.2% per event before costs, ~0 after. Not runnable, not worth buying data for.
+- 2026-10-02 18:20 **G7 424B2 autocallable barriers: KILLED (bound).** FTS "downside threshold" "common stock of" 424B2:
+  ~1,100 (2018), ~3,000 (2022), 10,000+ (2025) supplements. Sample June 2023 (250 docs, 43 parsed): underlyings are mega /
+  large caps (BX $61M, BAC $39M, AXP $28M, MSFT, NVDA, MA, XOM, AAPL), $5-60M per note. Even at 10x the parse rate, notional
+  per name is ~1-10% of ONE day's ADV per month, and the barrier delta shift is a fraction of that spread over days, with an
+  ambiguous sign: <= ~1-3% of a day's volume. No top decile worth trading; a 100k-document build for it is not justified.
+- 2026-10-02 18:25 **G3 ID3 size dose-response: no clean window -> forward gate (no N).** 2016-21 was seen by G2's report row
+  (ID3 >= $500k, any silence: +35.7bp x 1,788 trades, every year > 0, tier_hi +20.0bp, 2021 +23.8bp) and 2022-26 by the EV2
+  diagnostics (buckets +5/+17/+23/+35bp). Every period is positive, but none is untouched. Added a forward-only sub-gate
+  `id3_big` (insider_shadow.gate + testing.py REGISTRY entry "ID3 x buy >= $500k (any silence)", 60 trades), log-only.
+  If it and G2-F both pass, the overlay would trade ~350/yr instead of ~40/yr (breadth, lower per trade).
+
+### After 10 judged (round 1): what came closest and why it failed
+Closest: **G2** (EV2-big intraday overlay on SPY): every registered holdout bar passed (+11pp/yr after tax at $2.3k and
+$10k, lottery-proof), and it failed only on validation logistics: no clean judge half (the size cut was found on
+2022-26) and a flat untouched 2021. Second: **G1** (contract stack): huge at $2.3k (+20pp) but per-holder caps don't
+scale, so $10k misses (+8.8pp). Everything that died died the usual ways: TOO RARE (G4/G5/G6), COST (G10), GAP / no
+recovery (G8), no data (G9), flow too small vs ADV (G7). **The gap the next 10 must aim at:** (1) mechanisms in the
+own-money / forced-flow family whose history includes a window nobody here has looked at. The cheapest one: Form 345
+goes back to 2006, so 2006-15 is untouched for every insider rule, but it needs pre-2016 daily bars (Alpaca starts 2016;
+find a free raw-ish source or CRSP-like data). (2) payoffs that scale with the account, not per holder: breadth (many
+events/yr) or size that the mechanism itself sets (e.g. issuer buyback EXECUTION disclosed in 10-Q tables, 10b5-1
+adoptions by insiders who then buy, issuer self-tenders at a premium sized for all holders, forced index-fund flow in
+second-tier indexes where flow/ADV is large).

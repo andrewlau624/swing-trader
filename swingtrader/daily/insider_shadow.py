@@ -132,6 +132,12 @@ def _stats(x: pd.DataFrame) -> tuple[float, float]:
     return float(x.ret_net.mean()), t
 
 
+def id3_big(r: dict) -> bool:
+    """ID3 x buy >= $500k with no silence filter (Goal hunt G3: 2016-20 holdout report row +35.7bp/trade, 2021 +23.8bp;
+    forward data only, since 2016-26 have all been looked at)."""
+    return float(r.get("usd") or 0) >= BIG_USD
+
+
 def _sub_gate(x: pd.DataFrame, rest: pd.DataFrame) -> dict:
     if not len(x):
         return dict(n=0, verdict=f"shadowing (0/{SUB_GATE_N})")
@@ -165,8 +171,11 @@ def gate(records: list[dict]) -> dict:
     f = [ev2_flags(r) for r in s]
     tagged = np.array(["silence_days" in r for r in s])
     e2, big = np.array([a for a, _ in f]), np.array([b for _, b in f])
+    has_usd = np.array(["usd" in r for r in s])
+    big_any = np.array([id3_big(r) for r in s])
     return dict(n=len(x), mean_bp=mean * 1e4, t=t, verdict=v,
-                ev2=_sub_gate(x[e2], x[tagged & ~e2]), ev2_big=_sub_gate(x[big], x[tagged & ~big]))
+                ev2=_sub_gate(x[e2], x[tagged & ~e2]), ev2_big=_sub_gate(x[big], x[tagged & ~big]),
+                id3_big=_sub_gate(x[big_any], x[has_usd & ~big_any]))
 
 
 # ---------------------------------------------------------------- I/O
