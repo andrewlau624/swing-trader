@@ -1,12 +1,13 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 1 · ideas written 10 (G1-G10) · k (judged) 7 · program N 774 (next free 775)
+- round 1 · ideas written 10 (G1-G10) · k (judged) 8 · program N 774 (next free 775)
 - NEAR: G2 (forward follow-up G2-F); G1 bound NEAR at $10k, FOUND-level at $2.3k conditional on Schwab rounding B1
-  (VIVK ~10-07; check llm-trader state/roundup-orders.json after 10-07). Dead: G4, G5, G6 (counts), G8 (select), G10 (bound).
-- track streak: T4 (G10) -> next T3 (G9 bound, G7 sample)
-- NEXT: G9 bound (S&P 400/600 replacement prediction hit rate from S&P press releases), then G7 (424B2 sample), then
-  the 10-judged paragraph and round 2
+  (VIVK ~10-07; check llm-trader state/roundup-orders.json after 10-07). Dead: G4, G5, G6 (counts), G8 (select), G9 + G10 (bound).
+- track streak: T4 (G10), T3 (G9) -> next T3 G7 (424B2 sample)
+- NEXT: G7 424B2 autocallable barriers: FTS count of single-stock pricing supplements with a knock-in level, parse a
+  sample (underlying, barrier %, notional, dates), size notional / ADV; kill if the top decile is < ~10 names/yr with
+  notional >= 5% ADV. Then the 10-judged paragraph and round 2
   (30 more ideas, aimed at the 10-judged paragraph's gap).
 
 ## Notes carried in from other hunts (read 2026-10-02)
@@ -68,3 +69,8 @@
   strictly worse in taxable. Their only use would be Roth leverage without margin, and the data to price it honestly
   (historical single-name option quotes) starts 2024-02 on Alpaca, inside the contaminated half. Many $20M-ADV names have
   no weeklies. Not worth a study; revisit only if G2-F passes forward and the Roth wants the overlay.
+- 2026-10-02 18:05 **G9 S&P 400/600 replacement prediction: KILLED (bound, no N).** Already logged as "no free history"
+  (event_edge_candidates #30: S&P DJI announcements are not archived machine-readably for free; the flagship S&P 500 add
+  is dead because the move is in the announcement gap). Prediction prior is poor: an acquired SmallCap 600 member is
+  replaced from hundreds of eligible names (often a MidCap 400 drop or a recent IPO); with 3 picks and P(hit) ~10%, the
+  expected basket gain is ~1/3 x 10% x ~+5% pop = ~+0.2% per event before costs, ~0 after. Not runnable, not worth buying data for.
