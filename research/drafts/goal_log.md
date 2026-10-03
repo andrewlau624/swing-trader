@@ -1,12 +1,12 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 1 · ideas written 10 (G1-G10) · k (judged) 6 · program N 774 (next free 775)
+- round 1 · ideas written 10 (G1-G10) · k (judged) 7 · program N 774 (next free 775)
 - NEAR: G2 (forward follow-up G2-F); G1 bound NEAR at $10k, FOUND-level at $2.3k conditional on Schwab rounding B1
-  (VIVK ~10-07; check llm-trader state/roundup-orders.json after 10-07). Dead: G4, G5, G6 (counts), G8 (select).
-- track streak: T2 x2 (G6, G5) -> next T4 (G10 bound) then T3 (G9 bound, G7 sample)
-- NEXT: G10 bound: option spreads / weekly availability on the 2022-26 EV2-big names (Alpaca options snapshot or a
-  conservative IV bound) to see if calls can beat shares after the quoted bid/ask. Then G9, G7, then write round 2
+  (VIVK ~10-07; check llm-trader state/roundup-orders.json after 10-07). Dead: G4, G5, G6 (counts), G8 (select), G10 (bound).
+- track streak: T4 (G10) -> next T3 (G9 bound, G7 sample)
+- NEXT: G9 bound (S&P 400/600 replacement prediction hit rate from S&P press releases), then G7 (424B2 sample), then
+  the 10-judged paragraph and round 2
   (30 more ideas, aimed at the 10-judged paragraph's gap).
 
 ## Notes carried in from other hunts (read 2026-10-02)
@@ -60,3 +60,11 @@
   issuers in 10 years (AMSWA, CIX, Ford 2026, Forest City, GoPro, Lionsgate, Lyft, Monro, Nxu ...); "collapse of the dual
   class" 2 issuers. Most have only one listed class (the B class can't be bought), and where both trade (LGF.A/B, Forest
   City) the ratio-implied spread reprices on the announcement (GAP). ~1/yr tradable: TOO RARE.
+- 2026-10-02 18:00 **G10 calls instead of shares on EV2-big: KILLED (bound, no N).** Analytic, conservative: a 5-day ATM
+  call at IV 40% on a $50 name costs ~2.25% of S; the +69bp holdout drift x delta 0.5 = +15% of premium; theta over the
+  session ~ −10% and gamma gives it back only if realized = implied (event days: IV is bid up, so assume no free gamma);
+  a weekly single-name round-trip spread of ~5-10% of premium = ~16bp of S per 0.5-delta contract, i.e. ~32bp per
+  share-equivalent vs ~5bp for the stock. Per unit of exposure options keep ~+37bp of the +69bp vs ~+64bp for shares:
+  strictly worse in taxable. Their only use would be Roth leverage without margin, and the data to price it honestly
+  (historical single-name option quotes) starts 2024-02 on Alpaca, inside the contaminated half. Many $20M-ADV names have
+  no weeklies. Not worth a study; revisit only if G2-F passes forward and the Roth wants the overlay.
