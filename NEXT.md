@@ -1014,6 +1014,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | idea | verdict | why |
 |---|---|---|
+| Closed-end fund officers/directors buying their own fund, hold 60 vs PCEF (Goal G54, N 788) | **dead (select)** | 2021-23 n 96, +1.25%, t 0.8, ex-best-5 negative |
 | First 13D on a fund-like subject by any filer OTHER than the CEF activists, hold 60 vs PCEF (Goal G53, N 787) | **dead (select)** | 2021-23 n 96, −8.1%/trade; the G45 effect is activist-specific |
 | CEF activist escalations: stake first >= 15% / first proxy-contest filing, hold 60 vs PCEF (Goal G50 / G51, N 785-786) | **dead (select count / mean)** | G50 n 12 (+3.5%, t 3.7) below n >= 20; G51 +0.4%, t −0.3 |
 | Insider buys >= $500k in ADV $1-20M names / >= 0.5% of market cap, hold 5 vs SPY (Goal G42 / G43, N 781-782) | **dead (select)** | 2021-23 −0.13% (t 0.2) / +0.89% (t 0.96, 2023 only); the size effect is a liquid-name effect |

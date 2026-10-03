@@ -1,7 +1,7 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 3 · ideas written 49 (G1-G49; G47-G49 aimed at G45's lesson) · k (judged) 43 · program N 787 (next free 788)
+- round 3 · ideas written 49 (G1-G49; G47-G49 aimed at G45's lesson) · k (judged) 44 · program N 788 (next free 789)
 - NEAR: **G45** (activist 13D on CEFs: passes its study bars, misses the Goal add-on bar; forward G45-F needs a
   log-only watcher, to build next). Open: G2 (NEAR; forward G2-F = `ev2_big` gate), G3 (forward `id3_big` gate), G21 (combined ~+21pp at today's balances;
   waits on Schwab rounding B1: VIVK ~10-07, check llm-trader state/roundup-orders.json after 10-07), G23 / G26 (wait on
@@ -254,3 +254,7 @@ absorbed.
   watcher extended (forward-only, no verdict):** it now also logs 13D/As where one of the six activists first reports >= 15%
   of a fund (`kind: cross15`, cover-page regex on the filing, 20k chars), so G50's rare-but-strong signal (n 12, +3.5%, t 3.7
   on select) collects clean forward data for a later, separately registered test. The G45-F gate counts first-13D rows only.
+- 2026-10-03 00:40 **G54 fund insiders buying their own CEF: DEAD on select** (N 788). 312 officer/director buy events on
+  80 fund-like issuers (the regex also admits a few REITs: Pebblebrook, PennyMac), 286 with bars; select n 96, mean +1.25%
+  vs PCEF, median +0.83%, date-t 0.80, ex-best-5 −1.05% (2021 +1.9 / 2022 −1.3 / 2023 +3.4). Positive but weak: a fund
+  insider's buy is small vs the fund and carries no NAV-exit power; the activist is the mechanism, not the insider.
