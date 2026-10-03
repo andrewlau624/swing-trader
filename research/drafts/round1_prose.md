@@ -2661,3 +2661,17 @@ any forward outcome: a log-only watcher records every new first 13D by the same 
 scores it at 60 sessions (dividend-adjusted, vs PCEF). After 30 forward events: PASS iff mean excess vs PCEF >= +1.5% AND the
 hedged sleeve (long fund / short PCEF, 12.5% of equity per position, taxable, after tax) >= +5pp/yr on those events; else DEAD.
 No interim decisions; no re-run of history with new sizing. N stays 783.
+
+## Amendment — Goal hunt, Study G47: specialist small-bank activist 13Ds, buy the bank (pre-register; program N 783 -> 784)
+
+Session llm-trader-ec, idea G47 (`goal_ideas.md`, track T3). Registered 2026-10-02 before any price around these filings.
+Seen: FTS counts only (2016-26: PL Capital 68, Driver Management 127, Basswood 46 SC 13D filings; Stilwell rate-limited).
+- **Events:** the FIRST SC 13D / SCHEDULE 13D (not amendments) by Stilwell, PL Capital, Driver Management, Basswood,
+  Bulldog-free list as written) on a listed subject (any non-fund subject with a ticker), 2016-01..2026-09; one per
+  (subject, activist). Subject ticker from the FTS display names.
+- **Trade:** buy the next session's opening cross, hold 120 sessions, sell at that close. Dividend-adjusted return minus KRE
+  (dividend-adjusted). Costs tier per side. Prior raw close >= $5 is NOT required (small banks), ADV$ >= $200k (20d).
+- **Halves:** select 2021-23 (one look): proceed iff n >= 20, mean net excess >= +3.0%, date-level t >= 2; then judge 2024-26
+  (mean > 0, t >= 2, ex best 5 trades > 0) and holdout 2016-20 (mean >= 0).
+- **Goal bar:** sleeve at 12.5%/position from the SPY core, after tax, >= +5pp/yr vs SPY at $2.3k and $10k (add-on).
+- Runner `research/sim/goal_g47.py` (reuses goal_g45's adjusted-bar fetch). k = 38 when judged.
