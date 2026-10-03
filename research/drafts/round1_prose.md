@@ -2566,3 +2566,19 @@ frames), no returns.
   per $500 at $2.3k), or as an add-on >= +5pp.
 - **Why it might fail (written now):** TEXTBOOK. Actual-repurchase predictability is published (Stephens & Weisbach 1998;
   Ben-Rephael, Oded & Wohl 2014) and may have decayed. One variant. k = 25 when judged.
+
+## Amendment — Pick quality (session llm-trader-ee), Study PQ1: leveraged / inverse ETFs in the night pool (pre-register; 2 variants, program N 776 -> 778)
+
+`date`: Fri Oct 2 2026, before any PQ1 book or 2024+ outcome is computed. Prompt: research/drafts/prompt_pick_quality.md.
+Why: single-stock and index leveraged/inverse ETFs went from 3% of night picks (2021) to 24% (2026) (counts only); their
+-8% day is often a mechanical 2x of the underlying's move, not an overreaction, and they duplicate the underlying's pick.
+Only 2021-23 outcomes were seen (LETF +20.6bp vs stocks +17.5bp, n 208 / 3,857). Classifier: research/sim/pq1.py `classify`
+(Alpaca asset name has a leverage word AND a fund/issuer word; underlying = the ticker after Long/Short/Inverse/Bull/Bear).
+Variants: PQ1a EXCLUDE every LETF pick (it also leaves the raw signal count); PQ1b DEDUPE: drop an LETF pick when its
+underlying, or an earlier-listed LETF on the same underlying, is also a pick that night. Sizing otherwise as live
+(frac = min(1/n, 0.10) x min(1, 30/n_raw)). Book: V7 1.0x raw pool, Sim.replay, fixed $10k (and $2.3k whole shares),
+tier and tier_hi. Halves: select 2021-02..2023-12, judge 2024-01..2026-09. No 2016-20 holdout (the raw pool starts 2020-11).
+PASS (prompt_pick_quality.md): judge-half increment > 0 at tier AND tier_hi, NW t >= 2 (daily increment, judge half),
+placebo >= 95th pct (50 draws dropping the same number of random picks per night, tier), select half not worse than -0.5pp.
+Because LETFs were rare in 2021-23 the select half can only show "not worse"; the judge half carries the test. DSR at N 778
+reported.
