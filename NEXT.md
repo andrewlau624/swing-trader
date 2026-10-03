@@ -48,8 +48,9 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   R10: `tests/test_causality.py` (truncate-vs-poisoned future bars for momentum_top; cost monotone); live callers
   of oversold/TOW/momentum all slice `< today`.
 
-## Jump & ride hunt (2026-10-02, session llm-trader-51, `prompt_jump_hunt.md`): running
-- 62 ideas (`jump_ideas.md`), log + STATE in `jump_hunt_log.md`. N 761 (J1). Judged: **J1 first profitable
+## Jump & ride hunt (2026-10-02, session llm-trader-51, `prompt_jump_hunt.md`): STOPPED, NOT FOUND (rule 3)
+- 122 ideas in 4 rounds (`jump_ideas.md`), 97 explored, 8 judged (N 761-768), all dead; stop summary + table at
+  the end of `jump_hunt_log.md`. Deaths: exit liquidity (crowd attention), two-way, lottery, timing, too weak. Judged: **J1 first profitable
   quarter, RIDE hold60: DEAD** (judge +5.5%/trade but ex-top3 −1.8%, P 0.21; `study_jump_d6_first_profit.md`);
   **J2 insider buy after a 30% fall, JUMP tp205: DEAD** (judge x1.3, P 0.18; the fall, not the insider, carried select);
   **J3/J4 8-K strategic alternatives + advisor / NDAs: DEAD** (judge −1.7%, P 0.71 / 7 trades); **J5-J8 (big buybacks,

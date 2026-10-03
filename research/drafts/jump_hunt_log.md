@@ -1,18 +1,13 @@
 # Jump & ride hunt log (prompt_jump_hunt.md), session llm-trader-51
 
-## STATE (update after every idea)
-- program N: 768 (peer sessions have since taken 769-772). k (ideas judged): 8 — J1-J8 all DEAD on the judge half.
-- Ideas explored: 89 (+ S2v as S2's second look). Rounds of idea generation: 4 (R1 62 + R2 20 + R3 20 + R4 20).
-  Stop-rule counts met (>= 4 rounds, >= 80 explored); finishing the feasible sources before the stop summary.
-- running: R3-7 (LLM fact extraction from 2,021 small-cap 8-K Item 1.01 filings, ~24 calls/min), R2-24 and R4-7 (EDGAR
-  builds), H20 (subreddit creation dates, Arctic Shift), H24 (Yahoo trending snapshots, Wayback, ~1 per 4 s),
-  WSB 2021 (for H4, V1, H13; ~7 more hours at January's pace).
-- dropped before a run (data/rarity): H11/C8 (option alerts end 2017), S1/S1v (rare), D7 (runner needs ADV), R3-4
-  (PatentsView 403), R3-20 (rare); not built (heavy / unavailable / very low prior, listed in the stop summary):
-  D3 D11 V3 V4 V5 W1 W3 W4 W6 R2-3 R2-9 R2-16 R2-18 R2-21 R2-23 R3-1 R3-19 R4-9 R4-20.
-- why things die: EXIT LIQUIDITY (crowd attention), TWO-WAY, LOTTERY (every judged idea died with its mean carried
-  by its top 3 trades or too few trades), REGIME/timing (H16, R3-17, H9, V2, C2 failed the same-day control), TOO WEAK
-  (informed buyers and filing milestones ~ the stock's usual), TOO RARE.
+## STATE (final, 2026-10-02 19:55 PDT): STOPPED by rule 3 — NOT FOUND
+- program N used by this hunt: 761-768 (J1-J8; peers have since registered up to 778). k = 8, all DEAD on the judge
+  half; no confirm window reached. Ideas explored: 97 of 122 written in 4 rounds (+ S2v as S2's second look).
+- Summary, the full idea table and near misses are at the end of this log ("STOP" section).
+- Data built and cached for reuse (data/research/jump/): Alpaca/Benzinga news 2016-01..2025-09 (downloader stopped;
+  2025-10..2026-09 not fetched), Reddit posts for 8 subs incl. full WSB 2016-2026, Wikipedia pageviews for 3,511 company
+  and 692 CEO articles, Yahoo trending snapshots 2018-24, SEC FTD 2015-26, SEC 13F 2013-26, Form 345 2014-26,
+  XBRL shares history, openFDA 510(k), ClinicalTrials Phase 3, Federal Register adcom texts, 2,019 LLM extractions.
 
 ## Log
 - 12:45 setup: the prompt names `swing-trader`; the session started in the `llm-trader` checkout (no data caches); work in
@@ -275,3 +270,184 @@
   - **V1** (763 select -> 409 trades); hold1 x9.1 -1.6%/-2.7%/-3.1% P0.92; tp205 x2.5 -2.1%/-2.6%/-3.1% P0.98; hold20 x1.3 -6.9%/-8.9%/-12.6% P1.00; hold60 x1.3 -5.4%/-12.1%/-23.3% P0.86; tp2060 x1.3 +1.3%/+0.0%/+19.2% P0.23; all fail
   - **H13** (484 select -> 289 trades); hold1 x11.8 -1.5%/-3.4%/-2.8% P0.85; tp205 x2.9 -1.4%/-2.0%/-0.8% P0.90; hold20 x1.6 -4.6%/-7.2%/-8.6% P0.96; hold60 x1.2 -6.3%/-9.3%/-15.7% P0.97; tp2060 x1.2 -0.3%/-1.3%/+18.5% P0.57; all fail
   All dead: EXIT LIQUIDITY again (6-12x one-day jump rate; V1 small subs -> WSB median -23% over 60 sessions; H13 cross-sub spread median -16%). 96 explored.
+
+
+## STOP (stop rule 3): 4 rounds, >= 80 explored, no feasible source left — **NOT FOUND**
+
+Session llm-trader-51, 2026-10-02 (12:40-19:55 PDT), `prompt_jump_hunt.md`. Nothing met FOUND (explore gate + registration + judge
+PASS + CONFIRMED). This is the honest result after 97 explored ideas (122 written in 4 rounds), 8 registered
+and judged (k = 8, program N 761-768), and a same-day control rule added mid-hunt to stop market timing from being
+registered.
+
+**Judged (all DEAD on the judge half; no confirm window was ever reached):**
+| study | idea | select (only look) | judge | why it died |
+|---|---|---|---|---|
+| J1 | first profitable quarter after >= 6 losses (RIDE hold60) | +7.3%, ex-top3 +4.5% | +5.5%, ex-top3 -1.8%, P 0.21 | lottery; select flattered by survivorship + 2016/2020 timing |
+| J2 | insider buy after a 30% fall (JUMP tp205) | jump x2.6, +0.5% | x1.3, P 0.18 | the fall, not the insider (a no-insider control did as well) |
+| J3 | 8-K strategic alternatives + financial advisor (RIDE hold20) | +3.5%, control +4.4% | -1.7%, P 0.71 | takeover tail did not repeat |
+| J4 | 8-K strategic alternatives + NDAs (JUMP hold20) | +6.0% (24 trades) | 7 trades | too rare |
+| J5 | buyback >= 15% of market cap, un-gapped (JUMP tp205) | +2.1%, x2.6, control +1.9% | x4.8, +0.8%, ex-top3 -0.1%, P 0.23 | closest miss: lottery on 68 trades |
+| J6 | forward split announced (JUMP trail20) | +2.2%, control +2.0% | +2.6%, ex-top3 -1.1%, P 0.16 | lottery, 28 trades |
+| J7 | two upgrades in 10 days, small caps (JUMP tp205) | +0.7%, control +1.0% | +1.0%, ex-top3 -1.5%, P 0.34 | lottery, 25 trades |
+| J8 | initiation with a 2x target, micro caps (RIDE hold60) | +6.1%, control +5.0% | 0 trades | the headline format vanished after 2020 |
+
+**Met the explore gate but failed the same-day control (not registered):** H16 weekend Wikipedia spike, R3-17
+pageview high + insider buy, H9 "why is X trading higher" explainers, V2 Reddit-before-Benzinga, C2 first Reddit
+mention + insider buy: each equal to stocks bought on the same mornings (market timing: 2020 and 2021 rebounds).
+
+**Why things die here (the death map, updated):**
+- EXIT LIQUIDITY (new): crowd attention (Reddit, subreddits, PR blitzes, explainers) gives a 4-14x one-day jump rate,
+  then the names slide 5-22% over 20-60 sessions; a long-only buyer is the crowd's exit.
+- TWO-WAY (new): attention without direction (trade-count spikes, theme 8-Ks, poison pills, early earnings dates) raises
+  the up AND down jump rates; costs make the mean negative.
+- LOTTERY: every judged idea died with its out-of-sample mean carried by its top three trades or with too few trades.
+- REGIME / timing: 60-day rides on attention signals are market timing unless they beat a same-day control.
+- TOO WEAK: own-money and filing milestones (buybacks executed, going-concern removal, share shrink, first profit,
+  insider buys into shorts) earn about the stock's usual +1-2% over 60 sessions — real but below the +3% RIDE bar.
+
+**Money:** nothing to deploy. If J5 had been real at its judge-half +0.8%/trade, 34 signals a year at 10% per signal
+would be ~+$60 / $270 / $680 a year at $2.3k / $10k / $25k before tax — too small to matter even if it were real.
+
+**Not tested (listed with the reason):** H11/C8 (option-alert headlines end in 2017), S1 (rare in this feed), D7
+(runner needs ADV before a new listing), R3-4 (PatentsView 403), R3-20 (rare); not built because the data is
+unavailable or very heavy, or the prior is very low: D3 (defense.gov 403; D2 covered contracts), D11 (no Russell
+membership history), V3 (customer links need XBRL dimensions), V4 (no Korean/Japanese theme data), V5, W1, W3, W4,
+W6, R2-3, R2-9 (STOCK Act data not fetched), R2-16, R2-18, R2-21, R2-23, R3-1, R3-19, R4-9, R4-20.
+WSB-based H4, V1, H13 ran once WSB 2021 finished downloading (all EXIT LIQUIDITY); H24 ran on 2,193 Wayback snapshots (EXIT LIQUIDITY); R3-7 used 2,019 of the 3,000 LLM calls (too rare).
+
+**What would change the answer:** a source that gives DIRECTION before the crowd (e.g. order-flow imbalance, borrow
+fees, options open interest) — all paid here; or forward-only LLM judgment on post-cutoff events (prompt 3b/3c), which
+needs months of shadow logging, not history.
+
+### Every idea (prompt section 8 table; best select cell = highest mean net, as mean / ex-top3 / median, P(mean<=0))
+
+| idea | track | method | death dodged | signals/yr | best select cell (mean/ex-top3/median) | judged? | verdict | confirm |
+|---|---|---|---|---|---|---|---|---|
+| H1 Reddit first mention after silence: a ticker named in >= 2 posts withi | R | H | GAP: Reddit precedes the press; PRICE PROXY: each stock vs i | 200+ | hold1 n374 -0.7%/-2.3%/-2.2% P0.75 | no | explored-dead |  |
+| H2 Mention velocity without a price move: posts naming a ticker on day d  | R | H | GAP (attention before price), RIDE not price-first | 100+ | tp201 n294 -1.2%/-1.4%/-1.5% P1.00 | no | explored-dead |  |
+| H3 Shortsqueeze-sub DD: first r/Shortsqueeze or r/shortsqueeze post with  | R | H | GAP; LOTTERY tested by ex-top-3 | 50-150 | tp201 n112 -1.3%/-1.9%/-1.8% P0.92 | no | explored-dead |  |
+| H4 WSB first mention of a small cap (ADV$ < $20M at the time): first WSB  | R | H | GAP; PRICE PROXY | 100+ | tp2060 n2187 +1.2%/+1.0%/+10.0% P0.01 | no | explored-dead |  |
+| H5 Pageview spike, no price move: Wikipedia views >= 5x the trailing-60d  | R | H | GAP (attention before price), PRICE PROXY (vs itself) | 100+ | hold60 n1380 +1.9%/+1.4%/+1.4% P0.00 | no | explored-dead |  |
+| H6 Pageview slow build: 20-day mean views >= 2x the prior 120-day mean, m | R | H | REGIME (not a theme bet), RIDE not price-first | 30-80 | hold60 n223 +1.2%/+0.4%/+1.7% P0.17 | no | explored-dead |  |
+| H7 First Benzinga coverage: a ticker's first-ever news story in the archi | R | H | GAP: test both buy-open and only-if-gap-small; TEXTBOOK (no  | 50-200 | tp201 n207 -1.7%/-2.0%/-1.3% P1.00 | no | explored-dead |  |
+| H8 News velocity burst without a move: >= 4 stories in 5 days vs < 1/mont | R | H | GAP; PRICE PROXY | 100+ | hold60 n3072 -0.4%/-0.6%/-1.5% P0.82 | no | explored-dead |  |
+| H9 "Why is X trading higher" first explainer: Benzinga's first "why is .. | R | H | TEXTBOOK; risk PRICE-FIRST (named; graded anyway as a wildca | 200+ | hold60 n1141 +6.1%/+4.7%/+0.1% P0.00 MEETS | no | MEETS; failed the same-day control |  |
+| H10 First-ever analyst initiation on a micro cap ("initiates coverage" hea | R | H | TEXTBOOK (initiation drift is published on larger caps; micr | 100+ | hold1 n820 -0.9%/-1.2%/-1.3% P1.00 | no | explored-dead |  |
+| H11 Unusual options activity headlines on small caps (Benzinga "unusual op | J | H | GAP (headline is intraday; buy next open); LOTTERY (many eve | 100+ |  | no | not explored (data / rarity: see log) |  |
+| H12 "Short squeeze" in a headline, first time for a ticker | J | H | LOTTERY (ex-top3); GAP | 50-150 | trail60 n104 +1.7%/-3.7%/-6.5% P0.39 | no | explored-dead |  |
+| H13 Cross-sub spread: ticker first named in one small sub, then within 10  | R | H/V | GAP; LOTTERY | 50-150 | tp2060 n289 -0.3%/-1.3%/+18.5% P0.57 | no | explored-dead |  |
+| H14 PR blitz by a micro cap: >= 4 press releases (Benzinga wires: Globe/PR | R | H | GAP; LOTTERY (trail exits) | 50-150 | hold60 n1370 +0.8%/-0.1%/-1.6% P0.23 | no | explored-dead |  |
+| H15 Wikipedia article born: first day with >= 50 views for a listed ticker | R | H | GAP | 20-50 | hold20 n106 -0.8%/-2.6%/+0.2% P0.66 | no | explored-dead |  |
+| H16 Weekend pageview spike: Sat+Sun views >= 5x a normal weekend, bought M | J | H | GAP (named; tests it directly) | 50+ | hold60 n377 +5.4%/+4.2%/+3.5% P0.00 MEETS | no | MEETS; failed the same-day control |  |
+| H17 Trade-count spike, quiet price: trade_count >= 5x its 60d median, abs  | R | H | PRICE PROXY (vs itself), RIDE attention-first; TEXTBOOK (the | 300+ | tp2020 n2233 -0.2%/-0.6%/-0.2% P0.69 | no | explored-dead |  |
+| H18 Squeeze talk + short interest: Reddit posts naming a ticker with "sque | J | H/C | LOTTERY; GAP | 30-100 | tp201 n148 -0.1%/-0.5%/-0.7% P0.54 | no | explored-dead |  |
+| H19 Wikipedia theme spike -> theme small caps: a theme article (Quantum co | R | H/V | REGIME (a family of 15 themes, any year); price-first banned | 20-60 | trail60 n628 -0.3%/-1.7%/-5.6% P0.63 | no | explored-dead |  |
+| H20 Reddit mention by a new sub for the ticker: a subreddit named after th | R | H/W | GAP | 10-50 | trail5 n128 -1.2%/-2.5%/-2.7% P0.81 | no | explored-dead |  |
+| H21 News count drought, then a non-earnings story: first story in >= 180 d | R | H | GAP | 100+ | tp201 n370 -1.3%/-1.5%/-0.8% P1.00 | no | explored-dead |  |
+| H22 Big-name partnership headline on a micro cap: headline names NVIDIA /  | J | H | GAP: only when the next open gaps < 10% (the market under-re | 50-150 | hold1 n31 -2.0%/-2.6%/-1.0% P1.00 | no | explored-dead |  |
+| H23 Pageview spike of the CEO's article (Wikidata P169 CEO -> pageviews),  | R | H/W | GAP | 10-30 | hold60 n429 +4.4%/+2.4%/+1.5% P0.00 | no | explored-dead |  |
+| H24 First appearance on Yahoo Finance trending tickers (Wayback daily snap | R | H/V | GAP (the list itself is the venue; test it), PRICE PROXY | 50-150 | tp201 n2032 -1.5%/-1.5%/-1.4% P1.00 | no | explored-dead |  |
+| D1 FDA approvals died of GAP + LOTTERY -> 510(k) clearances in openFDA be | J | D | GAP (earlier than news), LOTTERY (many clearances) | 50+ | tp2060 n180 +1.2%/+0.7%/+2.4% P0.20 | no | explored-dead |  |
+| D2 Announcement-gap drift (Lab-BH) died of GAP -> material-contract stori | R | D | GAP (only un-gapped), COST (big moves) | 50-150 | hold60 n588 +2.4%/+0.3%/+0.6% P0.06 | no | explored-dead |  |
+| D3 8-K phrase drift died -> slow databases: defense.gov daily contract an | J | D | GAP (a slow venue), TEXTBOOK | 20-60 |  | no | not explored (data / rarity: see log) |  |
+| D4 Theme momentum died of REGIME/price-first -> theme pivot by filing tex | R | D | REGIME (family across themes and years), price-first (filing | 50-200 | hold20 n752 +0.3%/-1.3%/-1.3% P0.44 | no | explored-dead |  |
+| D5 Spin-offs / index adds died of GAP -> corporate name change to a hot w | R | D/W | GAP (EDGAR effective date vs press), LOTTERY | 20-60 | hold60 n10 +44.3%/-12.3%/-1.9% P0.10 | no | explored-dead |  |
+| D6 Earnings drift (TEXTBOOK) -> first profitable quarter ever (XBRL NetIn | R | D | TEXTBOOK (milestone, not surprise) | 50-150 | hold60 n299 +7.3%/+4.5%/-0.6% P0.00 MEETS | yes (J1, RIDE hold60) | DEAD (+5.5%, ex-top3 -1.8%, P 0.21) | not run |
+| D7 Uplisting (banned) died of concurrent offerings -> uplistings with NO  | R | D | the death (dilution), LOTTERY | 20-50 |  | no | not explored (data / rarity: see log) |  |
+| D8 First insider buys (EV2, a 1-day effect) -> RIDE version on micro caps | R | D/C | REGIME (L19 20d drift was 2020-only): only the uncovered sub | 50-150 | tp2060 n673 +0.6%/+0.5%/+1.8% P0.19 | no | explored-dead |  |
+| D9 Breakthrough/topline died -> ClinicalTrials.gov first posting of a piv | R | D | GAP (slow registry), LOTTERY | 30-60 | hold60 n111 +1.9%/-3.0%/-7.2% P0.32 | no | explored-dead |  |
+| D10 13D originals died of GAP -> activist 13D/A that raises the stake (ame | R | D | GAP (amendments get little attention) | 50-100 | tp2060 n36 +0.2%/-1.6%/+14.1% P0.47 | no | explored-dead |  |
+| D11 Index adds died of GAP -> predicted Russell 2000 adds (rank by XBRL sh | R | D | GAP (arithmetic before the list), REGIME (published, decayed | 100+ (once a year) |  | no | not explored (data / rarity: see log) |  |
+| C1 Wikipedia spike + insider buy within 10 days | R | C | each weak alone; PRICE PROXY | 10-30 | hold60 n33 +6.9%/-0.8%/+2.6% P0.12 | no | explored-dead |  |
+| C2 First Reddit mention + an insider buy in the prior 30 days | R | C | GAP; LOTTERY | 10-40 | hold60 n222 +14.7%/+10.0%/+2.7% P0.00 MEETS | no | MEETS; failed the same-day control |  |
+| C3 First news coverage + low float (shares outstanding < 10M, XBRL) | J | C | LOTTERY (median test) | 30-80 | hold1 n17 -4.9%/-6.7%/-2.1% P1.00 | no | explored-dead |  |
+| C4 Reddit velocity + high days-to-cover (FINRA SI) | J | C | LOTTERY | 30-80 | trail5 n188 +0.4%/-2.5%/-2.5% P0.45 | no | explored-dead |  |
+| C5 Contract $ >= 10% of mcap (D2) + float < 20M shares | J | C | GAP (un-gapped only) | 10-40 | hold60 n109 +6.4%/-0.5%/+1.2% P0.13 | no | explored-dead |  |
+| C6 Insider buy + no news in 90 days | R | C | REGIME | 30-80 | hold60 n4431 +0.8%/+0.6%/-0.3% P0.03 | no | explored-dead |  |
+| C7 Reddit mention spike within 60 days after a reverse split | J | C | LOTTERY; PRICE PROXY (vs itself) | 20-60 | tp201 n44 -1.8%/-3.3%/-0.6% P0.74 | no | explored-dead |  |
+| C8 Unusual options headline (H11) + no other news that day | J | C | GAP | 30-80 |  | no | not explored (data / rarity: see log) |  |
+| C9 Theme news spike (headline counts of a theme word >= 3x 90d) + a small | R | C/V | REGIME (family), price-first | 20-60 | hold1 n4139 -0.8%/-0.8%/-0.9% P1.00 | no | explored-dead |  |
+| C10 Short interest up >= 50% in a FINRA period + Reddit/news attention spi | J | C | LOTTERY | 20-60 | tp201 n146 -0.5%/-0.9%/-2.8% P0.68 | no | explored-dead |  |
+| C11 Trade-count spike (H17) + first news story in 90 days the same day | R | C | GAP | 30-100 | hold20 n6 -3.9%/-16.2%/-5.8% P0.73 | no | explored-dead |  |
+| V1 Small subs -> WSB: >= 3 posts in the small subs within 5 days naming a | R | V | GAP | 50-150 | tp2060 n409 +1.3%/+0.0%/+19.2% P0.23 | no | explored-dead |  |
+| V2 Reddit -> Benzinga: Reddit mention spike (H2 rule) with no Benzinga st | R | V | GAP | 50-150 | tp2060 n33 +7.8%/+6.6%/+19.2% P0.01 MEETS | no | MEETS; failed the same-day control |  |
+| V3 Theme leader's big up day -> its small listed suppliers (XBRL Concentr | R | V | TEXTBOOK (Cohen-Frazzini customer momentum: monthly, large;  | 30-100 |  | no | not explored (data / rarity: see log) |  |
+| V4 Korea/Japan retail theme stocks -> US peers (KOSDAQ theme leader +15%  | J | V | GAP (Asia trades first, a different venue) | 20-60 |  | no | not explored (data / rarity: see log) |  |
+| V5 Benzinga premarket "movers" list of yesterday's after-hours: names tha | J | V | GAP | 100+ |  | no | not explored (data / rarity: see log) |  |
+| S1 Conference run-up: micro/small caps announcing they will present at J. | R | S | GAP; LOTTERY | 100+ |  | no | not explored (data / rarity: see log) |  |
+| S2 PDUFA run-up: buy 30 sessions before a PDUFA date (date extracted from | R | S | LOTTERY (exit before the binary) | 50-100 | hold20 n89 +2.9%/+0.0%/-0.2% P0.11 | no | explored-dead |  |
+| S3 Investor/analyst day announced by a small cap: buy at announcement, se | R | S | GAP | 50+ | too few trades | no | explored-dead |  |
+| S4 Medical-conference data presentations (ASCO/ASH/AACR/ESMO abstract pre | R | S | LOTTERY (exit before data) | 100+ | tp201 n449 -0.7%/-0.8%/-0.9% P0.99 | no | explored-dead |  |
+| S5 Forward-split announcement -> run into the ex-date (Lab-BM tested AFTE | R | S | the dead study's window (after ex-date), GAP | 20-40 | trail20 n78 +2.2%/+0.8%/+2.6% P0.06 MEETS | yes (J6, JUMP trail20) | DEAD (+2.6%, ex-top3 -1.1%, P 0.16) | not run |
+| W1 Ticker spells a hot word while that theme's news count spikes (e.g. AI | J | W | REGIME | 10-30 |  | no | not explored (data / rarity: see log) |  |
+| W2 Press release that says "artificial intelligence"/"AI" >= 5 times, fir | R | W | REGIME (dates), GAP | 50-150 | trail60 n143 +3.1%/-0.3%/-6.9% P0.14 | no | explored-dead |  |
+| W3 Wikipedia edit burst (>= 10 edits in a day on the company article vs < | R | W | GAP | 20-50 |  | no | not explored (data / rarity: see log) |  |
+| W4 Super Bowl / big-event ad buyers that are small caps (announced in new | R | W | TOO RARE (named) | 2-5 |  | no | not explored (data / rarity: see log) |  |
+| W5 "Meme stock" word in a headline for the first time for a ticker | J | W | GAP | 30-80 | hold60 n39 +9.2%/-10.1%/+1.0% P0.32 | no | explored-dead |  |
+| W6 ARK Invest first buy of a small/mid cap (daily trade emails, archived) | R | W | REGIME (2020-21) | 20-50 |  | no | not explored (data / rarity: see log) |  |
+| R2-1 First executed buyback: XBRL PaymentsForRepurchaseOfCommonStock > 0 (o | R | D | GAP + TEXTBOOK of buyback announcements (X3, Ikenberry): exe | 50-150 | tp2060 n342 +0.5%/+0.2%/+2.9% P0.31 | no | explored-dead |  |
+| R2-2 Going-concern doubt removed: a 10-K without "substantial doubt" after  | R | D | LOTTERY (many events, survival is the bet), EXIT LIQ | 100+ | hold60 n673 +2.0%/+1.0%/+0.3% P0.06 | no | explored-dead |  |
+| R2-3 Net cash above market cap: (cash + short-term investments − total liab | R | D/W | LOTTERY (a cash floor under the downside), EXIT LIQ (no crow | 50-200 |  | no | not explored (data / rarity: see log) |  |
+| R2-4 Big own-money buy: an officer/director buys >= $100k in the open marke | R | C | EXIT LIQ; LOTTERY (many events) | 100+ | hold60 n1568 +2.4%/+1.7%/-1.0% P0.00 | no | explored-dead |  |
+| R2-5 Insider buys after a 30% fall: officer/director buy when the stock is  | R | C | EXIT LIQ (the crowd already left); price is a filter, the Fo | 100+ | hold60 n2379 +8.7%/+8.4%/+5.2% P0.00 MEETS | yes (J2, JUMP tp205) | DEAD (x1.3, P 0.18) | not run |
+| R2-7 Strategic-alternatives review announced (headline), RIDE: a sale proce | R | H/D | GAP (headline is mild), LOTTERY (many deals) | 30-80 | trail60 n331 +1.0%/-0.3%/-3.2% P0.21 | no | explored-dead |  |
+| R2-9 Congress member buys a small cap (STOCK Act periodic transaction repor | R | W | EXIT LIQ | 20-50 |  | no | not explored (data / rarity: see log) |  |
+| R2-13 Listing compliance regained (8-K / headline: "regained compliance" wit | R | D | EXIT LIQ (forced sellers done), GAP | 100+ | tp2060 n337 -0.2%/-1.4%/+18.5% P0.56 | no | explored-dead |  |
+| R2-14 Emergence from Chapter 11 with new listed equity (headline) | R | D | LOTTERY, forced sellers | 10-30 | hold20 n4 +64.4%/-4.9%/+4.8% P0.13 | no | explored-dead |  |
+| R2-15 Share count shrinks >= 3% in a quarter (dei cover-page shares, origina | R | D | TEXTBOOK (buyback announcements) -> execution; EXIT LIQ | 50-150 | hold60 n689 +1.7%/+1.2%/-0.2% P0.01 | no | explored-dead |  |
+| R2-16 Revenue doubles year on year for the first time (XBRL Revenues, origin | R | D | TEXTBOOK (revenue drift: milestone, micro caps) | 50-150 |  | no | not explored (data / rarity: see log) |  |
+| R2-17 Insider buy into heavy shorts: officer/director buy while the last pub | J | C | EXIT LIQ (no crowd buying); LOTTERY (many) | 50-150 | hold60 n3178 +1.5%/+1.2%/-0.2% P0.00 | no | explored-dead |  |
+| R2-18 Double own money: an officer/director buy in a quarter in which the co | R | C | EXIT LIQ | 30-80 |  | no | not explored (data / rarity: see log) |  |
+| R2-19 Two upgrades in 10 days on a small cap (headlines "Upgrades ... to Buy | R | H/D | TEXTBOOK (single upgrades) -> clusters on small caps | 50-150 | hold60 n277 +5.9%/+3.2%/+2.1% P0.00 MEETS | yes (J7, JUMP tp205) | DEAD (+1.0%, ex-top3 -1.5%, P 0.34) | not run |
+| R2-20 Big-name counterparty in an 8-K exhibit (FTS 8-K "Amazon.com Services" | R | D | GAP (slow exhibit text) | 50-150 | hold1 n28 +0.1%/-2.4%/-1.2% P0.50 | no | explored-dead |  |
+| R2-21 New major customer named in XBRL (ConcentrationRiskPercentage on a cus | R | D/W | GAP, EXIT LIQ | 30-80 |  | no | not explored (data / rarity: see log) |  |
+| R2-22 Dividend raised >= 50% by a small cap (headline amounts) | R | D | TEXTBOOK (dividend initiation dead) -> big raises | 30-80 | tp2060 n49 +2.1%/+0.9%/+1.4% P0.16 | no | explored-dead |  |
+| R2-23 Tiny-float de-SPAC: first session after a business combination closes  | J | W | LOTTERY (many 2021-23 deals) | 30-80 |  | no | not explored (data / rarity: see log) |  |
+| R2-24 After an issuer's Dutch tender closes (SC TO-I final amendment): RIDE  | R | D | GAP (after, not at, the announcement) | 20-40 | hold60 n26 +4.5%/-1.8%/+2.4% P0.17 | no | explored-dead |  |
+| R2-25 Buyback authorization >= 15% of market cap, un-gapped (headline $ amou | R | D | GAP (un-gapped only), TEXTBOOK | 30-80 | tp2060 n162 +3.6%/+3.3%/+6.7% P0.00 MEETS | yes (J5, JUMP tp205) | DEAD (x4.8, +0.8%, ex-top3 -0.1%, P 0.23) | not run |
+| R3-1 First revenue ever: XBRL revenue > 0 in an original filing after >= 4  | R | D | TOO WEAK? milestone with a forced buyer (revenue screens) | 30-80 |  | no | not explored (data / rarity: see log) |  |
+| R3-2 Fails-to-deliver spike: SEC FTD quantity >= 0.5% of shares outstanding | J | W | EXIT LIQ (forced buyers, not the crowd) | 100+ | tp2060 n2671 +0.6%/+0.3%/+7.5% P0.13 | no | explored-dead |  |
+| R3-3 FDA advisory committee run-up: Federal Register notice of an adcom nam | R | S | LOTTERY (exit before the binary), GAP (notice weeks ahead) | 20-40 | hold60 n35 +0.6%/-8.5%/+1.1% P0.49 | no | explored-dead |  |
+| R3-4 First patent ever granted to a listed micro-cap assignee (USPTO weekly | R | D | GAP (slow database), EXIT LIQ | 30-80 |  | no | not explored (data / rarity: see log) |  |
+| R3-5 Earnings date moved earlier by >= 7 days vs the same quarter last year | J | D | TEXTBOOK (published, but not on small caps with a daily cale | 100+ | hold5 n2569 +0.0%/-0.1%/-0.4% P0.45 | no | explored-dead |  |
+| R3-6 13F discovery: >= 3 different 13F filers open a new position in the sa | R | D | EXIT LIQ (institutions, not retail); TEXTBOOK (herding paper | 50-150 | trail60 n8451 -1.0%/-1.2%/-1.8% P1.00 | no | explored-dead |  |
+| R3-7 LLM-extracted big contract vs revenue: 8-K Item 1.01 exhibit -> counte | R | D | GAP (slow text), TOO WEAK (big relative size only) | 30-80 | hold1 n7 +12.4%/-0.3%/+3.0% P0.03 | no | explored-dead |  |
+| R3-8 Russell inclusion announced by the company (8-K/PR "set to join the Ru | R | S | REGIME (published effect; small adds only) | 100+ | tp201 n137 -2.7%/-3.1%/-2.2% P1.00 | no | explored-dead |  |
+| R3-9 Short interest collapses >= 50% in one FINRA period with the price fla | R | D | PRICE PROXY (vs itself), EXIT LIQ | 100+ | tp2060 n6595 -0.6%/-0.8%/-0.7% P0.99 | no | explored-dead |  |
+| R3-10 Unsolicited non-binding proposal made public (FTS 8-K/SC 13D "non-bind | R | D | GAP at the announcement (RIDE after it), LOTTERY | 30-80 | tp201 n107 +0.1%/-0.4%/-0.6% P0.38 | no | explored-dead |  |
+| R3-11 Treasury in bitcoin announced by a small cap (headline "adds/purchases | J | W | REGIME (two waves), EXIT LIQ risk named | 20-60 | hold60 n13 -1.6%/-39.2%/-31.5% P0.56 | no | explored-dead |  |
+| R3-12 Special dividend >= 10% of price announced (headline amount vs price), | R | D | GAP (un-gapped), TOO WEAK | 20-50 | too few trades | no | explored-dead |  |
+| R3-13 New CEO buys stock in the first 90 days (8-K Item 5.02 new CEO + their | R | C | TOO WEAK (own money alone earns ~usual) -> only new-CEO buys | 30-80 | hold60 n881 +1.9%/+1.2%/-0.8% P0.04 | no | explored-dead |  |
+| R3-14 Price target raised >= 50% in one note on a small cap ("Raises PT from | R | H/D | TEXTBOOK (revisions) -> only huge revisions on small caps | 100+ | hold60 n16 +26.7%/-9.2%/-10.9% P0.15 | no | explored-dead |  |
+| R3-15 Initiation with >= 100% upside to the target on a micro cap | R | H | EXIT LIQ (institutional), TEXTBOOK | 100+ | hold60 n140 +6.1%/+2.7%/+1.0% P0.05 MEETS | yes (J8, RIDE hold60) | DEAD (0 trades) | not run |
+| R3-16 Fails-to-deliver collapse after a spike (FTD back under 0.05% of share | R | W | PRICE PROXY | 50+ | hold60 n1241 +1.6%/-0.1%/-3.0% P0.15 | no | explored-dead |  |
+| R3-17 Two-year high in Wikipedia views AND an insider buy within 30 days | R | C | EXIT LIQ (only with own money) | 10-30 | hold60 n90 +6.5%/+2.3%/+3.4% P0.02 MEETS | no | MEETS; failed the same-day control |  |
+| R3-18 First 10-K risk factor naming a hot theme by a micro cap (FTS 10-K, no | R | D | TWO-WAY (D4 died) -> quieter venue | 50-150 | hold1 n684 -0.9%/-1.1%/-1.0% P1.00 | no | explored-dead |  |
+| R3-19 LLM-extracted "first commercial sale / first order" in a 10-Q MD&A of  | R | D | GAP, EXIT LIQ | 30-80 |  | no | not explored (data / rarity: see log) |  |
+| R3-20 Analyst coverage dropped by the last broker (headline "Discontinues/Su | R | C | EXIT LIQ, TOO WEAK | 10-30 |  | no | not explored (data / rarity: see log) |  |
+| R4-1 Change-in-control severance plan adopted (8-K Item 5.02 "change in con | J | D | GAP (a quiet 5.02 filing), TWO-WAY (sale = up only) | 50-150 | trail60 n190 +0.3%/-1.3%/-6.0% P0.46 | no | explored-dead |  |
+| R4-2 Retention bonus / retention plan adopted (8-K "retention bonus" OR "re | J | D | as R4-1 | 30-100 | tp2020 n335 -0.6%/-1.0%/-0.5% P0.80 | no | explored-dead |  |
+| R4-3 Poison pill adopted (8-K Item 3.03 "rights agreement" + "adopted"), sm | J | D | GAP (the pill is not a bid), LOTTERY (many) | 30-80 | trail60 n365 +1.2%/-0.5%/-6.8% P0.25 | no | explored-dead |  |
+| R4-4 Special committee of independent directors formed to evaluate a propos | J | D | GAP (the proposal may already be public: test) | 20-60 | trail60 n97 +2.5%/+0.1%/-0.5% P0.12 | no | explored-dead |  |
+| R4-5 Financial advisor engaged to evaluate "strategic alternatives" in an 8 | J | D | GAP (8-K vs headline) | 50-150 | trail60 n155 +7.4%/+4.1%/-2.2% P0.00 MEETS | yes (J3, RIDE hold20) | DEAD (-1.7%, P 0.71) | not run |
+| R4-6 Confidentiality / standstill agreements signed ("entered into confiden | J | D | GAP | 10-40 | hold20 n24 +6.0%/+1.7%/+3.5% P0.04 MEETS | yes (J4, JUMP hold20) | DEAD (7 trades) | not run |
+| R4-7 Bylaw amendment: exclusive forum / advance notice right after a 13D (a | J | C | EXIT LIQ | 20-60 | trail60 n10 +16.0%/-4.2%/+0.9% P0.09 | no | explored-dead |  |
+| R4-8 Large holder files 13D after holding a 13G (13G -> 13D switch: passive | J | D | GAP of fresh 13Ds (A1 died): this is a known holder switchin | 50-150 | hold60 n1446 +0.6%/+0.0%/-1.6% P0.25 | no | explored-dead |  |
+| R4-9 Corporate (non-fund) filer takes a 5%+ stake (13D/13G filer is an oper | J | D | GAP | 20-60 |  | no | not explored (data / rarity: see log) |  |
+| R4-10 Insider sells nothing for 12 months, then 3+ insiders buy in one windo | J | C | TOO WEAK alone (EV), combined | 10-30 | tp2060 n16 +6.3%/+2.6%/+15.7% P0.06 | no | explored-dead |  |
+| R4-11 Debt covenant waiver / forbearance ends with a refinancing (8-K "forbe | R | D | EXIT LIQ | 20-60 | tp2020 n258 +0.4%/-0.2%/-0.8% P0.35 | no | explored-dead |  |
+| R4-12 Auditor change to a Big-4 firm from a small auditor (8-K Item 4.01, ne | R | D | TOO WEAK? informed party | 30-80 | hold60 n54 +2.9%/-1.2%/-0.6% P0.20 | no | explored-dead |  |
+| R4-13 CFO hired from a big company (8-K 5.02 text "previously served as ...  | R | D | TOO WEAK | 30-80 | hold20 n225 +2.2%/-2.1%/-1.9% P0.34 | no | explored-dead |  |
+| R4-14 Nasdaq/NYSE transfer of listing from NYSE American / Nasdaq CM to Nasd | R | D | EXIT LIQ | 20-60 | trail60 n5 +7.3%/-7.4%/+9.8% P0.13 | no | explored-dead |  |
+| R4-15 S-3 shelf WITHDRAWN (form RW on an S-3) by a small cap | R | D | TOO WEAK | 30-80 | tp2020 n64 -0.4%/-1.4%/+0.3% P0.58 | no | explored-dead |  |
+| R4-16 Going-private proposal by management / controller made public (SC 13D/ | J | D | GAP at the proposal, then bumps | 10-30 | hold1 n18 -1.0%/-2.5%/-1.2% P0.85 | no | explored-dead |  |
+| R4-17 Tender offer by a non-controlling holder for >= 10% at a premium (SC T | J | D | GAP | 10-30 | too few trades | no | explored-dead |  |
+| R4-18 Merger agreement amendment raising the price (8-K "amendment to the ag | J | W | GAP | 10-30 | hold20 n16 +3.2%/-1.3%/+3.1% P0.16 | no | explored-dead |  |
+| R4-19 Company buys back a block from a departing big holder (8-K "repurchase | R | D | TOO WEAK | 10-30 | trail20 n216 +0.1%/-1.1%/-1.8% P0.48 | no | explored-dead |  |
+| R4-20 Merger-of-equals target in a sector consolidating (two sale announceme | J | V | GAP (peers, not targets), TOO RARE | 20-60 |  | no | not explored (data / rarity: see log) |  |
+
+### Near misses
+- **J5 big buybacks, un-gapped** (closest): both halves positive in mean and median, jump rate 2.6x then 4.8x the stock's normal; died on ex-top3 (-0.1%) and P 0.23 with 68 trades.
+- **J1 first profitable quarter**: judge +5.5%/trade, median +3.3%, but ex-top3 -1.8%, P 0.21 (48 trades).
+- **J6 forward splits / J7 upgrade clusters**: jump rates held (x1.8 / x2.4), means +2.6% / +1.0%, carried by 3 trades.
+- **Explore-only, failed the same-day control**: H16, R3-17, H9, V2, C2 (60-day rides that were market timing).
