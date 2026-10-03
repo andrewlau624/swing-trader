@@ -1,7 +1,7 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 2 · ideas written 20 (G1-G20) · k (judged) 15 · program N 775 (G12 took 775; next free 776)
+- round 2 · ideas written 20 (G1-G20) · k (judged) 17 · program N 775 (G12 took 775; next free 776)
 - NEAR: G2 (forward G2-F = ev2_big gate); G1 bound NEAR at $10k / FOUND-level at $2.3k if Schwab rounds B1 (VIVK ~10-07;
   check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = `id3_big` gate.
 - BLOCKED: G11 / G20 (2006-15 insider window) need pre-2016 daily bars incl. delisted names. Stooq is behind a JS bot
@@ -9,7 +9,8 @@
   User item: a Tiingo (paid tier) / Norgate / CRSP source would unlock the cleanest test this hunt has.
 - running: nothing
 - round-2 quota: G21-G30 need T1 3, T2 3, T3 2, T4 5, T5 3
-- NEXT: G13 data check,
+- NEXT: write G21-G30 (quota: T1 3, T2 3, T3 2, T4 5, T5 3 short of 40), then G13 data check.
+  Old next list:
   G18/G19 warrant counts, then write G21-G30.
 
 ## Notes carried in from other hunts (read 2026-10-02)
@@ -124,3 +125,13 @@ second-tier indexes where flow/ADV is large).
   ADV >= $20M. Select 2021-23: n 128, mean **+32.6bp** net (tier_hi + 5bp entry), median −5.3bp, hit 48%, t **+1.75**
   (2021 +24 / 2022 +91 / 2023 −5). The gate needs t >= 2: FAIL. The mean is carried by 2022 and a right tail; the typical
   trade loses. Judge / holdout not run. The insider edge looks like a next-day attention effect, not an intraday one.
+- 2026-10-02 19:55 **G18 pre-deal SPAC warrant basket: KILLED (bound: REGIME + LOTTERY).** The only era with enough
+  SPACs is 2020-23: ~600 IPOs in 2021, most liquidated in 2022-23 (their warrants went to 0), and after 2021 deal
+  announcements stopped lifting warrants. Any 2021-23 select half is dominated by liquidations; a 2024-26 judge half has
+  few new SPACs. A strategy whose sign depends on whether SPACs are in fashion fails "why would this work in 2017 AND
+  2025?". Not run.
+- **G19 warrants distributed to holders: KILLED (count).** FTS 8-K "warrants will be distributed" / "distribution of
+  warrants" + record date, 2016-26: genuine warrant dividends to common holders ~3-6 a year (OXY 2020, CHK 2021, TGI 2022,
+  SAVA 2023, GME / OPEN / ENVX / BBBY 2025, XRX / PSKY 2026), the rest SPAC / REIT boilerplate. TOO RARE for a book. Each
+  outcome is option-like (OXY warrants went ~10x, others to 0): LOTTERY by construction. The 2025-26 uptick (meme-stock
+  warrant dividends) is noted, not acted on.
