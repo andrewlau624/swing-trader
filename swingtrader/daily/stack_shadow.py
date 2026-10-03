@@ -6,7 +6,8 @@ logs, each weekday, what those two accounts would have earned next to what the l
   stacked taxable = r_taxable + r_SPY - DEBIT x MARGIN / 252     (r_taxable: the live account's day, SPY: close -> close)
   stacked Roth    = 2/3 r_roth + 1/3 r_UPRO
 Account days come from state/book-daily-{live,roth}.json `equity_log`; a day whose move is > MAX_DAY (a deposit or a
-transfer) is logged but left out of the sums. SPY/UPRO from regular-session daily bars (`marketdata.sip_daily`, labelled by
+transfer), or whose equity on either side is an exact $100 multiple (the book's capital-cap placeholder, e.g. an unfunded
+Roth at 1000.00), is logged but left out of the sums. SPY/UPRO from regular-session daily bars (`marketdata.sip_daily`, labelled by
 trade date). Read at NEED sessions: does stacked beat both the live account and SPY, net of the modelled interest?
 """
 from __future__ import annotations
@@ -39,7 +40,8 @@ def day_returns(equity_log: list[dict]) -> dict[str, float | None]:
         e = float(row.get("equity") or 0.0)
         if prev and prev > 0 and e > 0:
             r = e / prev - 1
-            out[row["date"]] = r if abs(r) <= MAX_DAY else None
+            placeholder = any(abs(x / 100 - round(x / 100)) < 1e-9 for x in (e, prev))
+            out[row["date"]] = r if abs(r) <= MAX_DAY and not placeholder else None
         prev = e
     return out
 
