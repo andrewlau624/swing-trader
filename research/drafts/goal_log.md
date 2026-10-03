@@ -6,7 +6,7 @@
   log-only watcher, to build next). Open: G2 (NEAR; forward G2-F = `ev2_big` gate), G3 (forward `id3_big` gate), G21 (combined ~+21pp at today's balances;
   waits on Schwab rounding B1: VIVK ~10-07, check llm-trader state/roundup-orders.json after 10-07), G23 / G26 (wait on
   the forward gates). BLOCKED: G11 / G20 (pre-2016 bars). Everything else dead (see Log + NEXT.md dead rows).
-- NEXT: write round 4 (the CEF-activist family is now mapped: first 13D works, 15% crossings look strong but rare, proxy
+- NEXT (round 4 cont.): write more round-4 ideas; the CEF-activist family is now mapped ( first 13D works, 15% crossings look strong but rare, proxy
   filings don't). Ideas for round 4: other NAV-exit vehicles (BDCs below NAV with activists, SPAC-like trusts, royalty trusts,
   holding-company discounts with an activist). VIVK check after 10-07. VIVK settles ~10-07: check llm-trader state/roundup-orders.json (G21's open fact). G45-F watcher LIVE in code (server needs a pull + `make persist`). Check VIVK as soon as it settles (~10-07).
 
@@ -249,3 +249,8 @@ absorbed.
   "Capital / Global / Trust / Income", so this is not a clean "non-activist on CEFs" test. It does show the G45 effect is
   not a generic 13D effect: it belongs to activists who can force a NAV exit (the mechanism claim holds). First build crashed
   (index entries for subject and filer have different paths; grouped by accession instead), fixed before any outcome.
+- 2026-10-03 00:25 G59 idea (CEF distribution cuts -> yield-seller overreaction) PARKED before registration: no clean CEF
+  universe (SEC series/class data lists open-end funds; CEFs have no series), and Alpaca has no fund-type flag. **G45-F
+  watcher extended (forward-only, no verdict):** it now also logs 13D/As where one of the six activists first reports >= 15%
+  of a fund (`kind: cross15`, cover-page regex on the filing, 20k chars), so G50's rare-but-strong signal (n 12, +3.5%, t 3.7
+  on select) collects clean forward data for a later, separately registered test. The G45-F gate counts first-13D rows only.

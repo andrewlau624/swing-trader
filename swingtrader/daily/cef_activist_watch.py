@@ -23,6 +23,8 @@ ACTIVISTS = ("Saba Capital", "Karpus", "Bulldog Investors", "City of London Inve
 ACT_RE = re.compile(r"saba|karpus|bulldog|city of london|1607|almitas", re.I)
 FUND_RE = re.compile(r"fund|trust|income|municipal|opportunit|strategic|dividend|global|capital", re.I)
 HOLD, GATE_N = 60, 30
+PCT = re.compile(r"percent\s+of\s+class\s+represented\s+by\s+amount\s+in\s+row\s*\(?\s*(?:11|13)\s*\)?[^0-9]{0,80}(\d{1,2}(?:\.\d+)?)\s*%",
+                 re.I)
 
 
 def ticker_of(name: str) -> str | None:
@@ -30,19 +32,41 @@ def ticker_of(name: str) -> str | None:
     return m.group(1).split(",")[0].strip().replace("-", ".") if m else None
 
 
-def events_from_hits(hits: list[dict]) -> list[dict]:
-    """(fund ticker, activist, filing date) for original 13Ds whose subject looks like a listed fund."""
+def events_from_hits(hits: list[dict], forms=("SC 13D", "SCHEDULE 13D")) -> list[dict]:
+    """(fund ticker, activist, filing date) for 13Ds (of `forms`) whose subject looks like a listed fund."""
     out = []
     for x in hits:
         s = x.get("_source", {})
-        if s.get("form") not in ("SC 13D", "SCHEDULE 13D"):
+        if s.get("form") not in forms:
             continue
         names = s.get("display_names", [])
         act = next((m.group(0).lower() for n in names for m in [ACT_RE.search(n)] if m), None)
         subj = [n for n in names if not ACT_RE.search(n) and ticker_of(n) and FUND_RE.search(n)]
         if act and subj:
             out.append(dict(sym=ticker_of(subj[0]), name=subj[0][:60], act=act, date=s.get("file_date"),
-                            adsh=s.get("adsh")))
+                            adsh=s.get("adsh"), doc=x.get("_id", ":").split(":", 1)[1], cik=(s.get("ciks") or [""])[0]))
+    return out
+
+
+def crossings(start: dt.date, end: dt.date, known: set) -> list[dict]:
+    """Forward-only log of G50 events (no verdict from history): a 13D/A whose cover page states >= 15% of the class
+    for a (fund, activist) pair not yet logged as crossed."""
+    out = []
+    for a in ACTIVISTS:
+        u = (f"https://efts.sec.gov/LATEST/search-index?q=%22{a.replace(' ', '%20')}%22&forms=SC%2013D/A,SCHEDULE%2013D/A"
+             f"&dateRange=custom&startdt={start}&enddt={end}")
+        t = _sec_get(u)
+        if not t:
+            continue
+        for e in events_from_hits(json.loads(t).get("hits", {}).get("hits", []), forms=("SC 13D/A", "SCHEDULE 13D/A")):
+            if (e["sym"], e["act"]) in known or not e.get("cik"):
+                continue
+            doc = _sec_get(f"https://www.sec.gov/Archives/edgar/data/{int(e['cik'])}/{e['adsh'].replace('-', '')}/{e['doc']}") or ""
+            m = PCT.search(re.sub(r"<[^>]+>", " ", doc)[:20000])
+            if m and float(m.group(1)) >= 15.0:
+                e.update(pct=float(m.group(1)))
+                out.append(e)
+                known.add((e["sym"], e["act"]))
     return out
 
 
@@ -84,7 +108,8 @@ def score(r: dict) -> dict | None:
 
 
 def gate(rows: list[dict]) -> dict:
-    sc = [r for r in rows if r.get("status") == "scored"]
+    """G45-F gate: first-13D rows only (the 15%-crossing rows are logged for a later, separately registered test)."""
+    sc = [r for r in rows if r.get("status") == "scored" and r.get("kind", "first13d") == "first13d"]
     n = len(sc)
     if not n:
         return dict(n=0, verdict=f"shadowing (0/{GATE_N})")
@@ -104,6 +129,10 @@ def run(state_dir: Path, today: dt.date | None = None, log=print) -> dict:
             continue
         e.update(status="open", seen=str(today), alert=True)
         seen.add((e["sym"], e["act"]))
+        new.append(e)
+    crossed = {(r["sym"], r["act"]) for r in rows if r.get("kind") == "cross15"}
+    for e in crossings(today - dt.timedelta(days=10), today, crossed):
+        e.update(kind="cross15", status="open", seen=str(today))
         new.append(e)
     rows += new
     for r in rows:
