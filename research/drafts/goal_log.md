@@ -1,7 +1,7 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 2 · ideas written 30 (G1-G30) · k (judged) 22 · program N 775 (G12 took 775; next free 776)
+- round 2 · ideas written 30 (G1-G30) · k (judged) 24 · program N 775 (G12 took 775; next free 776)
 - NEAR: G2 (forward G2-F = ev2_big gate); G1 bound NEAR at $10k / FOUND-level at $2.3k if Schwab rounds B1 (VIVK ~10-07;
   check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = `id3_big` gate.
 - BLOCKED: G11 / G20 (2006-15 insider window) need pre-2016 daily bars incl. delisted names. Stooq is behind a JS bot
@@ -9,8 +9,9 @@
   User item: a Tiingo (paid tier) / Norgate / CRSP source would unlock the cleanest test this hunt has.
 - running: nothing
 - round-2 quota after G30: T1 7/8 (+G28), T2 6/8 (+G27, G25 half), T3 7/8 (+G30), T4 7/8 (+G24-G26, G29), T5 4/4 (+G21-G23) -> G31-G40: T1 1, T2 2, T3 1, T4 1 + free
-- NEXT: G25 count (listed CVRs), G24 bound (LEAP vs UPRO cost), G13 data check; G23/G26 wait on forward gates.
-  Then write G31-G40 and the 20-judged paragraph.
+- NEXT: G13 via SEC XBRL frames (us-gaap StockRepurchasedDuringPeriodShares / TreasuryStockSharesAcquired per quarter,
+  all filers, free): count coverage 2014-26, then pre-register (top decile repurchase intensity, entry at quarter end +
+  46/91 days, hold 1 quarter, vs SPY). G23/G26 wait on forward gates. Then G31-G40.
   Old next list:
   G18/G19 warrant counts, then write G21-G30.
 
@@ -151,3 +152,19 @@ second-tier indexes where flow/ADV is large).
   >= 5/yr on the deals with data (~2.6/yr; ~7-12/yr exist), and eligibility needs a deposit account 1-2 years ahead at each
   mutual (residency limits, proration). A human project for the user, not a FOUND. First run had a bug (second steps'
   old minority shares counted as the IPO); fixed before the write-up.
+- 2026-10-02 20:50 **G25 listed CVRs: KILLED (count).** FTS "contingent value rights" + "listed" + "Nasdaq" (8-K/S-4/425)
+  2016-26: most hits are biotech reverse-merger CVRs that are NON-transferable ("will not be listed"); tradable listed CVRs
+  ~1/yr (BMY-RT 2019, a few others). TOO RARE.
+- **G24 deep-ITM SPY LEAPs vs UPRO for the Roth's beta: KILLED (bound).** UPRO: ~0.9% expense + swap financing + daily-reset
+  drag. A 0.8-delta LEAP: financing at the implied rate + an IV-over-RV premium (~1-2%/yr of notional at 3x) + roll spreads.
+  Under fair pricing the convexity the call buys roughly offsets the reset drag it avoids; the net is within ~1%/yr either
+  way, sign unclear, and it can't be tested without SPY option history before 2024 (not free). Not an edge; a wrapper choice.
+
+### After 20 judged: what came closest and why it failed
+Closest: **G21/G1** (the shipped contract stack in the Roth + index-beat's stack): ~+21pp at today's balances, waiting on one
+live fact (Schwab rounding B1). Then **G2** (EV2-big overlay, holdout pass, no clean judge) and **DL-G27** (thrift
+conversions: +21% median per deal, but needs depositor eligibility years ahead). Since round 1 the failures were: TOO RARE
+(G15, G19, G25), book-level too small (G16, G17), no data / arbitraged (G14, G24), weak t (G12: right mean, wrong median),
+REGIME (G18), BLOCKED (G11/G20, pre-2016 bars). **Gap for G31-G40:** (1) breadth: mechanisms that fire >= 50 times a
+year (only the insider family does so far), from broad free data (SEC XBRL frames, Form 345, FTS); (2) payoffs that scale
+with capital, since every contract payoff caps per holder; (3) no more one-event-a-year index ideas.
