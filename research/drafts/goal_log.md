@@ -1,7 +1,7 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 2 · ideas written 36 (G1-G36; round 2 closed short of 40 on purpose) · k (judged) 28 · program N 779 (G13 = 776; ee PQ1 = 777-778; next free 779)
+- round 2 · ideas written 36 (G1-G36; round 2 closed short of 40 on purpose) · k (judged) 30 · program N 779 (G13 = 776; ee PQ1 = 777-778; next free 779)
 - NEAR: G2 (forward G2-F = ev2_big gate); G1 bound NEAR at $10k / FOUND-level at $2.3k if Schwab rounds B1 (VIVK ~10-07;
   check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = `id3_big` gate.
 - BLOCKED: G11 / G20 (2006-15 insider window) need pre-2016 daily bars incl. delisted names. Stooq is behind a JS bot
@@ -186,3 +186,12 @@ with capital, since every contract payoff caps per holder; (3) no more one-event
   Select 2021-23: conditional n 34, mean −1.22%, median −1.76%, hit 44%, t −1.51 (fails n >= 40 and the mean). All events
   bought at the open (report): n 281, +0.37%, median −0.42%, t 0.73. Stocks that open AT the offer price are the weak deals
   (stabilization fails); the floor isn't a floor.
+- 2026-10-02 21:55 **G33 tax-loss harvesting the taxable SPY core: KILLED as a strategy (bound; a free habit, user's call).**
+  Harvesting a loss L saves 35% x L now against the legs' ST gains but lowers the basis, so ~20% x L comes back as LT tax
+  later: net ~15% x L plus deferral. SPY >= 5% below a rising (deposit-fed) basis happens ~once a year with L ~5-10% of the core
+  -> ~+0.5-1.5pp/yr of the core. Real but small, and the SPY->IVV/VOO "substantially identical" question is the user's
+  (or a tax adviser's), not research. Not pursued.
+- **G32 ATM program exhaustion: KILLED (count).** FTS 10-Q "at-the-market" + "sales agreement" + "remaining available":
+  34 (2018) .. ~125 (2022, 2025) filings a year, and the explicit exhaustion phrase ("no shares remain") only ~218 filings in
+  10 years, repeated quarter to quarter: ~10 unique exhaustions a year, most followed by a new ATM. TOO RARE as an event,
+  and too noisy to parse "% sold" reliably from free text.
