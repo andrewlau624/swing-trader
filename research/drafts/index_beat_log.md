@@ -140,3 +140,38 @@
   -6.64 / +0.79pp (2021-23 / 2024-26, tier), -6.50 / +0.80 (tier_hi) -> DEAD (HALF-FLIP, as the dead row). R6-5 checked: it
   holds SPY 1.0x every day, so it has no pick-conditional exposure and no such lookahead (its margin interest uses same-day
   usage, a cost only).
+- R8-2 Roth "stack without margin" (spec before run): Roth = 1/3 UPRO (3x daily S&P, ~1.0x beta, decay + 0.9% ER inside its
+  price) + 2/3 the Roth book (EH), mixed daily (rebalance cost 1bp on the drift); vs the Roth book (EH) and all-SPY. Bar: +2pp
+  Roth IRR vs the Roth book in both halves, tier and tier_hi; report max DD (3x ETF in a crash is the death: Lab-CA, DS6).
+
+## FOUND (2026-10-02): the book stacked on index beta in both accounts (track C, structure) — study_ib_found_stack.md
+Taxable SPY 1.0x + legs on margin, Roth 1/3 UPRO + 2/3 book: combined vs P +3.50/+11.09pp ($1k/mo tier), +4.03/+11.44 ($2k),
+tier_hi +3.88/+11.59, +4.29/+11.78; vs SPY in both +5.3/+6.6pp; break-even ~25% of the edge; k = 10 structure looks, 0 book
+ideas judged; N unchanged (774 at the time, none registered by this hunt). Shadow: stack_shadow.py (no orders).
+
+| idea | track | method | death dodged | events/yr | select / result | judged? | verdict | holdout | after-tax $ at $2.3k/$10k |
+|---|---|---|---|---|---|---|---|---|---|
+| C1 bot only in Roth, taxable SPY | C | sim | TAX | n/a | -0.1/+3.6..4.3pp | no (report) | not found (one half) | n/a | ~0 / ~0 |
+| C2 taxable SPY + noise leg | C | sim | HAIRCUT | n/a | +1.2/+2.0pp at $1k | report | not found | n/a | — |
+| C3 Jan Roth lump | C | sim | TAX | 1 | +-$300/yr | report | dead (flip) | n/a | — |
+| C4 475(f) + G0 | C | sim | TAX/wash | n/a | -0.7/+2.4pp | report | dead (flip) | n/a | — |
+| C5 tax-rate grid | C | sim | TAX | n/a | EH loses to SPY at 0% | report | report | n/a | — |
+| A1/DL-IB1 round-up in more accounts | A DP | deal rule | LOTTERY | ~90 | $371/yr/acct | history | PAYS conditional (VIVK) | n/a | +$371 per extra Roth acct |
+| B3 intraday-margin close selling | B | data | REGIME | — | t 0.3 | no | dead | — | — |
+| A9 CEF IBS | A | explore | TEXTBOOK/COST | 173 | net -15.8bp | no | dead | — | — |
+| A18 whole-share leftovers | A | bound | WHOLE SHARES | — | < 0.5pp | no | dead | — | — |
+| A20 pre-market exit | A | explore | GAP | 250 | +5.6bp t 1.8 / lottery | no | dead | — | — |
+| A2 spin-off round-ups | A DP | EDGAR | RARE | 0 | none exist | no | dead | — | — |
+| R2-7 spin-offs held 1y | A | explore | TAX | 8 | ex-top3 -14.6% | no | dead (lottery) | — | — |
+| R3-1 noise overnight hold | A | explore | HALF-FLIP | 80 | t -0.01 | no | dead | — | — |
+| R3-2 special dividends Roth | A | explore | TAX | 231 | median -35bp | no | dead | — | — |
+| R3-3 Roth SPY + noise | C | sim | HAIRCUT | n/a | -0.1/-3.4pp | report | dead | — | — |
+| DL-IB2 round-lot top-up | A DP | deal rule | RARE | ~1 | AREB only | history | does not pay | — | — |
+| R4-2 stock-dividend round-ups | A DP | EDGAR | RARE | <1 | FCUV only | no | dead | — | — |
+| R5-2 IBS close exit | B | explore | — | 160 | -8.7bp t -2.2 | no | dead | — | — |
+| R6-5 stacked taxable | C | sim | HAIRCUT | n/a | +1.5/+4.7pp at $1k | report | near miss -> part of FOUND | COVID ok | see study |
+| R7-1/R7-2 alert coverage | A DP | EDGAR | RARE | 2.5 / 0 | +$10/yr / none | no | dead | — | — |
+| R8-1 Roth idle cash in SPY | C | sim | HALF-FLIP | n/a | -6.6/+0.8pp (lookahead fixed) | report | dead | — | — |
+| R8-2 Roth 1/3 UPRO + 2/3 book | C | sim | HAIRCUT | n/a | +1.7/+6.5pp at $1k | report | near miss -> part of FOUND | COVID UPRO -76% | see study |
+| **R6-5 + R8-2 stacked in both** | C | sim | HAIRCUT | n/a | **+3.5/+11.1pp** | report (bar 3) | **FOUND** | COVID -37.5% | ~+$160 / ~+$700 taxable + Roth |
+Near misses: R6-5 alone, R8-2 alone, C2. Best track C report: FOUND row above.

@@ -107,8 +107,17 @@ def _log_tag(tag: str):
     return read
 
 
+def _stack(state: Path, logs: Path) -> dict:
+    from . import stack_shadow as s
+    rows = s._read(state / s.LOG_NAME)
+    wk = sum(1 for r in rows if r["date"] >= _week_ago())
+    return dict(n=len(rows), week=wk, line=s.line(rows) if rows else "no sessions logged yet (make stack-shadow)")
+
+
 # ---------------------------------------------------------------- the list
 REGISTRY: list[Test] = [
+    Test("Book stacked on index beta (index-beat FOUND)", "taxable = SPY 1.0x + live legs on margin; Roth = 1/3 UPRO + 2/3 book: does it beat both the live accounts and SPY?",
+         "2026-10-02", 250, "sessions", _stack, "make stack-shadow; study_ib_found_stack.md", ["stack_shadow"]),
     Test("Insider-day (ID3)", "buy the open / sell the close the session after an officer/director buy",
          "2026-10-02", 300, "scored trades", _insider(None), "make forward-status", ["insider_shadow", "insider_day"]),
     Test("EV2: first insider buy in 2+ years", "is ID3 ~2x stronger when nobody bought in the open market for 2 years?",

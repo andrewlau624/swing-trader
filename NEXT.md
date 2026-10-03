@@ -49,6 +49,18 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
   Explored-dead: H17 trade-count spike (two-way), D4 theme 8-K (two-way), D5 hot-word renames (rare), D9 first
   Phase 3 (lottery).
 
+## Index-beat hunt (2026-10-02, session llm-trader-ee): FOUND (structure, track C) — stack the book on index beta; SHADOW
+- **Taxable = SPY 1.0x + the live legs on margin; Roth = 1/3 UPRO + 2/3 the Roth book (Roth IBS skips QQQ/SMH).** After tax,
+  edge-halves, combined plan vs today's plan: **+3.5 / +11.1pp (2021-23 / 2024-26) at $1k/mo**, +4.0 / +11.4 at $2k/mo, tier_hi
+  +3.9..+11.8. Vs SPY in both accounts: +5.3 / +6.6pp. Break-even: the bot keeps ~25% of its backtested edge. Risk ~ the
+  index's: stacked taxable max DD −27.8% (SPY −24.5%), COVID −37.5% (SPY −33.8%); 5y P(DD>50%) 0.1-0.3%.
+- Caveats: beta + the bot, not a new edge; post-hoc combination of two structure looks (k = 10 structure looks, 0 book
+  ideas judged); margin house requirements on night names; UPRO decay. Not switched on: a user decision (live code changes).
+- Shadow LIVE in research only: `make stack-shadow` (state/stack-shadow.jsonl, testing.py REGISTRY, gate 250 sessions).
+- Also from this hunt: DL-IB1 round-up in extra accounts PAYS on history ($371/yr per account), conditional on VIVK rounding
+  (~10-07); the HAIRCUT finding (at edge-halves the bot ~= SPY in both accounts); ~30 explored ideas dead
+  (`index_beat_log.md`). Write-up: `research/drafts/study_ib_found_stack.md`.
+
 ## Discovery loop (2026-10-02, session llm-trader-mid-01): no new edge; N stays 760
 - 40 ideas written before any outcome (`discovery_ideas.md`), 8 killed; a 168-form-type enrichment census of 162,848
   big 5-day moves (`discovery_enrich.py`, K=168); verdicts: **I26 insider exercise-and-hold (Form 4 M, no same-day S)

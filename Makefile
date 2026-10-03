@@ -385,6 +385,9 @@ qi-eval:      ## forward test of the 15:40 quote-imbalance tilt (Round 24 BB; ve
 insider-shadow: ## Round 31 ID3: score + plan the insider-purchase session shadow (weekdays before 09:00 ET; no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.insider_shadow $(DATE)
 
+stack-shadow: ## Index-beat FOUND: log the book stacked on index beta (taxable SPY core + legs; Roth 1/3 UPRO) vs live and SPY (no orders)
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.stack_shadow $(DATE)
+
 tender-watch: ## Round 31: new SC TO-I filings -> odd-lot tender alerts (email; manual tender at Schwab): make tender-watch [DATE=YYYY-MM-DD]
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.tender_watch $(DATE)
 
