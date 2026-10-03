@@ -1,18 +1,11 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 2 · ideas written 36 (G1-G36; round 2 closed short of 40 on purpose) · k (judged) 30 · program N 779 (G13 = 776; ee PQ1 = 777-778; next free 779)
-- NEAR: G2 (forward G2-F = ev2_big gate); G1 bound NEAR at $10k / FOUND-level at $2.3k if Schwab rounds B1 (VIVK ~10-07;
-  check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = `id3_big` gate.
-- BLOCKED: G11 / G20 (2006-15 insider window) need pre-2016 daily bars incl. delisted names. Stooq is behind a JS bot
-  wall; Alpaca SIP starts 2016; the live Schwab token shouldn't be used for bulk research and has no delisted names.
-  User item: a Tiingo (paid tier) / Norgate / CRSP source would unlock the cleanest test this hunt has.
-- running: nothing
-- round-2 quota after G30: T1 7/8 (+G28), T2 6/8 (+G27, G25 half), T3 7/8 (+G30), T4 7/8 (+G24-G26, G29), T5 4/4 (+G21-G23) -> G31-G40: T1 1, T2 2, T3 1, T4 1 + free
-- NEXT: G32 count; G33 bound; G36 via Form 345 code F. G23/G26 wait on forward gates.
-  Jump caches available: data/research/jump/ (FTD, 13F, Form 345 2014-26, XBRL shares history).
-  Old next list:
-  G18/G19 warrant counts, then write G21-G30.
+- round 2 closed · ideas written 36 (G1-G36) · k (judged) 31 · program N 780 (next free 781)
+- Open: G2 (NEAR; forward G2-F = `ev2_big` gate), G3 (forward `id3_big` gate), G21 (combined ~+21pp at today's balances;
+  waits on Schwab rounding B1: VIVK ~10-07, check llm-trader state/roundup-orders.json after 10-07), G23 / G26 (wait on
+  the forward gates). BLOCKED: G11 / G20 (pre-2016 bars). Everything else dead (see Log + NEXT.md dead rows).
+- NEXT: round 3 ideas (G41-G50), aimed at the after-30 paragraph below; first check VIVK as soon as it settles.
 
 ## Notes carried in from other hunts (read 2026-10-02)
 - Index-beat (llm-trader-ee): HAIRCUT: at edge-halves the live bot ~= SPY in both accounts; the only thing that beat the
@@ -195,3 +188,17 @@ with capital, since every contract payoff caps per holder; (3) no more one-event
   34 (2018) .. ~125 (2022, 2025) filings a year, and the explicit exhaustion phrase ("no shares remain") only ~218 filings in
   10 years, repeated quarter to quarter: ~10 unique exhaustions a year, most followed by a new ATM. TOO RARE as an event,
   and too noisy to parse "% sold" reliably from free text.
+- 2026-10-02 22:10 **G36 RSU vest selling (code-F clusters): DEAD on select** (registered 06716e0, N 780). 449,379 code-F
+  filings -> 28,093 clusters (>= 5 owners in 2 days) -> 9,743 events at ADV >= $50M (2016-26). Select 2021-23: n 2,979 on
+  617 dates, mean +0.03% vs SPY, median −0.12%, date-level −0.16%, t −1.00. Large caps absorb the vest-day selling.
+
+### After 30 judged (round 2 closed): what came closest and why it failed
+Nothing new came close in round 2. The best remain the **combinations of what already works** (G21 ~+21pp, conditional on
+one live Schwab fact) and the **insider size effect** (G2 holdout pass, G3 breadth; both forward-only now). Every new
+mechanism with breadth died on select with ~0 means (G8, G12, G13, G31, G36: forced or scheduled flows in liquid names are
+absorbed), and every contract payoff was too rare (G4-G6, G15, G19, G25, G34, G35). The one positive new payoff, DL-G27
+(thrift conversions), needs a human setup years ahead. **Gap for round 3:** (1) the only family with both breadth and
+an effect is own-money insider buying. Find independent own-money signals with long free history (13F new positions by
+small concentrated funds; issuer self-tenders; director buys in other documents) or a clean test window for the insider
+size effect (pre-2016 data; a paid source). (2) Small names where flow / ADV is large: every liquid-name flow idea was
+absorbed.
