@@ -1009,6 +1009,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | idea | verdict | why |
 |---|---|---|
+| Follow-on offerings bought at the open when within 1% of the offer price, stop −3%, exit day 3 (Goal G31, N 779) | **dead (select)** | 2021-23 n 34, −1.22%/trade, t −1.5; at-the-offer opens are the weak deals |
 | Issuers that repurchased >= 2% of shares in a quarter (XBRL), bought after the filing, held 63 sessions vs SPY (Goal G13, N 776) | **dead (select)** | 2021-23 +0.20%/month excess, NW t 0.34, median trade −1.4% |
 | Insider buys >= $500k filed 09:30-15:20, bought 5 min after acceptance, sold at the close (Goal G12, N 775) | **dead (select)** | 2021-23 n 128, +32.6bp mean but median −5bp, t 1.75 |
 | S&P 400/600 replacement prediction, RSP / SCHD rebalance front-running, due-bill specials, spin-off WI vs regular-way, odd-lot programs, dual-class collapses, 424B2 barriers, calls instead of shares (Goal G5-G7, G9, G10, G14-G17) | **killed (count / bound)** | too rare, too small at the book level, no free data, or arbitraged; `goal_log.md` |

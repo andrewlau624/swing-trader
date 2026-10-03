@@ -1,7 +1,7 @@
 # Goal hunt log (`prompt_strategy_goal.md`, session llm-trader-ec)
 
 ## STATE (update every iteration)
-- round 2 · ideas written 36 (G1-G36; round 2 closed short of 40 on purpose) · k (judged) 27 · program N 778 (G13 = 776; ee PQ1 = 777-778; next free 779)
+- round 2 · ideas written 36 (G1-G36; round 2 closed short of 40 on purpose) · k (judged) 28 · program N 779 (G13 = 776; ee PQ1 = 777-778; next free 779)
 - NEAR: G2 (forward G2-F = ev2_big gate); G1 bound NEAR at $10k / FOUND-level at $2.3k if Schwab rounds B1 (VIVK ~10-07;
   check llm-trader state/roundup-orders.json after 10-07). Forward-only: G3 = `id3_big` gate.
 - BLOCKED: G11 / G20 (2006-15 insider window) need pre-2016 daily bars incl. delisted names. Stooq is behind a JS bot
@@ -9,7 +9,7 @@
   User item: a Tiingo (paid tier) / Norgate / CRSP source would unlock the cleanest test this hunt has.
 - running: nothing
 - round-2 quota after G30: T1 7/8 (+G28), T2 6/8 (+G27, G25 half), T3 7/8 (+G30), T4 7/8 (+G24-G26, G29), T5 4/4 (+G21-G23) -> G31-G40: T1 1, T2 2, T3 1, T4 1 + free
-- NEXT: G31 count (follow-on pricings with an offer price) -> register; G32 count; G33 bound; G36 via Form 345 code F. G23/G26 wait on forward gates.
+- NEXT: G32 count; G33 bound; G36 via Form 345 code F. G23/G26 wait on forward gates.
   Jump caches available: data/research/jump/ (FTD, 13F, Form 345 2014-26, XBRL shares history).
   Old next list:
   G18/G19 warrant counts, then write G21-G30.
@@ -181,3 +181,8 @@ with capital, since every contract payoff caps per holder; (3) no more one-event
   TOO RARE, and the payoff per deal is ~1-3%. **G35 baby bonds with a 101% CoC put: KILLED (count).** FTS hits are 8-Ks for
   institutional note issuance (APH, CTAS, EA ...), not exchange-listed $25 notes; the put also needs a downgrade; the
   qualifying listed-note events are rarer still.
+- 2026-10-02 21:45 **G31 follow-ons at the stabilization floor: DEAD on select** (registered b9ccd52, N 779). 3,077 FTS hits
+  -> 1,029 common-stock follow-ons with bars and a parsed offer price (2016-26), 147 opening within 1% of the offer.
+  Select 2021-23: conditional n 34, mean −1.22%, median −1.76%, hit 44%, t −1.51 (fails n >= 40 and the mean). All events
+  bought at the open (report): n 281, +0.37%, median −0.42%, t 0.73. Stocks that open AT the offer price are the weak deals
+  (stabilization fails); the floor isn't a floor.
