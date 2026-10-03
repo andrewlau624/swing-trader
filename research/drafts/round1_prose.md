@@ -2636,3 +2636,20 @@ market-cap-relative insider rule.
 - **Goal bar:** an overlay at 0.25x equity per event funded from the SPY core (taxable), after tax, >= +5pp/yr at $2.3k and
   $10k (add-on), or >= SPY + 10pp as part of the G2 book.
 - Runner `research/sim/goal_g42.py`. k = 32-33 when judged.
+
+## Amendment — Goal hunt, Study G45: activist 13D on a closed-end fund, buy the fund (pre-register; program N 782 -> 783)
+
+Session llm-trader-ec, idea G45 (`goal_ideas.md`, track T3/T2). Registered 2026-10-02 before any price around these filings
+was looked at. Seen: FTS counts only (Saba SC 13D: 42 filings / 14 funds in 2017, 105 / 23 in 2020, 354 / 58 in 2023; Karpus
+193 in 2016-26; the form is "SCHEDULE 13D" from 2025).
+- **Events:** the FIRST SC 13D / SCHEDULE 13D (not amendments) filed by Saba Capital, Karpus, Bulldog Investors, City of
+  London Investment, 1607 Capital or Almitas on a subject company that is a registered closed-end fund (the subject has
+  N-2/N-CSR filings or "Fund"/"Trust" in its name and trades on an exchange), 2016-01..2026-09; subject ticker from the FTS
+  display names. One event per (fund, activist).
+- **Trade:** buy the opening cross of the session after the filing date, hold 60 sessions, sell at that close. Return
+  (dividend-adjusted, Alpaca adjustment "all") minus PCEF (dividend-adjusted) over the same window. Costs `tier` per side.
+- **Halves:** select 2021-23 (one look) -> proceed only if n >= 30, mean net excess >= +2.0% per trade, date-level t >= 2.
+  Then judge 2024-26 (mean > 0, t >= 2, lottery test ex best 5 trades) and holdout 2016-20 (mean >= 0).
+- **Goal bar:** an add-on sleeve (a few % of equity per fund, 60-session holds; Roth-friendly, since CEF distributions are
+  income), after tax where it applies, >= +5pp/yr at $2.3k and $10k.
+- Runner `research/sim/goal_g45.py`. k = 34 when judged.
