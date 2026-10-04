@@ -149,3 +149,11 @@ has ~47 names for 2006-09 and none of LEH/WM/BSC/Circuit City).
 - H-POOL (2006-15 insider) stays blocked on the same data.
 - The validated components: IBS (OOS 2016-20 on ETF data). Research direction: data-obtainable mechanisms in the
   CLAUDE.md frontier ledger, not more night-leg variants.
+
+## 2026-10-04 Study EF (ETF creation/redemption flow, N 810 -> 813) - REJECTED x3
+- Registered `round1_prose.md` (30251ec) before any flow-conditioned return; run once, 2008-26, entry t+1 and t+2 stress.
+  Write-up `research/drafts/study_ef.md`; code `research/sim/etf_flow.py`, `etf_flow_data.py`.
+- SSGA navhist (27 SPDR funds) matches Alpaca prices. SO date convention (internal evidence): row t = orders at the t-1 close;
+  publication lag unknown, t+1 open assumed (unproven).
+- H1 BDR weekly LS: -21.9bp/wk net (t -2.9), gross +5bp. H2 JNK/SJNK discount: 15 episodes, -16bp (t -0.1). H3 redemption
+  reversal: -31.7bp (t -15), gross -5bp. Decile effects are 4-6bp/day, before the flow is knowable, below cost. No shadow, no sizing.
