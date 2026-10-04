@@ -2,6 +2,19 @@
 
 Decisions and state for the research loop, newest first. One entry per decision; link the evidence.
 
+## 2026-10-04 — Options line closed; execution audit; FRONTIER RESET (contest-hunt session)
+
+**Options: CLOSED.** 12 judged variants dead at executable OPRA NBBO (T1-T7; `research/drafts/study_contest_t*.md`).
+**T5L (permanent verdict): DEAD** on untouched 2016-22, liquid names, far-side fills: -3.4% of risk/trade, 5/6 gates
+failed; T5's +20% mid-to-mid was a midpoint/liquidity illusion (mid +3.3% vs ~3.7% round-trip spread; residue = short
+vol). `research/drafts/study_t5l.md`, registration f667b2f. No T5 variations; options reopen only for induced flows.
+**Execution audit:** true live cost ~0bp (130 fills = auction prints); the +65..+240bp was ref->auction drift.
+Cleanup item (separate): digest 1.3x re-arm text uses that drift as cost. `research/drafts/audit_execution_1002.md`.
+**Frontier reset:** `research/drafts/frontier_reset_2026-10-04.md` (fallen angels, ETF create/redeem, borrow/HTB,
+margin cascades, settlement/buy-ins, dealer gamma, other forced flows; every data source queried). Nothing VALIDATED;
+PROMISING: threshold-list forced buy (daily lists free 2007+), Treasury auction concession (small). CEF discounts
+recorded as a secondary track (CEFConnect weekly NAV 1996+, survivorship unhandled). N = 809. No deployment, no sizing.
+
 ## 2026-10-04 — Exact night-rule reconstruction (touched window) + noise audit + OPRA status
 
 Cycle order: exact night OOS, noise-residual audit, execution realism, OPRA frontier. No deployment.
