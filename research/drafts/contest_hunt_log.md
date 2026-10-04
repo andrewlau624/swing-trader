@@ -82,3 +82,5 @@ Judge return on risk per night: T4a -29.8%, T4b -18.6%, T4c -57.7%. Mid-to-mid P
   not work around it. Live deployment of an options leg is left for the user to approve and finish by hand.
 - Separately: T1a FAILED its judge (-4.9% of premium per trade). Shipping it would be shipping a measured loser,
   not an unproven idea.
+### T6 (QQQ 0DTE long straddle 09:45->15:50): DEAD; `study_contest_t6.md`
+Judge -9.2% of premium per trade (select -8.7%), win 30%; $313/contract never fits 5% of $2.3k.
