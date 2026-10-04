@@ -3387,3 +3387,10 @@ AND >= 60% of the 11 calendar years positive AND ex-best-5 mean >= +5pp. Labels 
 [+5, +8), or mean >= +8 with another gate failing), FAIL (mean < +5). The same label is reported for B1 "cash in lieu" and for
 $2.3k / $25k, but only the $10k rounded line is the judged one. If B1 is cash in lieu, B1 contributes ~$0 and the rest must
 stand alone.
+
+## Amendment — Study TL WITHDRAWN before any outcome (2026-10-04)
+Study TL (N 809 -> 810, 27f401c) is withdrawn unrun: no price, volume or return of a threshold-list stock was loaded by
+it. Reason: Study THR (another session, `study_threshold_flow.md`, `threshold_flow.py`) already judged the same mechanism
+on 1,516 FTD-derived threshold episodes 2021-26: CAR to the 13-day deadline -959bp (t -6.4), the 3 sessions into the
+deadline are the worst (-274bp), no volume footprint (0.54x ADV), long-only net -1009bp; CLAUDE.md: "do not re-run
+threshold/FTD-buy tests". Running TL would re-test the same idea with other data. TL's registration still counts in N.
