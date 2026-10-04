@@ -2841,3 +2841,116 @@ bid (before any report on t, before or after the open). $0.65/contract/leg. Max 
 whole contracts, skip otherwise; several events on one day are taken in market-cap order while budget allows (each 5%).
 Two variants: **T3a** market cap >= $2B; **T3b** $2B-$10B. Splits by t: select 2023-01..2024-12, judge 2025-01..2026-09.
 Gates and reporting exactly as T1/T2. Runner `research/sim/contest_straddle.py`.
+
+## Amendment — Methodology track M1: forward test of the pooled-posterior decision rule (pre-register; no new N)
+Registered 2026-10-04, before any forward outcome exists. Source: the meta-holdout of the evaluation process (session
+scratchpad `meta/meta_report.md`, ledger of 654 rows / 178 clusters). Its finding: the "NW t >= 2 in both halves" gate
+loses 27-62% of ideas with true select-clock t >= 2. The judge keeps what shrinkage predicts (delta ~1.1, shrink 0.63),
+so a select t of 2 is expected to give a judge t of ~1.2. Live night-leg cost against the official auction prints is
+-0.66bp/side (95% UB +0.09bp, 78 fills), not tier_hi's 7.5-25bp.
+**Proposed rule (what M1 tests):** decide on the pooled two-half posterior, with P(mu > 0) >= 0.9 and net edge above the
+hurdle at live cost; forward shadow is the third stage; predictions are registered first. Nothing here changes a live
+order or a size. M1 judges no new variant, so program N stays at 800 (after T3).
+
+**Model.** Ideas use the t-space normal-normal model A1: mu ~ N(0.36, 1.91^2), s 1.46, judge = 1.10·r·mu + noise,
+r = sqrt(n_judge / n_select). The ideas' mu is pooled from both halves. The forward prediction is 0.63 x the pooled
+select+judge net per trade at live cost. Live cost is 0bp/side (the mean is floored at 0); the pooled UB +0.09bp/side
+is used for scoring. Forward n is reported two ways, both from the judge half's SE (mean / t, on n_judge units):
+- n80 = n_j (2.487 SE sqrt(n_j) / pred)^2, which gives 80% power against zero at one-sided 5%;
+- the gate count, set near the 24-month count, and P(forward mean > 0 | real at prediction) at that count.
+Numbers come from `research/sim/m1_numbers.py` (`PYTHONPATH=. .venv/bin/python -m research.sim.m1_numbers`). Inputs are published select and judge means, t and trade counts only;
+no outcome was re-read.
+
+| idea (killed on) | select / judge (bp, t, n) | pooled P(mu>0) | predicted forward | n80 (time) | gate n (time) | P(fwd>0 \| real) |
+|---|---|---|---|---|---|---|
+| ID1 every officer/director buy, ADV$ >= $1M (judge t 1.18) | +20.2 t3.40 n8934 / +17.2 t1.18 n6076 | 0.981 | **+14.6bp/trade** | 37,400 (13.8 y) | 5,400 (24 mo) | 0.83 |
+| ID2 ADV$ $1-20M (judge t 0.86) | +27.6 t2.60 n4699 / +14.4 t0.86 n2982 | 0.944 | **+15.6bp/trade** | 21,200 (16 y) | 2,650 (24 mo) | 0.81 |
+| EV1 cluster: another O/D buy filing in [fd-5d, fd), ADV$ >= $20M (judge t 1.85) | +27.7 t2.42 n780 / +27.3 t1.85 n635 | 0.972 | **+20.5bp/trade** | 2,040 (7.2 y) | 560 (24 mo) | 0.90 |
+| N2 night leg on CPI/NFP exit mornings vs other nights (leg t 0.74) | +18.7 t2.44 ~70 / +9.0 t0.74 ~64 | 0.924 | **+8.8bp of equity / release night** | 750 (31 y) | 48 (24 mo) | 0.74 |
+
+All four clear the hurdle at live cost. Using the per-name live_hi tier (5-8bp/side), the insider ideas stay positive:
+ID1 +7.3, ID2 +8.9, EV1 +16.6bp. N2 is a same-cost comparison of nights; its x1.5 increment must also cover about
+2.4bp per release night of margin interest on the extra 0.5x.
+
+**Dropped (cannot be computed forward from data the live system gets, or the kill was not only t / cost):**
+- **J2** (insider buy after a 30% fall): killed by its registered control. Falls with no insider buy did as well, and
+  the judge mean (+0.5%) was below the stock's usual +1.4%. That is a failed mechanism, not a power failure.
+- **MNQ-ORB**: the 2016-20 window lost -8.6% CAGR, which is a third-window failure. One contract also needs ~$29k,
+  outside the $2-25k priority.
+- **Lab-BD** (QQQ early closing imbalance): needs the Nasdaq NOII paired/imbalance shares at 15:54:30. The live system
+  gets only L1 bid/ask sizes at 15:40. Entry is at the NBBO, not in an auction, so the live auction cost does not apply.
+- **J1 / J5**: killed as lottery-tail (ex-top-3 judge negative), not on t.
+
+**Cost kills re-scored at the live tier.** `cost_fit.register` fits on the 78 taxable fills: TIERS['live'] = (0.33, 0,
+0, 0) and live_hi = (7.81, 4.68, 5.36, 7.96) bp/side. The raw-price pool is used; the published 3bp and tier_hi figures
+reproduce exactly. Cells are the increment vs V7 in pp/yr (NW t of the daily difference), 2021-23 / 2024-26:
+
+| kill | 3bp | tier_hi | **live** | live_hi |
+|---|---|---|---|---|
+| night name cap .15 | +4.4 (2.32) / +7.5 (2.98) | +1.3 (0.67) / +3.6 (1.46) | **+5.2 (2.74) / +8.3 (3.29)** | +3.5 (1.86) / +6.4 (2.53) |
+| gated 1.3x overnight, cap .10 | +2.3 (1.17) / +7.1 (2.81) | -0.9 (-0.47) / +2.7 (1.06) | **+3.2 (1.65) / +8.1 (3.21)** | +1.3 (0.69) / +5.8 (2.30) |
+| moderate (1.3x + cap .15) | +8.0 (2.08) / +16.7 (3.22) | +0.5 (0.13) / +7.1 (1.38) | **+10.2 (2.64) / +18.8 (3.63)** | +5.9 (1.53) / +14.0 (2.71) |
+| night top-3 (bp/trade, t) | — | +1.3 (0.1) / +35.1 (1.6) | **+26.9 (1.8) / +61.2 (2.7)** | +14.3 (0.9) / +48.6 (2.2) |
+
+- At live cost, every cost kill is positive in both halves. The cap .15 change passes t >= 2 in both halves even at
+  live_hi.
+- Top-3 keeps maxDD -55 to -62%, which is the separate Kelly objection.
+- The open question for these four is cost, not edge. Their forward test is the cost measurement already running:
+  "Night auction cost by price bucket" at 100 $5-10 trips, plus `cost_fit` refits. No new shadow is added.
+- **Pre-registered reading:**
+  - If the refit pooled 95% UB stays <= +2.5bp/side at 100 trips, the cap .15 and moderate kills are overturned, to be
+    proposed to the user. 1.3x and top-3 stay subject to their drawdown limits.
+  - If the UB exceeds tier_hi's 7.5bp for the < $10 names, the kills stand.
+
+**Implementation (log-only, weekly digest "Being tested").**
+- ID1, ID2 and EV1 run inside the existing ID3 shadow (`swingtrader/daily/insider_shadow.py`). Rows with ADV$ $1-20M
+  carry `id2` and are never counted by the ID3 gate, its EV2 weights or the digest. Rows logged since M1 began carry
+  `m1`.
+- EV1 uses the issuer's earlier officer/director purchase filing dates, kept in `state/insider-filings.json` and
+  pruned to 14 days.
+- `m1_gate()` reports n, the mean at 2.5bp/side and at the live +0.09bp/side, and the day-clustered t.
+- N2 uses `events.n2_score` on the live taxable book's own night round trips, from 2026-10-05.
+- CPI/NFP dates are taken from BLS through 2026-12. The registry line warns when the calendar runs out, so the 2027
+  schedule must be appended.
+- REGISTRY entries: "M1 ID1/ID2/EV1/N2".
+
+**Decision rule (primary, as proposed).**
+- Each shadow's forward mean at live cost is read once, at its gate count or on **2028-10-04**, whichever comes first.
+- **Validated** if >= 80% of the shadows show a positive forward mean (with 4 shadows, 4/4).
+- **Refuted** if about 50% do (2/4 or fewer).
+- 3/4 is inconclusive.
+- Interim look on 2027-10-04: report only, no decision.
+
+**Calibration, stated before the data.**
+- Under "real at prediction", the expected positive share is 0.82 (mean of the last column).
+- Under "zero" it is 0.50.
+- With only 4 shadows, P(4/4) is about 0.45 if they are real and about 0.06 if they are zero. ID1 contains ID2 and
+  ID3, so the shadows are not independent. A miss of the primary rule is therefore weak evidence against the method.
+- **Secondary test (registered now):** Stouffer Z = sum(forward mean_i / SE_i) / 2.
+  - The expectation is 1.88 if real at prediction and 0 if zero.
+  - **Validated if Z >= 1.645; refuted if Z <= 0.5.**
+- ID3 / EV2 (already shadowed, ID3 passed its gate) and the meta's other predictions are not part of M1's count.
+
+**Stop.**
+- All four M1 shadows stop on 2028-10-04, or at their gate count if that comes first.
+- Their REGISTRY entries are removed in the commit that reads them.
+- No idea switches on from M1 alone. A validated method changes the gate for **future** studies; each M1 idea would
+  still need its own proposal.
+
+## Amendment — Contest hunt, Studies T5 / T6 / T7: three more option families (pre-register; program N 800 -> 803)
+Registered 2026-10-04 before any T5-T7 option price was loaded (T1/T2/T4 judged dead; T3 data loading, unseen).
+Shared: Databento OPRA cbbo-1m, far-side fills, $0.65/contract/leg, whole contracts, max loss <= 5% of equity, splits
+select 2023-01..2024-12 / judge 2025-01..2026-09, gates and reporting as T1/T2. Strikes from raw prices only.
+- **T5 short earnings iron fly through the announcement** (the other side of GXZ's negative through-event straddle;
+  retail lottery demand, IV crush). Events as T3 (Nasdaq calendar, market cap >= $2B). ATM = listed strike nearest the
+  raw close of t-2; wings = strikes nearest raw close x 1.10 and x 0.90 (same candidate grid as T3); expiry = earliest
+  Friday / third Friday >= t+1. Sell the fly on the 15:51 NBBO of t-1, buy back on the 15:51 NBBO of t+1 (covers before-
+  open and after-close reports). Max loss = wider wing - credit + fees.
+- **T6 QQQ 0DTE long straddle, intraday** (Muravyev & Ni 2020: option returns positive intraday). Every session: buy the
+  call + put at the strike nearest the raw QQQ price at 09:45 (decision minute 15, NBBO record of minute 16, ask), sell
+  on the 15:51 record at the bid.
+- **T7 EV2-big insider buy -> long call**. Events = G2 EV2-big (officer/director code-P >= $500k, no code-P filing at the
+  issuer for 730 days; `goal_g12.buys()`), traded the session after the filing date as G2. Buy the call at the strike
+  nearest the raw prior close, expiry = earliest Friday / third Friday >= trade day + 5 calendar days, on the 09:35 NBBO
+  (record of minute 5) at the ask; sell on the 15:51 NBBO at the bid. Few events (~30-50/yr): reported with its n.
+Runners `research/sim/contest_straddle.py` (T5, T7) and `research/sim/contest_options.py` (T6).
