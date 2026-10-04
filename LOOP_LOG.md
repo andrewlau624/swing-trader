@@ -157,3 +157,24 @@ has ~47 names for 2006-09 and none of LEH/WM/BSC/Circuit City).
   publication lag unknown, t+1 open assumed (unproven).
 - H1 BDR weekly LS: -21.9bp/wk net (t -2.9), gross +5bp. H2 JNK/SJNK discount: 15 episodes, -16bp (t -0.1). H3 redemption
   reversal: -31.7bp (t -15), gross -5bp. Decile effects are 4-6bp/day, before the flow is knowable, below cost. No shadow, no sizing.
+
+## 2026-10-04 — Treasury frontier settled: auction concession KILLED, month-end VALIDATED (Study TME)
+
+- **Auction concession (Study TAC, third session, 2016-26): KILLED.** Pre-auction dip real (-29bp/3d, t -4.3) but no
+  bounce (-16.5bp, t -2.6); tradable +2.4bp (t 0.9). Do not rerun or vary. Code-quality flag (not fixed, not a reason
+  to rerun): bare `except Exception: pass` in `research/sim/tac_treasury.py` around the bid-to-cover tercile split.
+- **Month-end duration extension (Study TME, pre-reg 003e176, N 813 -> 814, one look 15:24): VALIDATED (registered
+  label).** TLT close(T-3) -> close(T), 2002-08..2015-12, 161 months: net AR +32.3bp/month (median +35.9, t 2.76),
+  ex-best-5 +20.8 (t 1.91), 2x cost +28.3, subperiods +23.5 (t 1.58) / +40.4 (t 2.26), 13/14 years positive.
+  Identification: TLT > IEF > SHY in proportion to duration; the move sits on T-1 and T with a partial reversal after.
+  Refunding months not stronger (against the mechanism). 2016-26 probe same sign. `research/drafts/study_tme.md`.
+- **Economics:** +4.2%/yr on deployed capital, capital used ~14% of sessions; $2.3k +$58-96/yr, $10k +$250-417,
+  $25k +$625-1,042, $100k +$2.5-4.2k. Capacity effectively unlimited for this account. Small per trade, scalable,
+  capital-light; it does not by itself move the book toward 2x at today's balances. No deployment; next step if chosen
+  = log-only forward shadow (testing.py entry) and, separately, a pre-registered scaling study (margin over 3 sessions
+  in taxable; 2x/3x Treasury ETFs in the Roth).
+- **Forward-shadow specs registered, NOT run:** Russell Dec-2026 reconstitution (`shadow_russell_recon.md`; a rule must
+  be registered before the ~13 Nov preliminary lists) and signed dealer gamma (`shadow_dealer_gamma.md`, DATA-TARGET,
+  free SqueezeMetrics GEX first; distinct from the killed OI-pin study). No paid data bought. REGISTRY entries are
+  added when their logging code exists.
+- Threshold-list (TL) is the other session's study; status per that session.
