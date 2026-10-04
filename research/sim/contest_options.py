@@ -154,9 +154,9 @@ def fetch(dry):
 class Book:
     """As-of NBBO lookup: quote of minute m = last record stamped before the end of minute m (ET)."""
 
-    def __init__(self):
-        fs = sorted(f for f in os.listdir(OUT) if f.endswith(".parquet"))
-        q = pd.concat([pd.read_parquet(f"{OUT}/{f}") for f in fs])
+    def __init__(self, out=OUT):
+        fs = sorted(f for f in os.listdir(out) if f.endswith(".parquet"))
+        q = pd.concat([pd.read_parquet(f"{out}/{f}") for f in fs])
         ts = pd.to_datetime(q["ts_recv"] if "ts_recv" in q else q["ts_event"], utc=True).dt.tz_convert(ET)
         q["day"] = ts.dt.tz_localize(None).dt.normalize()
         q["sec"] = (ts.dt.hour * 3600 + ts.dt.minute * 60 + ts.dt.second) - 34200
@@ -343,6 +343,105 @@ def report(p, cal):
     return pd.DataFrame(out)
 
 
+# ------------------------------------------------------------------ T4: overnight short 1DTE condor / fly
+OUT4 = "data/research/contest/opra_t4"
+T4_IN, T4_OUT = 381, 5        # sell on the 15:51 record, buy back on the 09:35 record next session
+
+
+def t4_days(M):
+    """(day, next session, raw 15:50 price) for every session with a next one."""
+    f = pd.read_parquet(RAW_FACTOR)["factor"]
+    days = [d for d in M["close"].index if pd.Timestamp(START) <= d < pd.Timestamp(END)]
+    rows = [(d, d1, float(M["close"].loc[d][EXIT_M]) * f[d]) for d, d1 in zip(days, days[1:])]
+    return pd.DataFrame(rows, columns=["day", "nxt", "px"])
+
+
+def legs_t4(nxt, px):
+    def condor(k):
+        kc, kp = int(np.ceil(px * (1 + k))), int(np.floor(px * (1 - k)))
+        return [(-1, osi(nxt, "C", kc)), (1, osi(nxt, "C", kc + 1)),
+                (-1, osi(nxt, "P", kp)), (1, osi(nxt, "P", kp - 1))]
+    a = int(round(px))
+    return {"T4a": condor(0.005), "T4b": condor(0.010),
+            "T4c": [(-1, osi(nxt, "C", a)), (1, osi(nxt, "C", a + 2)),
+                    (-1, osi(nxt, "P", a)), (1, osi(nxt, "P", a - 2))]}
+
+
+def fetch4(dry):
+    """One request per night, windowed 15:49 -> 09:37 next session (month-wide windows cost ~$5)."""
+    import databento as db
+    client = db.Historical(dotenv_values(".env")["DATABENTO_API_KEY"])
+    d4 = t4_days(intra.load("QQQ"))
+    os.makedirs(OUT4, exist_ok=True)
+    jobs = []
+    for r in d4.itertuples():
+        path = f"{OUT4}/QQQ_{r.day:%Y-%m-%d}.parquet"
+        if os.path.exists(path):
+            continue
+        syms = sorted({x for legs in legs_t4(r.nxt, r.px).values() for _, x in legs})
+        start = pd.Timestamp(r.day).tz_localize(ET) + pd.Timedelta(hours=15, minutes=49)
+        end = pd.Timestamp(r.nxt).tz_localize(ET) + pd.Timedelta(hours=9, minutes=37)
+        jobs.append((syms, start.tz_convert("UTC").isoformat(), end.tz_convert("UTC").isoformat(), path))
+    sample = jobs[:: max(1, len(jobs) // 20)]
+    est = sum(client.metadata.get_cost(dataset="OPRA.PILLAR", symbols=j[0], stype_in="raw_symbol",
+                                       schema="cbbo-1m", start=j[1], end=j[2]) for j in sample)
+    total = est / max(len(sample), 1) * len(jobs)
+    print(f"{len(jobs)} nights, estimated ${total:.2f}", flush=True)
+    if total > CAP_USD:
+        sys.exit(f"ABORT: estimated ${total:.2f} > cap ${CAP_USD}")
+    if dry:
+        return
+
+    def one(job):
+        syms, start, end, path = job
+        df = client.timeseries.get_range(dataset="OPRA.PILLAR", symbols=syms, stype_in="raw_symbol",
+                                         schema="cbbo-1m", start=start, end=end).to_df().reset_index()
+        keep = [k for k in ("ts_event", "ts_recv", "symbol", "bid_px_00", "ask_px_00", "bid_sz_00", "ask_sz_00")
+                if k in df.columns]
+        df[keep].rename(columns=lambda k: k.replace("_00", "")).to_parquet(path)
+
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(8) as ex:
+        list(ex.map(one, jobs))
+    print("done", flush=True)
+
+
+def priced4(book, d4):
+    rows, skipped = [], 0
+    for r in d4.itertuples():
+        for v, legs in legs_t4(r.nxt, r.px).items():
+            qin, qout = [], []
+            for _, sym in legs:
+                qin.append(book.quote(sym, r.day, T4_IN))
+                qout.append(book.quote(sym, r.nxt, T4_OUT))
+            if any(q is None for q in qin + qout):
+                skipped += 1
+                continue
+            cost = sum(a if sg > 0 else -b for (sg, _), (b, a) in zip(legs, qin))
+            val = sum(b if sg > 0 else -a for (sg, _), (b, a) in zip(legs, qout))
+            fees = FEE * len(legs) * 2 / 100
+            k = sorted(int(x[-8:]) / 1000 for _, x in legs)
+            risk = max(k[1] - k[0], k[3] - k[2]) + cost + fees
+            rows.append((v, r.day, cost, val, fees, risk))
+    p = pd.DataFrame(rows, columns=["v", "day", "cost", "val", "fees", "risk"])
+    p["pnl"] = p.val - p.cost - p.fees
+    p["r"] = p.pnl / p.risk
+    return p[p.risk > 0], skipped
+
+
+def main4():
+    M = intra.load("QQQ")
+    d4 = t4_days(M)
+    p, skipped = priced4(Book(OUT4), d4)
+    p.to_parquet("data/research/contest/t4_trades.parquet")
+    cal = [d for d in M["close"].index if pd.Timestamp(START) <= d < pd.Timestamp(END)]
+    print(f"T4 nights {len(d4)}, variant-nights unpriced {skipped}")
+    rep = report(p, cal)
+    pd.set_option("display.width", 250, "display.max_columns", 60)
+    print(rep.round(4).T.to_string())
+    rep.to_csv("data/research/contest/t4_report.csv", index=False)
+
+
 def main():
     t, c = signal(intra.load("QQQ"))
     book = Book()
@@ -360,5 +459,9 @@ def main():
 if __name__ == "__main__":
     if sys.argv[1:2] == ["fetch"]:
         fetch("--dry" in sys.argv)
+    elif sys.argv[1:2] == ["fetch4"]:
+        fetch4("--dry" in sys.argv)
+    elif sys.argv[1:2] == ["run4"]:
+        main4()
     else:
         main()

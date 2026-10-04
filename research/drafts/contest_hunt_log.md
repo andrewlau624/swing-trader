@@ -69,3 +69,5 @@ Judge 2025-01..2026-09 return on risk per trade: T1a -4.9%, T1b -15.5%, T1c -11.
 Underlying signal +4.5bp/trade (2023-24), +2.6bp (2025-26, t 0.77): too small to carry 0DTE theta and spread.
 Next: T3 pre-earnings straddle (GXZ 2018) and T4 overnight short QQQ condor (Muravyev-Ni 2020: delta-hedged option
 returns are negative overnight, positive intraday).
+### T4 (overnight short QQQ 1DTE condor/fly): DEAD, all three; N 795 -> 798. `study_contest_t4.md`
+Judge return on risk per night: T4a -29.8%, T4b -18.6%, T4c -57.7%. Mid-to-mid P&L ~0: no overnight premium; spreads kill it.
