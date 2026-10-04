@@ -178,3 +178,21 @@ has ~47 names for 2006-09 and none of LEH/WM/BSC/Circuit City).
   free SqueezeMetrics GEX first; distinct from the killed OI-pin study). No paid data bought. REGISTRY entries are
   added when their logging code exists.
 - Threshold-list (TL) is the other session's study; status per that session.
+
+## 2026-10-04 — TME-L forward shadow registered; futures frontier memo
+
+- **TME-L** (pre-reg e68391a, N 814 -> 816; runner/registry 774d67d): L2 = TLT 2x on Reg T margin (taxable), L3 = TMF
+  (Roth/taxable), L1 = TLT reference; official closing prints; kill/success gates at 24 forward windows (Oct-2028),
+  interim at 12. No orders; `make tme-shadow` must be added to the server schedule by the user to log forward.
+  Report-only instrument history 2009-26: TMF keeps 2.8x of the TLT window (tracking -9bp, worst window -8.7%,
+  maxDD -22.5%); TLT 2x margin keeps only 1.62x (financing ~15bp/window); UBT poor (15bp/side + tracking).
+  TME rule stays FROZEN; TME is now an implementation question, not a discovery target.
+- **Futures frontier** (`research/drafts/frontier_futures_2026-10-04.md`, web + repo reading, nothing run). Verified
+  access facts: Schwab futures need margin approval ($1,500 min); IRA futures need $25k NLV and 125% of initial
+  margin; the Schwab Trader API cannot place futures orders; one MES/MNQ is ~$30k/$61k notional (13-26x on $2.3k).
+  Futures at this account size are a leverage/tax wrapper, not a new alpha source. Roll, commodity-index roll,
+  USO roll, CTA crowding, pre-FOMC, VIX SOQ: dead or decayed (evidence in the memo).
+  Ranked next cycle: (1) month-end 60/40 rebalancing spread SPY vs TLT/IEF (Harvey-Mazzoleni-Melone 2025), standalone,
+  one look on untouched 2002-15 via ETFs, + the Agg 3pm->4pm (2021-01-14) timing diagnostic; (2) month-end index
+  extension in LQD/HYG/TIP/MBB; (3) CFTC hedging pressure; (4) micro /10Y as a TME vehicle (implementation);
+  (5) equity-index implied financing (signal only).
