@@ -2954,3 +2954,24 @@ select 2023-01..2024-12 / judge 2025-01..2026-09, gates and reporting as T1/T2. 
   nearest the raw prior close, expiry = earliest Friday / third Friday >= trade day + 5 calendar days, on the 09:35 NBBO
   (record of minute 5) at the ask; sell on the 15:51 NBBO at the bid. Few events (~30-50/yr): reported with its n.
 Runners `research/sim/contest_straddle.py` (T5, T7) and `research/sim/contest_options.py` (T6).
+
+## Amendment — Study T5L: the earnings iron fly on liquid large caps, executable prices, untouched 2016-22 (pre-register; program N 805 -> 806)
+Registered 2026-10-04 before any pre-2023 option price or earnings date was loaded. (N: 803 after T5-T7 plus Study IN's two
+judged variants, which another session registered as "799 -> 801" in parallel: the true count before this is 805.)
+Question: does T5's mid-to-mid +20% of risk (2023-26, `study_contest_t5.md`) survive executable prices, large-cap liquidity
+and a period never looked at? One judged variant, no tuning:
+- Events: Nasdaq earnings calendar report date t, 2016-02-01..2022-12-31 (judge, never inspected). 2023-26 is the
+  selection period (already seen) and is reported only. The calendar's market cap is as-of today (look-ahead): NOT used.
+- Liquidity, ex ante: 20-session mean raw close x volume (Alpaca SIP raw daily bars, sessions t-21..t-2) >= $1B/day and
+  raw close of t-2 >= $20.
+- Structure exactly T5: short ATM call + put (strike nearest raw close of t-2), long wings at the strikes nearest x1.10 /
+  x0.90, earliest Friday / third Friday >= t+1. Sell on the 15:51 NBBO of t-1, buy back on the 15:51 NBBO of t+1.
+- Executable fills only: every leg at the far side (sell at bid, buy at ask), both ends; $0.65/contract/leg. A short leg
+  with no bid at entry = no trade; a missing long-wing bid at exit = 0; no ask on a short leg at exit = unpriced (counted).
+- Entry spread gate (observable at entry, executable): trade only if the entry half-spread cost (mid credit - far-side
+  credit) <= 10% of the far-side max loss (wider wing - far-side credit).
+Pass (all): judge mean return on risk > 0 with event-date block bootstrap P(mean <= 0) <= 5%; judge median > 0; judge
+ex-best-5 > 0; positive in >= 5 of the 7 judge years; still > 0 with every exit half-spread doubled (2x spread shock);
+>= 300 judge trades. Reported: by year (2020, 2022 stress), mid-to-mid vs executable, win rate, worst trade, 3-month return
+distribution at 5% risk per trade at $2.3k / $10k / $25k, the 2023-26 selection-period numbers. Kill = any gate fails.
+Runner `research/sim/contest_t5l.py`.
