@@ -484,3 +484,15 @@ cheapest high-value tests and mapped what each remaining mechanism actually need
   inflated by its own benchmark (other sessions of the month = the signal's inputs; 69% of the effect). Executable
   spread +27bp net, t 1.2, gone after 2015. Rule for all future studies: gate on executable raw P&L; never benchmark an
   event window against sessions that define the signal. No more month-end variants.
+
+## Research-priority gate (user, 2026-10-04): reject low-ceiling ideas BEFORE any backtest
+Target = 2x the book. The live book's realistic forward return is ~8-15%/yr pre-tax (T0L: 23.7% at tier_hi 2021-26,
+11% edge-halves, 16.8% 2016-20 holdout, night leg unproven), so a candidate needs a plausible path to **+8-15pp/yr
+on the whole account, independent of the book**. Before writing code, write down:
+`ceiling %/yr = events per year x net edge per event x share of account deployable per event x capture rate`
+at $2.3k / $10k / $25k / $100k, plus who pays, why it persists, independence and the cheapest kill test.
+**Kill before testing if the ceiling at $10k is < +8pp/yr under honest capture (<= 50% of the published effect).**
+Shapes that can clear it: daily frequency x >= 15bp net x >= 50% of capital (the night-leg shape); ~monthly x >= 2% x
+~100%; rare events x >= 10-20% with a per-holder cap that small accounts fill (the contract-payoff shape). Shapes that
+cannot: deep-market calendar effects (TME: 12 x 35bp x 100% = 4%/yr), event signals deploying a sliver of capital
+(insider-day ~0.5%/yr), anything whose edge is < 5x its round-trip cost.

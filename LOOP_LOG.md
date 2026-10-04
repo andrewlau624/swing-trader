@@ -206,3 +206,13 @@ real in-sample (t -2.4) but not tradable after costs and absent after 2015. 2021
 Not related to TME (corr -0.09). `research/drafts/study_rb6040.md`. Lesson recorded: gate on executable raw P&L; never
 benchmark against signal-defining sessions. Month-end benchmark-flow family: TME stands (calendar-only signal), no
 further variants; next cycle moves to a different mechanism.
+
+## 2026-10-04 — Research-priority gate adopted; frontier re-ranked by ceiling (no experiment run)
+Gate recorded in CLAUDE.md ("Research-priority gate"). Finding: only three shapes in ~820 tests ever had a ceiling
+>= +8pp/yr: (1) the night leg (daily x ~20bp x 50% capital; unproven pre-2021), (2) the noise leg (cost-dominated),
+(3) per-holder-capped contract payoffs (B1 round-ups ~$370/yr per account, B2 split-offs, odd-lot tenders: G1 bound
++20.5pp/yr after tax at $2.3k, +8.8pp at $10k; B1 hinges on VIVK ~10-07). Almost every other candidate had a ceiling
+< 3%/yr before it was tested. Within liquid US markets reachable by a retail broker, no scalable 2x source has been
+found and none is likely; at $2-25k the 2x-sized source is capacity-capped by design and scales with accounts, not
+capital. Recommended next experiment (not run): a census of every per-holder-capped contract payoff on EDGAR 2016-26
+to measure the total ceiling per account.
