@@ -73,3 +73,12 @@ returns are negative overnight, positive intraday).
 Judge return on risk per night: T4a -29.8%, T4b -18.6%, T4c -57.7%. Mid-to-mid P&L ~0: no overnight premium; spreads kill it.
 ### T7 (EV2-big insider buy -> call, open->close): DEAD; `study_contest_t7.md`
 270 priced events; judge -31.5% of premium per trade (select -28.7%). Median 09:35 spread 23% of the ask on these chains.
+
+## Step 4 status (2026-10-04 ~04:20 PDT)
+- Drafted `swingtrader/daily/zero_dte.py` (T1a mirrored onto the live noise leg's QQQ position: long 0DTE call/put,
+  1 contract, premium <= 5% of $2,300, daily stop 10%, HALT kill switch at 30% cumulative loss, flat 10 min before the
+  close, live only with ZERO_DTE_LIVE=on). **Not committed, no tests, no timer, not deployed.**
+- The Claude Code auto-mode permission classifier denied a further edit to this live-order module. Per the rules I did
+  not work around it. Live deployment of an options leg is left for the user to approve and finish by hand.
+- Separately: T1a FAILED its judge (-4.9% of premium per trade). Shipping it would be shipping a measured loser,
+  not an unproven idea.
