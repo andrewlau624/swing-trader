@@ -2,6 +2,33 @@
 
 Decisions and state for the research loop, newest first. One entry per decision; link the evidence.
 
+## 2026-10-04 — Next cycle: NX still blocked; OPEX OI-pinning FALSIFIED; frontier probes
+
+**Closed branches (do not reopen):** stable pre-2021 night edge; daily-close proxy; generic intraday-noise variants;
+generic options strategies; midpoint options results; night-rule parameter tuning.
+
+**NX: still DATA-LIMITED, not run.** Frozen registration (commit `5be14c74`, N 806->809); the $69 Sharadar purchase
+is user-approved but there is **no `SHARADAR_API_KEY` in `.env` and no vendor data on disk** (re-checked this cycle).
+No progress fabricated. Day-1 checks run the moment the key exists; then NX runs once on 2003-2015, no tuning. 2016-20
+stays exploratory.
+
+**Options-induced underlying flow — cheapest variant TESTED and FALSIFIED.** Pre-reg
+`research/drafts/study_A_opex_pin.md`; runner `research/sim/opex_pin.py` (Databento OPRA `statistics`, OI = `stat_type 9`;
+prior-close OI is lookahead-free). SPY monthly OPEX 2023-2024 (24 events), max-OI strike within +/-3% of prior close,
+trade open->close toward it: **K1 (max-OI) hit 43%, net -8.4bp, t -0.51; K2 (2nd-OI placebo) hit 55%, +19.5bp**.
+No attraction, and K1 does not beat the placebo. **OI-concentration / pin variant REJECTED for this window**
+(underpowered at 24 events; the 2013-2024 extension ~$110 is not justified by a wrong-sign first look).
+**Signed dealer gamma (OI x gamma from IV) remains DATA-TARGET and untested.** Observed OPRA `statistics` cost:
+SPY ~$0.37/day, QQQ ~$0.36/day — the reset doc's "credit left ~$4" is stale (pulls to ~$17 succeeded this cycle).
+
+**Other frontier probes:** ETF creation/redemption DATA-LIMITED (no free bulk shares/NAV; iShares page 200 scrapeable,
+SSGA `navhist` URL 404). Fallen angels DATA-LIMITED (FRED ICE BofA is aggregate only; no free PIT issuer ratings).
+Borrow/HTB BLOCKED. Futures-roll / benchmark-change / auction mechanics NOT SEARCHED.
+
+**Ledger delta:** options OI-pinning TARGET -> REJECTED (the OI variant only); signed gamma still TARGET. Highest-value
+next experiment: NX once the key is added; otherwise the free PROMISING threshold-list forced-buy test (daily Nasdaq lists
+2007+) ahead of any paid signed-gamma pull.
+
 ## 2026-10-04 — Options line closed; execution audit; FRONTIER RESET (contest-hunt session)
 
 **Options: CLOSED.** 12 judged variants dead at executable OPRA NBBO (T1-T7; `research/drafts/study_contest_t*.md`).
@@ -99,3 +126,26 @@ session scratchpad `data/vendors.md`.
 - D3 losing-night x2 and M1 "moderate": positive on 2021-26 at live cost, but they depend on the unverified night
   leg. Shadow / NX-secondary only.
 - H-POOL (2006-15 insider): registered, blocked on the same delisted-inclusive data (free Yahoo covers 37% < 40% gate).
+
+**NX registration stamp.** Commit `5be14c74df68be34bf2d04a185a0d9ed5a23da41`, 2026-10-04T14:46:25-07:00, before
+any Sharadar purchase or 2003-15 data. The NX methodology in `round1_prose.md` is frozen from this commit.
+User approved the Sharadar $69/1-month purchase (2026-10-04); the user makes the purchase and adds the key.
+
+## 2026-10-04 — NX not funded (user decision)
+
+**Decision (user).** Do not buy Sharadar ($69): the upside if NX passed (~+4-10pp/yr on size-ups, ~$90-230/yr at
+$2.3k) does not justify it, given P(pass) ~0.2-0.3 after the exact 15:40 rule came out ~0 on 2016-18 (touched,
+survivor-only). Alpha Vantage was probed as a free substitute and fails (full history is premium; its delisted list
+has ~47 names for 2006-09 and none of LEH/WM/BSC/Circuit City).
+
+**Consequences (binding until NX runs on qualifying data).**
+- NX stays registered (commit 5be14c7) and UNRUN. Code staged: `research/sim/nx.py` (fetch/validate/run, 13 synthetic
+  tests in `tests/test_nx.py`). If qualifying data appears later (university WRDS/CRSP, a vendor), run it as registered.
+  Open wording issues to settle in a dated clarification BEFORE any fetch: the delisting gate (per name-year cannot
+  reach 20%; per-name reading proposed) and halted-then-resumed names (registered text scores -100%).
+- The night leg is **unproven**, not failed. No size-ups (losing-night x2, "moderate"), no parameter changes.
+  Evidence on file: exact rule 2016-18 ~0 net, edge concentrated in 2019-20; factor decomposition alpha t 1.5 after
+  tech and size exposure (`book_decomp.py`). Whether to keep it at its current weight is the user's call.
+- H-POOL (2006-15 insider) stays blocked on the same data.
+- The validated components: IBS (OOS 2016-20 on ETF data). Research direction: data-obtainable mechanisms in the
+  CLAUDE.md frontier ledger, not more night-leg variants.
