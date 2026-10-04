@@ -216,3 +216,10 @@ Gate recorded in CLAUDE.md ("Research-priority gate"). Finding: only three shape
 found and none is likely; at $2-25k the 2x-sized source is capacity-capped by design and scales with accounts, not
 capital. Recommended next experiment (not run): a census of every per-holder-capped contract payoff on EDGAR 2016-26
 to measure the total ceiling per account.
+
+## 2026-10-04 Study CPC (census of per-holder-capped contract payoffs 2016-26, N 817 -> 818)
+Pre-reg 40e3910. Report `research/drafts/study_cpc.md`, runner `research/sim/cpc.py`. Primary (taxable $10k, B1 rounded, after-tax excess over
+T-bills): PASS on the registered gates, +13.3pp/yr ($1,330), 91% of years positive, ex-best-5 +8.5pp; $2.3k +32.4pp PASS, $25k +7.6pp NEAR. B1 cash in lieu:
++12.4pp at $10k (B1 is only $130/yr per account over 2016-26, $312 over 2023-26). 79% of the dollars are DRIP (UMH/MNR, $820/yr, not automated, 36 manual
+steps/yr) and B2 ($934/yr); ex-DRIP +8.4pp, UMH-only +11.4pp, 2023-26 +9.6pp. Correlation with the live book -0.08. Only B1 scales per account;
+odd-lot priority is per beneficial owner across all accounts, so the stack does not scale with accounts. Selection-bias caveat applies.
