@@ -284,10 +284,13 @@ def main5():
                         (1, osi(r.sym, e, "C", hi)), (1, osi(r.sym, e, "P", lo))]
                 qi = [Q[(x, r.d_in)] for _, x in legs]
                 qo = [Q.get((x, r.d_out)) for _, x in legs]
+                if any(not (q[0] > 0) for (sg, _), q in zip(legs, qi) if sg < 0):
+                    break                                    # no bid to sell into at entry (NaN/0): no trade
                 if any(q is None or not (q[1] > 0) for (sg, _), q in zip(legs, qo) if sg < 0):
                     break                                    # cannot price the buy-back: skip, logged as unpriced
                 cost = sum(a if sg > 0 else -b for (sg, _), (b, a) in zip(legs, qi))
-                val = sum((q[0] if q else 0.0) if sg > 0 else -q[1] for (sg, _), q in zip(legs, qo))
+                bid = lambda q: q[0] if q and q[0] > 0 else 0.0          # missing/NaN bid on a long wing = 0
+                val = sum(bid(q) if sg > 0 else -q[1] for (sg, _), q in zip(legs, qo))
                 fees = FEE * 8 / 100
                 rows.append((r.sym, r.t, r.d_in, r.d_out, r.mcap, cost, val, fees,
                              max(hi - k, k - lo) + cost + fees))

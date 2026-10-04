@@ -1,13 +1,28 @@
 # Contest hunt log (prompt: `prompt_contest_hunt.md`, started 2026-10-04)
 
 ## Morning summary
-(pending)
+**Verdict: no new leg is live. All 11 option variants (7 families) died on real NBBO at far-side fills. N 791 -> 803.**
+1. Friend most likely runs 0DTE SPY/QQQ long premium on breakout triggers. Priced on the repo's best intraday trigger
+   (T1a), that loses 4.9% of risked premium per trade in 2025-26. His 2x lead is far more likely variance than edge.
+2. Judge 2025-26, return on risk per trade: T1a 0DTE long ATM -4.9%, T1b vertical -15.5%, T1c OTM -11.4%, T2a condor -9.5%,
+   T3 pre-earnings straddle -35%/-44%, T4 overnight condor/fly -19..-58%, T5 short earnings fly -65%, T6 intraday straddle
+   -9%, T7 insider-buy calls -31%. The killer every time: spreads (QQQ 0DTE ~1-3%; single names 20-23% of the ask).
+   One real effect: T5 mid-to-mid +20% of risk in both halves (IV crush). It needs passive fills, so it is a forward-test lead.
+3. Built: research runners + studies (commits d4c4a64..). `swingtrader/daily/zero_dte.py` (T1a mirrored onto the live
+   noise leg; 1 contract, <= $115 premium = 5% of $2.3k, 10% day stop, HALT at 30% loss) is an UNCOMMITTED DRAFT:
+   no tests, no timer. The permission classifier denied further edits to that live-order module, so I stopped.
+   It is not deployed. To deploy, you finish it, add tests, a registry entry and a timer, and set ZERO_DTE_LIVE=on.
+   I advise against it: T1a is a measured loser (3-mo median -20% at $2.3k, P(-30%) 24%).
+4. Odds a new options leg beats a 2x lead in 3 months: under 10%. The likely cost is losing 15-30% of whatever it trades.
+   The better contest bet is variance you control: deposits count against you, so they don't help; nothing found tonight does.
+Live now: unchanged (daily book taxable + Roth). New leg: none. Stop the book as before (`make daily-live-off`).
+Open: measured slippage on 10-02 live fills looked like +65..+240bp vs ref (server agent); config claims ~0bp. Audit it.
 
 ## Steps
 - [x] Step 1: strategy-family table, top 3 picked (T1 noise 0DTE overlay, T2 0DTE credit spreads, T3 pre-earnings straddle)
 - [x] Step 2: data (Databento OPRA cbbo-1m, signal-driven, $2.00)
-- [ ] Step 3: pre-register + test (N 791 at start)
-- [ ] Step 4: build, test, deploy small
+- [x] Step 3: 11 variants in 7 families, all dead (N 791 -> 803)
+- [ ] Step 4: NOT deployed (nothing passed; classifier denied the live-order module edit)
 
 ## Open questions for the user (logged, not blocking)
 
@@ -88,3 +103,6 @@ Judge -9.2% of premium per trade (select -8.7%), win 30%; $313/contract never fi
 Judge -35.4% (>= $2B) / -44.4% ($2-10B) of premium per trade. Mid-to-mid +1.5% (half of GXZ); straddle spread ~20% of mid.
 **All three top families (T1, T2, T3) are now tested and dead.** Extra families tested: T4 (overnight VRP), T6 (intraday
 straddle), T7 (insider calls); T5 (short earnings fly) data loading.
+### T5 (short earnings iron fly t-1 -> t+1): DEAD as registered; mid-to-mid +20% of risk. `study_contest_t5.md`
+Judge -64.8% at far side; 4-leg half-spreads ~63% of risk. Mega caps (>= $50B): +3.5% at half the spread (unregistered lead).
+**Stop rule met:** top 3 families (T1, T2, T3) dead + 4 more (T4, T5, T6, T7).
