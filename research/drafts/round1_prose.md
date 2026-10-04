@@ -2755,3 +2755,76 @@ $25k, maxDD, worst day, win rate (a win rate >= 90% is treated as a bug until au
 Pick among passers: highest judge median 3-month return at $2.3k. Pass = build + live at the smallest size (contest
 prompt); no pass = the best is shipped only if labelled unproven. T3 (pre-earnings straddle) is registered separately
 if its data can be had. Runner `research/sim/contest_options.py`.
+
+## Amendment — Study H-POOL: the insider-buy next-session open -> close effect as ONE pooled rule, judged on the untouched 2006-15 decade (pre-register; 1 judged rule, program N 795 -> 796)
+`date`: Sun Oct 4 02:25 PDT 2026, written before any 2006-15 Form 345 file was downloaded and before any price for a
+2006-15 session was loaded. Not committed by the registering session (the file mtime and the session log are the stamp).
+**Why.** A program-wide meta-analysis (this session) found select-half strength predicts judge-half results (rank corr
+~0.6; judge keeps ~0.61x of select) and the median judge window detects only ~29bp/trade at t 2. The insider-buy
+next-session intraday family was cut into underpowered pieces: ID1 (select +20.2bp t 3.4, judge +17.2 t 1.18), ID2
+(+27.6 / +14.4), EV1 (+27.7 t 2.42 / +27.3 t 1.85, DEAD on bar g), EV2 (shadow; EV2-big NEAR on 2016-20 via G2). H-POOL
+says these are one edge; it is judged once, on a window none of them saw.
+**Window touched so far (checked, not assumed):** ID/ID1-3, EV1, EV2, L16-L20 explore: 2020-01..2026-03. G2 (EV2-big,
+EV2 all sizes, ID3 >= $500k): 2016-21. J2 (insider after a 30% fall, 5-day jump target): 2016-23 events; its 2014-15
+parse was lookback only (`jump_insider.py` filters fd >= 2016). G2's 2014-15 parse was lookback only (fd >= 2016-01-02).
+**No insider rule here has computed any outcome on a 2006-15 session.** 2006-15 is therefore the window; 2016-19 is
+NOT used (G2 saw its larger-buy, ADV >= $20M part). Published work on the same decade exists (e.g. Cohen-Malloy-Pomorski
+2012), so "untouched" means untouched by this program, not by the world.
+- **Data.** SEC insider-transactions data sets 2006q1..2015q4 (`insider-transactions-data-sets/YYYYqN_form345.zip`;
+  2006q1 is the first published set; parsed exactly as `goal_g2.buys()`, keeping ISSUERCIK). Bars: Alpaca SIP starts
+  2016, so **Yahoo Finance chart API daily bars** (regular-session OHLCV, timestamps at the 09:30 ET open -> labelled by
+  trade date with `marketdata.trade_date`; split-adjusted, un-adjusted to raw with Yahoo's split events, so price
+  filters and the ticker guard use raw prices; open->close and ADV$ are split-invariant). Yahoo open/close are the
+  consolidated daily open/close, a proxy for the official 09:30 / 16:00 crosses (no 2006-15 minute or auction data
+  exists in the repo). Yahoo has no delisted tickers: **survivor-only** coverage is a known bias, reported, not fixed.
+- **Ticker map.** Per (CIK, fd): try the Form 4's ISSUERTRADINGSYMBOL, then the CIK's current ticker (SEC
+  company_tickers.json); keep the first series that passes the ticker-reuse guard (dollar-weighted Form 4 price within
+  0.67-1.5x the raw close of the session before d, as G2). Count of events lost at each step reported.
+- **Event (the union, written once).** Officer/director (RPTOWNER_RELATIONSHIP contains Director|Officer) Form 4 / 4-A
+  code-P acquisitions, summed per (issuer, filing date fd). Eligible if ANY of:
+  (a) ID1: summed $ >= $10,000 and 20-session mean raw close x volume (to the session before d) >= $1M;
+  (b) EV1 (causal form): ADV$ >= $20M and another officer/director purchase filing at the issuer has fd' in [fd-5d, fd)
+      (every EV1 chain completion date satisfies this; it is the "cluster is visible" day);
+  (c) EV2: ADV$ >= $20M and no code-P filing by anyone at the issuer in the 730 days before fd (evaluable only for
+      fd >= 2008-01-01, two years after the data start; before that only (a)/(b) apply).
+  Common filters known before the open: raw prior close >= $5; the next session d must be within 7 days of fd; volume
+  on d > 0; |open->close| >= 50% dropped (as ID/G2). Trade session d = the first regular session strictly after fd
+  (sessions = the exchange calendar; the data sets give a filing date, not acceptance time, so d+0 trading is not
+  possible). **One trade per (symbol, d)** (several eligible fd mapping to one d count once).
+- **Trade.** Buy the opening cross of d, sell the closing cross of d. Unit = raw open -> close, gross; net = gross - 2 x
+  per-side cost. Costs: `book.cost_bps("tier", raw open, ADV$)` (judged) and `"tier_hi"` (stress); 2.5bp/side flat
+  (ID/EV comparability) printed.
+- **Pass bar (all on 2006-01..2015-12 trade sessions, at `tier`):** (1) mean net > 0 with t >= 2.0, standard error
+  clustered by trade date; (2) mean net > 0 in 2006-10 AND in 2011-15; (3) n >= 500 trades. **PASS** = 1-3; PASS is
+  "robust" if 1-2 also hold at tier_hi. **FAIL** otherwise. One look, no variant search after it.
+- **Data-adequacy gates (checked before the bar; a failure = INCONCLUSIVE (data), not FAIL):** (i) Yahoo vs Alpaca
+  raw bars on 2016-19 for up to 300 of the window's mapped symbols, all common sessions: mean(Yahoo - Alpaca)
+  open->close within +-5bp and corr >= 0.95; (ii) >= 40% of (a)-eligible-by-$ (issuer, fd) groups get a series that
+  passes the guard. Both reported whatever the verdict.
+- **Reported, not judged:** n, gross/net mean, median, hit rate, ex-top-1% mean, by-year mean and sign, ID1-only /
+  EV1-only / EV2-only subsets (context only, no new N), $-impact as a cash sleeve using idle daytime cash (0.63 x
+  equity, split equally over the session's trades, <= 10% equity and <= 1% ADV$ per name, whole shares at the raw open)
+  at $2.3k / $10k / $25k (+ one $100k capacity line), %/yr and $/yr at tier and tier_hi.
+- **Causality.** Every input is dated <= fd (filings) or <= the session before d (ADV, prior close, guard, cluster and
+  silence look-backs), except the inherited same-session |ret| >= 50% and volume > 0 drops (counts reported).
+Runner `research/sim/hpool.py` (`build` = events and data gates only; `judge` = the one look).
+**H-POOL build result (2026-10-04 ~03:00 PDT; `hpool build`, no outcome computed): INCONCLUSIVE (data); judge NOT run.**
+Gate (i) OK: Yahoo vs Alpaca open->close 2016-19, 293 symbols / 293,582 name-days, mean(Y-A) +0.20bp, corr 0.986.
+Gate (ii) FAIL: 37.3% of the 90,673 >= $10k officer/director (issuer, fd) groups map to a Yahoo series passing the guard
+(27% in 2006 rising to 49% in 2015; 79,813 of 133,626 groups have no Yahoo series = delisted names). Survivor-only bars
+miss most of the decade's issuers, so the one look is withheld: 2006-15 stays untouched for every insider rule.
+Re-runnable as registered (`hpool judge`, N 796 already counted) once a delisted-inclusive daily source covers >= 40%.
+
+## Amendment — Contest hunt, Study T4: overnight short QQQ 1DTE condor / fly (pre-register; program N 795 -> 798)
+Registered 2026-10-04 after T1/T2 were judged (dead) and before any T4 option price was loaded. Mechanism: option returns
+are negative overnight and positive intraday (Muravyev & Ni, JFE 2020, "Why do option returns change sign from day to
+night?"); sellers of overnight option exposure are paid. Instrument: QQQ options expiring the NEXT trading session (1DTE;
+Friday -> Monday). At 15:50 (minute 380) raw close price P (adjusted matrix x raw factor): sell, fill on the NBBO record of
+minute 381, close at 09:35 next session (record of minute 5 after 09:30), far side both times, $0.65/contract/leg.
+Whole contracts, max loss (width - credit + fees) <= 5% of equity. Every trading day with a next session. Three variants:
+- **T4a**: short call at the first strike >= P x 1.005, short put at the first strike <= P x 0.995, wings $1 further out.
+- **T4b**: as T4a at 1.0% OTM.
+- **T4c iron fly**: short call and put at the strike nearest P, wings $2 further out.
+Splits, gates and reporting exactly as T1/T2 (select 2023-01-03..2024-12-31, judge 2025-01-02..2026-09-18; pass = judge mean
+> 0 with day-block bootstrap P <= 5%, select > 0, judge ex-best-5 > 0, P(-30% in 3 months) <= 10% at $2.3k). Runner
+`research/sim/contest_options.py` (`fetch4` / `run4`).
