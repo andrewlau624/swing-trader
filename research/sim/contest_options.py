@@ -329,9 +329,7 @@ def report(p, cal):
                     med_risk=g.risk.median() * 100)
         for e0 in SIZES:
             s, skip = run_equity(jud, e0)
-            full = pd.Series(e0, index=pd.DatetimeIndex(jcal)).astype(float)
-            full.loc[s.index] = s.eq
-            full = full.ffill()
+            full = s["eq"].reindex(pd.DatetimeIndex(jcal).astype(s.index.dtype)).ffill().fillna(e0)
             dr = full.pct_change().fillna(full.iloc[0] / e0 - 1)
             at = after_tax(dr) * e0
             med, p10, p90, p30 = boot_3m(jud, jcal, e0)

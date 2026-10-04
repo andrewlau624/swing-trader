@@ -62,3 +62,10 @@ Data: Databento OPRA cbbo-1m, near-ATM 0DTE only, inside the remaining free cred
   mostly skip at $2.3k; the $2 vertical (T1b) is the version that fits whole-contract rounding.
 - T3 (pre-earnings straddle): parked. A straddle on a typical large cap costs $1,000+; at $2.3k with a 5% max loss only sub-$30
   names fit, and the remaining credit (~$7) may not cover single-name NBBO. Tested only if T1/T2 all die.
+
+## Step 3 results
+### T1/T2 (QQQ 0DTE on the noise signal): DEAD, all four; N 791 -> 795. `study_contest_t1t2.md`
+Judge 2025-01..2026-09 return on risk per trade: T1a -4.9%, T1b -15.5%, T1c -11.4%, T2a -9.5%. 3-mo median at $2.3k -15..-42%.
+Underlying signal +4.5bp/trade (2023-24), +2.6bp (2025-26, t 0.77): too small to carry 0DTE theta and spread.
+Next: T3 pre-earnings straddle (GXZ 2018) and T4 overnight short QQQ condor (Muravyev-Ni 2020: delta-hedged option
+returns are negative overnight, positive intraday).
