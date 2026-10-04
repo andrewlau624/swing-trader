@@ -48,6 +48,11 @@ MATERIAL = ("deadline", "maximum_position", "estimated_gross_payoff", "estimated
 UMH_AMOUNT, UMH_MIN, UMH_DISCOUNT = 1000.0, 500.0, 0.05
 UMH_SOURCE = ("UMH DRIP prospectus supplement 424B3 acc. 0001493152-21-002238 (Q11, Q14, Q16); "
               "UMH 10-Q Q2 2026 acc. 0001493152-26-036177 (plan still issuing at ~5% discount)")
+# User decision 2026-10-04: UMH is HOLD-ONLY and EXCLUDED from the clean CPC payoff. The plan may return cash from
+# holders who short to earn the 5% differential and may cut the discount for immediate resale, so the discount cannot
+# be locked in; what is left is a long UMH position. No monthly UMH events or alerts; never counted in the validation.
+UMH_ENABLED = False
+EXCLUDED_FAMILIES = {"UMH_OCP"}
 PROMOTE_DAYS = 10          # an upcoming UMH event becomes ACTION_REQUIRED this many days before its deadline
 
 
@@ -461,7 +466,7 @@ def _after_tax(net: float) -> float:
 def report(rows: list[dict], now=None, book_monthly: dict | None = None) -> dict:
     n = _now(now)
     st = fold(rows)
-    ev = list(st.values())
+    ev = [e for e in st.values() if e["family"] not in EXCLUDED_FAMILIES]
     comp = [e for e in ev if e["status"] == "COMPLETED"]
     nets = {e["event_id"]: (e.get("realized_pnl") or 0.0) - (e.get("realized_costs") or 0.0) for e in comp}
     nets_at = {k: _after_tax(v) for k, v in nets.items()}
@@ -556,7 +561,7 @@ def run(state_dir: Path, now=None, email: bool = True, log=print) -> dict:
     path = Path(state_dir) / LOG_NAME
     n = _now(now)
     res = dict(new=[], changed=[], refused=[])
-    cands = umh_events(n) + ingest(state_dir)
+    cands = (umh_events(n) if UMH_ENABLED else []) + ingest(state_dir)
     for ev in cands:
         try:
             kind, rec = add_event(path, ev, n)

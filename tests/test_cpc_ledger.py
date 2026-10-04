@@ -155,6 +155,7 @@ def test_run_sends_via_notifier_once(path, tmp_path, monkeypatch):
     sent = []
     from swingtrader.live import notify
     monkeypatch.setattr(notify.Notifier, "mail", lambda self, subj, html, dedupe_key=None: sent.append(dedupe_key) or "ok")
+    monkeypatch.setattr(L, "UMH_ENABLED", True)   # dedup mechanics only; UMH itself is hold-only in production
     r1 = L.run(tmp_path, at(2026, 10, 4), email=True, log=lambda *_: None)
     n1 = len(sent)
     L.run(tmp_path, at(2026, 10, 4), email=True, log=lambda *_: None)
@@ -236,3 +237,18 @@ def test_digest_read_and_registry(tmp_path):
     from swingtrader.daily import testing
     assert L.digest_read(tmp_path, tmp_path)["n"] == 0
     assert any("cpc_ledger" in t.covers for t in testing.REGISTRY)
+
+
+def test_umh_hold_only_no_events_and_excluded_from_report(tmp_path):
+    """User decision 2026-10-04: UMH is hold-only, generates nothing, and never counts toward validation."""
+    import datetime as _dt
+    from swingtrader.daily import cpc_ledger as c
+    assert c.UMH_ENABLED is False
+    now = _dt.datetime(2026, 10, 1, 9, 0, tzinfo=c.ET)
+    res = c.run(tmp_path, now=now, email=False, log=lambda *a: None)
+    assert not any(str(e).startswith("UMH") for e in res["new"])
+    ev = c.umh_event(2026, 11, now)                      # an old-style UMH record, e.g. written before the decision
+    _, rec = c.add_event(tmp_path / c.LOG_NAME, ev, now)
+    c.done(tmp_path / c.LOG_NAME, rec["event_id"], 50.0, 0.0, now=now)
+    r = c.report(c.read(tmp_path / c.LOG_NAME), now=now)
+    assert r["events"] == 0 and r["completed"] == 0

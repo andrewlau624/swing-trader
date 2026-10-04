@@ -235,3 +235,10 @@ promotion after ~12 months forward (>= +8pp annualized at $10k, >= 2 independent
 
 ## 2026-10-04 — CPC: FORWARD VALIDATION — ACTIVE (pending deploy)
 `swingtrader/daily/cpc_ledger.py` (append-only `state/cpc-ledger.jsonl`, no orders): UMH monthly plan events, ingest of the tender / split-off / round-up watcher state, one email per new or materially changed event, `make cpc-ledger|cpc-status|cpc-done|cpc-failed`, REGISTRY entry "CPC forward validation". Verification (`cpc_verification_2026-10-04.md`): UMH optional cash must be RECEIVED by the agent by the 10th (VERIFIED, 2021 prospectus); online/ACH, sale and DRS cost/timing UNKNOWN; the plan reserves the right to return cash from short sellers and cut the discount for immediate resale, so the taxable hedge itself is a plan-compliance risk. Gate (frozen): ~12 months, >= 2 independent events, >= +8pp/yr at $10k after costs/35% tax, not one event.
+
+## 2026-10-04 — UMH HOLD-ONLY, excluded from clean CPC accounting; ledger deployed (user)
+The plan names the hedge (short to earn the 5% differential) and immediate resale as grounds to return cash or cut the
+discount, so the discount cannot be locked in: what remains is a long UMH position, not the CPC mechanism. UMH
+generates no monthly events/alerts (`cpc_ledger.UMH_ENABLED = False`) and family UMH_OCP never counts in the report.
+October UMH skipped. CPC is an ACTIVE HYPOTHESIS near the +8pp gate (census ex-UMH-DRIP ~+8.4pp at $10k), not
+validated; evidence must come from forward split-offs, tenders, round-ups. Do not open positions just to make data.

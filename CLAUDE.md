@@ -496,3 +496,7 @@ Shapes that can clear it: daily frequency x >= 15bp net x >= 50% of capital (the
 ~100%; rare events x >= 10-20% with a per-holder cap that small accounts fill (the contract-payoff shape). Shapes that
 cannot: deep-market calendar effects (TME: 12 x 35bp x 100% = 4%/yr), event signals deploying a sliver of capital
 (insider-day ~0.5%/yr), anything whose edge is < 5x its round-trip cost.
+- **CPC (2026-10-04): FORWARD VALIDATION ACTIVE, personal-scale only.** UMH is HOLD-ONLY and excluded from clean CPC
+  accounting (the plan prohibits the hedge/flip that captures the discount). Remaining CPC (split-offs, odd-lot
+  tenders, round-ups) sits near the +8pp gate (~+8.4pp at $10k historically): an active hypothesis, not validated.
+  Ledger `swingtrader/daily/cpc_ledger.py`; no new CPC families, no issuer-plan search, no positions opened for data.
