@@ -480,3 +480,7 @@ cheapest high-value tests and mapped what each remaining mechanism actually need
   dollars at $2-25k. Not deployed. Stop Treasury variants; scaling it (leverage over 3 sessions) is the only open
   Treasury question. Russell Dec-2026 and signed dealer gamma are forward-shadow SPECS only
   (`research/drafts/shadow_*.md`); no paid data.
+- **Month-end 60/40 rebalancing (Study RB6040, 2002-15): ARTIFACT.** The registered abnormal-return statistic was
+  inflated by its own benchmark (other sessions of the month = the signal's inputs; 69% of the effect). Executable
+  spread +27bp net, t 1.2, gone after 2015. Rule for all future studies: gate on executable raw P&L; never benchmark an
+  event window against sessions that define the signal. No more month-end variants.

@@ -196,3 +196,13 @@ has ~47 names for 2006-09 and none of LEH/WM/BSC/Circuit City).
   one look on untouched 2002-15 via ETFs, + the Agg 3pm->4pm (2021-01-14) timing diagnostic; (2) month-end index
   extension in LQD/HYG/TIP/MBB; (3) CFTC hedging pressure; (4) micro /10Y as a TME vehicle (implementation);
   (5) equity-index implied financing (signal only).
+
+## 2026-10-04 — Study RB6040 (month-end 60/40 rebalancing): ARTIFACT; stop month-end variants
+
+Pre-reg e2c4aed (N 816 -> 817), one look 15:51. The registered rule printed VALIDATED (+114bp/window, t 4.6), but 69%
+of it is a construction artifact: the abnormal benchmark (other sessions of the month) is the same data that defines
+the signal. Executable raw P&L: +26.9bp net (t 1.16), ex-best-5 +1.7bp, 2016-26 +1.7bp. Dose response on raw returns is
+real in-sample (t -2.4) but not tradable after costs and absent after 2015. 2021 pricing-time experiment: mixed.
+Not related to TME (corr -0.09). `research/drafts/study_rb6040.md`. Lesson recorded: gate on executable raw P&L; never
+benchmark against signal-defining sessions. Month-end benchmark-flow family: TME stands (calendar-only signal), no
+further variants; next cycle moves to a different mechanism.
