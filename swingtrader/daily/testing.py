@@ -132,6 +132,15 @@ def _pick_cost(state: Path, logs: Path) -> dict:
 
 
 # ---------------------------------------------------------------- the list
+
+def _tme_l(state: Path, logs: Path) -> dict:
+    rows = [r for r in _jsonl(state / "tme-shadow.jsonl") if r.get("status") == "scored"]
+    if not rows:
+        return dict(n=0, week=0, line="no forward window scored yet (first: Oct-2026 month-end; make tme-shadow)")
+    wk = sum(1 for r in rows if str(r.get("T", "")) >= _week_ago())
+    m = {k: sum(r["pnl"][k] for r in rows) / len(rows) for k in ("L1", "L2", "L3")}
+    return dict(n=len(rows), week=wk, line=" ".join(f"{k} {_bp(v * 1e4)}" for k, v in m.items()) + " per window (of sleeve C)")
+
 REGISTRY: list[Test] = [
     Test("Night auction cost by price bucket (pick-quality lead)", "do $5-10 night names really cost ~15bp/side live, or ~0 in the auctions? (gross bounce $5-10 +40bp vs $50+ ~0)",
          "2026-10-02", 100, "$5-10 live trips", _pick_cost, "make pick-cost; pick_quality_log.md", ["pick_cost_watch"]),
@@ -172,6 +181,10 @@ REGISTRY: list[Test] = [
          "2026-09-22", 0, "log lines", _log_tag("wash-guard"), "make review", ["wash_guard_mode"]),
     Test("Tug-of-war night tilt (AU3)", "tilt night picks by the tug-of-war score (logged, not sized)",
          "2026-09-22", 0, "log lines", _log_tag("night"), "make review section 9 (SINCE=2026-09-22)"),
+    Test("TME-L: leveraged month-end Treasury sleeve", "does 2x (TLT on margin) / 3x (TMF) keep >= 80% / 73% of "
+         "the theoretical multiple of the VALIDATED month-end TLT window without breaching the tail limits?",
+         "2026-10-27", 24, "month-end windows", _tme_l, "make tme-shadow; round1_prose.md Study TME-L",
+         ["tme_shadow"]),
 ]
 
 
