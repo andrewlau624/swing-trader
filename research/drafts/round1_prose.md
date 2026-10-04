@@ -3161,3 +3161,49 @@ Classification: VALIDATED (all gates, t+2 stress mean > 0, economically meaningf
 fails or Roth leg fails), SMALL (passes, <= 1% of NAV/yr effect or capacity trivial), REJECTED (mean net <= 0 or t < 1),
 DATA-LIMITED (episodes/events below the n gate). A pass is log-only shadow proposal only; no live trading.
 Runner `research/sim/etf_flow.py`.
+
+## Amendment — Study TME: Treasury month-end duration extension, one definitive look on 2002-15 (pre-register; 1 judged rule, program N 813 -> 814)
+
+Registered 2026-10-04 before any 2002-15 TLT/IEF/SHY price was loaded by this program. Touched, never judged: 2016-26
+(the market-map probe read TLT last-3 vs mid-month 2016-26: +42.6bp/month, t 3.46). Study TAC (auction concession,
+2016-26) is a different, killed premise; this study does not use auction dates in its rule.
+
+**Mechanism.** The Bloomberg/Barclays US Treasury index (the benchmark for most core bond money) is rebalanced at month-end:
+bonds issued during the month enter and bonds falling under one year to maturity leave, so the index's duration jumps on
+the last business day. Benchmarked managers (pensions, insurers, bond funds) buy duration into the last sessions of the
+month to stay matched; dealers who warehouse the demand are paid through a predictable price rise (Hartley & Schwarz,
+"Predictable end-of-month Treasury returns"). Counterparty: dealers/arbitrageurs who provide the duration; the effect
+persists because benchmark tracking error is costlier to the managers than the concession. Capacity: the Treasury market;
+TLT/IEF ADV is $1B+ (2010s), so the account's size never binds.
+
+**Data.** Yahoo chart API daily bars with dividends (research/sim/etf_flow_data.fetch_px pattern), TLT, IEF, SHY
+(inception 2002-07-30), and ^IRX (13-week T-bill yield) for cash. Validation before outcomes: on 2016-26 the Yahoo
+closes must match Alpaca SIP closes (median |diff| <= 2bp); else DATA-LIMITED. Trading calendar = TLT's own dates.
+
+**Rule TME1 (judged).** Each calendar month m with a full window: let T = the last trading session of m. Buy TLT at the
+close of session T-3, sell at the close of session T (3 sessions held; closing auction both sides; long-only, works in
+the Roth and the taxable account). Window return R_w uses dividend-adjusted closes.
+Primary statistic: abnormal window return AR_m = R_w - 3 x mean daily TLT return over the OTHER sessions of month m
+(removes the month's own drift/term premium). Net = AR_m - 2 x 2bp (2bp/side, TLT; 2x shock = 4bp/side).
+
+**Judge window.** Months 2002-08 .. 2015-12 (~161 months). Subperiods: 2002-08 .. 2008-12 and 2009-01 .. 2015-12.
+
+**Gates (all, for PASS).** mean net AR > 0 with t >= 2 (months are non-overlapping; Newey-West 3 lags reported);
+median net AR > 0; mean net AR > 0 excluding the 5 best months; positive mean in both subperiods; positive in >= 60% of
+calendar years; mean > 0 at the 2x cost shock.
+**Economic threshold (decides the label).** Incremental account return = 12 x mean net R_w-excess-over-cash x the share
+of the account deployable for 3 sessions (taxable: idle cash, ~60%; Roth: up to 100%).
+VALIDATED = all gates and mean net AR >= +25bp/month (>= ~3%/yr at 100% deployment).
+PROMISING = all gates, +10 to +25bp/month. SMALL / NON-SCALABLE = gates pass but < +10bp/month, or the effect is carried
+by < 5 months. REJECTED = mean net AR <= 0 or t < 1, or either subperiod negative with t < 1 overall... otherwise
+(t in [1, 2) or a failed robustness gate) = REJECTED for adoption, reported as WEAK. DATA-LIMITED = validation fails.
+
+**Identification (reported, not gates; registered so they cannot be chosen after).**
+(a) Duration monotonicity: the same AR for IEF and SHY; duration demand predicts TLT > IEF > SHY ~ 0.
+(b) Day profile: mean abnormal daily return for sessions T-5 .. T+2; the mechanism predicts concentration on T-2 .. T
+and no reversal required before T (a reversal on T+1/T+2 is reported, not traded).
+(c) Refunding months (Feb/May/Aug/Nov, larger index extension) vs other months.
+(d) Excess over cash (R_w - T-bill) as the money number, and the share of the year's TLT return earned in the windows.
+(e) Ex-2008: mean without Sep-Dec 2008. (f) Per-year table.
+Capacity, turnover (12 round trips/yr), and $ economics at $2.3k / $10k / $25k / $100k reported.
+One look; nothing tuned on 2002-15. Runner `research/sim/tme_treasury.py`.
