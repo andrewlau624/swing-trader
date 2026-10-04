@@ -3105,3 +3105,59 @@ here is informative about that.
 Classification: VALIDATED (all gates + economically meaningful capacity), PROMISING (TL1 and TL1-ID pass, economics
 unclear), SMALL/NON-SCALABLE (passes but capacity trivial), REJECTED (TL1 or TL1-ID fails), DATA-LIMITED (n < 150).
 Runner `research/sim/threshold_tl.py` (`bars`, `run`).
+
+## Amendment — Study EF: ETF share-creation/redemption flow (pre-register; program N 810 -> 813)
+Registered 2026-10-04 before any flow-conditioned return was computed. Bar: observable flow -> forced/intermediated
+transaction -> predictable price effect -> EXECUTABLE trade; else reject. ETF flows are NOT assumed to be alpha. Three
+judged rules. SPDR sector ETF prices were heavily used by the IBS leg; flow-conditioned returns are untouched.
+Data (built, no outcomes read): `research/sim/etf_flow_data.py`, files in `data/research/etf_flow/`. SSGA navhist
+(date, NAV, shares outstanding SO, total net assets) for 27 SPDR funds: SPY DIA XLB XLE XLF XLI XLK XLP XLU XLV XLY XBI
+KRE XOP XRT XHB XME from 2006-06 (SPY, DIA, sectors 2003-12, but SO is blank before 2006-05-31); MDY SO from 2011-01;
+XLRE 2015-10; XLC 2018-06; JNK 2007-12; SJNK 2012-03; SPSB 2009-12; SPIB 2009-02; SPLB 2009-03; BIL 2007-05; GLD (grantor
+trust, no in-kind basket mechanics like the 1940-Act funds; excluded from the judged rules). ~252 rows/yr, through 2026-10-01
+(the SPY file lacked 2026-10-02 on 2026-10-04 while GLD had it: SSGA publication lag is >= 1 session and unknown
+historically). Prices: Yahoo chart API 2007+ (split-adjusted OHLC, adjclose), agrees with the Alpaca SIP panel 2016+ on
+open/close ratios (median 0.1-0.5bp, p95 1.6-6.7bp; SPY XLK XBI MDY GLD). Pre-2016 opens are the first consolidated print
+(auction proxy only); this is a data-quality caveat on the 2008-15 half, not a gate.
+**Date convention of SO (internal evidence only; no external source).** corr(dSO_t/SO, premium_{t+k}), premium =
+close/NAV-1: the peak is at k = -1 in 2024-26 (SPY 0.19, JNK 0.37, GLD 0.20 at k -1/0) i.e. the row dated t shows shares
+created/redeemed on orders from the prior session close (T+1 settlement), and the pre-2024 eras are too weak (<= 0.1) to
+date. So the flow occurred at or before the close of t-1, and row t is published after t's close with an unknown lag.
+Conservative rule used everywhere: row t is actionable at the OPEN of t+1 (stated baseline, NOT proven; a 2026-10-04
+snapshot suggests SPY's lag can exceed one session); every rule is also run with entry at the open of t+2 as a timing
+stress, and a rule that passes only at t+1 can be at most PROMISING (timing unproven).
+**Flow measure.** f_t = (SO_t - SO_{t-1}) * NAV_t / (SO_{t-1} * NAV_{t-1}) = SO_t/SO_{t-1} - 1 (fraction of shares), with
+share-split days (|SO ratio - 1| > 0.4 and the NAV ratio ~ 1/SO ratio) set to NaN. Daily NaN/zero rows are kept.
+Universe EQ = XLB XLE XLF XLI XLK XLP XLU XLV XLY (+XLRE from 60 sessions after launch, +XLC likewise) XBI KRE XOP XRT
+XHB XME MDY DIA (no SPY: SPY is the benchmark). Returns: adjclose-adjusted open->open. Costs: book.cost_bps tier per side
+at each open (ETF price, prior-20d ADV), stress = 2x tier; shorts add 1%/yr borrow. Judge window 2008-01-02 .. 2026-09-30
+(one look); subperiods 2008-12, 2013-19, 2020-26 reported. No parameter is tuned; thresholds are round numbers.
+- **H1 (Brown-Davies-Ringgenberg 2021): net creations predict underperformance.** Friday t (last session of the week):
+  F = sum of f over the trailing 20 rows (ETFs with >= 15 non-NaN rows). Rank EQ; LOW = 3 lowest F (net redemptions),
+  HIGH = 3 highest. Enter at the open of the next session after t (Monday), hold to
+  the next Monday's open (5 sessions), equal weight, full round trip each week. Primary statistic = LS spread
+  EW(LOW) - EW(HIGH) net of cost on both legs + borrow (taxable). Roth long-only version = EW(LOW) - EW(EQ) (excess over the
+  equal-weight universe; not itself investable without the benchmark, so the Roth leg is tested as LOW minus EW(EQ) AND must
+  beat zero in raw excess over SPY). Gates: n >= 400 weeks; LS mean > 0, Newey-West(4) t >= 2, median weekly > 0, mean > 0 ex
+  5 largest weeks, positive in >= 60% of calendar years, mean > 0 at 2x cost; plus Roth LOW-EW(EQ) mean > 0 with t >= 2.
+  Entry-at-t+2 stress reported.
+- **H2: high-yield bond ETF discount at the close.** Universe JNK, SJNK. D_t = close_t / NAV_t - 1, t's NAV is the SSGA row.
+  Signal: D_t <= -1.0%. Entry at the open of t+1 (known from the evening NAV), exit at the open of t+6 (5 sessions). First
+  signal of an episode only (signals within 5 sessions of an entry ignored). The NAV can be stale (bonds priced at 4pm bid
+  vs a real-time ETF price) so the test is the ETF return, not NAV convergence: AR = ETF return - beta * SPY return over the
+  window, beta fitted by OLS on all non-overlapping 5-session windows of the fund. Roth-compatible (long only). Costs tier
+  per side (doubled for a 1%+ discount day) plus 2x shock. Gates: >= 15 episodes (fewer: DATA-LIMITED); mean net AR > 0 with
+  episode-clustered t >= 2; median > 0; mean > 0 ex 2 largest episodes; positive in >= 60% of years with an episode; mean > 0 at
+  2x cost; not carried by one episode window (2008-09 or 2020-03 alone). Reported: raw return, mean D, JNK vs SJNK, t+2 entry.
+- **H3: large redemption day, next-day reversal.** An EQ fund-day with f_t <= -3.0% (APs buy the ETF and sell the basket at
+  the close; price pressure expected to revert). Enter at the open of t+1, exit at the open of t+2 (1 session), long only.
+  AR = ETF open->open return - SPY open->open return. Costs: 2 x tier per side (one-day hold). Gates: >= 150 events; mean
+  net AR > 0, date-clustered t >= 2; median > 0; mean > 0 ex 5 largest and ex top 1%; positive in >= 60% of years; mean > 0
+  at 2x cost. Creation side (f >= +3%, short) reported only.
+Reported, not gates: mean AR by f decile (all rules' fund-days) and cumulative AR by day from t-3 to t+5 (timing: whether the
+effect is before t+1's open, i.e. untradable); capacity and turnover; overlap with IBS (share of H3/H1 entries with IBS_t < 0.2
+on the signal fund); P&L at $2.3k / $10k / $25k with whole shares; DSR across N.
+Classification: VALIDATED (all gates, t+2 stress mean > 0, economically meaningful), PROMISING (gates pass but t+2 stress
+fails or Roth leg fails), SMALL (passes, <= 1% of NAV/yr effect or capacity trivial), REJECTED (mean net <= 0 or t < 1),
+DATA-LIMITED (episodes/events below the n gate). A pass is log-only shadow proposal only; no live trading.
+Runner `research/sim/etf_flow.py`.
