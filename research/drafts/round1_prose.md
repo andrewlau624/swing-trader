@@ -2704,3 +2704,26 @@ Session llm-trader-ec, idea G54. Registered 2026-10-03 before any outcome. Event
 FTS display) matches the G45 fund regex AND that symbol has an adjusted Alpaca bar history; first event per fund per 90 days.
 Trade/benchmark/costs/hold/halves/gates exactly as G45 (60 sessions vs PCEF, select n >= 30, mean >= +2.0%, date-level t >= 2;
 judge mean > 0, t >= 2, ex-best-5 > 0; holdout >= 0). Runner `research/sim/goal_g54.py`. k = 44 when judged.
+
+## Amendment — Goal L, Studies L1 / L2: concentration and leverage on the proven legs only (pre-register; program N 788 -> 791)
+Registered 2026-10-04 before any outcome of these variants. Prior work cited, not redone: add. 22/29 (leverage profiles,
+growth peaks at L ~ 3 under edge-halves), add. 24 D (night top-1 at 100%: dead, Kelly), add. 32 (after-tax frontier knee =
+moderate 1.3x), add. 39 (raw pool), index-beat stack (taxable SPY 1.0x + legs on margin). New here: only the two legs with
+holdout evidence (IBS ETF leg 2016-20; night leg 2020 raw rebuild), no noise/conviction legs, at the user's balances, with a
+$2,000 margin floor, a drawdown stop and a 3-year ruin bootstrap. Three judged variants (N +3):
+- **B0 control**: ibs 0.5 / night 0.5 (live today, 1.0x overnight, no margin).
+- **L1 concentration**: one budget of 1.0x. On a Sim day where only one leg has a signal, that leg gets 1.0 of equity;
+  both fire -> 0.5 / 0.5; neither -> cash (SGOV). No margin. (Top-1-name concentration is add. 24 D, dead; not re-run.)
+- **L2a 1.5x / L2b 2.0x**, taxable only (Roth stays 1.0x): both legs scaled to 0.75/0.75 and 1.0/1.0 of equity. Capped at
+  half-Kelly: f* = mu/sigma^2 of the 1.0x book's daily returns on the 2016-20 holdout; if 0.5 f* < L, run at 0.5 f*.
+  Margin only while equity >= $2,000 (below it: B0). **Hard stop: equity 15% below its running peak -> B0 until a new
+  peak.** Margin interest 12.5%/yr on the overnight debit (Schwab base-rate tier for < $25k; not in SCHWAB.md; ~12-13%).
+Costs: night tier_hi (2020 rebuild: flat 10bp/side + its 9.1bp bias charge), IBS 3bp/side. Tax: 30% short-term on each
+year's net gain, losses carried forward, paid from the account on Dec 31. Shipped simulator `load_sim(raw_price=True)`,
+whole shares, $2.3k / $10k / $25k lumps, no deposits (time-weighted). Judge = 2016-20 holdout returns book (night leg 2020
+only, bills before; L1 judged on 2020 only, the one holdout year with both legs). 2021-26 is descriptive.
+Pass (each variant vs B0): holdout after-tax, after-interest CAGR >= B0 + 2pp/yr; holdout maxDD <= 30% and COVID
+(2020-02-19..03-23) loss <= 25%; 3-yr 21-day block bootstrap of 2016-26 under edge-halves P(equity < 50% of start) <= 5%;
+2021-23 and 2024-26 after-tax CAGR >= B0 at $10k. Also reported, not gates: worst month, P(equity < $2,000) in 3 yrs,
+implied max leverage. Pass = SHADOW at most (live night edge unproven: 34 trades at 09-29; re-arm rule ~100 trades).
+Options overlay: no option-chain history in the repo (NEXT.md, Study AR): not testable. Runner `research/sim/goal_l.py`.
