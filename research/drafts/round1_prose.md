@@ -2955,6 +2955,60 @@ select 2023-01..2024-12 / judge 2025-01..2026-09, gates and reporting as T1/T2. 
   (record of minute 5) at the ask; sell on the 15:51 NBBO at the bid. Few events (~30-50/yr): reported with its n.
 Runners `research/sim/contest_straddle.py` (T5, T7) and `research/sim/contest_options.py` (T6).
 
+## Amendment — Study IN: the insider-buy gap captured from the filing time (pre-register; 2 judged variants, program N 799 -> 801)
+Registered 2026-10-04 ~03:40 PDT, before any IN outcome (no auction, extended-hours or quote price for these events has
+been loaded; only EDGAR headers). **N bookkeeping:** T4's header says 795 -> 798, but H-POOL (registered just before it)
+had already counted 795 -> 796, so the reconciled count is 799; IN adds 2 -> **801**.
+Claim being attacked (context note `disc/info_sources.md`, from the cached EV2/ID3 trade file, raw, not SPY-adjusted):
+the prior close -> next open of the session after an officer/director buy filing averages +76bp (ID3), +113bp (EV2),
++198bp (EV2 >= $500k); the book trades only the next open -> close (+18bp). **Prior coverage:** G12 (N 775) tested
+buys >= $500k accepted 09:30-15:20, bought at the first minute after acceptance + 5 min, sold at the SAME session's close
+(select 2021-23 n 128, +32.6bp net, median -5bp, t 1.75: dead on select). No close -> open (or after-hours -> open)
+insider window has been computed in any study; L19 (night tilt on 30/90-day insider names) is a different event.
+- **Events.** Form 345 data sets 2016q1..2026q1 (`goal_g12.buys()`), document 4 or 4/A, >= 1 non-derivative code-P
+  acquisition, reporting owner Director or Officer, P dollars in the accession >= $10k (ID3's definition). EDGAR
+  ACCEPTANCE-DATETIME from the filing header (`event_fetch.hdr`, ET). **Public time = acceptance + 1 min** (EDGAR
+  disseminates on acceptance, 06:00-22:00; Rogers, Skinner & Zechman 2017 put the public-website lag behind the PDS feed
+  at seconds); the entry rule adds 2 more minutes, and a +15 min lag is reported. One event per (symbol, acceptance
+  date): the earliest acceptance that day; $ size and "first buy" flags use only that first accession (known at the
+  public time). Filters through the PRIOR session (Alpaca raw daily bars; used only for ADV and prior close, not for any
+  return): 20d ADV$ >= $20M (ID3), prior raw close >= $5. Half-day sessions (SPY's closing-cross print before 14:00 ET)
+  are dropped and counted.
+- **IN1 (rule-compliant).** Public time on a regular session in [09:30, 15:50) ET -> buy that session's official
+  closing cross, sell the next session's official opening cross. Cross price = the largest-size print in Alpaca's SIP
+  auction record for that trade date (the repo's max-by-size rule, `auction_share.load_hist` / `outside_box.cross_prices`),
+  keeping only prints whose ET timestamp falls on that trade date (a vendor day can start the evening before).
+- **IN2 (research only; deploying it needs a user exception to the sessions rule).** Public time in [16:00, 20:00) ET on
+  a session day -> entry on the first SIP 1-minute extended-hours bar starting >= public + 2 min and < public + 32 min
+  (no bar in that window = no trade, counted); entry price = max(bar high, bar close x (1 + half-spread)); exit at the next
+  official opening cross. **Spread model:** half-spread = median over the SIP NBBO quotes inside the entry minute of
+  (ask - bid) / 2 / mid (bid > 0, ask > bid, spread < 10% of mid); when no valid quote exists, the median half-spread of
+  quoted IN2 entries in the same price bucket (<$10, $10-20, >=$20) x ADV bucket (<$50M, >=$50M); floored at half a
+  cent. The quote is an input cost, not an outcome.
+- **Costs and adjustment.** `book.cost_bps("tier", raw price, ADV$)` per side on both legs (tier_hi reported); IN2 pays the
+  spread model on top. **Judged unit = SPY-adjusted net**: trade net minus SPY's return over the same window (IN1: SPY
+  close cross -> next open cross; IN2: SPY's last extended-hours minute close at or before the entry minute -> next open
+  cross). Raw net is reported.
+- **Halves.** Select 2022-01..2023-12, judge 2024-01..2026-03 (data end). **The judge window is heavily reused in this
+  program** (ID, EV1/EV2, G-series, H-POOL context); its p-values are optimistic. 2016-21 is reported as an extra
+  out-of-sample period (EDGAR headers and Alpaca SIP auctions/minutes cover it), not a gate.
+- **Pass bar (each variant separately, all in the judge half):** SPY-adjusted net mean >= +25bp/trade; median > 0;
+  t >= 2 on the equal-weight daily series (date-clustered); mean > 0 after dropping the top 1% of trades; plus select
+  half mean > 0. PASS = all hold; else DEAD. EV2-only and >= $500k-only subsets are reported, never judged (a subset
+  result needs its own registration).
+- **Artifact checks (reported whatever the verdict):** (a) acceptance vs FILING_DATE by acceptance hour (do 17:30-22:00
+  filings carry the next business day's date; is any FILING_DATE earlier than the acceptance date); (b) for IN2, the move
+  from the closing cross to the entry price and from the close to the last pre-public print, i.e. how much of the claimed
+  close -> open happened before a public trader could act; (c) share of IN2 events with no extended-hours trade within
+  30 min of public + 2 min; entry-bar $ volume vs the order at $2.3k / $10k / $25k; (d) % of P&L from the top 1% / 5% of
+  trades, by-year signs; (e) every selection field (size, first-buy, ADV, price) dated <= the public time.
+- **Sizing (reported):** events/yr; shared nights and daily correlation with the night leg (`B.night_days(raw_price=True,
+  max_corr=0.7)`) and with ID3's next-session open -> close on the same events; %/yr as a sleeve on idle overnight cash
+  (0.5 x equity per night split equally over that night's events, <= 0.25 x equity per name, whole shares at the entry
+  price, IN2 order <= 20% of the entry bar's $ volume) at $2.3k / $10k / $25k, one $100k capacity line. The Roth can
+  hold IN1 overnight longs without margin; IN2 needs extended-hours limit orders (broker-dependent).
+Runner `research/sim/insider_night.py` (`events`, `fetch`, `run`; one look).
+
 ## Amendment — Study T5L: the earnings iron fly on liquid large caps, executable prices, untouched 2016-22 (pre-register; program N 805 -> 806)
 Registered 2026-10-04 before any pre-2023 option price or earnings date was loaded. (N: 803 after T5-T7 plus Study IN's two
 judged variants, which another session registered as "799 -> 801" in parallel: the true count before this is 805.)
@@ -2975,3 +3029,47 @@ ex-best-5 > 0; positive in >= 5 of the 7 judge years; still > 0 with every exit 
 >= 300 judge trades. Reported: by year (2020, 2022 stress), mid-to-mid vs executable, win rate, worst trade, 3-month return
 distribution at 5% risk per trade at $2.3k / $10k / $25k, the 2023-26 selection-period numbers. Kill = any gate fails.
 Runner `research/sim/contest_t5l.py`.
+
+## Amendment — Study NX: the exact live night leg judged on survivorship-free pre-2016 data (pre-register; 1 primary rule + 2 conditional size-up rules, program N 806 -> 809)
+
+Stamped 2026-10-04, before any pre-2016 night-leg outcome has been computed by this program and before the dataset
+is chosen. Why now: the night leg is the book's least-verified leg (CLAUDE.md "Research philosophy"); every proposed
+size-up (D3 losing-night x2, M1 "moderate" 1.3x + cap .15) depends on it; it has never been judged on data it was not
+chosen on. **2016-20 is NOT untouched**: `night_oos_pre2021.py` (survivor-only Alpaca universe) and this session's D3
+proxy both read 2016-20 night outcomes on 2026-10-04. It is reported, never judged. The judge window is pre-2016.
+
+**Data requirements (the purchase must meet all, or the study is INCONCLUSIVE, not FAIL).** Daily unadjusted OHLCV
+plus split/dividend factors; delisted securities with history through the last trading day and a delisting price or
+return; a permanent security id across ticker changes and reuse; security type (common stock vs ETF/ETN/ADR/CEF/
+unit/warrant/preferred); an exchange trading calendar. Coverage gate (checked before any outcome): per-year count of
+securities passing the eligibility filter within +/-15% of an independent count (e.g. CRSP/NYSE-published listings or
+the vendor's own active+delisted totals), and >= 20% of eligible-name-years ending in a delisting over the window.
+
+**Rule (frozen = the live rule as of config.yaml 2026-10-04; daily-bar form, the close stands in for the 15:40 price).**
+Eligible on day t from bars before t: prior close >= $5, 20-day mean (unadjusted close x volume) >= $10M nominal.
+Pick: close_t / close_{t-1} - 1 <= -8%, IBS_t = (close-low)/(high-low) < 0.10, close in [$5, $2000], 20-day realized
+vol (log closes, x sqrt 252) >= 0.60. Crowd: n_raw (before the vol filter) > 30 -> exposure x 30/n_raw. Dedupe: walk
+most-beaten first, drop a name whose 20-day returns correlate > 0.7 with a kept one. Weights: signals.night_tilt v1
+(k 0.25, frozen NIGHT_TILT constants), per-name cap 10%, weekend/holiday x0.5 (signals.gap_scale). Outcome: next
+session open / close_t - 1 on unadjusted prices adjusted only for a split/distribution effective at that open; a name
+with no next open (halt/delist) is scored at its delisting price/return, or -100% if the vendor has none.
+Universe: PRIMARY = common stock (incl. ADRs) on NYSE/Nasdaq/AMEX; SECONDARY (reported) = all listed incl. ETF/ETN.
+
+**Windows.** Judge: 2003-01-02 .. 2015-12-31 (post-decimalization). Subperiods judged: 2003-07, 2008-09, 2010-15.
+Reported only: 1998-2002 if available (pre-decimal spreads), 2016-20 (touched).
+
+**Costs.** Primary: book.TIERS "tier" (5-15bp/side; consolidated open/close are not the auction prints, and pre-2016
+spreads were wider). Stress: tier_hi and 2x tier_hi. The live-measured ~0bp is NOT used for the judge.
+
+**Pass bar (primary).** Leg-level, equity-weighted per night, net at tier: mean > 0 with night-clustered t >= 2 over
+2003-15; positive in >= 2 of the 3 subperiods; per-trade median > 0; mean still > 0 without its best 5 nights; still
+> 0 after subtracting beta x same-night IWM (or Russell 2000 proxy) close->open, beta fitted on the window. FAIL: mean
+net <= 0 at tier, or t < 1. Anything else: WEAK (not adopted for sizing; IBS remains the only OOS-verified leg).
+Reported, not gated: tier_hi and 2x shock, hit rate, ADV-bucket and year trend (capacity), edge by VIX/vol regime
+(mechanism: liquidity-provision premium should rise with stress), sector-adjusted residual.
+
+**Secondary (judged ONLY if the primary passes; rules frozen as stated by D3 and M1 on 2026-10-04).**
+NX-S1 losing-night: if yesterday's equal-weight night picks lost <= -2% net, size tonight's leg x2 within equity.
+NX-S2 moderate: night 1.3x with name cap .15. Pass: book-level increment > 0 at tier in 2003-15 and in 2 of 3
+subperiods, and max drawdown no worse than 1.5x the base leg's. Neither may be live-sized before both the primary and
+its own bar pass. No parameter in this amendment may be tuned on the judge window; a second look is a new study.
