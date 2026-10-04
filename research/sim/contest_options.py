@@ -442,6 +442,78 @@ def main4():
     rep.to_csv("data/research/contest/t4_report.csv", index=False)
 
 
+# ------------------------------------------------------------------ T6: QQQ 0DTE long straddle 09:45 -> 15:50
+OUT6 = "data/research/contest/opra_t6"
+T6_DEC, T6_OUT = 15, 381
+
+
+def t6_days(M):
+    f = pd.read_parquet(RAW_FACTOR)["factor"]
+    days = [d for d in M["close"].index if pd.Timestamp(START) <= d < pd.Timestamp(END)]
+    return pd.DataFrame([(d, float(M["close"].loc[d][T6_DEC]) * f[d]) for d in days], columns=["day", "px"])
+
+
+def legs_t6(day, px):
+    k = int(round(px))
+    return [(1, osi(day, "C", k)), (1, osi(day, "P", k))]
+
+
+def fetch6():
+    import databento as db
+    client = db.Historical(dotenv_values(".env")["DATABENTO_API_KEY"])
+    os.makedirs(OUT6, exist_ok=True)
+    jobs = []
+    for r in t6_days(intra.load("QQQ")).itertuples():
+        syms = [x for _, x in legs_t6(r.day, r.px)]
+        for tag, (h, m) in (("a", (9, 44)), ("b", (15, 49))):
+            path = f"{OUT6}/QQQ_{r.day:%Y-%m-%d}{tag}.parquet"
+            if not os.path.exists(path):
+                st = pd.Timestamp(r.day).tz_localize(ET) + pd.Timedelta(hours=h, minutes=m)
+                jobs.append((syms, st.tz_convert("UTC").isoformat(),
+                             (st + pd.Timedelta(minutes=5)).tz_convert("UTC").isoformat(), path))
+
+    def one(job):
+        syms, start, end, path = job
+        try:
+            df = client.timeseries.get_range(dataset="OPRA.PILLAR", symbols=syms, stype_in="raw_symbol",
+                                             schema="cbbo-1m", start=start, end=end).to_df().reset_index()
+        except Exception as exc:
+            print(f"{path}: {type(exc).__name__} {str(exc)[:100]}", flush=True)
+            return
+        keep = [k for k in ("ts_recv", "symbol", "bid_px_00", "ask_px_00") if k in df.columns]
+        df[keep].rename(columns=lambda k: k.replace("_00", "")).to_parquet(path)
+
+    print(f"{len(jobs)} windows", flush=True)
+    from concurrent.futures import ThreadPoolExecutor
+    with ThreadPoolExecutor(8) as ex:
+        list(ex.map(one, jobs))
+    print("done", flush=True)
+
+
+def main6():
+    M = intra.load("QQQ")
+    book = Book(OUT6)
+    rows, skipped = [], 0
+    for r in t6_days(M).itertuples():
+        x = price_trade(book, legs_t6(r.day, r.px), r.day, T6_DEC, T6_OUT - 1)
+        if x is None:
+            skipped += 1
+            continue
+        cost, val, fees = x
+        rows.append(("T6", r.day, cost, val, fees))
+    p = pd.DataFrame(rows, columns=["v", "day", "cost", "val", "fees"])
+    p["risk"] = p.cost + p.fees
+    p["pnl"] = p.val - p.cost - p.fees
+    p["r"] = p.pnl / p.risk
+    p.to_parquet("data/research/contest/t6_trades.parquet")
+    cal = [d for d in M["close"].index if pd.Timestamp(START) <= d < pd.Timestamp(END)]
+    print(f"T6 days priced {len(p)}, unpriced {skipped}")
+    rep = report(p, cal)
+    pd.set_option("display.width", 250, "display.max_columns", 60)
+    print(rep.round(4).T.to_string())
+    rep.to_csv("data/research/contest/t6_report.csv", index=False)
+
+
 def main():
     t, c = signal(intra.load("QQQ"))
     book = Book()
@@ -463,5 +535,9 @@ if __name__ == "__main__":
         fetch4("--dry" in sys.argv)
     elif sys.argv[1:2] == ["run4"]:
         main4()
+    elif sys.argv[1:2] == ["fetch6"]:
+        fetch6()
+    elif sys.argv[1:2] == ["run6"]:
+        main6()
     else:
         main()

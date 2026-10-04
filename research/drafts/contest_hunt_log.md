@@ -71,3 +71,5 @@ Next: T3 pre-earnings straddle (GXZ 2018) and T4 overnight short QQQ condor (Mur
 returns are negative overnight, positive intraday).
 ### T4 (overnight short QQQ 1DTE condor/fly): DEAD, all three; N 795 -> 798. `study_contest_t4.md`
 Judge return on risk per night: T4a -29.8%, T4b -18.6%, T4c -57.7%. Mid-to-mid P&L ~0: no overnight premium; spreads kill it.
+### T7 (EV2-big insider buy -> call, open->close): DEAD; `study_contest_t7.md`
+270 priced events; judge -31.5% of premium per trade (select -28.7%). Median 09:35 spread 23% of the ask on these chains.
