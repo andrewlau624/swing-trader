@@ -242,3 +242,12 @@ discount, so the discount cannot be locked in: what remains is a long UMH positi
 generates no monthly events/alerts (`cpc_ledger.UMH_ENABLED = False`) and family UMH_OCP never counts in the report.
 October UMH skipped. CPC is an ACTIVE HYPOTHESIS near the +8pp gate (census ex-UMH-DRIP ~+8.4pp at $10k), not
 validated; evidence must come from forward split-offs, tenders, round-ups. Do not open positions just to make data.
+
+## 2026-10-04 — Cash-feeder track (separate from alpha and Polymarket): ranked, nothing new beats the CPC set
+`research/drafts/feeders_2026-10-04.md`. ACTIVE: split-offs (B2, ledger), odd-lot tenders (alerts). VALIDATION NEEDED:
+reverse-split round-ups (Schwab treatment pending VIVK ~10-07; unverified report that brokers close accounts that farm
+rounding), mutual-bank conversions (human project, 1-2 yr lead, 100-share oversubscription floor -> ~$200/deal, not
+$400). WATCH: Robinhood IRA match (borderline; moves Roth off Schwab). KILL: ACATS matches, SPAC trust, warrants,
+consent mergers, liquidations, term CEFs, ETF closures, rights, merger elections, appraisal, IPO access, cash-in-lieu,
+Treasury/muni retail periods, class actions, venue rebates. Combined realistic ceiling ~$300-700/yr pre-tax at $2.5k.
+New risk to the tender rule: UTMD's offer requires ownership on a record date before the alert (2026-09-21).
