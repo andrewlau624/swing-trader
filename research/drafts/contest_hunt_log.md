@@ -5,7 +5,7 @@
 
 ## Steps
 - [x] Step 1: strategy-family table, top 3 picked (T1 noise 0DTE overlay, T2 0DTE credit spreads, T3 pre-earnings straddle)
-- [ ] Step 2: data for the top 3
+- [x] Step 2: data (Databento OPRA cbbo-1m, signal-driven, $2.00)
 - [ ] Step 3: pre-register + test (N 791 at start)
 - [ ] Step 4: build, test, deploy small
 
@@ -51,3 +51,14 @@ wins). A 2x lead over 3 months is consistent with positive skew plus luck; the u
 - **T3 = family 4**: pre-earnings straddles, if earnings dates + single-name NBBO can be had for the remaining credit.
 Splits: select 2023-01..2024-12 (daily QQQ expiries from 2022-11), untouched judge 2025-01..2026-09.
 Data: Databento OPRA cbbo-1m, near-ATM 0DTE only, inside the remaining free credit (~$9 of $125). No purchase needed.
+
+## Step 2 (data)
+- Alpaca options historical API (probed): minute bars + trades from 2024-02 only, **no historical quotes** (404). Too thin for far-side fills.
+- Databento OPRA.PILLAR cbbo-1m (real consolidated NBBO, 2013+) via the existing key. A full +/-3% 0DTE chain would be ~$22
+  (over the ~$9 left of the free credit). Signal-driven pull (only the contracts T1/T2 trade): **$2.00** for 2023-01..2026-09,
+  865 signal trades + 690 condor days. Paid from the existing credit; no purchase, so no question for the user.
+- Pre-registered T1a/T1b/T1c/T2a in round1_prose.md (0dc72d6), N 791 -> 795, before any option price was loaded.
+- Small-account note: a 10:00 ATM QQQ 0DTE costs ~$300-500/contract, above the 5% ($115) max loss at $2.3k, so T1a will
+  mostly skip at $2.3k; the $2 vertical (T1b) is the version that fits whole-contract rounding.
+- T3 (pre-earnings straddle): parked. A straddle on a typical large cap costs $1,000+; at $2.3k with a 5% max loss only sub-$30
+  names fit, and the remaining credit (~$7) may not cover single-name NBBO. Tested only if T1/T2 all die.
