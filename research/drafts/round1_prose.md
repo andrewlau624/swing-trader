@@ -3305,3 +3305,85 @@ below puts the real mean at < 90th pct, or the effect exists only in raw (not ab
   of each leg.
 Relationship labels if it passes: A independent (equity leg carries it, low corr with TME), B TME extension (bond leg
 carries it, unsigned bond strength), C overlapping (corr with TME AR > 0.5). Runner `research/sim/rb6040.py`; one look.
+
+## Amendment — Study CPC: census of ALL per-holder-capped contract payoffs 2016-2026, as ONE opportunity (pre-register; 1 judged total, program N 817 -> 818)
+
+Registered 2026-10-04 before any new aggregate was computed. Prior (NOT an input): study_goal_g1.md says +20.5pp after tax at
+$2.3k, +8.8pp at $10k (2024-26 judge half, SPY-core baseline, B1 ~$370/yr/account). This study re-derives the total from the
+per-deal tables, with costs, whole shares, capital allocation and overlap, on 2016-2026 as one block (no judge/holdout split;
+the halves 2016-20 and 2021-26 are reported). Nothing is fitted; every rule below is an already-existing deal rule. Runner
+`research/sim/cpc.py`, report `research/drafts/study_cpc.md`. Selection-bias caveat, stated up front: these families were
+chosen BECAUSE they paid on this same history (B1/B2/odd-lot tenders were registered and judged on it; DL-G27 and DL1 were
+kept for paying). The census therefore overstates the forward value of the survivors; it is a ceiling check, not a fresh test.
+
+**Event universe and per-deal sources (frozen).**
+- B1 reverse-split round-ups: `data/research/program/roundup_deals.csv`, status `ok` (the repo's "rounded up", never
+  "participant level") with ratio_chk in [0.33, 3] (344 deals). One post-split share per account. Buy 1 share at the raw
+  close of S (+ half-spread h), sell at the raw close of E+5 sessions (- h). PRIMARY scenario "rounded" (value = pe5);
+  SENSITIVITY "cash in lieu" (every deal pays `cash` = P_E/N - ps; Schwab's treatment is unverified until VIVK ~2026-10-07),
+  plus E-close exit, plus the break-even P(round). Live 3/day and $25 caps not applied; days with > 3 deals are counted.
+- B2 split-off exchange offers with odd-lot priority: `splitoff_deals.csv` (14 offers 2016-25; none failed or cancelled; the
+  live MDT/MMED offer is not complete and is excluded). <= 99 parent shares, buy at the close 5 sessions before expiry
+  (+h), received shares valued and sold at the first close after expiry (value * (1 - h)), upper limit already in `value`.
+- Issuer tender offers (fixed price or Dutch) with odd-lot priority: `data/research/night/tender/oddlot_trades_rule.csv`
+  (EDGAR FTS "odd lot" SC TO-I, 2016-26). PRIMARY set = kind cash_fixed/cash_dutch, oddp = Y, entry B, floor_gain >= +1% (the
+  tender_watch rule; decidable at entry from the offer's own floor and the market close; 14 deals). Entry at the close (+h), tender
+  <= 99 shares, odd lots accepted in full, paid `final` (Dutch: the floor/low end, the conservative reading used in
+  study_oddlot_tenders.md), exit date = entry + `days`. Reported variant: ALL cash odd-lot-priority deals with no floor filter.
+  Failed or terminated offers would be valued at the market close (none in the set; the table carries the text).
+- CEF tender offers (`kind = nav`, 55 offers; 54 of 55 give odd lots NO priority): scored pro-rata, p = `prorate`/100 else 25%
+  (stated conservative), residual shares at the first close 5 sessions after expiry (+/- h). Marked CAPITAL-PROPORTIONAL, not
+  per-holder capped, and EXCLUDED from the total (it belongs with the book's capacity-limited families); reported on its own.
+- Rights offerings: capital-proportional (a holder's rights scale with shares held), no per-deal table exists, earlier
+  discovery rounds (I4/I39) found text unidentifiable and payoff ~0. Marked as an UNSCORED GAP, counted $0, excluded.
+- Thrift/mutual conversions (DL-G27): `goal_dl27_deals.csv` (18 deals with bars, ~2.6/yr), $2,000 order at $10, exit at the
+  first-day close (column d1), tier cost via h. Requires a depositor account opened 1-2 years before the record date, so
+  EXCLUDED from the primary total and reported separately as "pre-positioning required" (two scenarios: eligible for every
+  listed deal; eligible for 2 deals/yr, the median-by-year deals).
+- DRIP/DSPP optional-cash discount: only issuers with a documented non-zero discount actually granted over the window:
+  UMH (95% of price, $1,000/month cap, 2016-26) and MNR (same terms, to 2022-02). `drip_ocp_deals.csv`, P&L exit ID+5 (as
+  registered in DL1) less an exit half-spread h; capital $1,000 locked ID-5 calendar days to ID+14 (cash to the agent,
+  DRS transfer). Taxable only (plan accounts are personal registrations). Other DSPP issuers (CLDT, HASI, OKE, NNN, ONB) have
+  no filed history of the discount: forward-only, not counted.
+- Eligibility: everything is decided from public information before the entry date. No proration or outcome is used to
+  select events, except that the B1 "rounded" label and the B2/tender deal lists were themselves built from filings (offer
+  text) available before entry.
+
+**Costs.** Buy at ask, sell at bid, via a frozen half-spread h(P) per side (daily bars only, no 2016 quotes): P < $1:
+max(0.005/P, 0.01) capped at 4%; $1-5: 1.0%; $5-20: 0.30%; $20-100: 0.15%; >= $100: 0.07%. $0 commissions, $0 voluntary
+reorganization fee (Schwab 2026 guide), whole shares only. Tender/exchange proceeds from the issuer carry no exit spread.
+
+**Accounts and sizes.** Taxable $2.3k / $10k / $25k, cash only (no margin). Roth separately: B1 ONLY. Legal/eligibility basis
+(stated, not re-verified in the documents): odd-lot priority in an issuer tender or exchange offer is conditioned on the
+holder owning beneficially fewer than 100 shares in total (the offers' own odd-lot certification; SEC Rule 13e-4(f)(3)
+requires the issuer to accept odd lots first but defines the class by beneficial ownership), and the repo's tender_buy.py /
+splitoff_buy.py already refuse to buy if the owner holds >= 100 in total. A Roth IRA is beneficially owned by the same
+person, so Roth shares count toward the same 99. B1's round-up is a broker allocation per account and carries no such
+aggregation in the filings' text, so the Roth takes B1. DRIP plan accounts are personal registrations, not IRA. Report-only
+variant: the 99-share families placed in a Roth of $8.5k instead of the taxable account (the G21/G22 venue idea).
+
+**Capital allocation and overlap.** All events pooled and processed in entry-date order (ties: B2, tender, DRIP, B1). Each
+takes units = min(its cap, floor(free capital / unit cost)) (B1: 1 share; B2/tender: <= 99 shares; DRIP: <= $1,000 continuous;
+thrift: $2,000 whole shares); capital frees the session after exit. Concurrent events compete; unfilled events earn $0.
+Idle capital earns T-bills: frozen annual 3-month yields 2016-26 = 0.3, 0.9, 1.9, 2.1, 0.4, 0.05, 2.0, 5.1, 5.0, 4.2,
+3.7 % (approximate averages, typed here before running). Excess = deal P&L minus T-bill interest on the deployed capital
+over its hold (PRIMARY); minus SPY's return over the same hold (SECONDARY, raw SPY bars). Maximum simultaneous capital
+and the days-in-deal share are reported.
+
+**Taxes.** Taxable: 35% short-term on each calendar year's net deal gain (losses net within the year, no carryover,
+conservative); Roth 0. Years by exit date.
+
+**Aggregation.** Dollars and % of starting capital (constant $2.3k / $10k / $25k, no compounding) per calendar year
+2016-2026 (2026 = YTD to 09-30, 0.75 yr); mean = total / 10.75 yr; 2016-20 vs 2021-26; ex-best-5 (the five events with
+the largest P&L at that size removed, taxes recomputed); median calendar year. Reported per family in $/yr, events/yr, capital
+per event, maximum simultaneous capital, per-account capacity, monthly-P&L correlation with the live book (T0L
+`program_books_res_rawpool.pkl`: 'ho' 2016-02..2020-12 daily returns plus tier_hi 'r' 2021-26, monthly sums, over overlapping
+months), operational burden (manual steps/yr, automated today), and accounts needed for the total to reach $1k/$5k/$10k a year
+(B1 is the only family that scales per account; the rest are per beneficial owner; legitimacy and tax notes, no recommendation
+to proliferate accounts).
+
+**Pass (one judged total, the PRIMARY scenario = B1 "rounded", taxable $10k, after-tax excess over T-bills):** mean >= +8pp/yr
+AND >= 60% of the 11 calendar years positive AND ex-best-5 mean >= +5pp. Labels on the mean: PASS (all three), NEAR (mean in
+[+5, +8), or mean >= +8 with another gate failing), FAIL (mean < +5). The same label is reported for B1 "cash in lieu" and for
+$2.3k / $25k, but only the $10k rounded line is the judged one. If B1 is cash in lieu, B1 contributes ~$0 and the rest must
+stand alone.
