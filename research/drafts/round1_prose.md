@@ -2727,3 +2727,31 @@ Pass (each variant vs B0): holdout after-tax, after-interest CAGR >= B0 + 2pp/yr
 2021-23 and 2024-26 after-tax CAGR >= B0 at $10k. Also reported, not gates: worst month, P(equity < $2,000) in 3 yrs,
 implied max leverage. Pass = SHADOW at most (live night edge unproven: 34 trades at 09-29; re-arm rule ~100 trades).
 Options overlay: no option-chain history in the repo (NEXT.md, Study AR): not testable. Runner `research/sim/goal_l.py`.
+
+## Amendment — Contest hunt, Studies T1 / T2: QQQ 0DTE options on the noise-leg signal (pre-register; program N 791 -> 795)
+Session contest hunt (`prompt_contest_hunt.md`), registered 2026-10-04 before any option price was loaded. First options
+study in the program (no prior option result exists; Goal L noted "not testable" for lack of chains). Data: Databento
+OPRA.PILLAR cbbo-1m (consolidated NBBO, 1-min), only the contracts each rule needs (cost cap $5 of the shared credit);
+QQQ signal from the SIP minute matrix (`intra.load('QQQ')`, regular hours 09:30-16:00 by trade date, data to 2026-09-21).
+Signal: the noise rule exactly as `research/daily-strategies/noise.py` (lookback 14, step 30, first 30, VWAP stop,
+long and short), decisions at the close of minutes 30, 60, ..., 360 (10:00..15:30 ET). Option = QQQ expiring that day.
+Fills: decision at minute m, fill on the NBBO record of minute m+1; buy at the ask, sell at the bid, $0.65/contract/leg.
+Forced exit 15:50 (minute 380) at the bid (long legs) / ask (short legs); a missing bid counts as 0. Whole contracts.
+Sizing: max loss per trade (premium paid, or width - credit) <= 5% of equity; a trade whose one contract exceeds it is
+skipped (logged). One position at a time. Four judged variants (N +4):
+- **T1a long ATM**: noise long -> buy the call at the first strike >= price; noise short -> the put at the first strike
+  <= price; exit when the noise rule exits (or flips: exit, then re-enter the new side) or at 15:50.
+- **T1b debit vertical**: as T1a but buy ATM / sell the strike $2 further OTM (call or put spread).
+- **T1c long OTM**: as T1a with the strike nearest 0.5% OTM.
+- **T2a short iron condor inside the noise area**: at 10:00 (minute 30) if the noise rule is flat, sell the call at the
+  first strike >= the day's upper band at minute 389 and the put at the first strike <= the lower band at minute 389,
+  buy wings $1 further out; hold to 15:50 (no stop); skipped on days the rule is already in a position at 10:00.
+Splits: select 2023-01-03..2024-12-31, untouched judge 2025-01-02..2026-09-21. Costs as above; tax 30% short-term on each
+year's net gain (taxable); margin interest none (defined-risk, premium paid in cash).
+Pass (each variant): judge mean net P&L per trade > 0 with day-block bootstrap P(mean <= 0) <= 5%; select mean > 0; judge
+sum ex best 5 trades > 0; 3-month (63-session) 5-day block bootstrap of the judge period at 5% risk: P(equity -30% within
+3 months) <= 10% at $2.3k. Reported per variant: CAGR pre/after tax, 3-month return median / p10 / p90 at $2.3k / $10k /
+$25k, maxDD, worst day, win rate (a win rate >= 90% is treated as a bug until audited), skipped-trade share at $2.3k.
+Pick among passers: highest judge median 3-month return at $2.3k. Pass = build + live at the smallest size (contest
+prompt); no pass = the best is shipped only if labelled unproven. T3 (pre-earnings straddle) is registered separately
+if its data can be had. Runner `research/sim/contest_options.py`.
