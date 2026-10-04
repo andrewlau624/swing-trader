@@ -141,6 +141,11 @@ def _tme_l(state: Path, logs: Path) -> dict:
     m = {k: sum(r["pnl"][k] for r in rows) / len(rows) for k in ("L1", "L2", "L3")}
     return dict(n=len(rows), week=wk, line=" ".join(f"{k} {_bp(v * 1e4)}" for k, v in m.items()) + " per window (of sleeve C)")
 
+def _cpc(state: Path, logs: Path) -> dict:
+    from . import cpc_ledger
+    return cpc_ledger.digest_read(state, logs)
+
+
 REGISTRY: list[Test] = [
     Test("Night auction cost by price bucket (pick-quality lead)", "do $5-10 night names really cost ~15bp/side live, or ~0 in the auctions? (gross bounce $5-10 +40bp vs $50+ ~0)",
          "2026-10-02", 100, "$5-10 live trips", _pick_cost, "make pick-cost; pick_quality_log.md", ["pick_cost_watch"]),
@@ -185,6 +190,11 @@ REGISTRY: list[Test] = [
          "the theoretical multiple of the VALIDATED month-end TLT window without breaching the tail limits?",
          "2026-10-27", 24, "month-end windows", _tme_l, "make tme-shadow; round1_prose.md Study TME-L",
          ["tme_shadow"]),
+    Test("CPC forward validation", "do the personal-scale contract payoffs (UMH plan cash, odd-lot tenders, split-off "
+         "priority, round-ups) pay forward: >= 2 independent events, >= +8pp/yr at $10k after costs and 35% tax, "
+         "not one event, over ~12 months (personal-scale economics, not scalable alpha)?",
+         "2026-10-04", 2, "independent completed events", _cpc, "make cpc-status; research/drafts/study_cpc.md",
+         ["cpc_ledger"]),
 ]
 
 

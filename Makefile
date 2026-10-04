@@ -394,6 +394,20 @@ stack-shadow: ## Index-beat FOUND: log the book stacked on index beta (taxable S
 cef-activist-watch: ## Goal G45-F: first activist 13Ds on closed-end funds, logged and scored at 60 sessions vs PCEF (log only, no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.cef_activist_watch
 
+cpc-ledger: ## CPC forward ledger: UMH monthly events + watcher ingest + one email per new/changed event (never trades); make cpc-ledger [DRY=1: no write, no email]
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.cpc_ledger $(if $(DRY),dry,run)
+
+cpc-status: ## CPC forward validation report (P&L, annualized at $10k, by family, failure rates; "too early" until the frozen gate inputs exist)
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.cpc_ledger status
+
+cpc-done: ## record a completed CPC event: make cpc-done EVENT=<id> PNL=<$> COSTS=<$> [NOTE=...]
+	@test -n "$(EVENT)" -a -n "$(PNL)" || { echo "usage: make cpc-done EVENT=<id> PNL=<$$> COSTS=<$$> [NOTE=...]"; exit 2; }
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.cpc_ledger done --event '$(EVENT)' --pnl '$(PNL)' --costs '$(or $(COSTS),0)' --note '$(NOTE)'
+
+cpc-failed: ## record a failed CPC event: make cpc-failed EVENT=<id> STATUS=MISSED|INELIGIBLE|CANCELLED [NOTE=...]
+	@test -n "$(EVENT)" -a -n "$(STATUS)" || { echo "usage: make cpc-failed EVENT=<id> STATUS=MISSED|INELIGIBLE|CANCELLED [NOTE=...]"; exit 2; }
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.cpc_ledger failed --event '$(EVENT)' --status '$(STATUS)' --note '$(NOTE)'
+
 tme-shadow: ## Study TME-L: log completed month-end windows of the leveraged Treasury sleeve (L1 TLT, L2 TLT 2x margin, L3 TMF; forward shadow, no orders)
 	@PYTHONPATH=. $(PY) -m research.sim.tme_shadow forward
 

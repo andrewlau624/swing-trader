@@ -232,3 +232,6 @@ $500-1,000/month per owner; street-name holders eligible via an Authorization Ca
 during the sale/transfer lag unless hedged). MNR is gone. Round-ups, split-offs, tenders alive with existing watchers.
 Labels: personal-scale economics, NOT scalable alpha. Next: forward CPC ledger + DRIP monthly alert (never trades);
 promotion after ~12 months forward (>= +8pp annualized at $10k, >= 2 independent events, no single-event dependence).
+
+## 2026-10-04 — CPC: FORWARD VALIDATION — ACTIVE (pending deploy)
+`swingtrader/daily/cpc_ledger.py` (append-only `state/cpc-ledger.jsonl`, no orders): UMH monthly plan events, ingest of the tender / split-off / round-up watcher state, one email per new or materially changed event, `make cpc-ledger|cpc-status|cpc-done|cpc-failed`, REGISTRY entry "CPC forward validation". Verification (`cpc_verification_2026-10-04.md`): UMH optional cash must be RECEIVED by the agent by the 10th (VERIFIED, 2021 prospectus); online/ACH, sale and DRS cost/timing UNKNOWN; the plan reserves the right to return cash from short sellers and cut the discount for immediate resale, so the taxable hedge itself is a plan-compliance risk. Gate (frozen): ~12 months, >= 2 independent events, >= +8pp/yr at $10k after costs/35% tax, not one event.
