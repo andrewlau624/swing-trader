@@ -3073,3 +3073,35 @@ NX-S1 losing-night: if yesterday's equal-weight night picks lost <= -2% net, siz
 NX-S2 moderate: night 1.3x with name cap .15. Pass: book-level increment > 0 at tier in 2003-15 and in 2 of 3
 subperiods, and max drawdown no worse than 1.5x the base leg's. Neither may be live-sized before both the primary and
 its own bar pass. No parameter in this amendment may be tuned on the judge window; a second look is a new study.
+
+## Amendment — Study TL: Reg SHO threshold-list forced buy-in, the 13-day clock (pre-register; program N 809 -> 810)
+Registered 2026-10-04 before any price, volume or return of a threshold-list stock was loaded (only the free daily
+lists and their episode counts exist at registration). One judged rule plus a pre-registered identification contrast.
+Mechanism: Rule 203(b)(3) forces a participant with a fail persisting 13 consecutive settlement days in a threshold
+security to close it out by PURCHASE (due by the start of list day 14). The question is whether that forced demand is
+visible early enough to capture, distinct from generic distress / squeeze behaviour.
+Data: Nasdaq daily threshold files (nasdaqthYYYYMMDD.txt) and the NYSE-family JSON (NYSE/Arca/American/National/Chicago),
+`research/sim/threshold_lists.py`. A list dated D is public before D's open. Episode = run of consecutive sessions a
+symbol is on any list; list day k = k-th session of the run. Funds/ETPs excluded by name (FUND_WORDS in that file).
+Prices: Alpaca SIP daily bars 2016+ (split+dividend-adjusted for returns, RAW for the price filter).
+- **Primary rule TL1**: every episode still on the list on list day 10 (known at day 10's open). Filters at entry, fixed:
+  raw close of day 9 >= $1; 20-session mean $ volume before list day 1 >= $250k; Alpaca bars exist. Buy at the OPEN of
+  list day 10, sell at the CLOSE of list day 13 (fixed horizon; removal from the list before day 13 does not change the
+  exit: removal is not known in advance). Abnormal return AR = stock return - IWM return over the same open->close window.
+- **Identification contrast TL1-ID** (forced timing vs generic distress): same episodes, same-length placebo window
+  open(day 6) -> close(day 9). Forced-buy timing predicts AR[10-13] - AR[6-9] > 0.
+- Costs: round trip = the Corwin-Schultz high-low spread estimate (mean over the 20 sessions before list day 1), floor
+  10bp; plus a 2x cost shock.
+Judge = ALL entries 2016-01-04..2026-09-30 (the one look; no design period, the rule is fixed a priori). Gates (all):
+n >= 150 entries; mean net AR > 0 with entry-week-clustered t >= 2; median net AR > 0; mean > 0 ex the 5 largest and ex the
+top 1% of trades; TL1-ID mean > 0 with clustered t >= 2; positive in >= 60% of calendar years; mean > 0 at 2x costs.
+Reported, not gates: AR and abnormal volume (volume / pre-episode 20d mean) by list day 1..16, split overnight
+(close->open) vs intraday (open->close); by price, $ADV and episode-length buckets; episodes reaching day 13 vs removed
+earlier (descriptive only: conditions on the future); re-entries; per-year; FINRA short interest context 2020+ where
+available; capital per trade at 1% / 5% of $ADV, entries per year, P(entering) (share of day-10 episodes passing filters),
+top-5 share of P&L, worst trade; feasibility at $2k / $25k / $250k+. Market cap: not available free (DATA-LIMITED; $ADV
+used instead). Note: Rule 204 (2008+) forces most fails closed by T+4/T+6, so the day-13 clock may bind rarely; a null
+here is informative about that.
+Classification: VALIDATED (all gates + economically meaningful capacity), PROMISING (TL1 and TL1-ID pass, economics
+unclear), SMALL/NON-SCALABLE (passes but capacity trivial), REJECTED (TL1 or TL1-ID fails), DATA-LIMITED (n < 150).
+Runner `research/sim/threshold_tl.py` (`bars`, `run`).
