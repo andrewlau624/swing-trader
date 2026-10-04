@@ -3207,3 +3207,48 @@ and no reversal required before T (a reversal on T+1/T+2 is reported, not traded
 (e) Ex-2008: mean without Sep-Dec 2008. (f) Per-year table.
 Capacity, turnover (12 round trips/yr), and $ economics at $2.3k / $10k / $25k / $100k reported.
 One look; nothing tuned on 2002-15. Runner `research/sim/tme_treasury.py`.
+
+## Amendment — Study TME-L: leveraged month-end Treasury sleeve, forward shadow (pre-register; 2 rules L2 / L3, program N 814 -> 816)
+
+Registered 2026-10-04 before any leveraged-instrument window return was computed. The base rule TME1 (VALIDATED,
+`study_tme.md`) is FROZEN: same windows (close of T-3 -> close of T, T = last session of the month), no change to
+entry/exit day, instrument family or costs after this stamp. Question: does leverage raise TME's useful account-level
+dollar contribution enough to justify its added tail and implementation risk? Forward shadow only; no orders.
+
+**Rules.** Sleeve capital C = the account's idle cash at the T-3 close, capped at 50% of equity (taxable) / 100% (Roth).
+- **L1 (reference, not judged):** TLT, notional 1.0 x C.
+- **L2 (2x):** taxable: TLT notional 2.0 x C on Reg T margin (overnight 2x is the Reg T maximum; equity >= $2,000).
+  Financing = Schwab margin rate, assumed 12.5%/yr on the debit (1.0 x C), actual/360 over the CALENDAR days held.
+  Roth variant (report-only, no margin): UBT (ProShares Ultra 20+ Yr) notional 1.0 x C.
+- **L3 (3x):** TMF (Direxion Daily 20+ Yr Treasury Bull 3X), notional 1.0 x C (3x TLT exposure, no margin; Roth and
+  taxable). Report-only alternative: TLT 3x is not allowed overnight under Reg T; not modelled.
+Entry/exit: official closing-auction prints (primary exchange's largest-size print rule the repo uses) of T-3 and T;
+whole shares; the residual cash earns nothing. No intra-window stop (positions are held through overnight gaps; gap
+risk is controlled by sizing and the kill rules). Distributions: total return (ex-dates inside a window credited); TLT
+ex-dates fall at month start, TMF/UBT quarterly, reported.
+Costs per side: TLT 2bp, TMF 5bp, UBT 15bp; stress 2x. Margin rate stress: 14%.
+
+**Measured each window (logged):** sleeve $ P&L and % of C and of account equity; instrument window return vs
+k x TLT window return (tracking error, k = 2 or 3) split into: daily-reset path effect, fund fees/swap financing
+drag, closing-print slippage; financing $; margin used (debit / equity) and Reg T maintenance headroom at each close;
+worst overnight move and worst single session inside the window; 3-session window loss.
+Running: monthly P&L, worst month, max drawdown of the sleeve, volatility, downside deviation, % of windows lost.
+
+**Historical implementation measurement (one run, reported, NOT a gate, not evidence of edge).** Over the TME windows
+2009-05..2026-09 (TMF from 2009-04, UBT from 2010-01; Yahoo total-return closes, the TME data path): tracking error of
+TMF/UBT vs 3x/2x TLT per window, implementation drag, worst 3-session loss, worst overnight move, worst window in
+2013 taper / 2020-03 / 2022. This window overlaps the TME judge (2009-15) and the 2016-26 probe: it measures the
+instrument, not the edge.
+
+**Kill (forward, either rule, checked at each window close):** sleeve max drawdown > 30% of peak sleeve capital; any
+single window loss > 15% of C; for L2, any close with maintenance headroom < 10% of equity; for L3, median tracking
+error |TMF - 3 x TLT| > 50bp per window after 12 windows. Kill = stop that rule's shadow and record it; no re-tune.
+
+**Success (evaluated once, at 24 forward windows = the Oct-2028 month-end, interim report-only at 12):**
+(1) the frozen L1 TLT window keeps mean net > 0 (edge persists forward); (2) the leveraged rule's mean net $ P&L per
+window >= 1.6 x L1's (L2) / >= 2.2 x L1's (L3), i.e. implementation keeps >= 80% / >= 73% of the theoretical multiple;
+(3) worst window loss <= 10% of C and sleeve max DD <= 25%; (4) leveraged sleeve P&L ratio to downside deviation
+not worse than L1's by more than 20%. PASS = all four -> eligible for a user sizing decision (not automatic).
+Otherwise FAIL; if (1) fails, TME itself is flagged for review (forward decay), not re-tuned.
+Leverage ratio is fixed at 2 and 3; never optimized on forward data. Runner `research/sim/tme_shadow.py`; digest via
+testing.py REGISTRY "TME-L".
