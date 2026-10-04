@@ -84,3 +84,7 @@ Judge return on risk per night: T4a -29.8%, T4b -18.6%, T4c -57.7%. Mid-to-mid P
   not an unproven idea.
 ### T6 (QQQ 0DTE long straddle 09:45->15:50): DEAD; `study_contest_t6.md`
 Judge -9.2% of premium per trade (select -8.7%), win 30%; $313/contract never fits 5% of $2.3k.
+### T3 (pre-earnings straddle t-3 -> t-1): DEAD, both; N 798 -> 800. `study_contest_t3.md`
+Judge -35.4% (>= $2B) / -44.4% ($2-10B) of premium per trade. Mid-to-mid +1.5% (half of GXZ); straddle spread ~20% of mid.
+**All three top families (T1, T2, T3) are now tested and dead.** Extra families tested: T4 (overnight VRP), T6 (intraday
+straddle), T7 (insider calls); T5 (short earnings fly) data loading.
