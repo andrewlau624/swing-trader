@@ -223,3 +223,12 @@ T-bills): PASS on the registered gates, +13.3pp/yr ($1,330), 91% of years positi
 +12.4pp at $10k (B1 is only $130/yr per account over 2016-26, $312 over 2023-26). 79% of the dollars are DRIP (UMH/MNR, $820/yr, not automated, 36 manual
 steps/yr) and B2 ($934/yr); ex-DRIP +8.4pp, UMH-only +11.4pp, 2023-26 +9.6pp. Correlation with the live book -0.08. Only B1 scales per account;
 odd-lot priority is per beneficial owner across all accounts, so the stack does not scale with accounts. Selection-bias caveat applies.
+
+## 2026-10-04 — CPC: mechanisms verified alive (UMH DRIP 5%, implied 4.3-5.3% 2024-26); forward ledger next
+Census (Study CPC, pre-reg 40e3910, result a8e4513): +13.3pp/yr after tax at $10k, fragile (DRIP + split-offs carry most
+of it; tender floor filter chosen on the same history). Verification (`research/drafts/cpc_verification_2026-10-04.md`):
+UMH plan still issues stock at ~5% below market (implied 4.3% / 5.3% / 4.8% in 9M-24 / 9M-25 / H1-26); optional cash
+$500-1,000/month per owner; street-name holders eligible via an Authorization Card; shares held at the Agent (price risk
+during the sale/transfer lag unless hedged). MNR is gone. Round-ups, split-offs, tenders alive with existing watchers.
+Labels: personal-scale economics, NOT scalable alpha. Next: forward CPC ledger + DRIP monthly alert (never trades);
+promotion after ~12 months forward (>= +8pp annualized at $10k, >= 2 independent events, no single-event dependence).
