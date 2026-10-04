@@ -79,9 +79,9 @@ def forward() -> list[dict]:
     if "TLT" not in bars:
         raise SystemExit("no TLT bars")
     cal = bars["TLT"].index[bars["TLT"].index >= FWD_START]
-    done = set()
-    if LOG.exists():
-        done = {json.loads(l)["T"] for l in LOG.read_text().splitlines() if l.strip()}
+    rows = [json.loads(l) for l in LOG.read_text().splitlines() if l.strip()] if LOG.exists() else []
+    done = {r["T"] for r in rows if r.get("status") == "scored"}            # idempotent: a scored window is final
+    pending = {r["T"] for r in rows if r.get("status") == "missing_prints"}  # retried every run, logged once
     new = []
     for t3, t in windows(cal):
         if str(t.date()) in done or t > cal[-1]:
@@ -98,7 +98,10 @@ def forward() -> list[dict]:
             dv = sum(x["rate"] for x in divs if x["sym"] == s)
             r[s] = (b + dv) / a - 1
         if "TLT" not in r or "TMF" not in r:
-            new.append({"T": str(t.date()), "status": "missing_prints", "missing": miss}); continue
+            if str(t.date()) not in pending:
+                new.append({"T": str(t.date()), "status": "missing_prints", "missing": miss,
+                            "logged": dt.datetime.now().isoformat(timespec="seconds")})
+            continue
         days = (t - t3).days
         p = sleeve(r, days)
         seg = bars["TLT"].loc[t3:t]

@@ -134,12 +134,23 @@ def _pick_cost(state: Path, logs: Path) -> dict:
 # ---------------------------------------------------------------- the list
 
 def _tme_l(state: Path, logs: Path) -> dict:
-    rows = [r for r in _jsonl(state / "tme-shadow.jsonl") if r.get("status") == "scored"]
+    allr = _jsonl(state / "tme-shadow.jsonl")
+    rows = [r for r in allr if r.get("status") == "scored"]
+    scored = {r.get("T") for r in rows}
+    stuck = sorted({r.get("T") for r in allr if r.get("status") == "missing_prints"} - scored)
+    today = dt.date.today()
+    last_me = today.replace(day=1) - dt.timedelta(days=1)                     # last weekday of the previous month
+    while last_me.weekday() >= 5:                                              # (approx. month-end; holidays ignored)
+        last_me -= dt.timedelta(days=1)
+    overdue = (last_me >= dt.date(2026, 10, 30) and (today - last_me).days > 7
+               and not any(str(x).startswith(last_me.strftime("%Y-%m")) for x in scored))
+    warn = (f"; FAILED: {len(stuck)} window(s) awaiting prints ({', '.join(stuck)})" if stuck else "") + \
+           (f"; OVERDUE: {last_me:%Y-%m} not scored (check make tme-shadow runs)" if overdue else "")
     if not rows:
-        return dict(n=0, week=0, line="no forward window scored yet (first: Oct-2026 month-end; make tme-shadow)")
+        return dict(n=0, week=0, line="no forward window scored yet (first: Oct-2026 month-end; make tme-shadow)" + warn)
     wk = sum(1 for r in rows if str(r.get("T", "")) >= _week_ago())
     m = {k: sum(r["pnl"][k] for r in rows) / len(rows) for k in ("L1", "L2", "L3")}
-    return dict(n=len(rows), week=wk, line=" ".join(f"{k} {_bp(v * 1e4)}" for k, v in m.items()) + " per window (of sleeve C)")
+    return dict(n=len(rows), week=wk, line=" ".join(f"{k} {_bp(v * 1e4)}" for k, v in m.items()) + " per window (of sleeve C)" + warn)
 
 def _cpc(state: Path, logs: Path) -> dict:
     from . import cpc_ledger

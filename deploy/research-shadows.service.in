@@ -17,4 +17,5 @@ ExecStart=__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.splitoff_watch
 ExecStart=__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.roundup_watch
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.cef_activist_watch
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.cpc_ledger
+ExecStart=-__APP_DIR__/.venv/bin/python -u -m research.sim.tme_shadow forward
 TimeoutStartSec=1800
