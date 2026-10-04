@@ -2828,3 +2828,16 @@ Whole contracts, max loss (width - credit + fees) <= 5% of equity. Every trading
 Splits, gates and reporting exactly as T1/T2 (select 2023-01-03..2024-12-31, judge 2025-01-02..2026-09-18; pass = judge mean
 > 0 with day-block bootstrap P <= 5%, select > 0, judge ex-best-5 > 0, P(-30% in 3 months) <= 10% at $2.3k). Runner
 `research/sim/contest_options.py` (`fetch4` / `run4`).
+
+## Amendment — Contest hunt, Study T3: pre-earnings long straddle (pre-register; program N 798 -> 800)
+Registered 2026-10-04 before any T3 option price was loaded. Mechanism: option sellers under-price the uncertainty ahead of
+scheduled earnings, so straddles bought a few days before the announcement and sold before it earn +3.34% on average
+(Gao, Xing & Zhang, JFQA 2018, 1996-2013; strongest in small names). Events: Nasdaq earnings calendar report date t
+(api.nasdaq.com, scheduled date, known weeks ahead), 2023-01..2026-09, market cap >= $2B (the calendar's figure; may be
+as-of today, a mild universe look-ahead, noted). Strike = listed strike nearest the raw close of session t-4 (Alpaca raw
+daily bars; strictly before entry). Expiry = the earliest listed expiry >= t (first Friday >= t, else the third Friday of
+that month). Buy the call + put on the 15:51 NBBO of session t-3 at the ask; sell on the 15:51 NBBO of session t-1 at the
+bid (before any report on t, before or after the open). $0.65/contract/leg. Max loss = premium paid + fees <= 5% of equity,
+whole contracts, skip otherwise; several events on one day are taken in market-cap order while budget allows (each 5%).
+Two variants: **T3a** market cap >= $2B; **T3b** $2B-$10B. Splits by t: select 2023-01..2024-12, judge 2025-01..2026-09.
+Gates and reporting exactly as T1/T2. Runner `research/sim/contest_straddle.py`.
