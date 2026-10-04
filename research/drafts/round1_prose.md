@@ -3252,3 +3252,56 @@ not worse than L1's by more than 20%. PASS = all four -> eligible for a user siz
 Otherwise FAIL; if (1) fails, TME itself is flagged for review (forward decay), not re-tuned.
 Leverage ratio is fixed at 2 and 3; never optimized on forward data. Runner `research/sim/tme_shadow.py`; digest via
 testing.py REGISTRY "TME-L".
+
+## Amendment — Study RB6040: month-end 60/40 rebalancing pressure as a stock/bond relative-value trade, one look on 2002-15 (pre-register; 1 judged rule, program N 816 -> 817)
+
+Registered 2026-10-04 before any 2002-15 month-end SPY/IEF window return was computed. NEW hypothesis, validated
+independently of TME (TME is frozen; its bond-demand effect is a confound to measure, not part of this rule). Prior
+touched work: add. 34 Q4 M3 (2016-26, SPY-only, MTD SPY-TLT with +/-3% thresholds) and the 2025 paper
+(Harvey-Mazzoleni-Melone, NBER w33554). No IBS or any book sizing anywhere in this study.
+
+**Mechanism.** Balanced funds / pensions holding ~60% equity / 40% bonds drift when stocks and bonds diverge within the
+month; calendar rebalancers restore weights near month-end: if equities outperformed month-to-date they SELL equities
+and BUY bonds (and vice versa). The flow is non-informational, so the price pressure should partially reverse after
+month-end. Bond benchmark (Bloomberg US Aggregate) priced at ~15:00 ET until 2021-01-14, 16:00 after.
+
+**Signal (known at entry).** At the close of session T-3 (T = the month's last session), with month-start = last close of
+the prior month: Re, Rb = SPY and IEF total returns month-start -> close(T-3);
+w = 0.6(1+Re) / (0.6(1+Re) + 0.4(1+Rb)); s = w - 0.6 (positive = equity overweight -> rebalancers sell SPY, buy IEF).
+**Trade (primary, every month, direction = -sign(s)):** at the close of T-3, short $1 SPY and long $h IEF if s > 0
+(reverse if s < 0); exit both at the close of T. h = sd(SPY daily ret) / sd(IEF daily ret) over the 60 sessions ending
+T-3 (volatility-neutral; both legs required). P&L per $1 of the SPY leg:
+P = -sign(s) x [(R_SPY - h R_IEF)] over close(T-3) -> close(T), total returns (dividend-adjusted closes).
+Primary statistic AP (abnormal): each leg's window return minus 3 x its mean daily return over the month's other
+sessions (as TME). Costs per side: SPY 1bp, IEF 2bp, both legs, each side: cost = 2 x (1 + 2h) bp per window; 2x shock.
+Instruments fixed: SPY / IEF primary. Data: Yahoo total-return daily (TME path), validated vs Alpaca 2016-26 returns.
+**Judge:** months 2002-08 .. 2015-12 (~161). Subperiods 2002-08..2008-12 / 2009-01..2015-12.
+
+**Return gates (all):** mean net AP > 0 and t >= 2 (NW3 reported); median > 0; ex-best-5 > 0; both subperiods > 0;
+>= 60% of years positive; > 0 at 2x costs.
+**Mechanism gates (judged on 2002-15):** M-dose: OLS of the signed-free spread (R_SPY - h R_IEF, abnormal) on s has a
+NEGATIVE slope with t <= -1.5; M-dir: mean P in the top |s| tercile > mean P in the bottom tercile.
+**Labels.** VALIDATED = all return gates + both mechanism gates. RESEARCH = return gates pass, one mechanism gate fails,
+or all mechanism gates pass with return t in [1.5, 2). INTERESTING = mean net > 0, t >= 1, mechanism directionally
+right, economics small (< +5bp net per window per $1 SPY leg) or a robustness gate fails. ARTIFACT = the placebo test
+below puts the real mean at < 90th pct, or the effect exists only in raw (not abnormal) returns. DECAYED = passes on
+2002-15 but the reported 2016-26 mean net <= 0. KILL = mean net <= 0 or t < 1.
+
+**Reported, not gates (falsification only; never used to change the rule):**
+- Placebos: (i) 1,000 draws of one random 3-session window per month from sessions 3..(T-6), signal computed the same
+  way at the window start -> percentile of the real mean; (ii) fixed mid-month window (sessions 9-11 -> 12).
+- Alternative month-end definitions: T-2 -> T, T-4 -> T-1, T-1 -> T, T -> T+2 (reversal), T -> T+5.
+- |s| terciles; months with |Re - Rb| < 1% vs > 5%; ex 2008-09..2009-03; ex the 5 largest |P|.
+- Leg decomposition: -sign(s) R_SPY abnormal and +sign(s) h R_IEF abnormal separately (equity-leg effect = new
+  mechanism; bond-leg-only effect = overlaps TME). Monthly correlation of P with TME's AR; the unsigned average bond-leg
+  return (TME confound).
+- Cross-section (same rule): SPY/TLT, SPY/AGG (2003-10+), IWM/IEF, VTI/IEF.
+- 2016-26 (touched: add. 34) reported for decay, not judged.
+- **2021 natural experiment (mechanism, report-only; Alpaca SIP minutes 2016-01..2026-09):** on day T, split the signed
+  spread and each signed leg into close(T-1) -> 15:00 and 15:00 -> close(T). Prediction if the Agg-benchmarked flow
+  drives it: the share of the bond-leg signed move in 15:00 -> 16:00 rises after 2021-01-14 (pre 2016-01..2020-12 vs
+  post 2021-02..2026-09). The equity leg (S&P priced at 16:00 throughout) is the control: its timing should not shift.
+- Capacity: IEF/SPY $ADV from the data by year; spread notional at $100k / $1M / $10M / $100M as % of 3-session volume
+  of each leg.
+Relationship labels if it passes: A independent (equity leg carries it, low corr with TME), B TME extension (bond leg
+carries it, unsigned bond strength), C overlapping (corr with TME AR > 0.5). Runner `research/sim/rb6040.py`; one look.
