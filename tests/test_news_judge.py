@@ -150,3 +150,32 @@ def test_opencode_client_retries_without_json_mode_on_400_and_shows_errors(monke
     h = seen[0]
     assert h["x-opencode-session"].startswith("news-judge-") and h["User-Agent"] == nj.USER_AGENT
     assert h["Authorization"] == "Bearer k"
+
+
+class FakeSeqOpenCode:
+    provider = "opencode-go"
+
+    def __init__(self, contents):
+        self.contents, self.calls = list(contents), 0
+
+    def chat(self, payload):
+        c = self.contents[min(self.calls, len(self.contents) - 1)]
+        self.calls += 1
+        return {"id": "x", "model": "deepseek-v4-flash", "usage": {"prompt_tokens": 1, "completion_tokens": 1},
+                "choices": [{"message": {"content": c}}]}
+
+
+def test_opencode_empty_reply_retries_then_succeeds(tmp_path, monkeypatch):
+    monkeypatch.setattr(nj.time, "sleep", lambda *_: None)
+    c = FakeSeqOpenCode(["", '{"verdict": "liquidity", "confidence": 0.6, "catalyst": "", "reason": "flow"}'])
+    _run(tmp_path, c, max_calls=1)
+    rec = json.loads((tmp_path / nj.LOG_NAME).read_text().splitlines()[0])
+    assert rec["verdict"] == "liquidity" and c.calls == 2, "one empty completion is retried"
+
+
+def test_opencode_persistently_empty_is_logged_as_error(tmp_path, monkeypatch):
+    monkeypatch.setattr(nj.time, "sleep", lambda *_: None)
+    c = FakeSeqOpenCode(["", "", ""])
+    _run(tmp_path, c, max_calls=1)
+    rec = json.loads((tmp_path / nj.LOG_NAME).read_text().splitlines()[0])
+    assert rec["verdict"] is None and "no JSON object" in rec["error"] and c.calls == 3

@@ -163,15 +163,34 @@ class OpenCodeClient:
 
 def _parse(text: str) -> dict:
     """The verdict JSON, validated against SCHEMA (OpenAI-style JSON mode guarantees JSON, not keys)."""
-    t = text.strip()
+    t = (text or "").strip()
     if t.startswith("```"):
         t = t.strip("`").removeprefix("json").strip()
-    out = json.loads(t[t.find("{"): t.rfind("}") + 1])
+    i, j = t.find("{"), t.rfind("}")
+    if i < 0 or j < i:
+        raise ValueError(f"no JSON object in reply: {t[:80]!r}")
+    out = json.loads(t[i:j + 1])
     if out.get("verdict") not in SCHEMA["properties"]["verdict"]["enum"]:
         raise ValueError(f"bad verdict {out.get('verdict')!r}")
     out["confidence"] = min(1.0, max(0.0, float(out["confidence"])))
     out["catalyst"], out["reason"] = str(out.get("catalyst", ""))[:200], str(out.get("reason", ""))[:400]
     return {k: out[k] for k in ("verdict", "confidence", "catalyst", "reason")}
+
+
+def _chat_verdict(client, payload: dict) -> tuple[dict, dict]:
+    """One verdict from a chat client, retrying if the reply is empty/unparseable (the gateway
+    returns an empty completion on ~5% of calls); raises after the last attempt. `client.chat`
+    already retries on 429/5xx, so this only covers bad payloads."""
+    last: Exception | None = None
+    for attempt in range(3):
+        try:
+            j = client.chat(payload)
+            return _parse(j["choices"][0]["message"]["content"]), j
+        except (json.JSONDecodeError, ValueError, KeyError, IndexError) as exc:
+            last = exc
+            if attempt < 2:
+                time.sleep(1.5 * (attempt + 1))
+    raise last
 
 
 def judge(client, model: str, effort: str, sym: str, day_ret: float, price: float,
@@ -185,11 +204,11 @@ def judge(client, model: str, effort: str, sym: str, day_ret: float, price: floa
             + ("\n".join(f"- [{s['time']}] {s['form']} {s['items']} {s['description']}".rstrip() for s in sec)
                or "- none"))
     if hasattr(client, "chat"):
-        j = client.chat({"model": model, "temperature": 0, "max_tokens": 1000,
-                         "response_format": {"type": "json_object"},
-                         "messages": [{"role": "system", "content": SYSTEM + JSON_ONLY},
-                                      {"role": "user", "content": body}]})
-        out = _parse(j["choices"][0]["message"]["content"])
+        payload = {"model": model, "temperature": 0, "max_tokens": 1000,
+                   "response_format": {"type": "json_object"},
+                   "messages": [{"role": "system", "content": SYSTEM + JSON_ONLY},
+                                {"role": "user", "content": body}]}
+        out, j = _chat_verdict(client, payload)
         u = j.get("usage") or {}
         out.update(request_id=j.get("id"), served_by=j.get("model"),
                    tokens_in=u.get("prompt_tokens"), tokens_out=u.get("completion_tokens"))
@@ -206,7 +225,7 @@ def judge(client, model: str, effort: str, sym: str, day_ret: float, price: floa
     if resp.stop_reason == "refusal":
         return {"verdict": None, "error": "refusal", "request_id": resp._request_id}
     text = next((b.text for b in resp.content if b.type == "text"), "")
-    out = json.loads(text)
+    out = _parse(text)
     out.update(request_id=resp._request_id, served_by=resp.model,
                tokens_in=resp.usage.input_tokens, tokens_out=resp.usage.output_tokens)
     return out
