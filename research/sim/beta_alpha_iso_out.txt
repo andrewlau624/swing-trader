@@ -1,0 +1,114 @@
+BETA / ALPHA ISOLATION (diagnostic, no N bump). Pre-registration: research/drafts/round1_prose.md
+Factors: window-matched, total-return adjusted bars; MKT=SPY TECH=QQQ-SPY SIZE=IWM-SPY MOM=MTUM-SPY. night/ibs factors scaled by invested fraction. alpha=mean(y-b.xf)*252 (arith), t=Newey-West(5).
+Book = max_edge.BOOKS['V7'] night_cost 2.5bp, replay 2021-02-01..2026-09-18 (night leg 2021-26 is FITTED; conviction is shadow so absent)
+
+=== 1. DECOMPOSITION (daily, 2021-26) ===
+night (exposure-scaled)    n=1415 raw=  20.3% alpha=  15.2% t= 3.10 R2=0.11 rvol= 12.4% | MKT: +0.99/ +4.0 TECH: +1.38/ +3.5 SIZE: +0.66/ +2.8 MOM: -0.05/ -0.3 | contrib%/yr MKT: +3.7 TECH: +1.1 SIZE: +0.4 MOM: -0.2 | sys=   25%
+ibs (exposure-scaled)      n=1414 raw=   8.1% alpha=   0.2% t= 0.09 R2=0.60 rvol=  4.7% | MKT: +0.94/+19.8 TECH: +0.05/ +0.4 SIZE: +0.34/ +5.5 MOM: +0.34/ +4.3 | contrib%/yr MKT: +6.5 TECH: +0.1 SIZE: +0.3 MOM: +0.9 | sys=   98%
+noise (unscaled)           n=1415 raw=   9.3% alpha=   8.1% t= 3.10 R2=0.02 rvol=  6.9% | MKT: -0.00/ -0.1 TECH: -0.00/ -0.0 SIZE: -0.01/ -0.3 MOM: -0.11/ -3.2 | contrib%/yr MKT: -0.0 TECH: -0.0 SIZE: +0.1 MOM: +1.2 | sys=   13%
+night (unscaled, prior)    n=1415 raw=  20.3% alpha=  17.0% t= 3.47 R2=0.07 rvol= 12.7% | MKT: +0.20/ +4.1 TECH: +0.30/ +3.3 SIZE: +0.13/ +2.6 MOM: +0.04/ +1.0 | contrib%/yr MKT: +1.9 TECH: +0.5 SIZE: +0.4 MOM: +0.4 | sys=   16%
+ibs (unscaled, prior)      n=1414 raw=   8.1% alpha=   5.2% t= 1.85 R2=0.24 rvol=  6.4% | MKT: +0.21/ +7.7 TECH: -0.04/ -1.1 SIZE: +0.03/ +1.2 MOM: +0.07/ +4.2 | contrib%/yr MKT: +3.2 TECH: -0.1 SIZE: -0.2 MOM: -0.1 | sys=   36%
+TOTAL BOOK: raw=38.6%/yr CAGR=45.1% alpha(incl cash)=24.5% t=4.26 R2=0.19 resid vol=15.0%  cash+margin=1.0%  alpha ex-cash=23.5%
+  systematic contribution=14.1%/yr = 37% of raw; by factor: MKT:+10.2 TECH:+1.2 SIZE:+0.8 MOM:+1.9
+  per-leg raw ann%: night=20.3 ibs=8.1 noise=9.3 cash=1.0; avg exposure night=0.23 ibs=0.16
+  TECH=XLK-SPY robustness (alpha/t): night:14.8/3.02  ibs:0.2/0.11  noise:8.1/3.08
+
+--- weekly (non-overlapping 5-session blocks, x52) ---
+night weekly               n= 283 raw=  20.8% alpha=  18.9% t= 3.78 R2=0.05 rvol= 11.5% | MKT: +0.47/ +1.1 TECH: +1.25/ +1.8 SIZE: +0.83/ +1.8 MOM: -0.44/ -1.3 | contrib%/yr MKT: +1.8 TECH: +1.0 SIZE: +0.5 MOM: -1.5 | sys=    9%
+ibs weekly                 n= 282 raw=   8.3% alpha=   0.0% t= 0.01 R2=0.58 rvol=  4.8% | MKT: +1.01/+15.0 TECH: -0.05/ -0.2 SIZE: +0.20/ +1.5 MOM: +0.35/ +3.0 | contrib%/yr MKT: +7.2 TECH: -0.1 SIZE: +0.2 MOM: +1.0 | sys=  100%
+noise weekly               n= 283 raw=   9.5% alpha=   9.6% t= 3.65 R2=0.01 rvol=  6.4% | MKT: -0.02/ -0.4 TECH: -0.03/ -0.4 SIZE: +0.01/ +0.2 MOM: -0.01/ -0.2 | contrib%/yr MKT: -0.1 TECH: -0.0 SIZE: -0.1 MOM: +0.2 | sys=   -1%
+
+=== 2. CHRONOLOGICAL OOS (expanding; betas from earlier years only) ===
+night                      OOS pooled alpha=  15.0%/yr (raw  22.8%) t= 2.27 pos 4/4 | per-year alpha% 2023: +3.7 2024:+11.5 2025:+39.9 2026: +1.2  class=A
+ibs                        OOS pooled alpha=   1.0%/yr (raw   9.0%) t= 0.42 pos 2/4 | per-year alpha% 2023: +5.4 2024: -3.9 2025: -2.4 2026: +6.8  class=C
+noise                      OOS pooled alpha=   5.0%/yr (raw   5.7%) t= 1.54 pos 3/4 | per-year alpha% 2023: +4.4 2024: +6.0 2025:+10.4 2026: -3.4  class=B
+TOTAL BOOK (incl cash)     OOS pooled alpha=  22.9%/yr (raw  39.3%) t= 2.93 pos 4/4 | per-year alpha% 2023:+15.1 2024:+15.3 2025:+49.4 2026: +7.4  class=B
+  (total raw includes cash/margin 1.0%/yr; classification of the book uses the ex-cash OOS alpha 21.8% vs raw ex-cash 38.2%)
+  book OOS classification ex-cash: B
+
+=== 4. NIGHT LEG ===
+raw=20.3%/yr; explained by: MKT +18% TECH +5% SIZE +2% MOM -1%; total systematic 25%; residual alpha 15.2% (t 3.10)
+MKT-only R2=0.10 beta=1.56 alpha=14.4% t=2.92
+  2021-22        own-fit alpha=   9.9% t= 1.71 raw= 15.5% sys=  36% | full-sample-beta residual alpha=  12.1%
+  2023-24        own-fit alpha=   8.5% t= 1.21 raw= 14.5% sys=  41% | full-sample-beta residual alpha=   9.4%
+  2025-26        own-fit alpha=  28.0% t= 2.42 raw= 32.5% sys=  14% | full-sample-beta residual alpha=  25.6%
+  2021-23 (fit)  own-fit alpha=   8.0% t= 1.61 raw= 12.6% sys=  36% | full-sample-beta residual alpha=   9.4%
+  2024-26        own-fit alpha=  23.5% t= 2.71 raw= 28.6% sys=  18% | full-sample-beta residual alpha=  21.5%
+
+=== 3. IBS (open->open; 18-ETF top-3 momentum, IBS<0.2) ===
+[2017-20 (IBS OOS)] IBS trades n=557 on 314 days; every-top-3 control n=2964; SPY all-days mean 6.2bp
+   per-trade mean bp: IBS   29.8 (t 4.02) | unconditional top-3    9.4 | premium   20.3 | beta-adj IBS   19.9 vs beta-adj control    3.1 -> adj premium   16.8
+   day-avg residual vs 4 factors (bp/day): IBS days    8.2, all control days    1.5, IBS-specific    6.7 (Welch t 1.51); placebo (same day count, 1000): raw pct 92, residual pct 99 [placebo resid 5-95%: -2.9..6.3bp]
+[2021-26] IBS trades n=829 on 473 days; every-top-3 control n=4299; SPY all-days mean 6.2bp
+   per-trade mean bp: IBS   21.6 (t 3.45) | unconditional top-3    7.8 | premium   13.8 | beta-adj IBS    8.6 vs beta-adj control    0.1 -> adj premium    8.5
+   day-avg residual vs 4 factors (bp/day): IBS days    1.4, all control days    1.9, IBS-specific   -0.5 (Welch t -0.10); placebo (same day count, 1000): raw pct 100, residual pct 45 [placebo resid 5-95%: -3.1..7.1bp]
+
+--- market-day timing vs ETF selection (SPY open->open, same window as the trade) ---
+[2017-20] SPY next-day mean bp: all days   6.2 | control days   6.2 | IBS signal days   7.0 (timing premium vs all +0.8); trade minus same-day SPY: IBS +20.7 vs control +3.3 (selection premium +17.4bp)
+[2021-26] SPY next-day mean bp: all days   6.2 | control days   6.2 | IBS signal days  16.5 (timing premium vs all +10.3); trade minus same-day SPY: IBS +6.2 vs control +1.6 (selection premium +4.7bp)
+
+--- IBS sleeve (fully deployed on signal days, idle BIL, 1bp/side) vs buy&hold open->open ---
+[2017-20] utilisation (signal days) = 31% of sessions
+   IBS sleeve                     CAGR   16.8% vol  13.5% maxDD  -13.0% Sharpe  1.13 w5d  -10.7% w20d   -8.1% rec          58d 
+   SPY buy&hold                   CAGR   15.6% vol  18.3% maxDD  -32.0% Sharpe  0.82 w5d  -16.1% w20d  -30.1% rec          97d 
+   QQQ buy&hold                   CAGR   28.5% vol  21.8% maxDD  -27.6% Sharpe  1.21 w5d  -14.9% w20d  -27.3% rec          50d 
+   TQQQ buy&hold                  CAGR   70.9% vol  65.4% maxDD  -69.4% Sharpe  1.14 w5d  -44.8% w20d  -68.9% rec          77d 
+   SPY scaled to 31% util         CAGR    5.9% vol   5.7% maxDD  -10.8% Sharpe  0.82 w5d   -5.1% w20d  -10.1% rec          83d 
+   IBS minus util-scaled SPY: +10.5%/yr (NW t 1.85); IBS excess-of-cash 15.2%/yr vs scaled SPY 4.7%/yr
+   IBS sleeve excess-of-cash  n=1005 raw=  15.2% alpha=   0.6% t= 0.19 R2=0.80 rvol=  6.0% | MKT: +1.05/+27.9 TECH: +0.74/ +5.7 SIZE: +0.18/ +2.8 MOM: +0.13/ +1.1 | contrib%/yr MKT: +6.3 TECH: +7.6 SIZE: -0.1 MOM: +0.8 | sys=   96%
+[2021-26] utilisation (signal days) = 33% of sessions
+   IBS sleeve                     CAGR   19.6% vol  15.1% maxDD  -16.8% Sharpe  1.05 w5d   -9.2% w20d  -13.0% rec          67d 
+   SPY buy&hold                   CAGR   15.3% vol  16.7% maxDD  -26.3% Sharpe  0.75 w5d  -11.0% w20d  -13.6% rec         294d 
+   QQQ buy&hold                   CAGR   17.0% vol  22.6% maxDD  -36.6% Sharpe  0.67 w5d  -11.7% w20d  -16.2% rec         294d 
+   TQQQ buy&hold                  CAGR   25.4% vol  67.5% maxDD  -81.6% Sharpe  0.63 w5d  -33.1% w20d  -44.4% rec         541d 
+   SPY scaled to 33% util         CAGR    7.4% vol   5.5% maxDD   -8.8% Sharpe  0.75 w5d   -3.7% w20d   -4.5% rec         164d 
+   IBS minus util-scaled SPY: +11.8%/yr (NW t 2.03); IBS excess-of-cash 15.6%/yr vs scaled SPY 4.0%/yr
+   IBS sleeve excess-of-cash  n=1411 raw=  15.6% alpha=  -0.2% t=-0.04 R2=0.60 rvol=  9.5% | MKT: +0.91/+18.9 TECH: +0.12/ +0.8 SIZE: +0.39/ +6.1 MOM: +0.33/ +4.2 | contrib%/yr MKT:+12.4 TECH: +0.6 SIZE: +1.1 MOM: +1.7 | sys=  101%
+[2017-26] utilisation (signal days) = 32% of sessions
+   IBS sleeve                     CAGR   18.3% vol  14.4% maxDD  -16.8% Sharpe  1.07 w5d  -10.7% w20d  -13.0% rec          67d 
+   SPY buy&hold                   CAGR   15.2% vol  17.4% maxDD  -32.0% Sharpe  0.77 w5d  -16.1% w20d  -30.1% rec          97d 
+   QQQ buy&hold                   CAGR   21.3% vol  22.3% maxDD  -36.6% Sharpe  0.88 w5d  -14.9% w20d  -27.3% rec         294d 
+   TQQQ buy&hold                  CAGR   41.5% vol  66.7% maxDD  -81.6% Sharpe  0.82 w5d  -44.8% w20d  -68.9% rec         541d 
+   SPY scaled to 32% util         CAGR    6.7% vol   5.6% maxDD  -11.2% Sharpe  0.77 w5d   -5.3% w20d  -10.4% rec          83d 
+   IBS minus util-scaled SPY: +11.3%/yr (NW t 2.74); IBS excess-of-cash 15.5%/yr vs scaled SPY 4.2%/yr
+   IBS sleeve excess-of-cash  n=2417 raw=  15.5% alpha=   1.0% t= 0.39 R2=0.66 rvol=  8.5% | MKT: +0.94/+25.0 TECH: +0.38/ +3.4 SIZE: +0.31/ +6.1 MOM: +0.31/ +4.2 | contrib%/yr MKT: +9.6 TECH: +2.7 SIZE: +0.5 MOM: +1.7 | sys=   93%
+IBS sleeve excess-of-cash  OOS pooled alpha=  -0.3%/yr (raw  19.0%) t=-0.08 pos 4/8 | per-year alpha% 2019: -3.6 2020:+15.3 2021:+11.2 2022:-16.0 2023: +1.9 2024: -9.7 2025: -6.5 2026: +8.8 class=C
+
+=== 5. PORTFOLIOS (fractional for risk stats; whole shares for $) ===
+A = V7 book via Sim.replay (2021-26 only). B IBS 100%; C IBS+TME-A stacked (equal split on overlap); D = C with IBS at 1.25x margin (12.5% on excess). IBS 1bp/side, TME 2bp/side.
+
+[2021-26]
+A current book (V7)            CAGR   45.1% vol  16.6% maxDD  -12.8% Sharpe  2.14 w5d   -6.8% w20d  -12.2% rec          27d alpha(in-sample,incl cash)  24.5% OOS-alpha(ex-cash)  21.8% avg dollar MKT beta +0.38 util overnight 40%
+B IBS 100%                     CAGR   19.5% vol  15.1% maxDD  -16.8% Sharpe  1.05 w5d   -9.2% w20d  -13.0% rec          67d alpha(in-sample)   2.5% t 0.61 dollar-beta +0.31 OOS alpha   4.8% t 0.96 pos 2/4 util 33%
+C IBS+TME                      CAGR   18.1% vol  15.1% maxDD  -19.5% Sharpe  0.97 w5d   -9.2% w20d  -14.6% rec         165d alpha(in-sample)   2.4% t 0.56 dollar-beta +0.30 OOS alpha   5.9% t 1.13 pos 2/4 util 42%
+D IBS1.25x+TME                 CAGR   20.6% vol  18.5% maxDD  -23.6% Sharpe  0.93 w5d  -11.5% w20d  -17.6% rec         166d alpha(in-sample)   1.3% t 0.25 dollar-beta +0.37 OOS alpha   5.3% t 0.84 pos 2/4 util 49%
+E TME only                     CAGR    5.0% vol   5.3% maxDD   -4.7% Sharpe  0.34 w5d   -2.9% w20d   -2.6% rec         218d alpha(in-sample)   4.5% t 2.21 dollar-beta +0.00 OOS alpha   5.6% t 2.38 pos 3/4 util 14%
+
+[2017-26]
+B IBS 100%                     CAGR   18.3% vol  14.4% maxDD  -16.8% Sharpe  1.07 w5d  -10.7% w20d  -13.0% rec          67d alpha(in-sample)   3.2% t 1.15 dollar-beta +0.30 OOS alpha   2.2% t 0.64 pos 4/8 util 32%
+C IBS+TME                      CAGR   18.8% vol  14.4% maxDD  -19.5% Sharpe  1.10 w5d  -10.7% w20d  -14.6% rec         165d alpha(in-sample)   4.8% t 1.64 dollar-beta +0.28 OOS alpha   2.8% t 0.79 pos 5/8 util 42%
+D IBS1.25x+TME                 CAGR   21.4% vol  17.8% maxDD  -23.6% Sharpe  1.05 w5d  -13.4% w20d  -17.6% rec         166d alpha(in-sample)   4.1% t 1.17 dollar-beta +0.35 OOS alpha   1.7% t 0.41 pos 5/8 util 49%
+E TME only                     CAGR    5.1% vol   4.9% maxDD   -7.8% Sharpe  0.56 w5d   -2.9% w20d   -3.4% rec         233d alpha(in-sample)   4.9% t 3.43 dollar-beta +0.00 OOS alpha   4.9% t 2.82 pos 6/8 util 14%
+
+[2017-20 (IBS holdout)]
+B IBS 100%                     CAGR   16.9% vol  13.5% maxDD  -13.0% Sharpe  1.13 w5d  -10.7% w20d   -8.1% rec          58d alpha(in-sample)   1.9% t 0.62 dollar-beta +0.33 OOS alpha   6.1% t 1.33 pos 1/2 util 31%
+C IBS+TME                      CAGR   20.2% vol  13.5% maxDD  -10.7% Sharpe  1.34 w5d  -10.7% w20d   -8.3% rec          16d alpha(in-sample)   5.7% t 1.72 dollar-beta +0.27 OOS alpha   8.0% t 1.61 pos 2/2 util 41%
+D IBS1.25x+TME                 CAGR   23.0% vol  16.6% maxDD  -13.4% Sharpe  1.26 w5d  -13.4% w20d  -10.4% rec          14d alpha(in-sample)   5.2% t 1.33 dollar-beta +0.35 OOS alpha   8.4% t 1.43 pos 2/2 util 49%
+E TME only                     CAGR    5.6% vol   4.2% maxDD   -6.0% Sharpe  1.05 w5d   -2.0% w20d   -2.3% rec  >25d (open) alpha(in-sample)   5.1% t 2.63 dollar-beta +0.00 OOS alpha   5.0% t 1.62 pos 1/2 util 14%
+
+$/yr on a static account (S x whole-share CAGR, no deposits, PRE-TAX) -- A via Sim.replay, B-E by explicit loop
+                                    $1000    $3000    $5000   $10000   $25000
+A current book (V7)                   413     1295     2252     4496    11364
+B IBS 100% [2021-26]                  176      570      958     1927     4855
+C IBS+TME [2021-26]                   155      525      890     1788     4504
+D IBS1.25x+TME [2021-26]              190      606     1014     2048     5134
+E TME only [2021-26]                   49      147      246      495     1236
+B IBS 100% [2017-26]                  171      539      904     1819     4569
+C IBS+TME [2017-26]                   178      554      929     1868     4689
+D IBS1.25x+TME [2017-26]              205      633     1063     2132     5341
+E TME only [2017-26]                   50      152      255      511     1280
+
+Sensitivity: IBS cost 3bp/side (B, 2017-26)
+B IBS 100% @3bp                CAGR   14.5% vol  14.4% maxDD  -18.8% Sharpe  0.85 w5d  -10.8% w20d  -13.3% rec         162d 
+
+Done.

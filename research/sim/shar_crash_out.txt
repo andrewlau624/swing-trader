@@ -1,0 +1,45 @@
+Study SHAR-CRASH - whole-book crash/stress replay, daily-bar form
+pre-reg: research/drafts/round1_prose.md (N unchanged; diagnostic, one ref, no variants)
+legs 0.5 IBS (EQ18, top-3 12-1 mom, IBS<0.2, open d+1 -> open d+2) +
+     0.5 NIGHT (loser_picks at the close, buy close d -> open d+1; daily close as the
+     15:40 proxy; delisted-complete Sharadar panel, live tilt/weekend-scale/delist px)
+combined: 0.5/0.5 rebalanced daily, no leverage, no margin, GROSS of costs
+generated: 2026-10-06 00:11  python 00:11:28
+
+EQ18 first session with a bar (window universe cue):
+  SPY:1998-06-01, DIA:1998-06-01, MDY:1998-06-01, XLB:1998-12-22, XLU:1998-12-22, XLP:1998-12-22, XLY:1998-12-22, XLI:1998-12-22, XLV:1998-12-22, XLE:1998-12-22, XLF:1998-12-22, XLK:1998-12-22, QQQ:1999-03-10, IWM:2000-05-26, SMH:2000-06-05, EFA:2001-08-27, EEM:2003-04-14, XBI:2006-02-06
+
+IBS daily-return series: 1546 signal days [1999-07-06..2016-04-21]
+
+Sharadar: SEP 35,867,985 rows, SFP 9,602,799 rows, master 30,953, ACTIONS 716,015
+
+Per window (combined daily equal-weight book, gross):
+window                     cum    maxDD   worst5d  worst20d  recov  halt  lever   ibs_cum   ngt_cum     n  ibs_d  ngt_d  picks
+------------------------------------------------------------------------------------------------------------------------------
+2000-01..2002-12       278.40%  -24.07%   -11.02%   -20.74%      -    no    YES    -6.18%  1286.59%   752    329    639   7455
+2008-01..2009-12        51.31%   -9.86%    -8.44%    -9.25%     54    no     no    38.06%    60.60%   505    190    318   2075
+2011-01..2011-12        17.25%   -8.35%    -5.10%    -6.31%     28    no     no    11.99%    21.49%   252     82    123    337
+2015-08..2016-02         2.08%   -8.25%    -6.65%    -3.45%     10    no     no    -4.28%     7.96%   145     52    112    425
+
+Night outcome kinds per window (all kept; delist_nopx / nobar_halt score -100%):
+  2000-01..2002-12     delist_nopx:3 open:7452
+  2008-01..2009-12     open:2075
+  2011-01..2011-12     open:337
+  2015-08..2016-02     open:425
+
+maxDD is the peak-to-trough of the compounded curve; worst5d/20d are the worst
+compounded 5- and 20-session returns in the window; recov = sessions from the
+trough back to the prior peak ('-' = never in the window). halt/lever = maxDD would
+breach signals.HALT_DRAWDOWN (0.25) / signals.LEVER_MAX_DD (0.10).
+ibs_cum / ngt_cum = each leg's own compounded return over the window (gross);
+ibs_d = sessions with an IBS signal; ngt_d = sessions with a night pick;
+picks = night trades; n = combined sessions in the window.
+
+Caveats: daily-close proxy for the live 15:40 night decision (optimistic on the
+entry); EQ18 universe grows during 2000-02 (IWM 2000-05, SMH 2000-06, EEM 2003,
+XBI 2006), so early-window IBS uses fewer names; night outcomes keep EVERY kind,
+with delist_nopx / nobar_halt scored at -100% exactly as nx.collect_trades does
+(delisting prices / back dividends from Sharadar; fully-removed tickers retained).
+No costs, no leverage, no margin, no deposits; weights are the live leg weights.
+
+elapsed 34.6s

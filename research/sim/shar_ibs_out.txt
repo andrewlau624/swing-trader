@@ -1,0 +1,70 @@
+Study SHAR-IBS (pre-reg round1_prose.md ~:3945; judged rule, N 838 -> 839)
+data: Sharadar SFP funds bars 1997-01-01..2016-01-31, 18 live ibs_symbols
+panel sessions 1997-12-31..2016-01-29 (4549), leg days 1568, judged leg days 1146
+costs book.cost_bps per side; returns split-adj open(d+2)/open(d+1)-1 (split-invariant; raw open feeds the tier); ADV=prior-20-session mean of split-invariant close*volume
+t = day-clustered (one observation per leg day)
+
+effective universe: mean #of-18 ETFs with a bar, per year
+  2000: 14.2  leg days 103
+  2001: 15.3  leg days 109
+  2002: 16.0  leg days 117
+  2003: 16.7  leg days 84
+  2004: 17.0  leg days 102
+  2005: 17.0  leg days 111
+  2006: 17.9  leg days 101
+  2007: 18.0  leg days 83
+  2008: 18.0  leg days 101
+  2009: 18.0  leg days 89
+  2010: 18.0  leg days 67
+  2011: 18.0  leg days 82
+  2012: 18.0  leg days 82
+  2013: 18.0  leg days 71
+  2014: 18.0  leg days 83
+  2015: 18.0  leg days 90
+
+=== JUDGE 2003-01-02..2015-12-31, at tier (pass bar) ===
+  net tier                 n=1146 mean=   4.99bp t= 1.03 med=   9.56bp hit= 52% ex5=   1.84bp sd= 163.6
+  gross (0 cost)           n=1146 mean=  16.15bp t= 3.34 med=  19.94bp hit= 55% ex5=  12.99bp sd= 163.7
+  PASS BAR:
+   (1) mean>0 & t>=2.0 : mean=4.99bp t=1.03 -> FAIL
+   (2) both halves >0  : 2003-09 +11.84bp (t 1.85) / 2010-15 -4.69bp (t -0.64) -> FAIL
+   (3) median per-trade : +10.69bp -> PASS
+   (4) ex-best-5 leg days>0: +1.84bp -> PASS
+   (5) beta-adj to SPY  : beta=+1.010 resid mean=-8.58bp t=-2.89 -> FAIL
+
+=== cost shock (judged window) ===
+  tier (judged)            n=1146 mean=   4.99bp t= 1.03 med=   9.56bp hit= 52% ex5=   1.84bp sd= 163.6
+  tier_hi                  n=1146 mean=  -0.18bp t=-0.04 med=   3.81bp hit= 51% ex5=  -3.34bp sd= 163.6
+  2*tier_hi                n=1146 mean= -16.52bp t=-3.42 med= -12.71bp hit= 46% ex5= -19.66bp sd= 163.6
+
+=== subperiods / per-year (tier) ===
+  2003-09                  n= 671 mean=  11.84bp t= 1.85 med=  13.99bp hit= 54% ex5=   6.49bp sd= 165.7
+  2010-15                  n= 475 mean=  -4.69bp t=-0.64 med=   4.44bp hit= 51% ex5=  -9.72bp sd= 160.3
+  2000-02 (report)         n= 329 mean= -13.23bp t=-1.09 med= -19.55bp hit= 44% ex5= -24.84bp sd= 220.1
+  2008-09 (report)         n= 190 mean=   8.05bp t= 0.49 med=   4.16bp hit= 51% ex5= -11.31bp sd= 224.4
+  2000                     n= 103 mean=   7.02bp t= 0.24 med= -22.77bp hit= 48% ex5= -28.59bp sd= 298.4
+  2001                     n= 109 mean= -37.54bp t=-2.41 med= -38.19bp hit= 41% ex5= -52.54bp sd= 162.4
+  2002                     n= 117 mean=  -8.41bp t=-0.50 med= -14.95bp hit= 44% ex5= -28.45bp sd= 182.3
+  2003                     n=  84 mean=  28.41bp t= 1.96 med=  30.00bp hit= 56% ex5=  12.61bp sd= 132.7
+  2004                     n= 102 mean=   9.22bp t= 0.77 med=   8.64bp hit= 53% ex5=  -5.51bp sd= 120.9
+  2005                     n= 111 mean=  12.52bp t= 0.98 med=  32.30bp hit= 58% ex5=  -0.16bp sd= 134.7
+  2006                     n= 101 mean=  12.55bp t= 0.88 med=  19.34bp hit= 54% ex5=  -2.58bp sd= 143.8
+  2007                     n=  83 mean=   5.22bp t= 0.32 med=   9.52bp hit= 52% ex5= -14.64bp sd= 150.3
+  2008                     n= 101 mean=  13.50bp t= 0.49 med=  -2.90bp hit= 50% ex5= -22.90bp sd= 275.6
+  2009                     n=  89 mean=   1.88bp t= 0.12 med=  10.50bp hit= 53% ex5= -15.09bp sd= 147.4
+  2010                     n=  67 mean=  21.55bp t= 1.18 med=  36.38bp hit= 60% ex5=  -5.30bp sd= 149.6
+  2011                     n=  82 mean=   4.90bp t= 0.22 med=  10.98bp hit= 54% ex5= -23.00bp sd= 200.8
+  2012                     n=  82 mean= -20.68bp t=-1.45 med= -14.16bp hit= 44% ex5= -39.60bp sd= 128.8
+  2013                     n=  71 mean= -10.80bp t=-0.88 med= -10.00bp hit= 49% ex5= -25.78bp sd= 103.9
+  2014                     n=  83 mean=  -1.25bp t=-0.07 med=  -2.62bp hit= 49% ex5= -22.41bp sd= 163.2
+  2015                     n=  90 mean= -16.76bp t=-0.86 med=  -0.98bp hit= 50% ex5= -37.11bp sd= 185.7
+
+=== DSR (program N=839, repo V[SR]=1/T convention) ===
+  leg days T=1146 SR/day=0.0305 SR0=0.0947 DSR=0.015
+
+=== placebo (judged window, tier) ===
+  IBS lagged 1 session     n= 380 mean=  14.84bp t= 1.71 med=  17.96bp hit= 56% ex5=   5.83bp sd= 168.9
+  IBS led 1 session (lookahead) n= 382 mean=-129.44bp t=-18.10 med=-121.71bp hit= 12% ex5=-135.20bp sd= 139.8
+  random-name top-3 x200   n_draws=100 mean=  2.51bp sd=  2.5 actual=  4.99bp pct=  82%
+
+VERDICT: WEAK

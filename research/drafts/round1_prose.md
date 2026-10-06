@@ -3939,3 +3939,40 @@ count, coverage check or night return. It settles the two wording issues LOOP_LO
    printed; if it is material (> 1% of picks) the report also states the tier-net leg mean with those picks left out,
    as a sensitivity line that does not change the verdict.
 No threshold, window, cost tier or pass-bar term is changed. N stays 809.
+
+---
+
+## Amendment — Study SHAR-IBS: the live IBS leg judged on untouched 2003-15 ETF data (pre-register; 1 judged rule, program N 838 -> 839)
+`date`: Mon Oct 5 2026, written before any 2003-15 IBS outcome was computed. Sharadar SFP daily bars (delisted funds included) make a genuinely untouched pre-2016 window available; IBS was chosen on 2021-26 and OOS-tested on 2016-20 ETFs, so 2003-15 is new for this leg. 2008-09 is a stress subperiod.
+- **Rule (frozen = live `signals.ibs_targets` + `signals.momentum_top`, run as `book.ibs_days`).** Universe = the 18 live `daily.ibs_symbols` (SPY,QQQ,IWM,DIA,MDY,XLK,XLF,XLE,XLV,XLI,XLY,XLP,XLU,XLB,SMH,XBI,EEM,EFA); an ETF absent on a date is simply not a candidate (effective count per year reported). At session d (>= 260 sessions into the panel): rank those ETFs by 12-1 momentum `close.shift(21)/close.shift(252)-1` at the last month-end strictly before d+1, keep top-3; hold each with IBS(d) = (close-low)/(high-low) < 0.2; buy at the open of d+1, sell at the open of d+2; per-name return = open(d+2)/open(d+1)-1, equal weight. Raw prices via closeunadj/close.
+- **Judge window.** 2003-01-02..2015-12-31, one look. (2016-20 and 2021-26 are touched; not judged here.)
+- **Costs.** `book.cost_bps("tier", raw_open, adv)` judged; "tier_hi" and 2*"tier_hi" stress. Per side.
+- **Pass bar** (all at tier, standard error clustered by leg day): (1) mean net > 0 with t >= 2.0; (2) mean net > 0 in both halves 2003-09 AND 2010-15; (3) median per-trade net > 0; (4) mean net > 0 ex-best-5 leg days; (5) mean net > 0 after beta-adjusting each leg day to SPY window-matched open-to-open. FAIL if mean <= 0 or t < 1; PASS if all; else WEAK.
+- **Reported, not judged:** 2000-02 and 2008-09 subperiods, per-year mean, effective universe size per year, hit rate, ex-top-5.
+- Runner `research/sim/shar_ibs.py`; output `research/sim/shar_ibs_out.txt`. DSR at N 839.
+- **Kill rule:** mean <= 0 or t < 1 -> FAIL: the durable-IBS claim is regime-bound to 2016+.
+
+## Amendment — Study SHAR-CRASH: whole-book crash/stress replay, daily-bar form (pre-register; diagnostic, no judged rule; N unchanged 839)
+`date`: Mon Oct 5 2026. Delisted-complete bars let the two daily-bar legs be replayed through 2000-02, 2008-09, 2011 and 2015-16. **Diagnostic: no pass/fail, no tuning, no new N.** The noise leg is excluded (no minute data).
+- Legs (weights 0.5 / 0.5, live night_w/ibs_w): IBS exactly as SHAR-IBS (EQ18, top-3 momentum, IBS<0.2, open d+1 -> open d+2); night daily-bar form = live `loser_picks` at the close (close(d)/close(d-1)-1 <= -8%, IBS(d) < 0.10, raw price 5..2000, ADV$ >= 1e7, vol20 >= .60, corr dedupe .7, night_sizing crowd_n 30 cap .10), buy close(d), sell open(d+1). Daily-close proxy for the live 15:40 decision stated.
+- Report per window: combined daily equal-weight book cumulative return, max drawdown, worst 5 and 20 sessions, sessions to recover the prior peak, and whether realised drawdown would have breached `signals.HALT_DRAWDOWN` (0.25) and `signals.LEVER_MAX_DD` (0.10).
+- Runner `research/sim/shar_crash.py`; output `research/sim/shar_crash_out.txt`.
+
+## Clarification — Study H-POOL, Sharadar data substitution and the SF2 2008 start (dated Mon Oct 5 2026, before any H-POOL outcome is read)
+H-POOL (registered at N 796, `round1_prose.md` ~:2759; judge 2006-15) planned SEC Form 345 files + Yahoo survivor-only bars. Sharadar now supplies delisted-complete `insiders` (SF2) and `stocks`/`funds` bars. Substitutions, no threshold changed:
+1. **Bars.** SEC/Yahoo bars -> Sharadar SEP/SFP raw OHLC (`closeunadj/close`), permaticker identity, delisted names retained. This removes H-POOL's survivor-only bias (an improvement, not a rule change).
+2. **Events.** Form 345 sets -> SF2 (`formtype` 3/4/5 incl. RESTATED; officer/director open-market code-P purchases; `transactionvalue`, `transactiondate`, `date` = filing date). The event union (a)/(b)/(c) is unchanged.
+3. **Window.** SF2 starts **2008-01-02** (not 2006q1), so the judged window becomes 2008-01-01..2015-12-31 and the two halves become 2008-10 and 2011-15. EV2's 730-day silence is evaluable only for fd >= 2010-01; the EV2-only subset is **reported, not judged**. The pass bar is otherwise unchanged: mean net > 0 with t >= 2.0 (day-clustered), positive in both halves, n >= 500, at `tier`.
+4. **Data-adequacy gates become informational** (event-mapping rate and delisted coverage reported), since the survivor-only source they were written against is gone. One look.
+- Runner `research/sim/hpool_sharadar.py` (new; does not edit `hpool.py`); output `research/sim/hpool_sharadar_out.txt`. N stays 796.
+
+## Amendment — Study SHAR-SURV: survivorship audit of the 2021-26 stock-panel results (pre-register; diagnostic, no judged rule; N unchanged 839)
+`date`: Mon Oct 5 2026. Diagnostic: re-run the 2021-26 night leg daily-bar form (live `loser_picks` at the close, filters as SHAR-CRASH) on (a) Sharadar delisted-complete common stocks and (b) the survivor-only 2021-26 source used for the published numbers, and report (a)-(b).
+- Report mean net/trade at `tier` and flat 2.5bp, day-clustered t, ex-top-5, median, hit rate, by year, and the count of 2021-26 eligible names now delisted. If cheap, repeat for one other surviving stock-universe result (bounded to the night leg if time is short).
+- Runner `research/sim/shar_surv.py`; output `research/sim/shar_surv_out.txt`.
+
+### Correction — Study SHAR-IBS (dated 2026-10-05, adversarial check before acceptance; no re-look)
+The first run reported FAIL. An independent verifier found a genuine data bug: the trade return was taken as a ratio of **raw** opens, so on 2 judged leg-days whose sell date d+2 was a split ex-date (EEM 2005-06-07, XBI 2015-09-09) it printed ~-67% instead of the split-adjusted return. Fixing the return to the split-adjusted `open` (raw still feeds tier/price/ADV) gives tier net **+4.99bp (t 1.03)**, gross +16.15bp (t 3.34), halves +11.84 / -4.69, median +10.69bp, ex-best-5 +1.84bp, beta-adj SPY resid -8.58bp (t -2.89); **2/5 checks pass**. By the registered kill rule (FAIL if mean<=0 or t<1; PASS if all; else WEAK) the verdict is **WEAK**, not FAIL. Rule, window, costs and pass bar unchanged; one look preserved. Runner/output updated in place.
+
+### Correction — Study SHAR-CRASH (dated 2026-10-05, adversarial check before acceptance)
+The night-leg daily return filtered outcomes to {open, delist_price}, dropping `delist_nopx` and `nobar_halt`, which the registered engine scores -100%. Including them: 2000-02 night +1537% -> **+1287%**, combined +310% -> **+278%**, maxDD -20.07% -> **-24.07%** (still shallower than the 0.25 halt, still trips the 0.10 lever gate). The other three windows are unchanged (no dropped outcomes). Diagnostic only; N unchanged.

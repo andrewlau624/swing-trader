@@ -9,6 +9,37 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Sharadar full-bundle session (2026-10-05): 4 studies; IBS WEAK on 2003-15, H-POOL PASS-not-robust, survivorship +4bp; N 838 -> 839
+Data: full Sharadar bundle at `~/data/sharadar` (stocks=SEP, funds=SFP, insiders=SF2 2008+, actions, sp500, fundamentals, daily,
+holdings), delisted-complete 1998-2026, permaticker ids; loader `github.com/andrewlau624/sharadar-data`. **Daily bars only**
+(no minute data: every 15:40/intraday rule is a labelled daily-close proxy). Backup copy at `~/Downloads/sharadar-backup/`.
+- **Study SHAR-IBS (N 838 -> 839): WEAK, not PASS.** Live IBS leg (18 EQ18 ETFs, top-3 12-1 momentum, IBS<0.2, buy open
+d+1, sell open d+2) judged 2003-01-02..2015-12-31 (never used for IBS): tier net **+4.99bp, t 1.03** (gross +16.15bp
+t 3.34); halves +11.84 / **-4.69**; median +10.69bp; ex-best-5 +1.84bp; beta-adj SPY resid **-8.58bp t -2.89**; 2/5 checks
+pass. A verifier-found raw-open split bug (2 leg-days) moved the verdict FAIL->WEAK; no re-look. Runner
+`research/sim/shar_ibs.py`. Read: the IBS premium is real gross but **does not survive tier costs in 2003-15**, and its
+beta-adjusted residual is negative pre-2016 (vs +6.7bp/day 2017-20). Only the live ~0bp auction cost keeps it net-positive
+in that regime; do not size up the leg on its old strength until this is understood.
+- **Study H-POOL on Sharadar (N 796): PASS at tier, NOT ROBUST.** Registered pooled insider-buy open->close rule, now
+survivorship-free; SF2 starts 2008 so the judge is 2008-01..2015-12: tier **+21.1bp, t 2.71, n 29,285**, halves +37.2 /
++10.6bp, gross +40.2bp; tier_hi +11.4bp t 1.46 (fails), ex-top-1% +5.4bp, DSR 0.842; decays to ~0 by 2013-15. Placebo
+100th pct. The insider family transfers to a window the program never saw, but as a **crisis/high-vol tilt**; confirm on
+the live ID3 shadow before any size. Runner `research/sim/hpool_sharadar.py`.
+- **Study SHAR-SURV (diagnostic): survivorship flattered the 2021-26 night leg by ~+4.1bp/trade at tier** (survivor-only
++18.86bp t 1.99 vs delisted-complete +14.75bp t 1.81; flat2.5bp +33.95 vs +30.14). Delisted names are 24.1% of eligible
+but only 16.0% of picks; the gap is one mis-valued -100% merger (SPRT) plus a 2021-23 concentration. Runner
+`research/sim/shar_surv.py`.
+- **Study SHAR-CRASH (diagnostic; N unchanged):** daily-bar 0.5 IBS + 0.5 night book. 2000-02 cum +278%, maxDD **-24.07%**
+(trips the -10% lever gate, NOT the -25% halt); 2008-09 maxDD -9.86%; 2011 -8.35%; 2015-16 -8.25%. A selection bug
+dropping -100% delisting outcomes was fixed (maxDD -20.07 -> -24.07). Runner `research/sim/shar_crash.py`.
+- **Dropped before testing (gate):** structural events (S&P 500 add/delete, spin-offs, reverse-split round-ups) — the S&P
+flow is in the announcement gap (`sp500.note` carries `Announced YYYY-MM-DD`, but post-gap drift ~0); spin-offs ~23/yr with
+the effect in the distribution gap; round-ups ~$370/yr. All < +8pp/yr at $10k. No generic fundamentals mining run.
+- **Do not redo:** SHAR-IBS 2003-15 (one look, now TOUCHED — no IBS variants/tuning on it); H-POOL 2008-15 (one look,
+now TOUCHED); SHAR-SURV/SHAR-CRASH are diagnostics, not edges.
+
+---
+
 ## Study ACC (2026-10-05): account structure — Roth-first + non-callable 1.25x 3x-ETF; accepted, NO bot change
 - **ACCEPTED as PROMISING, structure only, NO DEPLOYMENT; do not ship a live 3x-ETF IBS mode.** Runner
   `research/sim/account_struct.py`; out `data/research/program/account_struct_out.txt`;
@@ -1045,6 +1076,9 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | idea | verdict | why |
 |---|---|---|
+| IBS leg on untouched 2003-15 ETF data (SHAR-IBS, N 838 -> 839) | **WEAK, not pass** | tier +4.99bp t 1.03 (gross +16.15 t 3.34); halves +11.84/-4.69; beta-adj -8.58bp t -2.89; 2/5 checks; a raw-open split bug was found+fixed (FAIL->WEAK). 2003-15 is now TOUCHED: no IBS variants or tuning on it. `study_shar_ibs.md` |
+| H-POOL pooled insider-buy open->close, judged 2008-15 on Sharadar (N 796) | **PASS, not robust** | tier +21.1bp t 2.71, n 29,285; tier_hi +11.4bp t 1.46; ex-top-1% +5.4bp; decays to ~0 by 2013-15; crisis-concentrated. Window now TOUCHED. `study_hpool_sharadar.md` |
+| Structural events (S&P 500 add/delete, spin-offs, reverse-split round-ups) via Sharadar actions/sp500 | **not run (gate + gap)** | S&P flow is in the announcement gap (post-gap drift ~0); spin-off effect in the distribution gap; round-ups ~$370/yr; all < +8pp/yr at $10k. No generic fundamentals mining. |
 | Concentration (one 1.0x budget, spill to the only leg firing) / 1.5x / 2x Reg T on IBS + night, taxable, half-Kelly cap, -15% stop (Goal L1/L2, N 789-791) | **dead (holdout)** | 2016-20 after tax/interest B0 3.9 vs L1 3.7 (2020 +0.6pp), 1.5x 3.8, 2x 2.2; night leg Kelly f* -0.2 at tier_hi; ruin <= 3%; study_goal_l.md |
 | RGTI $14-$16 next-day bounce, concentrate/leverage (Study CC, N 820 -> 821) | **dead (regime + outlier)** | n 78, net +65bp/trade but ex-best-5 -14bp; every signal 2024-12+ (no liquid pre-2024 sample, one quantum-boom regime, no OOS); random-placebo 70th pct; 2025 +10bp; beta -1.0 vs SPY; fresh-cross ex-top-5 -81bp; study_conviction.md, conviction_out.txt |
 | CEF year-end tax-loss forced selling -> January reversion (Study CEF-TL, N 823 -> 824) | **REJECTED** | 142 CEFs, adj total returns 2016-26: Dec bottom-YTD quintile +0.27% vs universe (t 0.63, wrong sign), Jan +0.01%, Jan Q1-Q5 -0.93%; the Jan rebound is market beta (2018/2022), no forced signature; cef_taxloss_out.txt |
