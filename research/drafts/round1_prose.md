@@ -4210,3 +4210,9 @@ credited and sellable at the E open.
   (3) median > 0; (4) ex-top-5 > 0; (5) mean > 10bp (2x a 2.5bp/side cost; LOC in the cross pays no spread).
   FAIL if mean <= 0 or t < 1. Reported: k = 0.5% / 2%, fills/day, adverse-selection check (fills vs a matched
   no-dislocation control: same names' overnight when C is within 0.2% of p), next-day session, cross $ size.
+
+### Result — Study CLOSE-DISLOC (2026-10-06, one look, new minute data): WEAK (no breadth)
+198 names, 566 sessions; closing cross vs 15:55 price sd 21bp. Control (|dev| <= 0.2%) overnight -0.8bp. **k = 1%:
+73 fills (0.13/session), +105.7bp t 1.76, median +29.4, ex-top-5 -11.2, halves -77.2 / +153.0 -> WEAK** (outlier-carried).
+k = 0.5%: 1422 fills, +9.2bp t 1.06. Mirror (cross >= +1% above 15:55) -17.8bp. Mid-cap closing crosses absorb MOC
+flow efficiently; dislocations big enough to pay are rare and lumpy. KILL as a sleeve.
