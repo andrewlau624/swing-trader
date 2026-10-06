@@ -5052,3 +5052,10 @@ crash): 09:24 bid vs open -5.5, median 0 -> after a crash day the open clears ne
 haircut) — adverse selection eats it. **The opening auction stays the night-leg exit; the 23/5 / BOATS exit (index_beat
 B1) is closed on 2024-26 data: BOATS spreads are wider than pre-market, so the BOATS VWAP edge (+76) is the same
 spread artifact.** Lesson: any "sell in the tape beats the auction" result must be judged at the bid, never VWAP/mid.
+- **ETDX attack (official crosses 2021-26, ETD n 1,995; descriptive).** Issuers: 108; top-10 = 34% of events; **95% of
+  issuers have mean CO > 0; ex-top-5 issuers CO +45.5 med +42.3, CC +40.4.** Scales with the coupon as the tax mechanism
+  predicts: coupon/payment terciles (median 138 / 164 / 207bp) -> CO +33.0 / +36.5 / +62.3, CC +21.8 / +31.8 / +62.3
+  (under-adjustment 22-30% of the coupon). Not a few-issuer or few-event artifact.
+- **Pre-test ceiling kills (2026-10-06 late):** preferred-index (PFF/PGX) month-end rebalance flow (no free historical
+  holdings: iShares asOfDate returns HTML; month-end proxy <= 12 x ~50bp on part of capital < +8pp); royalty-trust /
+  thin-common ex-div (HYC class verdict + small per-event under-adjustment).
