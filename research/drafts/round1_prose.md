@@ -4894,3 +4894,24 @@ fake +500..900bp/night with drop/div 0.31. Rule for any SFP dividend study: requ
   preferred ex-date + added $/yr at $3k/$10k/$25k at 5% participation, 10bp round trip.
 - **Kill.** Any primary bar fails -> class closed, no variants.
 - Runner `research/sim/etdx.py` -> `data/research/program/etdx_out.txt`.
+
+## Result — ETDX (judged 2026-10-06 late; N 869): PASS (both classes); capacity extension of PREF-EX
+Runners `etdx.py` (Sharadar SFP), `etdx_fetch.py` + `etdx_cross.py` (official SIP crosses), `etdx_exec.py` (accounts);
+outputs `data/research/program/etdx_{out,cross_out,exec_out}.txt`. Dividend guard dropped 43 of 5,379 events.
+- **Sharadar 1998-2026:** ETD CO +45.3bp, med +42.4, t(day) 19.0, ex-top5 +44.7, hit 82%, 28/29 years > 0, 2021-26
+  +46.2; CC +36.3 (27/29 yrs). Flat by liquidity (dv >= $1M +39.3). Drop/div 0.76. CEF Preferred CO +31.2, med +32.2,
+  t 11.3, 14/15 yrs, 2021-26 +34.0; CC +14.0. Non-ex nights ~+1bp. All primary bars pass.
+- **Official crosses 2021-26 (J3):** ETD (n 1,995) CO +43.9 med +40.8 hit 83% t 16.3, CC +38.6 med +36.5;
+  CEF Preferred (n 298) CO +37.9, CC +23.8; pooled years +39..+51 (CO). Drop at open / div 0.74. Close cross median
+  $5.0k (the binding leg), open cross $11.5-12.7k.
+- **Mechanism (stronger than for preferreds):** baby bonds trade FLAT, so a taxable holder who sells before the ex-date
+  converts the accrued coupon (ordinary income) into a capital gain; the buyer-before-ex is taxed on the full coupon.
+  Taxable supply before ex / demand after ex is systematic; a Roth is indifferent.
+- **Capacity increment (5% participation, 10bp round trip, Roth, whole shares):** CO PREF $793 -> PREF+ETDX $1,107 at
+  $10k (11.1%/yr), $923 -> $1,442 at $25k (5.8%), $459 -> $566 at $3k; CC $500 -> $737 at $10k (7.4%), $554 -> $844 at
+  $25k. 51% of ETD ex-nights have no preferred ex-event (new nights, not just more names). At 10% participation CO
+  $1,586 at $10k / $2,463 at $25k. The plateau rises ~1.5x but still binds above ~$10k.
+- **Forward:** logged in the PREF-EX shadow (`pref_ex_shadow.py`, cls="etd", universe `etd_symbols.txt`, 185 listed
+  ETDs from Sharadar 2026-10-05), gated separately: 60 forward ex-nights, PASS net CO >= +20bp, median > 0, t >= 2;
+  KILL <= +5bp. Sept-2026 backfill (touched, 7 nights/71 events): gross CO +35bp, net CO +11, net CC -5 (shadow slip
+  model charges CC ~19bp). Unverified: ETD spreads (impact rows use the preferred quote sample), Schwab MOC on ETDs.

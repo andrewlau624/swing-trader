@@ -16,6 +16,11 @@ Each run: pull Alpaca cash dividends (process-date window), keep ".PR" symbols w
 events, score every event whose E session has printed. Rows with E < FORWARD_FROM are backfill, shown separately.
 Gate: NEED forward ex-nights with >= 1 eligible event. Pass = night-mean net CO >= +20bp, median event > 0 and t >= 2;
 kill = night-mean net CO <= +5bp. CC is reported alongside.
+
+ETDX (round1_prose.md "Study ETDX", 2026-10-06): the same rule on $25-par exchange-traded debt (baby bonds, plain symbols
+listed in etd_symbols.txt; CEF preferreds are ".PR" and already in the preferred set). Official 2021-26 CO +44bp, CC
++39bp. Logged in the same file with cls="etd" and gated separately with the same thresholds; the preferred gate counts
+preferreds only. Both classes share the account on a night (the combined book).
 """
 from __future__ import annotations
 
@@ -39,10 +44,16 @@ MIN_PX, MAX_PX = 10.0, 60.0
 MIN_YLD, MAX_YLD = 0.002, 0.04
 MIN_CROSS = 1_400.0                   # = research screen 20d median $vol >= $100k x 0.014 (cross $ / daily $vol)
 AU_URL = "https://data.alpaca.markets/v2/stocks/auctions"
+ETD = frozenset(ln.strip() for ln in (Path(__file__).with_name("etd_symbols.txt")).read_text().splitlines()
+                if ln.strip() and not ln.startswith("#"))
+
+
+def _cls(sym: str) -> str:
+    return "pref" if ".PR" in sym else "etd"
 
 
 def events(today: dt.date, H: dict) -> list[dict]:
-    """Preferred cash dividends (symbol 'XXX.PRY') with process date in [today-60, today+90]."""
+    """Preferred ('XXX.PRY') and baby-bond (ETD list) cash dividends with process date in [today-60, today+90]."""
     out, tok = [], None
     while True:
         q = {"types": "cash_dividend", "start": str(today - dt.timedelta(days=60)),
@@ -52,8 +63,8 @@ def events(today: dt.date, H: dict) -> list[dict]:
         j = _get(CA_URL, q, H)
         for x in (j.get("corporate_actions") or {}).get("cash_dividends", []):
             s = x.get("symbol", "")
-            if ".PR" in s and not x.get("special") and not x.get("foreign") and (x.get("rate") or 0) > 0:
-                out.append(dict(sym=s, ex=x["ex_date"], div=float(x["rate"])))
+            if (".PR" in s or s in ETD) and not x.get("special") and not x.get("foreign") and (x.get("rate") or 0) > 0:
+                out.append(dict(sym=s, ex=x["ex_date"], div=float(x["rate"]), cls=_cls(s)))
         tok = j.get("next_page_token")
         if not tok:
             return list({(e["sym"], e["ex"]): e for e in out}.values())
@@ -139,8 +150,9 @@ def _stats(rows: list[dict], key: str) -> dict:
                 t=t)
 
 
-def summary(rows: list[dict]) -> dict:
+def summary(rows: list[dict], cls: str = "pref") -> dict:
     out = {}
+    rows = [r for r in rows if _cls(r["sym"]) == cls]
     for tag, fwd in (("forward", True), ("backfill", False)):
         x = [r for r in rows if r.get("status") == "scored" and r.get("eligible") and "net_co" in r
              and (r["ex"] >= FORWARD_FROM) == fwd]
@@ -152,8 +164,8 @@ def summary(rows: list[dict]) -> dict:
     return out
 
 
-def line(rows: list[dict]) -> str:
-    s = summary(rows)
+def line(rows: list[dict], cls: str = "pref") -> str:
+    s = summary(rows, cls)
     parts = []
     for tag in ("forward", "backfill"):
         v = s[tag]
@@ -172,6 +184,10 @@ def line(rows: list[dict]) -> str:
         verdict = (" -> PASS (net >= 20bp, median > 0, t >= 2)" if f["night_mean_bp"] >= 20 and f["median_bp"] > 0
                    and (f["t"] or 0) >= 2 else " -> KILL (net <= 5bp)" if f["night_mean_bp"] <= 5 else " -> HOLD")
     return "; ".join(parts) + (f"; next: {nxt}" if nxt else "") + verdict
+
+
+def lines(rows: list[dict]) -> str:
+    return f"{line(rows)} | ETDX: {line(rows, 'etd')}"
 
 
 def run(state_dir: Path, logs_dir: Path, log=print, today: dt.date | None = None, H: dict | None = None) -> dict:
@@ -208,7 +224,7 @@ def run(state_dir: Path, logs_dir: Path, log=print, today: dt.date | None = None
     execution(rows)
     state_dir.mkdir(parents=True, exist_ok=True)
     path.write_text("".join(json.dumps(r) + "\n" for r in rows))
-    log(f"[pref-ex] {line(rows)}")
+    log(f"[pref-ex] {lines(rows)}")
     return summary(rows)
 
 

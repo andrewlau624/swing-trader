@@ -54,3 +54,13 @@ def test_summary_counts_forward_nights_and_gate_line():
     ln = W.line(rows)
     assert "PASS" in ln and "next: UP.PRA 2027-03-01" in ln
     json.dumps(rows)
+
+
+def test_etd_rows_are_gated_separately_from_preferreds():
+    assert W._cls("AAA.PRA") == "pref" and W._cls("SOJD") == "etd" and "SOJD" in W.ETD
+    rows = [dict(sym="BOND", ex="2026-12-01", status="scored", eligible=True, co=0.005, cc=0.004, net_co=0.004,
+                 net_cc=0.003, order_usd=200.0, part_close=0.04),
+            dict(sym="P.PRA", ex="2026-12-02", status="scored", eligible=True, co=0.004, cc=0.003, net_co=0.003,
+                 net_cc=0.002, order_usd=200.0, part_close=0.04)]
+    assert W.summary(rows)["forward"]["co"]["n"] == 1 and W.summary(rows, "etd")["forward"]["co"]["n"] == 1
+    assert "ETDX: forward 1 nights/1 events" in W.lines(rows)

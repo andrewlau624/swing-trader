@@ -168,9 +168,10 @@ def _pick_cost(state: Path, logs: Path) -> dict:
 def _pref_ex(state: Path, logs: Path) -> dict:
     from . import pref_ex_shadow as w
     rows = _jsonl(state / w.LOG_NAME)
-    fwd = {r["ex"] for r in rows if r.get("status") == "scored" and r.get("eligible") and r["ex"] >= w.FORWARD_FROM}
+    fwd = {r["ex"] for r in rows if r.get("status") == "scored" and r.get("eligible") and r["ex"] >= w.FORWARD_FROM
+           and w._cls(r["sym"]) == "pref"}
     wk = sum(1 for d in fwd if d >= _week_ago())
-    return dict(n=len(fwd), week=wk, line=w.line(rows) if rows else "no events logged yet (make pref-ex)")
+    return dict(n=len(fwd), week=wk, line=w.lines(rows) if rows else "no events logged yet (make pref-ex)")
 
 
 def _exdate_open(state: Path, logs: Path) -> dict:
@@ -316,7 +317,8 @@ REGISTRY: list[Test] = [
     Test("PREF-EX: preferred ex-dividend auction capture", "buy a $25-par preferred's closing cross before its "
          "ex-date, sell the ex-date opening cross (CO) or closing cross (CC, MOC both legs): does the ~0.8x-dividend "
          "drop (official 2021-26 CO +38bp, CC +28bp) survive forward net of 10bp + impact at a $10k Roth, 5% of the "
-         "auction?", "2026-10-07", 60, "forward ex-nights", _pref_ex,
+         "auction? Also logs ETDX (baby bonds, same rule, official CO +44bp / CC +39bp), gated separately.",
+         "2026-10-07", 60, "forward ex-nights", _pref_ex,
          "make pref-ex; research/sim/pref_exec_out.txt; round1_prose.md Study PREF-EX", ["pref_ex_shadow"]),
     Test("Ex-date open: split + spin-off night (SPLIT-T0 / SPIN-T0)", "close cross before a forward-split or "
          "spin-off ex-date -> ex-date opening cross (parent + child): does the retail open premium (official 2016-20 "
