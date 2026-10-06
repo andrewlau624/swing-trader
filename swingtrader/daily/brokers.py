@@ -282,8 +282,8 @@ class SchwabAdapter:
         out = {}
         for p in self._acct().get("positions", []) or []:
             ins = p.get("instrument", {})
-            if ins.get("assetType") not in ("EQUITY", "ETF", "COLLECTIVE_INVESTMENT"):
-                continue
+            if ins.get("assetType") not in ("EQUITY", "ETF", "COLLECTIVE_INVESTMENT") or not ins.get("symbol"):
+                continue                            # Schwab lists corporate-action placeholders with no symbol
             q = float(p.get("longQuantity") or 0) - float(p.get("shortQuantity") or 0)
             if abs(q) < 1e-9:
                 continue
