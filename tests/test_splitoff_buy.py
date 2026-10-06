@@ -29,9 +29,8 @@ def test_payout_counts_cash_in_lieu_when_the_cap_set_the_ratio():
     assert q["cash_in_lieu"] is None and q["pnl"] == round(47 * 19.56 - 859.30, 2)
 
 
-def test_track_tendered_to_delivered_reopens_a_wrong_missed_and_completes_the_ledger(tmp_path):
+def _setup(tmp_path):
     import json
-    from types import SimpleNamespace as NS
     from swingtrader.daily import cpc_ledger as L
     from swingtrader.daily.splitoff_watch import LOG_NAME
     (tmp_path / LOG_NAME).write_text(json.dumps(dict(MDT, date="2026-10-02")) + "\n")
@@ -39,27 +38,65 @@ def test_track_tendered_to_delivered_reopens_a_wrong_missed_and_completes_the_le
     at = dt.datetime(2026, 10, 4, 19, tzinfo=dt.timezone(dt.timedelta(hours=-4)))
     L.add_event(led, dict(family="SPLIT_OFF", issuer="MDT", security="MDT->MMED", event_date="2026-10-02",
                           deadline="2026-10-09T16:00:00-04:00", status="ACTION_REQUIRED"), now=at)
-    eid = "SPLIT-OFF:MDT:2026-10-02"
-    L.failed(led, eid, "MISSED", note="declined", now=at)
+    L.failed(led, "SPLIT-OFF:MDT:2026-10-02", "MISSED", note="declined", now=at)
     (tmp_path / b.ORDERS_NAME).write_text(json.dumps({"MDT-2026-10-09": dict(
         ticker="MDT", recv="MMED", expires="2026-10-09", status="bought", account="roth", qty=10, held=10,
         cost=859.30, bought="2026-10-06")}))
+    return led, "SPLIT-OFF:MDT:2026-10-02"
 
-    class Ad:
-        def __init__(self, pos): self.pos = pos
-        def positions(self): return self.pos
-    mails = []
-    b.track(tmp_path, dt.date(2026, 10, 7), adapters={"roth": Ad({})}, log=lambda *_: None)
-    o = json.loads((tmp_path / b.ORDERS_NAME).read_text())["MDT-2026-10-09"]
-    assert o["status"] == "tendered" and o["recv_before"] == 0.0
-    b.track(tmp_path, dt.date(2026, 10, 13), adapters={"roth": Ad({"MMED": NS(qty=45.0, current_price=20.0)})},
-            notify=lambda subj, html: mails.append(subj), log=lambda *_: None)
-    o = json.loads((tmp_path / b.ORDERS_NAME).read_text())["MDT-2026-10-09"]
-    assert o["status"] == "delivered" and o["pnl"] == round(45.939 * 20.0 - 859.30, 2) and o["ledger"] == eid
+
+class Ad:
+    def __init__(self, pos, fill=("new", 0.0, 0.0, "")):
+        self.pos, self.fill = pos, fill
+    def positions(self): return self.pos
+    def order_status(self, coid, info): return self.fill
+
+
+def _order(tmp_path):
+    import json
+    return json.loads((tmp_path / b.ORDERS_NAME).read_text())["MDT-2026-10-09"]
+
+
+def test_track_sells_the_delivered_shares_and_books_the_fill(tmp_path):
+    from types import SimpleNamespace as NS
+    from swingtrader.daily import cpc_ledger as L
+    led, eid = _setup(tmp_path)
+    sells, mails, quiet = [], [], (lambda *_: None)
+    seller = lambda ad, sym, qty: sells.append((sym, qty)) or "777"
+    b.track(tmp_path, dt.date(2026, 10, 7), adapters={"roth": Ad({})}, log=quiet, seller=seller)
+    assert _order(tmp_path)["status"] == "tendered" and not sells
+    mmed = {"MMED": NS(qty=45.0, current_price=20.0)}
+    b.track(tmp_path, dt.date(2026, 10, 13), adapters={"roth": Ad(mmed)}, log=quiet, seller=seller)
+    assert sells == [("MMED", 45)] and _order(tmp_path)["status"] == "selling"
+    assert L.fold(L.read(led))[eid]["status"] == "MISSED"           # nothing booked until the sell fills
+    b.track(tmp_path, dt.date(2026, 10, 13), adapters={"roth": Ad(mmed)}, log=quiet, seller=seller)
+    assert len(sells) == 1                                           # working order: no second sell
+    b.track(tmp_path, dt.date(2026, 10, 14), adapters={"roth": Ad({}, ("filled", 45.0, 20.5, ""))},
+            notify=lambda subj, html: mails.append(subj), log=quiet, seller=seller)
+    o = _order(tmp_path)
+    assert o["status"] == "sold" and o["pnl"] == round(45.939 * 20.5 - 859.30, 2) and o["ledger"] == eid
     e = L.fold(L.read(led))[eid]
     assert e["status"] == "COMPLETED" and e["realized_pnl"] == o["pnl"]
     assert [h["rec"] for h in e["history"]] == ["transition", "reopen", "transition"]
-    assert mails and "payout" in mails[0]
-    b.track(tmp_path, dt.date(2026, 10, 14), adapters={"roth": Ad({"MMED": NS(qty=45.0, current_price=21.0)})},
-            log=lambda *_: None)                                  # delivered is final: no second ledger write
-    assert L.fold(L.read(led))[eid]["realized_pnl"] == o["pnl"]
+    assert mails and "sold" in mails[0]
+
+
+def test_track_resells_an_expired_day_order_and_falls_back_to_the_mark(tmp_path):
+    from types import SimpleNamespace as NS
+    from swingtrader.daily import cpc_ledger as L
+    led, eid = _setup(tmp_path)
+    quiet, sells = (lambda *_: None), []
+    ok = lambda ad, sym, qty: sells.append(qty) or "1"
+    b.track(tmp_path, dt.date(2026, 10, 7), adapters={"roth": Ad({})}, log=quiet, seller=ok)
+    mmed = {"MMED": NS(qty=45.0, current_price=20.0)}
+    b.track(tmp_path, dt.date(2026, 10, 13), adapters={"roth": Ad(mmed)}, log=quiet, seller=ok)
+    b.track(tmp_path, dt.date(2026, 10, 14), adapters={"roth": Ad(mmed, ("expired", 0.0, 0.0, ""))}, log=quiet, seller=ok)
+    assert sells == [45, 45] and _order(tmp_path)["status"] == "selling"
+
+    def broken(ad, sym, qty):
+        raise RuntimeError("closing-only")
+    b.track(tmp_path, dt.date(2026, 10, 15), adapters={"roth": Ad(mmed, ("expired", 0.0, 0.0, ""))}, log=quiet,
+            seller=broken)
+    o = _order(tmp_path)
+    assert o["status"] == "delivered" and o["pnl"] == round(45.939 * 20.0 - 859.30, 2)
+    assert L.fold(L.read(led))[eid]["status"] == "COMPLETED"

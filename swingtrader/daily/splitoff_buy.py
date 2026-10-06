@@ -5,7 +5,9 @@
 It re-checks the offer live (implied gain >= +1% with the upper limit applied, >= 3 business days to expiry, <= 99
 parent shares in total across Roth + Brokerage), shows the plan, and places ONE DAY limit buy only after you type the
 ticker. Nothing in the daily jobs calls this. After it fills, the morning split-off watch emails "BOUGHT - tender now".
-Tendering is manual at Schwab (Corporate actions / Voluntary reorganization, odd-lot box).
+Tendering is manual at Schwab (Corporate actions / Voluntary reorganization, odd-lot box). The one order the morning
+job places itself (user-approved 2026-10-06): when the received shares land, a DAY market sell of exactly those shares;
+the payout is then taken from the fill and written to the CPC ledger.
 """
 from __future__ import annotations
 
@@ -99,15 +101,18 @@ def main(parent: str, state_dir: Path, confirm=input, adapters=None, quotes=None
     return 0
 
 
-def track(state_dir: Path, today: dt.date, adapters=None, notify=None, log=print) -> dict:
-    """Morning bookkeeping (no orders): ordered -> bought (email: tender now) -> tendered when the parent shares are
-    gone -> delivered when the received shares land (payout computed, CPC ledger COMPLETED, email); an unfilled DAY
-    order -> 'unfilled' (email: run the command again)."""
+def track(state_dir: Path, today: dt.date, adapters=None, notify=None, log=print, seller=None) -> dict:
+    """Morning bookkeeping: ordered -> bought (email: tender now) -> tendered when the parent shares are gone ->
+    selling when the received shares land (the ONLY order this places: a DAY market sell of exactly those shares, at
+    the open) -> sold when it fills (payout from the fill, CPC ledger COMPLETED, email). If the sell cannot be placed,
+    the payout is taken at the delivery mark ('delivered') and the email says to sell by hand. An unfilled DAY buy
+    -> 'unfilled' (email: run the command again)."""
+    seller = seller or place_sell
     path = Path(state_dir) / ORDERS_NAME
     if not path.exists():
         return {}
     st = json.loads(path.read_text())
-    live = {k: s for k, s in st.items() if s.get("status") in ("ordered", "bought", "tendered")}
+    live = {k: s for k, s in st.items() if s.get("status") in ("ordered", "bought", "tendered", "selling")}
     if not live:
         return st
     if adapters is None:
@@ -128,7 +133,10 @@ def track(state_dir: Path, today: dt.date, adapters=None, notify=None, log=print
             recv = held.get(s["recv"])
             got = float(getattr(recv, "qty", 0.0) or 0.0) - s.get("recv_before", 0.0)
             if got >= 1 and getattr(recv, "current_price", None):
-                _deliver(Path(state_dir), s, got, float(recv.current_price), today, notify, log)
+                _deliver(Path(state_dir), s, ad, int(got), float(recv.current_price), today, notify, log, seller)
+            continue
+        if s["status"] == "selling":
+            _sold(Path(state_dir), s, ad, today, notify, log, seller)
             continue
         if s["status"] == "ordered" and q >= 1:
             s.update(status="bought", held=int(q), bought=str(today))
@@ -160,52 +168,79 @@ def track(state_dir: Path, today: dt.date, adapters=None, notify=None, log=print
     return st
 
 
+def place_sell(ad, sym: str, qty: int) -> str:
+    from schwab.orders.common import Duration, Session
+    from schwab.orders.equities import equity_sell_market
+    resp = ad.c.place_order(ad.hash, equity_sell_market(sym, qty).set_duration(Duration.DAY)
+                            .set_session(Session.NORMAL).build())
+    if resp.status_code not in (200, 201):
+        raise RuntimeError(f"Schwab rejected SELL {qty} {sym}: {resp.status_code} {resp.text[:160]}")
+    return resp.headers.get("Location", "").rstrip("/").split("/")[-1]
+
+
 def payout(s: dict, got: float, px: float, cap: float | None) -> dict:
-    """Value of what the tender returned, at the first mark after delivery, minus what the parent shares cost.
-    Fractional shares come back as cash in lieu: counted at the same mark when the upper limit set the ratio
-    (held x cap rounds down to exactly the shares delivered), otherwise left out (< 1 share) and said so."""
+    """Value of what the tender returned (at the sale price, or the delivery mark if not sold) minus what the parent
+    shares cost. Fractional shares come back as cash in lieu: counted at the same price when the upper limit set the
+    ratio (held x cap rounds down to exactly the shares delivered), otherwise left out (< 1 share) and said so."""
     frac = None
     if cap and math.floor(s["held"] * cap + 1e-9) == int(got):
         frac = s["held"] * cap - int(got)
     value = got * px + (frac or 0.0) * px
     pnl = value - s["cost"]
-    return dict(recv_qty=got, recv_px=px, cash_in_lieu=round(frac * px, 2) if frac is not None else None,
+    return dict(recv_qty=got, recv_px=round(px, 4), cash_in_lieu=round(frac * px, 2) if frac is not None else None,
                 value=round(value, 2), pnl=round(pnl, 2), ret=round(pnl / s["cost"], 5))
 
 
-def _deliver(state_dir: Path, s: dict, got: float, px: float, today: dt.date, notify, log) -> None:
+def _cap(state_dir: Path, s: dict) -> float | None:
+    return next((r.get("cap") for r in _read(state_dir / LOG_NAME)
+                 if r.get("parent") == s["ticker"] and r.get("expires") == s["expires"] and r.get("cap")), None)
+
+
+def _deliver(state_dir: Path, s: dict, ad, got: int, mark: float, today: dt.date, notify, log, seller) -> None:
+    s.update(delivered=str(today), recv_qty=got, recv_mark=mark)
+    try:
+        s["sell_order"] = seller(ad, s["recv"], got)
+        s.update(status="selling", sell_placed=str(today))
+        log(f"[splitoff] {s['recv']} delivered ({got} sh) -> SELL {got} at market (order {s['sell_order']})")
+    except Exception as exc:
+        log(f"[splitoff] {s['recv']} delivered, sell failed: {str(exc)[:120]} - payout taken at the mark")
+        _complete(state_dir, s, got, mark, today, notify, log, sold=False)
+
+
+def _sold(state_dir: Path, s: dict, ad, today: dt.date, notify, log, seller) -> None:
+    status, fq, avg, _ = ad.order_status(None, {"broker_id": s["sell_order"]})
+    if status == "filled" and fq >= 1:
+        _complete(state_dir, s, fq, avg, today, notify, log, sold=True)
+    elif status not in ("filled", "new") and s.get("sell_placed", "") < str(today):
+        log(f"[splitoff] {s['recv']} sell {status} - placing it again")      # a DAY order that expired unfilled
+        _deliver(state_dir, s, ad, int(s["recv_qty"]), s["recv_mark"], today, notify, log, seller)
+
+
+def _complete(state_dir: Path, s: dict, got: float, px: float, today: dt.date, notify, log, sold: bool) -> None:
     from . import cpc_ledger as L
-    cap = next((r.get("cap") for r in _read(state_dir / LOG_NAME)
-                if r.get("parent") == s["ticker"] and r.get("expires") == s["expires"] and r.get("cap")), None)
-    p = payout(s, got, px, cap)
-    s.update(status="delivered", delivered=str(today), **p)
+    p = payout(s, got, px, _cap(state_dir, s))
+    s.update(status="sold" if sold else "delivered", resolved=str(today), **p)
     cil = (f" + cash in lieu ~${p['cash_in_lieu']:,.2f}" if p["cash_in_lieu"] is not None
            else " (cash in lieu for the fraction not counted: under one share)")
-    line = (f"{s['ticker']}->{s['recv']}: {got:g} {s['recv']} @ ${px:,.2f}{cil} = ${p['value']:,.2f} vs "
-            f"${s['cost']:,.2f} paid -> ${p['pnl']:+,.2f} ({p['ret']:+.1%})")
-    log(f"[splitoff] delivered {line}")
-    ledger = state_dir / L.LOG_NAME
-    st = L.fold(L.read(ledger))
-    eid = next((e for e, v in st.items() if v.get("family") == "SPLIT_OFF" and v.get("issuer") == s["ticker"]
-                and v.get("deadline", "").startswith(s["expires"])), None)
-    if eid is None:
-        log(f"[splitoff] no CPC ledger event for {s['ticker']} {s['expires']} - payout kept in {ORDERS_NAME} only")
-    else:
-        try:
-            if st[eid]["status"] == "MISSED":
-                L.reopen(ledger, eid, note=f"bought {s['held']} {s['ticker']} in {s['account']} on {s['bought']} "
-                                           f"and tendered; the earlier MISSED was wrong")
-            L.done(ledger, eid, pnl=p["pnl"], costs=0.0, note=f"auto from splitoff tracking ({s['account']}): {line}")
-            s["ledger"] = eid
-        except L.Refused as exc:
-            log(f"[splitoff] CPC ledger not updated: {exc}")
+    line = (f"{s['ticker']}->{s['recv']}: {got:g} {s['recv']} {'sold' if sold else 'marked'} @ ${px:,.2f}{cil} = "
+            f"${p['value']:,.2f} vs ${s['cost']:,.2f} paid -> ${p['pnl']:+,.2f} ({p['ret']:+.1%})")
+    log(f"[splitoff] {line}")
+    eid = L.settle(state_dir / L.LOG_NAME, "SPLIT_OFF",
+                   lambda v: v.get("issuer") == s["ticker"] and v.get("deadline", "").startswith(s["expires"]),
+                   p["pnl"], note=f"auto from splitoff tracking ({s['account']}): {line}",
+                   reopen_note=f"bought {s['held']} {s['ticker']} in {s['account']} on {s['bought']} and tendered; "
+                               "the earlier MISSED was wrong", log=log)
+    if eid:
+        s["ledger"] = eid
     if notify:
         from ..live import mail as M
-        notify(f"split-off {s['ticker']}: {s['recv']} delivered, payout ${p['pnl']:+,.2f}",
-               M.page("Split-off exchange offer", f"{s['recv']} delivered: ${p['pnl']:+,.2f}",
+        tail = ("Sold at the open; done." if sold else
+                f"The automatic sell could not be placed: sell the {got:g} {s['recv']} yourself if you do not want "
+                f"to hold them. The payout is measured at this delivery mark.")
+        notify(f"split-off {s['ticker']}: {s['recv']} {'sold' if sold else 'delivered'}, payout ${p['pnl']:+,.2f}",
+               M.page("Split-off exchange offer", f"{s['recv']} {'sold' if sold else 'delivered'}: ${p['pnl']:+,.2f}",
                       f"{s['account'].upper()} · recorded in the CPC ledger",
-                      [M.para(line), M.para(f"From here it is {s['recv']} risk: sell or keep it. The payout is "
-                                            "measured at this first mark after delivery.", muted=True)]))
+                      [M.para(line), M.para(tail, muted=True)]))
 
 
 if __name__ == "__main__":

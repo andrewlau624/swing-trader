@@ -21,6 +21,7 @@ from .tender_watch import LOG_NAME, MIN_FLOOR, instructions
 
 ORDERS_NAME = "tender-orders.json"
 MIN_BDAYS_LEFT = 3          # settle T+1, Schwab's cutoff ~1 business day before expiry, one spare day
+PAY_BDAYS = 3               # issuers pay "promptly" after expiry; judge the outcome this many business days later
 
 
 def offer_id(r: dict) -> str:
@@ -118,12 +119,13 @@ def main(oid: str, state_dir: Path, confirm=input, adapters=None, quote=None, to
 
 def track(state_dir: Path, today: dt.date, adapters=None, notify=None, log=print) -> dict:
     """Morning bookkeeping (no orders): ordered -> bought when the shares show up (email: tender now);
-    bought -> tendered when they are gone; an unfilled DAY order -> 'expired' (email: run the command again)."""
+    bought -> tendered when they are gone -> paid PAY_BDAYS business days after expiry (payout computed, CPC ledger
+    COMPLETED, email); an unfilled DAY order -> 'expired' (email: run the command again)."""
     path = Path(state_dir) / ORDERS_NAME
     if not path.exists():
         return {}
     st = json.loads(path.read_text())
-    live = {k: s for k, s in st.items() if s.get("status") in ("ordered", "bought")}
+    live = {k: s for k, s in st.items() if s.get("status") in ("ordered", "bought", "tendered")}
     if not live:
         return st
     if adapters is None:
@@ -139,8 +141,13 @@ def track(state_dir: Path, today: dt.date, adapters=None, notify=None, log=print
         ad = adapters.get(s["account"])
         if ad is None:
             continue
-        q = float(getattr(ad.positions().get(s["ticker"]), "qty", 0.0) or 0.0)
+        pos = ad.positions().get(s["ticker"])
+        q = float(getattr(pos, "qty", 0.0) or 0.0)
         r = offers.get(k, {})
+        if s["status"] == "tendered":
+            if s.get("expires") and np.busday_count(dt.date.fromisoformat(s["expires"]), today) >= PAY_BDAYS:
+                _paid(Path(state_dir), s, r, q, float(getattr(pos, "current_price", 0.0) or 0.0), today, notify, log)
+            continue
         if s["status"] == "ordered" and q >= 1:
             s.update(status="bought", held=int(q), bought=str(today))
             if notify:
@@ -169,6 +176,45 @@ def track(state_dir: Path, today: dt.date, adapters=None, notify=None, log=print
             log(f"[tender] {s['ticker']}: shares gone - tendered")
     path.write_text(json.dumps(st, indent=1))
     return st
+
+
+def payout(s: dict, r: dict, returned: float, mark: float) -> dict:
+    """Cash received for the shares bought, minus their cost. Price: the fixed offer price, or for a Dutch auction
+    the guaranteed low end (the real purchase price can only be higher). Shares back in the account after expiry
+    (offer terminated, or prorated after all) count at today's mark. Cost is the buy limit (fills are at or under)."""
+    price = float(r.get("fixed") or r.get("floor") or 0.0)
+    bought = s["held"] - returned
+    value = bought * price + returned * mark
+    pnl = value - s["cost"]
+    return dict(price=price, dutch=not r.get("fixed"), returned=returned, value=round(value, 2),
+                pnl=round(pnl, 2), ret=round(pnl / s["cost"], 5))
+
+
+def _paid(state_dir: Path, s: dict, r: dict, q: float, mark: float, today: dt.date, notify, log) -> None:
+    from . import cpc_ledger as L
+    if not (r.get("fixed") or r.get("floor")):
+        log(f"[tender] {s['ticker']}: no offer price on file - record it by hand (make cpc-done)"); return
+    p = payout(s, r, min(q, s["held"]), mark)
+    s.update(status="paid", paid=str(today), **p)
+    line = (f"{s['ticker']}: {s['held'] - p['returned']:g} sh @ ${p['price']:,.2f}"
+            + (" (Dutch: guaranteed low end; the final price may be higher)" if p["dutch"] else "")
+            + (f" + {p['returned']:g} returned @ ${mark:,.2f}" if p["returned"] else "")
+            + f" = ${p['value']:,.2f} vs ${s['cost']:,.2f} paid -> ${p['pnl']:+,.2f} ({p['ret']:+.1%})")
+    log(f"[tender] paid {line}")
+    eid = L.settle(state_dir / L.LOG_NAME, "ODD_LOT_TENDER",
+                   lambda v: v.get("security") == s["ticker"] and s["offer"] == f"{s['ticker']}-{v.get('event_date')}",
+                   p["pnl"], note=f"auto from tender tracking ({s['account']}): {line}",
+                   reopen_note=f"bought {s['held']} {s['ticker']} in {s['account']} on {s.get('bought')} and tendered; "
+                               "the earlier MISSED was wrong", log=log)
+    if eid:
+        s["ledger"] = eid
+    if notify:
+        from ..live import mail as M
+        notify(f"odd-lot tender {s['ticker']}: paid, payout ${p['pnl']:+,.2f}",
+               M.page("Odd-lot tender", f"{s['ticker']} paid: ${p['pnl']:+,.2f}",
+                      f"{s['account'].upper()} · recorded in the CPC ledger",
+                      [M.para(line), M.para("Measured from the offer terms, not the cash entry; check the Schwab "
+                                            "statement if the numbers look off.", muted=True)]))
 
 
 if __name__ == "__main__":

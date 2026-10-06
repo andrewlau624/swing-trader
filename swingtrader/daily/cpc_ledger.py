@@ -253,6 +253,24 @@ def reopen(path: Path, eid: str, note: str, now=None) -> dict:
                               to="ACTION_REQUIRED", note=note))
 
 
+def settle(path: Path, family: str, match, pnl: float, note: str, reopen_note: str, log=print, now=None) -> str | None:
+    """Record an automatically measured payout on the one open event of `family` that `match(state)` picks:
+    reopen it first if it was wrongly MISSED, then COMPLETED. Returns the event id, or None (logged) if none fits."""
+    st = fold(read(path))
+    eid = next((e for e, v in st.items() if v.get("family") == family and match(v)), None)
+    if eid is None:
+        log(f"[cpc] no {family} ledger event matches - payout not recorded in the ledger")
+        return None
+    try:
+        if st[eid]["status"] == "MISSED":
+            reopen(path, eid, note=reopen_note, now=now)
+        done(path, eid, pnl=pnl, costs=0.0, note=note, now=now)
+    except Refused as exc:
+        log(f"[cpc] {eid} not updated: {exc}")
+        return None
+    return eid
+
+
 def failed(path: Path, eid: str, status: str, note: str = "", now=None) -> dict:
     if status not in ("MISSED", "INELIGIBLE", "CANCELLED"):
         raise Refused("STATUS must be MISSED, INELIGIBLE or CANCELLED")
