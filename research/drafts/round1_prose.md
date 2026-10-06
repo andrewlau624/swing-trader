@@ -4863,3 +4863,34 @@ partitioned by yield, nothing pre-2005, no official crosses for funds.
 - **Kill.** J1 t < 2 or wrong sign in CEFs, OR effect not increasing in y, OR ETF effect present only in vendor opens and
   absent in official crosses (stale-open artifact).
 - Runner `research/sim/fxd.py` -> `data/research/program/fxd_out.txt`.
+
+## Result — FXD (judged 2026-10-06 late; N 868): KILL as a capacity extension; mechanism-supportive
+`research/sim/fxd.py` -> `data/research/program/fxd_out.txt`. **Data bug found and guarded first:** 9.6% of eligible fund
+ex-events (31% of those with y > 2%) carry a Sharadar dividend that disagrees with the dividend-adjusted series by > 10%
+(split-adjusted dividends vs raw prices after later reverse splits: YieldMax-type funds); unguarded, the >5% bins showed a
+fake +500..900bp/night with drop/div 0.31. Rule for any SFP dividend study: require |div/P - y(closeadj)| < 10%.
+- **J1 (untouched 1998-2004, CEF, xCO):** 0.5-1% +3.4bp (t 2.45) / 1-2% +22.2 (t 4.77) / 2-5% +41.6 (t 5.09, med +42.8,
+  ex-top5 +34.6). Monotone in yield: PASS (tax-clientele under-adjustment existed in CEFs and scaled with yield).
+- **J2 (2005-26):** CEF 2-5% xCO +27.8 (t 7.7) but 5-yr blocks **+51 / +31 / +26 / +9 / +4**; CEF 1-2% decays to +1/+0.
+  xCC (MOC both legs, the Schwab-executable form) is ~0 or negative in every CEF bin <5%: the excess sits in the vendor
+  ex-date OPEN print and is given back intraday. ETFs: ~0, recent blocks negative (-15/-40bp in 2025 for 0.5-2%), as the
+  creation/redemption arb predicts. ETNs noise.
+- **Verdict: KILL for the purpose registered** (extend PREF-EX capacity). The fund effect has been arbitraged to < 10bp
+  since 2020 and is not capturable with MOC; J3 (official crosses) not triggered. Supports the PREF-EX mechanism (the
+  same clientele effect, alive only where holders are retail and dealer inventory thin). No fund ex-div variants.
+
+## Study ETDX — PREF-EX rule on $25-par exchange-traded debt and CEF preferreds (pre-register; N 868 -> 869)
+`date`: Tue Oct 6 2026, late evening. Coverage counted (SFP ETD 365 tickers / 9,819 distributions, CEF Preferred 76 /
+2,205; ~700 + ~280 events/yr recently); NO return on these classes has been read.
+- **Why.** FXD showed the clientele under-adjustment survives only where holders are retail and dealer inventory thin.
+  Baby bonds (trade flat; coupon = ordinary income) and CEF term preferreds are the same holder class as PREF-EX. If
+  they carry the effect they roughly double PREF-EX's ex-nights and its capacity ceiling (~$5k).
+- **Rule (frozen = PREF-EX rule).** Raw price $10-60, 20d median $vol >= $100k, distribution y 0.2-4%/payment with the FXD
+  dividend guard (|div/P - y(closeadj)| < 10%). CO = buy close(T-1), sell open(T) + div; CC = sell close(T). Placebo =
+  same names' non-ex nights.
+- **Judge, per class (ETD, CEF Preferred).** PASS if CO mean >= +20bp, median > 0, day-clustered t >= 2, ex-top-5 > +15bp,
+  >= 75% of years > 0, and the 2021-26 block >= +20bp. CC reported (the Schwab-executable form) with the same bars as a
+  secondary. Then (only if PASS): official SIP crosses 2021-26 and the capacity increment = share of ex-nights with no
+  preferred ex-date + added $/yr at $3k/$10k/$25k at 5% participation, 10bp round trip.
+- **Kill.** Any primary bar fails -> class closed, no variants.
+- Runner `research/sim/etdx.py` -> `data/research/program/etdx_out.txt`.
