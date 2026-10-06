@@ -16,7 +16,8 @@ Leaderboard + report: `research/drafts/golden_egg_2026-10-06.md`.
 - **SPLIT-T0 (STRONG CANDIDATE, not deployed, forward shadow needed):** buy the closing cross on the session before a
   forward-split ex-date, sell the ex-date opening cross (common stock, raw px >= $5, $vol >= $1M). Vendor 2013-26:
   n 540, raw-SPY **+105bp t 5.0, median +42, ex-top-5 +68, hit 68%**, 12/14 years positive; 1998-2026 every era
-  positive. Official SIP crosses 2021-26: n 174, +120bp t 2.42, **median +17**, ex-top-5 +31; 2023 and 2026 flat/negative.
+  positive. Official SIP crosses 2021-26: n 174, +120bp t 2.42, **median +17**, ex-top-5 +31; 2023 and 2026 flat/negative. **Pre-registered SPLIT-T0 on
+  official crosses 2016-20: PASS** (n 145 after 2 non-split vendor rows, +77bp t 2.99, median +57, both halves > 0).
   Mechanism: retail open buying after the per-share price drop (session reverts -36bp). Ex-dates are known weeks
   ahead (Alpaca corporate-actions `record_date`). ~34 event nights/yr; open cross median $0.55M (capacity ~$10-25k).
   Account: half the account per event night at $10k, 5bp/side, official 2021-26: median year +11% (-2..+54%).
