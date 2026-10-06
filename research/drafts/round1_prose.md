@@ -4922,3 +4922,21 @@ outputs `data/research/program/etdx_{out,cross_out,exec_out}.txt`. Dividend guar
   L=2 (T-2 + T-1 closes) $10k $1,103 -> $1,261, $25k $1,437 -> $2,046 (+42%); L=3 no better.** CC: laddering LOWERS $
   (exit = one closing cross, so no capacity is added; only haircut + locked capital). The ladder is a lever only for the
   open-auction exit, i.e. only if a Schwab pre-open sell fills at the official open on these symbols (unverified).
+
+## Study OVX — overnight-venue (BOATS) exit for night picks (pre-register; N 869 -> 870)
+`date`: Tue Oct 6 2026, late. Correction to `index_beat_ideas.md` B1 ("forward only from 2026-12-06"): Alpaca serves
+Blue Ocean ATS (`feed=boats`) bars from ~2024-10, so the 23/5 exit question is testable on ~2 years NOW. No overnight
+price for any pick has been read.
+- **Mechanism.** Night-leg picks are big same-day losers; overnight-venue liquidity is mostly retail (Robinhood/Schwab
+  24h) dip-buying, dealers are thin. If retail overnight demand lifts loser prices above where the opening auction
+  clears (institutional supply arrives at 09:30), the bounce is better harvested overnight. Competing: overnight prints
+  are noisy/adverse (wide spreads), and the opening auction is the deepest exit.
+- **Data.** Picks = `auction_audit_picks.pkl` (ok rows, 2024-10-01..2026-09-18; 4,419 picks / 484 nights; entry =
+  official close cross c_auc, base exit = next official open cross o_auc). Path from Alpaca 1-min bars: SIP post-market
+  16:00-20:00, BOATS 20:00-04:00 (split 20-24 / 00-04), SIP pre-market 04:00-09:28.
+- **Primary (H1).** x = VWAP_BOATS(20:00-04:00) / o_auc - 1 per pick with >= 1 BOATS trade. PASS if mean x >= +20bp
+  (a conservative half-spread allowance for overnight venues), median > 0, day-clustered t >= 2, ex-top-5 > +10bp, both
+  halves (split at 2025-09-30) > 0, coverage (picks with BOATS trades) >= 50%. Secondary (report): same for post-market
+  and pre-market windows; return decomposition close -> each window -> open; liquid (ADV top half) vs thin.
+- **Kill.** H1 fails any bar -> the 23/5 exit stays forward-only (B1), no window tuning on this sample.
+- Runner `research/sim/ovx.py` (fetch cached under data/research/ovx) -> `data/research/program/ovx_out.txt`.
