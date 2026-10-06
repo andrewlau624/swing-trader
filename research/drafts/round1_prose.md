@@ -4222,6 +4222,37 @@ Data complete (window restored through 2026-10-01; 566 sessions, 107k name-days)
 registered arm): fills 73, mean +105.7bp but **t 1.76 < 2**, halves -77.2 / +153.0 (flip), **ex-top-5 -11.2bp**
 (carried by ~5 events), next-session +77.7bp (the "reversion" is the day AFTER the open, untradable end-first).
 k=0.5% has fills (1422, 2.51/session) but +9.2bp t 1.06, below the >10bp bar. Mirror side (cross >= +1% above
-15:55): -17.8bp =你可以 must pay the spread back. Control (|dev|<=0.2%): -0.8bp — no conditional-alpha drift in
+15:55): -17.8bp — you must be the one SELLING into that dislocated cross
+to collect; the collectible side is the dislocation event itself, not the open. Control (|dev|<=0.2%): -0.8bp — no conditional-alpha drift in
 this universe at all. Final status: **REJECTED** (a >1% closing-cross dislocation is rare and its post-open drift
 is tail-carried; do not re-tune k).
+
+## Amendment — Study TL-JAN: tax-loss selling -> January reversal, delisted-complete (pre-register; N 853 -> 854)
+`date`: Tue Oct 6 2026, written before any 1998-2025 December return for this cross-section is read.
+Origin: RESURRECTION track (research/drafts/resurrection_inventory_2026-10-06.md, RES-1). The design is the
+one frozen in research/drafts/seasonal_memo_2026-10-04.md (B.5), which was drafted but never run; the
+resurrection upgrade permitted by the Sharadar panel is 28 formation years (1998-2025; Judge windows the
+memo never saw: 1998-2015) instead of the memo's 10 Alpaca years, and a delisted-complete cross-section.
+- **Mechanism (unchanged):** the statutory Dec-31 loss-harvest deadline makes taxable holders sell YTD losers
+  into year-end; wash-sale rules stop immediate repurchase; sellers are price-insensitive and small/illiquid
+  names bear the concession. The pressure lifts in January.
+- **Universe:** common stocks (kbd src=0, alpha ticker), raw close >= $3 and 20d $ADV >= $1M at formation
+  (nominal thresholds kept, as drafted; they also make the whole-share constraint realistic in the 1990s era).
+- **Formation:** close of the 7th-last December session; rank by YTD (prior-year-end close -> formation, with
+  dividend factors); take the worst 50 with YTD <= -30% AND December (start of Dec -> formation) daily mean
+  $vol >= 1.0x the prior-6-month (Jun-Nov) daily mean $vol.
+- **Trade:** equal weight, buy the close of the 5th-last December session, sell the close of the 10th January
+  session (next year). One formation per year; all formation years 1998-2025 judged ONCE, no splits, no design
+  changes after the first output line.
+- **Benchmark:** IWM over the same window (Sharadar SFP, has a dividend factor); IWM starts 2000-05 so
+  1998-00 events are ALSO reported vs SPY-equivalents (SPY starts 93-01) and raw; pre-IWM years are labelled
+  and excluded from the headline judgement if they disagree.
+- **Costs:** 25bp/side floor per name; also report 2x (the registered 2x shock). No Corwin-Schultz per-name
+  spread estimate: the floor is the conservative side of the memo's spec.
+- **Kill criteria (frozen, from the memo, adapted to 28 events):** mean net abnormal (vs IWM) < +1%/event; or
+  fewer than 60% of pre-2016 judged years positive; or ex-best-single-year mean <= 0; or a June placebo
+  (same rule, formation mid-June, sell mid-July) nets as much; or the effect is not monotone in YTD-loss
+  terciles; or 2x costs flips the mean negative.
+- **Pass bar:** mean net >= +1%/event, >= 60% years positive, ex-best-year > 0, placebo small, monotone.
+- **Accounting:** the memo's ceiling is ~+1-2pp/yr at full deployment; this is a December sleeve, never a
+  book. Multiple-testing: 1 judged rule (N 854).
