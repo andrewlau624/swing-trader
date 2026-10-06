@@ -4977,3 +4977,21 @@ ex-dividend security classes without a new thin-inventory class.
   open-auction exit) apply in the taxable account.
 - **New-issue $25-par probe (no N): CEILING-KILL.** First listed close vs $25: preferreds median +0.28% (2010+, n 958),
   ETDs 0.00% (n 417); +20d drift ~= accrued coupon. No retail new-issue concession worth an allocation.
+
+## Result — OVX H1 (judged 2026-10-06 late; N 870): PASS on VWAP; executable test registered below
+`ovx.py` -> `ovx_out.txt`; 4,419 picks / 484 nights 2024-10..2026-09. Base close->open cross +14.3bp (t 1.0).
+BOATS 20-04 VWAP vs open cross: +76.1bp, med +32.4, t 2.40, ex-top5 +44.2, cov 72%; halves +144 / +41 (t 1.44 / 3.10);
+ADV top half +44 (t 2.9). All H1 bars pass. **Bigger finding: SIP pre-market VWAP 08:00-09:28 vs the open cross +46.6,
+med +38.1, t 8.88, hit 63%, cov 93%; 04-08 +68.4 med +46.** Decomposition (BOATS-covered picks): close -> 20-24 +60,
+-> 04-08 +59, -> 08-09:28 +48 (med +71), -> open cross +17: the loser bounce is in the price by the evening and the
+opening cross clears ~40-50bp BELOW the pre-market tape. VWAP is not a fill -> executable test:
+
+## Amendment — Study OVX-Q: sell night picks at the pre-market NBBO bid (pre-register; N 871 -> 872)
+Written before any quote is read. SIP NBBO (Alpaca quotes) last quote in [tau-60s, tau] at tau = 08:00 / 09:00 / 09:15
+/ 09:24 ET on the session after the pick; drop locked/crossed, spread > 10%. x_bid = bid/o_auc - 1, also x_mid and the
+quoted half-spread. **Primary: tau = 09:24** (inside every broker's pre-market session, deepest pre-open book).
+PASS if x_bid mean >= +15bp, median > 0, t(day) >= 2, ex-top5 > +10bp, both halves > 0, coverage >= 70%; report
+by ADV half and a placebo (same tau on random non-pick losers is NOT available cheaply: instead report the same x for the
+picks' own previous-session 09:24 bid vs that session's open cross = a baseline of the generic pre-open/open gap).
+Kill: fails -> night exits stay in the open auction. Caveat logged up front: a limit sell at the bid assumes the bid
+size is available; report median bid size $.
