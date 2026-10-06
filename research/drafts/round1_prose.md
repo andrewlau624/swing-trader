@@ -4940,3 +4940,17 @@ price for any pick has been read.
   and pre-market windows; return decomposition close -> each window -> open; liquid (ADV top half) vs thin.
 - **Kill.** H1 fails any bar -> the 23/5 exit stays forward-only (B1), no window tuning on this sample.
 - Runner `research/sim/ovx.py` (fetch cached under data/research/ovx) -> `data/research/program/ovx_out.txt`.
+
+## Study HYC — high-yield non-qualified common dividends (REIT/mREIT/BDC) ex-night (pre-register; N 870 -> 871)
+`date`: Tue Oct 6 2026, late. Branch from PREF-EX/ETDX: same clientele (taxable retail, distributions taxed as
+ordinary income) but deep auctions -> the capacity ceiling would lift. Partly touched: AZ/EXDIV-OPEN (common stocks,
+top-500, mean yield ~0.7%/payment: +4..+7bp, dead) may include large REITs; no REIT/BDC or yield >= 1% split was read.
+- **Rule (frozen).** SEP common (category contains "Common Stock"), raw price >= $5, 20d median $vol >= $1M, regular
+  cash dividend with ex-date T, FXD dividend guard, y = div/close(T-1) in [1%, 6%]. Classes by SIC: REIT 6798, BDC/
+  closed-end 6726, other. CO = close(T-1) -> open(T) + div; CC = -> close(T) + div. Excess = minus the name's own mean
+  non-ex CO/CC over the prior 60 sessions.
+- **Judge.** Per class (REIT, BDC), xCO and xCC: mean >= +15bp, median > 0, t(day) >= 2, ex-top-5 > +10bp, >= 75% of
+  years > 0, 2021-26 >= +15bp. Report yield bins 1-2 / 2-4 / 4-6%, dv tiers ($1-10M / >= $10M), drop/div, by year.
+  If a class passes -> official crosses 2021-26 (J3, same bars net of 5bp round trip) + capacity at $10k/$25k/$100k.
+- **Kill.** Fails -> the clientele effect does not reach deep-auction common stock; PREF/ETDX stays capacity-capped.
+- Runner `research/sim/hyc.py` -> `data/research/program/hyc_out.txt`.
