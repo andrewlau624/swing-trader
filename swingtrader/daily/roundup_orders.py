@@ -5,7 +5,8 @@ whose buy-by session is today or later, it places ONE 1-share DAY limit buy in e
 (default "live,roth"), so the share is held at the last pre-split close. After the ex-date it watches the position:
 1+ share from 2 days after the ex-date (never earlier: an unprocessed split still shows the old share) -> "rounded" (the round-up was paid) and a 1-share DAY market sell is placed; still 0 shares 21
 days after the ex-date -> "cash" (Schwab paid cash in lieu). Kill switch per account: once 2 deals are "cash" and none
-"rounded", that account stops buying and an email says so.
+"rounded", that account stops buying and an email says so. Each resolved account gets a payout (sell fill - buy fill;
+cash in lieu estimated from the ask / ratio), and once the whole deal is resolved the total is booked in the CPC ledger.
 
 Caps: price <= $25, at most 3 buys per account per day, never a symbol the account already holds (the daily book's
 or anyone's). The executor treats these shares as foreign (never trades or sizes on them).
@@ -157,5 +158,53 @@ def manage(state_dir: Path, alerts: list[dict], today: dt.date, adapters: dict |
                                     "state/roundup-orders.json.")]))
                 else:
                     s["status"] = "waiting"
+    _book(state_dir, st, adapters, log)
     _save(state_dir, st)
     return st
+
+
+def _fill(ad, oid) -> float | None:
+    try:
+        status, fq, avg, _ = ad.order_status(None, {"broker_id": str(oid)})
+    except Exception:
+        return None
+    return avg if status == "filled" and fq >= 1 else None
+
+
+def _book(state_dir: Path, st: dict, adapters: dict, log) -> None:
+    """Payout per account once a deal resolves: sold -> sell fill - buy fill (buy limit if the fill is unknown);
+    cash -> cash in lieu estimated as today's ask / ratio - buy. When every account in the deal is resolved, the
+    total goes to the CPC ledger (COMPLETED; a wrong MISSED is reopened first)."""
+    from . import cpc_ledger as L
+    for key, d in st.items():
+        sym, ex = key.rsplit("-", 3)[0], key[-10:]
+        for a, s in d.items():
+            if "pnl" in s or a not in adapters or s.get("status") not in ("sold", "cash"):
+                continue
+            buy = _fill(adapters[a], s.get("order_id")) or s.get("limit")
+            if s["status"] == "sold":
+                px = _fill(adapters[a], s.get("sell_order"))
+                if px is None:
+                    continue                                     # the sell has not filled yet
+                s.update(sell_px=px, pnl=round(px - buy, 2), est=False)
+            else:
+                px = ask(adapters[a], sym)
+                if not px or not s.get("ratio"):
+                    continue
+                s.update(cil_est=round(px / s["ratio"], 4), pnl=round(px / s["ratio"] - buy, 2), est=True)
+            s["buy_px"] = buy
+            log(f"[roundup] {a}: {sym} {s['status']} -> ${s['pnl']:+.2f}" + (" (cash in lieu estimated)" if s["est"] else ""))
+        done = [s for s in d.values() if s.get("status") in ("sold", "cash")]
+        if not done or any(s.get("booked") for s in done) or any("pnl" not in s for s in done) \
+                or any(s.get("status") in ("ordered", "held", "waiting", "rounded") for s in d.values()):
+            continue
+        pnl = round(sum(s["pnl"] for s in done), 2)
+        note = "; ".join(f"{a} {s['status']} ${s['pnl']:+.2f}" + (" est" if s["est"] else "") for a, s in d.items()
+                         if s in done)
+        eid = L.settle(Path(state_dir) / L.LOG_NAME, "REVERSE_SPLIT_ROUNDUP",
+                       lambda v: v.get("security") == sym and v.get("event_date") == ex, pnl,
+                       note=f"auto from roundup tracking: {note}",
+                       reopen_note=f"1-share buys in {', '.join(a for a, s in d.items() if s in done)}; the MISSED was wrong",
+                       log=log)
+        for s in done:
+            s["booked"] = eid or True

@@ -61,3 +61,37 @@ def test_sell_only_after_split_settles_then_cash_and_kill(tmp_path):
 def test_kill_switch_after_two_cash_and_no_rounded():
     st = {"A-1": {"roth": {"status": "cash"}}, "B-2": {"roth": {"status": "cash"}}, "C-3": {"live": {"status": "sold"}}}
     assert ro.killed(st, "roth") and not ro.killed(st, "live")
+
+
+def test_resolved_deal_books_payout_per_account_then_the_ledger(tmp_path, monkeypatch):
+    from swingtrader.daily import cpc_ledger as L
+    led = tmp_path / L.LOG_NAME
+    at = dt.datetime(2026, 9, 30, 9, tzinfo=dt.timezone(dt.timedelta(hours=-4)))
+    eid = L.add_event(led, dict(family="REVERSE_SPLIT_ROUNDUP", issuer="VIVK", security="VIVK",
+                                event_date="2026-10-05", deadline="2026-10-02T16:00:00-04:00",
+                                status="ACTION_REQUIRED"), now=at)[1]["event_id"]
+
+    class Filled(Fake):
+        fills = {"id": 0.30, "sell": 4.20}
+        c = None
+        def order_status(self, coid, info):
+            px = self.fills.get(info["broker_id"])
+            return ("filled", 1.0, px, "") if px else ("new", 0.0, 0.0, "")
+    live, roth = Filled(), Filled()
+    run(tmp_path, "2026-10-02", {"live": live, "roth": roth})
+    live.held, roth.held = {"VIVK": 1}, {}
+    calls = []
+    st = ro.manage(tmp_path, [ALERT], dt.date(2026, 10, 7), adapters={"live": live, "roth": roth},
+                   prices={"VIVK": 0.2983}, placer=lambda *a, **k: calls.append(a) or "sell", log=lambda *a: None)
+    d = st["VIVK-2026-10-05"]
+    assert d["live"]["status"] == "sold" and d["live"]["pnl"] == round(4.20 - 0.30, 2)
+    assert d["roth"]["status"] == "waiting" and "booked" not in d["live"]    # roth unresolved: no ledger yet
+    assert L.fold(L.read(led))[eid]["status"] == "ACTION_REQUIRED"
+    monkeypatch.setattr(ro, "ask", lambda ad, sym: 4.50)                     # quote for the cash-in-lieu estimate
+    st = ro.manage(tmp_path, [ALERT], dt.date(2026, 10, 27), adapters={"live": live, "roth": roth},
+                   prices={"VIVK": 0.2983}, placer=lambda *a, **k: "x", log=lambda *a: None)
+    d = st["VIVK-2026-10-05"]
+    assert d["roth"]["status"] == "cash" and d["roth"]["est"] and d["roth"]["pnl"] == round(4.50 / 15 - 0.30, 2)
+    e = L.fold(L.read(led))[eid]
+    assert e["status"] == "COMPLETED" and e["realized_pnl"] == round(d["live"]["pnl"] + d["roth"]["pnl"], 2)
+    assert d["live"]["booked"] == eid and d["roth"]["booked"] == eid
