@@ -5144,3 +5144,13 @@ Adverse selection: filled events earn +33.6bp CO at our bid vs +41.4 at MOC on t
 on bid liquidity (median $7k) instead of the closing cross:** an ADD-ON passive order (MOC at p of the cross PLUS a resting
 bid for extra size) adds fills on ~25% of events at ~+34bp, i.e. ~+20-25% deployed $ where the cross caps the account
 ($10k+). Descriptive, not judged; queue position ignored (conservative fill rule partly offsets).
+
+## Study THN — thin common ex-nights: mechanism test (pre-register; N 874 -> 875)
+`date`: Tue Oct 6 2026, late. Not read: any common-stock ex-night with 20d median $vol < $1M.
+- **Prediction (tax clientele x thin inventory).** Thin (20d $vol $100k-$1M) REIT 6798 / BDC~6799 commons (non-qualified
+  distributions) show the under-adjustment (xCO >= +20bp, 2021-26 >= +15bp, t >= 2, median > 0). Thin OTHER commons
+  (mostly qualified dividends: no tax reason to sell pre-ex) show ~0 (|xCO| < 10bp) -> the placebo. Same frozen HYC rule
+  otherwise (price >= $5, y 0.5-6%, dividend guard, excess vs own 60-session non-ex mean).
+- **Outcomes.** Thin REIT/BDC pass AND placebo ~0 -> mechanism confirmed, new (small) capacity; both ~0 -> thin-inventory
+  alone is not enough; placebo also large -> the effect is thin-stock bounce, not tax (and PREF/ETDX needs a re-check).
+- Runner `research/sim/thn.py` -> `data/research/program/thn_out.txt`.
