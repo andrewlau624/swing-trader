@@ -1372,3 +1372,18 @@ name), and names above ~$150 buy one share or none.
 - **#7 asset location: structural, no change.** Every leg is <= 1 session (all short-term); the only
   lever is which account + the wash guard. Run IBS + night in the tax-free Roth (Study AQ), keep the
   G4s guard (add. 39), F3 off in the Roth. `study_ar_remaining.md`.
+
+## Study NX RESULT (2026-10-06): night leg PASSES on untouched 2003-15 — real but small, cost-sensitive
+- Data: Sharadar direct (full bundle, ~/data/sharadar via the sharadar-data repo); all day-1 checks PASS (LEH/WAMU/BSC/
+  CCTY present to the end, raw split math exact, 36.8% of eligible names delist). Single registered look, code 532cee4,
+  output data/research/program/nx_out.txt.
+- Primary (common stock, tier 5-15bp/side): leg +3.07bp/night (t 3.13; +6.66bp on trade nights), positive in all 3
+  subperiods (2003-07 +1.4, 2008-09 +5.0, 2010-15 +3.8), per-trade median +23bp, hit 54.5%, ex-best-5 +2.2bp, beta to
+  IWM 0.26 and +2.1bp (t 2.3) after it. **PASS.** Secondaries (judged because primary passed): S1 losing-night x2
+  +0.37bp t 2.3, S2 moderate 1.3x cap .15 +0.59bp t 3.1, both within the 1.5x DD limit -> PASS.
+- But: tier_hi t 1.95, **2x tier_hi negative (-1.35bp)**; ~7.7%/yr on leg capital at tier (~3.9%/yr of book at w .5),
+  far below 2021-26. The edge is real and survivorship-free, and it lives inside the cost: auction fills (live ~0bp)
+  are what keep it. 1998-2002 (reported) +27.8bp/night; 2016-20 (reported, touched) +2.9bp t 1.0.
+- Consequence: the night leg is no longer "unproven"; it is VALIDATED-SMALL. Size-ups S1/S2 passed their bar, but are
+  a user decision and only while live auction cost stays near 0 (`make review` 2b). Supersedes the "do not size up
+  until NX" rule for the night leg; the beta/alpha study's 2021-26 night alpha (~15%) is still regime-flattered.
