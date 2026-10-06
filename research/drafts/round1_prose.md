@@ -5115,3 +5115,7 @@ PASS/WEAK/REJECT recorded in NEXT.md's do-not-redo table; no size-ups, no deploy
 (an inventory story predicts the down side only). J3 not fetched (registered: J1 failure kills; the symmetry already
 answers the artifact question). Rule: in thin securities, any daily-close reversal must show asymmetry vs its mirror
 before an official-cross check is worth running.
+- **ADR preferreds under the frozen PREF-EX rule (Sharadar SEP 'ADR Preferred Stock', descriptive, same rule/guard):**
+  1,212 events / 61 names, CO +59.8bp med +49.3 t 16.0, ex-top5 +57.7, 22/22 years, 2021-26 +61.3; CC +30.5 (2021-26
+  +51.4); drop/div 0.84; ~46 ex-nights/yr since 2021. Same clientele effect, small capacity add; Alpaca ".PR" symbols are
+  already in the shadow's filter. Official crosses not fetched (low marginal value vs ETDX).
