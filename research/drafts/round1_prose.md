@@ -4188,3 +4188,9 @@ credited and sellable at the E open.
 - **LETF-NIGHT execution check (2026-10-06, official SIP crosses 2024-26, same events):** n 2009, raw-SPY +43.9bp t 2.17,
   median +32.0bp (vendor +48.4 / +39.0; corr 0.990). By year (mean/median): 2024 +112/+80, 2025 +11/+34, 2026 +55/+24.
   Executable at the auctions; still in-sample. Status: STRONG CANDIDATE (forward test needs the user's OK).
+- **LETF-NIGHT adversarial correction (2026-10-06, 2024-26, same events): about half is beta.** LETF names' median 120d
+  daily beta 2.9 vs 1.6 for no-LETF big-down names; the raw-SPY excess carries (beta-1) x the overnight market rebound
+  after down days. Beta-adjusted overnight (r <= -5%): LETF median +23bp (mean +36, t 2.6) vs no-LETF +7 (+16);
+  market-down days +27 vs +8; flat-market days +13 vs +7 (raw-SPY +13 vs +10: no edge on flat days); within beta
+  quartiles LETF beats no-LETF by 6-25bp. **Status downgraded to PROMISING**: the rebalancing-specific edge is ~+15-20bp
+  per event, concentrated on market-down days; the rest is levered overnight market rebound.
