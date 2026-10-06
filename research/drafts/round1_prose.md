@@ -5119,3 +5119,19 @@ before an official-cross check is worth running.
   1,212 events / 61 names, CO +59.8bp med +49.3 t 16.0, ex-top5 +57.7, 22/22 years, 2021-26 +61.3; CC +30.5 (2021-26
   +51.4); drop/div 0.84; ~46 ex-nights/yr since 2021. Same clientele effect, small capacity add; Alpaca ".PR" symbols are
   already in the shadow's filter. Official crosses not fetched (low marginal value vs ETDX).
+
+## Study PXB — passive ex-eve bid entry for PREF/ETDX (pre-register; N 873 -> 874)
+`date`: Tue Oct 6 2026, late. No intraday quote/trade on an ex-eve has been read.
+- **Mechanism.** Before ex, taxable holders sell (that is the clientele flow). A resting limit buy at the NBBO bid in the
+  afternoon of T-1 can be filled BY those sellers at the bid (~19bp below the mid the close cross prints at), and it
+  draws on continuous-book liquidity instead of the thin closing cross (capacity). Risk: adverse selection (fills only
+  when the price is falling).
+- **Rule (frozen).** Events = official-cross rows of PREF (pref/cross_rows) + ETDX (etdx/cross_rows), 2021-26. Limit buy
+  at the SIP NBBO bid as of 14:00 ET on T-1 (last quote in 13:59-14:00, spread <= 5%). Filled if any 1-min bar low on
+  T-1 in 14:00-15:50 <= bid - $0.01 (conservative: a print THROUGH our price). Unfilled -> MOC at the closing cross
+  (as now). Exit = T opening cross (CO) and T closing cross (CC), + dividend.
+- **Judge.** Blended (filled at bid, else MOC) minus the MOC-only baseline on the same events: mean >= +5bp, median >= 0,
+  t(day) >= 2, both years-halves (2021-23 / 2024-26) > 0. Report fill rate, filled-only return vs those events' MOC
+  return (adverse-selection measure), and the extra $ capacity (min(bid size, our order)).
+- **Kill.** Blended <= baseline: passive entry is adversely selected; keep MOC.
+- Runner `research/sim/pxb.py` -> `data/research/program/pxb_out.txt`.
