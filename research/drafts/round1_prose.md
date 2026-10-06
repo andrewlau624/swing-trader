@@ -4185,3 +4185,6 @@ credited and sellable at the E open.
   median > 0, the no-LETF control (same r and price/volume screens, LETF share = 0) lower by >= 15bp. Kill: mean <= 0 or
   control not lower. Overlap with the live night leg reported (shared nights).
 - Not deployed (user instruction 2026-10-06: discovery only, no deployment). A shadow needs the user's OK.
+- **LETF-NIGHT execution check (2026-10-06, official SIP crosses 2024-26, same events):** n 2009, raw-SPY +43.9bp t 2.17,
+  median +32.0bp (vendor +48.4 / +39.0; corr 0.990). By year (mean/median): 2024 +112/+80, 2025 +11/+34, 2026 +55/+24.
+  Executable at the auctions; still in-sample. Status: STRONG CANDIDATE (forward test needs the user's OK).
