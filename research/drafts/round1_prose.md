@@ -4194,3 +4194,19 @@ credited and sellable at the E open.
   market-down days +27 vs +8; flat-market days +13 vs +7 (raw-SPY +13 vs +10: no edge on flat days); within beta
   quartiles LETF beats no-LETF by 6-25bp. **Status downgraded to PROMISING**: the rebalancing-specific edge is ~+15-20bp
   per event, concentrated on market-down days; the rest is levered overnight market rebound.
+
+## Amendment — Study CLOSE-DISLOC: passive limit-on-close liquidity to closing-cross dislocations (pre-register; N 852 -> 853)
+`date`: Tue Oct 6 2026, written before any minute bar or cross for this universe is read (new, never-examined data).
+- **Mechanism.** Price-insensitive MOC flow (index/LETF/fund rebalancing, retail MOC) sometimes clears the closing cross
+  well away from the pre-close price; the next open reverts. A resting limit-on-close (LOC) buy below the pre-close price
+  fills ONLY when the cross dislocates down, i.e. it sells liquidity exactly to forced sellers. Counterparty: MOC sellers.
+- **Data.** Alpaca free SIP: 1-minute bars 15:50-15:56 ET + official open/close crosses (`close_disloc_fetch.py`);
+  200 common stocks with 20d $vol $10-200M and raw close >= $10 on 2024-06-28 (chosen before the window);
+  window 2024-07-01..2026-10-01.
+- **Rule (frozen).** Pre-close price p = close of the 15:55 ET minute bar (last bar <= 15:55 if missing). LOC buy limit
+  L = p x (1 - k), primary k = 1%. Fill if the official closing cross C <= L, at C. Exit at the next official opening
+  cross. P&L = O/C - 1 minus SPY's official overnight; equal weight per fill.
+- **Pass bar** (SE clustered by date): (1) mean > 0, t >= 2; (2) halves 2024-07..2025-06 / 2025-07..2026-09 > 0;
+  (3) median > 0; (4) ex-top-5 > 0; (5) mean > 10bp (2x a 2.5bp/side cost; LOC in the cross pays no spread).
+  FAIL if mean <= 0 or t < 1. Reported: k = 0.5% / 2%, fills/day, adverse-selection check (fills vs a matched
+  no-dislocation control: same names' overnight when C is within 0.2% of p), next-day session, cross $ size.

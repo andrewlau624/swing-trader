@@ -24,16 +24,3 @@
 | Broker/mandate thresholds: price crossing UP through $5/$10/$1 | 1 (K) | REJECTED | 20d abnormal medians -303/-102/-829bp (low-price drift), no eligibility bid | — | — |
 | Settlement reference price: SPX monthly SOQ (OPEX Friday opening prints) | 1 (O) | PROMISING-small (mechanism confirmed, sub-gate) | constituents' opening gaps reverse intraday -0.188 x gap on OPEX Fridays vs -0.102 other Fridays; SPY OPEX-Friday session -14bp vs +4.5; 12 days/yr -> ~4%/yr ceiling | weekly/quarterly SOQ, VIX SOQ Wednesdays | — |
 | Lagged fund-redemption selling after market down days | 1 (R) | REJECTED | after SPY <= -2%: illiquid (<$5M) names T+1 session -13bp median (2013+), no T+2 overnight rebound (-6..-8bp) | fund-flow data | — |
-| Stale prices: illiquid stocks catching up to their sector ETF | 1 (L) | REJECTED (cost-bound) | top-decile gap -> +8.8bp next day (t 3.4), 2013+ +3.4bp, in names whose spreads are >> 9bp | — | — |
-| Participant entry: 13F holder count <= 3 -> >= 8 | 1 (I) | REJECTED | -1228bp median 126d abn (control stable >= 20 holders -412) | — | — |
-
-## Meta-findings (after ~25 regions)
-1. **Long-horizon long-only events that select small/new/low-priced stocks inherit the delisted-complete small-cap drift**
-   (even controls run -400bp/126d vs SPY). Event drifts here die on the long side for that reason, not only for gaps.
-2. **The one class that keeps producing positives: one-night auction distortions caused by forced, price-insensitive
-   flow** — split ex-date opens (retail), spin-off parent opens, single-stock LETF closes (hedge desks), OPEX SOQ opens
-   (option hedgers), listing-transfer first nights, quarter-end close marking. A small account executing in the auctions
-   at ~0bp is the natural liquidity provider. Breadth is the binding constraint: only LETF-NIGHT has daily breadth, and
-   ~half of it is beta.
-3. Next data that would open new auction-flow sources (not bought): daily ETF shares outstanding per fund (creation
-   flows into constituents), single-stock options OI (dealer gamma at the close), N-PORT fund flows (SEC UA needed).
