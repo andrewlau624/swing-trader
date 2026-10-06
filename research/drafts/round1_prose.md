@@ -5059,3 +5059,10 @@ spread artifact.** Lesson: any "sell in the tape beats the auction" result must 
 - **Pre-test ceiling kills (2026-10-06 late):** preferred-index (PFF/PGX) month-end rebalance flow (no free historical
   holdings: iShares asOfDate returns HTML; month-end proxy <= 12 x ~50bp on part of capital < +8pp); royalty-trust /
   thin-common ex-div (HYC class verdict + small per-event under-adjustment).
+- **Capital stacking on the taxable book (economics, no N; `etdx_stack.py` -> `etdx_stack_out.txt`).** V7 book (night 0.5
+  + IBS 0.5, idle IBS cash counted as occupying buying power in BIL): overnight exposure on ex-eves median 0.64-0.70x
+  equity -> Reg-T headroom ~1.3x. PREF/ETDX in that headroom (5% participation, 10bp round trip, incremental debit at
+  12%): **$2.3k CO +$498/yr pre-tax (+21.6%), CC +$318 (+13.8%); $5k +$802 / +$547; $10k +$1,091 / +$623; $25k +$1,361
+  / +$664**; financing $69-133/yr. After tax (x0.7) the $2.3k taxable gain is ~+15% (CO) / ~+10% (CC) of equity, on top of
+  the book, without displacing a night or IBS dollar. **Capacity is shared across accounts:** Roth + taxable draw on the
+  same auctions, so combined dollars plateau at the single-account $25k row once total equity > ~$10k.
