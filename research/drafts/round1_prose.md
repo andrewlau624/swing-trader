@@ -3890,3 +3890,52 @@ pct of 1000 shuffles of the same weights across names), DSR(N=838) >= 0.5. Arm B
 Ceiling gate (paper, before running): ~40 multi-name days/yr x paired spread x ibs_w 0.5 of account; a 5bp spread =
 ~1pp/yr, far under the +8pp gate. Therefore this is FALSIFICATION-ONLY: a PASS would still be a sub-1pp sizing tweak,
 not worth shipping. Kill rule: any gate fails -> KILL, record in NEXT do-not-redo.
+
+## Diagnostic amendment — Beta/alpha isolation of the current book, IBS, night, noise (NOT a variant: no N bump, no new rule, no orders)
+Registered 2026-10-05 BEFORE any output of `research/sim/beta_alpha_iso.py` was read (only code of book.py, book_decomp.py,
+ibs_oos.py, xb_alloc.py, tme_leverage.py and the prior outputs quoted in CLAUDE.md were read). Question: how much of the book's
+historical return is alpha vs systematic exposure, and does IBS stay attractive after removing the exposures? Reuses
+`book.Sim` (live signals), `book.ibs_days`, `ibs_oos._trades`, `xb_alloc.load_ohlc/load_treasury`, `book_decomp._ols`.
+Nothing is tuned; no threshold, trigger, weight or leverage is chosen from outcomes.
+- **Factors (window-matched to each leg's holding window; total-return adjusted bars from `data/cache/bars*`):** MKT = SPY,
+  TECH = QQQ - SPY, SIZE = IWM - SPY, MOM = MTUM - SPY (MTUM is cached 2016+). TQQQ is NOT a factor (no live leg holds it;
+  conviction is `shadow`); it is only a benchmark in the IBS comparison. XLK-SPY replaces QQQ-SPY as a robustness row.
+  Windows: night close(d)->open(d+1); IBS open(d+1)->open(d+2); noise open(d)->close(d); TME close-to-close on T-2,T-1,T.
+- **Exposure scaling:** night and IBS factors are multiplied by the day's invested fraction of equity (a flat factor on idle
+  days mis-specifies the regression, the book_decomp first version). Noise has a sign-flipping exposure that is not logged, so
+  it uses unscaled factors (caveat: beta ~0 by construction). Alpha = mean(y - beta.x*f) x 252 (arithmetic); t = Newey-West(5);
+  weekly = non-overlapping 5-session compounded blocks x 52. Total book residual = sum of leg residuals + cash (r_cash).
+- **OOS:** expanding window, fit betas on all years before Y (min 2 yrs), score alpha on year Y with those betas; report per
+  year and pooled (NW t). Book legs 2021-26 (test 2023-26); IBS/TME sleeves 2017-26 (test 2019-26; 2017-20 is IBS's held-out
+  window). In-sample flags: night 2021-26 FITTED; IBS 2016-20 OOS (rule chosen on 2021-23); TME 2002-15 validated, 2016+ touched.
+- **A/B/C rule (frozen):** A = genuine independent alpha: pooled OOS alpha >= 60% of raw annual return AND NW t >= 2 AND alpha > 0
+  in >= 75% of OOS years. C = essentially none: pooled OOS alpha <= 0, or < 20% of raw return, or |t| < 1. B = everything between
+  (mostly beta + modest alpha). Applied separately to: current book, IBS sleeve, night, noise.
+- **Portfolios (only validated evidence, no weight optimisation):** A current (V7 = `max_edge.BOOKS["V7"]`, 2.5bp night cost);
+  B 100% IBS (live rule, fully deployed on signal days, idle BIL); C IBS + TME-A (TLT close(T-3)->close(T), XB rule: each at
+  full notional, equal split when both are active, idle BIL); D = C with IBS at the 1.25x margin cap (CLE/ACC/XB decided; 12.5%
+  financing on the excess; TME stays 1x per TME-L2 verdict). Whole shares by explicit loop at $1k/$3k/$5k/$10k/$25k (no
+  deposits; A via `Sim.replay`). Dollars/yr = S x whole-share CAGR, pre-tax. Costs: IBS 1bp/side (3bp shock reported), TME 2bp/side.
+- **IBS tests:** IBS<0.2 vs every-top-3 control vs random-day placebo (1000 draws, same day count) on 2017-20 and 2021-26 split;
+  beta-adjusted (trailing-252d beta of each ETF on SPY, lagged 2 sessions); residualised on the 4 factors (betas fit on all
+  control days); vs SPY/QQQ/TQQQ buy-hold and SPY scaled to IBS's utilisation. Kill/decision rule: IBS "survives" if residual
+  IBS-specific premium > 0 with placebo percentile >= 95 in both windows.
+- Diagnostics only; no deployment, no gate counted, no testing.py entry (no shadow/log-only switch is added).
+
+## Clarification — Study NX (dated 2026-10-06, before `validate` or `run`; no night-rule outcome computed)
+
+Written after the purchase and the raw download (row counts and schema only were looked at), before any eligibility
+count, coverage check or night return. It settles the two wording issues LOOP_LOG flagged; neither changes the rule.
+1. **Vendor/path.** The data was bought direct from sharadar.com (api.sharadar.com bulk `years=full`), not via Nasdaq
+   Data Link. Same tables and legacy schema (SEP/SFP/TICKERS/ACTIONS; TICKERS.table = SEP/SFP; actions include
+   delisted / bankruptcyliquidation / acquisitionof). `nx.py` reads the local store (~/data/sharadar, filled by the
+   sharadar-data repo) when no raw export is present; the parsing after the read is unchanged.
+2. **Delisting coverage gate.** ">= 20% of eligible-name-years ending in a delisting" is read **per distinct eligible
+   name over the window** (>= 20% of names eligible at any point in 2003-15 end in a delisting by 2015-12-31), as
+   `nx.py` check 9 already implements. A per-name-year share is an annual delisting rate (~5-8%) and could never reach
+   20%, so that reading would fail every complete dataset; it is reported, not gated.
+3. **Halted-then-resumed picks.** Kept exactly as registered: a pick with no next-session bar is scored at its
+   delisting price/return, else -100%, even if bars resume later (the conservative reading). The count of such picks is
+   printed; if it is material (> 1% of picks) the report also states the tier-net leg mean with those picks left out,
+   as a sensitivity line that does not change the verdict.
+No threshold, window, cost tier or pass-bar term is changed. N stays 809.

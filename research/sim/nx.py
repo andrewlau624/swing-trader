@@ -144,8 +144,30 @@ def nyse_sessions(year: int) -> pd.DatetimeIndex:
 
 
 # ------------------------------------------------------------------ IO
+STORE_NAMES = {"SEP": "stocks", "SFP": "funds", "TICKERS": "tickers", "ACTIONS": "actions"}
+
+
+def store_dir() -> pathlib.Path:
+    """The direct-API Sharadar store filled by the sharadar-data repo's `sharadar-download` (2026-10-06 clarification:
+    the data was bought direct from sharadar.com, not via Nasdaq Data Link; same tables, same legacy schema)."""
+    return pathlib.Path(os.environ.get("SHARADAR_DATA", pathlib.Path.home() / "data" / "sharadar")).expanduser()
+
+
 def _files(P: Paths, name: str):
-    return sorted(P.raw.glob(f"SHARADAR_{name}*.zip")) + sorted(P.raw.glob(f"SHARADAR_{name}*.csv"))
+    raw = sorted(P.raw.glob(f"SHARADAR_{name}*.zip")) + sorted(P.raw.glob(f"SHARADAR_{name}*.csv"))
+    st = store_dir() / f"{STORE_NAMES.get(name, name.lower())}.parquet"
+    return raw or ([st] if st.exists() else [])
+
+
+def _chunks(f: pathlib.Path, kw: dict):
+    if f.suffix == ".parquet":
+        import pyarrow.parquet as pq
+        pf = pq.ParquetFile(f)
+        cols = [c for c in pf.schema_arrow.names if kw.get("usecols") is None or kw["usecols"](c)]
+        for b in pf.iter_batches(batch_size=kw["chunksize"], columns=cols):
+            yield b.to_pandas()
+    else:
+        yield from pd.read_csv(f, **kw)
 
 
 def read_table(P: Paths, name: str, lo=INGEST_LO, hi=INGEST_HI) -> pd.DataFrame | None:
@@ -163,7 +185,7 @@ def read_table(P: Paths, name: str, lo=INGEST_LO, hi=INGEST_HI) -> pd.DataFrame 
         kw = dict(chunksize=2_000_000, low_memory=False)
         if bars:
             kw["usecols"] = lambda c: c.lower() in want
-        for ch in pd.read_csv(f, **kw):
+        for ch in _chunks(f, kw):
             ch.columns = [c.lower() for c in ch.columns]
             if "date" in ch:
                 ch["date"] = pd.to_datetime(ch["date"])
@@ -756,6 +778,9 @@ def run_window_report(P, pn, master, act, which, lo, hi, bench_df, label, judged
     # sensitivity: literal -100% for gap-no-bar vs fill with nothing -> report count only
     if kinds.get("nobar_halt"):
         out.append(f"  NOTE: {kinds['nobar_halt']} picks had no next-session bar but later bars exist (halt/gap); scored -100% as registered.")
+        if kinds["nobar_halt"] > 0.01 * len(tr):   # 2026-10-06 clarification: sensitivity line, verdict unchanged
+            alt = leg_series(tr[tr["kind"] != "nobar_halt"], nights, "tier")
+            out.append(f"  SENSITIVITY (not judged): tier-net leg mean with those picks left out {_bp(alt.mean())}")
     return out, dict(tr=tr, nights=nights, st=st, bench=bench)
 
 
