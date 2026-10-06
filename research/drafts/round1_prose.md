@@ -4129,3 +4129,20 @@ uplisting +30/+19 (not judged: T-1 is an OTC price with no closing cross, not ex
   2021 SPAC bubble (median +210) and 2023 is -1361bp median; opening cross median **$50k** (p10 $4k). KILL as a sleeve.
 - Spin-off child first nights (vendor screen, no N): overnight medians -23..-34bp on nights 1-4 — forced parent-holder
   selling shows up at the open (short side only). Consistent with the open-pressure mechanism; not tradeable long.
+
+## Amendment — Study SPLIT-T0: forward-split ex-date night, official crosses 2016-2020 (pre-register; 1 judged rule; N 849 -> 850)
+`date`: Tue Oct 6 2026, written before any 2016-2020 official cross is fetched. Rule frozen as SPLIT-NIGHT's T+0 night
+(buy closing cross E-1, sell opening cross E; common stock, raw close(E-1) >= $5, $vol(E-1) >= $1M; |T+0| > 100% =
+vendor/tape mismatch, dropped). Judge on Alpaca official SIP crosses 2016-01..2020-12 (vendor years touched: execution
+verification on an earlier window, not OOS). Pass: (1) raw-SPY mean > 0, t >= 2; (2) halves 2016-18 / 2019-20 > 0;
+(3) median > 0; (4) ex-top-5 > 0; (5) 5bp/side mean > 0. FAIL if mean <= 0 or t < 1. Runner `split_t0_1620.py`.
+
+### Result — Study SPLIT-T0 (2026-10-06, one look on official SIP crosses 2016-2020): PASS
+Registered rule: n 147, raw-SPY +203.5bp t 2.17, median +57.5bp, hit 69%, ex-top-5 +43.4bp, halves +242.6 / +99.1,
+5bp/side +193.5 -> all 5 checks pass. **Adversarial fix (disclosed, not a re-look of the rule):** two events are not
+splits — DELL 2018-12-28 (DVMT reverse merger, +90%) and UAA 2016-04-08 (Class C share distribution, +99%) — and slip
+under the registered |T+0| > 100% mismatch filter; without them n 145 **+77.1bp t 2.99, median +56.5, ex-top-5 +38.4,
+halves +68.7 / +99.1** (still PASS). By year (median): 2016 +79, 2017 +60, 2018 +49, 2019 +8, 2020 +56.
+Caveat: Alpaca symbols are current, so names renamed/removed since 2016 are missing (survivor tilt in the fetch).
+Combined official 2016-2026 ~320 events: median +57bp (2016-20) -> +17bp (2021-26); the effect is real at the auction
+and shrinking. Status: STRONG CANDIDATE; next is a forward shadow (no deployment).

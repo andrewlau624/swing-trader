@@ -1,0 +1,12 @@
+SPLIT-NIGHT (official SIP crosses 2021-2026), common stocks, nights T+0..T+4: 135 events
+name-nights 735 (nights 554) raw-SPY mean +40.2bp t 2.06 median +7.2bp hit 54% | ex-top-5 tickers +11.1bp | halves <= 2018 +53.1 after +6.5 | 5bp/side +30.2 | T+1..T+4 only -0.6bp
+   checks [t, halves, median, ex-top5, 5bp cost, T+1..4] = [np.True_, np.True_, np.True_, np.True_, np.True_, np.False_] -> WEAK
+   T+0: n 147 mean +203.5bp t 2.17 median +57.5 hit 69% ex-top5 +43.4 | open-cross $ median 0.23M p10 29k
+   T+1: n 148 mean +3.6bp t 0.29 median +9.4 hit 55% ex-top5 -6.1 | open-cross $ median 0.22M p10 21k
+   T+2: n 148 mean +1.0bp t 0.14 median -4.8 hit 45% ex-top5 -8.1 | open-cross $ median 0.15M p10 14k
+   T+3: n 146 mean +0.6bp t 0.06 median +3.9 hit 51% ex-top5 -10.9 | open-cross $ median 0.16M p10 12k
+   T+4: n 146 mean -7.7bp t -1.17 median -0.7 hit 50% ex-top5 -12.9 | open-cross $ median 0.15M p10 15k
+   T+0 by year (n / mean / median bp): 2016 38/+326/+79; 2017 39/+66/+60; 2018 30/+367/+49; 2019 19/-48/+8; 2020 21/+233/+56
+
+SPLIT-T0 judged (T+0 only, official 2016-2020): n=147 raw-SPY mean +203.5bp t 2.17 median +57.5bp hit 69% ex-top5 +43.4bp halves 16-18 +242.6 19-20 +99.1 5bp/side +193.5
+   checks [t, halves, median, ex-top5, 5bp] = [np.True_, np.True_, np.True_, np.True_, np.True_] -> PASS

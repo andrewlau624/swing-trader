@@ -27,7 +27,8 @@ OUT = pathlib.Path(__file__).resolve().parent / "split_night_out.txt"
 STORE = pathlib.Path.home() / "data" / "sharadar"
 
 
-def main() -> None:
+def main(folder: str = "splitnight", spy_file: str = "spy.json", out: pathlib.Path = OUT,
+         split_year: int = 2023) -> None:
     lines: list[str] = []
 
     def log(s=""):
@@ -35,12 +36,12 @@ def main() -> None:
         lines.append(s)
 
     P = Panel.load()
-    spy_on = overnight(crosses(json.load(open(D / "spy.json"))["SPY"]))
+    spy_on = overnight(crosses(json.load(open(D / spy_file))["SPY"]))
     a = pd.read_parquet(STORE / "actions.parquet", columns=["date", "action", "ticker", "value"])
     a["date"] = pd.to_datetime(a["date"])
     sp = a[(a.action == "split") & (a.value > 1)].drop_duplicates(["ticker", "date"])
     rows = []
-    for f in sorted(glob.glob(str(D / "splitnight" / "*.json"))):
+    for f in sorted(glob.glob(str(D / folder / "*.json"))):
         t, d = pathlib.Path(f).stem.rsplit("_", 1)
         d = pd.Timestamp(d)
         v = json.load(open(f))
@@ -73,12 +74,12 @@ def main() -> None:
     m, t = cluster_t(X.x, g)
     srt_t = X.groupby("ticker").x.sum().sort_values()
     ex5 = X[~X.ticker.isin(srt_t.index[-5:])].x.mean()
-    h1, h2 = X[X.d.dt.year <= 2023].x.mean(), X[X.d.dt.year >= 2024].x.mean()
+    h1, h2 = X[X.d.dt.year <= split_year].x.mean(), X[X.d.dt.year > split_year].x.mean()
     c5 = X.x.mean() - 0.001
     post = X[X.off > 0].x.mean()
-    log(f"SPLIT-NIGHT (official SIP crosses 2021-2026), common stocks, nights T+0..T+4: {X.E.nunique()} events")
+    log(f"SPLIT-NIGHT (official SIP crosses, {folder}), common stocks, nights T+0..T+4: {X.E.nunique()} events")
     log(f"name-nights {len(X)} (nights {g.nunique()}) raw-SPY mean {m*1e4:+.1f}bp t {t:.2f} median {X.x.median()*1e4:+.1f}bp "
-        f"hit {(X.x > 0).mean()*100:.0f}% | ex-top-5 tickers {ex5*1e4:+.1f}bp | halves 21-23 {h1*1e4:+.1f} 24-26 "
+        f"hit {(X.x > 0).mean()*100:.0f}% | ex-top-5 tickers {ex5*1e4:+.1f}bp | halves <= {split_year} {h1*1e4:+.1f} after "
         f"{h2*1e4:+.1f} | 5bp/side {c5*1e4:+.1f} | T+1..T+4 only {post*1e4:+.1f}bp")
     checks = [m > 0 and t >= 2, h1 > 0 and h2 > 0, X.x.median() > 0, ex5 > 0, c5 > 0, post > 0]
     verdict = "PASS" if all(checks) else ("FAIL" if (m <= 0 or t < 1) else "WEAK")
@@ -92,8 +93,8 @@ def main() -> None:
     T0 = X[X.off == 0]
     log("   T+0 by year (n / mean / median bp): " + "; ".join(
         f"{y} {len(s)}/{s.x.mean()*1e4:+.0f}/{s.x.median()*1e4:+.0f}" for y, s in T0.groupby(T0.d.dt.year)))
-    X.to_csv(D / "split_night.csv", index=False)
-    OUT.write_text("\n".join(lines) + "\n")
+    X.to_csv(D / f"{folder}.csv", index=False)
+    out.write_text("\n".join(lines) + "\n")
 
 
 if __name__ == "__main__":

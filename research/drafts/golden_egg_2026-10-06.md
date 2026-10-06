@@ -8,7 +8,7 @@ verification on Alpaca official SIP cross prints 2021-2026 (free data API, no sp
 
 | candidate | mechanism | evidence | net / cost | capacity | freq / hold | independence | status |
 |---|---|---|---|---|---|---|---|
-| **SPLIT-T0**: buy close cross E-1, sell open cross E (forward-split ex-date) | retail market buys at the first post-split open; session reverts | vendor 2013-26 n 540 +105bp t 5.0 med +42 ex-top5 +68; 1998-2026 every era > 0; official 2021-26 n 174 +120bp t 2.42 med +17 | 5bp/side leaves ~all; official $10k half-account median yr +11% | open cross median $0.55M, p10 $38k: fine to ~$10k, binding ~$25k | ~34 event nights/yr, 1 night | event-driven, not IBS/TME/night selection; long-only, Roth-OK | **STRONG CANDIDATE** |
+| **SPLIT-T0**: buy close cross E-1, sell open cross E (forward-split ex-date) | retail market buys at the first post-split open; session reverts | vendor 2013-26 n 540 +105bp t 5.0 med +42 ex-top5 +68; 1998-2026 every era > 0; official 2021-26 n 174 +120bp t 2.42 med +17; **official 2016-20 n 145 +77bp t 2.99 med +57 (registered PASS)** | 5bp/side leaves ~all; official $10k half-account median yr +11% | open cross median $0.55M, p10 $38k: fine to ~$10k, binding ~$25k | ~34 event nights/yr, 1 night | event-driven, not IBS/TME/night selection; long-only, Roth-OK | **STRONG CANDIDATE** |
 | De-SPAC first night | retail attention at new identity | official n 261 med +99bp t 1.32; 2021 bubble only; 2023 -1361bp | — | open cross median $50k | ~50/yr then collapsing | yes | WEAK / untradeable |
 | Split nights T+1..T+4 | same, decaying | official: T+1 +27 med; T+2/T+4 -30..-35bp | — | — | — | — | REJECTED (registered basket WEAK) |
 | Spin-off parent ex-date | open under-adjustment | official n 88 +197bp t 1.16, ex-top5 < 0 | — | — | — | — | WEAK (outliers) |
@@ -38,6 +38,7 @@ splits survive the official-cross check (vendor open = official cross to 0.1bp t
    closing cross on E-1 and sell the opening cross on E. Ex-dates come from the exchange/Alpaca corporate-actions feed
    (record date weeks earlier). Equal-weight same-night events; cap the sleeve at ~50% of the account per night.
 4. **OOS performance:** no untouched historical data remains (all Sharadar years were screened). Official SIP crosses
+   2016-20 (pre-registered SPLIT-T0, PASS): n 145, +77bp t 2.99, median +57bp, ex-top-5 +38bp, both halves > 0. Official
    2021-26 (verification, same period): +120bp t 2.42, median +17bp, ex-top-5 +31bp, hit 57%. Per year medians:
    2021 +36, 2022 +50, 2023 -17, 2024 +39, 2025 -1, 2026 +10. Vendor long history: 1998-2002 +112, 2003-07 +62,
    2008-12 +69, 2013-17 +63, 2018-20 +90, 2021-26 +99bp (mean raw-SPY, all t > 2).
