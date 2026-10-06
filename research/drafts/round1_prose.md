@@ -5135,3 +5135,12 @@ before an official-cross check is worth running.
   return (adverse-selection measure), and the extra $ capacity (min(bid size, our order)).
 - **Kill.** Blended <= baseline: passive entry is adversely selected; keep MOC.
 - Runner `research/sim/pxb.py` -> `data/research/program/pxb_out.txt`.
+
+## Result — PXB (judged 2026-10-06 late; N 874): KILL as a replacement; positive as an add-on tranche
+`pxb.py` -> `pxb_out.txt`; 7,265 PREF+ETDX events 2021-26. Quoted at 14:00 71%, filled (print through bid) 25%, median
+half-spread 17bp, median bid size $7.1k. **Blended - MOC: -1.9bp (t -2.6), both halves negative -> KILL as registered.**
+Adverse selection: filled events earn +33.6bp CO at our bid vs +41.4 at MOC on the same events; the close cross lands
+4.5bp below our fill (price keeps falling). **But the filled tranche is itself +33.6bp CO (t 11.9) / +20.1 CC and draws
+on bid liquidity (median $7k) instead of the closing cross:** an ADD-ON passive order (MOC at p of the cross PLUS a resting
+bid for extra size) adds fills on ~25% of events at ~+34bp, i.e. ~+20-25% deployed $ where the cross caps the account
+($10k+). Descriptive, not judged; queue position ignored (conservative fill rule partly offsets).
