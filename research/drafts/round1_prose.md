@@ -4915,3 +4915,10 @@ outputs `data/research/program/etdx_{out,cross_out,exec_out}.txt`. Dividend guar
   ETDs from Sharadar 2026-10-05), gated separately: 60 forward ex-nights, PASS net CO >= +20bp, median > 0, t >= 2;
   KILL <= +5bp. Sept-2026 backfill (touched, 7 nights/71 events): gross CO +35bp, net CO +11, net CC -5 (shadow slip
   model charges CC ~19bp). Unverified: ETD spreads (impact rows use the preferred quote sample), Schwab MOC on ETDs.
+- **ETDX/PREF-EX entry ladder (descriptive, no N; `etdx_ladder.py` -> `etdx_ladder_out.txt`).** Pre-ex sessions are flat
+  (Sharadar 2005-26, night/day around ex: T-3..T-1 means -6..+5bp, medians 0; the whole move is the T night: prefs +41,
+  ETD +46; ex-day open->close -10/-11bp = why CC < CO; T+1 day +3..+7). Day-level Roth sim (capital locked while held,
+  3bp haircut per extra pre-ex session, 10bp round trip): L=1 reproduces etdx_exec ($1,103 at $10k CO 5%). **CO, 5%:
+  L=2 (T-2 + T-1 closes) $10k $1,103 -> $1,261, $25k $1,437 -> $2,046 (+42%); L=3 no better.** CC: laddering LOWERS $
+  (exit = one closing cross, so no capacity is added; only haircut + locked capital). The ladder is a lever only for the
+  open-auction exit, i.e. only if a Schwab pre-open sell fills at the official open on these symbols (unverified).
