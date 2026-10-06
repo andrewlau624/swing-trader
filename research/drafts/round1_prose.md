@@ -5107,3 +5107,11 @@ PASS/WEAK/REJECT recorded in NEXT.md's do-not-redo table; no size-ups, no deploy
   for thin names can be last-trade-at-bid: bid-ask bounce would fake a reversal, so J1/J2 alone cannot PASS.
 - **Kill.** J3 fails, or J1/J2 sign-unstable.
 - Runner `research/sim/prv.py` -> `data/research/program/prv_out.txt`.
+
+## Result — PRV (judged 2026-10-06 late; N 873): KILL (bid-ask bounce signature)
+`prv.py` -> `prv_out.txt`. J1 1998-2015 signal (m <= -2%) CC -4.2bp (med +18, t 1.04) -> fails. J2 2016-26 CC +19.4
+(t 3.98), CO +33.6 (t 13.8) but the **mirror (m >= +2%) reverts as hard: CO -20.8 (t -14.0, 0/11 years > 0)**, control
+~0. Symmetric reversal of vendor closes in thin names = last-trade-at-bid/ask bounce, not dealer-inventory reversal
+(an inventory story predicts the down side only). J3 not fetched (registered: J1 failure kills; the symmetry already
+answers the artifact question). Rule: in thin securities, any daily-close reversal must show asymmetry vs its mirror
+before an official-cross check is worth running.
