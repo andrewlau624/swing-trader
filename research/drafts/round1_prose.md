@@ -4162,3 +4162,26 @@ n 78: raw-SPY +83.0bp t 2.03, median +53.9bp, hit 60%, ex-top-5 +17.5bp, halves 
 checks pass. By year median: 2021 +42, 2022 +141, 2023 +31, 2024 +140, 2025 -10, 2026 +16. Child open cross median
 $0.22M. Same family as SPLIT-T0 (price drop on a scheduled date -> rich open). Unverified operational risk: child shares
 credited and sellable at the E open.
+
+## Amendment — Study LETF-NIGHT: single-stock leveraged-ETF close rebalancing -> overnight reversal (forward-only registration; N 851 -> 852)
+`date`: Tue Oct 6 2026. **No untouched history exists** (single-stock LETFs reach > 2% of underlying $volume only in
+2024+); the 2023-26 exploratory read below is in-sample. This entry freezes the rule for a FORWARD test only.
+- **Mechanism.** A daily-reset LETF with leverage L must trade L(L-1) x AUM x r_day of the underlying at the close
+  (long and inverse funds both buy on up days, sell on down days). Close-auction pressure in the day's direction; the
+  next open reverts. Counterparty: the LETF's swap/hedge desk forced into the closing cross. Prediction: reversal grows
+  with LETF $vol share and with |r|; flat days show nothing; the mirror (up days -> negative overnight).
+- **Exploratory evidence (2023-26, touched):** 520 single-stock LETFs over 278 underlyings (fund names parsed). Big
+  down day (r <= -5%), LETF 20d $vol share (lagged) > 2%: n 2010, overnight raw-SPY mean +48bp t 2.38, median +39, hit
+  56%, 81 names, ex-top-5 names median +32; same-period vol-matched no-LETF names ~0..+9; within the same 91 names
+  pre-LETF median +4 vs post +39 at equal vol; adds beyond the night-leg filters (night-like days +109 vs +28 median;
+  -5..-8% +18 vs 0; <= -8% with IBS >= .1 +66 vs +10). By |r|: -3..-5% nothing; asymmetric: r >= +8% -> -32bp. Flat
+  days -10bp (no retail overnight premium). Sleeve at 2.5bp/side: 2024 +62%, 2025 +61%, 2026 YTD +28% (319 event days).
+- **Analog check (2010-20, untouched, NOT a valid falsifier):** sector LETF share vs the underlying sector ETF's
+  overnight after |z| >= 2 days: nothing (SOXX/SOXL share 119%: ~0bp). The sector flow lands on constituents via swap
+  hedges, not on the ETF; reported, not judged.
+- **Forward rule (frozen):** each session, common stocks with raw close >= $5, $vol >= $10M, close-to-close r <= -5%,
+  and prior-day 20d (sum of single-stock LETF $vol on the name) / (name's 20d $vol) > 2%: buy the closing cross, sell
+  the next opening cross; equal weight. Gate: 120 forward event days. Pass: mean > 15bp/event-day net of 2.5bp/side,
+  median > 0, the no-LETF control (same r and price/volume screens, LETF share = 0) lower by >= 15bp. Kill: mean <= 0 or
+  control not lower. Overlap with the live night leg reported (shared nights).
+- Not deployed (user instruction 2026-10-06: discovery only, no deployment). A shadow needs the user's OK.
