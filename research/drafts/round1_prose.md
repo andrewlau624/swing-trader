@@ -4963,3 +4963,17 @@ the 2021-26 >= +15bp bar in both classes. **Class verdict (with FXD): the tax-cl
 been arbitraged to ~0 wherever the auction is deep (REIT/BDC common, CEFs, ETFs) and survives only in thin-inventory
 $25-par securities (preferreds, baby bonds, CEF preferreds). The PREF/ETDX capacity ceiling is structural.** No more
 ex-dividend security classes without a new thin-inventory class.
+- **Correction — PREF/ETDX is NOT Roth-only (2026-10-06 late; economics, no N; `etdx_margin.py` -> `etdx_margin_out.txt`).**
+  The prose above says "taxable accounts likely net ~0 after dividend tax". Wrong for this book: held one night, the
+  distribution is ordinary income (qualified holding period unmet) and the ex-date drop is a short-term capital loss;
+  against the taxable book's ST gains both sit at the ordinary rate, so after-tax = (1 - tau) x pre-tax, like any ST
+  trade (the under-adjustment exists because buy-and-hold taxable holders do NOT realize that loss). Wash sales only
+  defer (skip re-buying a name within 31 days of a losing exit). **Taxable margin account (Reg T, 13% debit, 10bp round
+  trip, 5% participation), pre-tax $/yr:** $2.3k CO 1x $475 / 1.5x $587 / 2x $689 (financing $54, worst night -2.2%);
+  CC $321 / $393 / $464; $10k CO $1,103 -> $1,322 at 2x; $25k flat (capacity binds). **Stacking on the night leg's
+  overnight equity** (the book is 1.0x overnight, Reg T allows 2x): each PREF/ETDX dollar is then borrowed at ~3.6bp/night
+  (x3 over weekends) vs ~+30bp net edge -> ~$410/yr CO, ~$270 CC pre-tax at $2.3k (~$190-290 after tax, +8..+13pp).
+  Margin amplifies only below ~$10k; above, capacity binds. Same unverified broker items (MOC on preferred/ETD symbols,
+  open-auction exit) apply in the taxable account.
+- **New-issue $25-par probe (no N): CEILING-KILL.** First listed close vs $25: preferreds median +0.28% (2010+, n 958),
+  ETDs 0.00% (n 417); +20d drift ~= accrued coupon. No retail new-issue concession worth an allocation.
