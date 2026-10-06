@@ -106,10 +106,11 @@ def _raw_closes(sym: str, start: dt.date, end: dt.date):
     from alpaca.data.requests import StockBarsRequest
     from alpaca.data.timeframe import TimeFrame
     import pandas as pd
-    from .marketdata import _clients, trade_date
+    from .marketdata import _clients, _sip_end, trade_date
     data, _ = _clients()
     df = data.get_stock_bars(StockBarsRequest(symbol_or_symbols=[sym], timeframe=TimeFrame.Day,
-                                              start=pd.Timestamp(start, tz="UTC"), end=pd.Timestamp(end, tz="UTC"),
+                                              start=pd.Timestamp(start, tz="UTC"),
+                                              end=min(pd.Timestamp(end, tz="UTC"), _sip_end()),
                                               feed="sip", adjustment="raw")).df
     if df is None or df.empty:
         return None
