@@ -5066,3 +5066,44 @@ spread artifact.** Lesson: any "sell in the tape beats the auction" result must 
   / +$664**; financing $69-133/yr. After tax (x0.7) the $2.3k taxable gain is ~+15% (CO) / ~+10% (CC) of equity, on top of
   the book, without displacing a night or IBS dollar. **Capacity is shared across accounts:** Roth + taxable draw on the
   same auctions, so combined dollars plateau at the single-account $25k row once total equity > ~$10k.
+
+## Study DDR — delayed-decision reversal: the lag+5 entry of the night signal (3rd-robot session; 1 judged rule; program N 858 -> 859)
+
+**Why.** PCAL's pre-named lag controls were assumed to decay with lag. They did not: on the 2021-26
+window the lag+1 entry is ~0 (t -0.85) but the lag+5 entry PASSES the full program bar (+57.4bp/night
+net at tier, t_cl 3.41, both halves +61.5/+53.2, median +27.3, ex-top-5 +36.2, ~7.7k trades). If real,
+"buy at the close five sessions after an -8%/IBS<0.10 crash day, hold one night" is a NEW leg whose
+entry timing exploits the continuation of the after-crash weakness that the on-time rule does not.
+
+**Contract (frozen).** The PCAL C2 machinery EXACTLY (same eligibility, gates, dedupe corr <= 0.7,
+night_sizing vol_min 0.60/crowd 30/cap 10%, delisting -1.0 rules, dividend credit, one-look NO tuning).
+Entry = close of the 5th session after the crashing day; exit = the next session's open.
+
+**Judge window (clean, pre-registered):** 1998-01-01 .. 2020-12-31 Sharadar SEP, delisted-complete.
+2021-2026 = already-read exploratory (PCAL), reported as context only, never judged.
+
+**Gates (frozen):** n >= 300 events; day-clustered t >= 2.0 on pooled per-night net at `tier`;
+halves (1998-2009 / 2010-2020) both net-positive; median trade net-positive; ex-top-5 net-positive;
+2x-tier stress net-positive; hit rate >= 55%; proxy-abnormal (vs same-day equal-weight eligible
+overnight) positive mean AND positive median.
+
+**Kill:** median net <= 0, or the mean carried by <5 events, or halves sign-disagree. Verdict
+PASS/WEAK/REJECT recorded in NEXT.md's do-not-redo table; no size-ups, no deployment regardless.
+
+**No N beyond the registered increment; diagnostic economics at $2.3k/$10k/$25k reported in the study note.**
+
+## Study PRV — liquidity-provision reversal in thin $25-par paper (pre-register; N 872 -> 873)
+`date`: Tue Oct 6 2026, late. No non-ex-date preferred/ETD return conditioned on a prior move has been read.
+- **Mechanism.** Dealer inventory in exchange-listed preferreds/baby bonds is thin (closing cross median ~$5k), holders
+  are retail. An idiosyncratic down-move with no news is a liquidity shock nobody absorbs at the close; it should revert
+  as dealers/arbs lean in. Distinct from IBS (no equity-vol/tech beta) and from PREF/ETDX (non-ex nights).
+- **Rule (frozen).** SEP Domestic Preferred + SFP ETD/CEF Preferred, raw close $10-60, 20d median $vol >= $100k. Exclude
+  sessions T-1..T+2 around any distribution ex-date of that name, and names with close(T) < $15 (distress). Idio move
+  m = close(T)/close(T-1) - 1 minus the same-day cross-sectional median of the universe. Signal: m <= -2%. Trade: buy
+  close(T); CO = sell open(T+1), CC = sell close(T+1). Placebo: m >= +2% (mirror), and |m| < 0.5% (control).
+- **Judge.** J1 1998-2015 and J2 2016-2026 (Sharadar vendor closes): CC mean >= +20bp, median > 0, day-clustered t >= 2,
+  ex-top-5 > +10bp, >= 75% of years > 0 in each. **J3 (decisive, artifact check):** official SIP crosses 2021-26 for the
+  signals (entry = T closing cross, signal recomputed on CROSS prices) CC >= +15bp net of 10bp round trip. Vendor closes
+  for thin names can be last-trade-at-bid: bid-ask bounce would fake a reversal, so J1/J2 alone cannot PASS.
+- **Kill.** J3 fails, or J1/J2 sign-unstable.
+- Runner `research/sim/prv.py` -> `data/research/program/prv_out.txt`.
