@@ -22,7 +22,10 @@ Leaderboard + report: `research/drafts/golden_egg_2026-10-06.md`.
   ahead (Alpaca corporate-actions `record_date`). ~34 event nights/yr; open cross median $0.55M (capacity ~$10-25k).
   Account: half the account per event night at $10k, 5bp/side, official 2021-26: median year +11% (-2..+54%).
   All Sharadar years are touched: the only OOS left is forward.
-- **Do not redo:** ex-dividend overnight capture (EXDIV-OPEN A FAIL on official crosses; vendor open = official cross,
+- **SPIN-T0 (PROMISING, same family):** hold the spin-off parent into the ex-date open, sell parent + child at E
+  opening crosses. Official 2021-26 n 78: +83bp t 2.03, median +54 (registered PASS). ~13/yr; child shares must be
+  sellable at the E open (broker crediting risk, unverified).
+- **Do not redo:** reverse-split / ADR-ratio nights (short side); ex-dividend overnight capture (EXDIV-OPEN A FAIL on official crosses; vendor open = official cross,
   the "+9bp" was the names' normal overnight premium); split nights T+1..T+4 (SPLIT-NIGHT: T+2/T+4 negative); ticker-change
   first night (FAIL, vendor stitching artifact); de-SPAC first night (WEAK, 2021-only, $50k crosses); OTC->exchange
   uplisting (-17% 250d abnormal, short side only); Chapter 11 emergence (DATA-LIMITED: no clean old->new equity link);

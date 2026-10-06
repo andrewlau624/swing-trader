@@ -4146,3 +4146,19 @@ halves +68.7 / +99.1** (still PASS). By year (median): 2016 +79, 2017 +60, 2018 
 Caveat: Alpaca symbols are current, so names renamed/removed since 2016 are missing (survivor tilt in the fetch).
 Combined official 2016-2026 ~320 events: median +57bp (2016-20) -> +17bp (2021-26); the effect is real at the auction
 and shrinking. Status: STRONG CANDIDATE; next is a forward shadow (no deployment).
+
+## Amendment — Study SPIN-T0: spin-off parent ex-date night with the child's actual open (pre-register; N 850 -> 851)
+`date`: Tue Oct 6 2026, written before official child crosses are fetched. Vendor screen (touched): parent close E-1 ->
+parent open E + ratio x child open E (Sharadar `spinoff` value = child shares per parent share), raw-SPY: n 409 mean
++43bp t 1.24, **median +70bp** (2013+ median +60). Mechanism: same price-drop salience as SPLIT-T0 (parent's price
+falls at E) plus the child's first regular-way open. Rule: buy parent closing cross E-1, sell parent opening cross E
+and the ratio's child shares at the child's opening cross E; parent raw close >= $5, $vol >= $1M; |P&L| > 50% dropped as
+mismatch. Judge: official SIP crosses 2021-01..2026-09; checks as SPLIT-T0 (t >= 2, halves 2021-23/2024-26 > 0,
+median > 0, ex-top-5 > 0, 5bp/side > 0). **Execution caveat (judged separately, not by data):** the child shares must be
+credited and sellable at the E open; brokers sometimes credit spin shares late.
+
+### Result — Study SPIN-T0 (2026-10-06, one look on official SIP crosses 2021-26): PASS (small n, execution caveat)
+n 78: raw-SPY +83.0bp t 2.03, median +53.9bp, hit 60%, ex-top-5 +17.5bp, halves +95.8 / +65.6, 5bp/side > 0 -> all 5
+checks pass. By year median: 2021 +42, 2022 +141, 2023 +31, 2024 +140, 2025 -10, 2026 +16. Child open cross median
+$0.22M. Same family as SPLIT-T0 (price drop on a scheduled date -> rich open). Unverified operational risk: child shares
+credited and sellable at the E open.
