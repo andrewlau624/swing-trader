@@ -22,6 +22,10 @@ Leaderboard + report: `research/drafts/golden_egg_2026-10-06.md`.
   ahead (Alpaca corporate-actions `record_date`). ~34 event nights/yr; open cross median $0.55M (capacity ~$10-25k).
   Account: half the account per event night at $10k, 5bp/side, official 2021-26: median year +11% (-2..+54%).
   All Sharadar years are touched: the only OOS left is forward.
+- **Forward shadow LIVE on `him` (2026-10-06, log-only, no orders):** `swingtrader/daily/exdate_open_shadow.py`
+  (REGISTRY "Ex-date open", gate 40 forward common-stock events; `make exdate-open`; state `state/exdate-open.jsonl`), run
+  daily by research-shadows.timer (12:20 UTC). Scores split + spin-off ex-date nights from official crosses; 2026 YTD
+  backfill n 37: raw-SPY mean +77bp, median +21bp, hit 57%. Pass = forward median > 0 and mean > 10bp; kill = median <= 0.
 - **SPIN-T0 (PROMISING, same family):** hold the spin-off parent into the ex-date open, sell parent + child at E
   opening crosses. Official 2021-26 n 78: +83bp t 2.03, median +54 (registered PASS). ~13/yr; child shares must be
   sellable at the E open (broker crediting risk, unverified).
