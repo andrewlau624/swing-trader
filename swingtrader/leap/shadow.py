@@ -44,3 +44,42 @@ def log(decisions: list[dict], path: Path = LOG) -> None:
     with path.open("a") as f:
         for d in decisions:
             f.write(json.dumps(d) + "\n")
+
+
+def forward(cfg: Config, path: Path = LOG, bars=None, today: dt.date | None = None, log_fn=print) -> list[dict]:
+    """The robust leap rule, scored forward from daily bars once its exit prints: SOXL IBS < ibs_max on day d ->
+    next open -> following open (research/sim/leap.py soxl_ibs, the same rule). The ORB rule is not scored here: it
+    needs minute high/low and is ~0 in 2016-20 / dead at 10bp/side (addendum 24). `bars` = {sym: DataFrame} for tests."""
+    import pandas as pd
+    c = cfg.leap
+    rows = [json.loads(x) for x in path.read_text().splitlines() if x.strip()] if path.exists() else []
+    done = {r["date"] for r in rows if r.get("rule") == "ibs_fwd"}
+    if bars is None:
+        from ..daily import marketdata as md
+        bars = md.sip_daily([c.symbol], pd.Timestamp(dt.date(2026, 10, 1)) - pd.Timedelta(days=5))
+    b = bars[c.symbol].sort_index()
+    b = b[b.index < pd.Timestamp(today)] if today else b
+    new = []
+    for i in range(len(b) - 2):
+        d = b.index[i]
+        if str(d.date()) in done or d < pd.Timestamp(START):
+            continue
+        h, lo, cl = (float(b[k].iloc[i]) for k in ("high", "low", "close"))
+        if not sg.ibs_entry(h, lo, cl, c.ibs_max):
+            continue
+        o1, o2 = float(b["open"].iloc[i + 1]), float(b["open"].iloc[i + 2])
+        new.append(dict(rule="ibs_fwd", date=str(d.date()), sym=c.symbol, ibs=round(sg.ibs(h, lo, cl), 4),
+                        entry=o1, exit=o2, r_bp=round((o2 / o1 - 1) * 1e4, 1)))
+    if new:
+        log(new, path)
+    allr = [r["r_bp"] for r in rows + new if r.get("rule") == "ibs_fwd"]
+    log_fn(f"[leap] SOXL IBS forward: {len(allr)} trades" + (f", mean {np.mean(allr):+.1f}bp" if allr else ""))
+    return rows + new
+
+
+START = dt.date(2026, 10, 1)     # first signal day scored (forward only)
+
+
+if __name__ == "__main__":
+    # scoring only, never orders: runs whatever leap.enabled says (that switch is for a future live book)
+    forward(Config.load())

@@ -391,6 +391,12 @@ pick-cost: ## Pick-quality lead: live night auction cost + bounce by price bucke
 stack-shadow: ## Index-beat FOUND: log the book stacked on index beta (taxable SPY core + legs; Roth 1/3 UPRO) vs live and SPY (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.stack_shadow $(DATE)
 
+size-shadow: ## Capacity shadow: the live book's decisions re-sized at $30k/$100k/$250k (night impact, MNQ contracts); never trades; make size-shadow [DATE=YYYY-MM-DD]
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.size_shadow $(DATE)
+
+leap-shadow: ## Leap book: SOXL IBS rule scored forward from daily bars (no orders)
+	@PYTHONPATH=. $(PY) -m swingtrader.leap.shadow
+
 ibs-lev-shadow: ## Study ACC: log the 1.25x 3x-ETF IBS overlay vs the live 1x leg (delta, running maxDD, exposure); never trades; make ibs-lev-shadow [DATE=YYYY-MM-DD]
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.ibs_lev_shadow $(DATE)
 

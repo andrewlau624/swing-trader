@@ -1,0 +1,40 @@
+Study VT-IBS: signal days 788, multi-name 398
+
+=== cost 1.0bp/side ===
+A g=+1 vol-prop    2016-20 (JUDGE)  multi n=155 paired mean= -0.55bp med=  0.13 hit= 53% t=-0.77 NWt=-0.89 ex5= -1.16bp
+                                    all signal days n=315: growth arm  18.23 vs eq  18.52 bp/day; Sharpe/day arm 0.1272 vs eq 0.1299
+A g=+1 vol-prop    2021-26          multi n=243 paired mean=  1.74bp med=  0.04 hit= 50% t= 1.43 NWt= 1.76 ex5=  0.25bp
+                                    all signal days n=473: growth arm  19.84 vs eq  19.03 bp/day; Sharpe/day arm 0.1254 vs eq 0.1240
+A g=+1 vol-prop    2017-19 ex-2020  multi n=102 paired mean= -1.44bp med= -0.05 hit= 48% t=-1.45 NWt=-1.73 ex5= -2.21bp
+                                    all signal days n=239: growth arm   4.68 vs eq   5.30 bp/day; Sharpe/day arm 0.0449 vs eq 0.0503
+A g=+1 vol-prop    placebo(2016-20): obs -0.55bp vs shuffled mean 0.01 sd 0.62; pctile 19
+A g=+1 vol-prop    DSR(N=838) on paired 2016-20 series: 0.000
+A g=+1 vol-prop    ceiling: paired 0.85bp x 40 multi-days/yr x ibs_w0.5 = 0.17 pp/yr of account
+B g=-1 inv-vol     2016-20 (JUDGE)  multi n=155 paired mean=  0.67bp med= -0.16 hit= 47% t= 0.87 NWt= 0.96 ex5= -0.54bp
+                                    all signal days n=315: growth arm  18.86 vs eq  18.52 bp/day; Sharpe/day arm 0.1328 vs eq 0.1299
+B g=-1 inv-vol     2021-26          multi n=243 paired mean= -1.71bp med= -0.50 hit= 49% t=-1.43 NWt=-1.77 ex5= -2.89bp
+                                    all signal days n=473: growth arm  18.23 vs eq  19.03 bp/day; Sharpe/day arm 0.1219 vs eq 0.1240
+B g=-1 inv-vol     2017-19 ex-2020  multi n=102 paired mean=  1.58bp med=  0.03 hit= 52% t= 1.46 NWt= 1.64 ex5= -0.24bp
+                                    all signal days n=239: growth arm   5.98 vs eq   5.30 bp/day; Sharpe/day arm 0.0561 vs eq 0.0503
+B g=-1 inv-vol     placebo(2016-20): obs 0.67bp vs shuffled mean -0.01 sd 0.66; pctile 85
+B g=-1 inv-vol     DSR(N=838) on paired 2016-20 series: 0.005
+B g=-1 inv-vol     ceiling: paired -0.79bp x 40 multi-days/yr x ibs_w0.5 = -0.16 pp/yr of account
+
+=== cost 3.0bp/side ===
+A g=+1 vol-prop    2016-20 (JUDGE)  multi n=155 paired mean= -0.55bp med=  0.13 hit= 53% t=-0.77 NWt=-0.89 ex5= -1.16bp
+                                    all signal days n=315: growth arm  14.24 vs eq  14.53 bp/day; Sharpe/day arm 0.1010 vs eq 0.1035
+A g=+1 vol-prop    2021-26          multi n=243 paired mean=  1.74bp med=  0.04 hit= 50% t= 1.43 NWt= 1.76 ex5=  0.25bp
+                                    all signal days n=473: growth arm  15.84 vs eq  15.04 bp/day; Sharpe/day arm 0.1018 vs eq 0.0997
+A g=+1 vol-prop    2017-19 ex-2020  multi n=102 paired mean= -1.44bp med= -0.05 hit= 48% t=-1.45 NWt=-1.73 ex5= -2.21bp
+                                    all signal days n=239: growth arm   0.68 vs eq   1.30 bp/day; Sharpe/day arm 0.0116 vs eq 0.0168
+B g=-1 inv-vol     2016-20 (JUDGE)  multi n=155 paired mean=  0.67bp med= -0.16 hit= 47% t= 0.87 NWt= 0.96 ex5= -0.54bp
+                                    all signal days n=315: growth arm  14.87 vs eq  14.53 bp/day; Sharpe/day arm 0.1062 vs eq 0.1035
+B g=-1 inv-vol     2021-26          multi n=243 paired mean= -1.71bp med= -0.50 hit= 49% t=-1.43 NWt=-1.77 ex5= -2.89bp
+                                    all signal days n=473: growth arm  14.23 vs eq  15.04 bp/day; Sharpe/day arm 0.0969 vs eq 0.0997
+B g=-1 inv-vol     2017-19 ex-2020  multi n=102 paired mean=  1.58bp med=  0.03 hit= 52% t= 1.46 NWt= 1.64 ex5= -0.24bp
+                                    all signal days n=239: growth arm   1.98 vs eq   1.30 bp/day; Sharpe/day arm 0.0226 vs eq 0.0168
+
+=== IBS leg Kelly fraction f*=mean/var of equal-weight day return (1bp/side) ===
+2016-20 (JUDGE)  n=315 mean 19.7bp sd 152bp f*=8.6
+2021-26          n=473 mean 20.4bp sd 165bp f*=7.5
+2017-19 ex-2020  n=239 mean 6.0bp sd 119bp f*=4.2

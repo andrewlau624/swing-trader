@@ -1219,6 +1219,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Night leg: tug-of-war tilt (Round 19 AU3) | **shadow** | +2.8-3.2pp/yr at 2.5bp, t 2.6-3.0, holds on auction prints; DSR 0.46, 2022-23 ≈ 0; spec only (study_au_tow.md) |
 | Night leg: 20d mean overnight return as tilt / filter (Round 19 AU1, AU2) | **dead** | tilt t 1.5-1.7; filter −1.4..−1.7pp at 2.5bp (its tier_hi gain is the cost gate) |
 | IBS leg: hold until IBS > 0.5 or a close > prior high (Round 19 AV) | **dead** | IBS > 0.5 −5.9pp (t −2.3, both halves); prior-high exit −0.8pp (t −0.1): holds past the overnight bounce |
+| IBS within-leg weights by vol, either sign (sigma^+1 constrained-Kelly / sigma^-1 inverse-vol), per-name James-Stein edge (Study VT-IBS, N 836 -> 838) | **dead** | 2016-20 judge paired vs equal weight: sigma^+1 -0.55bp (t -0.77), sigma^-1 +0.67bp (t 0.87), medians ~0, sign flips 2021-26, DSR ~0; ceiling ~+0.17pp/yr. Leg Kelly f* 7.5-8.6 >> 1: exposure, not weights, is the lever (= ACC overlay). study_ibs_voltilt.md |
 | Night exit later than the open auction (9:35 / 10:00 / 10:30) | **dead** | add. 7: open auction +20.1bp vs +1.9 / −9.3 / −21.5 (was only in RESULTS.md) |
 | Night tilts on gap share, relative volume, late selling, idio move, 20d/52w distance, price | **dead** | add. 23: none monotone, most flip halves (was only in RESULTS.md) |
 | IBS leg decided at 15:50 and bought in the close auction | **dead** | add. 6: QQQ 13.9 → 8.8%; trade at the next open (V6 index version is separate, shadow) |

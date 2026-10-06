@@ -208,11 +208,31 @@ def _daybook(config: str):
     return read
 
 
+def _size(state: Path, logs: Path) -> dict:
+    from . import size_shadow as s
+    rows = _jsonl(state / s.LOG_NAME)
+    wk = sum(1 for r in rows if str(r.get("date")) >= _week_ago())
+    return dict(n=len(rows), week=wk, line=s.line(rows) if rows else "no sessions logged yet (make size-shadow)")
+
+
+def _leap(state: Path, logs: Path) -> dict:
+    rows = [r for r in _jsonl(logs / "leap-shadow.jsonl") if r.get("rule") == "ibs_fwd"]
+    wk = sum(1 for r in rows if str(r.get("date")) >= _week_ago())
+    if not rows:
+        return dict(n=0, week=0, line="no SOXL IBS trade scored yet (make leap-shadow)")
+    m = sum(r["r_bp"] for r in rows) / len(rows)
+    return dict(n=len(rows), week=wk, line=f"{len(rows)} trades, mean {_bp(m)}/trade (2016-26 backtest: positive in every block)")
+
+
 REGISTRY: list[Test] = [
     Test("Night auction cost by price bucket (pick-quality lead)", "do $5-10 night names really cost ~15bp/side live, or ~0 in the auctions? (gross bounce $5-10 +40bp vs $50+ ~0)",
          "2026-10-02", 100, "$5-10 live trips", _pick_cost, "make pick-cost; pick_quality_log.md", ["pick_cost_watch"]),
     Test("Book stacked on index beta (index-beat FOUND)", "taxable = SPY 1.0x + live legs on margin; Roth = 1/3 UPRO + 2/3 book: does it beat both the live accounts and SPY?",
          "2026-10-02", 250, "sessions", _stack, "make stack-shadow; study_ib_found_stack.md", ["stack_shadow"]),
+    Test("Capacity shadow: live decisions at $30k/$100k/$250k", "where does the night leg stop scaling (net of square-root impact, % of ADV), and how far do whole MNQ contracts drift from the ideal noise leg?",
+         "2026-10-05", 60, "sessions", _size, "make size-shadow; swingtrader/daily/size_shadow.py", ["size_shadow"]),
+    Test("Leap SOXL IBS (forward)", "SOXL IBS < 0.2 -> next open to following open, scored forward from daily bars (no orders)",
+         "2026-10-05", 40, "trades", _leap, "make leap-shadow; RESULTS.md addendum 24", ["leap"]),
     Test("IBS 1.25x 3x-ETF overlay (Study ACC)", "does the non-callable 1.25x 3x-ETF IBS overlay beat the live 1x leg forward, "
          "inside a 25% DD budget? (kill: maxDD < -25% or delta <= 0 at 60 sessions)",
          "2026-10-05", 60, "sessions", _ibs_lev, "make ibs-lev-shadow; study_acc_account_structure.md",

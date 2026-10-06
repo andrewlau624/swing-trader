@@ -3869,3 +3869,24 @@ ex-top5 +31.2; net@5bp +56.8, net@15bp +36.8, net@3x(45bp) -23.2. The mechanism 
 SPY mean -6.9bp, median -19.7, hit 48%, date-clustered t -0.04. The monthly +66.8bp is a size/value tilt (164
 payers vs 3,081 smaller benchmark names), carried by 2021-22 (+162/+166bp), ~0 since 2023 (half2 median -10.4),
 and dies at the 3x cost shock. VERDICT: KILL (gate 5: event-time mean <= 0). Files: `research/drafts/study_dm.md`.
+
+## Amendment — Study VT-IBS: vol-proportional vs inverse-vol split of the IBS budget across simultaneous names (pre-register; 2 judged, N 836 -> 838)
+Pre-registered before any outcome is read (only the count of multi-name days, 200+198 of 788 signal days, was seen);
+runner `research/sim/ibs_voltilt.py` -> `research/sim/ibs_voltilt_out.txt`, note `research/drafts/study_ibs_voltilt.md`.
+Theory (derived, not fitted). Established: IBS premium mu_i = k*sigma_i (ibs_xasset_scan). Growth of a day with weights
+w: g = sum w_i mu_i - 0.5 sum w_i^2 sigma_i^2 (independent-names approx). Unconstrained Kelly w_i = k/sigma_i (inverse
+vol). But the leg's Kelly fraction mu/sigma^2 ~ 15-20 >> 1, so the budget (sum w = 1, no leverage at $2-25k) BINDS, and
+the constrained optimum is w_i = (k*sigma_i - lam)/sigma_i^2, which for a tight budget tilts toward the HIGH-vol name
+(max mu per dollar), the opposite of inverse-vol. Prediction P: on days with >= 2 IBS names, w_i ~ sigma_i^g with g=+1
+beats equal (g=0) beats g=-1 in mean day return and growth; Sharpe order reversed or flat.
+Rule (live selection untouched via book.ibs_days = signals.momentum_top + signals.ibs_targets). sigma_i = stdev of the
+last 20 close-to-close returns up to the signal close d (no look-ahead). Day return = sum w_i * (o2/o1-1) - 2*cost,
+w_i = sigma_i^g / sum sigma^g, fully deployed on signal days (idle = BIL, unchanged). Arms: g=+1 (A), g=-1 (B), g=0 live.
+Data: etf_daily.parquet raw prices. Judge: 2016-20 (never used to choose anything here; 2021-26 reported as the second
+half, not as judge). Metric: paired day difference (arm - equal) on multi-name days, day-clustered t; plus growth
+(mean log) and Sharpe on all signal days. Gates (arm A): paired mean > 0 AND t >= 2 in 2016-20, same sign in 2021-26,
+ex-top-5-days > 0, median >= 0, survives 3x cost shock (1 -> 3bp/side), beats the random-weight placebo (>= 95th
+pct of 1000 shuffles of the same weights across names), DSR(N=838) >= 0.5. Arm B judged symmetrically (gate on its own).
+Ceiling gate (paper, before running): ~40 multi-name days/yr x paired spread x ibs_w 0.5 of account; a 5bp spread =
+~1pp/yr, far under the +8pp gate. Therefore this is FALSIFICATION-ONLY: a PASS would still be a sub-1pp sizing tweak,
+not worth shipping. Kill rule: any gate fails -> KILL, record in NEXT do-not-redo.

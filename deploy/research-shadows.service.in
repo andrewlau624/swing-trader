@@ -2,7 +2,7 @@
 # odd-lot tender watch (emails a qualifying offer) and, Round 32, the split-off
 # exchange-offer watch; index-beat FOUND: the stacked-book shadow (stack_shadow, logs only). Reads EDGAR at SEC's rate limit (~6-8 min).
 [Unit]
-Description=swing-trader research shadows (stack shadow, pick cost, insider-day, tender watch, split-off watch, round-up watch, CEF activist watch, CPC forward ledger, forced-flow EDGAR discovery)
+Description=swing-trader research shadows (stack shadow, capacity shadow, leap SOXL IBS, pick cost, insider-day, tender watch, split-off watch, round-up watch, CEF activist watch, CPC forward ledger, forced-flow EDGAR discovery)
 
 [Service]
 Type=oneshot
@@ -19,6 +19,8 @@ ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.cef_activist_wat
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.cpc_ledger
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.forced_flow_discovery
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.ibs_lev_shadow
+ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.size_shadow
+ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.leap.shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m research.sim.tme_shadow forward
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daybook.shadow forward
 TimeoutStartSec=1800
