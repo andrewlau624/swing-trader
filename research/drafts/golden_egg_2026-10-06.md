@@ -68,3 +68,14 @@ splits survive the official-cross check (vendor open = official cross to 0.1bp t
 13. **Deserves deeper research:** yes — as a forward shadow (log the E-1 close cross and E open cross for every
     announced forward split; gate ~40 events), not as a deployment. It is a small, capacity-limited sleeve, not an
     order-of-magnitude edge.
+
+## Mechanism check (not used to tune the rule)
+T+0 effect by post-split price quintile (vendor, raw-SPY): 1998+ median +75 / +56 / +44 / +33 / +32bp from cheapest to
+dearest; 2013+ +65 / +65 / +35 / +32 / +13bp. Monotonic in the price level, as price-level salience predicts; reverse
+splits (price goes UP) show the mirror sign (-100bp), spin-off children (forced sellers) negative opens.
+
+## Forward-shadow spec (not built; building it needs a REGISTRY entry in swingtrader/daily/testing.py in the same commit)
+- Source: Alpaca `/v1/corporate-actions?types=forward_split` (ex_date, old/new rate) each session after the close.
+- For every forward split with ex_date = next session: common stock (not ETF/ETN), raw close >= $5, $vol >= $1M ->
+  log intended MOC buy (closing cross price) and MOO sell (next opening cross price), no orders.
+- Gate: 40 logged events. Pass = median raw-SPY > 0 and mean > 10bp; kill = median <= 0 after 40.
