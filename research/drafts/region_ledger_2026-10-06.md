@@ -6,3 +6,8 @@
 | Event drifts (uplisting, emergence, spin child) | 3 | REJECTED / short-side | long-only | short-side with borrow data | DATA-LIMITED |
 | Dealer balance-sheet constraints (bond ETFs at quarter/year-end) | 1 (region B) | REJECTED | quarter-ends look like other month-ends (TME) | intraday/NAV-gap version needs NAV | — |
 | **Product-induced forced flow (single-stock LETF rebalancing)** | 1 (LETF-NIGHT) | **PROMISING** (in-sample 2024-26, forward-only) | retail-attention confound (failed to explain: asymmetric, flat days negative); pre-2021 analog uninformative | intraday last-hour pressure; options/covered-call ETF (YieldMax) flows | new region; forward test needs OK |
+| Insider sale supply (scheduled sellers) | 1 (D) | REJECTED | sales >= 15% of day $vol: -14bp intraday, no next-night reversal (-2..-4bp); small sales sit on up days (selection) | predictability step skipped (no reversal to harvest) | — |
+| Tax-lot timing (IPO 1-year LT threshold) | 1 (A) | REJECTED (short side) | winners +160bp pre-anniversary -> -64bp post (LT selling); losers = momentum | short side needs borrow | — |
+| Round-number order clustering | 1 (C) | REJECTED | crossings vs non-crossings at equal return: 1-8bp next day | intraday version needs minute data | — |
+| Corporate treasury: buyback blackout windows | 1 (T) | REJECTED | open-minus-blackout median rises with buyback yield (+4 -> +35bp) but mean t 0.59, sign flips by year; <= ~3%/yr | daily buyback execution data (none free) | — |
+| 24/7 asset vs session-bound stock (weekend BTC -> Monday crypto stocks) | 1 (X) | REJECTED | ETFs price the weekend at the open (gap beta 1.04); Monday continuation after >= +2% weekends +70bp/weekend, t 1.81, 58 weekends, 2024-carried; no mirror on down weekends | — | — |
