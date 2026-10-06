@@ -17,6 +17,13 @@ EV2 (Round 33, study_ev2_first_insider_buy.md; registered PASS at N 760): each p
 EV2 = silence >= 730 days, and EV2 x big = EV2 with >= $500k bought (found post-judge, so forward data only).
 Each gets its own gate at 60 scored trades: mean <= 0 -> drop the weight; mean > 0 and t >= 2 -> may propose a 2x
 weight inside ID3.
+
+Track M1 (round1_prose.md "Methodology track M1", 2026-10-04): three ideas the program killed ONLY on judge-half t < 2
+are scored forward in the same log, to test the pooled-posterior methodology (no orders, no sizing, never ID3):
+ID1 = every officer/director buy with ADV$ >= $1M (ID2 rows + ID3 rows), ID2 = ADV$ $1-20M (rows tagged `id2`, which
+the ID3 gate, its EV2 weights and the digest never count), EV1 = ID3 rows whose issuer had another officer/director
+purchase filing dated in [fd - 5d, fd) (H-POOL's causal form; filing dates kept in state/insider-filings.json).
+`m1_gate()` reads each against its pre-registered prediction at its gate count.
 """
 from __future__ import annotations
 
@@ -37,6 +44,12 @@ MIN_USD, MIN_ADV, MIN_PRICE = 1e4, 2e7, 5.0
 COST_BPS = 2.5                     # per side, as judged in research; live MOO/MOC cost is the open question
 GATE_N = 300
 SILENCE_DAYS, BIG_USD, SILENCE_CAP, SUB_GATE_N = 730, 5e5, 1095, 60
+# Track M1. Predictions = 0.63 x the pooled select+judge net at live cost (bp/trade); need = trades expected in 24
+# months at the research rate (forward sign read there, or at STOP, whichever comes first). Live cost = the 78-fill
+# pooled 95% upper bound, +0.09bp/side (research/sim/cost_fit.py); 2.5bp/side is the judged cost.
+MIN_ADV_ID1, EV1_DAYS, LIVE_COST_BPS, M1_STOP = 1e6, 5, 0.09, "2028-10-04"
+M1 = {"id1": dict(pred_bp=14.6, need=5400), "id2": dict(pred_bp=15.6, need=2650), "ev1": dict(pred_bp=20.5, need=560)}
+FILINGS_NAME = "insider-filings.json"
 
 
 # ---------------------------------------------------------------- parsing (pure)
@@ -81,9 +94,9 @@ def form4_paths(idx_text: str) -> list[str]:
     return sorted(set(out))
 
 
-def plan_rows(buys: list[dict], bars: dict[str, pd.DataFrame], session: str) -> list[dict]:
+def plan_rows(buys: list[dict], bars: dict[str, pd.DataFrame], session: str, min_adv: float = MIN_ADV) -> list[dict]:
     """Today's shadow trades from yesterday's buys: officer/director, >= $10k per symbol, ADV$ and price filters
-    on bars that end before `session`."""
+    on bars that end before `session`. With `min_adv` below MIN_ADV (Track M1) the extra rows carry id2=True."""
     agg: dict[str, float] = {}
     for b in buys:
         if b["insider"]:
@@ -98,9 +111,66 @@ def plan_rows(buys: list[dict], bars: dict[str, pd.DataFrame], session: str) -> 
             continue
         adv = float((g.close * g.volume).tail(20).mean())
         pc = float(g.close.iloc[-1])
-        if adv >= MIN_ADV and pc >= MIN_PRICE:
+        if adv >= min_adv and pc >= MIN_PRICE:
             rows.append(dict(date=session, sym=sym, usd=round(usd), adv=round(adv), prev_close=pc, status="planned"))
+            if adv < MIN_ADV:
+                rows[-1]["id2"] = True
     return rows
+
+
+def is_id3(r: dict) -> bool:
+    """ID3 = ADV$ >= $20M. Track M1's ADV$ $1-20M rows (id2) are never ID3."""
+    return not r.get("id2")
+
+
+def ev1_flags(rows: list[dict], buys: list[dict], recent: dict[str, list[str]]) -> None:
+    """EV1 (causal, H-POOL form): an ID3 row is EV1 when its issuer has an officer/director purchase filing dated
+    fd and another dated in [fd - EV1_DAYS, fd). `buys` = this batch's filings ({sym, insider, fd}); `recent` =
+    {sym: [earlier filing dates]}. Adds `ev1` to ID3 rows in place."""
+    batch: dict[str, set] = {}
+    for b in buys:
+        if b.get("insider") and b.get("fd"):
+            batch.setdefault(b["sym"], set()).add(b["fd"])
+    for r in rows:
+        if not is_id3(r):
+            continue
+        mine = batch.get(r["sym"], set())
+        fds = {dt.date.fromisoformat(d) for d in mine | set(recent.get(r["sym"], []))}
+        r["ev1"] = any(any(f - dt.timedelta(days=EV1_DAYS) <= g < f for g in fds) for f in map(dt.date.fromisoformat, mine))
+
+
+def remember_filings(recent: dict[str, list[str]], buys: list[dict], today: dt.date, keep_days: int = 14) -> dict:
+    """Officer/director purchase filing dates by symbol, pruned to the last `keep_days` (for EV1's look-back)."""
+    for b in buys:
+        if b.get("insider") and b.get("fd"):
+            recent.setdefault(b["sym"], [])
+            if b["fd"] not in recent[b["sym"]]:
+                recent[b["sym"]].append(b["fd"])
+    lo = str(today - dt.timedelta(days=keep_days))
+    return {k: sorted(d for d in v if d >= lo) for k, v in recent.items() if any(d >= lo for d in v)}
+
+
+def m1_gate(records: list[dict]) -> dict:
+    """Track M1 forward read: per idea n, mean at the judged 2.5bp/side and at the live cost, day-clustered t, the
+    prediction, and the pre-registered sign verdict once n reaches `need` (or at M1_STOP)."""
+    s = [r for r in records if r.get("status") == "scored"]
+    pick = {"id1": lambda r: bool(r.get("m1")), "id2": lambda r: bool(r.get("id2")), "ev1": lambda r: bool(r.get("ev1"))}
+    out = {}
+    for k, f in pick.items():
+        x = [r for r in s if f(r)]
+        spec = M1[k]
+        if not x:
+            out[k] = dict(n=0, need=spec["need"], pred_bp=spec["pred_bp"], verdict=f"M1 reading (0/{spec['need']})")
+            continue
+        d = pd.DataFrame(x)
+        d["ret_live"] = d.ret_net + 2 * (COST_BPS - LIVE_COST_BPS) / 1e4
+        mean, t = _stats(d)
+        live = float(d.ret_live.mean())
+        done = len(d) >= spec["need"] or str(dt.date.today()) >= M1_STOP
+        v = (("positive" if live > 0 else "NOT positive") + " at the gate") if done else f"M1 reading ({len(d)}/{spec['need']})"
+        out[k] = dict(n=len(d), need=spec["need"], pred_bp=spec["pred_bp"], mean_bp=mean * 1e4, live_bp=live * 1e4,
+                      t=t, verdict=v)
+    return out
 
 
 def silence_days(filings: list[tuple[dt.date, str]], fd: dt.date, has_purchase, cap: int = SILENCE_CAP) -> int | None:
@@ -155,7 +225,7 @@ def _sub_gate(x: pd.DataFrame, rest: pd.DataFrame) -> dict:
 
 
 def gate(records: list[dict]) -> dict:
-    s = [r for r in records if r.get("status") == "scored"]
+    s = [r for r in records if r.get("status") == "scored" and is_id3(r)]
     if not s:
         return dict(n=0, verdict="no scored trades yet")
     x = pd.DataFrame(s)
@@ -297,20 +367,29 @@ def run(state_dir: Path, today: dt.date | None = None, log=print) -> dict:
     # 2-3. filings since the previous session -> today's plan (only on a session; once a day)
     if today in sess and len(sess) >= 2 and not any(r["date"] == str(today) for r in rows):
         prev = sess[-2]
-        buys = [b for d in filing_days(prev, today) for b in fetch_buys(d, log)]
+        buys = [dict(b, fd=str(d)) for d in filing_days(prev, today) for b in fetch_buys(d, log)]
         syms = sorted({b["sym"] for b in buys if b["insider"]})
         bars = md.sip_daily(syms, pd.Timestamp(today) - pd.Timedelta(days=45)) if syms else {}
-        new = plan_rows(buys, bars, str(today))
-        if new:
+        new = plan_rows(buys, bars, str(today), min_adv=MIN_ADV_ID1)        # Track M1: ID2 rows tagged id2
+        fpath = Path(state_dir) / FILINGS_NAME
+        recent = json.loads(fpath.read_text()) if fpath.exists() else {}
+        ev1_flags(new, buys, recent)
+        for r in new:
+            r["m1"] = True                                                # logged since Track M1 began (ID1 base)
+        fpath.write_text(json.dumps(remember_filings(recent, buys, today)))
+        id3_new = [r for r in new if is_id3(r)]
+        if id3_new:
             from .news_judge import _cik_map
             cmap = _cik_map(Path(state_dir))
-            tag_silence(new, min(filing_days(prev, today)), lambda s: cmap.get(s.upper().replace(".", "-")), log)
-            log(f"[insider] EV2: " + ", ".join(f"{r['sym']} {r.get('silence_days', '?')}d ${r['usd']:,}" for r in new))
+            tag_silence(id3_new, min(filing_days(prev, today)), lambda s: cmap.get(s.upper().replace(".", "-")), log)
+            log(f"[insider] EV2: " + ", ".join(f"{r['sym']} {r.get('silence_days', '?')}d ${r['usd']:,}" for r in id3_new))
         rows += new
-        log(f"[insider] {prev}: {len(buys)} code-P Form 4s, {len(syms)} officer/director symbols -> {len(new)} shadow trades for {today}")
+        log(f"[insider] {prev}: {len(buys)} code-P Form 4s, {len(syms)} officer/director symbols -> {len(new)} shadow trades for {today} "
+            f"({len(id3_new)} ID3, {len(new) - len(id3_new)} M1 ID2, {sum(1 for r in new if r.get('ev1'))} EV1)")
     _write(path, rows)
     g = gate(rows)
     log(f"[insider] gate: {g}")
+    log(f"[insider] M1: {m1_gate(rows)}")
     return g
 
 

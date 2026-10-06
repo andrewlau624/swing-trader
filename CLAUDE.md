@@ -472,6 +472,156 @@ cheapest high-value tests and mapped what each remaining mechanism actually need
 - **Strongest negative result this cycle:** the OPEX OI-pinning falsification. **No new mechanism discovered; the
   frontier did not materially change** beyond closing the OI-pinning branch.
 
+## Research memory — session "threshold forced-buy test" (2026-10-04, part 7)
+
+### Data-buy rule (user, permanent)
+Buy research data only if **expected information value > data cost**: (1) structurally compelling
+mechanism, (2) free evidence does not already weaken it, (3) experiment specified enough to
+falsify it, (4) payoff materially larger than existing edges, (5) no cheaper dataset answers it.
+- **Sharadar $69: DEFERRED, not rejected.** Do not purchase or request the key now; NX is
+deprioritized. Apply the rule retroactively.
+
+### Study NX: BLOCKED / LOW PRIORITY (unchanged, frozen)
+Registration frozen (commit `5be14c74`, N 806->809): 2003-2015 judge, one execution, no tuning,
+2016-20 exploratory. Not proven false; just not worth paid data while the night hypothesis is
+already weakened. Do not edit the preregistration to make it easier to pass.
+
+### Study THR: Reg SHO threshold forced-buy window — TESTED and REJECTED (long side)
+`research/sim/threshold_flow.py` (pre-reg `study_threshold_flow.md`). FTD-derived threshold
+episodes (fails >= 0.5% of shares AND >= 10k shares, 5 consecutive settlement days; same
+definition as the SRO list, 2016+, all exchanges); entry at the open after the 5th day (list is
+public then); deadline = +13 settlement days. Panel 2021-2026, n=1516 episodes / 647 symbols.
+- **CAR to deadline: -959bp (median -1242, hit 27%, day-clustered t -6.4, ex-top-5 -1217).**
+  The 3 sessions into the deadline are the WORST (-274bp) — the opposite of a forced-buy lift.
+  Sub-periods both negative: 2021-23 -58bp, 2024-26 -1094bp.
+- **No volume footprint** (window $vol / 20d ADV at entry = 0.54x median): no forced-buying
+  signature. Split: overnight +267bp, intraday -878bp (the fall is intraday).
+- **Long-only net of 50bp is -1009bp. KILL.** The forced flow is real (Rule 203(b)(3) buy-in) but
+  the profitable short side is inaccessible — these names are on the list *because they are
+  hard to borrow* — and the long side is a strong loser. Do not re-run threshold/FTD-buy tests.
+- Data note: the useful daily list URL is `nasdaqtrader.com/dynamic/symdir/regsho/nasdaqthYYYYMMDD.txt`
+  (2008+); the older `/symdir/threshold/` path 404s. FTD-derived status is equivalent and cached.
+
+### OI-pinning / signed gamma / ranking
+- **OPEX OI-pinning: permanently killed** for the tested mechanism/window (part 6).
+- **Signed dealer gamma: DATA-TARGET, no purchase yet** — must compete against free tests and
+  pass the data-buy rule first (state exact mechanism, direction, inputs, design, why larger
+  than the killed OI-pinning effect).
+- **Frontier ranking (user):** 1) threshold-list forced buy -> now TESTED-REJECTED; next free
+  candidates are Treasury-auction concession and SPDR ETF discount reversion (SSGA, $0);
+  2) NX BLOCKED; 3) signed gamma DATA-TARGET; 4) ETF creation/redemption DATA-LIMITED;
+  5) fallen angels DATA-LIMITED; 6) borrow/HTB BLOCKED; 7) futures roll / benchmark changes /
+  auction mechanics NOT SEARCHED; 8) night variants / generic options / intraday noise CLOSED.
+- "Data-limited" is NOT negative evidence. No deployment.
+
+## Research memory — session "capacity/scale frontier" (2026-10-04, part 8)
+
+Objective shifted to **total profit-generation capacity / scaling toward 2x**, not a new standalone signal.
+Two strongest free tests run first.
+
+### Study TAC: Treasury-auction concession — REJECTED
+`research/sim/tac_treasury.py` (pre-reg `study_tac_treasury.md`; FiscalData auctions 1979+, 2633 note/bond
+aucions). TLT/IEF vs SPY, 2016-2026, 979 auctions (TLT 297 / IEF 682).
+- Concession (A-3 -> A): -29bp (t -4.3). Reversal (A -> A+3): -16bp (t -2.6). **Executable A+1 -> A+3: +2.4bp (t 0.9).**
+- The mid-window "reversal" is the auction-day move **bleeding back** (partly a stale-close day-turn artifact); it
+  is gone by the next session. Both halves negative; TLT worse than IEF; not larger for high bid-to-cover.
+- **Verdict: no executable post-auction reversal. The published concession effect is a pre-auction move, not a
+  tradable simplification. KILL** (economically small even before costs; 2bp/gap in the right direction but t<1).
+- Note: ETF bars are 2016+; the pre-2008 positive-reversal regime (Lou-Yan-Zhang) cannot be tested free here.
+
+### Study ETC: SPY creation/redemption flow — REJECTED (no tradable flow signal)
+`research/sim/etc_etf_flow.py` (pre-reg `study_etc_etf_flow.md`; SSGA navhist xlsx: daily NAV/shares out).
+- **Data bug found and fixed:** `etf_daily` SPY closes are split/DIV-adjusted, so `close/NAV-1` shows a fake -15%
+  "discount". The true SPY discount (raw closes vs NAV) is +/-2.7%, median +0.4bp. **Any ETF-premium study must use
+  raw closes**, not the adjusted panel.
+- Flow (shares-out change) -> next-day return: top creation quintile +9.3bp (t 1.5); big creation +16.8bp (t 1.7);
+  big redemption +0.1bp. **Weak (t<2), not stable across years (-17bp in 2022), and ~= SPY's drift + the 1-2bp
+  round trip.** Discount quintiles: premium +12.7bp, deep-discount -0.4bp (t<1).
+- **Verdict: no tradable, scalable flow or discount-reversion signal in SPY. KILL** (the AP arbitrage leaves nothing
+  in the most liquid ETF; a smaller/international fund would need its own NAV history, i.e. a scrape).
+
+### Ranking after this cycle
+1. **Options-induced underlying flow (signed dealer gamma) — DATA-TARGET**, no purchase (must beat the killed
+   OI-pinning; see data-buy rule). Only remaining structurally-motivated, if small.
+2. **Threshold-list forced buy — TESTED-REJECTED.** OI-pinning — killed. Generic options — closed. Night — do not size.
+3. **DATA-LIMITED:** ETF creation/redemption (needs a per-fund raw-NAV + shares scrape, not just SPY), fallen angels,
+   borrow/HTB, margin cascades.
+4. **NOT SEARCHED:** futures (roll/basis/calendar), benchmark/index rebalances (no membership/PIT), auction mechanics
+   beyond TAC, cross-venue/structural.
+5. **Capacity audit of the live book** (execution/capital bottlenecks) — not yet done; the other lever to 2x.
+- Honest read: neither free test produced a scalable edge; the local book is not the bottleneck this cycle revealed.
+  Bigger capacity likely needs a new market (futures) or a per-fund NAV scrape. No deployment.
+
+## Research memory — session "frontier ranking" (2026-10-04, part 9)
+
+Memo: `research/drafts/memo_next_frontier_2026-10-04.md`. Ranked 9 directions; chose ONE.
+
+- **Capacity finding (important):** the live book is NOT capital-constrained until ~$1M
+  (`study_y_scale_book.md`: ~20.5%/yr at $100k, ~17.8% at $500k, ~15.9% at $1M). So the "execution
+  audit → 2x" path CANNOT move total P&L at $2-25k. The real ceiling is the after-tax crossover at
+  ~$250k (lever: Roth-first), not execution. Stop treating the capacity audit as a route to 2x.
+- **Chosen next experiment: FUTURES roll / calendar / basis** — the "have we been in the wrong
+  universe?" test. Scheduled, mechanical flow from beta/passive roll; maximal capacity; free CME
+  settlement/volume + CFTC COT (verified reachable) allow a pre-purchase falsification; independent
+  of the equity book.
+- **Ranked frontier:** 1) futures roll/calendar — SEARCH; 2) signed dealer gamma — DATA-TARGET
+  (small; must beat OI-pinning); 3) borrow/HTB/recall — DATA-LIMITED; 4) fallen angels — DATA-LIMITED;
+  5) margin cascades, 6) benchmark/index rebalances, 7) auction/beyond-TAC, 8) per-fund ETF flow —
+  DEPRIORITIZE; 9) retail vol-premium — KILL.
+- **Lesson:** the frontier's binding constraint is universe/data, not signal generation. The two
+  genuinely new spaces are futures (capacity, scheduled flows) and options-induced underlying flow
+  (small). Bigger capacity = new universe, not more equity variants. No deployment; no purchase.
+
+## Research memory — session "futures roll" (2026-10-04, part 10)
+
+Study FUT-ROLL (`research/sim/fut_roll.py`, pre-reg `study_fut_roll.md`). Data: Databento `GLBX.MDP3`
+`ohlcv-1d`, individual contracts 2011-2025 for ES/NQ/CL/NG (~$0.02/root-year; the parent also publishes
+the actual calendar-spread instruments, e.g. `ESH0-ESM0`). Spread S = F1-F2, LTD = last day a contract
+is front.
+
+- **Mechanism is real in equity-index futures.** Rolling institutions vacate the front: the front
+  contract's volume share falls monotonically 0.48 -> 0.37 into LTD (ES/NQ), then jumps back to ~0.59.
+  Spread daily volatility in the roll window is **3-4.6x** the baseline for ES/NQ. So scheduled roll
+  pressure exists and is measurable.
+- **The tradable distortion is small and decaying.** Short-spread (short front/long back) into LTD:
+  ES +16.6bp t 2.0 (but 2011-15 +21.9 t 1.66, 2016-20 +19.0 t 1.34, **2021-25 +1.3 t 0.14**);
+  NQ +8.2bp t 0.97 (**2021-25 +3.0 t 0.16**). CL sign-unstable. NG has the **opposite** sign (-94bp).
+  One-tick round trip is only ~1-6bp, so cost is not the killer — the effect itself has decayed to ~0.
+- **Verdict: ARTIFACT-ADJACENT / INTERESTING, not RESEARCH.** A genuine mechanism (roll migration) with
+  a real but small spread effect that has been **arbitraged away in ES/NQ since ~2021** and is
+  contract-specific (NG reverses). Equity-index rolls were the right mechanism example but are now
+  too crowded; commodity "roll" is carry/seasonality, not the same forced flow.
+- **Spread liquidity (capacity):** the published ES calendar spread instruments trade heavily in the
+  roll weeks (multi-million contracts/day on the active spreads) — capacity is NOT the constraint.
+  The constraint is that the edge is gone.
+- **Did futures fail, or just roll pressure?** Not settled. Roll *pressure* is arbitraged, but the
+  futures universe is still largely unsearched for other structural mechanisms (settlement/SOQ,
+  first-notice/warehouse flows in commodities, futures-based volatility-target/CTA repositioning,
+  cross-asset basis). Recommend pivoting to those, not to more roll variants.
+
+## Research memory — session "physical delivery / FND" (2026-10-04, part 11)
+
+Study FND (`research/sim/fnd_physical.py`, pre-reg `study_fnd_physical.md`). Object = the nearby/deferred
+calendar spread and OI/volume migration around first notice day, for physically-settled CL/NG vs the
+financially-settled ES roll (part 10). Data: cached Databento GLBX individual contracts 2011-2025.
+
+- **Physical constraint is real and observable.** CL nearby volume share collapses 0.90 -> 0.55 into FND
+  then recovers to 0.91 (delivery migration). NG shows almost none (0.92-0.98; diffuse delivery).
+- **But no harvestable spread distortion.** Spread (nearby - deferred) means around FND are outlier-carried:
+  CL FND->+5d +206bp (t 1.5, **median +3.9**, ex-top-5 -24); NG FND->+10d -86bp (ex-top-5 -313); signs
+  flip between CL and NG; every median is single-digit bp. The apparent moves are carry/convenience yield,
+  seasonality (NG winter), and a few well-known squeezes (2020 negative WTI, 2021-22 gas).
+- The CL migration signature is the **same shape** as the ES financial roll (part 10) that has been
+  arbitraged since ~2021: visible migration is necessary but NOT sufficient for a tradable distortion.
+- **Verdict: KILL (physical-settlement branch closed).** Outcome is ARTIFACT / carry-and-seasonality, not
+  a physical edge; the user closed the branch 2026-10-04. **No FND variants, no more physical-settlement
+  variants.** Answer to the key question: physical delivery, as expressed in the front calendar spread, is
+  NOT a new harvestable inefficiency. The straddling speculator bears the same delivery risk as the
+  constrained physical party, so there is no free side.
+- **Next genuinely different futures mechanisms (not load-bearing roll):** futures-based
+  volatility-target / CTA scheduled repositioning; settlement-auction (SOQ); cross-asset basis
+  (futures vs ETF/physical). Pick one; do not re-tune roll/FND windows.
+
 ## Treasury frontier (2026-10-04, Study TME)
 - **Treasury auction concession: KILLED** (Study TAC 2016-26: dip real, no tradable bounce, +2.4bp t 0.9). No variants.
 - **Treasury month-end duration extension: VALIDATED on untouched 2002-15** (pre-reg 003e176, one look): TLT
@@ -500,3 +650,20 @@ cannot: deep-market calendar effects (TME: 12 x 35bp x 100% = 4%/yr), event sign
   accounting (the plan prohibits the hedge/flip that captures the discount). Remaining CPC (split-offs, odd-lot
   tenders, round-ups) sits near the +8pp gate (~+8.4pp at $10k historically): an active hypothesis, not validated.
   Ledger `swingtrader/daily/cpc_ledger.py`; no new CPC families, no issuer-plan search, no positions opened for data.
+
+## Research memory — session "frontier tests + discovery" (2026-10-05)
+- **Study BSPD (bond-SPDR premium/discount + creation flow, N 834 -> 835): KILL.** JNK/SJNK/SPSB/SPIB/SPLB,
+  2007-12..2026-10, navhist + raw closes. Gross market-adjusted spreads ~0 (+0.32/-1.54/-1.25bp); every arm negative
+  net (net_1x -6.6..-9.5bp, median ~-8, clus_t -3..-12), wrong sign, same in all sub-periods. No reversion to harvest.
+  With SPY (ETC) and broad SPDRs (EF) rejected, the **ETF premium/discount + creation-flow family is CLOSED**.
+- **Study DM (dividend-month clientele premium, N 835 -> 836): KILL.** Monthly payer-vs-non-payer +66.8bp (t 2.51,
+  ex-top5 +31.2) passes the registered gates but is a size/value tilt (164 payers vs 3,081 smaller benchmark names);
+  the ex-date mechanism test (T-5..T+5 vs SPY) is -6.9bp, median -19.7, t -0.04, and the monthly spread dies at 3x
+  cost (-23.2bp). Panel 2021+ only. Hartzmark-Solomon does not survive at retail size/cost.
+- **P01 EDGAR discovery layer built** (`swingtrader/daily/forced_flow_discovery.py`, REGISTRY "Forced-flow discovery
+  (EDGAR forms)", `make forced-flow-discovery`): scans SC 14D-9 / DEFM14C / 425 / 8-K 2.01-5.01 / 25-NSE / S-4 /
+  SC 13E3, flags per-holder-capped guaranteed-floor events to `state/forced-flow-discovery.jsonl`; discovery-only, no
+  orders. Dry run 3 sessions: 85 docs, 1 candidate. The only new forward mechanism this cycle.
+- **No new runnable edge. The free frontier is exhausted.** Remaining open ground is DATA-LIMITED/BLOCKED (borrow
+  fees, PIT ratings, per-fund NAV) or the paid signed-gamma source, whose free proxy already failed the untouched
+  2016-20 window. Do not re-open BSPD/DM/CEF-TL or the ETF-discount family without new data.

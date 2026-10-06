@@ -9,6 +9,37 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Study ACC (2026-10-05): account structure — Roth-first + non-callable 1.25x 3x-ETF; accepted, NO bot change
+- **ACCEPTED as PROMISING, structure only, NO DEPLOYMENT; do not ship a live 3x-ETF IBS mode.** Runner
+  `research/sim/account_struct.py`; out `data/research/program/account_struct_out.txt`;
+  `research/drafts/study_acc_account_structure.md`; N 833 -> 834.
+- **Decisions (manual account actions, NOT bot changes):** (a) move the IBS leg into the Roth; (b) sequence all
+  $7.5k/yr Roth-first. (c) leverage form = non-callable partial-3x-ETF, **cap at 1.25x** (1.5x is a narrow
+  in-sample pass: worst-window DD -24.1% vs the -25% cap, and CLE-attack's whole-share path is -27.7%). Never
+  margin (1.5x rejected at -28.1%), never above 1.25x.
+- **Carry the framing:** the judge-window dollars are the $36,875 of forced Roth contributions plus a 2020-vol
+  regime (ex-2020 the arms are 5-9%/yr) — a **structure/deposit result, not new alpha**. Do not re-open as a
+  signal search; do not ship a live 3x-ETF IBS mode.
+
+---
+
+## Study BSPD + Study DM (2026-10-05): two $0 frontier tests, both KILL; N 834 -> 836
+- **Study BSPD — bond-SPDR premium/discount + creation flow: KILL.** JNK/SJNK/SPSB/SPIB/SPLB, 2007-12..2026-10: gross
+  market-adjusted spreads ~0 (+0.32/-1.54/-1.25bp), every arm negative net (~-7 to -9bp at 1x), strongly negative at
+  2x/3x, wrong sign, same across all sub-periods. Runner `research/sim/bond_spdr_flow.py`, out
+  `data/research/program/bond_spdr_out.txt`. With SPY (ETC) and broad SPDRs (EF) rejected, the **ETF
+  premium/discount + creation-flow family is CLOSED**.
+- **Study DM — dividend-month clientele premium: KILL.** Monthly payer-vs-non-payer +66.8bp (t 2.51, ex-top5 +31.2)
+  passes the registered gates on a size tilt, but the mechanism test (ex-date T-5..T+5 vs SPY) is -6.9bp, median
+  -19.7, t -0.04, and the monthly spread dies at 3x cost (-23.2bp). Panel 2021+ only. Runner
+  `research/sim/dividend_month.py`. Hartzmark-Solomon does not survive at retail size/cost.
+- **P01 discovery scanner built** (`swingtrader/daily/forced_flow_discovery.py` + REGISTRY entry): reads SC 14D-9 /
+  DEFM14C / 425 / 8-K 2.01-5.01 / 25-NSE / S-4 / SC 13E3, flags per-holder-capped guaranteed-floor events to
+  `state/forced-flow-discovery.jsonl`, discovery-only (no orders). Dry run over 3 sessions: 85 primary docs, 1
+  candidate (S-4/A Agility Robotics, $10 floor). This is the only new forward mechanism from this cycle.
+
+---
+
 ## Goal hunt (2026-10-02, session llm-trader-ec, `prompt_strategy_goal.md`): G2 NEAR, G21 combined ~+21pp (conditional), G8/G12 dead; N 768 -> 775
 - **G2 EV2-big (officer/director buys >= $500k after 2+ years of no open-market buying) as an intraday overlay on a 100%
   SPY core, taxable: NEAR.** Judged on the untouched 2016-20 holdout (2014-21 Form 345 sets, registered e6316e8): 195
@@ -1015,6 +1046,11 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | idea | verdict | why |
 |---|---|---|
 | Concentration (one 1.0x budget, spill to the only leg firing) / 1.5x / 2x Reg T on IBS + night, taxable, half-Kelly cap, -15% stop (Goal L1/L2, N 789-791) | **dead (holdout)** | 2016-20 after tax/interest B0 3.9 vs L1 3.7 (2020 +0.6pp), 1.5x 3.8, 2x 2.2; night leg Kelly f* -0.2 at tier_hi; ruin <= 3%; study_goal_l.md |
+| RGTI $14-$16 next-day bounce, concentrate/leverage (Study CC, N 820 -> 821) | **dead (regime + outlier)** | n 78, net +65bp/trade but ex-best-5 -14bp; every signal 2024-12+ (no liquid pre-2024 sample, one quantum-boom regime, no OOS); random-placebo 70th pct; 2025 +10bp; beta -1.0 vs SPY; fresh-cross ex-top-5 -81bp; study_conviction.md, conviction_out.txt |
+| CEF year-end tax-loss forced selling -> January reversion (Study CEF-TL, N 823 -> 824) | **REJECTED** | 142 CEFs, adj total returns 2016-26: Dec bottom-YTD quintile +0.27% vs universe (t 0.63, wrong sign), Jan +0.01%, Jan Q1-Q5 -0.93%; the Jan rebound is market beta (2018/2022), no forced signature; cef_taxloss_out.txt |
+| IBS leverage >1.5x (margin or 3x ETF) for small-account capital efficiency (Study CLE, N 821 -> 822) | **PROMISING framework, cap 1.25x; reject 1.5x+** | 3x-ETF financing (~5.5%, non-callable) beats retail margin; attack: actual 3x drags -7.6bp/trade vs synthetic, whole-share effective exposure only 1.33-1.49x, 1.5x maxDD -28% breaches a 25% DD budget, ex-best-10 8.4%. Allocation (current->100% IBS) +5.0pp > leverage +3.9pp. study_cle.md, cle_attack_out.txt |
+| TME month-end (TLT 1x) | **VALIDATED** on untouched 2002-15 | +32.3bp/mo net, t 2.76, 13/14 yrs, duration-monotonic; ~+4.3%/yr, -5.9% DD, $43/k; study_tme.md, tme_out.txt |
+| TME leverage via Treasury ETFs (Study TME-L2, N 822 -> 823) | **PROMISING overlay; reject UBT** | TMF 3x ~9.5%/yr, -21.9% DD, $95/k (vs IBS 1.25x $105/k same DD); 0.5 TLT+0.5 TMF ~6.9%, -14.2%, $69/k; UBT 2x dominated by 15bp/side cost; TMF-3xTLT drag -9.2bp/w. Deployed 14% of sessions -> stacks on IBS. Cap 2.5x @25% DD. Best use: more IBS + modest TME. tme_leverage_out.txt |
 | Closed-end fund officers/directors buying their own fund, hold 60 vs PCEF (Goal G54, N 788) | **dead (select)** | 2021-23 n 96, +1.25%, t 0.8, ex-best-5 negative |
 | First 13D on a fund-like subject by any filer OTHER than the CEF activists, hold 60 vs PCEF (Goal G53, N 787) | **dead (select)** | 2021-23 n 96, −8.1%/trade; the G45 effect is activist-specific |
 | CEF activist escalations: stake first >= 15% / first proxy-contest filing, hold 60 vs PCEF (Goal G50 / G51, N 785-786) | **dead (select count / mean)** | G50 n 12 (+3.5%, t 3.7) below n >= 20; G51 +0.4%, t −0.3 |
@@ -1049,6 +1085,8 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Trailing / let-winners-run exits | **dead** | selection screens for *non*-trending names; a trend-following exit contradicts it |
 | Long/short (shorting range tops) | **dead** | negative in every configuration |
 | Short the night picks after the open (Study S) | **dead** | 75% are SSR; the shortable rest drift +10bp, below the spread |
+| Short the pre-boom/falling-knife screen (long clean vs short stressed; Study SH) | **dead** | discovery LS gross +1.45%/20d (t 8) but net-negative after costs on ETB names, reverses OOS (t -3.6), and is just quality/junk beta (risk-on only); the profitable side is HTB/SSR |
+| Falling-knife screen as a long-only night-leg filter (exclude/down-weight stressed crashes; Study EX) | **dead** | discovery improve +4.8bp (placebo 99%) but OOS -1.9bp (placebo 16%); removed stressed picks did better OOS -> discovery artifact |
 | Looser entry for more trades | **dead** | raises CAGR, raises drawdown faster |
 | Broad-market cohort | **weak** | 1.6% CAGR vs 15.1% — the edge needs high volatility |
 | Momentum sleeve at 25% | **promising, unvalidated** | blend Sharpe 1.09 vs 0.95, but standalone CAGR swings 1.2–43.6% across settings |
@@ -1060,6 +1098,8 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Volume-z dip filter | **weak** | rm 18–23, at or below the matched random-drop control (~20) |
 | IBS / close-at-low as an entry gate | **dead** | closing at lows is a falling knife — worst bucket (+0.56%/trade) |
 | z-turn-up, z-depth band, 52w-high distance | **dead** | no robust effect, unstable across halves |
+| IBS × TME free-sleeve capital allocation (Study XB, N 820) | **dead** | every w_IBS<1 worse than 100% IBS: 50/50 incremental **-2.5pp/yr** (both halves negative), all-TME -2.2% CAGR; hedge-only TME-K (short ~2x β·IEF) flips validated TME +2.8% → -2.2%. Book stays 100% IBS; do not re-anchor TME to the IBS cash |
+| Extreme-drawdown bottom-fishing (DD252<=-70) with conviction sizing (Study BH, N 819) | **dead** | forward 126d excess **-8.6% mean / -24.2% median**; P(another -50%)=42%; recover 252d high 2.4% vs 40.3% base; sleeve t 1.32, ex-best-5-days CAGR -17%, flat-25bp cost -9.6%; positive mean = FFAI repeat-rebound + survivorship. Falling-knife class re-confirmed |
 | Regime gates (SPY 5d return, VIXY fear proxy) | **dead** | unstable across halves; SPY>200dma only buys Sharpe for return |
 | Fixed take-profit exit | **dead** | worse at every level (cutting winners, same as trailing) |
 | Inverse-vol / overnight-share position sizing | **weak** | top8 +5pp CAGR at best, no gain on the uncapped book |
@@ -1078,6 +1118,8 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Last-half-hour intraday momentum (Gao et al.) | **dead** | sign flips across periods; overlaps the noise leg (add. 27 R3) |
 | Sector-loser reversal, ETF pairs, international close->open | **dead** | duplicates IBS / no edge after costs (add. 27 R4) |
 | Theme-explosion sleeve (breakouts, top-1% momentum, theme clusters, residual momentum) | **dead** | no rule beats vol-matched random picks; trails SPY; caught quantum late and got stopped out (add. 28) |
+| Pre-boom tail-probability conditioning (vol/range/volume compression, Amihud, idio-vol, corr breakdown, gap frequency, short interest/DTC, FTD, insider buys, earnings proximity) | **dead (outcome B)** | conditions raise P(fwd20>=+30%) 1.3-3.8x OOS, per-year, beyond vol-match and beyond momentum; but they raise the -30% tail as much or more (up-minus-down lift < 0, day-clustered CI excludes 0, or sign-flips), median fwd <= 0 -> predicts big moves, not direction (Study PB, N 826) |
+| Follow the direction once the move starts, filtered by a pre-boom condition (PB-C) | **dead** | early up-move net +0.96% OOS but -0.97% discovery; the same early move measured down is BETTER (+2.00% net) -> early direction mean-reverts, and no condition improves continuation over the plain move (Study PB-C, N 827) |
 | Night pool $5 floor / cost tier / share rounding on split-ADJUSTED prices | **bug, fixed** | 16% of V7 night trades were really < $5; lookahead winners. Every earlier night level ~1/5 too high; use `raw_price=True` (add. 30, 36, 39) |
 | Lower `night_price_min` to $3 / $2 / $1 (raw pool) | **dead** | added names lose 33-73bp in 2021-23, placebo 2-7%; add. 21's live-cost conditional ($3 if sub-$10 costs ≤ ~20bp) still stands (add. 30) |
 | Classify listings by CURRENT asset name on old bars | **bug** | delisted names kept at volume 0, tickers reused (INFO, FB, PCLN): split listings first (add. 36) |
@@ -1215,6 +1257,9 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Cash tender offers by acquirers / merger arb (Round 32 B3) | **dead** | spread ~+0.4% by the first close even in tiny deals; failures −20..−42% |
 | Going-private odd-lot cash-outs (Round 32 B4) | **dead** | ~1 listed/yr, 100-day holds, Anebulo −89% (split abandoned) |
 | Reverse-split round-up (Round 30 #12 "KILL") | **reopened -> PASS (alert)** | Round 32 B1: +$4.36/account/deal if rounded, ~$0 if not; Schwab behaviour is the live check |
+
+| Bond-SPDR premium/discount + creation/redemption flow (Study BSPD, N 834 -> 835) | **dead** | gross spread ~0, net -7 to -9bp/1x, t -4..-12, wrong sign all sub-periods; closes the ETF discount/flow family (with ETC/EF) |
+| Dividend-month clientele premium, payers vs non-payers (Study DM, N 835 -> 836) | **dead** | monthly +66.8bp is a size tilt; the mechanism (ex-date T-5..T+5 vs SPY) is -6.9bp t -0.04; dies at 3x cost |
 
 ## Ideas not yet tested
 

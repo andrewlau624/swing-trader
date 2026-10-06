@@ -411,8 +411,17 @@ cpc-failed: ## record a failed CPC event: make cpc-failed EVENT=<id> STATUS=MISS
 	@test -n "$(EVENT)" -a -n "$(STATUS)" || { echo "usage: make cpc-failed EVENT=<id> STATUS=MISSED|INELIGIBLE|CANCELLED [NOTE=...]"; exit 2; }
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.cpc_ledger failed --event '$(EVENT)' --status '$(STATUS)' --note '$(NOTE)'
 
+forced-flow-scan: ## rank all per-holder-capped forced-flow families by events/yr x net edge x deployable share x capture at $2.3k/$10k/$25k vs +8pp/yr (reuses cpc.py; no orders)
+	@PYTHONPATH=. $(PY) -m research.sim.forced_flow_scan
+
 tme-shadow: ## Study TME-L: log completed month-end windows of the leveraged Treasury sleeve (L1 TLT, L2 TLT 2x margin, L3 TMF; forward shadow, no orders)
 	@PYTHONPATH=. $(PY) -m research.sim.tme_shadow forward
+
+daybook-shadow: ## BOT#2: no-order forward shadow of the intraday day book (PROD QQQ+SMH, Config B, Config C) for one session
+	@PYTHONPATH=. $(PY) -m swingtrader.daybook.shadow forward $(DATE)
+
+daybook-report: ## BOT#2: forward validation report for the day book shadow (realized bp/trade, win rate, vs history)
+	@PYTHONPATH=. $(PY) -m swingtrader.daybook.shadow report
 
 tender-watch: ## Round 31: new SC TO-I filings -> odd-lot tender alerts (email; manual tender at Schwab): make tender-watch [DATE=YYYY-MM-DD]
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.tender_watch $(DATE)
@@ -430,6 +439,9 @@ splitoff-watch: ## Round 32 B2: split-off exchange offers (odd lots accepted in 
 splitoff-buy: ## Round 32 B2: buy the odd lot for an open split-off offer, after YOU confirm: make splitoff-buy PARENT=MDT
 	@test -n "$(PARENT)" || { echo "usage: make splitoff-buy PARENT=TICKER (from the alert email)"; exit 2; }
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.splitoff_buy $(PARENT)
+
+forced-flow-discovery: ## Forced-flow discovery: EDGAR form-type scan (SC 14D-9/DEFM14C/425/8-K 2.01+5.01/25-NSE/S-4/SC 13E3) for per-holder-capped guaranteed-floor events (log only, no orders): make forced-flow-discovery [DATE=YYYY-MM-DD]
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.forced_flow_discovery $(DATE)
 
 splitoff-add: ## set an offer's terms by hand: make splitoff-add ARGS='PARENT RECV YYYY-MM-DD PER100 CAP [URL]'
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.splitoff_watch add $(ARGS)

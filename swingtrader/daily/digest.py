@@ -207,7 +207,8 @@ def round31_whatif(state: Path, acct: Account, manual_only: bool = False) -> lis
     out = []
     eq_on = {e["date"]: e["equity"] for e in acct.equity_log}
     eq = lambda d: float(eq_on.get(d, acct.equity))
-    ins = [] if manual_only else [r for r in _jsonl(state / "insider-day.jsonl") if r.get("status") == "scored"]
+    ins = [] if manual_only else [r for r in _jsonl(state / "insider-day.jsonl")
+                                  if r.get("status") == "scored" and not r.get("id2")]     # ID3 only (Track M1 id2 rows)
     if ins:
         by: dict = {}
         for r in ins:
@@ -267,7 +268,8 @@ def gates(accts: dict, logs: Path, state: Path) -> list[dict]:
             "make review §9", unit="night trades"),
         row("LLM news judge verdict", len(verdicts), 300, "verdict read once", "make forward-status", unit="picks judged"),
         row("Quote imbalance verdict", len(snaps), 300, "verdict read once", "make forward-status", unit="picks logged"),
-        row("Insider-day (ID3) verdict", sum(1 for r in _jsonl(state / "insider-day.jsonl") if r.get("status") == "scored"),
+        row("Insider-day (ID3) verdict", sum(1 for r in _jsonl(state / "insider-day.jsonl")
+                                             if r.get("status") == "scored" and not r.get("id2")),
             300, "verdict read once", "make forward-status", unit="shadow trades"),
     ]
 

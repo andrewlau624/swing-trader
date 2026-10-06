@@ -140,3 +140,30 @@ def test_splitoff_whatif_is_sized_by_what_each_account_can_buy(tmp_path):
     assert roth[0]["usd"] == pytest.approx(11 * 86.89 * 0.0431) and len(roth) == 1
     assert big[0]["usd"] == pytest.approx(99 * 86.89 * 0.0431), "odd-lot priority caps at 99"
     assert digest.odd_lot_shares(50.0, 86.89) == 0
+
+
+# ------------------------------------------------------------ Track M1: ID1 / ID2 / EV1 forward (never ID3)
+def test_m1_plan_tags_id2_rows_and_id3_gate_ignores_them():
+    bars = {"BIG": _bars(50.0, 1e6), "THIN": _bars(50.0, 1e5), "DUST": _bars(50.0, 1e4)}   # $50M / $5M / $0.5M
+    buys = [dict(sym=k, usd=5e4, insider=True) for k in bars]
+    rows = s.plan_rows(buys, bars, "2026-10-02", min_adv=s.MIN_ADV_ID1)
+    assert [(r["sym"], r.get("id2", False)) for r in rows] == [("BIG", False), ("THIN", True)]
+    assert [r["sym"] for r in s.plan_rows(buys, bars, "2026-10-02")] == ["BIG"]          # default unchanged
+    sc = [dict(r, status="scored", ret_net=0.001, m1=True) for r in rows]
+    assert s.gate(sc)["n"] == 1                                                          # ID3 counts BIG only
+    g = s.m1_gate(sc)
+    assert g["id1"]["n"] == 2 and g["id2"]["n"] == 1 and g["ev1"]["n"] == 0
+    assert abs(g["id2"]["live_bp"] - (10 + 2 * (s.COST_BPS - s.LIVE_COST_BPS))) < 1e-9
+    assert g["id1"]["verdict"].startswith("M1 reading")
+
+
+def test_m1_ev1_needs_another_filing_in_the_previous_five_days():
+    rows = [dict(sym="A"), dict(sym="B"), dict(sym="C"), dict(sym="D", id2=True)]
+    buys = [dict(sym="A", insider=True, fd="2026-10-09"), dict(sym="B", insider=True, fd="2026-10-09"),
+            dict(sym="B", insider=True, fd="2026-10-09"), dict(sym="C", insider=True, fd="2026-10-09"),
+            dict(sym="D", insider=True, fd="2026-10-09")]
+    recent = {"A": ["2026-10-05"], "C": ["2026-10-03"], "D": ["2026-10-08"]}    # A 4 days back; C 6 days back
+    s.ev1_flags(rows, buys, recent)
+    assert [r.get("ev1") for r in rows] == [True, False, False, None]          # same-day only: no; ID2 never EV1
+    kept = s.remember_filings(recent, buys, dt.date(2026, 10, 9), keep_days=5)
+    assert kept["C"] == ["2026-10-09"] and kept["A"] == ["2026-10-05", "2026-10-09"]   # 10-03 pruned

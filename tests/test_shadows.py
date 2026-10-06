@@ -264,3 +264,17 @@ def test_wash_shadow_logs_and_changes_no_orders(tmp_path, monkeypatch):
     assert {r.symbol for r in ex.broker.client.submitted} == {"FREE"}, "live guard still blocks LOSS/GAIN"
     line = next(l for l in ex.lines if "[wash-guard] SHADOW roth 15:40" in l)
     assert "G4s would take GAIN" in line and "skip LOSS" in line
+
+
+def test_m1_n2_scores_release_nights_against_other_nights():
+    import datetime as dt
+    from swingtrader.daily import events as ev
+    eq = [dict(date="2026-10-13", equity=1000.0), dict(date="2026-10-14", equity=1000.0)]
+    closed = [dict(leg="night", entry_date="2026-10-13", exit_date="2026-10-14", pnl=2.0),     # CPI morning: +20bp
+              dict(leg="night", entry_date="2026-10-13", exit_date="2026-10-14", pnl=1.0),     # same night: +10bp
+              dict(leg="night", entry_date="2026-10-14", exit_date="2026-10-15", pnl=-1.0),    # other: -10bp
+              dict(leg="ibs", entry_date="2026-10-13", exit_date="2026-10-14", pnl=50.0)]      # not the night leg
+    g = ev.n2_score(closed, eq)
+    assert g["n"] == 1 and g["n_other"] == 1 and abs(g["event_bp"] - 30) < 1e-9 and abs(g["diff_bp"] - 40) < 1e-9
+    assert dt.date(2026, 11, 6) in ev.release_mornings() and ev.release_stale_warning(dt.date(2026, 10, 4)) is None
+    assert "events.py" in ev.release_stale_warning(dt.date(2026, 11, 20))

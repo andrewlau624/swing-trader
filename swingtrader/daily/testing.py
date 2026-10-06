@@ -67,6 +67,33 @@ def _insider(key: str | None):
     return read
 
 
+def _m1_insider(key: str):
+    """Track M1 (round1_prose.md): an insider idea killed only on judge t < 2, read against its prediction."""
+    def read(state: Path, logs: Path) -> dict:
+        from . import insider_shadow as s
+        rows = s._read(state / s.LOG_NAME)
+        g = s.m1_gate(rows)[key]
+        wk = sum(1 for r in rows if r.get("status") == "scored" and r.get("m1") and r["date"] >= _week_ago()
+                 and (key == "id1" or r.get(key)))
+        line = (f"{g['verdict']}; live {_bp(g['live_bp'])} vs predicted {g['pred_bp']:+.1f}bp, t {g['t']:+.2f}"
+                if g["n"] else f"{g['verdict']}; predicted {g['pred_bp']:+.1f}bp/trade")
+        return dict(n=g["n"], week=wk, line=line)
+    return read
+
+
+def _m1_n2(state: Path, logs: Path) -> dict:
+    from . import events as ev
+    p = state / "book-daily-live.json"
+    b = json.loads(p.read_text()) if p.exists() else {}
+    g = ev.n2_score(b.get("closed", []), b.get("equity_log", []))
+    wk = sum(1 for c in b.get("closed", []) if c.get("leg") == "night" and str(c.get("exit_date", "")) >= _week_ago()
+             and c.get("exit_date") and dt.date.fromisoformat(c["exit_date"][:10]) in ev.release_mornings())
+    stale = ev.release_stale_warning(dt.date.today())
+    line = (f"{g['verdict']}; release nights {_bp(g['event_bp'])} vs other {_bp(g['other_bp'])} "
+            f"(diff {_bp(g['diff_bp'])}, predicted {g['pred_bp']:+.1f}bp)") + (f"; {stale}" if stale else "")
+    return dict(n=g["n"], week=wk, line=line)
+
+
 def _cef_activist(state: Path, logs: Path) -> dict:
     from . import cef_activist_watch as c
     rows = _jsonl(state / c.LOG_NAME)
@@ -164,6 +191,23 @@ def _cpc(state: Path, logs: Path) -> dict:
     return cpc_ledger.digest_read(state, logs)
 
 
+def _daybook(config: str):
+    def read(state: Path, logs: Path) -> dict:
+        from swingtrader.daybook import shadow as s
+        rows = _jsonl(state / s.LOG_NAME)
+        days = [r for r in rows if r.get("kind") == "daily" and r.get("config") == config]
+        trades = [r for r in rows if r.get("kind") == "trade" and r.get("config") == config]
+        n = len(days)
+        wk = [r for r in days if str(r.get("date")) >= _week_ago()]
+        if not days:
+            return dict(n=0, week=0, line="no sessions logged")
+        net = [r.get("net_return", 0.0) for r in days]
+        mean = sum(net) / len(net)
+        return dict(n=n, week=len(wk),
+                    line=f"{n} sessions, mean {mean*1e4:+.1f}bp/day, {len(trades)} trades")
+    return read
+
+
 REGISTRY: list[Test] = [
     Test("Night auction cost by price bucket (pick-quality lead)", "do $5-10 night names really cost ~15bp/side live, or ~0 in the auctions? (gross bounce $5-10 +40bp vs $50+ ~0)",
          "2026-10-02", 100, "$5-10 live trips", _pick_cost, "make pick-cost; pick_quality_log.md", ["pick_cost_watch"]),
@@ -181,6 +225,17 @@ REGISTRY: list[Test] = [
          "2026-10-02", 60, "scored trades", _insider("ev2_big"), "make forward-status; study_ev2_first_insider_buy.md"),
     Test("ID3 x buy >= $500k (any silence)", "Goal G3: does the buy SIZE alone carry ID3? (holdout report row +35.7bp)",
          "2026-10-02", 60, "scored trades", _insider("id3_big"), "make forward-status; study_goal_g2.md"),
+    Test("M1 ID1: every insider buy, ADV >= $1M", "Track M1: killed only on judge t 1.18; is the forward mean > 0 "
+         "(predicted +14.6bp/trade at live cost)?", "2026-10-05", 5400, "scored trades", _m1_insider("id1"),
+         "make insider-shadow; round1_prose.md Methodology track M1"),
+    Test("M1 ID2: insider buy, ADV $1-20M", "Track M1: killed only on judge t 0.86; forward mean > 0 (predicted +15.6bp)?",
+         "2026-10-05", 2650, "scored trades", _m1_insider("id2"), "make insider-shadow; round1_prose.md Methodology track M1"),
+    Test("M1 EV1: cluster insider buys", "Track M1: 2+ officer/director buy filings within 5 days, killed only on judge "
+         "t 1.85; forward mean > 0 (predicted +20.5bp)?", "2026-10-05", 560, "scored trades", _m1_insider("ev1"),
+         "make insider-shadow; round1_prose.md Methodology track M1"),
+    Test("M1 N2: night leg on CPI/NFP mornings", "Track M1: does the live night leg earn more on nights into an 08:30 "
+         "CPI/NFP release (predicted +8.8bp of equity vs other nights)?", "2026-10-05", 48, "release nights", _m1_n2,
+         "make testing; round1_prose.md Methodology track M1"),
     Test("CEF activist 13D (G45-F)", "does the first activist 13D on a closed-end fund beat PCEF by >= 1.5% over 60 sessions?",
          "2026-10-02", 30, "scored events", _cef_activist, "make cef-activist-watch; study_goal_g45.md", ["cef_activist_watch"]),
     Test("Odd-lot tenders", "issuer tenders with odd-lot priority >= 1% over market (manual, <= 99 shares)",
@@ -190,6 +245,10 @@ REGISTRY: list[Test] = [
          "2026-10-02", 0, "alerts", _alerts("splitoff-watch.jsonl", "offers"), "make splitoff-watch", ["splitoff_watch"]),
     Test("Reverse-split round-up", "1 share before a reverse split that rounds fractions up (manual)",
          "2026-10-02", 0, "alerts", _alerts("roundup-watch.jsonl", "splits"), "make roundup-watch", ["roundup_watch"]),
+    Test("Forced-flow discovery (EDGAR forms)", "does the SC 14D-9 / DEFM14C / 425 / 8-K 2.01+5.01 / 25-NSE / "
+         "S-4 / SC 13E3 scanner surface per-holder-capped, guaranteed-floor events? (discovery only)",
+         "2026-10-05", 0, "candidates", _alerts("forced-flow-discovery.jsonl", "filings"),
+         "make forced-flow-discovery", ["forced_flow_discovery"]),
     Test("LLM news judge", "does Claude's 'fundamental' label pick the night picks that keep falling?",
          "2026-09-24", 300, "picks judged", _news, "make forward-status", ["news_judge"]),
     Test("15:40 quote imbalance", "does the bid/ask size at 15:40 predict the night pick's bounce?",
@@ -217,6 +276,18 @@ REGISTRY: list[Test] = [
          "not one event, over ~12 months (personal-scale economics, not scalable alpha)?",
          "2026-10-04", 2, "independent completed events", _cpc, "make cpc-status; research/drafts/study_cpc.md",
          ["cpc_ledger"]),
+    Test("Daybook PROD (QQQ+SMH noise, forward)", "production-equivalent intraday noise leg, replayed as a "
+         "no-order forward shadow: does the edge survive live (esp. the 2024-26 decay)?",
+         "2026-10-04", 60, "sessions", _daybook("PROD"), "make daybook-shadow; make daybook-report",
+         ["daybook_shadow"]),
+    Test("Daybook Config B (moderate risk)", "QQQ/SMH core + conviction TQQQ/SOXL at 0.02 vol target; "
+         "does the leveraged basket beat the production leg forward net of realistic fills?",
+         "2026-10-04", 60, "sessions", _daybook("B"), "make daybook-shadow; make daybook-report",
+         ["daybook_shadow"]),
+    Test("Daybook Config C (high risk, research-only)", "2x risk profile (0.04 vol target, 7x cap) — "
+         "is the 43% historical CAGR reproducible forward, or does the drawdown dominate?",
+         "2026-10-04", 60, "sessions", _daybook("C"), "make daybook-shadow; make daybook-report",
+         ["daybook_shadow"]),
 ]
 
 

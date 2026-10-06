@@ -3394,3 +3394,478 @@ it. Reason: Study THR (another session, `study_threshold_flow.md`, `threshold_fl
 on 1,516 FTD-derived threshold episodes 2021-26: CAR to the 13-day deadline -959bp (t -6.4), the 3 sessions into the
 deadline are the worst (-274bp), no volume footprint (0.54x ADV), long-only net -1009bp; CLAUDE.md: "do not re-run
 threshold/FTD-buy tests". Running TL would re-test the same idea with other data. TL's registration still counts in N.
+
+## Amendment — Study BH "Asymmetric Bottom Hunter" (pre-register; 1 judged total, program N 818 -> 819)
+
+Registered 2026-10-04 before any drawdown-conditioned forward return was read. Motivation (user): is there a systematic
+edge in making relatively large allocations to a name the market prices as nearly dead, when survival is more likely
+than the market implies — i.e. bounded downside + large right tail? Prior (NOT an input to the rule, all in `NEXT.md`'s
+dead table): long-term reversal 1963-2015 dead (t 1.76, 2016-26 -22bp at 2x); IBS/close-at-low "falling knife" dead;
+night 2/3/5-day losers dead; sub-$5 crossers keep falling; going-concern/listing-compliance relief dead; first-profitable-
+quarter-after-6-losses lottery-dead; theme-explosion (incl. quantum, add. 28) dead. The open, un-run question is whether
+*extreme price depression itself* carries forward asymmetry and whether conviction sizing harvests it.
+
+**Question.** Not "will it go up" but "is the forward return distribution at this price unusually asymmetric, and is it
+tradable net of costs on a survivorship-aware universe?" Price-only: the repo has no point-in-time fundamentals panel
+(gross margin, debt detail, cash burn, dilution series, guidance, analyst revisions do not exist); XBRL companyfacts,
+FINRA short interest (2020-06+) and Form 4 buys (2020-03+) exist for report-only survival proxies. This limitation is
+part of the answer, not hidden.
+
+**Data (frozen).** PRIMARY `data/research/night/panel.pkl`, SIP daily OHLCV, split/div adjusted, 2020-10-01..2026-09-21,
+13,933 symbols incl. inactive (survivorship-aware, NOT delisted-complete). Extension (REPORT ONLY, never judged):
+`data/cache/bars_pre2021/*.parquet`, 2016-01..2020-12, which exist only for today's symbol list (survivorship-limited).
+Universe: `asset_meta.json` name excludes ETFs/ETNs/funds/trusts (`theme_explosion.stock_mask`); ticker matches
+`swingtrader.universe.valid_symbol`; eligible on a day = close >= $1, 20d median ADV$ >= $1M, >= 252 sessions of history.
+Delisting while held: `swingtrader.backtest.DELIST_RET` (-30%) on the last bar. Costs: `book.TIERS` per side by price/ADV
+(primary `tier_hi`; `tier` and x2 `tier_hi` sensitivity). Entry = next session's open after the signal close (no same-bar
+lookahead); exit evaluated at closes, executed at the next open.
+
+**Signal (frozen, ONE definition; alternatives report-only).** `DD252 = close / rolling_max(close, 252) - 1`.
+EXTREME LOW = `DD252 <= -0.70` AND close >= $3 (a $1-3 name is treated as broken, not cheap). Report-only alternative
+definitions: `DD_ALL <= -0.70` (expanding max), trailing-2y close percentile <= 2%, z of log price vs 200d <= -2, and
+distance from 52w high <= -70%.
+
+**Rule (frozen).** Sleeve, $1 of equity at start, 10 slots. At each close, rank eligible extreme-low names by
+`score = min(2.0, max(0.5, 1 + (|DD252|-0.70)/0.30)) * (1.0 if close > MA20 else 0.75)`, take the top free slots by
+score (ties by ADV$). Sizing: slot weight = score / mean(score of filled slots) x (equity/10), hard-capped at 10% of
+sleeve equity per name; idle cash earns BIL. Exit = first of (a) close <= 0.75 x highest close since entry, (b) close <
+MA50, (c) 126 sessions held -> next open; delist at -30%.
+
+**Judged PRIMARY (one look, 2021-26):** the sleeve's mean daily return MINUS the same-day, same-20d-vol-decile random
+placebo (50 seeds, identical exits/sizing/costs, `theme_explosion.placebo`), net of tier_hi costs. PASS = mean excess
+> 0 AND day-clustered t >= 2 AND ex-best-5 excess > 0 AND the 2016-20 extension excess > 0. NEAR = passes 2 of 4;
+FAIL = mean <= 0 or ex-best-5 <= 0. Label on the primary only.
+
+**Report-only (pre-specified, never used to change the primary).** (R1) forward-return distributions by DD bucket and
+horizon 21/63/126/252: median, mean, P(+25/50/100/200/500%), P(-20/30/50%), in excess of that day's eligible-universe
+mean. (R2) falling-knife: additional drawdown after the signal; share of signals that are within 5% of the forward
+252-session low. (R3) survival filters, each vs the same-day eligible mean: price>= $10, ADV >= $10M, close > MA20,
+close > 1.05 x 252d low, an insider buy in the prior 60 days. (R4) entry timing: immediate open vs wait-for-close>MA20
+vs 5-session staged. (R5) theme/sector capitulation using per-symbol bars (survivorship/hindsight flagged): ETFs QTUM
+(quantum), BOTZ/ROBO (robotics), SMH/SOXX (semis), ARKX/ARKQ (space), ICLN/TAN/URA/NLR (clean/nuclear), XBI (biotech),
+XLE/XOP (energy), LIT, ARKK, and the quantum basket RGTI/IONQ/QBTS/QUBT/ARQQ — each bought after its own DD252 <= -20%
+or <= -30%, hold 126, vs SPY; quantum's rank among themes. (R6) Spearman of the score vs forward 126d return, decile
+monotonicity, and equal-weight vs conviction sizing, with dollars at $2.5k/$10k/$25k/$100k/$1M. Runner
+`research/sim/bottom_hunter.py`; output `data/research/program/bottom_hunter_out.txt`; one look. If the primary FAILs,
+the verdict is KILL/WATCHLIST and no live capital.
+
+## Amendment — Study XB "existing-book optimization: IBS x TME portfolio allocation" (pre-register; 1 judged total, program N 819 -> 820)
+
+Registered 2026-10-04, before any capital-allocation simulation number was read. Motivation (user): the alpha hunt is
+at diminishing returns; the remaining lever is whether the ALREADY-VALIDATED legs can be allocated better. Prior
+(NOT inputs): every IBS conditional/sizing/universe/exit variant is dead (`NEXT.md` dead table — AP1-AP3, AV1,
+vol-target, IBS>200d SMA, leverage Goal L, gap exits, xasset/24-ETF universes all below the +2pp bar); V6
+close->open is SHADOW/borderline; no IBS x TME allocation study exists (only the monthly corr -0.09,
+`study_rb6040.md:29`). This study opens exactly one question, the open one: **does capital allocation between the
+free IBS overlay and the TME-K (Kalman hedge-only Treasury month-end) overlay beat 100%-to-IBS after tax and at size?**
+It does NOT touch the production IBS rule, TME's rule, or the backtest periods.
+
+**Frozen inputs.**
+- IBS H: monthly top-3 of the 18-ETF universe (`config.yaml:94`) by 12-1 momentum, hold while IBS<0.2; the ALREADY-TESTED
+  close(T)->open(T+1) "V6" variant is taken as the primary IBS stream (SHADOW elsewhere); entry next open (no lookahead).
+  Daily leg returns from `data/cache/bars/*.parquet` (split/div adj), 2016-01..2026-09.
+- IBS G: the same rule with the live open(T+1)->open(T+2) implementation, report-only baseline.
+- TME-A: TLT close(T-3)->close(T), no hedge (the validated form).
+- TME-K: long TLT + short beta x IEF, beta(t) = trailing-252d OLS beta of TLT/IEF daily returns (lagged), rebalanced
+  monthly; residual AR = R_(LT-SH) - 3 x mean daily residual over the month's other sessions; 2bp/side both legs.
+  This is the only NEW construction; it is an overlayment of the validated mechanism, not a new mechanism.
+- Cash: BIL from `data/research/night/etf_daily.parquet`; TLT/IEF/SHY/^IRX from `data/research/tme/px_*.csv`
+  (Yahoo, div-adj; TLT interest roll not modelled -> conservative), 2002-08..2026-09.
+
+**Allocation rule (frozen, no tuned parameter).** Each overlay runs at FULL sleeve notional on its own window; because the
+windows do not overlap (IBS = first 1-2 sessions of the month, TME-K = the last 3), the deployed overlays are disjoint.
+At any session, the free sleeve dollars are split equally across the overlays then ACTIVE (IBS legs are size 1/3 of the
+sleeve each, so an active IBS day uses its share; TME-K uses its share on an active month-end day). Idle sleeve dollars
+earn BIL. No leverage, no notional > sleeve. This is "equal allocation when everything overlaps", the simplest rule; no
+vol/correlation weighting (those are report-only variants).
+
+**Tax (frozen).** Taxable account: 35% short-term on the year's net overlay gain (losses net within the year, no
+carryover); Roth: 0%. Reported both. $2.3k static sleeve (no compounding), 2016-2026; 2026 = YTD to 09-30.
+
+**Judged PRIMARY (one look, 2016-09..2026-09 taxable):** (combined sleeve after-tax/yr) - (IBS-H-only after-tax/yr),
+where combined = 50/50 sleeve dollars to IBS-H and TME-K and the whole sleeve is the unit (reported for 100%-IBS-H cash
+leakage too). PASS = incremental >= +2.0pp of the sleeve /yr AND positive in both 2016-20 and 2021-26 AND ex-best-5
+months still > 0. NEAR = 1.0..2.0pp or one gate fails; FAIL < +1.0pp. The +2.0pp bar is the repo's standing adoption
+bar for an IBS change.
+
+**Report-only (pre-specified).** (R1) correlation of the two overlay monthly returns. (R2) allocation variants: 100/0,
+70/30, 50/50, 30/70, 0/100; a correlation-aware rule; TME-K hedged vs TME-A unhedged. (R3) maxDD and a bootstrap 5th-pct
+of annual dollars, at $2.3k/$10k/$25k/$100k/$1M. (R4) TME-K alone vs TLT-alone (does the hedge help per unit of risk?).
+(R5) 50% edge haircut; ex-best-5 months. Runner `research/sim/xb_alloc.py`; output
+`data/research/program/xb_alloc_out.txt`; one look. If the primary FAILs, the verdict is KILL for allocation and the
+book stays 100% to IBS (TME-K remains a standalone small, capital-light overlay).
+
+## Amendment — Study CC: RGTI \$14-\$16 level bounce, concentration/leverage (pre-register; 1 judged primary, program N 820 -> 821)
+
+Registered 2026-10-05, before any band-conditioned return was read (only RGTI's date range, schema and a
+raw==adjusted check were inspected; raw/adj ratio 1.0000 -> no splits/dividends). Motivating hypothesis (user):
+"RGTI around \$14-\$16 has historically produced a strong next-day bounce." This opens the Conviction
+Concentration / Leverage branch: does an instrument-specific price-state give a conditional next-day
+distribution strong enough to justify concentration or moderate leverage? NOT a claim of truth.
+
+Frozen rule: RGTI only; signal = raw close d in [14.00,16.00]; liquidity floor 20d median \$vol >= \$5M; entry
+open(d+1); exit close(d+1), max hold 1 session; costs book.cost_bps tier and tier_hi both sides; every band day
+counted (overlap allowed), with a report-only "fresh cross" subset. Unlevered size = 100% of sleeve.
+
+Judged PRIMARY (one look, 1,268 sessions): conditional net mean (tier) minus unconditional net mean (all liquid
+days, same costs). PASS = conditional net mean >= +50bp AND > unconditional AND positive in 2021-23 and 2024-26
+AND ex-best-5 > 0 AND still > 0 at tier_hi. PROMISING = net > 0 with one gate missed. REJECTED = net <= 0, or
+not positive in both halves, or ex-best-5 <= 0. Untouched judge is weak by construction (band is hindsight-chosen
+by the user; RGTI trades ~\$16 now): report-only chronological split + placebo, no clean OOS, no forward shadow
+unless the primary is PROMISING.
+
+Report-only (pre-specified): equal-width band placebo [8,10]..[20,22]; per-year and half returns; random-entry
+placebo 2,000 draws; SPY/QQQ beta and alpha on the same window; net mean by 20d-vol tercile and by day-d return
+bucket; overnight-gap distribution; leverage 1x-4x (financing 8%/yr, Reg T, ruin). Earnings is DATA-LIMITED
+(no PIT calendar). Search expansion classes (oversold levels, DD->reversal, gap-down recovery, vol-shock reversal,
+post-event) are pre-specified but NOT run unless the primary survives. Runner `research/sim/conviction.py`;
+output `data/research/program/conviction_out.txt`; one look. If the primary FAILs, the branch stops: no expansion,
+no leverage study, no deployment.
+
+Prior overlap (NOT inputs): Goal L1/L2 concentration/leverage on IBS+night is dead on holdout (`NEXT.md`, N 789-791);
+BH bottom-hunter and theme-explosion already cover drawdown/level hunting on the survivorship-aware panel. This study
+is a *different* object (single-name price-state conditional distribution), registered as one idea. No deployment.
+
+## Amendment — Study CLE: small-account IBS leverage (margin vs 3x-ETF financing) (pre-register; 1 judged primary, program N 821 -> 822)
+
+Registered 2026-10-05, before any leveraged account return was read (only Goal L's published 1.5x post-hoc row and the
+xasset premium scan were known, both cited as priors). Changed objective (user): small-account capital efficiency at
+$2.3k/$10k/$25k, not institutional capacity. Does moderate leverage on the validated IBS leg raise $/yr per account
+dollar without unacceptable drawdown/liquidation?
+
+Freezes: IBS leg only (shipped `book.ibs_days()`, night OFF), net 3bp/side, idle cash in BIL; exposure 1x..3x; two
+financing routes — retail margin 12.5%/yr on the borrowed fraction (Reg T, $2,000 floor) and a partial allocation to
+the ACTUAL 3x ETF tracking each selected name (financing embedded, non-callable) with the rest in BIL; tax 30%
+year-end; windows 2016-20 (untouched, judge) and 2021-26. Motivation: Goal L charged retail margin on ALL leverage and
+found it loses; a 3x ETF finances at institutional swap rates (~5.5%) and cannot be called, which Goal L never modelled.
+
+Judged PRIMARY (one look): largest LETF-allocated arm with maxDD <= 25% in BOTH windows and bootstrap P(DD>50%) <= 5%,
+vs the 1x IBS sleeve. CONVICTION if edge >= +3pp and controlled downside; PROMISING if edge > 0; else REJECTED.
+RESULT: 1.5x LETF allocation, +6.5pp OOS (9.6% -> 16.1%), maxDD -22.1% / -24.9%, P(DD>50%) 0%; 2x+ too fragile
+(-29% to -49%). VERDICT: **PROMISING**, not conviction (Sharpe ~flat; the gain is financing + non-callability).
+Runner `research/sim/cle.py`; output `data/research/program/cle_out.txt`. No deployment.
+
+## Amendment — Study TME-L2: capital efficiency of TME via leveraged Treasury ETFs (pre-register; 1 judged question, program N 822 -> 823)
+
+Registered 2026-10-05, before any leveraged TME account number was read (TME judge and tme_l_hist instrument history are
+priors, cited). User question: does modest leveraged Treasury-ETF exposure make TME a materially better small-account
+generator ($/yr per $1,000 of account capital), without unacceptable DD or ETF drag? Frozen TME1 signal (close(T-3) ->
+close(T), 12/yr). Arms: A TLT 1x; B TLT 1.25x synthetic margin; C UBT 2x; D TMF 3x; E 0.5 TLT + 0.5 TMF. Costs TLT 2bp,
+TMF 5bp, UBT 15bp/side; margin 12.5%; idle cash at ^IRX; whole-share; 30% tax; sizes $1k-$25k; DD budgets 20/25/33%.
+
+RESULT (after tax, whole-share, 2009-2026): TLT 1x ~4.3%/yr, -5.9% DD, $43/k; UBT 2x ~4.0%, -17%, $40/k (dominated by
+its 15bp/side cost — reject); TMF 3x ~9.5%, -21.9%, $95/k; blend 0.5TLT+0.5TMF ~6.9%, -14.2%, $69/k. ETF drag
+TMF-3xTLT -9.2bp/window (~-1.1%/yr). Risk-budget cap (TME-only account): 2.5x under 25% DD, 3.0x under 33%. VERDICT:
+PROMISING as a STACKING overlay, not a standalone conviction leg — TMF 3x gives $95/k (vs IBS 1.25x $105/k at the same
+~22% DD), and TME is deployed only ~14% of sessions, so it adds on month-end-idle capital. Best use: more IBS allocation
++ modest TME (TMF or the 0.5/0.5 blend). Caveat: 2009-2026 is bond-bull-flattered for 3x Treasuries. Runner
+`research/sim/tme_leverage.py`; output `data/research/program/tme_leverage_out.txt`. No deployment.
+
+## Amendment — Study CEF-TL: CEF year-end tax-loss forced selling -> January reversion (pre-register; 1 judged, N 823 -> 824)
+
+Registered 2026-10-05. Frontier search for "edge #3": a named forced counterparty, short duration, small account, different
+from IBS/TME. Chosen candidate: taxable CEF holders must realize YTD losses before Dec 31; CEFs are retail-held, hard to
+short, thin books. Frozen: 142 CEFs (ib/cef/all, distribution-adjusted total returns 2016-26); rank by YTD total return
+through last Nov session; bottom quintile; Dec leg (Nov_end->Dec_end) predicted underperformance, Jan leg (Dec_end->Jan_end)
+predicted reversion vs equal-weight universe; long-only; 30bp round trip. PASS = Jan Q1-u >= +1.0% net, both halves,
+ex-best-5>0, Dec forced sign.
+
+RESULT: Dec Q1-u +0.27% (t 0.63, WRONG sign), Jan Q1-u +0.01% (t 0.01), Jan Q1-Q5 -0.93%; quintiles non-monotonic
+(D5 best). The apparent Jan Q1 +2.7% is market beta (2018/2022 down-year rebounds), not tax-loss-specific. Gates 1/4.
+**VERDICT: REJECTED** — no forced-selling signature. Runner `research/sim/cef_taxloss.py`; out `cef_taxloss_out.txt`.
+Next candidates in the frontier: CEF discount-vs-own-history (needs a daily-NAV data build; strongest mechanism),
+dividend-month premium (Hartzmark-Solomon; testable, weak/non-forced mechanism). No deployment.
+
+## Amendment — Study FCC: commodity futures curve carry, frozen (pre-register; 1 judged, N 824 -> 825)
+
+Registered/run 2026-10-05 exactly as frozen (RY=(F2/F1-1)*12/months -> front excess return over the next roll
+period; CL/NG physical vs ES/NQ null; glbx 2011-2025; fut_roll roll-date definition; one tick/leg; fit 2011-17, OOS
+2018-25). Data note: Databento single-digit years repeat every decade, so contracts were split into instances on
+>400-day gaps; 2020-04 negative WTI makes one CL period return < -100% (flagged, not the verdict driver).
+
+RESULT: OOS pooled physical L/S +87.7bp/period but the pooled equity is destroyed (cum -120%, maxDD -137%); CL
+-86.6bp vs NG +344bp -> **sign carried by one commodity (kill #2 FIRES)**; RY quintiles non-monotonic (CL+NG
+-154/+61/-65/+138/-44bp); NG's OOS is a 2021-22 gas-crisis outlier (sd 1650bp, maxDD -75%); ES/NQ ~0 (null
+consistent, but physical not stably positive). Fit window physical -30.6bp. **VERDICT: REJECTED — commodity curve
+carry permanently closed under this frozen formulation.** Runner `research/sim/fcc.py`; out `fcc_out.txt`.
+
+## Amendment — Study PB: pre-boom predictability (tail-probability, pre-register; 13 conditions + 2 benchmarks, N 825 -> 826)
+
+Registered 2026-10-05, **before any conditional outcome was computed**. Only the *unconditional* boom base rates and
+the panel shape were read (explicitly permitted for threshold calibration). Question, frozen: does any condition
+observable at close t raise **P(a stock enters the extreme right tail of future returns)**, not P(positive mean
+return)? The already-killed family (buy-after-large-move, 52w breakouts, high-volume breakouts, 63d momentum, theme
+clusters, residual momentum, ORB, IPO pops, trailing winners, generic cross-sectional momentum) is NOT re-run.
+
+Data: the add. 28 survivorship-aware panel `data/research/program/add28/theme_panel.pkl` (14,697 symbols, 1,958
+delisted, open/close/volume, 2016-01..2026-09, adjustment='all'). Honest window 2020-10-01..2026-09-21; 2016-2020
+is **exploratory only** (pre-2021 inactive list is thin -> survivorship-flattered; never judged). Eligibility at t:
+close >= $3, adv20 (median C*V) >= $5M, >= 120 bars, non-ETF (`theme_explosion.stock_mask`). No permanent security id
+exists (tickers only); delisting is the last non-NaN bar; no vendor delisting return.
+
+Boom definitions, frozen from the unconditional honest-window distribution (4.46M stock-days):
+- **PRIMARY boom**: fwd20 = close(t+20)/close(t) - 1 >= +30%. Base rate **2.23%** (top ~2.2%).
+- SECONDARY: fwd60 >= +50%. Base **2.66%**.
+- DOWN control: fwd20 <= -30%. Base **1.42%** (used for the direction test).
+- VOL-RELATIVE: fwd20/sigma20 >= 6. Base **12.3%** (q95 of the ratio is 9.07 -> a fixed +30% is only ~1.5 sigma for
+  high-vol names, so the absolute target is vol-confounded; the vol-matched control below is mandatory).
+
+Conditions, frozen (all computed from bars <= t; cross-sectional extreme decile each day; no threshold tuning):
+1 `volcomp` vol20/vol60 bottom decile (volatility compression / coiling)
+2 `rngcomp` mean((H-L)/C) 5d / 60d bottom decile (range contraction)
+3 `voldry` (C*V) 5d / 60d bottom decile (volume dry-up)
+4 `accumbias` 20d (up-volume - down-volume)/total, top decile (accumulation)
+5 `amihudrise` Amihud |R|/(C*V) 10d / 60d top decile (illiquidity rising)
+6 `ivolrise` residual-vol vs SPY 10d / 60d top decile (idiosyncratic vol rising)
+7 `corrbreak` rolling 20d corr(stock, SPY) bottom decile (correlation breakdown)
+8 `gapfreq` share of last 20d with |overnight gap| > 2%, top decile
+9 `sincrease` FINRA short interest, latest published vs prior, top decile of delta (PIT pub date)
+10 `dtchigh` FINRA days-to-cover top decile (PIT)
+11 `ftdspike` FTD qty / 20d median dollar-vol top decile (PIT pub date)
+12 `insiderbuy` any Form 4 open-market purchase (code P, acquired) filed in the last 10 sessions (binary, PIT filing date)
+13 `earnprox` an earnings date in the next 5 sessions (binary; Nasdaq calendar, scheduled -> PIT)
+BENCHMARKS (not conditions; the disguise test): `ret20top` trailing 20d return top decile; `nearhigh` within 5% of the
+252d high. A condition that only beats the base rate because it is one of these is "momentum in disguise" and KILLED.
+
+Split, frozen: **DISCOVERY 2021-01-01..2023-12-31**; **OOS 2024-01-01..2026-06-30** (last signal so fwd60 exists).
+The 2016-2020 exploratory window is reported, never judged. Conditions are chosen from theory, not fit; no thresholds
+are tuned on either window.
+
+Metrics per condition x target: P(boom|cond), P(boom|no cond), base, lift, precision, recall, false-positive rate, n,
+median fwd return, P(downside|cond), median sessions to boom, and maximum adverse excursion (min low) before the boom.
+**A vs B discriminator (the point of the study):** (i) *vol-matched lift* = P(boom|cond) vs P(boom | a random pick
+from the SAME sigma20 decile), via placebo (200 seeds) — a condition that raises both tails but not direction is
+outcome **B**; (ii) *asymmetry* = lift_up(+30%) - lift_down(-30%) must be > 0 for a directional edge; (iii)
+*momentum orthogonality* = lift computed WITHIN trailing-20d-return deciles.
+Multiple testing: 13 conditions x 4 targets; family-wise bar from a max-statistic permutation (1,000 within-date
+shuffles of the condition label) plus Bonferroni; a condition must clear the OOS bar, not just discovery.
+
+KILL the branch if (any): lift is small (OOS P(boom|cond) < ~2x base, i.e. < ~4.5% for the primary); the result is
+carried by < 5 names / < 3 months (report ex-top-5 and per-year); it vanishes OOS; it needs hindsight; it is
+momentum/breakout in disguise (benchmark check); it predicts volatility but not direction (outcome B); or execution
+destroys it. No threshold tuning to rescue.
+
+Economic test (ONLY if the primary survives): arms 1 buy at condition, 2 condition + a directional confirmation,
+3 fixed small allocation across qualifiers, 4 concentrated top-confidence. Net 3bp/side (10bp small names), whole
+shares, 30% tax, no leverage. Leverage is downstream and is not tested unless the predictive test passes.
+
+DATA-LIMITED (reported, NO proxies invented): options activity and realized-vs-implied vol (no broad stock OPRA
+surface — only SPY/QQQ windows cached), institutional positioning (13F cached as cusip only, no shares/value),
+borrow fees / recalls (no history), historical L1 spreads (no quote data). No deployment; no portfolio change; no
+data purchase. Runner `research/sim/preboom.py`; output `data/research/program/preboom_out.txt`. One look.
+
+RESULT (one look; `research/sim/preboom.py` + `preboom2.py`; out `preboom_out.txt` / `preboom2_out.txt`). Discovery 2021-23 base
+P(fwd20>=+30%)=1.81%; OOS 2024-26H1 base 2.68% (P(fwd20<=-30%)=1.48%). Several conditions robustly raise the RIGHT tail OOS, per-year,
+beyond a same-sigma20-decile control AND beyond momentum (ortho lift within the non-momentum universe): voldry 1.70x / ortho 1.93,
+ftdspike 1.94x / 1.91, gapfreq 3.59x / 3.79, dtchigh 1.43x / 1.53, earnprox 1.43x / 1.44, volcomp 1.31x / 1.43, amihudrise 1.13x / 1.29.
+Concentration is fine (thousands of events, 600-800 names, all 30 months, top-5 < 8%). **BUT every one raises the LEFT tail as much or
+more:** up-lift minus down-lift is NEGATIVE with a day-clustered 95% CI excluding 0 for volcomp/rngcomp/voldry/accumbias/gapfreq/ftdspike
+(and the ret20top benchmark), and the few positive ones (amihudrise, dtchigh, insiderbuy) flip sign between windows or have right-tail lift
+~1.0. Median fwd20 conditional on the big-lift conditions is <= 0 (voldry -0.83%, gapfreq -0.83%); MAE -6..-12%. The conditions predict
+VOLATILITY / big-move, not direction. The one consistently-positive-asymmetry condition (insiderbuy +0.07/+0.13) has no boom lift (~1.0).
+Momentum itself (ret20top) raises the right tail 2.38x but is the killed family and even more bearish-skewed (-0.42). Data-limited (no
+proxies invented): options/IV, 13F positioning, borrow fees, L1 spreads. VERDICT: **PREDICTABLE BUT NOT TRADEABLE (outcome B); the
+pre-boom branch is KILLED.** No directional pre-boom signal; economic test not run (primary did not survive). No deployment.
+
+## Amendment — Study PB-C: the confirmation arm — follow the direction once the move starts (pre-register; N 826 -> 827)
+
+Registered 2026-10-05, before any confirmation-conditional number was read. User question: if a pre-boom condition says a
+big move is coming (both ways), why not wait for the move to start, then go WITH it? Frozen test of PB's arm 2.
+At t the PB condition is present; the early move is e5 = close(t+5)/close(t) - 1. **PRIMARY confirmation: e5 >= +10%
+(up) or e5 <= -10% (down); entry at close(t+5); target from entry fwd20 = close(t+25)/close(t+5) - 1, boom >= +30%,
+bust <= -30%.** Secondary reported (not judged): e3 >= +8%, e1 >= +5%. The decisive control is the SAME early move
+WITHOUT the condition (plain momentum): if cond+up == plain-up, the condition adds nothing and this is the killed
+"buy-after-a-large-move"/breakout family in a new costume (Lab-AX -33.7bp, ORB -23.5bp, add. 28 breakouts). Economic
+bar: mean fwd20 net 20bp round trip > 0 AND P(boom|cond,up) > P(bust|cond,up) with a day-clustered CI. Kill otherwise.
+Runner `research/sim/preboom3.py`; out `preboom3_out.txt`. One look.
+
+RESULT (one look). OOS `e5>=+10%`, entry t+5, fwd20 from entry: the **plain up-move (no condition) mean +1.16% (net +0.96%)**,
+but the SAME early move measured **DOWN is better: +2.20% (net +2.00%)**; discovery flips the up-move negative (net -0.97%)
+while down is ~flat. Adding any PB condition to the up-move does **not** help (cond+up net 0.5-1.4% OOS, every one negative in
+discovery; ALL-up >= cond+up). Boom/bust ratio: ALL-up 1.48, cond+up 1.0-1.8, cond+down often higher (dtchigh 1.98, amihudrise
+2.22). Secondary e3/e1 identical. So the early move is a coin flip that leans toward **reversal (fade)**, not continuation, and
+the pre-boom condition adds nothing. This is the killed buy-after-a-large-move / breakout family. **VERDICT: REJECTED.** No deployment.
+
+## Amendment — Study PB-M: magnitude and skew of the conditional boom (pre-register; N 827 -> 828)
+
+Registered 2026-10-05 before any magnitude number was read. PB measured the *probability* of crossing a fixed +30%/+50%
+line; a pure vol increase fattens both tails proportionally and would show the symmetric lifts already seen. The untested
+question: does any condition raise the **magnitude/skew** of the right tail (the long-only "golden egg": fat upside, capped
+downside)? Frozen metrics, per condition, discovery 2021-23 and OOS 2024-26H1: mean fwd20/fwd60 net 20bp; P(fwd60>=+100%);
+mean(fwd60 | fwd60>=+50%) [right magnitude] vs mean(fwd60 | fwd60<=-50%) [left magnitude]; conditional skew; the "boom
+share given a big move" = P(+30% | |fwd20|>=30%, cond) vs base (the true direction-of-the-big-move test); and an additive
+score = count of the 7 primary conditions true, its top decile, and its equal-weight daily basket (net, vs the eligible
+universe). A golden egg requires a condition (or the score) with right-magnitude growth > left AND a positive net basket.
+Kill otherwise. Runner `research/sim/preboom4.py`; out `preboom4_out.txt`. One look.
+
+## Amendment — Study PB-O: does a pre-boom condition predict the OVERNIGHT (the book's mechanism)? (pre-register; N 828 -> 829)
+
+Registered 2026-10-05 before any overnight number was read. PB/PB-M used 20/60-session targets the account cannot hold
+cheaply. The account's actual mechanism is close(t) -> open(t+1) (MOC buy / MOO sell, the night leg) and, secondarily,
+open(t+1) -> close(t+1) (intraday). Question: does a condition at close t predict the **next overnight** return (mean
+and tails), and is it directional? Frozen, per condition, discovery 2021-23 and OOS 2024-26H1: mean overnight net 5bp,
+P(>=+5%), P(<=-5%), up/down asymmetry, and the same for the next intraday. A golden egg requires a positive net overnight
+mean with up/down asymmetry > 0 in both windows. Runner `research/sim/preboom5.py`; out `preboom5_out.txt`. One look.
+
+## Amendment — Study PB-N: do the pre-boom conditions improve the night (crash-bounce) leg? (pre-register; N 829 -> 830)
+
+Registered 2026-10-05 before any number was read. Synthesis test: PB says the conditions predict volatility; the reversal
+premium scales with volatility (cross-asset scan); the night leg buys the -8% crash (close -> next open). Does a condition
+at the signal close raise the night pick's next-open return? Frozen: merge the PB condition flags onto
+`data.night_candidates()` (20,501 picks 2020-11..2026-09); per condition, discovery 2021-23 and OOS 2024-26H1, report
+mean/median night ret (bp) cond vs not, hit rate, the day-clustered t of the difference, P(ret>=+5%) and P(ret<=-5%),
+and the additive condition count (0..). Pass (a size-up candidate, shadow at most) requires the increment > 0 in BOTH
+windows with day-clustered t >= 2 in at least the OOS window and not carried by < 5 names. Runner
+`research/sim/preboom6.py`; out `preboom6_out.txt`. One look.
+
+## Amendment — Study PB-S: do the conditions aggregate into a market stress-timing signal? (pre-register; N 830 -> 831)
+
+Registered 2026-10-05 before any number was read. Different object: PB is cross-sectional; the conditions may share a
+common factor. stress_t = mean condition count (0-8) across eligible names each day, plus the fraction with score >= 3.
+Question: does stress_t predict forward market return (SPY 20d), forward realized vol (SPY 20d), and the book's own
+forward IBS premium (open->open on the EQ18 ETFs)? Frozen: discovery 2021-23, OOS 2024-26H1; rank-correlation of stress
+with each forward quantity, and the top/bottom stress decile forward means. A golden egg requires stress to predict a
+POSITIVE forward market/vol premium with the sign stable in both windows. Runner `research/sim/preboom7.py`; out
+`preboom7_out.txt`. One look.
+
+RESULTS (PB-M / PB-O / PB-N / PB-S, one look each). The conditions are a **BEARISH / falling-knife screen, not a boom screen**.
+- PB-M: the additive condition count is monotone NEGATIVE for forward return. Discovery mean20 net by count 0..6: +0.11 / -0.21 /
+  -0.41 / -0.78 / -2.55 / -5.09 / -7.28%. OOS the count-4..6 buckets underperform the universe. The strongest right-tail-lift
+  conditions (gapfreq, ftdspike, voldry) are the most bearish. Long basket (score top decile) is BELOW the universe in both
+  windows (disc -1.31 vs +0.05%; OOS +0.78 vs +1.34%). Right-tail magnitude (mean fwd60 | >=+50%) ~85-95% vs left (| <=-50%) ~-60%,
+  same as the universe (ordinary stock skew), no differential.
+- PB-O: no positive overnight. Conditions predict a BIGGER close->open move (gapfreq P(>=5%) 3.81% vs base 3.24% OOS) but the mean
+  is <= universe and up/down is symmetric. Only insiderbuy is mildly positive overnight (+0.086% OOS vs +0.061% base, +5bp) = noise.
+- PB-N (the synthesis test): on the book's OWN -8% crash pool (20,501 picks), the condition count is monotone NEGATIVE for the
+  next-open bounce. Discovery by count 0..4: **+23.4 / +2.2 / -6.2 / -11.7 / -54.3bp** (base +10.9); OOS noisy but clean-crash
+  (count 0) +9.3bp vs base +3.6. So the conditions separate *liquidity* crashes (bounce) from *informed / falling-knife* crashes
+  (keep falling). The high-count names are exactly the ones the night leg should NOT buy.
+- PB-S: no market-timing signal. corr(stress, fwd SPY) +0.02 disc / -0.10 OOS (sign flip); corr(stress, fwd vol) ~0; corr(stress,
+  IBS premium proxy) slightly NEGATIVE (-0.08 / -0.02). No aggregation edge.
+VERDICT: **REJECTED as a long boom predictor.** The genuine pattern is bearish (falling knives); its tradeable long-only form is
+the *inverse* (buy clean crashes / avoid stressed ones, a night-leg filter, increment ~+6bp disc but -2bp OOS) and its profitable
+form (short the stressed names) is inaccessible (no shorting in the Roth, hard-to-borrow names, retail option spreads). No deployment.
+
+## Amendment — Study SH: is the falling-knife short edge ACCESSIBLE? (pre-register; N 831 -> 832)
+
+Registered 2026-10-05 before any short number was read. PB/PB-M found the pre-boom conditions are a bearish screen
+(condition count monotone predicts underperformance; high-count -8% crashes keep falling). The repo's recurring short
+conclusion is that the profitable side sits on unborrowable names (Study S, Lab-BA). Decisive test: does the edge survive
+among **liquid, easy-to-borrow** names? Frozen: universe = eligible panel names split by `asset_meta.easy_to_borrow`
+(current flag; survivorship caveat) and ADV20 >= $50M (liquid) vs $5-50M. Signal = condition count 0-8. Arms:
+(a) SHORT top-decile count only; (b) dollar-neutral long bottom-decile / short top-decile count. Hold 20 sessions.
+Costs: 20bp/side (40bp round trip per leg) + borrow 0.5%/yr on ETB (25bp/20d) or 5%/yr on non-ETB. Judge discovery
+2021-23 and OOS 2024-26H1. PASS (a shadow short sleeve) requires (b) or (a) net > 0 in BOTH windows on ETB+liquid names
+with day-clustered t >= 2 in OOS and not carried by < 5 names. Also report each individual condition's short edge by
+liquidity/ETB. Runner `research/sim/short_pb.py`; out `short_pb_out.txt`. One look.
+
+RESULT (one look). The falling-knife short is real in *discovery* but not accessible/stable.
+- Market-neutral (long score==0 clean, short score>=3 stress, 20d): Discovery gross **+1.45%/20d (t 7.95)** on all names,
+  but net of 40bp round trip + 0.5% borrow it is **-1.85%**; on the accessible **ETB** names gross +0.70% (t 3.99) and net
+  **-0.35%**; on ETB+liquid gross +0.32% (t 1.34). **OOS the sign reverses** on ETB (-0.59% gross, t -3.6) — the
+  high-stress names *outperformed* in the 2024-26 bull. Short-only loses everywhere (top-decile short net -0.5% disc,
+  -2.9% OOS ETB+liquid: the names rose). Every individual condition's short edge is negative OOS (market beta + junk bid).
+- Non-overlapping (every 20th session) LS is +1.46% disc (t 2.16) / +1.17% OOS (t 1.36), but the overlapping daily mean
+  flips OOS sign -> not stationary. Regime split: works in risk-ON (+1.43%, t 2.3), ~0 in risk-off — i.e. it is the
+  quality/junk-beta spread, not short alpha.
+**VERDICT: REJECTED (no accessible short edge).** The falling-knife screen is a discovery-period junk-beta effect:
+net-negative after costs on easy-to-borrow names, reverses OOS, and the profitable version sits on HTB/SSR names (the
+repo's recurring short conclusion: Study S, Lab-BA). No deployment. The short frontier remains data-blocked (borrow/HTB
+fee history, PIT ratings for fallen angels) rather than idea-poor.
+
+## Amendment — Study EX: the falling-knife screen as a long-only night-leg filter (pre-register; N 832 -> 833)
+
+Registered 2026-10-05 before any filter number was read. PB-N found the night (-8% crash) bounce worsens monotonically with
+the condition count (score 0 -> 4: +23.4 -> -54.3bp discovery). Long-only use: does excluding / down-weighting stressed
+crash picks, or up-weighting clean ones, improve the shipped night leg? Frozen, on `data.night_candidates()` (20,501
+picks), discovery 2021-23 and OOS 2024-26H1, per-trade night ret: EX1 exclude score>=2; EX2 exclude score>=3; EX3
+up-weight score==0 2x (renormalised); EX4 exclude picks whose individual `voldry` is set. Report kept/removed means,
+the leg improvement = (kept_mean - base_mean) x kept_fraction, the day-clustered t of the kept-vs-all daily mean
+difference, and a within-night placebo removing the same count of random picks (200 seeds). PASS (shadow at most)
+requires improvement > 0 in BOTH windows, t >= 2 in OOS, and placebo >= 95th pct. Runner `research/sim/preboom8.py`;
+out `preboom8_out.txt`. One look.
+
+RESULT (one look). Discovery looks strong, OOS kills it. Discovery (base +10.9bp): EX1 excl score>=2 keep +17.0 / rem -10.3,
+improve **+4.8bp** (t 1.15, placebo 99%); EX4 excl voldry keep +15.6 / rem -42.1, improve +4.3bp (t 1.05, placebo 100%);
+EX3 tilt clean +4.4bp. OOS (base +3.6bp): EX1 improve **-1.9bp** (t -1.53, placebo 16%), EX2 -0.3bp, EX4 +0.6bp (t -1.49),
+EX3 +2.0bp. The removed stressed picks did *better* OOS. No arm clears ">0 both windows, t>=2 OOS" — it is a
+discovery-period artifact. **VERDICT: REJECTED.** The falling-knife screen is not a usable long-only night-leg filter
+(and its short side is inaccessible, Study SH). No deployment.
+
+## Amendment — Study ACC: account structure for the IBS edge at small size (pre-register; N 833 -> 834)
+
+Registered 2026-10-05 before any account-structure return was read (only Study CLE / CLE-attack leverage rows, Study Y
+scale, Study AL Roth-cash are cited as priors). User question: with the OOS-validated IBS leg taken as given, what
+account structure maximizes after-tax %/yr on $2.3k / $10k / $25k over a 5-year horizon — Roth-first contribution
+sequencing (+$7.5k/yr guaranteed), asset location, and the best non-callable leverage (3x-ETF allocation vs margin) —
+subject to account maxDD <= 25% and no liquidation? Judged on the 2016-20 holdout.
+
+Frozen leg: the live IBS rule only (`book.ibs_days`: top-3 of the 18 EQ18 ETFs by 12-1 momentum re-ranked monthly,
+IBS(close d)<0.2, buy open d+1, exit open d+2), 3bp/side. Night and noise legs OFF (not OOS-validated). Unit returns
+from the shipped simulator.
+
+Frozen instruments/exposure: 3x-ETF partial allocation — invest f = min(L/3,1) of the sleeve in the actual 3x proxy
+tracking each selected name (UPRO/TQQQ/TNA/UDOW/SOXL/TECL/FAS/LABU/MIDU/EDC), the rest in T-bills; names with no liquid
+3x express 1x (the CLE frost). Margin arm: L x notional in the base ETF, borrow (L-1) at 12.5%/yr, Reg T $2,000 floor,
+callable. L in {1, 1.25, 1.5, 2}. Cap: realized account maxDD <= 25%, zero liquidation.
+
+Frozen accounts: taxable (30% on each year's net gain, loss carryforward, year-end) vs Roth (tax-free, cash IRA — no
+borrowing). Whole shares; idle cash in BIL. Contributions: $7.5k/yr into the Roth ($625 every 21 sessions); no other
+deposits.
+
+Frozen structures: (A) all-taxable 1x; (B) all-taxable 3x-alloc 1.25x; (C) all-Roth 1x; (D) all-Roth 3x-alloc 1.25x;
+(E) all-Roth 3x-alloc 1.5x; (F) Roth-first sequencing with the initial capital split rho in {0, 1} (rho = fraction of
+starting capital that is Roth); (G) taxable margin 1.25x. Report money-weighted IRR, time-weighted %/yr, $/yr
+(final - cumulative deposits), maxDD, liquidation count and final balance at $2.3k / $10k / $25k.
+
+Judge (2016-02..2020-12): the structure with the highest after-tax IRR that keeps account maxDD <= 25% with zero
+liquidation. Report the same for 2017-2019 (ex-2020) and per year, because CLE shows the IBS leverage return is
+vol-regime-concentrated. Runner `research/sim/account_struct.py` -> `data/research/program/account_struct_out.txt`;
+one look. Research only, no deployment.
+
+RESULT (one look). Winner: **all-Roth / Roth-first, non-callable partial 3x-ETF allocation 1.5x** — IRR
+27.5 / 24.4 / 21.8 %/yr at $2.3k / $10k / $25k (end $77,874 / $94,820 / $127,695 incl. $36,875
+contributions), realized exposure 1.47x, judge-window strategy maxDD −20.8 to −21.3%, zero liquidation.
+Stress gate (worst strategy maxDD across 2016-20, ex-2020, **2022 bear**, in-sample 2021-26, reject if
+< −25%): 1.5x partial-3x **−24.1% (PASS, narrow)**; 2.0x −32% REJECT; margin 1.5x −28.1% REJECT; margin
+1.25x −23.5% marginal. The **2022 bear is the separator**: partial-3x 1.5x −11.8% (half the capital is
+T-bills, 3x leg not borrowed) vs margin 1.5x −27.8% and synthetic full 1.5x −29.0%. 3x-ETF beats the
+callable margin twin at equal L on both return and risk (1.25x taxable: 17.0%/−17.1% vs 15.5%/−20.4%).
+Tax-free Roth vs taxable 1x = +4.7/+4.2/+3.7pp; Roth-first sequencing with the starting capital stuck
+taxable is within 0.3-2.5pp of all-Roth. Ex-2020 the same arms are 5-9% IRR, so the dollars are carried by
+the $36,875 of forced Roth contributions, not the alpha; the 1.5x pass is narrow and CLE-attack's
+whole-share path shows −27.7% for the same definition, so **1.25x is the prudent deployment cap**. **VERDICT:
+PROMISING (structure only).** No deployment; a live 3x-ETF IBS mode would be a new switch needing a registry
+entry, shadow and kill rule. Details: `research/drafts/study_acc_account_structure.md`.
+
+DECISION (user, 2026-10-05): **accepted, structure only, no deployment; do not ship a live 3x-ETF IBS mode.**
+(a) move IBS into the Roth and (b) sequence all $7.5k/yr Roth-first are **manual account actions, not bot
+changes**; (c) non-callable partial-3x is the right form but **cap at 1.25x** (1.5x is a narrow in-sample
+pass; CLE-attack whole-share −27.7%). Recorded caveat: the judge-window dollars are the $36,875 of forced
+Roth contributions plus a 2020-vol regime (ex-2020 arms 5-9%), a structure/deposit result, not new alpha.
+
+## Amendment — Study BSPD: bond-SPDR premium/discount and creation-flow reversion (pre-register; 1 judged, N 834 -> 835)
+Pre-registered before outcomes; runner `research/sim/bond_spdr_flow.py` -> `data/research/program/bond_spdr_out.txt`.
+Mechanism: illiquid bond ETFs (AP arbitrage slow) may mean-revert premium/discount and creation flow. Universe
+JNK/SJNK/SPSB/SPIB/SPLB, SSGA navhist + raw Yahoo closes (never adjclose), pooled 2007-12..2026-10. H1: long
+most-discounted quintile, h=1/5; H2: long top-creation quintile, 1d. Two-leg 4c cost; net_1x = gross - 8bp. Kill:
+net <= 0, t < 2, < 30 events, or sign flip.
+
+RESULT (one look). Every arm negative net of 1x and strongly negative at 2x/3x. H1 h=1 gross +0.32bp, net_1x
+-7.68bp, median -7.63, hit 38.1%, clus_t -8.55, ex-top5 -8.24; H1 h=5 net_1x -9.54bp; most-discounted minus
+most-premium net_1x -6.61bp; H2 net_1x -9.25bp, clus_t -11.60. Gross market-adjusted spreads ~0 (+0.32 / -1.54 /
+-1.25bp): there is no reversion to harvest, the loss is the spread. Same sign in all sub-periods (2008-15 /
+2016-20 / 2021-26). VERDICT: KILL. Closes the bond-SPDR arm; with SPY (Study ETC) and the broad SPDRs (Study EF)
+rejected, the ETF premium/discount + creation-flow family is CLOSED. Files: `research/drafts/study_bspd.md`.
+
+## Amendment — Study DM: dividend-month clientele premium (pre-register; 1 judged, N 835 -> 836)
+Pre-registered before outcomes; runner `research/sim/dividend_month.py` -> `data/research/program/dividend_month_out.txt`.
+Rule: each month M, long stocks with a regular ex-date in M, equal-weight vs the liquid non-payer benchmark, hold M;
+secondary mechanism test = payer close(T-5)->close(T+5) minus SPY. Universe `data/research/night/panel.pkl`
+(2020-10..2026-09, SIP total-return closes) + `dividends.json`. Panel is 2021+ only -> single regime, flagged.
+
+RESULT (one look). Monthly long-minus-benchmark mean +66.8bp, median +20.1, hit 52%, month-clustered t +2.51,
+ex-top5 +31.2; net@5bp +56.8, net@15bp +36.8, net@3x(45bp) -23.2. The mechanism test fails: payer T-5->T+5 minus
+SPY mean -6.9bp, median -19.7, hit 48%, date-clustered t -0.04. The monthly +66.8bp is a size/value tilt (164
+payers vs 3,081 smaller benchmark names), carried by 2021-22 (+162/+166bp), ~0 since 2023 (half2 median -10.4),
+and dies at the 3x cost shock. VERDICT: KILL (gate 5: event-time mean <= 0). Files: `research/drafts/study_dm.md`.

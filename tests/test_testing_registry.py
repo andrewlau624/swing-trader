@@ -43,6 +43,8 @@ def test_status_reads_logs_and_never_raises(tmp_path):
     assert st["EV2 x buy >= $500k"]["n"] == 1
     assert st["Odd-lot tenders"]["n"] == 1
     assert st["FOMC-eve QQQ filler (F3)"]["n"] == 1
+    assert st["M1 ID1: every insider buy, ADV >= $1M"]["n"] == 0          # pre-M1 rows are not ID1's forward base
+    assert st["M1 N2: night leg on CPI/NFP mornings"]["n"] == 0
     assert all("line" in r for r in st.values())
 
 
