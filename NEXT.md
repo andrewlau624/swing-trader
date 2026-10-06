@@ -9,6 +9,26 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Golden-egg overnight loop (2026-10-06): forward-split ex-date night = STRONG CANDIDATE; N 843 -> 849
+Data note: `~/data/export/daily-price-history` is a byte-identical copy of the Sharadar bundle at `~/data/sharadar`
+(no new data). New shared long-history cache `research/sim/lh_panel.py` (-> `data/research/lh_panel.npz`, 61M bars).
+Leaderboard + report: `research/drafts/golden_egg_2026-10-06.md`.
+- **SPLIT-T0 (STRONG CANDIDATE, not deployed, forward shadow needed):** buy the closing cross on the session before a
+  forward-split ex-date, sell the ex-date opening cross (common stock, raw px >= $5, $vol >= $1M). Vendor 2013-26:
+  n 540, raw-SPY **+105bp t 5.0, median +42, ex-top-5 +68, hit 68%**, 12/14 years positive; 1998-2026 every era
+  positive. Official SIP crosses 2021-26: n 174, +120bp t 2.42, **median +17**, ex-top-5 +31; 2023 and 2026 flat/negative.
+  Mechanism: retail open buying after the per-share price drop (session reverts -36bp). Ex-dates are known weeks
+  ahead (Alpaca corporate-actions `record_date`). ~34 event nights/yr; open cross median $0.55M (capacity ~$10-25k).
+  Account: half the account per event night at $10k, 5bp/side, official 2021-26: median year +11% (-2..+54%).
+  All Sharadar years are touched: the only OOS left is forward.
+- **Do not redo:** ex-dividend overnight capture (EXDIV-OPEN A FAIL on official crosses; vendor open = official cross,
+  the "+9bp" was the names' normal overnight premium); split nights T+1..T+4 (SPLIT-NIGHT: T+2/T+4 negative); ticker-change
+  first night (FAIL, vendor stitching artifact); de-SPAC first night (WEAK, 2021-only, $50k crosses); OTC->exchange
+  uplisting (-17% 250d abnormal, short side only); Chapter 11 emergence (DATA-LIMITED: no clean old->new equity link);
+  spin-off child first nights (negative opens, short side).
+
+---
+
 ## Sharadar full-bundle session (2026-10-05): 4 studies; IBS WEAK on 2003-15, H-POOL PASS-not-robust, survivorship +4bp; N 838 -> 839
 Data: full Sharadar bundle at `~/data/sharadar` (stocks=SEP, funds=SFP, insiders=SF2 2008+, actions, sp500, fundamentals, daily,
 holdings), delisted-complete 1998-2026, permaticker ids; loader `github.com/andrewlau624/sharadar-data`. **Daily bars only**
