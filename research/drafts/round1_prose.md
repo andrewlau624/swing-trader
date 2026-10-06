@@ -5154,3 +5154,15 @@ bid for extra size) adds fills on ~25% of events at ~+34bp, i.e. ~+20-25% deploy
 - **Outcomes.** Thin REIT/BDC pass AND placebo ~0 -> mechanism confirmed, new (small) capacity; both ~0 -> thin-inventory
   alone is not enough; placebo also large -> the effect is thin-stock bounce, not tax (and PREF/ETDX needs a re-check).
 - Runner `research/sim/thn.py` -> `data/research/program/thn_out.txt`.
+
+## Result — THN (judged 2026-10-06 late; N 875): mechanism prediction FAILS; PREF/ETDX verdict unchanged, mechanism claim downgraded
+`thn.py` -> `thn_out.txt` (20d $vol $100k-$1M). xCO full / 2021-26: thin REIT +69.1 / -11.5; thin BDC~6799 +22.3 / -31.5;
+**thin OTHER commons (qualified-dividend placebo) +36.0 (t 16.7, 27/29 yrs) / +4.9**, scaling with yield (+29 / +44 / +50
+/ +101bp). Registered outcome: the placebo is large historically -> the pre-2021 thin-stock ex-night effect was NOT
+tax-specific, and since 2021 it is gone in ALL thin commons. **Consequences:** (1) thin REIT/BDC is not new capacity
+(KILL). (2) PREF/ETDX re-check: in its own judge window (official crosses 2021-26) the placebo class is ~0 while PREF/ETDX
+is +40..+60bp, non-ex nights ~0 and the crosses print at mid, so the PREF/ETDX verdict stands. (3) **Mechanism wording
+corrected:** a dividend-proportional ex-date under-adjustment once common to thin stocks and now surviving only in $25-par
+income paper (preferreds incl. bank prefs with QUALIFIED dividends +28bp, baby bonds, CEF and ADR preferreds). The tax
+story (flat-trading coupons) is a contributing explanation, not a demonstrated one; the coupon scaling supports
+under-adjustment in proportion to the payment, not tax specifically. Forward shadow is the arbiter of persistence.
