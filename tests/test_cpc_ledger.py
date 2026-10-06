@@ -252,3 +252,17 @@ def test_umh_hold_only_no_events_and_excluded_from_report(tmp_path):
     c.done(tmp_path / c.LOG_NAME, rec["event_id"], 50.0, 0.0, now=now)
     r = c.report(c.read(tmp_path / c.LOG_NAME), now=now)
     assert r["events"] == 0 and r["completed"] == 0
+
+
+def test_reopen_only_a_missed_and_keeps_history(path):
+    eid = L.add_event(path, ev(issuer="B"), now=at(2026, 10, 1))[1]["event_id"]
+    with pytest.raises(L.Refused):
+        L.reopen(path, eid, note="x")                      # not MISSED
+    L.failed(path, eid, "MISSED", note="declined", now=at(2026, 10, 2))
+    with pytest.raises(L.Refused):
+        L.reopen(path, eid, note="")                       # needs a reason
+    L.reopen(path, eid, note="bought and tendered after all", now=at(2026, 10, 3))
+    s = L.fold(L.read(path))[eid]
+    assert s["status"] == "ACTION_REQUIRED" and "outcome" not in s
+    L.done(path, eid, pnl=25.0, costs=0.0, now=at(2026, 10, 12))
+    assert L.fold(L.read(path))[eid]["status"] == "COMPLETED"

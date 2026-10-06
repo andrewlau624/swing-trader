@@ -168,6 +168,11 @@ def fold(rows: list[dict]) -> dict[str, dict]:
                                                     "completion_date")})
                 if r.get("material"):
                     s["version"] = r["version"]
+            elif k == "reopen":                 # a MISSED that was in fact acted on: back to ACTION_REQUIRED
+                s["status"] = r["to"]
+                s["history"].append(r)
+                for x in ("outcome", "realized_pnl", "realized_costs", "realized_return", "completion_date"):
+                    s.pop(x, None)
             elif k == "alert":
                 s["alerted"].add(r["version"])
     return st
@@ -233,6 +238,19 @@ def done(path: Path, eid: str, pnl: float, costs: float, note: str = "", now=Non
     net = pnl - costs
     return transition(path, eid, "COMPLETED", now, outcome="done", realized_pnl=pnl, realized_costs=costs,
                       realized_return=net / base, note=note)
+
+
+def reopen(path: Path, eid: str, note: str, now=None) -> dict:
+    """Undo a MISSED that was wrong (the buy and tender happened after all). Append-only: the MISSED stays in history."""
+    cur = fold(read(path)).get(eid)
+    if not cur:
+        raise Refused(f"unknown event {eid}")
+    if cur["status"] != "MISSED":
+        raise Refused(f"{eid}: only a MISSED event can be reopened (it is {cur['status']})")
+    if not note:
+        raise Refused("reopen needs a note saying what actually happened")
+    return _append(path, dict(rec="reopen", event_id=eid, ts=_now(now).isoformat(), **{"from": "MISSED"},
+                              to="ACTION_REQUIRED", note=note))
 
 
 def failed(path: Path, eid: str, status: str, note: str = "", now=None) -> dict:
