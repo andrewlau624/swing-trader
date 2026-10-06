@@ -1,0 +1,10 @@
+ATTN-OPEN arm D (de-SPAC), official SIP crosses 2021-2026
+D: n=261 raw-SPY mean +159.3bp t 1.32 median +99.3bp hit 55% ex-top5 +15.2bp | halves 21-23 +98.5 24-26 +539.6 | 5bp/side +149.3
+   checks [t, halves, median, ex-top5, 5bp] = [np.False_, np.True_, np.True_, np.True_, np.True_] -> WEAK
+   T+1 night: mean +330.4bp median +64.8bp | ex-day session -289.4bp | open-cross $ median 0.05M p10 4k
+   by year (n/mean/median bp): 2021 143/+314/+210; 2022 48/+22/+84; 2023 34/-699/-1361; 2024 7/+1395/+1593; 2025 14/+51/-66; 2026 15/+596/-274
+ATTN-OPEN arm T (ticker change), official SIP crosses 2021-2026
+T: n=387 raw-SPY mean -67.0bp t -1.10 median -24.0bp hit 43% ex-top5 -135.0bp | halves 21-23 -129.4 24-26 -19.6 | 5bp/side -77.0
+   checks [t, halves, median, ex-top5, 5bp] = [np.False_, np.False_, np.False_, np.False_, np.False_] -> FAIL
+   T+1 night: mean -23.3bp median -11.3bp | ex-day session -93.1bp | open-cross $ median 0.02M p10 1k
+   by year (n/mean/median bp): 2021 71/+84/-40; 2022 49/-196/-32; 2023 47/-381/+4; 2024 43/-64/-46; 2025 101/-106/-49; 2026 76/+121/-14

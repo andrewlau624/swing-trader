@@ -4120,3 +4120,12 @@ uplisting +30/+19 (not judged: T-1 is an OTC price with no closing cross, not ex
 - **Judge (official SIP crosses 2021-01..2026-09, `attn_open_fetch.py`)**, per arm, raw minus SPY official overnight,
   clustered by date: (1) mean > 0, t >= 2; (2) halves 2021-23 / 2024-26 > 0; (3) median > 0; (4) ex-top-5 > 0;
   (5) 5bp/side mean > 0. FAIL if mean <= 0 or t < 1; PASS if all; else WEAK. Reported: T+1 night, cross size, by year.
+
+### Result — Study ATTN-OPEN (2026-10-06, one look on official SIP crosses 2021-26)
+- **T ticker change: FAIL.** n 387: raw-SPY -67.0bp (t -1.10), median -24.0bp, both halves negative. The vendor screen
+  (+137/+19bp) was an artifact of stitching old/new symbol histories (vendor and tape disagree here; for splits they agree
+  to 0.1bp).
+- **D de-SPAC: WEAK, untradeable.** n 261: +159bp (t 1.32), median +99bp, ex-top-5 +15bp, but 143/261 events are the
+  2021 SPAC bubble (median +210) and 2023 is -1361bp median; opening cross median **$50k** (p10 $4k). KILL as a sleeve.
+- Spin-off child first nights (vendor screen, no N): overnight medians -23..-34bp on nights 1-4 — forced parent-holder
+  selling shows up at the open (short side only). Consistent with the open-pressure mechanism; not tradeable long.
