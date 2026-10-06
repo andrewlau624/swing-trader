@@ -4995,3 +4995,60 @@ by ADV half and a placebo (same tau on random non-pick losers is NOT available c
 picks' own previous-session 09:24 bid vs that session's open cross = a baseline of the generic pre-open/open gap).
 Kill: fails -> night exits stay in the open auction. Caveat logged up front: a limit sell at the bid assumes the bid
 size is available; report median bid size $.
+
+## Data documentation — FINRA OTC Transparency venue-mix panel (as requested)
+- **Endpoint/dataset:** POST https://api.finra.org/data/group/otcMarket/name/weeklySummary —
+  partitioned by weekStartDate (Monday) + tierIdentifier (T1/T2/"NMS"/OTCE). KEY-LESS (public
+  dataset); the user's FINRA API key (env FINRA_API_KEY) still 401s on group regData — not needed.
+- **Types used:** ATS_W_SMBL_FIRM + OTC_W_SMBL_FIRM (per-firm rows, summed across firms) as the
+  numerator; ATS_W_SMBL / OTC_W_SMBL aggregates exist and match the firm-sums (validated on SPY
+  week 2025-06-02: 50.4M ATS + 52.6M OTC shrink-adjusted).
+- **Fields:** issueSymbolIdentifier, weekStartDate, totalWeeklyShareQuantity, totalWeeklyTradeCount,
+  summaryTypeCode, initialPublishedDate.
+- **Coverage:** 2021-12-06..2026-09-14, 250 weekly partitions = ALL weeks in the window (the
+  dataset is a rolling archive; weeks before 2021-12 return 204). 2016-2021 is NOT in the API
+  (the web download-portal files remain the un-scraped fallback).
+- **Off-exchange share definition:** offshare_w = (ATS w-shares + OTC w-shares) / (the symbol's
+  consolidated Sharadar/panel tape volume over the week's sessions). EQ18 ETFs sanity: mean 22.5%,
+  median 23.2%, range 4.7-82.3% — plausible ETF off-exchange shares.
+- **Auth:** none for this dataset (Bearer key unused; regData groups 401 as of 2026-10-06 — do NOT
+  re-test with the same 20-char key, it appears truncated/invalid; user will reissue).
+- **Lookahead control:** per-row initialPublishedDate; empirical lag 3.00-3.14 weeks (99% at exactly
+  3.00). A trading day D sees the latest week with initialPublishedDate < D (strict). Publication
+  hour unknown -> strictness accepted.
+- **Caveats (documented in the study file):** holiday weeks have a shrunken 4-session denominator
+  (inflates offshare ~25%; not separately filtered in the JUDGED run — reported in the per-year
+  diagnostics); weeks with >100k firm rows would be asynchronously truncated (EQ18 short names
+  not truncated); survivorship: today's EQ18 listing, not a live PIT ETF set (the 18 ETFs never
+  delisted during 2021-26 — minor).
+- **Storage:** data/research/finra/ats_etf.parquet (175,071 rows; fetcher research/sim/finra_ats.py
+  caches per (symbol, weekStart) with 3 workers + 429 backoff).
+
+## Result — VENM (N 867; judged 2026-10-06 evening): KILL
+- **The conditioning does not survive the placebo.** IBS net by offshare LEVEL percentile:
+  LOW +10.1 / MID +28.9 / HIGH -4.5 (no monotone pattern; a dead-center bump);
+  TOP decile -2.3, BOTTOM -1.8; weekly-CHANGE buckets RISING +6.3 (t 1.25) / FALLING +21.0 (t 1.93,
+  halves -13.5/+25.8 flip). PLACEBO (symbol-permuted state, seed 20261006): LOW +2.0 / HIGH +15.9
+  t 2.68 — **the permuted state separates MORE than the real one**: bucketing captures sample
+  noise, not a venue-mix state.
+- **Ceiling also fails the gate:** even a PERFECT bucket effect (±20bp/trade on ~30-60 IBS
+  trades/yr) is ≈ +0.6-0.8pp/yr before honest-capture haircut — one order below the +8pp bar,
+  and the measured $/year at $3k is metric-noise ($12-53/yr).
+- **Verdict: venue-mix state (FINRA weekly ATS+OTC share of the ETF's consolidated volume) carries
+  no usable conditioning information for the IBS leg at the ETF tier. KILL.**
+- **Per-STOCK extension (not run, classified):** attaching venue-mix to the night leg's loser
+  pool is data-feasible but heavy (full-week NMS extracts > 100k rows/week need sorted paging or
+  multiple async pulls; ~2-5h fetch). Priors from the ETF-tier result + the placebo failure argue
+  the same dead end: do not pursue without a NEW mechanism hypothesis (e.g., a borrow-squeeze
+  state that is NOT derivable from prices and differs from the killed FTD/threshold family).
+
+## Result — OVX-Q (judged 2026-10-06 late; N 872): KILL — the pre-open "premium" is the spread
+`ovx_q.py` -> `ovx_q_out.txt`. SIP NBBO at 08:00/09:00/09:15/09:24 on the session after the pick (cov 46-54% after the
+<=10% spread filter; median half-spread 23-25bp; median bid size ~$140k). **09:24 bid vs open cross -13.7bp (med -10.2,
+t -1.1, hit 41%); halves -7.5 / -17.5; ADV halves -10.5 / -18.8.** Mid vs open +28.5 (t 3.9): the VWAP "premium" of
+OVX H1 is the half-spread; the open cross gives a mid-like price for free. Control (same names, pick day, before the
+crash): 09:24 bid vs open -5.5, median 0 -> after a crash day the open clears near the pre-market bid. Exploratory
+(touched, not judged): a resting limit at the 09:00 mid, fallback to the open: fill 80%, +8.3bp vs open t 1.08 (no queue
+haircut) — adverse selection eats it. **The opening auction stays the night-leg exit; the 23/5 / BOATS exit (index_beat
+B1) is closed on 2024-26 data: BOATS spreads are wider than pre-market, so the BOATS VWAP edge (+76) is the same
+spread artifact.** Lesson: any "sell in the tape beats the auction" result must be judged at the bid, never VWAP/mid.
