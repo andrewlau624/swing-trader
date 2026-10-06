@@ -4256,3 +4256,610 @@ memo never saw: 1998-2015) instead of the memo's 10 Alpaca years, and a delisted
 - **Pass bar:** mean net >= +1%/event, >= 60% years positive, ex-best-year > 0, placebo small, monotone.
 - **Accounting:** the memo's ceiling is ~+1-2pp/yr at full deployment; this is a December sleeve, never a
   book. Multiple-testing: 1 judged rule (N 854).
+
+## Result — TL-JAN (judged 2026-10-06; N stays 854)
+28 formation years attempted (1998-2025; 1998-99 dropped: no IWM benchmark yet), delisted-complete Sharadar
+panel, 468 fills, ~18 picks/yr (the px>=3/ADV>=$1M/YTD<=-30%/Dec-footprint gates bite hard), trunc 0%.
+- [cost 25bp/side] mean +2.94%/event-year, **t(yr) 1.91**, median-year +2.87%, years+ 69%, ex-best-year +2.07%;
+  [2x cost] +2.44% t 1.58 — still positive, fine.
+- **June placebo: -0.31%/yr (42%+), median-yr -2.54%** — the December conditioning is real, not seasonal-lift.
+- **Era split: 1998-2015 +4.45%/event t 2.13 (67%+) vs 2016-2025 +0.53% t 0.30** — the modern decade is dead.
+- Monotonicity in YTD loss **FAILS**: pooled terciles +2.66 / +1.94 / +3.18 (worst, middle, least).
+- Clustered-outlier audit: 1998-2015 ex-2010/2011/2012 = **+1.41% t 0.88** — the historical era's positive
+  mean is three adjacent years.
+- Year list (net): 2010 +15.5, 2011 +12.7, 2012 +24.7(!) vs 2013 -2.0, 2014 -8.1, 2015 -10.6, 2019 -9.4,
+  2021 -6.1, 2024 -4.2, 2025 -0.5.
+**Verdict: REJECTED AGAIN.** The resurrection test (insufficient power -> 28 events) was a fair retry and the
+mechanism still fails: not monotone in the loss depth it is named for, and its only positive era is
+2010-2012 + high-vol hoses (2009). Ceiling was ≤ +1-2pp/yr even if alive. No December sleeve. Status:
+**PERMANENTLY DEAD** (December losers; the June placebo ex-relief result confirms seasonal conditioning once
+existed pre-2016, which is history, not tradable alpha). Do not re-open without a *new measurement* of the
+tax-loss footprint (e.g. actual sell-side imbalance), not another prices-only panel.
+
+## Amendment — Study F13F-CAP: forced trim of concentrated fund holdings after a share-count shrink (pre-register; N 854 -> 856)
+`date`: Tue Oct 6 2026, written after building the 13F STATE panel (ownership x implied shares outstanding,
+data/research/f13f/agg.parquet, common shares only, quarters 2013-06..2026-06) and INSPECTING ONLY state
+counts — no returns have been loaded for this family. NEW FRONTIER track (domain jump: regulatory-mandated
+positioning; the program has never used 13F data at all).
+- **Mechanism.** A diversified registered investment company may not own >10% of an issuer's outstanding
+  voting shares (1940 Act §5(d) "diversified"; most active mutual funds apply far lower caps). When an
+  issuer shrinks its share count (buybacks, exchange offers, tender-driven retirements), a fund whose
+  position crosses the cap is a RULE-BOUND seller: it must trim regardless of price, in a small copy
+  (implied shares ≤ 13F scale ≈ mostly small caps). The 13F snapshot makes the constraint observable
+  one quarter after it binds. Counterparty: the diversified fund (forced); the flow is gradual
+  (quarterly rebalance calendar, haircut small caps expensive to trade), which is why arbitrage does not
+  remove it (shorting illiquid small caps is expensive and the constraint is per-fund, thousands of funds,
+  each a slow small order).
+- **Two judged arms (N 854 -> 855 and 855 -> 856):**
+  1. **F13C-TRIM (short arm).** Set: common stocks with mxp >= 9.5% at reported quarter Q (largest single
+     filer's units vs marketcap-implied shares outstanding) AND implied shares outstanding down <= -5%
+     Q-1 -> Q. Entry: the first trading session AFTER the next 13F filing deadline for Q
+     (04-30Q->May 15; 06-30Q->Aug 14; 09-30Q->Nov 14; 12-31Q->Feb 15, next session). Sell short; hedge with
+     SPY over the same window (P&L = -(raw - SPY)); exit 63 sessions after entry. n: ~1,200 events.
+  2. **F13C-FREED (long arm).** Names in the pressure set at Q-1 whose max-holder share has fallen <= 7%
+     at Q (the mandated unwind appears complete in the NEXT filing). Buy at the first session after the
+     next deadline, exit 63 sessions later, same benchmark.
+- **Judgement (frozen):** date-clustered t on the pooled abnormal; halves (2013-2019 / 2020-2026) both
+  non-negative; median > 0; ex-top-5 by NAME and by DATE; placebo = same dsh <= -5% set but mxp < 5%
+  (shrink without the cap) must be lower or equal; 50bp/side headline, 100bp/side + no-hedge shown.
+- **Kill:** trim arm net mean <= 0 at 2x cost, or placebo as good, or halves sign-disagree. Freed arm:
+  mean >= 1%/event and placebo lower, else dead.
+- **Honest ceiling (priority gate):** ~40-120 events/quarter x (overhang 0.5-2% per name over the window)
+  x sleeve ~30% of account -> ~+2-4pp/yr at $10k IF it works; below the +8pp discovery gate, run anyway
+  because the family (13F-state) is virgin and this de-blocks or kills it for pennies of compute.
+
+## Result — F13F-CAP (judged 2026-10-06; N stays 856)
+Panel: 674k->432k name-quarters (common-only), 53 filing deadlines 2014-2026, SPY-hedged 63-session holds,
+25bp+25bp legs at 50bp/side (100bp stress shown), px >= $3, reverse-split contamination measured at ~3% of
+the press set (split actions overlap), entry on the session AFTER each filing deadline.
+- **F13C-TRIM (short arm, primary): KILL.** mean +1.31%/window gross-SPY but **t 0.80**; 2x cost +0.31% t
+  0.19; **ex-top-5-names -0.03%** (the positive is 5 named events); halves both ~+1.3 but nothing survives
+  cluster. The rule-bound trim flow leaves no stable short-side footprint in daily bars.
+- **F13C-FREED (long arm): KILL.** -12.2%/window, t -3.2, both halves negative — names whose unwound
+  position prints as complete keep FALLING (their problem is not the unwind).
+- **Placebo / dilution observation (diagnostic, not judged):** names with implied shares down >= 5%/q and
+  mxp < 5% lose ~4.7-5.7% per quarter vs SPY in BOTH halves (t -2.3/-2.8 pooled, 25-28% days+): heavy
+  implied-shrink micro caps are a persistent drag — a risk-SCREEN candidate (avoid them in long sleeves),
+  not an alpha arm; recorded, forward watch only.
+13F-state family v1: **KILL both judged arms**. The family is not foreclosed (the participant-typed max
+holder — actual diversified mutual funds, not all filers — was never tested; would need a new registration);
+recorded as a v2 spec only, judged forward/no-run tonight. Do not re-run the as-registered rules.
+
+## Amendment — Study F13C-CAP v2: participant-typed forced trim (pre-register; N 856 -> 857)
+`date`: Tue Oct 6 2026, before any fund-typed return is read. The v1 rule's concentration state measured
+ALL 13F filers; hedge/PE/partnership filers are NOT bound by RIC diversification caps, so v1's "press" set
+grossly understates the forced-flow mechanism. v2 replaces the state variable only — everything else
+unchanged (deadline entry, 63-session hold, SPY hedge, 50/100bp/side costs, kill/pass trees identical).
+- **State:** mfx = the largest single FUND-NAME-flavored filer (mutual fund family regex, f13f_agg.py)
+  as % of marketcap-implied common shares outstanding; press = (mfx >= 9.5%) AND dsh <= -5%/q.
+- **F13C-TRIM2 (short) and F13C-FREED2 (long)** judged with the v1 gates; in addition, for TRIM2 the
+  no-hedge raw loss of the short leg is shown (borrow-cost honesty).
+
+## Study PCAL — negative-control calibration of the program's own PASS machinery (diagnostic, no N; third-robot session, 2026-10-06)
+
+**Question.** Every judged candidate in this program (N≈856) clears one standard bar on an
+overnight-reversal-shape rule on delisted-complete daily bars: day-clustered t ≥ 2, both halves
+net-positive, median trade net-positive, ex-top-5 net-positive. The bar's FALSE-PASS rate has never
+been measured empirically (per-study DSR is analytic and exchangeability-based). This study does not
+judge a candidate; it calibrates the machinery that judges them.
+
+**Template (exact NX night-leg machinery).** Candidate day T: c/c_prev-1 <= -0.08, IBS < 0.10, price
+$5-2000 (raw), eligible pos>=20, cu_prev >= $5, adv >= $10M; dedupe corr <= 0.7; night_sizing
+(vol_min 0.60, crowd 30, name cap 10%); overnight = o_next/c - 1 (+div/cu if ex = T+1); delisting by
+actions price else -1.0; no-bar halt = -1.0; costs `tier` both sides. Judge window 2021-01-01..2026-08-31,
+SEP panel, delisted-complete. No second look at any touched window is implied: no candidate is judged.
+
+**Pre-named controls (frozen before any read):**
+- C0 exact rule — implementation check only (outcome already known from the 2021-26 t.10.2 run);
+- C1 entry lag +1 session; C2 lag +5; C7 lag +10 (reversal edges must decay with lag);
+- C3 IBS gate inverted (>= 0.90);
+- C4 momentum mirror (day_ret >= +0.08, IBS < 0.10);
+- C5 within-day permutation of IBS across candidates (seed 20261006);
+- C6 count-matched random eligible names on the days the real rule fires (same seed).
+Acceptance bar (frozen): t_cl >= 2.0 AND halves both > 0 AND median > 0 AND ex-top-5 > 0, net at tier.
+
+**Read.** p-hat = passing controls / 7. If >= 2 controls pass, the bar is loose: program-level rule
+becomes "new one-look needs t >= 3 AND a forward shadow", and the current PASS verdicts get an error
+bar. If 0-1 pass, the machinery stands and p-hat becomes the program's background false-pass estimate.
+
+**No deployment. Diagnostic only.**
+
+## Result — F13C-CAP v2 (participant-typed; judged 2026-10-06; N stays 857)
+- **TRIM2: KILL.** press2 (fund-flavor max filer >= 9.5% + shrink) n 1888 events / 1207 names: short net
+  +0.15%/window t 0.08; 2x cost -0.85% t -0.48; halves +1.41/-0.67; ex-top5-names -1.1.
+- **FREED2: KILL.** n 36, mean ~0/median -6.5, halves +18.6/-5.7 (noise; n too small for anything).
+- **13F-state family FINAL (v1+v2): no rate-bound flow footprint in daily data.** The name-based
+  trim/freed constructions carry no shortable or longable edge at 50-100bp/side; the family's only value
+  is defensive (see the dilution-drag screen) or as a quarterly STATE gate to be specified on LATER.
+The program's regulatory-positioning domain jump is therefore answered NEGATIVELY at this data tier; the
+open-but-data-gated branches (participant = actual RICs with fund-level caps > our proxy, borrow fees,
+placement) stay on the frontier memo only. No deployment.
+
+## Study COTX — COT positioning as a derivatives-only state (pre-register; renumbered N 862; originally filed 857->858 in a counter collision)
+`date`: Tue Oct 6 2026, before any positioned return is read. Frontier branch: "participant
+constraints / forced positioning" — margin-call cascade proxies; the state (who is positioned
+how heavily) exists ONLY in CFTC data, invisible in equity daily prices.
+
+**Data.** CFTC public Socrata API, free: TFF `gpe5-46if` (financials; weekly, Tue as-of) and
+disaggregated for COMEX metals if TFF lacks gold/silver. Products: E-MINI S&P 500, NASDAQ MINI,
+CRUDE OIL, NATURAL GAS, GOLD, SILVER (or HG/COPPER), EURO FX, UST 10Y NOTE. Cache to
+`data/research/cot/`. Returns: weekly Fri->Fri (enter the first session after the report is
+public, exit 5 or 10 sessions later) from Sharadar raw ETF closes (SPY, QQQ, USO, UNG, GLD, SLV,
+CPER, UUP/IOO proxy as needed, IEF). Equity/rates events use SPY/QQQ/IEF; commodity events use
+the product's own ETF.
+
+**State (per product):** net participant positions / open interest, percentile of trailing
+3y (156 obs, min 78 warmup): LP = leveraged funds, DP = dealers, AM = asset managers.
+Pullback confirm: price <= 0.97 x 20d high; bounce confirm: price >= 1.03 x 20d low.
+
+**Judged arms (directions fixed a priori; 1-week horizon primary):**
+- A1 crowded-long unwind: LP >= 90th pct AND pullback -> SHORT 1 week (CTA/trend forced selling
+  below model triggers; the unwind is mechanical, not informational).
+- A2 crowded-short cover: LP <= 10th pct AND bounce -> LONG 1 week.
+- A3 dealer-inventory extreme (contrarian to customer crowding): DP >= 90th -> SHORT;
+  DP <= 10th -> LONG, 1 week.
+Secondary (reported, not judged): 2-week horizon; AM percentile arms.
+One open event per product max; no re-entry while holding.
+
+**Gate:** pooled per arm across products: net (1bp/side ETF proxy) week-clustered t >= 2.0,
+both halves of each product's own window net-positive, median > 0, ex-top-5 events > 0.
+Cost shock 3bp/side reported; a PASS that dies at 3bp is DOWN-WEIGHTED not killed.
+Kill rule: fail gate -> family KILL, no re-tuning percentiles/confirmations.
+
+**Honest priors:** weekly frequency and 3y percentile windows mean low power and slow regimes;
+expect A1/A2 to be the only plausible pass. This is a state test, not a strategy: even a PASS
+feeds the book as a regime/size gate, never as a standalone futures strategy at $2-25k.
+
+## Study CBAS — futures cash-basis dislocation (pre-register; renumbered N 863)
+`date`: Tue Oct 6 2026, before any basis-flagged return is read. Frontier branch: "two
+instruments that should coincide but temporarily disagree" — cash vs futures at the same 16:00
+mark; the financing/dividend state visible only in the derivative.
+
+**Data.** Cached GLBX ES/NQ daily contract bars 2011-2025 (front = min-exp, max-volume, same
+rule as fut_roll.py); spot = SPY/QQQ raw close (Sharadar SFP); DTB3 for carry context only.
+Basis b_t = ln(F_front_close / S_close) x 1e4 (bp). Known contamination: futures close prints
+~16:00-17:00 Globex vs SPY 16:00:00 — noise ~15bp, small vs dislocation flags; accepted.
+
+**Dislocation flag (frozen, not tuned):** z_t = (b_t - median21(b)) / MAD21(b). DISC: z <= -2;
+PREM: z >= +2. Robustness grid k in {1.5, 2.5} reported only.
+
+**Judged arms (entry next session t+1 open):**
+- ETF leg (retail-feasible): DISC -> LONG SPY/QQQ, PREM -> SHORT SPY/QQQ; exit t+1 close
+  (1-day arm primary) and t+3 close (secondary). Cost 1bp/side tier, 2bp tier_hi, 3x shock.
+- Hedged info arm (not retail; measures the derivative content): long cheap leg vs short dear
+  leg at same times, 0.5bp/side ES + 1bp SPY.
+**Gate:** day-clustered t >= 2 net, both halves (2011-2018 / 2019-2025) net-positive, median > 0,
+ex-top-5 > 0. Kill: fail -> KILL, no k re-tuning, no event-window re-scoping.
+
+**Mechanism being tested:** arbitrage/hedging balance-sheet constraint at moments of stress
+(deep futures discount) and forced hedging demand (premium); why not arbitraged instantly:
+arbitrageurs are capital-constrained exactly then; observable daily. Priors: HFT keeps the
+basis tight in liquid index space; expect KILL; the interesting residue would be the 2008/2020
+and Aug-2024-style stress episodes — if the pooled edge is only those <5 events, that is a NO.
+
+**Window note:** the GLBX cache is exploratory (touched by fut_roll/FND for spread shape only);
+this is a new hypothesis on it; no deployment either way without a forward shadow.
+
+## Amendment — Study PAIR-CLASS: same-issuer dual-class differential (pre-register; N 857 -> 858)
+`date`: Tue Oct 6 2026 (continuation). Domain: same-issuer liability/capital-structure stack. This is the
+family the program had never modeled; F13C killed one member (regulatory trim) — this is the OTHER member.
+- **Mechanism.** Two classes of the same issuer with identical/dividend-identical cash flows (GOOGL/GOOG,
+  NWSA/NWS, the Discovery pair in its era, and similar) trade separately. Their spread must behave like a
+  stationary quasi-arbitrage with a persistent voting/control premium plus retail-flow noise, NOT like two
+  independent stocks. Constraint force: nobody (retail) can cheaply force parity; arb funds hold it tight
+  in liquid pairs, but retail flow pressure (salience, same-store index buying at the float-weighted class)
+  can push the spread several bp-worth away for days, and it mean-reverts rather than trends.
+- **Panel (frozen).** All same-name primary/secondary COMMON-stock pairs in Sharadar SEP, both classes
+  listed (NASDAQ/NYSE/AMEX), each with >= 500 bars in 1998-2026, spread computed on raw closes
+  (cu_A/cu_B). Panel printed BEFORE any signal is computed; no pair is added after results are seen.
+- **Rule (frozen, ONE judged arm, long-only).** On day T close: z = (S - mean20)/sd20 of the log ratio
+  (both classes' 20d window). If z <= -2 (the class is dislocated DOWN vs its own spread history): buy
+  that class's close; exit its close 3 sessions later. Equal weight per fill. No short leg (retail borrow
+  reality on both classes at $2-25k).
+- **Pass bar:** date-clustered t >= 2; mean net > 5bp/event after 2.5bp/side; both calendar halves > 0;
+  ex-top-5 > 0; a date-placebo (z computed on a 30-session-shifted spread) must be lower. Because the
+  panel is small (few liquid dual-class pairs), ANY pass is a FORWARD-SHADOW candidate, never deployed on
+  backtest alone.
+- **Kill:** mean <= 5bp net, or either half <= 0, or placebo as good. Do not tune z-thresholds or the
+  horizon afterwards.
+
+## Amendment — FN-1 filing-lag map (OBSERVATION stage, no judged arm, N unchanged)
+`date`: Tue Oct 6 2026. First program contact with SF1 (quar fundamentals) filing REPORTDATE.
+Purpose: the OBSERVATION->MECHANISM steps only. Map, per firm-quarter, the filing lag
+(filingdate/calendarQuarterEnd) vs the firm's own 3-yr median lag; publish the cross-tab of the NEXT-quarter
+and SAME-quarter abnormal by lag-decile, FY-classes (10-K vs 10-Q), and delisted completeness. NO trade
+rule is specified in this amendment; if the map shows a mechanism-shaped asymmetry consistent with a
+constraint (filing-window stress: 10-K 60->90d, 10-Q 40->45d ceilings, the NT 60-day extension rules), a
+SEPARATE pre-registration must precede any judged run. No returns-based tuning from the map is allowed.
+
+## Amendment — Study SSR-LIFT: Rule 201 short-sale-restriction lift day, forward-only registration (N 859 -> 860)
+
+Registered 2026-10-06 AFTER the exploratory evidence below was read (2011-26 daily, 2021-26 official crosses): every
+historical window is TOUCHED, so the only judge is forward. (Concurrent session also bumped N to 859; if a collision
+exists, renumber this entry, not the other.)
+
+- **Mechanism (Rule 201).** A stock whose price falls >= 10% below the prior close is short-restricted (shorts only
+  above the NBB) for the rest of T and all of T+1. Exploratory diff-in-discontinuity (`research/sim/ssr_rd.py`, Sharadar
+  SEP 2003-26, local linear +/-3pp at L = low/prev_close - 1 = -10%, R control, date-clustered): post-rule (2011-11-10+)
+  T+2 close-to-close discontinuity **-43bp (t -6.5)**, pre-rule **-0.3bp** (placebo); adjacent cutoffs -8/-9/-11% show
+  no negative jump; leveraged/other ETFs (arbitrageable via unrestricted instruments) -19bp t -1.0; no reversal T+3..T+6
+  (permanent = delayed price discovery). Dose-response by FINRA days-to-cover runs OPPOSITE to a pent-up-shorts story
+  (low DTC -62bp, high -34bp): mechanism is the restriction's effect on T/T+1 price formation, not crowded shorts.
+- **Official-cross check** (`ssr_fetch.py` -> `ssr_cross.py`, 2021-01..2026-10, 36.7k treated events): short at the T+2
+  opening cross, cover at the T+2 closing cross, + 1.5 x SPY same-window hedge: **+16.7bp per EW day (t 2.72)**, per-event
+  median +42bp, 5/6 years > 0 (2021 -1); control (L -10..-7%) +2.4bp. Price >= $10: +17.7bp/day t 2.73, 6/6 years.
+  Tail: worst single-name -94%, 205 events < -20%; portfolio worst day -20.6%, maxDD -45% at 1x short notional.
+- **Rule (frozen).** Universe: common stock, prior raw close >= $10, 20d ADV >= $20M, symbol on that day's official
+  Rule 201 SSR list (or consolidated low <= -10% of prior close) on T, NOT re-triggered on T+1. Short at the T+2 opening
+  auction, cover at the T+2 closing auction, equal weight, hedge 1.5 x notional SPY (open->close). Log-only; no orders.
+  Report also per-name borrow status (ETB/HTB, fee) at the T+2 open from the broker; DTC tercile is reported, NOT used
+  (it was chosen in-sample).
+- **Gate (forward).** >= 120 lift sessions after 2026-12-06 (23/5 trading starts then: the overnight session may move
+  the decline ahead of the open cross; that is part of what is judged). PASS: hedged EW-day mean > +8bp net of measured
+  borrow, day-clustered t >= 2, median event > 0, ex-top-5 sessions > 0, ETB-only subset > 0. KILL: mean <= 0 at 120
+  sessions or ETB-only <= 0.
+- **Account eligibility (not part of the statistical verdict):** taxable margin account >= $2,000 only; Roth cannot
+  short; $1k accounts cannot. FINRA Rule 4210 amendments (effective 2026-06-04) removed the PDT day-trade count, so a
+  same-day short/cover is not trade-count-limited (Schwab: no counting since 2026-06-08, intraday margin buying power
+  since 2026-07-13, per secondary sources). No deployment; sizing is a user decision.
+
+## Result — PAIR-CLASS (judged 2026-10-06; N stays 858)
+Panel frozen: same-name primary/secondary common pairs with $20M+ 20d $vol on BOTH classes — only
+GOOGL/GOOG ($23-25B/day), WBD/DISCK (2008-2022, $51-139M), ZG/Z ($26-119M) survive; the rest are
+SPAC-unit pairs with nothing but noise.
+- Rule z<=-2 (dislocated class, long-only, 3-session exit, 2.5bp/side): pooled 1,027 fills, mean -0.08%
+  net (t -0.61), 50bp cost -0.33% t -2.5 NEGATIVE; placebo (shift-30) -0.20% — same sign: there is no
+  flow-release reversion across the panel at daily granularity.
+- GOOGL/GOOG alone: 73 fills, MEDIAN +13bp and ex-split-artifact mean ~+26bp — the mechanism (spread
+  reversion) EXISTS on the one big pair but is worth ~6 fills/yr x ~10bp x small sleeve ~ 0.03-0.1pp/yr
+  at $10k: **killed by arithmetic of scale, not by falsity.**
+Final: **rejected as a strategy; recorded as a real-but-unharvestable micro-mechanism.** No varied
+horizons/thresholds afterward.
+
+## Result — FN-LAG observation map (no judged arm; N unchanged)
+SF1 publish-date lag (~filing lag) per firm-quarter vs own 8-q median, D+1..+5/+63 abnormal vs SPY:
+- Quintiles 1-4 essentially flat (r5 ~ -0.2, r63 ~ +0.8..+1.0%);
+- "Late" quintile: pooled +1.3% by D+5 and **+12.7% by D+63** — BUT decomposed: **$0-2 px bucket +421%**
+  (sub-penny artifact pool: broken/melted micro caps), $2-5 = **-5.8%**, $5+ = **-3.0%**, and era split
+  1998-2016 vs 2016-26 (-0.10 vs +3.66 by D+5).
+- **Verdict: OBSERVATION DIES.** The pooled late-filer "premium" is a sub-$2 data artifact + going-private
+  premium tail; the executable universe ($2-5/$5+) is NEGATIVE in every era. No state, no gate, no arm.
+- Data-quality note recorded: SF1 `date` (publish date) as filing proxy is usable ONLY with restatement
+  dedup (keep first); sub-$2 implied sizes are unreliable in daily bars. Do not reuse SF1 `date` for a
+  "late-filing" state without this cleanup.
+
+## Study VTS — vol term structure as an options sensor (pre-register; renumbered N 864)
+`date`: Tue Oct 6 2026, before any curve-flagged return is read. Frontier branch: "options as a
+sensor of hidden market state" — the ONLY options-family data that is free (Yahoo ^VIX9D/^VIX3M/
+^VIX/^VIX6M daily closes, 2006/2007+). VIX roll (ETP) is separately TESTED-AND-REJECTED; this is
+the curve STATE, not the roll.
+
+**Mechanism under test (Cheng 2019 vol-demand):** contango (VIX3M/VIX9D >= 1.10) = harvesters
+structurally short front vol = dealers' re-hedging buys dips -> LONG. Inversion (ratio <= 0.98)
+= hedging demand front-loaded = dealer re-hedging amplifies downside -> SHORT. Directions frozen
+by that mechanism; thresholds frozen (1.10 / 0.98), no tuning.
+
+**Judged arms:** LONG SPY next open->close in contango; SHORT SPY next open->close in inversion.
+Secondary (reported): 5-day O->O horizons; VIX6M/VIX3M same rule.
+**Gate:** day-clustered t >= 2 net (1bp/side), both halves (2007-2016 / 2017-2026) net-positive,
+median > 0, ex-top-5 > 0; 3bp/side shock reported. Kill: fail -> options-sensor branch recorded
+DATA-WEAK at free tier; no re-tuned threshold reruns.
+**Ceiling note (priority gate):** a daily ~10-20bp gross effect deploying ~50% of capital at ~30%
+state frequency is ~+4-8%/yr pre-cost at best; this is a book-conditioning sensor test, not a
+standalone strategy. Judged as a state, reported at the book level if it passes.
+- **SSR-LIFT note (2026-10-06, after registration, no rule change):** the stronger C1->C2 variant (+37bp/day hedged t 4.9,
+  6/6 years) needs a short into the T+1 closing auction while SSR is in force. Exchange rules (SEC Rule 201 FAQ; NYSE 2011
+  no-action relief + Rule 123C; Nasdaq Reg SHO FAQ 2011) let short MOC/LOC orders participate but fill ONLY if the
+  auction price is above the NBB (Nasdaq) / last exchange bid (NYSE, lower priority than unrestricted MOC). Fill odds
+  need closing NBBO (DATA-LIMITED); the forward shadow should log a short-MOC on T+1 as a second, report-only arm.
+
+## Results — COTX, CBAS, VTS (judged 2026-10-06; program N = 866 after counter renumber; all three KILL)
+
+**COTX (N 862; COT positioning state, weekly, 9 products 2006-2026): KILL.** All four frozen arms fail:
+A1 crowded-long-unwind short net -119bp t -1.05 (wrong sign); A2 crowded-short-cover long -15bp
+t 0.25; A3 dealer extremes +6.7/-32.9bp t 0.97/-1.40. Halves flip, ex-top-5 negative, per-product
+scatter (HG t -2.24 negative, NQ +1.17). **The weekly COT participant state (leveraged funds,
+dealers, asset managers — information that exists ONLY in CFTC data) carries no tradable
+1-2 week footprint at retail cost.** CL/NG series end 2022-02 (CFTC dataset split) — not the cause
+of the null (they had 15y). Forced-positioning-via-COT branch closed.
+
+**CBAS (N 863; ES-NQ cash-futures basis dislocation, daily, 2011-2025): KILL, with mechanism evidence.**
+- First run was poisoned: GLBX daily bars are stamped by SESSION START (evening), not trade date;
+  rebuilt on trade_date = next business day. (fut_roll/fnd event-window studies are label-shift
+  invariant, so their verdicts stand.)
+- Retail spot leg: DISC->long next-day -11.1bp t -2.71, PREM->short -12.1bp t -2.65 (SPY follows
+  the futures-led move ~1 day, against convergence, cost-dominated). 3d arms t 1.47/-3.16. All fail.
+- **Mechanism diagnostic (the real finding): the daily index basis has NO persistent dislocation
+  regime.** MAD21 ~15-18bp; after a z<=-2 or z>=+2 flag, median z_(t+1) is -0.3/+0.4 and only
+  14-26% of flags are still flagged next day. The 2008-style multi-day blowouts do not exist in
+  2011-2025 daily index data — the arb is never balance-sheet-constrained for days at this
+  frequency. The "hedged convergence" t=18-24 numbers are 2xMAD regression-to-median baked into
+  the flag definition, not an edge. Cash-futures basis family closed at the daily tier.
+
+**VTS (N 864; VIX term structure as the one free options sensor, 2007-2026): KILL.**
+- contango (VIX3M/VIX9D>=1.10) LONG 1d: -0.04bp t -0.03 (dead); 5d: +17.1bp t 5.50 — but that is
+  unconditional SPY drift (uncond 5d ~ +25bp), not state excess; per-year is +-5bp noise around
+  beta. REJECTED as a sensor (t on drift, not on excess).
+- inversion (<=0.98) SHORT: wrong sign both horizons (1d -11.7bp t -1.67, 5d -59.5bp t -3.35) —
+  the market RELIEF-BOUNCES after inversion. The unregistered mirror (LONG after inversion,
+  ~+59bp/5d excess, 11% of days) is recorded as an observation/forward-shadow candidate only —
+  claiming it as a PASS would violate the registration. Overlapping 5d windows inflate its t.
+**Options-as-sensor at the free tier is now answered: no.** The only remaining options→underlying
+channel is the paid OI/gamma tier — see the frontier map; its prior is LOWER after today.
+
+### Derivatives frontier map after today (mechanism -> status)
+| mechanism (user's list) | status |
+|---|---|
+| cash-futures basis dislocation (ES/NQ) | TESTED-REJECTED (no persistent dislocation regime, daily) |
+| COT positioning / forced unwind | TESTED-REJECTED (weekly, 9 products) |
+| VIX term-structure sensor | TESTED-REJECTED (contango=drift; inversion wrong sign) |
+| roll mechanics | TESTED-REJECTED (FUT-ROLL, arbitraged since ~2021) |
+| delivery mechanics | TESTED-REJECTED (FND, closed) |
+| Treasury auction / month-end | KILLED (TAC) / validated-small (TME, no variants) |
+| OI pinning | TESTED-REJECTED (opex_pin) |
+| generic options strategies | CLOSED (T1-T7/T5L) |
+| ETF premium/discount + flows | CLOSED (ETC/EF/BSPD) |
+| signed dealer gamma / OI concentration | DATA-LIMITED — paid OPRA statistics ~$180/yr; prior lowered by today's kills; do NOT fund automatically |
+| CME margin-hike forced deleveraging | DATA-LIMITED — no free historical margin-rate series; scrape = CME notices archive; spec: event-study ±5d per hike, silver-2011 as canonical |
+| SOQ / expiration day mechanics | NO POWER at daily tier (n≈60/root); would need minute data |
+| cross-contract spreads (crack/crush/ES-NQ) | NOT TESTED — excluded as generic carry unless a named constrained participant is specified |
+| rates futures → equities (beyond TME) | NOT SEARCHED; TAC killed the auction leg |
+| commodity futures → producers | NOT TESTED — no forced-flow participant specified; generic risk |
+| structured-product hedging (barriers, autocalls) | DATA-LIMITED — needs issuer OI/structure data that does not exist free |
+
+**Meta answer (user question 12):** after COTX + CBAS + VTS (plus the prior roll/FND/TAC/OI-pin
+kills): NO — the free derivative data does not reveal forced behavior invisible in equity daily
+data at a harvestable tier. The derivative-market states we can see free (positioning weekly,
+basis daily, vol curve daily) are either arbitraged flat, drift-only, or the wrong sign. The
+invisible-in-equity-prices information that remains (OI by strike, signed gamma, margin rates,
+skew) is exactly the paid tier — and today's evidence lowers its expected value.
+
+## Mechanism-jump session — pre-test ceiling table (2026-10-06, evening; gate applied BEFORE any backtest)
+Standing priority gate: kill before testing if ceiling at $10k < +8pp/yr under honest capture.
+Shapes that clear: daily x >=15bp x >=50% deploy; ~monthly x >=2%; rare events x >=10-20% per-holder-capped.
+
+| candidate (user's mechanism list) | participant / constraint | ceiling at $10k (honest) | verdict |
+|---|---|---|---|
+| CL/NG monthly index roll (GSCI 5th-9th bday) | index funds; tracked-weight mandate | ~1-4%/yr on futures notional (roll-window ~10-30bp/mo) | CEILING-KILL (TME-shape: real, small) — no backtest; do not revisit without a size-up mechanism |
+| Buyback blackout window (10b-18) flow removal | issuer desk; blackout + 25% ADV cap | buyback factor lit ~2-3%/yr; 50% capture ~1-1.5%/yr | CEILING-KILL; the announcement event was already "in the gap" |
+| SG-Trend / CTA crowding reversal | CTAs; trend-model stops | ~1-2%/yr, monthly, proxy loose | CEILING-KILL |
+| DXJ/EWJ FX-forward-point wedge | currency hedgers; forward roll | 2-4%/yr gross, minus borrow | CEILING-KILL |
+| Dividend-fail pre-ex-div front-run | failing shorts owing dividends | small, event-capped, hard-to-borrow side inaccessible | CEILING-KILL (adjacent to DM/FTD kills) |
+| LDI funded-ratio de-risking (Milliman 100) | pension LDI desks; funded-ratio mandates | at-gate IF the state is real (0.5-1.5%/mo regime spread) | DATA-LIMITED-MEDIUM (290-page scrape); parked behind cheaper tests |
+| Financing plumbing states (SOFR-DTB3 / -IORB, TGA) | levered funds & dealers; balance sheet at stress | standalone < 1%/yr (rare state) BUT = risk-GATE for the book's -10% lever | **RUN (gate research, pre-registered below)** |
+| Margin-debt deleveraging state (FINRA monthly 1997-2026) | margin borrowers; house margin calls | standalone < gate; = crash-regime state + the one free forced-deleveraging observable | **RUN (pre-registered below)** |
+| Signed dealer gamma / OI | option dealers; delta-hedge rebalance | unknown; prior lowered | PAID tier, user decision (unchanged) |
+| Borrow fees / recalls | shorts; borrow availability | unknown | DATA-LIMITED (no free fee history) |
+| TBA / dollar roll | mortgage origination; TBA delivery | unknown | DATA-LIMITED (no free TBA history) |
+
+## Study PLUM — daily financing-plumbing stress states (pre-register; renumbered N 865)
+`date`: Tue Oct 6 2026 evening, before any state-flagged return is read. Frame: gate research for
+the book's -10% lever (financing/collateral constraint family), judged first as a standalone state.
+**Data:** FRED SOFR, DTB3, IORB (free CSV, 2018-04+); SPY raw O/C (Sharadar); TGA daily if the
+FiscalData field resolves, else dropped (no proxy invention).
+**States (frozen):** S1 = (SOFR - DTB3) >= +25bp; S2 = (SOFR - IORB) >= +15bp. (Repo prints above
+the unsecured proxy / administered rate = balance-sheet stress; thresholds are the literature's
+"abnormal" levels, not tuned.) S3 (secondary, reported): S1 restricted to the last 2 sessions of
+a quarter (window-dressing concentration).
+**Arms:** after S1 or S2 on day D: SHORT SPY next O->C (forced-unwind continuation) and LONG SPY
+next O->C (stress ends, relief) — both directions judged (family kill if neither passes);
+horizons 1d and O->O+2. Cost 1bp/side, shock 3bp.
+**Gate:** day-clustered t >= 2 net, both halves (2018-04..2022-06 / 2022-07..2026), median > 0,
+ex-top-5 > 0. Low-power accepted (states are rare by construction); a t 1.5-2 single-direction
+result = OBSERVATION, not PASS.
+**Honest prior:** SRF (2021+) absorbs repo stress; expect near-null post-2021 and any signal
+concentrated in 2019-09/2020-03 (< 5 events) = NO by the outlier rule.
+
+## Study MFLW — monthly margin-debt deleveraging state (pre-register; renumbered N 866)
+`date`: Tue Oct 6 2026 evening, before any monthly return is read.
+**Data:** FINRA customer margin debit balances, monthly 1997-01..2026-08 (one XLSX, free,
+data/research/finra/margin.xlsx); SPY monthly (Sharadar raw, total-return approx price-only).
+**State (frozen):** m = log debit balance; d3 = m - m.shift(3). CASCADE state: d3 <= -0.10 AND
+SPY < its 6m mean at month-end. EUPHORIA state: d3 >= +0.10 AND SPY > 6m mean. (10% in 3 months
+= a real leverage deflation/blowoff, not drift; not tuned.)
+**Arms (both judged, mechanism has two readings):** after CASCADE -> LONG next month (forced
+liquidation exhausts the seller -> bounce); after EUPHORIA -> SHORT next month (leverage peak ->
+deleveraging risk). Mirror continuations reported.
+**Gate:** monthly t >= 2 net (1bp/side), both halves (1997-2011 / 2012-2026), median > 0,
+ex-top-5 months > 0, 3bp shock reported. Fail either arm -> monthly-constraint-state family KILL.
+**Honest prior:** margin debt is mostly coincident; monthly lag eats the cascade; expect WEAK.
+
+## Amendment — Study CEF-TL2: December tax-loss in CEFs, delisted-complete (reopen on new data; N 863 -> 864)
+`date`: Tue Oct 6 2026 evening. This is a REOPENING under the standing rule "do not re-open CEF-TL without
+new data": the original kill (N 823->824) was judged on **142 SURVIVOR CEFs, 10 years, from CEFConnect**
+(documented weakness: "survivor CEFs, price-only"; the CLAUDE.md CEF row separately says survivorship is
+unhandled). Sharadar SFP now supplies **~1,891 CEF price series 1997-2026 including delisted**, which
+removes the survivorship objection and extends the never-seen eras to 1998-2015. Same mechanism (statutory
+Dec-31 loss harvesting by taxable retail CEF holders -> Jan reversion), same leg structure, NO design tuning.
+- **Frozen rule (as in CEF-TL with the new universe):** all SFP CEF categories (tickers.parquet category
+  contains "CEF"; common + preferred), raw close >= $3 at formation... (keep the original filters where
+  they map: distribution-adjusted = total-return via the fac factor); formation = last November session;
+  rank YTD total return; bottom quintile by year; Dec leg = Nov-end -> Dec-end; Jan leg = Dec-end ->
+  Jan-end; long-only, equal weight per leg, per year.
+- Benchmarks: the equal-weight CEF UNIVERSE (same-year, all SFP CEFs with bars) as the relative test, and
+  IWM as a market check; both reported, universe-relative is the registered abnormal.
+- Costs: 30bp/end leg round trip (original stated cost); report 2x.
+- Judgement (frozen, one look): Jan-Feb unfolding legs computed as the ORIGINAL PASS bar: Jan Q1-u >=
+  +1.0% net, both calendar halves positive, ex-best-5-years mean > 0, ex-best-year quintile > 0, Dec leg
+  predicted sign (Q1-u <= 0 in Nov->Dec), and quintile monotonicity not required (the original test's bar).
+- Kill: fails any original bar; or the "delisted-completeness" materially shrinks the set (n < 30/yr names,
+  underpower note only, judged as-is).
+- Ceiling note (priority gate): even a PASS is a ~+1-2pp/yr December/January sleeve; this is a
+  data-fix-driven decision on a small mechanism family.
+
+## Results — PLUM, MFLW (judged 2026-10-06 evening; N 864, 865; both KILL; financing region measured)
+
+**PLUM (N 865; daily repo/financing stress states 2018-04..2026): KILL.**
+S1 (SOFR-DTB3 >= 25bp, n 171, 8% of days): 1d both directions ~0 (t -0.43/-0.19); 3d short +44bp
+t 1.77 but median -18.3bp (the mean is crash-carried — fails the median/outlier rule).
+S2 (SOFR-IORB >= 15bp): n=3. S3 (S1 x quarter-end): n=5. Post-2021 flags (2025-10..12) were benign.
+**The daily financing-plumbing state is not a risk gate at free observables post-SRF; nothing to
+gate the book's -10% lever on.** Do not re-run SOFR-spread states at daily tier.
+
+**MFLW (N 866; FINRA margin-debt monthly cascade state 1997-2026, n 356): KILL.**
+CASCADE (3m log-debt contraction >= 10% + SPY < 6m mean, n 27) -> bounce-long: +16.4bp/mo
+t 0.11, hit 52%, halves -16.6/+47.0 (2008/2009 next-months were -8% to -10.7%: NO reliable bounce;
+the mean is one +12.7% month). EUPHORIA -> contrarian short: -46bp/mo t -1.05 wrong sign (leverage
+peaks kept running months, 1999-2000, 2020-21); continuation mirror t 0.96. Margin debt is
+coincident, as the prior said. Monthly-constraint-state family closed.
+
+### Ceiling-killed pre-test (no backtest, recorded): CL/NG monthly index roll (~1-4%/yr),
+buyback 10b-18 blackout flow (~1-2%/yr), SG-CTA crowding (~1-2%/yr), DXJ/EWJ forward-point wedge
+(2-4%/yr minus borrow), dividend-fail pre-ex-div front-run (capped, hard-to-borrow side inaccessible).
+
+### Region map after the financing jump (what is genuinely left)
+- **FINRA ATS venue-mix / off-exchange share per symbol**: weekly panels EXIST behind the free
+  FINRA API (otcMarket weeklySummary is key-less; equity ATS + short-interest datasets return
+  401 until an API token is registered at api.finra.org). Mechanism: internalized retail flow
+  share = inventory/state invisible in daily bars; would condition the IBS/night legs. Needs the
+  user to mint a free FINRA API key — one action, then testable.
+- **Paid tiers (each a user decision, none automatic):** OPRA OI/signed gamma (~$180/yr; prior
+  lowered twice), CME margin-rate archive (scrape), borrow-fee history, PIT ratings, TBA/dollar
+  roll, per-fund NAV (iShares CSVs), Milliman LDI (290-release scrape).
+- **Unsearched but likely below gate on priors:** TGA debt-ceiling episodes (n tiny), GPIF quarterly
+  rebalance (front-run), MMF/bill plumbing (macro-level), CP/corporate funding (no daily data).
+**Session verdict:** the financing/collateral/margin region — the last free-data member of the
+user's mechanism list — is now measured and empty at retail tier; discovery continues only with
+(a) the free FINRA token, or (b) a paid-tier decision.
+
+## Amendment — Study PREF-EX: preferred-stock ex-dividend under-adjustment captured in the auctions (registration after exploratory look; N 860 -> 861)
+
+Registered 2026-10-06 AFTER the exploratory evidence below (Sharadar 2005-26 all touched; official crosses 2021-26
+touched). Judge = forward only. (Concurrent session numbering: renumber this entry on collision.)
+- **Mechanism.** Exchange-listed $25-par preferreds are held by taxable retail/income investors; dividends (often
+  non-qualified: REIT, trust) are worth less than cash to the marginal holder, and dealer inventory is thin, so the
+  ex-date drop is ~0.8 x the dividend. A Roth (dividend untaxed) buys the cum-dividend close and sells the ex open.
+- **Evidence.** Sharadar (`pref_exdiv.py`, 19,853 ex-dates / 893 preferreds 2005-26): buy T-1 close, sell T open +45bp
+  (t 23), 22/22 years > 0, non-ex nights +1..+3bp; drop lands on T only (T-1..T+3 flat; drop/div 0.80). Official SIP crosses
+  2021-26 (`pref_fetch.py` -> `pref_cross.py`, 4,972 events): T-1 closing cross -> T opening cross +38.1bp mean, +34.8
+  median, hit 78%, t(day) 20, every year +30..+50, ex-top-5 +37.5, ex-top-5 issuers +41; stable by cross size (min cross
+  >= $30k: +30bp t 8.8). Quotes sample (`pref_quotes.py`, n 296): closing cross = mid -0.4bp, opening cross = mid -0.2bp
+  (median +9); quoted spreads 38bp close / 88bp open -> crossing the spread LOSES -59bp: executable ONLY in the auctions.
+  By issuer type: REIT +45.6 (drop 0.75), banks +28.4 (0.81), insurance/utilities ~+39 (0.76-0.77): partial tax-clientele
+  support (banks = most liquid). Risk: EW ex-night portfolio maxDD -2.4% at full deployment, worst night -2.0%.
+- **Rule (frozen).** Domestic preferred, raw price $10-60, 20d median $vol >= $100k, declared cash dividend with ex-date T,
+  yield 0.2-4% per payment. MOC (or LOC at the 15:50 indicative) buy at T-1, MOO sell at T; equal $ per name, each order
+  <= 10% of the name's 20-session median closing-cross $; Roth/cash account only.
+- **Forward gate.** Phase 1 (log-only, >= 60 ex-dates): official-cross P&L >= +20bp mean and median > 0 with t >= 2 ->
+  Phase 2 (user decision): tiny live pilot ($100-300/name) measuring fill rate and price vs the cross without us; PASS if
+  realized capture >= +15bp net over >= 100 live fills. KILL: Phase-1 mean <= +5bp, or live capture <= 0.
+- **Unverified constraints (not part of the statistical verdict):** price impact of our MOC/MOO in thin crosses (median
+  close cross $5.3k); broker support for MOC/MOO on preferred symbols; Roth cash-account settlement (T+1) / good-faith rules
+  on back-to-back ex-nights; taxable accounts likely net ~0 after dividend tax (Roth-specific edge).
+- **PREF-EX independent evidence (2026-10-06, Sharadar SFP 2005-26, T-1 close -> T open + div, $vol >= $100k):** CEFs
+  +13.0bp mean / +14.1 median (non-ex +3.8 / 0.0), drop/div 0.78, t 11, 21/22 yrs; ETFs (yield >= 0.5%) +17.5 / +12.1
+  (non-ex +5.2 / +3.9), drop/div 0.86, 20/22 yrs. Same sign in other retail-income classes, scaled down with per-payment
+  yield; common stocks show none (EXDIV-OPEN). Not judged (daily vendor opens, not official crosses).
+
+## Result — CEF-TL2 (judged 2026-10-06 evening; N stays 864)
+Universe restored: 1,156 SFP CEF series (delisted included) vs the original 142 survivors; 1999-2025 =
+27 formation years; ~110 bottom-quintile names/yr from a ~549-name universe; px >= $3; trunc guard.
+- **Dec leg (Nov-end -> Dec-end, Q1-u gross): +0.29% t 0.43, years+ 48%, median -0.16 — WRONG SIGN.**
+  The bottom-YTD CEF quintile does NOT underperform in December in the delisted-complete universe.
+- **Jan leg (Dec-end -> Jan-end, Q1-u gross): +2.72% t 3.28, years+ 81% (22/27), median +2.55,
+  ex-best-year +2.31)** — the December-loser January bounce is REAL on CEFs across 27 years,
+  including the never-seen pre-2016 eras (1999-2016 +2.59% t 2.44).
+- **But net (30bp round trip): +0.13% t 0.27; median -0.25; years+ 48%. DEAD at cost.**
+Final status: **REJECTED (net), with a mechanism-level finding: the December-loser January bounce is a
+durable GROSS effect across three independent panels (stocks 1998-2025 t 1.91; CEFs 1999-2025 t 3.28;
+both die at 25-60bp round trips). The January seasonal is gross-real and cost-bound at retail; treat
+any future December-sleeve idea as non-viable unless it cuts round-trip cost below ~10bp. PERMANENT
+CLASS VERDICT: December/January loser-bounce = cost-bound seasonal, no retail edge. Do not re-open on
+prices-only data again.
+- **PREF-EX execution attack — plan written before `pref_exec.py` was run (2026-10-06).** Descriptive only, no thresholds
+  tuned, nothing here changes the frozen rule: (1) flat round-trip degradation 0/5/10/15/20/25bp and asymmetric close/open
+  degradation incl. the full median half-spread on both legs; (2) capacity at p = 1/2/5/10/20% of each leg's auction $,
+  on the event's own cross $ and on an ex-ante estimate (median cross$/20d $vol x the name's $vol); (3) account $/yr at
+  $1k/3k/5k/10k/25k with whole shares, Roth (no leverage); (4) partitions by terciles or economic cut points fixed here:
+  yield per payment (terciles), price vs $25 par (<20 / 20-24 / 24-25.5 / >25.5), 20d $vol (terciles), issuer type
+  (SIC: REIT / bank-credit / insurance / utility / other), years since first price (<1 / 1-3 / >3), dividend $ (terciles).
+  Prior expectations: thin > liquid, REIT > bank, deep-discount ambiguous (distress). Spread partition is limited to the
+  296-event quote sample. Second executable form CC (MOC both legs) is reported alongside CO because Schwab has no MOO.
+- **PREF-EX execution attack — RESULT (2026-10-06, `pref_exec_out.txt`).** Statistical verdict unchanged; size claim
+  DOWNGRADED. (1) Degradation: CO +38 -> +13bp at 25bp round trip (t 6.4); CC +28 -> +13 at 15bp, ~0 at 25bp. If the open
+  leg misses the auction and pays the median half-spread (44bp) CO is NEGATIVE (-6bp): the open-auction fill decides CO.
+  (2) Capacity per ex-night (ex-ante): 1% of auction $ -> ~$280, 2% ~$550, 5% ~$1.4k, 10% ~$2.8k, 20% ~$5.5k (median).
+  (3) Account $/yr, CO at 5% participation and 10bp: $1k $232 (23%), $3k $456 (15%), $5k $585 (12%), $10k $789 (7.9%),
+  $25k $919 (3.7%); CC same: $168 / $310 / $396 / $498 / $552. Dollars plateau ~$0.9k (CO) / ~$0.55k (CC) per year at
+  5% participation: capacity, not cost, binds above ~$5k. The earlier 10%-cap/0bp figures (~$840 at $3k, ~$1.6k at $10k)
+  were optimistic by ~2x. (4) Partitions (pre-stated, no rule change): yield/payment terciles CO +26/+33/+56; dividend $
+  +30/+35/+51; thin/mid/liquid +46/+38/+30; REIT +46 vs bank +28; price vs par and issue age flat. All in the predicted
+  direction (tax value of the dividend, thin dealer inventory). (5) Broker: Schwab API supports MARKET_ON_CLOSE (live MOC
+  fills = official close, n 61) but has NO market-on-open; directed opening routes are refused (400) and AUTO-routed
+  pre-open sells filled at the official open for liquid names (n 72, median 0.0bp) -- unverified for preferreds. Schwab
+  GFV definition ("not sold prior to the settlement date") + T+1 permits back-to-back ex-nights in a cash Roth.
+  Unverified: Schwab acceptance of MOC on preferred symbols. (6) Shadow LIVE on him (log-only): `pref_ex_shadow.py`,
+  REGISTRY "PREF-EX", gate 60 forward ex-nights; Sept-2026 backfill (touched) net CO +32bp, net CC -12bp over 15 nights.
+  **Classification: strong candidate awaiting live validation, small Roth sleeve (~$0.2-0.9k/yr); passes the +8pp gate at
+  $1-5k, borderline at $10k, fails at $25k.** Next decisive step (user decision): one tiny live MOC buy + pre-open sell of a
+  liquid preferred in the Roth to verify symbol acceptance and the open fill vs the official cross.
+
+## Study VENM — FINRA off-exchange venue-mix as an IBS conditioning state (pre-register; N 866 -> 867)
+`date`: Tue Oct 6 2026 evening, before any venue-conditioned return is read.
+
+**Data.** FINRA OTC Transparency `weeklySummary` (group otcMarket; key-less endpoint that carries BOTH
+ATS and OTC weekly aggregates; the user's FINRA API key was stored in .env but the authed regData
+groups still return 401 — not needed because weeklySummary is public). Partition field
+weekStartDate (Monday); rows filtered locally to summaryTypeCode in {ATS_W_SMBL, OTC_W_SMBL};
+sample validation that *_SMBL (not _FIRM) rows are one-per symbol-week. Coverage probe: weeklySummary
+holds weeks 2018-01-08..2026-09-21 (no 4y-rolling limit). Cache: data/research/finra/ats.parquet.
+Key stored as FINRA_API_KEY in .env (gitignored); never in code/commits/logs.
+
+**Alignment (the lookahead rule).** Each row carries initialPublishedDate (empirically ~5 weeks after
+the week for the historic sample row; the field is authoritative). A symbol's state is KNOWN on
+ trading day D only if its week's initialPublishedDate < D (strictly earlier session). If
+initialPublishedDate were missing/republished inconsistently across rows, the study is DATA-LIMITED
+and I stop rather than silently lagging.
+
+**Off-exchange share.** offshare_w(i) = (ATS_W_SMBL shares + OTC_W_SMBL shares) /  (sum of
+Sharadar raw daily consolidated volume over the week's 5 sessions); clipped to [0,1]. Rationale:
+ATS + non-ATS OTC = off-exchange/internalized flow (the wholesalers' inventory); the tape total
+includes both, so the ratio is the off-exchange share of all reported volume.
+
+**States (frozen; tercile/deciles NOT tuned after the look):**
+- LV = previous-known week's offshare percentile vs each symbol's trailing 26 weeks: LOW < 1/3,
+  HIGH > 2/3.
+- DL = weekly change in offshare: RISING <= -3pp... (frozen: RISING: +3pp or more; FALLING: -3pp or
+  more; else NEUTRAL).
+- X = extreme: top decile level, bottom decile level.
+- LX interaction is the judged object: the IBS leg (book.py ibs_days: EQ18, top-3 momentum,
+  IBS<0.2, open d+1 -> open d+2) per trade bucketed by the above states.
+
+**Judged tests.** (1) IBS net return by LV bucket (LOW/HIGH) with day... trade-day clustering;
+(2) by DL bucket (RISING/FALLING); (3) X extremes. PASS bar: an interaction difference t >= 2
+(bootstrap over entry days) AND both halves same sign AND ex-top-5 stable AND the conditioned
+rule beats unconditional IBS by >= 20bp/trade; then the economic re-test (hit rate, $/yr at
+1k/3k/10k/25k, capital utilization). PLACEBOS: symbol-permuted offshare (fixed seed), adjacent
+tercile boundaries shifted one band, SPY-matched blanks. KILL: no bucket separation / placebo
+passing. **Prior:** weak-positive (off-exchange share = retail/wholesale flow state; the mechanism
+says high internalized share = the day's risk HAS ALREADY crossed retail hands; expected effect
+size < 30bp/trade interaction).
+
+**Documented data caveats:** SMBL aggregates; weeks containing holidays have 4-session tape sums
+(denominator shrinks -> share inflated ~25% for those weeks; flag holiday weeks and report with
+and without); ETF coverage in the tier identifiers ("selected exchange-traded products") verified
+per symbol; missing symbol-weeks -> state carried forward max 4 weeks else excluded.
+
+## Study FXD — fund ex-dividend under-adjustment by per-payment yield (pre-register; N 867 -> 868)
+`date`: Tue Oct 6 2026, late evening. Written before any yield-partitioned fund number is read. Branch from PREF-EX:
+its dollars plateau at ~$5k (capacity). Funds (CEFs, income ETFs) have far larger auctions.
+**Already seen (touched):** pooled SFP 2005-26 fund ex-nights only (CEF +13.0bp, ETF yield >= 0.5% +17.5bp). Nothing
+partitioned by yield, nothing pre-2005, no official crosses for funds.
+- **Mechanism.** Same as PREF-EX: the marginal holder of income funds is taxable retail who values the distribution
+  below cash, so the ex-date price drop < distribution. Prediction: under-adjustment (bp) grows with yield per payment;
+  for ETFs the creation/redemption arb should cap it at the spread (competing explanation for any ETF effect: stale
+  vendor opens / overnight drift, not under-adjustment).
+- **Ceiling (gate before testing).** Monthly payers at 1-3%/payment, drop/div 0.86 -> 14-40bp/event; ex-nights on ~150+
+  nights/yr with capacity of $100k+ per night in liquid funds -> if >= +15bp net it clears +8pp at $10k. Kill is cheap.
+- **Rule (frozen).** SFP CEF / ETF / ETN (separately), raw price >= $5, 20d median $vol >= $200k, regular cash
+  distribution with ex-date T, yield/payment y = div / close(T-1). Buy close(T-1), sell open(T) (CO) and close(T) (CC),
+  + distribution. Excess = event return minus the SAME fund's mean non-ex CO/CC over the prior 60 sessions (removes the
+  fund's own overnight drift). Yield bins fixed: <0.5% / 0.5-1% / 1-2% / 2-5% / >5% (>5% reported, not judged: ROC/
+  YieldMax-type, path noise).
+- **Judge (one look each).** J1 untouched era 1998-2004 (CEFs; ETFs too few): excess CO in y >= 0.5% bins > 0 with
+  day-clustered t >= 2 and monotone in y across the three middle bins. J2 2005-2026 partitions: median > 0, ex-top-5,
+  every 5-yr block > 0 for the bins carrying the claim. J3 execution (only if J1/J2 pass): official SIP crosses
+  2021-26 via Alpaca auctions for the passing bins; mean >= +15bp net of 5bp round trip.
+- **Kill.** J1 t < 2 or wrong sign in CEFs, OR effect not increasing in y, OR ETF effect present only in vendor opens and
+  absent in official crosses (stale-open artifact).
+- Runner `research/sim/fxd.py` -> `data/research/program/fxd_out.txt`.
