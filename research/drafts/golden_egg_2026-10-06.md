@@ -21,6 +21,7 @@ verification on Alpaca official SIP cross prints 2021-2026 (free data API, no sp
 | Name change, same ticker, first night | attention | vendor -0.2bp (n 1715) | — | — | — | — | REJECTED (attention needs the price/identity event) |
 | S&P 500 add/remove effective nights | index-fund close flow then open | 2013+ add night +20/+10bp, remove -12bp | — | — | — | — | REJECTED (decayed; = known S&P rows) |
 | Split pre-ex-date run-up (E-10..E-1) | announcement-to-ex attention drift | 2013+ +33bp med +32 t 0.8; E-5..E-1 -3bp | — | — | — | — | REJECTED (no extension of SPLIT-T0) |
+| Stock-deal acquirer nights after closing | target holders dump unwanted acquirer shares | vendor 2013+ T+0..T+4 overnight +3/+5/-2/+4/0bp medians (n ~690) | — | — | — | — | REJECTED (flow absorbed; no open footprint) |
 | Spin-off child first nights | forced parent-holder selling at the open | vendor medians -23..-34bp/night | short only | — | — | — | REJECTED long |
 
 Meta-pattern: event *drifts* in this data are on the short side (uplisting, spin child, delisting notice, parent spin);
