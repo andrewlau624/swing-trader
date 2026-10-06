@@ -1,0 +1,23 @@
+MBS-CVX probe 2002-08..2026-10-05: NEAR share 0.37
+
+TLT mom 1->h1: NEAR   -2.2bp t -1.18 n 2265 ac1 -0.016 | FAR   -2.4bp t -1.65 n 3816 ac1 -0.042
+TLT mom 5->h1: NEAR   -1.1bp t -0.60 n 2265 | FAR   -1.6bp t -1.09 n 3812
+TLT mom 5->h5: NEAR   -5.1bp t -0.59 n 453 | FAR   +1.3bp t +0.18 n 762
+TLT mom20->h5: NEAR   +5.4bp t +0.62 n 453 | FAR   -1.0bp t -0.15 n 759
+   TLT mom5->h1 2002-2012: NEAR +1.0 (n 723) FAR -1.6 (n 1895)
+   TLT mom5->h1 2013-2026: NEAR -2.1 (n 1542) FAR -1.6 (n 1917)
+
+IEF mom 1->h1: NEAR   -1.5bp t -1.69 n 2265 ac1 -0.042 | FAR   -1.5bp t -2.14 n 3816 ac1 -0.033
+IEF mom 5->h1: NEAR   -0.6bp t -0.73 n 2265 | FAR   -0.5bp t -0.77 n 3812
+IEF mom 5->h5: NEAR   +1.6bp t +0.40 n 453 | FAR   +0.9bp t +0.27 n 762
+IEF mom20->h5: NEAR   +1.2bp t +0.29 n 453 | FAR   -0.1bp t -0.03 n 759
+   IEF mom5->h1 2002-2012: NEAR -1.0 (n 723) FAR -0.8 (n 1895)
+   IEF mom5->h1 2013-2026: NEAR -0.5 (n 1542) FAR -0.3 (n 1917)
+
+SPY mom 1->h1: NEAR   -4.4bp t -1.69 n 2265 ac1 -0.145 | FAR   -3.1bp t -1.71 n 3816 ac1 -0.073
+SPY mom 5->h1: NEAR   -3.2bp t -1.19 n 2265 | FAR   -1.6bp t -0.88 n 3812
+SPY mom 5->h5: NEAR  -16.0bp t -1.48 n 453 | FAR  -14.4bp t -1.72 n 762
+SPY mom20->h5: NEAR   +6.8bp t +0.63 n 453 | FAR   +1.2bp t +0.14 n 759
+   SPY mom5->h1 2002-2012: NEAR -4.7 (n 723) FAR -1.2 (n 1895)
+   SPY mom5->h1 2013-2026: NEAR -2.4 (n 1542) FAR -2.0 (n 1917)
+

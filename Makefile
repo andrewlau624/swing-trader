@@ -385,6 +385,9 @@ qi-eval:      ## forward test of the 15:40 quote-imbalance tilt (Round 24 BB; ve
 insider-shadow: ## Round 31 ID3: score + plan the insider-purchase session shadow (weekdays before 09:00 ET; no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.insider_shadow $(DATE)
 
+pref-ex: ## PREF-EX shadow: preferred ex-dividend auction capture from official crosses (no orders)
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.pref_ex_shadow
+
 exdate-open: ## Ex-date open shadow: split / spin-off ex-date night from official crosses (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.exdate_open_shadow
 

@@ -1,0 +1,17 @@
+PREF-EX on official crosses: 4972 events / 733 ex-dates / 409 preferreds (2021-01-08..2026-10-02); fetched events 5944
+
+all (dv>=$100k)    co: n  4972 mean  +38.1 med  +34.8 hit 0.78 t(day) +20.03 ex-top5  +37.5 | yrs 2021:+32 2022:+30 2023:+50 2024:+35 2025:+38 2026:+44
+all (dv>=$100k)    cc: n  4972 mean  +28.2 med  +25.6 hit 0.64 t(day) +7.68 ex-top5  +27.2 | yrs 2021:+34 2022:+17 2023:+60 2024:+14 2025:+19 2026:+31
+
+dv>=$200k          co: n  3885 mean  +35.4 med  +32.3 hit 0.78 t(day) +17.58 ex-top5  +34.8 | yrs 2021:+31 2022:+29 2023:+47 2024:+33 2025:+36 2026:+38
+dv>=$200k          cc: n  3885 mean  +27.9 med  +24.0 hit 0.64 t(day) +9.46 ex-top5  +27.0 | yrs 2021:+33 2022:+22 2023:+55 2024:+15 2025:+20 2026:+27
+
+dv>=$1M            co: n  1224 mean  +28.6 med  +27.7 hit 0.76 t(day) +12.16 ex-top5  +27.6 | yrs 2021:+25 2022:+32 2023:+36 2024:+26 2025:+28 2026:+22
+dv>=$1M            cc: n  1224 mean  +17.9 med  +15.0 hit 0.59 t(day) +4.63 ex-top5  +15.8 | yrs 2021:+30 2022:+24 2023:+21 2024:+21 2025:-3 2026:+10
+
+open cross >= $5k  co: n  3849 mean  +38.3 med  +35.3 hit 0.79 t(day) +17.29 ex-top5  +37.6 | yrs 2021:+32 2022:+32 2023:+48 2024:+35 2025:+41 2026:+42
+open cross >= $5k  cc: n  3849 mean  +27.9 med  +24.9 hit 0.65 t(day) +8.74 ex-top5  +27.0 | yrs 2021:+33 2022:+23 2023:+55 2024:+16 2025:+19 2026:+27
+
+drop at open / dividend: median 0.78
+closing-cross $ on T-1: median $5,304 p25 $2,599; opening-cross $ on T: median $15,346 p25 $5,601
+events/yr 868, ex-dates/yr 128

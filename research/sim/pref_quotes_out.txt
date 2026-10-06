@@ -1,0 +1,8 @@
+PREF-EX quotes sample: 296 events with both quotes
+spr_c                      mean   +58.8bp  median   +38.4bp
+spr_o                      mean  +136.3bp  median   +88.2bp
+close_vs_mid               mean    -0.4bp  median    +2.1bp
+open_vs_mid                mean    -0.2bp  median    +9.0bp
+co                         mean   +37.8bp  median   +33.9bp
+co_mid                     mean   +38.0bp  median   +21.1bp
+co_cross_buy_ask_sell_bid  mean   -58.6bp  median   -41.0bp

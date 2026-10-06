@@ -1,0 +1,114 @@
+PREF-EX execution economics, official crosses 2021-01-08..2026-10-02: 4972 events, 733 ex-nights (128/yr)
+auction $: close median $5,304, open median $15,346; ex-ante size = 0.014 (close) / 0.031 (open) x 20d median daily $vol
+
+== 1. Per-event edge after flat round-trip degradation (bp) ==
+CO - 0bp: mean  +38.1 med  +34.8 hit 0.78 t +20.0 n 4972
+CO - 5bp: mean  +33.1 med  +29.8 hit 0.74 t +17.3 n 4972
+CO -10bp: mean  +28.1 med  +24.8 hit 0.70 t +14.6 n 4972
+CO -15bp: mean  +23.1 med  +19.8 hit 0.67 t +11.8 n 4972
+CO -20bp: mean  +18.1 med  +14.8 hit 0.63 t  +9.1 n 4972
+CO -25bp: mean  +13.1 med   +9.8 hit 0.59 t  +6.4 n 4972
+
+CC - 0bp: mean  +28.2 med  +25.6 hit 0.64 t  +7.7 n 4972
+CC - 5bp: mean  +23.2 med  +20.6 hit 0.62 t  +6.1 n 4972
+CC -10bp: mean  +18.2 med  +15.6 hit 0.59 t  +4.5 n 4972
+CC -15bp: mean  +13.2 med  +10.6 hit 0.56 t  +2.9 n 4972
+CC -20bp: mean   +8.2 med   +5.6 hit 0.53 t  +1.3 n 4972
+CC -25bp: mean   +3.2 med   +0.6 hit 0.50 t  -0.3 n 4972
+
+== 2. Asymmetric degradation (close leg / open leg, bp) for CO ==
+close  0 / open 10: mean  +28.1 med  +24.8 hit 0.70 t +14.6 n 4972
+close  0 / open 20: mean  +18.1 med  +14.8 hit 0.63 t  +9.1 n 4972
+close  0 / open 30: mean   +8.1 med   +4.8 hit 0.54 t  +3.7 n 4972
+close  0 / open 44: mean   -5.9 med   -9.2 hit 0.42 t  -4.0 n 4972
+close  5 / open 20: mean  +13.1 med   +9.8 hit 0.59 t  +6.4 n 4972
+close 10 / open 30: mean   -1.9 med   -5.2 hit 0.46 t  -1.8 n 4972
+close 19 / open 44: mean  -24.9 med  -28.2 hit 0.28 t -14.4 n 4972
+  (19/44 = paying the full median half-spread on both legs = no auction at all)
+
+== 3. Capacity per ex-night ($ deployable, all events that night) ==
+p   1% event cross $: per-event median CO $     42 | per night CO median $     191 p25 $     74 | CC median $     263
+p   1% ex-ante $    : per-event median CO $     60 | per night CO median $     276 p25 $     82 | CC median $     276
+p   2% event cross $: per-event median CO $     85 | per night CO median $     382 p25 $    148 | CC median $     526
+p   2% ex-ante $    : per-event median CO $    119 | per night CO median $     552 p25 $    165 | CC median $     552
+p   5% event cross $: per-event median CO $    212 | per night CO median $     955 p25 $    369 | CC median $   1,315
+p   5% ex-ante $    : per-event median CO $    298 | per night CO median $   1,379 p25 $    412 | CC median $   1,379
+p  10% event cross $: per-event median CO $    425 | per night CO median $   1,910 p25 $    738 | CC median $   2,630
+p  10% ex-ante $    : per-event median CO $    597 | per night CO median $   2,758 p25 $    824 | CC median $   2,758
+p  20% event cross $: per-event median CO $    849 | per night CO median $   3,820 p25 $  1,477 | CC median $   5,260
+p  20% ex-ante $    : per-event median CO $  1,193 | per night CO median $   5,516 p25 $  1,648 | CC median $   5,516
+
+== 4. Account economics (Roth, whole shares, ex-ante capacity) ==
+form p     cost                 $1,000           $3,000           $5,000          $10,000          $25,000
+CO    1% 0bp    $   153  15.3%  39% $   240   8.0%  21% $   248   5.0%  14% $   250   2.5%   7% $   250   1.0%   3%
+CO    1% 10bp   $   103  10.3%  39% $   160   5.3%  21% $   162   3.2%  14% $   162   1.6%   7% $   162   0.6%   3%
+CO    1% 20bp   $    53   5.3%  39% $    80   2.7%  21% $    75   1.5%  14% $    74   0.7%   7% $    74   0.3%   3%
+CO    1% impact $   122  12.2%  39% $   189   6.3%  21% $   193   3.9%  14% $   194   1.9%   7% $   194   0.8%   3%
+CO    2% 0bp    $   227  22.7%  54% $   398  13.3%  34% $   493   9.9%  25% $   535   5.4%  14% $   541   2.2%   6%
+CO    2% 10bp   $   158  15.8%  54% $   269   9.0%  34% $   334   6.7%  25% $   352   3.5%  14% $   353   1.4%   6%
+CO    2% 20bp   $    88   8.8%  54% $   140   4.7%  34% $   175   3.5%  25% $   169   1.7%  14% $   166   0.7%   6%
+CO    2% impact $   165  16.5%  54% $   282   9.4%  34% $   351   7.0%  25% $   371   3.7%  14% $   373   1.5%   6%
+CO    5% 0bp    $   325  32.5%  73% $   656  21.9%  52% $   851  17.0%  42% $ 1,164  11.6%  29% $ 1,391   5.6%  15%
+CO    5% 10bp   $   232  23.2%  73% $   456  15.2%  52% $   585  11.7%  42% $   789   7.9%  29% $   919   3.7%  15%
+CO    5% 20bp   $   139  13.9%  73% $   257   8.6%  52% $   319   6.4%  42% $   413   4.1%  29% $   447   1.8%  15%
+CO    5% impact $   194  19.4%  73% $   373  12.4%  52% $   475   9.5%  42% $   633   6.3%  29% $   723   2.9%  15%
+CO   10% 0bp    $   392  39.2%  84% $   876  29.2%  66% $ 1,202  24.0%  56% $ 1,723  17.2%  42% $ 2,573  10.3%  26%
+CO   10% 10bp   $   285  28.5%  84% $   622  20.7%  66% $   842  16.8%  56% $ 1,187  11.9%  42% $ 1,749   7.0%  26%
+CO   10% 20bp   $   177  17.7%  84% $   368  12.3%  66% $   483   9.7%  56% $   651   6.5%  42% $   926   3.7%  26%
+CO   10% impact $   177  17.7%  84% $   367  12.2%  66% $   482   9.6%  56% $   650   6.5%  42% $   924   3.7%  26%
+CO   20% 0bp    $   434  43.4%  93% $ 1,087  36.2%  79% $ 1,561  31.2%  70% $ 2,420  24.2%  56% $ 3,864  15.5%  38%
+CO   20% 10bp   $   316  31.6%  93% $   786  26.2%  79% $ 1,114  22.3%  70% $ 1,699  17.0%  56% $ 2,649  10.6%  38%
+CO   20% 20bp   $   197  19.7%  93% $   484  16.1%  79% $   667  13.3%  70% $   977   9.8%  56% $ 1,434   5.7%  38%
+CO   20% impact $    99   9.9%  93% $   234   7.8%  79% $   296   5.9%  70% $   378   3.8%  56% $   425   1.7%  38%
+
+CC    1% 0bp    $   119  11.9%  39% $   176   5.9%  21% $   183   3.7%  14% $   183   1.8%   7% $   183   0.7%   3%
+CC    1% 10bp   $    69   6.9%  39% $    96   3.2%  21% $    96   1.9%  14% $    94   0.9%   7% $    94   0.4%   3%
+CC    1% 20bp   $    19   1.9%  39% $    16   0.5%  21% $    10   0.2%  14% $     6   0.1%   7% $     6   0.0%   3%
+CC    1% impact $   100  10.0%  39% $   145   4.8%  21% $   150   3.0%  14% $   149   1.5%   7% $   149   0.6%   3%
+CC    2% 0bp    $   176  17.6%  54% $   303  10.1%  34% $   362   7.2%  25% $   394   3.9%  14% $   394   1.6%   6%
+CC    2% 10bp   $   106  10.6%  54% $   174   5.8%  34% $   203   4.1%  25% $   211   2.1%  14% $   207   0.8%   6%
+CC    2% 20bp   $    36   3.6%  54% $    45   1.5%  34% $    43   0.9%  25% $    28   0.3%  14% $    20   0.1%   6%
+CC    2% impact $   138  13.8%  54% $   233   7.8%  34% $   275   5.5%  25% $   295   2.9%  14% $   292   1.2%   6%
+CC    5% 0bp    $   261  26.1%  73% $   510  17.0%  52% $   662  13.2%  42% $   873   8.7%  29% $ 1,024   4.1%  15%
+CC    5% 10bp   $   168  16.8%  73% $   310  10.3%  52% $   396   7.9%  42% $   498   5.0%  29% $   552   2.2%  15%
+CC    5% 20bp   $    75   7.5%  73% $   111   3.7%  52% $   130   2.6%  42% $   123   1.2%  29% $    80   0.3%  15%
+CC    5% impact $   181  18.1%  73% $   338  11.3%  52% $   434   8.7%  42% $   551   5.5%  29% $   619   2.5%  15%
+CC   10% 0bp    $   304  30.4%  84% $   696  23.2%  66% $   936  18.7%  56% $ 1,345  13.4%  42% $ 1,894   7.6%  26%
+CC   10% 10bp   $   196  19.6%  84% $   442  14.7%  66% $   576  11.5%  56% $   809   8.1%  42% $ 1,070   4.3%  26%
+CC   10% 20bp   $    89   8.9%  84% $   187   6.2%  66% $   217   4.3%  56% $   272   2.7%  42% $   247   1.0%  26%
+CC   10% impact $   173  17.3%  84% $   387  12.9%  66% $   499  10.0%  56% $   694   6.9%  42% $   894   3.6%  26%
+CC   20% 0bp    $   314  31.4%  93% $   869  29.0%  79% $ 1,250  25.0%  70% $ 1,886  18.9%  56% $ 2,976  11.9%  38%
+CC   20% 10bp   $   196  19.6%  93% $   567  18.9%  79% $   803  16.1%  70% $ 1,165  11.6%  56% $ 1,761   7.0%  38%
+CC   20% 20bp   $    77   7.7%  93% $   266   8.9%  79% $   356   7.1%  70% $   443   4.4%  56% $   546   2.2%  38%
+CC   20% impact $   111  11.1%  93% $   351  11.7%  79% $   483   9.7%  70% $   647   6.5%  56% $   889   3.6%  38%
+
+  cell = gross $/yr, %/yr of the account, mean share deployed on ex-nights
+
+== 5. Event partitions (economically motivated; descriptive, CO and CC) ==
+-- yield/payment
+   low                CO mean  +25.8 med  +27.2 hit 0.75 t +12.1 n 1658 | CC mean  +15.5 med  +17.1
+   mid                CO mean  +32.6 med  +31.4 hit 0.77 t +13.2 n 1657 | CC mean  +21.9 med  +19.4
+   high               CO mean  +55.8 med  +51.4 hit 0.82 t +17.3 n 1657 | CC mean  +47.3 med  +41.6
+-- price vs $25 par
+   <20 (deep disc)    CO mean  +43.1 med  +40.6 hit 0.75 t +11.5 n 1196 | CC mean  +27.8 med  +21.6
+   20-24              CO mean  +38.9 med  +37.3 hit 0.75 t +12.7 n 1549 | CC mean  +21.8 med  +15.5
+   24-25.5            CO mean  +38.2 med  +35.3 hit 0.83 t +20.2 n 1119 | CC mean  +33.1 med  +31.4
+   >25.5              CO mean  +31.3 med  +28.6 hit 0.80 t +16.0 n 1108 | CC mean  +32.9 med  +27.4
+-- auction liquidity (20d $vol)
+   thin               CO mean  +46.4 med  +44.0 hit 0.79 t +14.5 n 1658 | CC mean  +31.9 med  +32.5
+   mid                CO mean  +38.2 med  +35.2 hit 0.78 t +14.0 n 1657 | CC mean  +32.3 med  +26.7
+   liquid             CO mean  +29.6 med  +29.1 hit 0.77 t +13.3 n 1657 | CC mean  +20.5 med  +17.4
+-- issuer type
+   REIT               CO mean  +45.6 med  +44.4 hit 0.80 t +13.4 n 1635 | CC mean  +32.4 med  +32.5
+   bank/credit        CO mean  +28.4 med  +28.3 hit 0.76 t +12.3 n 1432 | CC mean  +14.5 med  +15.6
+   insurance          CO mean  +38.7 med  +34.7 hit 0.84 t +12.9 n 544 | CC mean  +26.0 med  +21.9
+   other              CO mean  +38.9 med  +33.2 hit 0.76 t +13.1 n 1108 | CC mean  +40.7 med  +31.4
+   utility            CO mean  +39.1 med  +37.4 hit 0.75 t  +8.9 n 253 | CC mean  +29.5 med  +30.3
+-- years since first price
+   <1y                CO mean  +38.4 med  +34.3 hit 0.79 t  +8.8 n 372 | CC mean  +37.0 med  +32.6
+   1-3y               CO mean  +39.7 med  +35.7 hit 0.77 t +14.5 n 991 | CC mean  +23.7 med  +23.4
+   >3y                CO mean  +37.6 med  +34.7 hit 0.78 t +17.8 n 3609 | CC mean  +28.6 med  +25.4
+-- dividend $ per share
+   small              CO mean  +29.8 med  +29.7 hit 0.74 t +11.0 n 1712 | CC mean  +15.0 med  +16.4
+   mid                CO mean  +34.8 med  +31.9 hit 0.79 t +15.0 n 1694 | CC mean  +27.4 med  +23.2
+   large              CO mean  +50.7 med  +45.2 hit 0.82 t +16.7 n 1566 | CC mean  +43.6 med  +37.1

@@ -1,0 +1,12 @@
+GSCI-ROLL probe: change in (F1-F2)/F2 over business-day windows of each month (bp); negative = F1 cheapens
+
+== CL: 119 months ==
+pre   mean   +9.0 med   +0.3 t +1.87 hit<0 0.50 | 2011-17   +2.8 2018-25  +24.1
+roll  mean  -13.9 med   -1.8 t -1.46 hit<0 0.55 | 2011-17   -7.3 2018-25  -29.7
+post  mean   -2.7 med   -2.7 t -0.70 hit<0 0.58 | 2011-17   -0.4 2018-25   -8.1
+
+== NG: 119 months ==
+pre   mean   +7.1 med   +1.9 t +1.16 hit<0 0.50 | 2011-17   -1.4 2018-25  +27.5
+roll  mean   +3.7 med   +9.1 t +0.41 hit<0 0.44 | 2011-17  +10.5 2018-25  -12.6
+post  mean   +8.6 med   +4.1 t +0.91 hit<0 0.45 | 2011-17   +7.7 2018-25  +10.9
+
