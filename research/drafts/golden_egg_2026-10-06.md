@@ -82,3 +82,16 @@ splits (price goes UP) show the mirror sign (-100bp), spin-off children (forced 
 - For every forward split with ex_date = next session: common stock (not ETF/ETN), raw close >= $5, $vol >= $1M ->
   log intended MOC buy (closing cross price) and MOO sell (next opening cross price), no orders.
 - Gate: 40 logged events. Pass = median raw-SPY > 0 and mean > 10bp; kill = median <= 0 after 40.
+
+## Meta-search (after ~20 hypotheses)
+- Event *drifts* (uplisting, delisting notice, spin parent/child, reverse split) sit on the short side; long-only cannot
+  harvest them.
+- Forced *institutional* flows with sharp dates are absorbed (acquirer shares after stock deals: ~0bp at every open; S&P
+  effective nights decayed). Forced flows that do leave a footprint are where the counterparty is **retail at the open**
+  (splits, spin-off parents, de-SPACs) or a holder dumping a new unwanted security (spin child, short side).
+- Vendor overnight effects around **identity** events (ticker change) are stitching artifacts; only events where the
+  security keeps its symbol (splits, spins) agree with the official tape.
+- Gate kills (no test): dividend-aristocrat index adds (1 rebalance/yr, a few names: ceiling far below +8pp);
+  futures/OPRA ideas need paid Databento (not allowed tonight).
+- Conclusion: the free daily-bar frontier is close to exhausted again; the one live lead is the ex-date open family,
+  now a forward shadow on `him`.
