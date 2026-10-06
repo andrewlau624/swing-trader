@@ -96,3 +96,24 @@ splits (price goes UP) show the mirror sign (-100bp), spin-off children (forced 
   futures/OPRA ideas need paid Databento (not allowed tonight).
 - Conclusion: the free daily-bar frontier is close to exhausted again; the one live lead is the ex-date open family,
   now a forward shadow on `him`.
+
+## Update after the domain-jump phase (2026-10-06, ~25 unrelated regions; ledger `region_ledger_2026-10-06.md`)
+**Top 5 surviving candidates**
+1. **SPLIT-T0** — STRONG CANDIDATE, forward shadow live on `him`. Official crosses 2016-20 +77bp t 2.99 median +57
+   (registered PASS); 2021-26 +120bp t 2.42 median +17. ~34 events/yr; capacity to ~$10-25k. Shrinking median.
+2. **SPIN-T0** — PROMISING (same class). Official 2021-26 n 78 +83bp t 2.03 median +54 (registered PASS). ~13/yr;
+   child-share crediting risk. In the same shadow.
+3. **LETF-NIGHT** — PROMISING, independent region (product-induced forced flow at the close). Official crosses 2024-26
+   n 2009 +44bp t 2.17 median +32; ~half is beta (median beta 2.9): beta-adjusted edge vs non-LETF names ~+15-20bp,
+   concentrated on market-down days. ~1000 events/yr, 83% outside the night leg's rule. No history before 2024 ->
+   forward-only registration; not deployed (needs the user's OK).
+4. **OPEX SOQ open reversal** — PROMISING-small (mechanism confirmed): S&P members' opening gaps reverse intraday
+   -0.19 x gap on monthly OPEX Fridays vs -0.10 otherwise; 12 days/yr, ~4%/yr ceiling.
+5. **Listing-transfer first night** (NYSE<->Nasdaq) — PROMISING-small: +30bp t 2.54 median +23; ~17/yr, ~4%/yr.
+   (Dual-class spread reversion is stronger statistically — t 9-11 — but cost/short-bound; listed in the ledger.)
+
+**Class finding.** Every positive this night is a one-night distortion in an official auction caused by a forced,
+price-insensitive participant (retail after splits, spin parents, LETF hedge desks, SPX option settlement, venue
+change). Long-horizon long-only events die on the delisted-complete small-cap drift. Mid-cap closing crosses
+themselves are efficient (CLOSE-DISLOC: 0.13 dislocations >= 1% per session). No golden egg: nothing has untouched OOS
+except SPLIT-T0's official 2016-20 window, and its economics sit at the +8pp gate.
