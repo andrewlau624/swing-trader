@@ -165,6 +165,15 @@ def _pick_cost(state: Path, logs: Path) -> dict:
     return dict(n=cheap, week=wk, line=w.line(rows) if rows else "no live night trips scored yet (make pick-cost)")
 
 
+def _exdate_open(state: Path, logs: Path) -> dict:
+    from . import exdate_open_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    fwd = [r for r in rows if r.get("status") == "scored" and r.get("eligible") and not r.get("fund")
+           and r["ex"] >= w.FORWARD_FROM]
+    wk = sum(1 for r in fwd if r["ex"] >= _week_ago())
+    return dict(n=len(fwd), week=wk, line=w.line(rows) if rows else "no events logged yet (make exdate-open)")
+
+
 # ---------------------------------------------------------------- the list
 
 def _tme_l(state: Path, logs: Path) -> dict:
@@ -296,6 +305,11 @@ REGISTRY: list[Test] = [
          "not one event, over ~12 months (personal-scale economics, not scalable alpha)?",
          "2026-10-04", 2, "independent completed events", _cpc, "make cpc-status; research/drafts/study_cpc.md",
          ["cpc_ledger"]),
+    Test("Ex-date open: split + spin-off night (SPLIT-T0 / SPIN-T0)", "close cross before a forward-split or "
+         "spin-off ex-date -> ex-date opening cross (parent + child): does the retail open premium (official 2016-20 "
+         "split median +57bp, 2021-26 +17bp; spins +54bp) hold forward on common stocks?",
+         "2026-10-07", 40, "forward common-stock events", _exdate_open,
+         "make exdate-open; research/drafts/golden_egg_2026-10-06.md", ["exdate_open_shadow"]),
     Test("Daybook PROD (QQQ+SMH noise, forward)", "production-equivalent intraday noise leg, replayed as a "
          "no-order forward shadow: does the edge survive live (esp. the 2024-26 decay)?",
          "2026-10-04", 60, "sessions", _daybook("PROD"), "make daybook-shadow; make daybook-report",
