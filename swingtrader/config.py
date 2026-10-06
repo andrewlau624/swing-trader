@@ -272,6 +272,9 @@ class DailyCfg:
     lever_g1_log: str = "shadow"
     # Wash guard G4s, Roth first (add. 31, post-hoc): log what it would change.
     wash_guard_mode: str = "shadow"
+    # Study ACC: log the 1.25x non-callable 3x-ETF IBS overlay vs the live 1x leg
+    # (delta, running maxDD, realized exposure); no order path.
+    ibs_lev_shadow: str = "shadow"
     # The LIVE wash guard between the two real-money books (add. 31/39).
     # symmetric: each book avoids every name the other held/ordered/closed in
     #   31 days, on every leg; the brokerage book runs first each phase.

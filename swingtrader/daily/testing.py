@@ -123,6 +123,13 @@ def _stack(state: Path, logs: Path) -> dict:
     return dict(n=len(rows), week=wk, line=s.line(rows) if rows else "no sessions logged yet (make stack-shadow)")
 
 
+def _ibs_lev(state: Path, logs: Path) -> dict:
+    from . import ibs_lev_shadow as s
+    rows = s._read(state / s.LOG_NAME)
+    wk = sum(1 for r in rows if r["date"] >= _week_ago())
+    return dict(n=len(rows), week=wk, line=s.line(rows))
+
+
 def _pick_cost(state: Path, logs: Path) -> dict:
     from . import pick_cost_watch as w
     rows = [r for r in w._jsonl(state / w.LOG_NAME) if "buy_cost_bp" in r]
@@ -162,6 +169,10 @@ REGISTRY: list[Test] = [
          "2026-10-02", 100, "$5-10 live trips", _pick_cost, "make pick-cost; pick_quality_log.md", ["pick_cost_watch"]),
     Test("Book stacked on index beta (index-beat FOUND)", "taxable = SPY 1.0x + live legs on margin; Roth = 1/3 UPRO + 2/3 book: does it beat both the live accounts and SPY?",
          "2026-10-02", 250, "sessions", _stack, "make stack-shadow; study_ib_found_stack.md", ["stack_shadow"]),
+    Test("IBS 1.25x 3x-ETF overlay (Study ACC)", "does the non-callable 1.25x 3x-ETF IBS overlay beat the live 1x leg forward, "
+         "inside a 25% DD budget? (kill: maxDD < -25% or delta <= 0 at 60 sessions)",
+         "2026-10-05", 60, "sessions", _ibs_lev, "make ibs-lev-shadow; study_acc_account_structure.md",
+         ["ibs_lev_shadow"]),
     Test("Insider-day (ID3)", "buy the open / sell the close the session after an officer/director buy",
          "2026-10-02", 300, "scored trades", _insider(None), "make forward-status", ["insider_shadow", "insider_day"]),
     Test("EV2: first insider buy in 2+ years", "is ID3 ~2x stronger when nobody bought in the open market for 2 years?",

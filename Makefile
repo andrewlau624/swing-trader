@@ -391,6 +391,9 @@ pick-cost: ## Pick-quality lead: live night auction cost + bounce by price bucke
 stack-shadow: ## Index-beat FOUND: log the book stacked on index beta (taxable SPY core + legs; Roth 1/3 UPRO) vs live and SPY (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.stack_shadow $(DATE)
 
+ibs-lev-shadow: ## Study ACC: log the 1.25x 3x-ETF IBS overlay vs the live 1x leg (delta, running maxDD, exposure); never trades; make ibs-lev-shadow [DATE=YYYY-MM-DD]
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.ibs_lev_shadow $(DATE)
+
 cef-activist-watch: ## Goal G45-F: first activist 13Ds on closed-end funds, logged and scored at 60 sessions vs PCEF (log only, no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.cef_activist_watch
 
