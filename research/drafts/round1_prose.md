@@ -4954,3 +4954,12 @@ top-500, mean yield ~0.7%/payment: +4..+7bp, dead) may include large REITs; no R
   If a class passes -> official crosses 2021-26 (J3, same bars net of 5bp round trip) + capacity at $10k/$25k/$100k.
 - **Kill.** Fails -> the clientele effect does not reach deep-auction common stock; PREF/ETDX stays capacity-capped.
 - Runner `research/sim/hyc.py` -> `data/research/program/hyc_out.txt`.
+
+## Result — HYC (judged 2026-10-06 late; N 871): KILL
+`research/sim/hyc.py` -> `data/research/program/hyc_out.txt`. BDCs are SIC 6799 in Sharadar (6726 absent): 6799 used as
+the BDC proxy. REIT (n 8,169) xCO +21.9bp t 7.9, 26/29 yrs, but **2021-26 +2.9**; by year +40..+70 (1998-2006) ->
++1..+18 (2013-19) -> -17..+18 (2020-26). BDC~6799 (n 1,201) xCO +16.8 but 2021-26 +5.7, xCC -19.6 (t -3.6). Fails
+the 2021-26 >= +15bp bar in both classes. **Class verdict (with FXD): the tax-clientele ex-date under-adjustment has
+been arbitraged to ~0 wherever the auction is deep (REIT/BDC common, CEFs, ETFs) and survives only in thin-inventory
+$25-par securities (preferreds, baby bonds, CEF preferreds). The PREF/ETDX capacity ceiling is structural.** No more
+ex-dividend security classes without a new thin-inventory class.
