@@ -1,0 +1,49 @@
+SPIN-CHILD one-look  (events=557, traded=531, 1998-01-02..2026-06-29)
+dropped: {'ok': 531, 'no_bars': 16, 'late_entry': 9, 'short_history': 1}
+late-entry count: 0
+PRIMARY net abn 60d @10bp/side: mean=-1.038% t=-0.70 (exit-month clustered) median=-2.605% hit=45.2% n=531
+stress @25bp/side: mean=-1.338% t=-0.90
+gross (no bench) net: mean=0.278% t=0.16
+half 1998-2011: n=196 mean=-0.072% t=-0.03 median=-1.229%
+half 2012-2026: n=335 mean=-1.604% t=-0.80 median=-3.680%
+ex-top-5: mean=-0.287% t=-0.20
+placebo (same child, -252 sess): n=51 mean=1.271% t=0.36
+parent control (same window): n=496 mean=-3.106% t=-3.33
+year 1998: n=12 mean_net=-6.29%
+year 1999: n=17 mean_net=-9.60%
+year 2000: n=19 mean_net=-0.84%
+year 2001: n=17 mean_net=13.34%
+year 2002: n=17 mean_net=-0.52%
+year 2003: n=10 mean_net=18.19%
+year 2004: n=12 mean_net=6.82%
+year 2005: n=10 mean_net=2.27%
+year 2006: n=9 mean_net=3.39%
+year 2007: n=15 mean_net=0.46%
+year 2008: n=24 mean_net=-7.66%
+year 2009: n=8 mean_net=-2.56%
+year 2010: n=10 mean_net=-8.08%
+year 2011: n=9 mean_net=1.13%
+year 2012: n=22 mean_net=4.39%
+year 2013: n=20 mean_net=18.22%
+year 2014: n=33 mean_net=-7.38%
+year 2015: n=42 mean_net=1.26%
+year 2016: n=28 mean_net=2.68%
+year 2017: n=25 mean_net=3.33%
+year 2018: n=21 mean_net=-1.21%
+year 2019: n=22 mean_net=-2.67%
+year 2020: n=17 mean_net=4.32%
+year 2021: n=18 mean_net=-0.24%
+year 2022: n=26 mean_net=-20.40%
+year 2023: n=29 mean_net=-12.23%
+year 2024: n=12 mean_net=-4.89%
+year 2025: n=16 mean_net=-9.56%
+year 2026: n=11 mean_net=10.86%
+liquid subset (>=2$, >=500k dvol): n=477 mean=-0.129% t=-0.09 median=-1.615%
+entry dvol: median=$54,578,036 p10=$552,834
+dollars/year (equal-weight active trades, 5% entry-dvol cap/trade, idle=0):
+  $1000: total=-98.8% ann=-14.3% $-143/yr maxDD=-99.3%
+  $3000: total=-98.3% ann=-13.2% $-397/yr maxDD=-98.9%
+  $5000: total=-98.1% ann=-12.9% $-645/yr maxDD=-98.8%
+  $10000: total=-98.0% ann=-12.7% $-1,267/yr maxDD=-98.8%
+  $25000: total=-97.7% ann=-12.2% $-3,061/yr maxDD=-98.6%
+VERDICT: REJECTED

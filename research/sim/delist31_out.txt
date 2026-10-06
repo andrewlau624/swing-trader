@@ -1,0 +1,33 @@
+DELIST-31 one-look (episodes=11391, traded=3156)
+PRIMARY net abn 60d @10bp/side: mean=-2.724% t=-3.30 (exit-month clustered) median=-3.024% hit=40.5% n=3156
+stress @25bp/side: mean=-3.024% t=-3.67
+half 2004-2015: n=1775 mean=-1.564% t=-1.38 median=-1.640%
+half 2016-2026: n=1381 mean=-4.221% t=-3.66 median=-4.932%
+ex-top-5: mean=-2.566% t=-3.11
+delist-during-hold: 243/3156 (7.7%); ex-delist mean=-2.605% t=-2.99
+placebo (-252 sess): n=2902 mean=1.295% median=-2.276%
+year 2004: n=30 mean_net=-6.54%
+year 2005: n=221 mean_net=-2.44%
+year 2006: n=329 mean_net=0.58%
+year 2007: n=232 mean_net=-2.06%
+year 2008: n=177 mean_net=-6.40%
+year 2009: n=141 mean_net=8.86%
+year 2010: n=109 mean_net=-0.73%
+year 2011: n=92 mean_net=-5.63%
+year 2012: n=119 mean_net=-2.90%
+year 2013: n=104 mean_net=-0.53%
+year 2014: n=105 mean_net=-0.57%
+year 2015: n=93 mean_net=-5.98%
+year 2016: n=106 mean_net=0.10%
+year 2017: n=101 mean_net=-0.61%
+year 2018: n=103 mean_net=-3.86%
+year 2019: n=105 mean_net=-11.22%
+year 2020: n=111 mean_net=1.41%
+year 2021: n=180 mean_net=-2.17%
+year 2022: n=186 mean_net=-1.82%
+year 2023: n=173 mean_net=-8.95%
+year 2024: n=120 mean_net=-9.32%
+year 2025: n=137 mean_net=-3.03%
+year 2026: n=82 mean_net=-9.98%
+entry dvol: median=$1,840,144 p10=$172,815
+VERDICT: REJECTED
