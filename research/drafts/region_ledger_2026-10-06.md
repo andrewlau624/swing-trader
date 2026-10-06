@@ -26,3 +26,5 @@
 | Lagged fund-redemption selling after market down days | 1 (R) | REJECTED | after SPY <= -2%: illiquid (<$5M) names T+1 session -13bp median (2013+), no T+2 overnight rebound (-6..-8bp) | fund-flow data | — |
 | Regulatory holding period: Rule 144 6-month unlock after PIPEs (8-K 3.02) | 1 (P) | REJECTED | abnormal ~-2%/20d in every window (80-100 -225bp med, 115-135 -188, 135-155 -190): generic dilution/small-cap drift, no unlock-specific supply | — | — |
 | Exchange auction: passive LOC liquidity to closing-cross dislocations (CLOSE-DISLOC, new minute data) | 1 | WEAK -> killed | 1% dislocations 0.13/session, +106bp t 1.76 but ex-top-5 negative, first half -77bp; 0.5% +9bp t 1.06 | small caps / LETF names on market-down days | — |
+| Index-level LETF close flow (era diff-in-diff, QQQ/SPY/SMH/IWM 1999-2026) | 1 (J) | REJECTED | overnight reversal after |z| >= 1.5 index days does not strengthen as index LETF AUM grows; 2022-26 weakest. Index flow << index liquidity (single-stock ratio is what matters) | — | — |
+| Retail attention: IPO first nights | 1 (W) | REJECTED | night after day 1 mean +56bp t 2.9 but median +5, 2013+ median -4 (outliers) | — | — |

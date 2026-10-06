@@ -4216,3 +4216,12 @@ credited and sellable at the E open.
 73 fills (0.13/session), +105.7bp t 1.76, median +29.4, ex-top-5 -11.2, halves -77.2 / +153.0 -> WEAK** (outlier-carried).
 k = 0.5%: 1422 fills, +9.2bp t 1.06. Mirror (cross >= +1% above 15:55) -17.8bp. Mid-cap closing crosses absorb MOC
 flow efficiently; dislocations big enough to pay are rare and lumpy. KILL as a sleeve.
+
+## Result — CLOSE-DISLOC (judged 2026-10-06; N stays 853)
+Data complete (window restored through 2026-10-01; 566 sessions, 107k name-days). **WEAK / kill.** k=1% (the
+registered arm): fills 73, mean +105.7bp but **t 1.76 < 2**, halves -77.2 / +153.0 (flip), **ex-top-5 -11.2bp**
+(carried by ~5 events), next-session +77.7bp (the "reversion" is the day AFTER the open, untradable end-first).
+k=0.5% has fills (1422, 2.51/session) but +9.2bp t 1.06, below the >10bp bar. Mirror side (cross >= +1% above
+15:55): -17.8bp =你可以 must pay the spread back. Control (|dev|<=0.2%): -0.8bp — no conditional-alpha drift in
+this universe at all. Final status: **REJECTED** (a >1% closing-cross dislocation is rare and its post-open drift
+is tail-carried; do not re-tune k).
