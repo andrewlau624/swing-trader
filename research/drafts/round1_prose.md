@@ -4031,3 +4031,92 @@ The primary (+1.82% net, t 24.97, median +1.11%, both halves > 0, ex-top-5 intac
 
 ### Result — Study SPX-ELIG (dated 2026-10-06, one look; adversarially checked)
 472 trades / 297 tickers (18/yr, mean hold 119 sessions). Net SPY window-matched abnormal +0.61% (exit-month t 0.50), median -0.91%, hit 48.9%, ex-top-5 -0.61%; halves +1.14% / -0.05%; 25bp stress +0.31%; raw (unhedged) +4.73% = beta. Placebo (long-eligible) +1.81% t 2.44 (> primary; 2000-12 only, 2013-26 -1.05%). **Registered verdict FAIL (t < 1) -> REJECTED.** Mechanism check: add-within-hold 8.7% primary vs 10.1% placebo — the earnings transition does not raise the add probability; the 41 added trades (+16%) are the unpredictable announcement gap. Checks: no membership leakage (0 non-added primary names in the next quarterly snapshot), P20 size floor tracks the published minimums ($4.5B 2000 -> $25B 2025), no split artifacts (|ret|>100%: 4, all real moves: MRVL/TSLA/CVNA/MRNA). DSR at N 843 trivially fails. Economics ~0.6%/yr at any size ($65/yr at $10k). Do not chase the placebo's 2000-12 profitable-non-member tilt (unregistered, one half).
+
+## Amendment — Study EXDIV-OPEN: ex-dividend open-auction under-adjustment (pre-register; 1 judged rule; program N 843 -> 844)
+`date`: Tue Oct 6 2026 (golden-egg overnight loop), written before any official-auction outcome is computed.
+**Disclosure (selection):** an exploratory Sharadar screen (1998-2026, all periods, so NOTHING on Sharadar is untouched)
+found that on ex-dividend nights liquid high-yield stocks earn a total-return close->open excess over their own placebo
+nights of +9bp (2020+) to +50bp (1998-2009) for yield >= 0.6%, with the ex-day session (open->close) giving it back. The
+open price in daily vendor data may not be an executable auction price, so this study is an **execution verification on
+official SIP cross prints**, not an out-of-sample test. True OOS = forward shadow only.
+- **Mechanism (stated, falsifiable).** On the ex-date resting sell limit orders are not reduced by the dividend (FINRA
+  5330 / exchange practice reduces only buy limits and sell stops), and tax-motivated holders who sold cum-dividend
+  and buyers who waited for the ex-date meet at the opening cross; the open under-adjusts and the session completes the
+  drop. Counterparty: ex-date opening buyers / cum-date tax sellers. Small accounts fill at the cross with no spread.
+- **Data.** Alpaca `/v2/stocks/auctions` (SIP) official cross prints (largest-size print = the cross), 2021-01..2026-10,
+  for the 400 most frequent liquid (price >= $5, 3m $ADV >= $2M) yield >= 0.6% ex-date tickers (selection by event
+  count, not outcome; `exdiv_auction_fetch.py`). Ex-dates and dividend size from Sharadar `actions`; yield =
+  dividend / raw close(T-1).
+- **Trade (frozen).** Buy the closing cross on T-1, sell the opening cross on T (ex-date); P&L = (open_T + div)/close_{T-1} - 1.
+  Judged excess = that minus the same ticker's mean official-auction overnight return on nights T-35..T-5 (placebo).
+  Events with yield >= 0.6%.
+- **Pass bar** (SE clustered by ex-date): (1) mean excess > 0, t >= 2.0; (2) halves 2021-23 / 2024-26 both > 0;
+  (3) median > 0; (4) ex-top-5 > 0; (5) mean excess > 5bp (= 2x the 2.5bp/side research cost, a 2x cost shock);
+  (6) SPY-overnight-adjusted (official SPY crosses) mean > 0. FAIL if mean <= 0 or t < 1; PASS if all; else WEAK.
+- **Reported, not judged:** yield buckets, by-security-type split, cross size vs a $10k/$25k ticket, events per
+  session (deployable capital), Sharadar open vs official cross gap, dollars/yr at $1k/$5k/$10k/$25k at <= 50% capture.
+- **Kill rule:** FAIL -> the vendor-open effect is a data artifact; record and stop. Runner `research/sim/exdiv_open.py`.
+- **Added arms (same family, registered before their official-auction data is fetched; N 844 -> 846):** (B) forward-split
+  ex-date (Sharadar `split` value > 1), (C) spin-off parent ex-date (`spinoff` row date). Exploratory Sharadar screen
+  (all periods touched): overnight excess vs own placebo +71bp (B, 2020+ +78bp, n 386 liquid) and +151bp (C, outlier-
+  prone), each with a negative ex-day session. Same trade (close cross T-1 -> open cross T; raw auction prices
+  converted by the split ratio; for C the child's value is NOT added, so C is judged only as "does the parent open
+  print above the parent's own close-to-close path"), same placebo and pass bar, judged on official crosses 2021-26.
+
+### Result — Study EXDIV-OPEN (2026-10-06, one look on official SIP crosses 2021-26)
+- **A ex-dividend: FAIL.** n 13,199: excess vs own placebo -5.9bp (t -1.71; the placebo mean is inflated by split
+  outliers), robust median +3.9bp / trimmed +2.6bp; SPY-adj -7.5bp. Vendor (Sharadar) overnight on the same events
+  +14.0bp vs official +13.3bp: **the vendor open IS the official cross; the earlier "+9bp" was the names' normal
+  overnight premium.** Ex-dividend capture is dead again (= Round 22 AZ), now on 2021-26 official crosses.
+- **B forward split: WEAK** (t 1.76 < 2; halves, median, ex-top-5, >5bp, SPY-adj all pass). n 239: excess +42.7bp,
+  median +17.6bp; raw-SPY +56.6bp t 2.43, median +19.6bp. Vendor vs official median |diff| 0.1bp.
+- **C spin-off parent: WEAK** (n 88, +197bp, t 1.16, ex-top-5 negative: outlier-carried).
+
+## Amendment — Study SPLIT-NIGHT: post-split retail open pressure, multi-night (pre-register; 1 judged rule; N 846 -> 847)
+`date`: Tue Oct 6 2026, written before official crosses for nights T+1..T+4 are fetched.
+**Disclosure (selection):** chosen after the Sharadar 1998-2026 date-shift profile of forward-split ex-dates
+(common stock, raw px >= $5, $vol >= $1M; n 3,405): overnight raw-SPY T-5..T-1 +10..+15bp, **T+0 +94bp (t 10.7,
+median +43), T+1 +46, T+2 +26, T+3 +26, T+4 +20, T+5 +16**, every post-split session -20..-33bp. All Sharadar years
+are touched; official 2021-26 crosses for T+1..T+4 are new data in a touched period (execution verification, not OOS).
+- **Mechanism (falsifiable).** A forward split lowers the per-share price; retail investors (price-level/"affordable"
+  attention, fractional-share-naive) buy at the open with market orders for several sessions; opening crosses clear
+  above fair value and the session reverts (Berkman-Koch-Tuttle-Zhang 2012 overnight/intraday attention pattern).
+  Counterparty: retail open buyers. Prediction: the excess decays with nights since ex-date; reverse splits show the
+  opposite sign (screen: -100bp); funds/ETFs weaker (screen +28bp).
+- **Rule (frozen).** Each session D, hold overnight (buy closing cross D, sell opening cross D+1) an equal-weight basket
+  of every common stock (Sharadar `src` stocks, ticker regex [A-Z]{1,5}) whose forward-split ex-date (`split` value > 1)
+  E satisfies E <= D+1 <= E+4 sessions (nights T+0..T+4), with raw close(E-1) >= $5 and close(E-1)*volume >= $1M.
+  Sleeve fully in cash on nights with no name.
+- **Judge (official SIP crosses, 2021-01..2026-09, `split_night_fetch.py`).** Per-name-night raw minus SPY official
+  overnight; SE clustered by night. Pass: (1) mean > 0, t >= 2; (2) halves 2021-23 / 2024-26 both > 0; (3) median > 0;
+  (4) ex-top-5 names > 0; (5) at 5bp/side cost mean > 0; (6) nights T+1..T+4 alone (excluding T+0) mean > 0
+  (the decay prediction). FAIL if mean <= 0 or t < 1; PASS if all; else WEAK.
+- **Reported, not judged:** per-night-offset profile, per-year, basket nights/yr, sleeve daily-return series, maxDD,
+  Sharpe, SPY overnight beta, correlation with the live night leg's nights, open-cross $ size, $/yr at $1k-$25k at
+  50% capture. Vendor-based 1998-2026 sleeve reported as the long-history context (touched).
+- **Kill rule:** FAIL -> record; the split effect is a single-night curiosity at best.
+
+### Result — Study SPLIT-NIGHT (2026-10-06, one look on official SIP crosses 2021-26): WEAK (multi-night basket dead)
+159 events / 870 name-nights (2 split-date/ratio mismatches with the tape — BRIA 2024-11-27, MBC 2022-12-15, |T+0| >
+100% — dropped as vendor data errors). Basket raw-SPY +17.4bp t 1.42, **median -1.2bp**, ex-top-5 +1.7bp, 5bp/side
++7.4bp, **T+1..T+4 only -8.1bp (decay prediction FAILS: T+2 -30, T+4 -35bp)**. Checks: t no, halves yes, median no,
+ex-top-5 yes, cost yes, T+1..4 no -> WEAK. Per offset: **T+0 n 174 +119.5bp t 2.42 median +17.4 hit 57% ex-top5
++31.3**; T+1 +29.2 (median +26.6); T+2..T+4 negative. The edge, if any, is the ex-date night alone (= EXDIV-OPEN arm B,
+common stocks). Open cross median $0.55M, p10 $38k.
+
+## Amendment — Study ATTN-OPEN: scheduled retail-attention events, ex-date-night open pressure (pre-register; N 847 -> 849)
+`date`: Tue Oct 6 2026, written before official crosses for these events are fetched.
+**Disclosure:** chosen after a Sharadar 1998-2026 screen (touched) of corporate-identity events with the split-night
+signature (T+0 overnight up, session down): de-SPAC first day (`spacmerger`) T+0 overnight-SPY 2013+ +264bp / median
++86 (n 377), T+1 +135/+53; ticker change (`tickerchangeto`) T+0 2013+ +137/+19 (n 1106); name change +62/+12; OTC
+uplisting +30/+19 (not judged: T-1 is an OTC price with no closing cross, not executable at an auction).
+- **Mechanism.** Same as SPLIT-NIGHT T+0: a salient, scheduled identity event (new name/ticker, SPAC becomes an
+  operating company, lower share price) draws retail market buys into the next opening cross; the session reverts.
+  Counterparty: retail open buyers. Falsifier: the official opening cross is not above the prior closing cross.
+- **Rule (frozen), per arm.** Buy the exchange closing cross on E-1 (old symbol if the symbol changes), sell the
+  opening cross on E (the action date, first session under the new identity). Raw close(E-1) >= $5 (de-SPAC: >= $5 is
+  the trust floor area, kept), $vol(E-1) >= $1M on the vendor series. Arms: **D de-SPAC**, **T ticker change** (excl.
+  de-SPAC dates and preferred/unit tickers; regex [A-Z]{1,5}).
+- **Judge (official SIP crosses 2021-01..2026-09, `attn_open_fetch.py`)**, per arm, raw minus SPY official overnight,
+  clustered by date: (1) mean > 0, t >= 2; (2) halves 2021-23 / 2024-26 > 0; (3) median > 0; (4) ex-top-5 > 0;
+  (5) 5bp/side mean > 0. FAIL if mean <= 0 or t < 1; PASS if all; else WEAK. Reported: T+1 night, cross size, by year.

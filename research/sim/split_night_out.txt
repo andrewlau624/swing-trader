@@ -1,0 +1,9 @@
+SPLIT-NIGHT (official SIP crosses 2021-2026), common stocks, nights T+0..T+4: 159 events
+name-nights 870 (nights 600) raw-SPY mean +17.4bp t 1.42 median -1.2bp hit 50% | ex-top-5 tickers +1.7bp | halves 21-23 +11.9 24-26 +22.1 | 5bp/side +7.4 | T+1..T+4 only -8.1bp
+   checks [t, halves, median, ex-top5, 5bp cost, T+1..4] = [np.False_, np.True_, np.False_, np.True_, np.True_, np.False_] -> WEAK
+   T+0: n 174 mean +119.5bp t 2.42 median +17.4 hit 57% ex-top5 +31.3 | open-cross $ median 0.55M p10 38k
+   T+1: n 174 mean +29.2bp t 1.65 median +26.6 hit 60% ex-top5 +6.8 | open-cross $ median 0.58M p10 18k
+   T+2: n 174 mean -30.4bp t -1.80 median -13.2 hit 43% ex-top5 -40.8 | open-cross $ median 0.49M p10 19k
+   T+3: n 174 mean +3.4bp t 0.14 median -8.3 hit 45% ex-top5 -26.3 | open-cross $ median 0.52M p10 14k
+   T+4: n 174 mean -34.5bp t -2.06 median -12.4 hit 43% ex-top5 -44.3 | open-cross $ median 0.43M p10 18k
+   T+0 by year (n / mean / median bp): 2021 31/+100/+36; 2022 32/+79/+50; 2023 17/-36/-17; 2024 41/+133/+39; 2025 30/+336/-1; 2026 23/+10/+10
