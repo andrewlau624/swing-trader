@@ -391,6 +391,10 @@ pref-ex: ## PREF-EX shadow: preferred ex-dividend auction capture from official 
 cef-rv: ## CEF-RV shadow: CEF discount reversion vs the EW CEF universe from official crosses (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.cef_rv_shadow
 
+cef-rv-panel: ## Refresh the CEF-RV weekly NAV panel here (CEFConnect blocks the server's IP) and push it to the server
+	@mkdir -p /tmp/cef-rv-panel && PYTHONPATH=. $(PY) -m swingtrader.daily.cef_rv_shadow panel /tmp/cef-rv-panel
+	@scp -q /tmp/cef-rv-panel/cef-rv-panel.json him:llm-trader/state/cef-rv-panel.json && echo "pushed to him:llm-trader/state/"
+
 exdate-open: ## Ex-date open shadow: split / spin-off ex-date night from official crosses (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.exdate_open_shadow
 

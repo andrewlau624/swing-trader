@@ -100,6 +100,10 @@ def panel(state_dir: Path, today: dt.date, log=print) -> dict[str, list[tuple[st
     if old and last >= due:
         return old
     funds = _cefc("funds") or []
+    if not funds:     # CEFConnect blocks datacenter IPs (the server): the panel is pushed from a clean IP instead
+        log(f"[cef-rv] CEFConnect unreachable; using the stored panel (latest week {last or '-'}); "
+            f"refresh it from a clean IP: make cef-rv-panel")
+        return old
     new, bad = {}, 0
     for f in funds:
         sym = f.get("Ticker")
@@ -275,5 +279,9 @@ def run(state_dir: Path, logs_dir: Path, log=print, today: dt.date | None = None
 
 
 if __name__ == "__main__":
+    import sys
     root = Path(__file__).resolve().parents[2]
-    run(root / "state", root / "logs")
+    if sys.argv[1:2] == ["panel"]:            # refresh only, into the given dir (make cef-rv-panel)
+        panel(Path(sys.argv[2]), dt.date.today())
+    else:
+        run(root / "state", root / "logs")
