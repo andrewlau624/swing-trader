@@ -388,6 +388,9 @@ insider-shadow: ## Round 31 ID3: score + plan the insider-purchase session shado
 pref-ex: ## PREF-EX shadow: preferred ex-dividend auction capture from official crosses (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.pref_ex_shadow
 
+cef-rv: ## CEF-RV shadow: CEF discount reversion vs the EW CEF universe from official crosses (no orders)
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.cef_rv_shadow
+
 exdate-open: ## Ex-date open shadow: split / spin-off ex-date night from official crosses (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.exdate_open_shadow
 

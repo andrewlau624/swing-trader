@@ -174,6 +174,15 @@ def _pref_ex(state: Path, logs: Path) -> dict:
     return dict(n=len(fwd), week=wk, line=w.lines(rows) if rows else "no events logged yet (make pref-ex)")
 
 
+def _cef_rv(state: Path, logs: Path) -> dict:
+    from . import cef_rv_shadow as w
+    rows = [r for r in _jsonl(state / w.LOG_NAME) if r.get("signal", "") >= w.FORWARD_FROM]
+    closed = [r for r in rows if r.get("status") == "closed" and "x_oo" in r]
+    wk = sum(1 for r in closed if r.get("logged", "") >= _week_ago())
+    return dict(n=len(closed), week=wk, line=w.line(_jsonl(state / w.LOG_NAME)) if rows or closed
+                else "no forward signals yet (make cef-rv)")
+
+
 def _exdate_open(state: Path, logs: Path) -> dict:
     from . import exdate_open_shadow as w
     rows = _jsonl(state / w.LOG_NAME)
@@ -320,6 +329,12 @@ REGISTRY: list[Test] = [
          "auction? Also logs ETDX (baby bonds, same rule, official CO +44bp / CC +39bp), gated separately.",
          "2026-10-07", 60, "forward ex-nights", _pref_ex,
          "make pref-ex; research/sim/pref_exec_out.txt; round1_prose.md Study PREF-EX", ["pref_ex_shadow"]),
+    Test("CEF-RV: CEF discount reversion vs the CEF universe", "buy a CEF at its own 52-week 10th-percentile "
+         "discount (weekly NAV), sell at its median: does it beat the equal-weight CEF universe forward (research "
+         "+125bp/trade 2016-26, t 5.6; raw is ~2/3 market) at official opening crosses, net 50bp? Gate: excess >= +60bp, "
+         "t >= 2 across >= 10 entry weeks; kill <= 0.", "2026-10-09", 60, "closed forward trades", _cef_rv,
+         "make cef-rv; research/sim/cef_alpha_out.txt; round1_prose.md Study CEF-ALPHA / CEF-RV-FWD",
+         ["cef_rv_shadow"]),
     Test("Ex-date open: split + spin-off night (SPLIT-T0 / SPIN-T0)", "close cross before a forward-split or "
          "spin-off ex-date -> ex-date opening cross (parent + child): does the retail open premium (official 2016-20 "
          "split median +57bp, 2021-26 +17bp; spins +54bp) hold forward on common stocks?",
