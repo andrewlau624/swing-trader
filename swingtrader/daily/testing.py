@@ -126,9 +126,10 @@ def _quote_imbalance(state: Path, logs: Path) -> dict:
                 line="15:40 bid/ask sizes logged per night pick; verdict once at 300 (make forward-status)")
 
 
-def _log_tag(tag: str):
-    """Count `[tag]` lines in the executor's daily logs (logs/daily-YYYY-MM-DD.log); 0 this week = silent."""
-    pat = re.compile(r"\[" + re.escape(tag) + r"[\]: ]")
+def _log_tag(tag: str, sub: str = ""):
+    """Count `[tag]` lines in the executor's daily logs (logs/daily-YYYY-MM-DD.log); 0 this week = silent.
+    `sub` narrows to `[tag] sub...` (the night leg logs hundreds of `[night]` lines; AU3 is only `[night] tow`)."""
+    pat = re.compile(r"\[" + re.escape(tag) + r"\] " + re.escape(sub) + r"\b" if sub else r"\[" + re.escape(tag) + r"[\]: ]")
 
     def read(state: Path, logs: Path) -> dict:
         n = wk = 0
@@ -148,6 +149,19 @@ def _stack(state: Path, logs: Path) -> dict:
     rows = s._read(state / s.LOG_NAME)
     wk = sum(1 for r in rows if r["date"] >= _week_ago())
     return dict(n=len(rows), week=wk, line=s.line(rows) if rows else "no sessions logged yet (make stack-shadow)")
+
+
+def _fomc(state: Path, logs: Path) -> dict:
+    """F3 only acts on the eve of a scheduled FOMC decision, so 'silent' is normal between meetings: say when the next eve is."""
+    from . import events as ev
+    read = _log_tag("fomc")(state, logs)
+    nxt = ev.next_fomc(dt.date.today())
+    since = [d for d in ev.fomc_dates() if "2026-09-22" <= str(d) <= str(dt.date.today())]
+    tail = f"next decision {nxt} (eve = the night before)" if nxt else "FOMC calendar has run out"
+    read["line"] = f"{read['week']} [fomc] log lines this week; {len(since)} FOMC decision(s) since 2026-09-22; {tail}"
+    if not read["n"] and since and any(d < dt.date.today() for d in since):
+        read["line"] += " (a decision has passed with no [fomc] line: check it runs)"
+    return read
 
 
 def _ibs_lev(state: Path, logs: Path) -> dict:
@@ -317,7 +331,7 @@ REGISTRY: list[Test] = [
     Test("Oversold index buy (V6) + Roth A2", "SPY/QQQ close -> open after 3 down closes / RSI(2) < 10",
          "2026-09-22", 0, "log lines", _log_tag("oversold"), "make review", ["oversold_mode"]),
     Test("FOMC-eve QQQ filler (F3)", "QQQ close -> open on spare night cash before FOMC decisions",
-         "2026-09-22", 0, "log lines", _log_tag("fomc"), "make review", ["fomc_filler_mode"]),
+         "2026-09-22", 0, "log lines", _fomc, "make review", ["fomc_filler_mode"]),
     Test("Roth night cash (M2L)", "requested vs funded night notional in the Roth",
          "2026-09-22", 0, "log lines", _log_tag("roth-cash"), "make review", ["roth_night_cash_log"]),
     Test("Lever gate G1", "day-clustered 95% upper-bound gate beside the live lever gate",
@@ -325,7 +339,7 @@ REGISTRY: list[Test] = [
     Test("Wash guard G4s", "what the Roth-first wash-sale guard would change vs the live one",
          "2026-09-22", 0, "log lines", _log_tag("wash-guard"), "make review", ["wash_guard_mode"]),
     Test("Tug-of-war night tilt (AU3)", "tilt night picks by the tug-of-war score (logged, not sized)",
-         "2026-09-22", 0, "log lines", _log_tag("night"), "make review section 9 (SINCE=2026-09-22)"),
+         "2026-09-22", 0, "log lines", _log_tag("night", "tow"), "make review section 9 (SINCE=2026-09-22)"),
     Test("TME-L: leveraged month-end Treasury sleeve", "does 2x (TLT on margin) / 3x (TMF) keep >= 80% / 73% of "
          "the theoretical multiple of the VALIDATED month-end TLT window without breaching the tail limits?",
          "2026-10-27", 24, "month-end windows", _tme_l, "make tme-shadow; round1_prose.md Study TME-L",

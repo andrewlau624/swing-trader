@@ -53,3 +53,11 @@ def test_digest_shows_the_being_tested_section(tmp_path):
     subj, html, text, _ = digest.render(d, charts=False)
     assert "Being tested" in text and "Being tested" in html
     assert all(t.name.split(" (")[0][:20] in text for t in testing.REGISTRY)
+
+
+def test_au3_counts_only_tow_lines_and_f3_names_the_next_decision(tmp_path):
+    (tmp_path / "daily-2026-10-05.log").write_text(
+        "[night] scanned 3500 live names\n[night] tow shadow: A tow 3 w 0.10\n[night] data check\n")
+    st = {r["name"]: r for r in testing.status(tmp_path, tmp_path)}
+    assert st["Tug-of-war night tilt (AU3)"]["n"] == 1
+    assert "next decision" in st["FOMC-eve QQQ filler (F3)"]["line"]
