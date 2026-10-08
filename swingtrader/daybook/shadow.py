@@ -190,8 +190,16 @@ def append(records: list[dict]) -> int:
 
 
 def forward(day: pd.Timestamp | None = None, source: str | None = None) -> list[dict]:
-    day = pd.Timestamp(day or dt.date.today())
     source = source or "alpaca"
+    if day is None:
+        # the timer fires pre-open: replay the latest COMPLETE session, never "today"
+        S = sessions_for("QQQ", pd.Timestamp(dt.date.today()), 14, source)
+        if not S:
+            print("daybook-shadow: no QQQ sessions available"); return []
+        day = max(S)
+    day = pd.Timestamp(day)
+    if day not in sessions_for("QQQ", day, 14, source):
+        print(f"daybook-shadow: no complete QQQ session for {day.date()}, nothing logged"); return []
     recs = replay_day(day, source=source)
     # idempotent: skip if this date+config already logged
     seen = {(r.get("date"), r.get("config")) for r in _read() if r.get("kind") == "daily"}
