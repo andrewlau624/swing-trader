@@ -295,6 +295,30 @@ class DailyExecutor:
             except Exception as exc:
                 self.log(f"[{tag}] skipped ({type(exc).__name__}: {str(exc)[:80]})")
 
+    def _roth_night_priority(self, book: DailyBook, today: str, cash: float, need: float) -> float:
+        """Roth only: the night leg's money is on loan to the 3x noise ETFs (flattened
+        15:57, before the 16:00 close) and parked in SGOV at 15:40, so book cash
+        under-counts what the close can fund. Count the noise longs as cash, and
+        sell SGOV for whatever is still short. Proceeds are unsettled until T+1,
+        safe because the night buy is only sold at T+1's open (roth_cash_2026-10-08)."""
+        if not self.cash_account or self.d.roth_night_priority != "on":
+            return cash
+        marks = self._marks(book)
+        noise = sum(float(p["qty"]) * float(marks.get(s, p["avg_px"]))
+                    for s, p in book.leg_positions("noise").items() if float(p["qty"]) > 0)
+        eff, sold = cash + noise, 0.0
+        if eff < need:
+            for sym, p in book.leg_positions("tbill").items():
+                px = float(marks.get(sym, p["avg_px"]))
+                self._order(book, today, sym, "sell", "tbill", qty=float(p["qty"]),
+                            tif="day", ref_px=px, kind="exit")
+                sold += float(p["qty"]) * px
+            eff += sold
+        if noise or sold:
+            self.log(f"[roth-night] priority: cash ${cash:,.0f} + noise longs ${noise:,.0f} "
+                     f"+ SGOV sold ${sold:,.0f} funds ${eff:,.0f} vs need ${need:,.0f}")
+        return eff
+
     def _night_budget(self, book: DailyBook, plan: dict) -> float:
         if plan.get("budget") is not None:
             return float(plan["budget"])
@@ -1010,11 +1034,12 @@ class DailyExecutor:
         per = leg * frac * gs
         # never let this book borrow beyond the gross its weights allow
         floor = -(max(1.0, self._w_ibs(book) + self._w_night(book)) - 1.0) * equity
-        cash = book.cash
+        cash0 = book.cash                  # raw book cash, kept for the [roth-cash] shadow
+        cash = self._roth_night_priority(book, today, cash0, per * len(picks))
         plan = getattr(self, "_night_plan", None)
         if plan is None:
             plan = self._night_plan = {"requested": 0.0, "planned": 0.0}
-        plan.update(budget=leg, floor=floor, cash_start=cash, cash_left=cash, n_picks=len(picks))
+        plan.update(budget=leg, floor=floor, cash_start=cash0, cash_left=cash, n_picks=len(picks))
         v20 = picks["vol20"].values if "vol20" in picks else np.full(len(picks), np.nan)
         w = sg.night_tilt(v20, picks["day_ret"].values, self.d.night_tilt_k)
         prev = np.array([np.expm1(r[-1]) if isinstance(r, list) and r else np.nan

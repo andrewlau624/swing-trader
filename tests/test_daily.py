@@ -1430,3 +1430,44 @@ def test_paper_exit_cost_never_kills_or_warns(tmp_path, monkeypatch):
     ex._check_exit_cost(book, "2026-10-02")
     assert not book.killed and not ex.warnings
     assert any("Alpaca simulator" in l for l in ex.lines)
+
+
+def _roth_ex(tmp_path, mode="on"):
+    from swingtrader.config import Config
+    from swingtrader.daily import executor as E
+    cfg = Config.load()
+    cfg.daily.roth_night_priority = mode
+    ex = E.DailyExecutor(cfg, account="roth", broker=FakeBroker(), state_dir=tmp_path, log_dir=tmp_path)
+    ex._marks = lambda book: {}
+    return ex
+
+
+def _roth_book():
+    from swingtrader.daily.book import DailyBook
+    book = DailyBook(cash=157, start_equity=1000)
+    book.positions = {"SQQQ": {"qty": 13, "avg_px": 34.0, "leg": "noise"},
+                      "SGOV": {"qty": 4, "avg_px": 100.5, "leg": "tbill"}}
+    return book
+
+
+def test_roth_night_priority_counts_noise_longs_without_selling_sgov(tmp_path):
+    ex, book = _roth_ex(tmp_path), _roth_book()
+    eff = ex._roth_night_priority(book, "2026-10-08", 157.0, 500.0)
+    assert abs(eff - (157 + 13 * 34.0)) < 1e-9 and not book.orders
+
+
+def test_roth_night_priority_sells_sgov_only_for_the_shortfall(tmp_path):
+    ex, book = _roth_ex(tmp_path), _roth_book()
+    sent = []
+    ex._order = lambda b, today, sym, side, leg, **kw: sent.append((sym, side, leg, kw["qty"]))
+    eff = ex._roth_night_priority(book, "2026-10-08", 157.0, 900.0)
+    assert abs(eff - (157 + 442 + 402)) < 1e-9
+    assert sent == [("SGOV", "sell", "tbill", 4.0)]
+
+
+def test_roth_night_priority_off_and_taxable_unchanged(tmp_path):
+    assert _roth_ex(tmp_path, "off")._roth_night_priority(_roth_book(), "d", 157.0, 900.0) == 157.0
+    from swingtrader.config import Config
+    from swingtrader.daily import executor as E
+    ex = E.DailyExecutor(Config.load(), account="paper", broker=FakeBroker(), state_dir=tmp_path, log_dir=tmp_path)
+    assert ex._roth_night_priority(_roth_book(), "d", 157.0, 900.0) == 157.0

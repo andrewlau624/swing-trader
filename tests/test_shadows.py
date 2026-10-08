@@ -158,6 +158,7 @@ def test_roth_cash_log_and_a2_place_no_orders(tmp_path, monkeypatch):
     ex = _ex(tmp_path, account="roth", mult="1", equity="3000")
     ex.d.night_tilt_k = 0
     ex.d.night_max_name_pct = 1.0
+    ex.d.roth_night_priority = "off"      # pins the shadow against the old starved-night sizing
     book = DailyBook(cash=500.0, start_equity=3000.0)
     book.positions["TQQQ"] = {"qty": 20, "avg_px": 100.0, "leg": "noise", "entry_date": "2026-10-27"}
     book.positions["SGOV"] = {"qty": 5, "avg_px": 100.0, "leg": "tbill", "entry_date": "2026-10-20"}

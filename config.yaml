@@ -156,6 +156,7 @@ daily:
   # Research-program shadows: off | shadow. shadow = log + self-score, NO orders, no sizing change.
   fomc_filler_mode: shadow       # F3: QQQ close->open on spare night cash, FOMC eves, taxable only (add. 33)
   roth_night_cash_log: shadow    # Roth 15:40 `[roth-cash]` requested vs funded night notional, M2L (add. 31)
+  roth_night_priority: "on"      # Roth night leg first: count noise 3x longs (flat 15:57) as cash, sell SGOV for any shortfall
   lever_g1_log: shadow           # `[lever-g1]` day-clustered 95% UB gate beside `[lever]`; lever_ok unchanged (add. 38)
   ibs_lev_shadow: shadow         # Study ACC: log the 1.25x non-callable 3x-ETF IBS overlay vs the live 1x leg (delta, maxDD, exposure); never trades
   wash_guard_mode: shadow        # `[wash-guard]` what the Roth-first G4s guard would change vs the live one (add. 31)
