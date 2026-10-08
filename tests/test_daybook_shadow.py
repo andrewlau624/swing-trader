@@ -21,3 +21,8 @@ def test_forward_skips_day_without_session(monkeypatch, tmp_path):
     monkeypatch.setattr(shadow, "replay_day", lambda d, source: [{"kind": "daily", "date": "x", "config": "A"}])
     assert shadow.forward(pd.Timestamp("2026-10-08"), "alpaca") == []
     assert not (tmp_path / "l.jsonl").exists()
+
+
+def test_prod_flattens_at_live_minute():
+    assert shadow.CFGS["PROD"].close_min == 387
+    assert shadow.CFGS["B"].close_min == 389

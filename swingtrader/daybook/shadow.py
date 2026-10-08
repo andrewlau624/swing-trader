@@ -34,11 +34,12 @@ LEDGER = ROOT / "state" / LOG_NAME
 RESEARCH_M1 = ROOT / "data" / "research" / "night" / "m1"
 
 DEC = list(range(30, 361, 30))     # 10:00 .. 15:30
-CLOSE_M = 389                      # flatten at the 15:59 print (live flattens 15:57)
+CLOSE_M = 389                      # B/C flatten at the 15:59 print
+LIVE_CLOSE_M = 387                 # PROD mirrors the live flatten (15:57 ET, logs 19:57 UTC)
 
 CFGS = {
     "PROD": DaybookConfig(core={"QQQ": 0.5, "SMH": 0.5}, conviction={},
-                          target_vol=0.02, max_lev=3.5, cost_bps=0.5, close_min=CLOSE_M),
+                          target_vol=0.02, max_lev=3.5, cost_bps=0.5, close_min=LIVE_CLOSE_M),
     "B": DaybookConfig(core={"QQQ": 0.4, "SMH": 0.4}, conviction={"TQQQ": 0.25, "SOXL": 0.25},
                        target_vol=0.02, max_lev=3.5, conviction_strength=0.341,
                        conviction_mult=2.0, cost_bps=0.5, close_min=CLOSE_M),
@@ -155,7 +156,7 @@ def replay_instrument(S: dict, cfg: DaybookConfig, sym: str, w: float, day: pd.T
             if d != 0 and sym in cfg.conviction and not taken and stg >= cfg.conviction_strength:
                 taken = True
     if pos != 0:
-        rec(CLOSE_M, "close flatten")
+        rec(cfg.close_min, "close flatten")
     return trades
 
 
