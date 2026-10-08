@@ -48,3 +48,12 @@ def test_ew_comparator_and_the_gate_line():
     assert W.line(rows).endswith("PASS (excess >= +60bp, t >= 2, median > 0)")
     assert "KILL" in W.line([dict(r, x_oo=-r["x_oo"]) for r in rows])
     assert "PASS" not in W.line(rows[:59]) and "KILL" not in W.line(rows[:59])      # below NEED: no verdict
+
+
+def test_cut42_flags_a_cut_after_three_stable_payouts_within_42_days():
+    from swingtrader.daily import cef_rv_shadow as W
+    h = [("2026-05-15", 0.10), ("2026-06-15", 0.10), ("2026-07-15", 0.101), ("2026-08-14", 0.08)]
+    assert W.cut42(h, "2026-09-20") is True                       # 37 days after the cut
+    assert W.cut42(h, "2026-10-01") is False                      # 48 days: outside the window
+    assert W.cut42(h[1:], "2026-09-20") is False                  # only 2 priors: not a qualifying cut
+    assert W.cut42(h[:3] + [("2026-08-14", 0.095)], "2026-09-20") is False   # -5% is not a cut

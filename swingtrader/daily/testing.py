@@ -183,6 +183,15 @@ def _cef_rv(state: Path, logs: Path) -> dict:
                 else "no forward signals yet (make cef-rv)")
 
 
+def _repeat(state: Path, logs: Path) -> dict:
+    from . import repeat_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    w.flag(rows)
+    rep = [r for r in rows if r.get("status") == "scored" and r.get("repeat")]
+    wk = sum(1 for r in rep if r["date"] >= _week_ago())
+    return dict(n=len(rep), week=wk, line=w.line(rows) if rows else "no candidates logged yet (first night run)")
+
+
 def _exdate_open(state: Path, logs: Path) -> dict:
     from . import exdate_open_shadow as w
     rows = _jsonl(state / w.LOG_NAME)
@@ -326,15 +335,25 @@ REGISTRY: list[Test] = [
     Test("PREF-EX: preferred ex-dividend auction capture", "buy a $25-par preferred's closing cross before its "
          "ex-date, sell the ex-date opening cross (CO) or closing cross (CC, MOC both legs): does the ~0.8x-dividend "
          "drop (official 2021-26 CO +38bp, CC +28bp) survive forward net of 10bp + impact at a $10k Roth, 5% of the "
-         "auction? Also logs ETDX (baby bonds, same rule, official CO +44bp / CC +39bp), gated separately.",
+         "auction? Also logs ETDX (baby bonds, same rule, official CO +44bp / CC +39bp), gated separately; the PREF-CHAIN arm (buy "
+         "the close 10 sessions earlier, vs PFF; added 2026-10-08; own gate at 60 forward nights: >= +20bp vs PFF net of "
+         "MEASURED cost, t >= 2, and beats T-1) and the measured closing-cross cost vs the 15:59 mid.",
          "2026-10-07", 60, "forward ex-nights", _pref_ex,
          "make pref-ex; research/sim/pref_exec_out.txt; round1_prose.md Study PREF-EX", ["pref_ex_shadow"]),
     Test("CEF-RV: CEF discount reversion vs the CEF universe", "buy a CEF at its own 52-week 10th-percentile "
          "discount (weekly NAV), sell at its median: does it beat the equal-weight CEF universe forward (research "
          "+125bp/trade 2016-26, t 5.6; raw is ~2/3 market) at official opening crosses, net 50bp? Gate: excess >= +60bp, "
-         "t >= 2 across >= 10 entry weeks; kill <= 0.", "2026-10-09", 60, "closed forward trades", _cef_rv,
+         "t >= 2 across >= 10 entry weeks; kill <= 0. Each trade also carries cut42 (distribution cut 0-42 days before the "
+         "signal; research -255bp vs the rest, not validated), read beside the gate.", "2026-10-09", 60, "closed forward trades", _cef_rv,
          "make cef-rv; research/sim/cef_alpha_out.txt; round1_prose.md Study CEF-ALPHA / CEF-RV-FWD",
          ["cef_rv_shadow"]),
+    Test("Repeat loser (L1): night signals picked again within 5 sessions", "every 15:40 night-rule signal is "
+         "logged (before dedupe / vol / cash / wash filters) and scored close cross -> next opening cross: do repeats "
+         "(same symbol a signal 1-5 sessions earlier) out-bounce first-time signals forward (research +85..+103bp "
+         "night-paired, t 3.4-4.1, tail-driven)? Gate: paired >= +30bp, t >= 2, halves same sign; kill <= 0.",
+         "2026-10-08", 150, "scored repeat candidates", _repeat,
+         "state/night-candidates.jsonl; research/drafts/window_signals_loop_2026-10-07.md rounds 6/8/37",
+         ["repeat_shadow"]),
     Test("Ex-date open: split + spin-off night (SPLIT-T0 / SPIN-T0)", "close cross before a forward-split or "
          "spin-off ex-date -> ex-date opening cross (parent + child): does the retail open premium (official 2016-20 "
          "split median +57bp, 2021-26 +17bp; spins +54bp) hold forward on common stocks?",

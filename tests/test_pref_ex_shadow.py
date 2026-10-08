@@ -64,3 +64,47 @@ def test_etd_rows_are_gated_separately_from_preferreds():
                  net_cc=0.002, order_usd=200.0, part_close=0.04)]
     assert W.summary(rows)["forward"]["co"]["n"] == 1 and W.summary(rows, "etd")["forward"]["co"]["n"] == 1
     assert "ETDX: forward 1 nights/1 events" in W.lines(rows)
+
+
+def test_chain_prices_t10_close_and_compares_with_the_bench_over_both_windows():
+    p = _hist()
+    p["2026-09-26"] = (24.9, 100, 24.8, 300)             # ex-date E
+    r = W.score(dict(sym="A.PRA", ex="2026-09-26", div=0.40), {"A.PRA": p})
+    days = sorted(d for d in p if d < "2026-09-26")
+    b = {d: (50.0, 1, 50.0, 1) for d in days}
+    b["2026-09-26"] = (50.5, 1, 50.5, 1)
+    c = W.chain(r, p, b, {W.BENCH: [("2026-09-20", 0.10)]})
+    assert c["t10"] == days[-10] and abs(c["ch"] - ((24.8 + 0.40) / 25.0 - 1)) < 1e-12
+    assert abs(c["ch_bench"] - ((50.5 + 0.10) / 50.0 - 1)) < 1e-12        # bench dividend inside T-10 -> E
+    assert abs(c["cc_bench"] - (50.5 / 50.0 - 1)) < 1e-12                 # but not inside E-1 -> E
+    assert abs(c["ch_x"] - (c["ch"] - c["ch_bench"])) < 1e-12 and abs(c["cc_x"] - (r["cc"] - c["cc_bench"])) < 1e-12
+    assert W.chain(r, {d: p[d] for d in days[-5:]} | {"2026-09-26": p["2026-09-26"]}, b, {}) == {}
+
+
+def test_stable_needs_three_priors_within_2pct_and_current_within_10pct():
+    h = [("2026-01-01", 0.40), ("2026-04-01", 0.40), ("2026-07-01", 0.404)]
+    assert W.stable(h, "2026-10-01", 0.40) is True
+    assert W.stable(h, "2026-10-01", 0.30) is False
+    assert W.stable(h[:2], "2026-10-01", 0.40) is None                     # too little history: unknown, not stable
+    assert W.stable(h + [("2026-10-01", 0.40)], "2026-10-01", 0.40) is True  # the event itself is not a prior
+
+
+def test_costs_sign_convention_buy_above_mid_and_sell_below_mid_are_positive():
+    r = dict(sym="A.PRA", d0="d0", ex="E", t10="t", t10_px=25.05, close_px=25.0, exit_close_px=24.90)
+    Q = {("A.PRA", "t"): (24.90, 25.10), ("A.PRA", "d0"): (24.90, 25.10), ("A.PRA", "E"): (24.80, 25.10)}
+    c = W.costs(r, Q)
+    assert abs(c["cost_buy_t10"] - (25.05 / 25.0 - 1)) < 1e-12 and abs(c["cost_buy_d0"]) < 1e-12
+    assert abs(c["cost_sell_E"] - (1 - 24.90 / 24.95)) < 1e-12 and abs(c["hs_d0"] - 0.10 / 25.0) < 1e-12
+
+
+def test_chain_verdict_waits_for_need_forward_nights_then_reads_pass_or_kill():
+    def rows(n, ch, cc):
+        return [dict(sym=f"A{k}.PRA", ex=f"2026-11-{k % 28 + 1:02d}" if k < 28 else f"2027-{k // 28:02d}-{k % 28 + 1:02d}",
+                     status="scored", eligible=True, stable=True, ch_x=ch + 0.0001 * (k % 3), cc_x=cc,
+                     cost_buy_t10=0.0002, cost_buy_d0=0.0002, cost_sell_E=0.0003) for k in range(n)]
+    assert W.chain_verdict(rows(W.NEED - 1, 0.004, 0.001)) == ""
+    assert "PASS" in W.chain_verdict(rows(W.NEED, 0.004, 0.001))
+    assert "KILL" in W.chain_verdict(rows(W.NEED, 0.004, 0.006))          # no better than T-1
+    assert "KILL" in W.chain_verdict(rows(W.NEED, 0.0005, 0.0))           # <= +5bp net
+    backfill = [dict(r, ex="2026-09-15") for r in rows(W.NEED, 0.004, 0.001)]
+    assert W.chain_verdict(backfill) == ""                                # backfill never gates

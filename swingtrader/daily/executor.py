@@ -975,6 +975,11 @@ class DailyExecutor:
                                ibs_max=self.d.night_ibs_max, price_min=self.d.night_price_min,
                                price_max=self.d.night_price_max)
         self.log(f"[night] scanned {len(rows)} live names -> {len(picks)} signal(s)")
+        try:                                # L1 repeat-loser shadow: log every rule signal, never trades
+            from . import repeat_shadow
+            repeat_shadow.log_candidates(self.state_dir, today, picks, self.account)
+        except Exception as exc:
+            self.log(f"[repeat] candidate log skipped ({type(exc).__name__}: {str(exc)[:80]})")
         if src == "schwab":
             self._log_alt_source(syms, elig, picks)
         if picks.empty:

@@ -13,6 +13,11 @@ Research: +125bp/trade excess 2016-26 (t 5.6), raw ~2/3 market.
 Gate (NEED closed forward trades spanning >= 10 entry weeks): PASS = mean OO excess >= +60bp, entry-week-clustered
 t >= 2, median > 0; KILL = mean OO excess <= 0. CC reported alongside. Rows with a signal week before FORWARD_FROM are
 backfill, shown separately and never gated.
+
+Distribution-cut flag (window-signal loop 2026-10-07, round 17/36; PLAUSIBLE, not validated): cut42 = the fund cut its
+distribution (payout <= 0.9 x the median of its 3 prior payouts, which agree within 2%) on an ex-date 0-42 days before
+the signal. Research: such entries lagged the rest by -255bp (2016-26, t -2.9) and -191bp (2003-14, t -1.98). Logged
+on every trade and read beside the gate (flagged vs unflagged excess); the CEF-RV gate itself is unchanged.
 """
 from __future__ import annotations
 
@@ -24,7 +29,7 @@ import time
 from pathlib import Path
 
 from .exdate_open_shadow import CA_URL, _get, _headers
-from .pref_ex_shadow import crosses
+from .pref_ex_shadow import crosses, dividends
 
 LOG_NAME = "cef-rv.jsonl"
 PANEL_NAME = "cef-rv-panel.json"
@@ -126,23 +131,21 @@ def panel(state_dir: Path, today: dt.date, log=print) -> dict[str, list[tuple[st
     return new or old
 
 
-def dividends(syms: list[str], start: str, end: str, H: dict) -> dict[str, list[tuple[str, float]]]:
-    out: dict[str, list[tuple[str, float]]] = {}
-    for i in range(0, len(syms), 50):
-        tok = None
-        while True:
-            q = {"types": "cash_dividend", "symbols": ",".join(syms[i:i + 50]), "start": start, "end": end,
-                 "limit": 1000}
-            if tok:
-                q["page_token"] = tok
-            j = _get(CA_URL, q, H)
-            for x in (j.get("corporate_actions") or {}).get("cash_dividends", []):
-                if (x.get("rate") or 0) > 0 and not x.get("foreign"):
-                    out.setdefault(x["symbol"], []).append((x["ex_date"], float(x["rate"])))
-            tok = j.get("next_page_token")
-            if not tok:
-                break
-    return out
+CUT_DAYS = 42
+
+
+def cut42(hist: list[tuple[str, float]], signal: str) -> bool:
+    """True if a distribution cut (payout <= 0.9 x median of 3 prior payouts that agree within 2%) went ex 0-42 days
+    before `signal`."""
+    h = sorted(hist)
+    s = dt.date.fromisoformat(signal)
+    for i in range(3, len(h)):
+        ex, rate = h[i]
+        prior = [r for _, r in h[i - 3:i]]
+        if (max(prior) / min(prior) - 1 <= 0.02 and rate <= 0.9 * st.median(prior)
+                and 0 <= (s - dt.date.fromisoformat(ex)).days <= CUT_DAYS):
+            return True
+    return False
 
 
 def _after(days: dict, d: str) -> str | None:
@@ -208,6 +211,8 @@ def summary(rows: list[dict]) -> dict:
         out[tag] = {k: _stats(c, k) for k in ("x_oo", "x_cc", "net_oo")}
         out[tag]["open"] = sum(1 for r in rows if r.get("status") in ("open", "exiting")
                                and (r["signal"] >= FORWARD_FROM) == fwd)
+        out[tag]["cut"] = _stats([r for r in c if r.get("cut42")], "x_oo")
+        out[tag]["nocut"] = _stats([r for r in c if r.get("cut42") is False], "x_oo")
     return out
 
 
@@ -223,7 +228,10 @@ def line(rows: list[dict]) -> str:
         parts.append(f"{tag}: {a['n']} closed / {a['weeks']} entry weeks, {v['open']} open; excess vs EW CEF OO "
                      f"{a['mean_bp']:+.0f}bp (median {a['median_bp']:+.0f}, hit {a['hit']*100:.0f}%, t "
                      f"{a['t'] if a['t'] is None else round(a['t'], 2)}), CC {c['mean_bp']:+.0f}bp; raw net OO "
-                     f"{n['mean_bp']:+.0f}bp")
+                     f"{n['mean_bp']:+.0f}bp"
+                     + (f"; cut42-flagged {v['cut']['n']} at {v['cut']['mean_bp']:+.0f}bp vs unflagged "
+                        f"{v['nocut']['mean_bp']:+.0f}bp" if v["cut"].get("n") and v["nocut"].get("n") else
+                        f"; cut42-flagged {v['cut'].get('n', 0)}"))
     f = s["forward"]["x_oo"]
     verdict = ""
     if f["n"] >= NEED and f.get("weeks", 0) >= MIN_WEEKS:
@@ -271,6 +279,12 @@ def run(state_dir: Path, logs_dir: Path, log=print, today: dt.date | None = None
                                x_cc=new["cc"] - COST - m)
             new["logged"] = str(today)
             old[(r["sym"], r["signal"])] = new
+    need = [r for r in old.values() if "cut42" not in r]
+    if need:
+        hist = dividends(sorted({r["sym"] for r in need}),
+                         str(dt.date.fromisoformat(min(r["signal"] for r in need)) - dt.timedelta(days=500)), str(today), H)
+        for r in need:
+            r["cut42"] = cut42(hist.get(r["sym"], []), r["signal"])
     rows = sorted(old.values(), key=lambda r: (r["signal"], r["sym"]))
     state_dir.mkdir(parents=True, exist_ok=True)
     path.write_text("".join(json.dumps(r) + "\n" for r in rows))

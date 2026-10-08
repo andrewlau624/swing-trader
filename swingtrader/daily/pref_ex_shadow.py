@@ -21,6 +21,18 @@ ETDX (round1_prose.md "Study ETDX", 2026-10-06): the same rule on $25-par exchan
 listed in etd_symbols.txt; CEF preferreds are ".PR" and already in the preferred set). Official 2021-26 CO +44bp, CC
 +39bp. Logged in the same file with cls="etd" and gated separately with the same thresholds; the preferred gate counts
 preferreds only. Both classes share the account on a night (the combined book).
+
+PREF-CHAIN arm (window-signal loop 2026-10-07, research/drafts/window_signals_loop_2026-10-07.md): buy the closing
+cross 10 sessions before E instead of E-1, same exit (E's closing cross), dividend included. Research: 2016-26 +68bp
+excess vs the EW preferred universe, 2005-15 +57bp gross (every year > 0) but +17bp net of 40bp RT -> failed its net
+bar; it is logged to MEASURE it forward, not because it passed. Forward comparator: PFF over the same closes (ch_x,
+and cc_x for the T-1 arm on the same footing). Only events whose 3 prior payouts exist and agree within 2% (and the
+current one is within 10% of their median) count ("stable"), as in the research rule.
+
+Measured execution cost (the number three loop findings wait on): for every scored eligible event the last SIP quote
+in 15:55-16:00 ET is pulled for each closing-cross leg (T-10 entry, E-1 entry, E exit). cost_buy_* = cross / mid - 1,
+cost_sell_* = 1 - cross / mid (+ = worse than mid), hs_* = quoted half-spread. These replace the slip_* MODEL for the
+chain and CC reads (the model stays in the file for the original gate).
 """
 from __future__ import annotations
 
@@ -44,6 +56,9 @@ MIN_PX, MAX_PX = 10.0, 60.0
 MIN_YLD, MAX_YLD = 0.002, 0.04
 MIN_CROSS = 1_400.0                   # = research screen 20d median $vol >= $100k x 0.014 (cross $ / daily $vol)
 AU_URL = "https://data.alpaca.markets/v2/stocks/auctions"
+QURL = "https://data.alpaca.markets/v2/stocks/quotes"
+BENCH = "PFF"
+CHAIN_N = 10                          # sessions before E for the PREF-CHAIN entry
 ETD = frozenset(ln.strip() for ln in (Path(__file__).with_name("etd_symbols.txt")).read_text().splitlines()
                 if ln.strip() and not ln.startswith("#"))
 
@@ -88,6 +103,95 @@ def crosses(syms: list[str], start: str, end: str, H: dict) -> dict[str, dict[st
         tok = j.get("next_page_token")
         if not tok:
             return out
+
+
+def dividends(syms: list[str], start: str, end: str, H: dict) -> dict[str, list[tuple[str, float]]]:
+    """sym -> [(ex_date, cash rate)] from Alpaca corporate actions (non-foreign cash dividends)."""
+    out: dict[str, list[tuple[str, float]]] = {}
+    for i in range(0, len(syms), 50):
+        tok = None
+        while True:
+            q = {"types": "cash_dividend", "symbols": ",".join(syms[i:i + 50]), "start": start, "end": end,
+                 "limit": 1000}
+            if tok:
+                q["page_token"] = tok
+            j = _get(CA_URL, q, H)
+            for x in (j.get("corporate_actions") or {}).get("cash_dividends", []):
+                if (x.get("rate") or 0) > 0 and not x.get("foreign"):
+                    out.setdefault(x["symbol"], []).append((x["ex_date"], float(x["rate"])))
+            tok = j.get("next_page_token")
+            if not tok:
+                break
+    return out
+
+
+def close_quotes(syms: list[str], day: str, H: dict) -> dict[str, tuple[float, float]]:
+    """sym -> (bid, ask) of the last valid SIP quote in 15:55-16:00 ET on `day`: the book the closing cross met."""
+    from zoneinfo import ZoneInfo
+    a = dt.datetime.fromisoformat(f"{day}T15:55:00").replace(tzinfo=ZoneInfo("America/New_York")).astimezone(dt.timezone.utc)
+    b = a + dt.timedelta(minutes=5)
+    out: dict[str, tuple[float, float]] = {}
+    for i in range(0, len(syms), 50):
+        tok = None
+        while True:
+            q = {"symbols": ",".join(syms[i:i + 50]), "start": a.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                 "end": b.strftime("%Y-%m-%dT%H:%M:%SZ"), "feed": "sip", "limit": 10000}
+            if tok:
+                q["page_token"] = tok
+            j = _get(QURL, q, H)
+            for sym, rows in (j.get("quotes") or {}).items():
+                for x in rows:                                    # ascending in time: the last valid quote wins
+                    if (x.get("bp") or 0) > 0 and (x.get("ap") or 0) > x["bp"]:
+                        out[sym] = (float(x["bp"]), float(x["ap"]))
+            tok = j.get("next_page_token")
+            if not tok:
+                break
+    return out
+
+
+def stable(hist: list[tuple[str, float]], ex: str, div: float) -> bool | None:
+    """The research rule's payout filter: 3 prior payouts exist, agree within 2%, current within 10% of their median.
+    None when fewer than 3 priors are known (history too short to say)."""
+    prior = [r for e, r in sorted(hist) if e < ex][-3:]
+    if len(prior) < 3:
+        return None
+    return max(prior) / min(prior) - 1 <= 0.02 and abs(div / st.median(prior) - 1) <= 0.10
+
+
+def _divsum(divs: dict, sym: str, a: str, b: str) -> float:
+    return sum(r for e, r in divs.get(sym, []) if a < e <= b)
+
+
+def chain(r: dict, p: dict, bench: dict, bdivs: dict) -> dict:
+    """PREF-CHAIN fields for one scored row: T-10 closing cross -> E closing cross (+ dividend), and the same window
+    (and the T-1 window) for the PFF comparator. Empty when fewer than CHAIN_N prior closing crosses exist."""
+    prev = [d for d in sorted(p) if d < r["ex"] and p[d][2]]
+    if len(prev) < CHAIN_N:
+        return {}
+    t10 = prev[-CHAIN_N]
+    c10 = p[t10][2]
+    out = dict(t10=t10, t10_px=c10, ch=(r["exit_close_px"] + r["div"]) / c10 - 1, pre=r["close_px"] / c10 - 1)
+    a, b, c = bench.get(t10), bench.get(r["d0"]), bench.get(r["ex"])
+    if a and b and c and a[2] and b[2] and c[2]:
+        out["ch_bench"] = (c[2] + _divsum(bdivs, BENCH, t10, r["ex"])) / a[2] - 1
+        out["cc_bench"] = (c[2] + _divsum(bdivs, BENCH, r["d0"], r["ex"])) / b[2] - 1
+        out["ch_x"] = out["ch"] - out["ch_bench"]
+        out["cc_x"] = r["cc"] - out["cc_bench"]
+    return out
+
+
+def costs(r: dict, Q: dict) -> dict:
+    """Measured cross-vs-mid cost per closing-cross leg from Q[(sym, day)] = (bid, ask)."""
+    out = {}
+    for leg, day, px, side in (("t10", r.get("t10"), r.get("t10_px"), "buy"), ("d0", r["d0"], r["close_px"], "buy"),
+                               ("E", r["ex"], r["exit_close_px"], "sell")):
+        q = Q.get((r["sym"], day)) if day else None
+        if not q or not px:
+            continue
+        mid = (q[0] + q[1]) / 2
+        out[f"hs_{leg}"] = (q[1] - q[0]) / 2 / mid
+        out[f"cost_{side}_{leg}"] = px / mid - 1 if side == "buy" else 1 - px / mid
+    return out
 
 
 def score(ev: dict, X: dict) -> dict | None:
@@ -161,7 +265,70 @@ def summary(rows: list[dict], cls: str = "pref") -> dict:
         parts = [r["part_close"] for r in x if r.get("part_close") is not None]
         out[tag]["median_part_close"] = st.median(parts) if parts else None
     out["upcoming"] = sorted({(r["ex"], r["sym"]) for r in rows if r.get("status") == "upcoming"})
+    out["chain"] = chain_summary(rows)
     return out
+
+
+def chain_summary(rows: list[dict], fwd: bool | None = None) -> dict:
+    """PREF-CHAIN vs the T-1 (CC) arm on the same stable events, both vs PFF, gross and net of MEASURED cross cost.
+    fwd=True / False keeps forward (ex >= FORWARD_FROM) / backfill events only; None keeps both."""
+    x = [r for r in rows if r.get("status") == "scored" and r.get("eligible") and r.get("stable")
+         and "ch_x" in r and "cc_x" in r and (fwd is None or (r["ex"] >= FORWARD_FROM) == fwd)]
+    out = dict(n=len(x), nights=len({r["ex"] for r in x}))
+    if not x:
+        return out
+    out["ch_x"] = _stats(x, "ch_x")
+    out["cc_x"] = _stats(x, "cc_x")
+    d = [dict(ex=r["ex"], v=r["ch_x"] - r["cc_x"]) for r in x]
+    out["diff"] = _stats(d, "v")
+    m = [dict(r, ch_x_net=r["ch_x"] - r["cost_buy_t10"] - r["cost_sell_E"],
+              cc_x_net=r["cc_x"] - r["cost_buy_d0"] - r["cost_sell_E"])
+         for r in x if "cost_buy_t10" in r and "cost_buy_d0" in r and "cost_sell_E" in r]
+    if m:
+        out["measured"] = dict(n=len(m), ch_x_net=_stats(m, "ch_x_net"), cc_x_net=_stats(m, "cc_x_net"),
+                               diff_net=_stats([dict(ex=r["ex"], v=r["ch_x_net"] - r["cc_x_net"]) for r in m], "v"))
+    legs = {k: [r[k] for r in rows if r.get("status") == "scored" and r.get("eligible") and k in r]
+            for k in ("cost_buy_t10", "cost_buy_d0", "cost_sell_E", "hs_d0", "hs_E")}
+    out["cost_legs"] = {k: (len(v), st.median(v) * 1e4) for k, v in legs.items() if v}
+    return out
+
+
+def chain_verdict(rows: list[dict]) -> str:
+    """Frozen PREF-CHAIN gate (2026-10-08), forward events only, net of MEASURED cross cost, read at NEED ex-nights:
+    PASS = T-10 night-mean >= +20bp vs PFF, t >= 2, and T-10 minus T-1 night-mean > 0; KILL = T-10 <= +5bp or the
+    difference <= 0; else HOLD. '' until NEED forward nights have measured costs."""
+    m = chain_summary(rows, fwd=True).get("measured")
+    if not m or m["ch_x_net"]["nights"] < NEED:
+        return ""
+    ch, d = m["ch_x_net"], m["diff_net"]
+    if ch["night_mean_bp"] >= 20 and (ch["t"] or 0) >= 2 and d["night_mean_bp"] > 0:
+        return " -> CHAIN PASS (>= +20bp vs PFF net of measured cost, t >= 2, beats T-1)"
+    if ch["night_mean_bp"] <= 5 or d["night_mean_bp"] <= 0:
+        return " -> CHAIN KILL (<= +5bp, or no better than T-1)"
+    return " -> CHAIN HOLD"
+
+
+def chain_line(rows: list[dict]) -> str:
+    f = chain_summary(rows, fwd=True)
+    fm = f.get("measured")
+    head = (f"CHAIN forward {fm['ch_x_net']['nights']}/{NEED} nights: T-10 net {fm['ch_x_net']['night_mean_bp']:+.0f}bp vs "
+            f"T-1 net {fm['cc_x_net']['night_mean_bp']:+.0f}bp{chain_verdict(rows)} | " if fm
+            else f"CHAIN forward 0/{NEED} nights | ")
+    c = chain_summary(rows, fwd=False)
+    if not c["n"]:
+        return head + "backfill: no stable events with PFF"
+    s = head + (f"backfill {c['n']} stable events/{c['nights']} nights, excess vs PFF: T-10 "
+         f"{c['ch_x']['night_mean_bp']:+.0f}bp (median {c['ch_x']['median_bp']:+.0f}) vs T-1 "
+         f"{c['cc_x']['night_mean_bp']:+.0f}bp; difference {c['diff']['night_mean_bp']:+.0f}bp (t "
+         f"{c['diff']['t'] if c['diff']['t'] is None else round(c['diff']['t'], 2)})")
+    if "measured" in c:
+        mm = c["measured"]
+        s += (f"; net of MEASURED cross cost (n {mm['n']}): T-10 {mm['ch_x_net']['night_mean_bp']:+.0f}bp vs T-1 "
+              f"{mm['cc_x_net']['night_mean_bp']:+.0f}bp")
+    if c.get("cost_legs"):
+        s += "; cross vs mid (median bp, + = worse): " + ", ".join(f"{k} {v:+.1f} (n {n})"
+                                                                 for k, (n, v) in c["cost_legs"].items())
+    return s
 
 
 def line(rows: list[dict], cls: str = "pref") -> str:
@@ -187,7 +354,7 @@ def line(rows: list[dict], cls: str = "pref") -> str:
 
 
 def lines(rows: list[dict]) -> str:
-    return f"{line(rows)} | ETDX: {line(rows, 'etd')}"
+    return f"{line(rows)} | ETDX: {line(rows, 'etd')} | {chain_line(rows)}"
 
 
 def run(state_dir: Path, logs_dir: Path, log=print, today: dt.date | None = None, H: dict | None = None) -> dict:
@@ -204,7 +371,10 @@ def run(state_dir: Path, logs_dir: Path, log=print, today: dt.date | None = None
             except (ValueError, KeyError):
                 continue
     evs = [e for e in events(today, H) if BACKFILL <= e["ex"] <= str(today + dt.timedelta(days=14))]
-    todo = [e for e in evs if old.get((e["sym"], e["ex"]), {}).get("status") not in ("scored", "mismatch", "no_cross")]
+    def _done(o: dict) -> bool:
+        st_ = o.get("status")
+        return st_ in ("mismatch", "no_cross") or (st_ == "scored" and "chain_v" in o)
+    todo = [e for e in evs if not _done(old.get((e["sym"], e["ex"]), {}))]
     printed = [e for e in todo if e["ex"] < str(today)]          # E's closing cross must have printed
     X: dict = {}
     if printed:
@@ -213,13 +383,34 @@ def run(state_dir: Path, logs_dir: Path, log=print, today: dt.date | None = None
         end = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=20)).strftime("%Y-%m-%dT%H:%M:%SZ")
         for i in range(0, len(syms), 40):
             X.update(crosses(syms[i:i + 40], start, end, H))
+        X.update(crosses([BENCH], start, end, H))
+        hist = dividends(syms + [BENCH], str(dt.date.fromisoformat(start) - dt.timedelta(days=400)), str(today), H)
+    scored: list[dict] = []
     for e in todo:
         r = score(e, X) if e["ex"] < str(today) else None
+        if r is not None and r.get("status") == "scored":
+            r.update(chain(r, X.get(e["sym"], {}), X.get(BENCH, {}), hist))
+            r["stable"] = stable(hist.get(e["sym"], []), e["ex"], e["div"])
+            r["chain_v"] = 1
+            scored.append(r)
         if r is None:
             stale = e["ex"] <= str(today - dt.timedelta(days=5))
             r = dict(e, status="upcoming" if e["ex"] >= str(today) else ("no_cross" if stale else "pending"))
         r["logged"] = str(today)
         old[(e["sym"], e["ex"])] = r
+    legs: dict[str, set[str]] = {}
+    for r in scored:
+        if r.get("eligible"):
+            for day in (r.get("t10"), r["d0"], r["ex"]):
+                if day:
+                    legs.setdefault(day, set()).add(r["sym"])
+    Q: dict = {}
+    for day, ss in legs.items():
+        for sym, q in close_quotes(sorted(ss), day, H).items():
+            Q[(sym, day)] = q
+    for r in scored:
+        if r.get("eligible"):
+            r.update(costs(r, Q))
     rows = sorted(old.values(), key=lambda r: (r["ex"], r["sym"]))
     execution(rows)
     state_dir.mkdir(parents=True, exist_ok=True)
