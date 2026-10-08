@@ -108,3 +108,15 @@ def test_chain_verdict_waits_for_need_forward_nights_then_reads_pass_or_kill():
     assert "KILL" in W.chain_verdict(rows(W.NEED, 0.0005, 0.0))           # <= +5bp net
     backfill = [dict(r, ex="2026-09-15") for r in rows(W.NEED, 0.004, 0.001)]
     assert W.chain_verdict(backfill) == ""                                # backfill never gates
+
+
+def test_roth_stack_alloc_caps_at_part_of_cross_and_night_first_leaves_less():
+    import datetime
+    snap = W.roth_snapshot({"cash": 600.0, "start_equity": 1000.0, "equity_log": [{"equity": 1000.0}],
+                            "positions": {"SGOV": {"qty": 4, "avg_px": 100.0, "leg": "tbill"}}}, datetime.date(2026, 10, 9))
+    assert snap["tbill_usd"] == 400.0 and snap["night_budget"] == 500.0
+    night = [dict(sym="AAA", med_cross_usd=2000.0, close_px=25.0), dict(sym="BBB", med_cross_usd=1_000_000.0, close_px=25.0)]
+    a = W.stack_alloc(night, snap)
+    assert a["strict_pref"]["qty"] == {"AAA": 4, "BBB": 20}          # AAA capped at 5% x 2000 = $100; BBB gets the rest
+    assert a["strict_night"]["avail"] == 100.0 and a["strict_night"]["qty"]["AAA"] == 2
+    assert a["lenient_pref"]["avail"] == 1000.0

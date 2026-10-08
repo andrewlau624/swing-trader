@@ -171,7 +171,10 @@ def _pref_ex(state: Path, logs: Path) -> dict:
     fwd = {r["ex"] for r in rows if r.get("status") == "scored" and r.get("eligible") and r["ex"] >= w.FORWARD_FROM
            and w._cls(r["sym"]) == "pref"}
     wk = sum(1 for d in fwd if d >= _week_ago())
-    return dict(n=len(fwd), week=wk, line=w.lines(rows) if rows else "no events logged yet (make pref-ex)")
+    stk = _jsonl(state / w.STACK_LOG)
+    extra = f" | ROTH-STACK {len(stk)} nights" + (f", last {stk[-1]['ex']} strict pref-first ${stk[-1]['alloc']['strict_pref']['usd']:.0f}"
+                                                  if stk else " (snapshots from 2026-10-09)")
+    return dict(n=len(fwd), week=wk, line=(w.lines(rows) if rows else "no events logged yet (make pref-ex)") + extra)
 
 
 def _cef_rv(state: Path, logs: Path) -> dict:
@@ -337,7 +340,9 @@ REGISTRY: list[Test] = [
          "drop (official 2021-26 CO +38bp, CC +28bp) survive forward net of 10bp + impact at a $10k Roth, 5% of the "
          "auction? Also logs ETDX (baby bonds, same rule, official CO +44bp / CC +39bp), gated separately; the PREF-CHAIN arm (buy "
          "the close 10 sessions earlier, vs PFF; added 2026-10-08; own gate at 60 forward nights: >= +20bp vs PFF net of "
-         "MEASURED cost, t >= 2, and beats T-1) and the measured closing-cross cost vs the 15:59 mid.",
+         "MEASURED cost, t >= 2, and beats T-1) and the measured closing-cross cost vs the 15:59 mid. ROTH-STACK arm (from 2026-10-09, log-only): each ex-eve "
+         "snapshots the cash-Roth idle cash and logs strict/lenient x PREF-first/night-first whole-share allocation at the 5% "
+         "cap plus realized CC cost vs the 10bp assumption (state/pref-ex-roth-stack.jsonl; research/sim/roth_stack.py).",
          "2026-10-07", 60, "forward ex-nights", _pref_ex,
          "make pref-ex; research/sim/pref_exec_out.txt; round1_prose.md Study PREF-EX", ["pref_ex_shadow"]),
     Test("CEF-RV: CEF discount reversion vs the CEF universe", "buy a CEF at its own 52-week 10th-percentile "

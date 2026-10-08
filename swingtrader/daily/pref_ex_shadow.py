@@ -357,6 +357,68 @@ def lines(rows: list[dict]) -> str:
     return f"{line(rows)} | ETDX: {line(rows, 'etd')} | {chain_line(rows)}"
 
 
+STACK_SNAP = "pref-ex-roth-snap.jsonl"
+STACK_LOG = "pref-ex-roth-stack.jsonl"
+NIGHT_W = 0.5                         # config night_weight: most the night leg can spend of Roth equity
+
+
+def roth_snapshot(book: dict, today: dt.date) -> dict:
+    """ROTH-STACK: Roth cash on the ex-eve morning, before that evening's IBS/night buys (read from book-daily-roth.json).
+    cash_strict = free cash only; cash_lenient adds T-bill parking (SGOV/BIL), which can be sold for the cross."""
+    pos = book.get("positions", {})
+    tb = sum(p["qty"] * p["avg_px"] for p in pos.values() if p.get("leg") == "tbill")
+    held = sum(p["qty"] * p["avg_px"] for p in pos.values() if p.get("leg") != "tbill")
+    eq = (book.get("equity_log") or [{}])[-1].get("equity") or book.get("start_equity", 0.0)
+    return dict(date=str(today), equity=eq, cash=book.get("cash", 0.0), tbill_usd=tb, held_usd=held,
+                night_budget=NIGHT_W * eq)
+
+
+def stack_alloc(night: list[dict], snap: dict, part: float = PART) -> dict:
+    """Strict/lenient x pref-first/night-first whole-share allocation of the Roth's idle cash over one ex-night's eligible
+    events (smallest cross first, per-event cap part x ex-ante median cross $). Night-first leaves cash - night_budget."""
+    out = {}
+    for mode, base in (("strict", snap["cash"]), ("lenient", snap["cash"] + snap["tbill_usd"])):
+        for prio, avail in (("pref", base), ("night", max(0.0, base - snap["night_budget"]))):
+            rem, qty, usd = avail, {}, 0.0
+            for k, r in enumerate(sorted(night, key=lambda r: r["med_cross_usd"])):
+                want = min(part * r["med_cross_usd"], rem / (len(night) - k))
+                q = math.floor(want / r["close_px"])
+                qty[r["sym"]] = q
+                rem -= q * r["close_px"]
+                usd += q * r["close_px"]
+            out[f"{mode}_{prio}"] = dict(avail=round(avail, 2), usd=round(usd, 2), qty=qty)
+    return out
+
+
+def stack_rows(rows: list[dict], snaps: dict[str, dict]) -> list[dict]:
+    """One ROTH-STACK line per scored forward ex-night that has an ex-eve snapshot; realized CC cost vs the 10bp assumption."""
+    by: dict[str, list[dict]] = {}
+    for r in rows:
+        if r.get("status") == "scored" and r.get("eligible") and r["ex"] >= FORWARD_FROM and r["d0"] in snaps:
+            by.setdefault(r["ex"], []).append(r)
+    out = []
+    for ex, night in sorted(by.items()):
+        snap = snaps[night[0]["d0"]]
+        meas = [r["cost_buy_d0"] + r["cost_sell_E"] for r in night if "cost_buy_d0" in r and "cost_sell_E" in r]
+        out.append(dict(ex=ex, d0=night[0]["d0"], snap=snap, n=len(night), syms=sorted(r["sym"] for r in night),
+                        alloc=stack_alloc(night, snap), cc_net=[round(r["net_cc"], 5) for r in night],
+                        cc_cost_measured=round(sum(meas) / len(meas), 5) if meas else None, cc_cost_assumed=COST))
+    return out
+
+
+def stack_snapshot(state_dir: Path, today: dt.date) -> dict:
+    """Append today's Roth snapshot once per date (needs the live book; skipped if it is absent)."""
+    f = state_dir / "book-daily-roth.json"
+    path = state_dir / STACK_SNAP
+    snaps = {}
+    if path.exists():
+        snaps = {json.loads(ln)["date"]: json.loads(ln) for ln in path.read_text().splitlines() if ln.strip()}
+    if str(today) not in snaps and f.exists():
+        snaps[str(today)] = roth_snapshot(json.loads(f.read_text()), today)
+        path.write_text("".join(json.dumps(v) + "\n" for v in snaps.values()))
+    return snaps
+
+
 def run(state_dir: Path, logs_dir: Path, log=print, today: dt.date | None = None, H: dict | None = None) -> dict:
     state_dir = Path(state_dir)
     path = state_dir / LOG_NAME
@@ -416,6 +478,13 @@ def run(state_dir: Path, logs_dir: Path, log=print, today: dt.date | None = None
     state_dir.mkdir(parents=True, exist_ok=True)
     path.write_text("".join(json.dumps(r) + "\n" for r in rows))
     log(f"[pref-ex] {lines(rows)}")
+    snaps = stack_snapshot(state_dir, today)
+    st_rows = stack_rows(rows, snaps)
+    (state_dir / STACK_LOG).write_text("".join(json.dumps(r) + "\n" for r in st_rows))
+    if st_rows:
+        a = st_rows[-1]
+        log(f"[pref-ex] ROTH-STACK {len(st_rows)} nights; last {a['ex']}: strict pref-first ${a['alloc']['strict_pref']['usd']:.0f}"
+            f" night-first ${a['alloc']['strict_night']['usd']:.0f}; cc cost {a['cc_cost_measured']} vs {COST}")
     return summary(rows)
 
 
