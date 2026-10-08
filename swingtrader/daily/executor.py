@@ -81,6 +81,23 @@ def heartbeat_gaps(hb: dict) -> list[str]:
     return out
 
 
+
+BAR_GRACE_S = 3      # seconds after a minute closes before its bar is trusted as final
+
+
+def _last_done_minute(mins: dict, today: str, now=None) -> int:
+    """Newest minute index m (bar starts 09:30+m) whose bar is final. The newest
+    bar is usable once its minute has closed (+ grace); otherwise it may still
+    be forming, so step back one. The backtest decides on C[m] of the bar that
+    ends at the decision time, so the HH:01 / HH:31 runs must act on the
+    10:00 / 10:30 bar, not wait a whole run for it."""
+    last = int(mins["last_minute"])
+    now = pd.Timestamp(now) if now is not None else pd.Timestamp.now(tz=ET)
+    if now.tzinfo is None:
+        now = now.tz_localize(ET)
+    closes = pd.Timestamp(today).tz_localize(ET) + pd.Timedelta(minutes=570 + last + 1, seconds=BAR_GRACE_S)
+    return last if now >= closes else last - 1
+
 class DailyExecutor:
     def __init__(self, cfg: Config, account: str = "paper",
                  broker: PaperBroker | None = None,
@@ -1144,7 +1161,7 @@ class DailyExecutor:
         if not mins:
             return
         px_c, v = mins["close"], mins["volume"]
-        last_done = mins["last_minute"] - 1
+        last_done = _last_done_minute(mins, today)
         vwap = np.cumsum(px_c * v) / np.maximum(np.cumsum(v), 1)
         ub, lb, sig = np.array(c["ub"]), np.array(c["lb"]), np.array(c["sigma"])
         for m in range(sg.NOISE_FIRST, 390, sg.NOISE_STEP):
@@ -1245,7 +1262,7 @@ class DailyExecutor:
         if not mins:
             self.warn(f"[noise] no minute bars for {sig} today"); return
         c, v = mins["close"], mins["volume"]
-        last_done = mins["last_minute"] - 1          # the current minute is still forming
+        last_done = _last_done_minute(mins, today)   # newest minute bar that has fully closed
         ub, lb = np.array(n["ub"]), np.array(n["lb"])
         cum_v = np.cumsum(v)
         vwap = np.cumsum(c * v) / np.maximum(cum_v, 1)

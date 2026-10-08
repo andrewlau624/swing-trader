@@ -1430,3 +1430,16 @@ def test_paper_exit_cost_never_kills_or_warns(tmp_path, monkeypatch):
     ex._check_exit_cost(book, "2026-10-02")
     assert not book.killed and not ex.warnings
     assert any("Alpaca simulator" in l for l in ex.lines)
+
+
+def test_noise_decides_the_bar_that_just_closed():
+    # the HH:01 run must act on the HH:00 bar (m=30 at 10:01), as the backtest does
+    from swingtrader.daily.executor import _last_done_minute
+    mins = {"last_minute": 30}
+    ET_ = "America/New_York"
+    assert _last_done_minute(mins, "2026-10-08", pd.Timestamp("2026-10-08 10:01:20", tz=ET_)) == 30
+    assert _last_done_minute({"last_minute": 60}, "2026-10-08", pd.Timestamp("2026-10-08 10:31:20", tz=ET_)) == 60
+    # bar still forming (run at 10:00:30 sees the 10:00 bar): step back
+    assert _last_done_minute(mins, "2026-10-08", pd.Timestamp("2026-10-08 10:00:30", tz=ET_)) == 29
+    # past days are always final
+    assert _last_done_minute({"last_minute": 389}, "2026-09-24") == 389
