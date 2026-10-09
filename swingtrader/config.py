@@ -268,6 +268,7 @@ class DailyCfg:
     fomc_filler_mode: str = "shadow"
     # Roth M2L (add. 31): at 15:40 log requested night notional vs cash free.
     roth_night_cash_log: str = "shadow"
+    roth_night_priority: str = "on"   # Roth: night buys count noise longs + sell SGOV for the 16:00 close
     # Lever gate G1 (add. 38): day-clustered 95% UB beside the live gate.
     lever_g1_log: str = "shadow"
     # Wash guard G4s, Roth first (add. 31, post-hoc): log what it would change.
