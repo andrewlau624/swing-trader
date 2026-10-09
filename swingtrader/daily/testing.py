@@ -200,6 +200,14 @@ def _cef_rv(state: Path, logs: Path) -> dict:
                 else "no forward signals yet (make cef-rv)")
 
 
+def _crowd_hold(state: Path, logs: Path) -> dict:
+    from . import crowd_hold_shadow as w
+    rows = [r for r in _jsonl(state / w.LOG_NAME) if "hold_bp" in r]
+    crowded = [r for r in rows if r["crowded"]]
+    wk = sum(1 for r in crowded if r["date"] >= _week_ago())
+    return dict(n=len(crowded), week=wk, line=w.line(rows) if rows else "no nights scored yet")
+
+
 def _repeat(state: Path, logs: Path) -> dict:
     from . import repeat_shadow as w
     rows = _jsonl(state / w.LOG_NAME)
@@ -366,6 +374,12 @@ REGISTRY: list[Test] = [
          "signal; research -255bp vs the rest, not validated), read beside the gate.", "2026-10-09", 60, "closed forward trades", _cef_rv,
          "make cef-rv; research/sim/cef_alpha_out.txt; round1_prose.md Study CEF-ALPHA / CEF-RV-FWD",
          ["cef_rv_shadow"]),
+    Test("Crowded-night hold (OPENSIG lead): hold night picks to the close cross", "every night-rule signal is "
+         "scored close cross -> next opening cross -> its closing cross: on crowded nights (>= 16 signals) does holding "
+         "to the close beat selling at the open (research: per-trade gains sit on crowded washout days; per-day "
+         "OPENSIG null, both windows touched)? Gate: crowded-night mean >= +20bp, t >= 2, halves > 0, median > 0; "
+         "kill <= 0. Thin nights are the control.", "2026-10-09", 30, "crowded nights scored", _crowd_hold,
+         "state/crowd-hold.jsonl; round1_prose.md Study OPENSIG / CROWD-HOLD", ["crowd_hold_shadow"]),
     Test("Repeat loser (L1): night signals picked again within 5 sessions", "every 15:40 night-rule signal is "
          "logged (before dedupe / vol / cash / wash filters) and scored close cross -> next opening cross: do repeats "
          "(same symbol a signal 1-5 sessions earlier) out-bounce first-time signals forward (research +85..+103bp "
