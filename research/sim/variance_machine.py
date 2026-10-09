@@ -47,7 +47,7 @@ def rand_genome():
     g = {k: rng.random() for k in G}
     g["min_vol"] = rng.random() * 0.3; g["spy_lo"] = rng.random() * 0.3; g["spy_hi"] = 0.7 + rng.random() * 0.3
     g["max_crowd"] = 0.6 + rng.random() * 0.4; g["top_k"] = 0.5 + rng.random() * 0.5
-    g["cats"] = (rng.random(len(CATS)) < 0.85)
+    g["cats"] = (rng.random(len(CATS)) < 0.7)          # ~30% of categories off per random rule: explore bans
     g["w"] = int(rng.integers(0, 2))                     # 0 equal weight, 1 weight by |day_ret|
     return g
 
@@ -108,6 +108,24 @@ def holdout(g):
     return dict(n=len(i), bp_day=dr.sum() / NDAYS["hold"], t=t, med_trade=float(np.median(A["ret"][i] - COST)), ex_top5_bp_day=ex5)
 
 
+def categories():
+    """Category ablation on the live-like rule: ban one category (and the healthcare pair) at a time, budget reallocated
+    within the night. Fold bp/day and the LOCKED holdout, so a ban that only helps in-sample shows up as such."""
+    base_s, base_r = score(LIVE); base_h = holdout(LIVE)
+    rows = [("(none: live-like)", base_s, base_r, base_h)]
+    sets = [[c] for c in CATS] + [["Stock_biotech_pharma", "Stock_healthcare_other"]]
+    for ban in sets:
+        g = dict(LIVE, cats=np.array([c not in ban for c in CATS]))
+        s_, r_ = score(g); rows.append(("ban " + "+".join(ban), s_, r_, holdout(g)))
+    n = {c: int((X.cat == c).sum()) for c in CATS}
+    L = ["CATEGORY ABLATION (live-like rule, one ban at a time; net bp/day of account; holdout 2024-10..2026-10 locked)",
+         "picks per category: " + ", ".join(f"{c} {n[c]}" for c in CATS), ""]
+    for lab, s_, r_, h in rows:
+        f = "  ".join(f"{k} {v['bp_day']:+6.2f} (t {v['t']:.1f})" for k, v in (r_ or {}).items()) if r_ else "too few trades"
+        L.append(f"{lab:58s} worst {s_:+7.2f} | {f} | holdout {h.get('bp_day', 0):+6.2f} (t {h.get('t', 0):.1f}, n {h.get('n', 0)})")
+    open(os.path.join(OUT, "categories.txt"), "w").write("\n".join(L) + "\n")
+
+
 LIVE = {"max_dr": 1.0, "max_ibs": 1.0, "min_vol": 0.3, "min_ladv": 0.0, "spy_lo": 0.0, "spy_hi": 1.0, "max_crowd": 1.0,
         "min_prev": 0.0, "top_k": 1.0, "cats": np.ones(len(CATS), bool), "w": 0}
 
@@ -147,6 +165,7 @@ def main():
     measures shrinkage (in-sample worst-fold vs holdout) across hundreds of searches, not one lucky winner."""
     t0 = time.time(); trials = 0; allbest = {}; ep = 0
     base = score(LIVE); hl = holdout(LIVE)
+    categories()
     log = open(os.path.join(OUT, "log.txt"), "a")
     log.write(f"\n{time.ctime()} start; {HOURS}h; live-like baseline {base[0]:+.2f} bp/day worst fold; holdout {json.dumps(hl, default=float)}\n"); log.flush()
     ef = open(os.path.join(OUT, "epochs.jsonl"), "a")
@@ -182,6 +201,11 @@ def write(best, trials, base, t0, gen, sigma, final):
             L.append(f"SHRINKAGE over {len(E)} independent searches: champion in-sample worst-fold mean {ins.mean():+.2f} bp/day -> "
                      f"holdout mean {ho.mean():+.2f} (median {np.median(ho):+.2f}); share of champions beating the live-like rule on "
                      f"holdout {100*np.mean(ho > h.get('bp_day', 0)):.0f}%; corr(in-sample, holdout) {np.corrcoef(ins, ho)[0,1]:+.2f}")
+            L.append("CATEGORY BANS among the champions (share that banned it; mean holdout bp/day when banned vs kept):")
+            for c in CATS:
+                b = np.array([c in e["rule"]["cats_off"] for e in E])
+                if b.any() and (~b).any():
+                    L.append(f"   {c:26s} banned {100*b.mean():4.0f}%  holdout banned {ho[b].mean():+6.2f} vs kept {ho[~b].mean():+6.2f}")
         except Exception as exc:
             L.append(f"shrinkage summary unavailable ({exc})")
     for j, (s, g, r) in enumerate(rows, 1):
