@@ -211,3 +211,20 @@ code" list). Nothing to pre-register this wake-up.
   (ex-top5 -5.86). Pooled 128 all <= 0. Deeper breaks fall further. Prediction (thinner targets bounce more) falsified.
 - Consequence for 2(b)(i): the deal-database question is CLOSED, not just "do not buy": more events would not flip the sign.
   Post-break reversal class closed. No approval needed.
+
+## Autonomous run — item A2: LETF-NIGHT log-only shadow BUILT (not deployed)
+- `swingtrader/daily/letf_night_shadow.py` (LOG_NAME letf-night.jsonl): the frozen forward rule from round1_prose.md "Amendment —
+  Study LETF-NIGHT" (N 851 -> 852): close >= $5, session $vol >= $10M, r <= -5%, lagged 20d single-stock-LETF $vol share > 2%;
+  closing cross -> next opening cross at official SIP prints, 2.5bp/side; control = same screens, no LETF; gate 120 event days.
+  LETF -> underlying map `swingtrader/daily/letf_map.json` (531 funds / 294 underlyings, Sharadar fund names;
+  `research/sim/letf_map_build.py` refreshes it from the Mac). Universe = the night leg's eligibility cache. REGISTRY entry
+  "LETF-NIGHT: single-stock LETF close rebalancing -> overnight reversal" (need 120 event days); 4 tests; ExecStart line added to
+  `deploy/research-shadows.service.in`.
+- Local smoke run on the server's 10-09 universe snapshot (real Alpaca bars + crosses, read-only): 
+  4/120 event days, 32 events: net -34.7bp/day (median day -47.6, median event +79.1, hit 59%, t -0.39); vs SPY +22.6; control 7 days -0.9bp; night-leg overlap 3/32
+scanned [('2026-09-30', 2, 31), ('2026-10-01', 0, 49), ('2026-10-02', 0, 30), ('2026-10-05', 0, 29), ('2026-10-06', 1, 73), ('2026-10-07', 11, 96), ('2026-10-08', 18, 72), ('2026-10-09', 1, 38)]
+control scored 380
+  10-07: 6 treated events (all negative, -1.6..-2.9%); 10-08: 18 treated (16 positive; AAOI/COHR/LITE +5-6%), 3 overlap the night leg.
+  Two days, not evidence. Caveat logged in the module: the universe cache has no asset class, so the control can include ETFs.
+- **Approval needed to deploy:** on him `git pull` + `bash scripts/install-schedule.sh` (regenerates research-shadows.service with
+  the new line). Until then the shadow only exists in the repo.

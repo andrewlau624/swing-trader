@@ -137,6 +137,14 @@ def _nx_s2(state: Path, logs: Path) -> dict:
                      "in .env on him to arm (null = base 0.5)")
 
 
+def _letf_night(state: Path, logs: Path) -> dict:
+    from . import letf_night_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    s = w.summary(rows)
+    wk = {r["date"] for r in rows if r.get("treated") and r.get("status") == "scored" and r["date"] >= _week_ago()}
+    return dict(n=s["days"], week=len(wk), line=w.line(rows))
+
+
 def _log_tag(tag: str, sub: str = ""):
     """Count `[tag]` lines in the executor's daily logs (logs/daily-YYYY-MM-DD.log); 0 this week = silent.
     `sub` narrows to `[tag] sub...` (the night leg logs hundreds of `[night]` lines; AU3 is only `[night] tow`)."""
@@ -411,6 +419,10 @@ REGISTRY: list[Test] = [
          "(judge 1999-2015 +14bp/night t 3.4, Sharpe 2.34 vs 2.21; 2016-26 same Sharpe at 1.57x std = mostly leverage)? "
          "Gate: diff >= +10bp, t >= 2, halves > 0 and TOP2 Sharpe > base; kill <= 0.", "2026-10-10", 60,
          "judged nights", _top2, "state/top2-shadow.jsonl; round1_prose.md Study CAT-MOM + DEPTH", ["top2_shadow"]),
+    Test("LETF-NIGHT: single-stock LETF close rebalancing -> overnight reversal", "names down <= 5% with lagged single-stock "
+         "LETF $vol share > 2%: closing cross -> next opening cross vs the no-LETF control (forward-only registration, N 852)",
+         "2026-10-10", 120, "event days", _letf_night, "state/letf-night.jsonl; round1_prose.md Amendment LETF-NIGHT",
+         ["letf_night_shadow"]),
     Test("Crowded-night hold (OPENSIG lead): hold night picks to the close cross", "every night-rule signal is "
          "scored close cross -> next opening cross -> its closing cross: on crowded nights (>= 16 signals) does holding "
          "to the close beat selling at the open (research: per-trade gains sit on crowded washout days; per-day "

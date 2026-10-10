@@ -1,0 +1,3192 @@
+{
+"built": "2026-10-10",
+"n": 531,
+"map": {
+"ABNG": {
+"under": "ABNB",
+"inverse": false,
+"active": false,
+"name": "LEVERAGE SHARES 2X LONG ABNB DAILY ETF"
+},
+"ARMA": {
+"under": "ARM",
+"inverse": false,
+"active": true,
+"name": "CORGI ARM 2X DAILY ETF"
+},
+"ARMG": {
+"under": "ARM",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG ARM DAILY ETF"
+},
+"ARMU": {
+"under": "ARM",
+"inverse": false,
+"active": false,
+"name": "T-REX 2X LONG ARM DAILY TARGET ETF"
+},
+"AVGC": {
+"under": "AVGO",
+"inverse": false,
+"active": true,
+"name": "CORGI AVGO 2X DAILY ETF"
+},
+"AVGG": {
+"under": "AVGO",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG AVGO DAILY ETF"
+},
+"AVGU": {
+"under": "AVGO",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG AVGO DAILY ETF"
+},
+"AVGX": {
+"under": "AVGO",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG AVGO ETF"
+},
+"JOBC": {
+"under": "JOBY",
+"inverse": false,
+"active": true,
+"name": "CORGI JOBY 2X DAILY ETF"
+},
+"AVL": {
+"under": "AVGO",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY AVGO BULL 2X ETF"
+},
+"AVXX": {
+"under": "AVAV",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG AVAV ETF"
+},
+"BABC": {
+"under": "BABA",
+"inverse": false,
+"active": true,
+"name": "CORGI BABA 2X DAILY ETF"
+},
+"BABU": {
+"under": "BABA",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY BABA BULL 2X ETF"
+},
+"BABX": {
+"under": "BABA",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG BABA DAILY ETF"
+},
+"BAIG": {
+"under": "BBAI",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG BBAI DAILY ETF"
+},
+"SNDC": {
+"under": "SNDK",
+"inverse": false,
+"active": true,
+"name": "CORGI SNDK 2X DAILY ETF"
+},
+"SPYB": {
+"under": "SPY",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG SPY WEEKLY ETF"
+},
+"TAJX": {
+"under": "INDIA",
+"inverse": false,
+"active": true,
+"name": "CORGI INDIA 2X DAILY ETF"
+},
+"BIDG": {
+"under": "BIDU",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG BIDU DAILY ETF"
+},
+"BKNU": {
+"under": "BKNG",
+"inverse": false,
+"active": false,
+"name": "T-REX 2X LONG BKNG DAILY TARGET ETF"
+},
+"BNMC": {
+"under": "BMNR",
+"inverse": false,
+"active": true,
+"name": "CORGI BMNR 2X DAILY ETF"
+},
+"ACHX": {
+"under": "ACHR",
+"inverse": false,
+"active": true,
+"name": "CORGI ACHR 2X DAILY ETF"
+},
+"ACLZ": {
+"under": "ACLS",
+"inverse": false,
+"active": true,
+"name": "CORGI ACLS 2X DAILY ETF"
+},
+"ACMM": {
+"under": "ACMR",
+"inverse": false,
+"active": true,
+"name": "CORGI ACMR 2X DAILY ETF"
+},
+"BRKL": {
+"under": "BRKB",
+"inverse": false,
+"active": true,
+"name": "CORGI BRKB 2X DAILY ETF"
+},
+"BRKU": {
+"under": "BRKB",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY BRKB BULL 2X ETF"
+},
+"AKAL": {
+"under": "AKAM",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG AKAM DAILY TARGET ETF"
+},
+"ALA": {
+"under": "ALAB",
+"inverse": false,
+"active": true,
+"name": "CORGI ALAB 2X DAILY ETF"
+},
+"ALBG": {
+"under": "ALB",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG ALB DAILY ETF"
+},
+"CAMC": {
+"under": "CAMT",
+"inverse": false,
+"active": true,
+"name": "CORGI CAMT 2X DAILY ETF"
+},
+"AMA": {
+"under": "AMAT",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG AMAT ETF"
+},
+"AMAA": {
+"under": "AMZN",
+"inverse": false,
+"active": true,
+"name": "CORGI AMZN 2X DAILY ETF"
+},
+"AMAU": {
+"under": "AMAT",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG AMAT DAILY ETF"
+},
+"AMDC": {
+"under": "AMD",
+"inverse": false,
+"active": true,
+"name": "CORGI AMD 2X DAILY ETF"
+},
+"AMDD": {
+"under": "AMD",
+"inverse": true,
+"active": true,
+"name": "T-REX 2X INVERSE AMD DAILY TARGET ETF"
+},
+"AMDG": {
+"under": "AMD",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG AMD DAILY ETF"
+},
+"AMDL": {
+"under": "AMD",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG AMD DAILY ETF"
+},
+"AMDS": {
+"under": "AMD",
+"inverse": true,
+"active": false,
+"name": "GRANITESHARES 1X SHORT AMD DAILY ETF"
+},
+"AMKL": {
+"under": "AMKR",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG AMKR ETF"
+},
+"AMKX": {
+"under": "AMKR",
+"inverse": false,
+"active": true,
+"name": "CORGI AMKR 2X DAILY ETF"
+},
+"AMPU": {
+"under": "AMPX",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG AMPX ETF"
+},
+"GOGL": {
+"under": "GOOGL",
+"inverse": false,
+"active": true,
+"name": "CORGI GOOGL 2X DAILY ETF"
+},
+"AMUU": {
+"under": "AMD",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY AMD BULL 2X ETF"
+},
+"AMZG": {
+"under": "AMZN",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG AMZN DAILY ETF"
+},
+"AMZO": {
+"under": "AMZN",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT AMZN DAILY ETF"
+},
+"AMZU": {
+"under": "AMZN",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY AMZN BULL 2X ETF"
+},
+"AMZZ": {
+"under": "AMZN",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG AMZN DAILY ETF"
+},
+"ANEL": {
+"under": "ANET",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG ANET ETF"
+},
+"APHG": {
+"under": "APH",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG APH DAILY ETF"
+},
+"APHU": {
+"under": "APH",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG APH DAILY TARGET ETF"
+},
+"APLX": {
+"under": "APLD",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG APLD DAILY ETF"
+},
+"APLZ": {
+"under": "APLD",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT APLD DAILY ETF"
+},
+"APMI": {
+"under": "AMAT",
+"inverse": false,
+"active": true,
+"name": "CORGI AMAT 2X DAILY ETF"
+},
+"APPC": {
+"under": "APP",
+"inverse": false,
+"active": true,
+"name": "CORGI APP 2X DAILY ETF"
+},
+"APPX": {
+"under": "APP",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG APP DAILY ETF"
+},
+"AALG": {
+"under": "AAL",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG AAL DAILY ETF"
+},
+"AAOG": {
+"under": "AAOI",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG AAOI DAILY ETF"
+},
+"AAOX": {
+"under": "AAOI",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG AAOI DAILY ETF"
+},
+"AAOZ": {
+"under": "AAOI",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT AAOI DAILY ETF"
+},
+"AAPB": {
+"under": "AAPL",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG AAPL DAILY ETF"
+},
+"AAPE": {
+"under": "AAPL",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG AAPL DAILY ETF"
+},
+"AAPU": {
+"under": "AAPL",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY AAPL BULL 2X ETF"
+},
+"AAPX": {
+"under": "APPLE",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG APPLE DAILY TARGET ETF"
+},
+"ADBG": {
+"under": "ADBE",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG ADBE DAILY ETF"
+},
+"ADBU": {
+"under": "ADBE",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY ADBE BULL 2X ETF"
+},
+"ADIU": {
+"under": "ADI",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG ADI DAILY ETF"
+},
+"AEHG": {
+"under": "AEHR",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG AEHR DAILY ETF"
+},
+"AFRU": {
+"under": "AFRM",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG AFRM DAILY TARGET ETF"
+},
+"ARCX": {
+"under": "ACHR",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG ACHR DAILY ETF"
+},
+"ASMG": {
+"under": "ASML",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG ASML DAILY ETF"
+},
+"ASMU": {
+"under": "ASML",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY ASML BULL 2X ETF"
+},
+"ASMZ": {
+"under": "ASML",
+"inverse": false,
+"active": true,
+"name": "CORGI ASML 2X DAILY ETF"
+},
+"ASSX": {
+"under": "ASST",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG ASST DAILY TARGET ETF"
+},
+"ASTG": {
+"under": "ASTS",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG ASTS DAILY ETF"
+},
+"ASTT": {
+"under": "ASTS",
+"inverse": false,
+"active": true,
+"name": "CORGI ASTS 2X DAILY ETF"
+},
+"ASTX": {
+"under": "ASTS",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG ASTS DAILY ETF"
+},
+"ASTY": {
+"under": "ASTS",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG ASTS ETF"
+},
+"ASUP": {
+"under": "ASTS",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG ASTS DAILY TARGET ETF"
+},
+"AURU": {
+"under": "AUR",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG AUR DAILY ETF"
+},
+"AXPG": {
+"under": "AXP",
+"inverse": false,
+"active": false,
+"name": "LEVERAGE SHARES 2X LONG AXP DAILY ETF"
+},
+"AXTC": {
+"under": "AXTI",
+"inverse": false,
+"active": true,
+"name": "CORGI AXTI 2X DAILY ETF"
+},
+"AXTL": {
+"under": "AXTI",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG AXTI DAILY ETF"
+},
+"AXTQ": {
+"under": "AXTI",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT AXTI DAILY ETF"
+},
+"AXTU": {
+"under": "AXTI",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG AXTI DAILY TARGET ETF"
+},
+"AXTX": {
+"under": "AXTI",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG AXTI DAILY ETF"
+},
+"AXUP": {
+"under": "AXON",
+"inverse": false,
+"active": false,
+"name": "T-REX 2X LONG AXON DAILY TARGET ETF"
+},
+"BBUL": {
+"under": "BB",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG BB DAILY ETF"
+},
+"BEC": {
+"under": "BE",
+"inverse": false,
+"active": true,
+"name": "CORGI BE 2X DAILY ETF"
+},
+"BEG": {
+"under": "BE",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG BE DAILY ETF"
+},
+"BEX": {
+"under": "BE",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG BE DAILY ETF"
+},
+"BEZ": {
+"under": "BE",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT BE DAILY ETF"
+},
+"BLSG": {
+"under": "BLSH",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG BLSH DAILY ETF"
+},
+"BLSX": {
+"under": "BLSH",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG BLSH DAILY ETF"
+},
+"BMNG": {
+"under": "BMNR",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG BMNR DAILY ETF"
+},
+"BMNU": {
+"under": "BMNR",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG BMNR DAILY TARGET ETF"
+},
+"BMNZ": {
+"under": "BMNR",
+"inverse": true,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X SHORT BMNR ETF"
+},
+"BOEG": {
+"under": "BA",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG BA DAILY ETF"
+},
+"BOEU": {
+"under": "BA",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY BA BULL 2X ETF"
+},
+"BTDL": {
+"under": "BTDR",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG BTDR DAILY ETF"
+},
+"BU": {
+"under": "B",
+"inverse": false,
+"active": false,
+"name": "DEFIANCE DAILY TARGET 2X LONG B ETF"
+},
+"BULG": {
+"under": "BULL",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG BULL DAILY ETF"
+},
+"BULU": {
+"under": "BULL",
+"inverse": false,
+"active": false,
+"name": "T-REX 2X LONG BULL DAILY TARGET ETF"
+},
+"BULX": {
+"under": "BULL",
+"inverse": false,
+"active": false,
+"name": "GRANITESHARES 2X LONG BULL DAILY ETF"
+},
+"CARX": {
+"under": "CART",
+"inverse": false,
+"active": true,
+"name": "CORGI CART 2X DAILY ETF"
+},
+"CATG": {
+"under": "CAT",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG CAT DAILY ETF"
+},
+"CBRG": {
+"under": "CBRS",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG CBRS DAILY ETF"
+},
+"CBRX": {
+"under": "CBRS",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG CBRS DAILY ETF"
+},
+"CBRZ": {
+"under": "CBRS",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT CBRS DAILY ETF"
+},
+"CCUP": {
+"under": "CRCL",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG CRCL DAILY TARGET ETF"
+},
+"CDNG": {
+"under": "CDNS",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG CDNS DAILY ETF"
+},
+"CEGX": {
+"under": "CEG",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG CEG DAILY ETF"
+},
+"CELT": {
+"under": "CELH",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG CELH DAILY ETF"
+},
+"CIEG": {
+"under": "CIEN",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG CIEN DAILY ETF"
+},
+"CIEX": {
+"under": "CIEN",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG CIEN DAILY ETF"
+},
+"CIFC": {
+"under": "CIFR",
+"inverse": false,
+"active": true,
+"name": "CORGI CIFR 2X DAILY ETF"
+},
+"CIFG": {
+"under": "CIFR",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG CIFR DAILY ETF"
+},
+"CIFU": {
+"under": "CIFR",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG CIFR DAILY TARGET ETF"
+},
+"CIR": {
+"under": "CRCL",
+"inverse": false,
+"active": true,
+"name": "CORGI CRCL 2X DAILY ETF"
+},
+"CLSX": {
+"under": "CLSK",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG CLSK DAILY ETF"
+},
+"CLSZ": {
+"under": "CLSK",
+"inverse": true,
+"active": false,
+"name": "TRADR 2X SHORT CLSK DAILY ETF"
+},
+"CMGG": {
+"under": "CMG",
+"inverse": false,
+"active": false,
+"name": "LEVERAGE SHARES 2X LONG CMG DAILY ETF"
+},
+"CNCG": {
+"under": "CNC",
+"inverse": false,
+"active": false,
+"name": "LEVERAGE SHARES 2X LONG CNC DAILY ETF"
+},
+"COHC": {
+"under": "COHR",
+"inverse": false,
+"active": true,
+"name": "CORGI COHR 2X DAILY ETF"
+},
+"COHH": {
+"under": "COHR",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG COHR DAILY ETF"
+},
+"COHQ": {
+"under": "COHR",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT COHR DAILY ETF"
+},
+"COHX": {
+"under": "COHR",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG COHR DAILY ETF"
+},
+"COIG": {
+"under": "COIN",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG COIN DAILY ETF"
+},
+"COIX": {
+"under": "COIN",
+"inverse": false,
+"active": true,
+"name": "CORGI COIN 2X DAILY ETF"
+},
+"CONI": {
+"under": "COIN",
+"inverse": true,
+"active": true,
+"name": "GRANITESHARES 1X SHORT COIN DAILY ETF"
+},
+"CONL": {
+"under": "COIN",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG COIN DAILY ETF"
+},
+"CONX": {
+"under": "COIN",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY COIN BULL 2X ETF"
+},
+"CORD": {
+"under": "CRWV",
+"inverse": true,
+"active": true,
+"name": "T-REX 2X INVERSE CRWV DAILY TARGET ETF"
+},
+"COTG": {
+"under": "COST",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG COST DAILY ETF"
+},
+"COZX": {
+"under": "CORZ",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG CORZ DAILY ETF"
+},
+"CPNX": {
+"under": "CPNG",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG CPNG DAILY ETF"
+},
+"CRCD": {
+"under": "CRCL",
+"inverse": true,
+"active": true,
+"name": "T-REX 2X INVERSE CRCL DAILY TARGET ETF"
+},
+"CRCG": {
+"under": "CRCL",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG CRCL DAILY ETF"
+},
+"CRD": {
+"under": "CRDO",
+"inverse": false,
+"active": true,
+"name": "CORGI CRDO 2X DAILY ETF"
+},
+"CRDU": {
+"under": "CRDO",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG CRDO DAILY ETF"
+},
+"CRMG": {
+"under": "CRM",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG CRM DAILY ETF"
+},
+"CRMU": {
+"under": "CRML",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG CRML DAILY ETF"
+},
+"CRMX": {
+"under": "CRML",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG CRML DAILY ETF"
+},
+"CRUC": {
+"under": "CRUS",
+"inverse": false,
+"active": true,
+"name": "CORGI CRUS 2X DAILY ETF"
+},
+"CRWC": {
+"under": "CRWD",
+"inverse": false,
+"active": true,
+"name": "CORGI CRWD 2X DAILY ETF"
+},
+"CRWG": {
+"under": "CRWV",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG CRWV DAILY ETF"
+},
+"CRWL": {
+"under": "CRWD",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG CRWD DAILY ETF"
+},
+"CRWU": {
+"under": "CRWV",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG CRWV DAILY TARGET ETF"
+},
+"CRWX": {
+"under": "CRWV",
+"inverse": false,
+"active": true,
+"name": "CORGI CRWV 2X DAILY ETF"
+},
+"CSCL": {
+"under": "CSCO",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY CSCO BULL 2X ETF"
+},
+"CSEX": {
+"under": "CLS",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG CLS DAILY ETF"
+},
+"CVNX": {
+"under": "CVNA",
+"inverse": false,
+"active": false,
+"name": "DEFIANCE DAILY TARGET 2X LONG CVNA ETF"
+},
+"CWVX": {
+"under": "CRWV",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG CRWV DAILY ETF"
+},
+"DAMD": {
+"under": "AMD",
+"inverse": true,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X SHORT AMD ETF"
+},
+"DASX": {
+"under": "DASH",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG DASH DAILY ETF"
+},
+"DJTU": {
+"under": "DJT",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG DJT DAILY TARGET ETF"
+},
+"DKNX": {
+"under": "DKNG",
+"inverse": false,
+"active": false,
+"name": "DEFIANCE DAILY TARGET 2X LONG DKNG ETF"
+},
+"DKUP": {
+"under": "DKNG",
+"inverse": false,
+"active": false,
+"name": "DIREXION DAILY DKNG BULL 2X ETF"
+},
+"DLLL": {
+"under": "DELL",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG DELL DAILY ETF"
+},
+"DNNG": {
+"under": "DNN",
+"inverse": false,
+"active": false,
+"name": "LEVERAGE SHARES 2X LONG DNN DAILY ETF"
+},
+"DOGD": {
+"under": "DDOG",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG DDOG DAILY ETF"
+},
+"DRAL": {
+"under": "DRAM",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG DRAM ETF"
+},
+"DUOG": {
+"under": "DUOL",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG DUOL DAILY ETF"
+},
+"ECHX": {
+"under": "ECHO",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG ECHO DAILY ETF"
+},
+"ELIL": {
+"under": "LLY",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY LLY BULL 2X ETF"
+},
+"ENPX": {
+"under": "ENPH",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG ENPH DAILY ETF"
+},
+"ENTL": {
+"under": "ENTG",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG ENTG DAILY ETF"
+},
+"EO": {
+"under": "EOSE",
+"inverse": false,
+"active": true,
+"name": "CORGI EOSE 2X DAILY ETF"
+},
+"EOSU": {
+"under": "EOSE",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG EOSE DAILY TARGET ETF"
+},
+"ETNG": {
+"under": "ETN",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG ETN DAILY ETF"
+},
+"ETQ": {
+"under": "ETHER",
+"inverse": true,
+"active": false,
+"name": "T-REX 2X INVERSE ETHER DAILY TARGET ETF"
+},
+"ETRL": {
+"under": "ETOR",
+"inverse": false,
+"active": false,
+"name": "GRANITESHARES 2X LONG ETOR DAILY ETF"
+},
+"ETU": {
+"under": "ETHER",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG ETHER DAILY TARGET ETF"
+},
+"EVMU": {
+"under": "ETHER",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY ETHER BULL 2X ETF"
+},
+"FBL": {
+"under": "META",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG META DAILY ETF"
+},
+"FBX": {
+"under": "META",
+"inverse": false,
+"active": true,
+"name": "CORGI META 2X DAILY ETF"
+},
+"FCXG": {
+"under": "FCX",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG FCX DAILY ETF"
+},
+"FGRU": {
+"under": "FIGR",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG FIGR DAILY TARGET ETF"
+},
+"FIGG": {
+"under": "FIG",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG FIG DAILY ETF"
+},
+"FIXX": {
+"under": "FIX",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG FIX DAILY ETF"
+},
+"FLEL": {
+"under": "FLEX",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG FLEX DAILY ETF"
+},
+"FLYT": {
+"under": "FLY",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG FLY DAILY ETF"
+},
+"FNG": {
+"under": "FN",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG FN DAILY ETF"
+},
+"FOMG": {
+"under": "FORM",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG FORM DAILY ETF"
+},
+"FPSX": {
+"under": "FPS",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG FPS DAILY ETF"
+},
+"FRDU": {
+"under": "F",
+"inverse": false,
+"active": false,
+"name": "DIREXION DAILY F BULL 2X ETF"
+},
+"FUTG": {
+"under": "FUTU",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG FUTU DAILY ETF"
+},
+"GEMG": {
+"under": "GEMI",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG GEMI DAILY ETF"
+},
+"GEVC": {
+"under": "GEV",
+"inverse": false,
+"active": true,
+"name": "CORGI GEV 2X DAILY ETF"
+},
+"GEVG": {
+"under": "GEV",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG GEV DAILY ETF"
+},
+"GEVX": {
+"under": "GEV",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG GEV DAILY ETF"
+},
+"GFSG": {
+"under": "GFS",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG GFS DAILY ETF"
+},
+"GGLL": {
+"under": "GOOGL",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY GOOGL BULL 2X ETF"
+},
+"GLGG": {
+"under": "GLXY",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG GLXY DAILY ETF"
+},
+"GLWG": {
+"under": "GLW",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG GLW DAILY ETF"
+},
+"GLX": {
+"under": "GLXY",
+"inverse": false,
+"active": true,
+"name": "CORGI GLXY 2X DAILY ETF"
+},
+"GLXU": {
+"under": "GLXY",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG GLXY DAILY TARGET ETF"
+},
+"GMEC": {
+"under": "GME",
+"inverse": false,
+"active": true,
+"name": "CORGI GME 2X DAILY ETF"
+},
+"GMEU": {
+"under": "GME",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG GME DAILY TARGET ETF"
+},
+"GOOL": {
+"under": "GOOGL",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG GOOGL DAILY ETF"
+},
+"GOU": {
+"under": "GOOGL",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG GOOGL DAILY ETF"
+},
+"GRAG": {
+"under": "GRAB",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG GRAB DAILY ETF"
+},
+"GSX": {
+"under": "GS",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG GS DAILY ETF"
+},
+"HAWG": {
+"under": "HAWK",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG HAWK DAILY ETF"
+},
+"HIMC": {
+"under": "HIMS",
+"inverse": false,
+"active": true,
+"name": "CORGI HIMS 2X DAILY ETF"
+},
+"HIMZ": {
+"under": "HIMS",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG HIMS ETF"
+},
+"HLXX": {
+"under": "HL",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG HL DAILY ETF"
+},
+"HODU": {
+"under": "HOOD",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY HOOD BULL 2X ETF"
+},
+"HONG": {
+"under": "HON",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG HON DAILY ETF"
+},
+"HOOC": {
+"under": "HOOD",
+"inverse": false,
+"active": true,
+"name": "CORGI HOOD 2X DAILY ETF"
+},
+"HOOG": {
+"under": "HOOD",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG HOOD DAILY ETF"
+},
+"HOOX": {
+"under": "HOOD",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG HOOD ETF"
+},
+"HOOZ": {
+"under": "HOOD",
+"inverse": true,
+"active": false,
+"name": "DEFIANCE DAILY TARGET 2X SHORT HOOD ETF"
+},
+"HPEL": {
+"under": "HPE",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG HPE DAILY ETF"
+},
+"HUTG": {
+"under": "HUT",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG HUT DAILY ETF"
+},
+"HYNX": {
+"under": "SKHY",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG SKHY DAILY TARGET ETF"
+},
+"IBX": {
+"under": "IBM",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG IBM DAILY ETF"
+},
+"INFH": {
+"under": "INFQ",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG INFQ ETF"
+},
+"INT": {
+"under": "INTC",
+"inverse": false,
+"active": true,
+"name": "CORGI INTC 2X DAILY ETF"
+},
+"INTW": {
+"under": "INTC",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG INTC DAILY ETF"
+},
+"IONC": {
+"under": "IONQ",
+"inverse": false,
+"active": true,
+"name": "CORGI IONQ 2X DAILY ETF"
+},
+"IONL": {
+"under": "IONQ",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG IONQ DAILY ETF"
+},
+"IONX": {
+"under": "IONQ",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG IONQ ETF"
+},
+"IONZ": {
+"under": "IONQ",
+"inverse": true,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X SHORT IONQ ETF"
+},
+"IOSX": {
+"under": "AAPL",
+"inverse": false,
+"active": true,
+"name": "CORGI AAPL 2X DAILY ETF"
+},
+"IRE": {
+"under": "IREN",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG IREN ETF"
+},
+"IREC": {
+"under": "IREN",
+"inverse": false,
+"active": true,
+"name": "CORGI IREN 2X DAILY ETF"
+},
+"IREG": {
+"under": "IREN",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG IREN DAILY ETF"
+},
+"IREX": {
+"under": "IREN",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG IREN DAILY ETF"
+},
+"IREZ": {
+"under": "IREN",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT IREN DAILY ETF"
+},
+"ISUL": {
+"under": "ISRG",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG ISRG DAILY ETF"
+},
+"JBLG": {
+"under": "JBL",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG JBL DAILY ETF"
+},
+"JOBX": {
+"under": "JOBY",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG JOBY DAILY ETF"
+},
+"JPX": {
+"under": "JPM",
+"inverse": false,
+"active": false,
+"name": "DEFIANCE DAILY TARGET 2X LONG JPM ETF"
+},
+"KATT": {
+"under": "PURR",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG PURR DAILY TARGET ETF"
+},
+"KBAB": {
+"under": "BABA",
+"inverse": false,
+"active": true,
+"name": "KRANESHARES 2X LONG BABA DAILY ETF"
+},
+"KBDU": {
+"under": "BIDU",
+"inverse": false,
+"active": true,
+"name": "KRANESHARES 2X LONG BIDU DAILY ETF"
+},
+"KEEX": {
+"under": "KEEL",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG KEEL ETF"
+},
+"KEYG": {
+"under": "KEYS",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG KEYS DAILY ETF"
+},
+"KEYX": {
+"under": "KEYS",
+"inverse": false,
+"active": true,
+"name": "CORGI KEYS 2X DAILY ETF"
+},
+"KJD": {
+"under": "JD",
+"inverse": false,
+"active": true,
+"name": "KRANESHARES 2X LONG JD DAILY ETF"
+},
+"KLAG": {
+"under": "KLAC",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG KLAC DAILY ETF"
+},
+"KMLI": {
+"under": "MELI",
+"inverse": false,
+"active": true,
+"name": "KRANESHARES 2X LONG MELI DAILY ETF"
+},
+"KPDD": {
+"under": "PDD",
+"inverse": false,
+"active": true,
+"name": "KRANESHARES 2X LONG PDD DAILY ETF"
+},
+"KTUP": {
+"under": "KTOS",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG KTOS DAILY TARGET ETF"
+},
+"LABX": {
+"under": "ALAB",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG ALAB DAILY ETF"
+},
+"LACG": {
+"under": "LAC",
+"inverse": false,
+"active": false,
+"name": "LEVERAGE SHARES 2X LONG LAC DAILY ETF"
+},
+"LASC": {
+"under": "LASR",
+"inverse": false,
+"active": true,
+"name": "CORGI LASR 2X DAILY ETF"
+},
+"LCDL": {
+"under": "LCID",
+"inverse": false,
+"active": false,
+"name": "GRANITESHARES 2X LONG LCID DAILY ETF"
+},
+"LCIZ": {
+"under": "LCID",
+"inverse": true,
+"active": false,
+"name": "TRADR 2X SHORT LCID DAILY ETF"
+},
+"LEUX": {
+"under": "LEU",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG LEU DAILY ETF"
+},
+"LINT": {
+"under": "INTC",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY INTC BULL 2X ETF"
+},
+"LITC": {
+"under": "LITE",
+"inverse": false,
+"active": true,
+"name": "CORGI LITE 2X DAILY ETF"
+},
+"LITG": {
+"under": "LITE",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG LITE DAILY ETF"
+},
+"LITU": {
+"under": "LITE",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG LITE DAILY TARGET ETF"
+},
+"LITX": {
+"under": "LITE",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG LITE DAILY ETF"
+},
+"LITZ": {
+"under": "LITE",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT LITE DAILY ETF"
+},
+"LLYX": {
+"under": "LLY",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG LLY ETF"
+},
+"LLYZ": {
+"under": "LLY",
+"inverse": true,
+"active": false,
+"name": "DEFIANCE DAILY TARGET 2X SHORT LLY ETF"
+},
+"LMNX": {
+"under": "LMND",
+"inverse": false,
+"active": false,
+"name": "DEFIANCE DAILY TARGET 2X LONG LMND ETF"
+},
+"LMTL": {
+"under": "LMT",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY LMT BULL 2X ETF"
+},
+"LNOK": {
+"under": "NOK",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG NOK ETF"
+},
+"LRCC": {
+"under": "LRCX",
+"inverse": false,
+"active": true,
+"name": "CORGI LRCX 2X DAILY ETF"
+},
+"LRCU": {
+"under": "LRCX",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG LRCX DAILY ETF"
+},
+"LRNX": {
+"under": "LRN",
+"inverse": false,
+"active": true,
+"name": "CORGI LRN 2X DAILY ETF"
+},
+"LULG": {
+"under": "LULU",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG LULU DAILY ETF"
+},
+"LUNL": {
+"under": "LUNR",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG LUNR ETF"
+},
+"LWLX": {
+"under": "LWLG",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG LWLG DAILY ETF"
+},
+"LYFX": {
+"under": "LYFT",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG LYFT DAILY ETF"
+},
+"MCHG": {
+"under": "MCHP",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG MCHP DAILY ETF"
+},
+"MCHU": {
+"under": "MCHP",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG MCHP DAILY ETF"
+},
+"MDBX": {
+"under": "MDB",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG MDB DAILY ETF"
+},
+"METG": {
+"under": "META",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG META DAILY ETF"
+},
+"METQ": {
+"under": "META",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT META DAILY ETF"
+},
+"METU": {
+"under": "META",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY META BULL 2X ETF"
+},
+"MHX": {
+"under": "MARA",
+"inverse": false,
+"active": true,
+"name": "CORGI MARA 2X DAILY ETF"
+},
+"MIC": {
+"under": "MU",
+"inverse": false,
+"active": true,
+"name": "CORGI MU 2X DAILY ETF"
+},
+"MNSX": {
+"under": "MNST",
+"inverse": false,
+"active": true,
+"name": "CORGI MNST 2X DAILY ETF"
+},
+"MPG": {
+"under": "MP",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG MP DAILY ETF"
+},
+"MPL": {
+"under": "MP",
+"inverse": false,
+"active": false,
+"name": "DEFIANCE DAILY TARGET 2X LONG MP ETF"
+},
+"MPWC": {
+"under": "MPWR",
+"inverse": false,
+"active": true,
+"name": "CORGI MPWR 2X DAILY ETF"
+},
+"MPWX": {
+"under": "MPWR",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG MPWR DAILY ETF"
+},
+"MRAL": {
+"under": "MARA",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG MARA DAILY ETF"
+},
+"MRAX": {
+"under": "MRAM",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG MRAM DAILY ETF"
+},
+"MRNX": {
+"under": "MRNA",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG MRNA ETF"
+},
+"MRVU": {
+"under": "MRVL",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY MRVL BULL 2X ETF"
+},
+"MRVX": {
+"under": "MRVL",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG MRVL ETF"
+},
+"MSDD": {
+"under": "MSTR",
+"inverse": true,
+"active": false,
+"name": "GRANITESHARES 2X SHORT MSTR DAILY ETF"
+},
+"MSFC": {
+"under": "MSFT",
+"inverse": false,
+"active": true,
+"name": "CORGI MSFT 2X DAILY ETF"
+},
+"MSFL": {
+"under": "MSFT",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG MSFT DAILY ETF"
+},
+"MSFU": {
+"under": "MSFT",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY MSFT BULL 2X ETF"
+},
+"MSIX": {
+"under": "MSI",
+"inverse": false,
+"active": true,
+"name": "CORGI MSI 2X DAILY ETF"
+},
+"MSTC": {
+"under": "MSTR",
+"inverse": false,
+"active": true,
+"name": "CORGI MSTR 2X DAILY ETF"
+},
+"MSTP": {
+"under": "MSTR",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG MSTR DAILY ETF"
+},
+"MSTU": {
+"under": "MSTR",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG MSTR DAILY TARGET ETF"
+},
+"MSTX": {
+"under": "MSTR",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG MSTR ETF"
+},
+"MSTZ": {
+"under": "MSTR",
+"inverse": true,
+"active": true,
+"name": "T-REX 2X INVERSE MSTR DAILY TARGET ETF"
+},
+"MTSG": {
+"under": "MTSI",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG MTSI DAILY ETF"
+},
+"MUG": {
+"under": "MU",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG MU DAILY ETF"
+},
+"MULL": {
+"under": "MU",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG MU DAILY ETF"
+},
+"MUU": {
+"under": "MU",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY MU BULL 2X ETF"
+},
+"MUZ": {
+"under": "MU",
+"inverse": true,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X SHORT MU ETF"
+},
+"MVLL": {
+"under": "MRVL",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG MRVL DAILY ETF"
+},
+"MXLL": {
+"under": "MXL",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG MXL DAILY ETF"
+},
+"NBIC": {
+"under": "NBIS",
+"inverse": false,
+"active": true,
+"name": "CORGI NBIS 2X DAILY ETF"
+},
+"NBIG": {
+"under": "NBIS",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG NBIS DAILY ETF"
+},
+"NBIL": {
+"under": "NBIS",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG NBIS ETF"
+},
+"NBIZ": {
+"under": "NBIS",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT NBIS DAILY ETF"
+},
+"NEBX": {
+"under": "NBIS",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG NBIS DAILY ETF"
+},
+"NEMG": {
+"under": "NEM",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG NEM DAILY ETF"
+},
+"NETG": {
+"under": "NET",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG NET DAILY ETF"
+},
+"NETX": {
+"under": "NET",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG NET DAILY ETF"
+},
+"NFLU": {
+"under": "NFLX",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG NFLX DAILY TARGET ETF"
+},
+"NFX": {
+"under": "NFLX",
+"inverse": false,
+"active": true,
+"name": "CORGI NFLX 2X DAILY ETF"
+},
+"NFXL": {
+"under": "NFLX",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY NFLX BULL 2X ETF"
+},
+"NIOG": {
+"under": "NIO",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG NIO DAILY ETF"
+},
+"NNEX": {
+"under": "NNE",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG NNE DAILY ETF"
+},
+"NOWL": {
+"under": "NOW",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG NOW DAILY ETF"
+},
+"NOWX": {
+"under": "NOW",
+"inverse": false,
+"active": true,
+"name": "CORGI NOW 2X DAILY ETF"
+},
+"NTAL": {
+"under": "NTAP",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG NTAP DAILY ETF"
+},
+"NUG": {
+"under": "NU",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG NU DAILY ETF"
+},
+"NVC": {
+"under": "NVDA",
+"inverse": false,
+"active": true,
+"name": "CORGI NVDA 2X DAILY ETF"
+},
+"NVD": {
+"under": "NVDA",
+"inverse": true,
+"active": true,
+"name": "GRANITESHARES 2X SHORT NVDA DAILY ETF"
+},
+"NVDG": {
+"under": "NVDA",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG NVDA DAILY ETF"
+},
+"NVDL": {
+"under": "NVDA",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG NVDA DAILY ETF"
+},
+"NVDS": {
+"under": "NVDA",
+"inverse": true,
+"active": true,
+"name": "TRADR 15X SHORT NVDA DAILY ETF"
+},
+"NVDU": {
+"under": "NVDA",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY NVDA BULL 2X ETF"
+},
+"NVOC": {
+"under": "NVO",
+"inverse": false,
+"active": true,
+"name": "CORGI NVO 2X DAILY ETF"
+},
+"NVOX": {
+"under": "NVO",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG NVO ETF"
+},
+"NVTC": {
+"under": "NVTS",
+"inverse": false,
+"active": true,
+"name": "CORGI NVTS 2X DAILY ETF"
+},
+"NVTX": {
+"under": "NVTS",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG NVTS DAILY ETF"
+},
+"NWMX": {
+"under": "NEM",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG NEM DAILY ETF"
+},
+"NXPG": {
+"under": "NXPI",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG NXPI DAILY ETF"
+},
+"NXPX": {
+"under": "NXPI",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG NXPI DAILY ETF"
+},
+"OCNL": {
+"under": "DOCN",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG DOCN DAILY TARGET ETF"
+},
+"OKLC": {
+"under": "OKLO",
+"inverse": false,
+"active": true,
+"name": "CORGI OKLO 2X DAILY ETF"
+},
+"OKLL": {
+"under": "OKLO",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG OKLO ETF"
+},
+"OKLS": {
+"under": "OKLO",
+"inverse": true,
+"active": false,
+"name": "DEFIANCE DAILY TARGET 2X SHORT OKLO ETF"
+},
+"OKTG": {
+"under": "OKTA",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG OKTA DAILY ETF"
+},
+"OKTX": {
+"under": "OKTA",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG OKTA DAILY ETF"
+},
+"ONDC": {
+"under": "ONDS",
+"inverse": false,
+"active": true,
+"name": "CORGI ONDS 2X DAILY ETF"
+},
+"ONDG": {
+"under": "ONDS",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG ONDS DAILY ETF"
+},
+"ONDL": {
+"under": "ONDS",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG ONDS ETF"
+},
+"ONDU": {
+"under": "ONDS",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG ONDS DAILY ETF"
+},
+"ONG": {
+"under": "ON",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG ON DAILY ETF"
+},
+"ONTX": {
+"under": "ONTO",
+"inverse": false,
+"active": true,
+"name": "CORGI ONTO 2X DAILY ETF"
+},
+"ONX": {
+"under": "ON",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG ON DAILY ETF"
+},
+"OPEG": {
+"under": "OPEN",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG OPEN DAILY ETF"
+},
+"OPEX": {
+"under": "OPEN",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG OPEN DAILY ETF"
+},
+"ORAC": {
+"under": "ORCL",
+"inverse": false,
+"active": true,
+"name": "CORGI ORCL 2X DAILY ETF"
+},
+"ORCU": {
+"under": "ORCL",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY ORCL BULL 2X ETF"
+},
+"ORCX": {
+"under": "ORCL",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG ORCL ETF"
+},
+"ORCZ": {
+"under": "ORCL",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT ORCL DAILY ETF"
+},
+"ORLG": {
+"under": "ORLY",
+"inverse": false,
+"active": false,
+"name": "LEVERAGE SHARES 2X LONG ORLY DAILY ETF"
+},
+"OSCG": {
+"under": "OSCR",
+"inverse": false,
+"active": false,
+"name": "LEVERAGE SHARES 2X LONG OSCR DAILY ETF"
+},
+"OSCX": {
+"under": "OSCR",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG OSCR ETF"
+},
+"OSSL": {
+"under": "OSS",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG OSS ETF"
+},
+"OUSL": {
+"under": "OUST",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG OUST ETF"
+},
+"PAAU": {
+"under": "PAAS",
+"inverse": false,
+"active": false,
+"name": "T-REX 2X LONG PAAS DAILY TARGET ETF"
+},
+"PALU": {
+"under": "PANW",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY PANW BULL 2X ETF"
+},
+"PANG": {
+"under": "PANW",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG PANW DAILY ETF"
+},
+"PATX": {
+"under": "PATH",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG PATH DAILY ETF"
+},
+"PBRG": {
+"under": "PBR",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG PBR DAILY ETF"
+},
+"PDDL": {
+"under": "PDD",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG PDD DAILY ETF"
+},
+"PENU": {
+"under": "PENG",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG PENG DAILY TARGET ETF"
+},
+"PLTG": {
+"under": "PLTR",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG PLTR DAILY ETF"
+},
+"PLTL": {
+"under": "PLTR",
+"inverse": false,
+"active": true,
+"name": "CORGI PLTR 2X DAILY ETF"
+},
+"PLTU": {
+"under": "PLTR",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY PLTR BULL 2X ETF"
+},
+"PLTZ": {
+"under": "PLTR",
+"inverse": true,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X SHORT PLTR ETF"
+},
+"PLU": {
+"under": "PL",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG PL ETF"
+},
+"PLUL": {
+"under": "PLUG",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG PLUG DAILY ETF"
+},
+"POEL": {
+"under": "POET",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG POET ETF"
+},
+"PONX": {
+"under": "PONY",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG PONY DAILY ETF"
+},
+"PTIR": {
+"under": "PLTR",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG PLTR DAILY ETF"
+},
+"PUL": {
+"under": "P",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG P DAILY ETF"
+},
+"PUR": {
+"under": "PURR",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG PURR ETF"
+},
+"PXIU": {
+"under": "UPXI",
+"inverse": false,
+"active": false,
+"name": "T-REX 2X LONG UPXI DAILY TARGET ETF"
+},
+"PYPG": {
+"under": "PYPL",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG PYPL DAILY ETF"
+},
+"PYPU": {
+"under": "PYPL",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY PYPL BULL 2X ETF"
+},
+"QBTX": {
+"under": "QBTS",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG QBTS DAILY ETF"
+},
+"QBTZ": {
+"under": "QBTS",
+"inverse": true,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X SHORT QBTS ETF"
+},
+"QCML": {
+"under": "QCOM",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG QCOM DAILY ETF"
+},
+"QCMU": {
+"under": "QCOM",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY QCOM BULL 2X ETF"
+},
+"QNTU": {
+"under": "QNT",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG QNT DAILY ETF"
+},
+"QSU": {
+"under": "QS",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG QS ETF"
+},
+"QSX": {
+"under": "QS",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG QS DAILY ETF"
+},
+"QUA": {
+"under": "QBTS",
+"inverse": false,
+"active": true,
+"name": "CORGI QBTS 2X DAILY ETF"
+},
+"QUBX": {
+"under": "QUBT",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG QUBT DAILY ETF"
+},
+"RAM": {
+"under": "DRAM",
+"inverse": false,
+"active": true,
+"name": "ROUNDHILL T-REX 2X LONG DRAM DAILY TARGET ETF"
+},
+"RAMZ": {
+"under": "DRAM",
+"inverse": true,
+"active": true,
+"name": "T-REX 2X INVERSE DRAM DAILY TARGET ETF"
+},
+"RBLU": {
+"under": "RBLX",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG RBLX DAILY TARGET ETF"
+},
+"RCAX": {
+"under": "RCAT",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG RCAT ETF"
+},
+"RDDC": {
+"under": "RDDT",
+"inverse": false,
+"active": true,
+"name": "CORGI RDDT 2X DAILY ETF"
+},
+"RDTL": {
+"under": "RDDT",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG RDDT DAILY ETF"
+},
+"RDWU": {
+"under": "RDW",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG RDW DAILY TARGET ETF"
+},
+"RGTC": {
+"under": "RGTI",
+"inverse": false,
+"active": true,
+"name": "CORGI RGTI 2X DAILY ETF"
+},
+"RGTU": {
+"under": "RGTI",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG RGTI DAILY ETF"
+},
+"RGTX": {
+"under": "RGTI",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG RGTI ETF"
+},
+"RGTZ": {
+"under": "RGTI",
+"inverse": true,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X SHORT RGTI ETF"
+},
+"RIOX": {
+"under": "RIOT",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG RIOT ETF"
+},
+"RIVC": {
+"under": "RIVN",
+"inverse": false,
+"active": true,
+"name": "CORGI RIVN 2X DAILY ETF"
+},
+"RKLX": {
+"under": "RKLB",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG RKLB ETF"
+},
+"RKLZ": {
+"under": "RKLB",
+"inverse": true,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X SHORT RKLB ETF"
+},
+"RKTL": {
+"under": "RKT",
+"inverse": false,
+"active": false,
+"name": "DEFIANCE DAILY TARGET 2X LONG RKT ETF"
+},
+"RKX": {
+"under": "RKLB",
+"inverse": false,
+"active": true,
+"name": "CORGI RKLB 2X DAILY ETF"
+},
+"RMBC": {
+"under": "RMBS",
+"inverse": false,
+"active": true,
+"name": "CORGI RMBS 2X DAILY ETF"
+},
+"RMBX": {
+"under": "RMBS",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG RMBS DAILY ETF"
+},
+"ROBN": {
+"under": "HOOD",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG HOOD DAILY TARGET ETF"
+},
+"RTXG": {
+"under": "RTX",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG RTX DAILY ETF"
+},
+"RVNL": {
+"under": "RIVN",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG RIVN DAILY ETF"
+},
+"SBTU": {
+"under": "SBET",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG SBET DAILY TARGET ETF"
+},
+"SBU": {
+"under": "SBUX",
+"inverse": false,
+"active": false,
+"name": "LEVERAGE SHARES 2X LONG SBUX DAILY ETF"
+},
+"SHPU": {
+"under": "SHOP",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY SHOP BULL 2X ETF"
+},
+"SIMX": {
+"under": "SIMO",
+"inverse": false,
+"active": true,
+"name": "CORGI SIMO 2X DAILY ETF"
+},
+"SITX": {
+"under": "SITM",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG SITM DAILY ETF"
+},
+"SKDD": {
+"under": "SK",
+"inverse": true,
+"active": true,
+"name": "GRANITESHARES 2X SHORT SK HYNIX DAILY ETF"
+},
+"SKHA": {
+"under": "SK",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG SK HYNIX DAILY ETF"
+},
+"SKHN": {
+"under": "SK",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT SK HYNIX DAILY ETF"
+},
+"SKHQ": {
+"under": "SK",
+"inverse": true,
+"active": true,
+"name": "LEVERAGE SHARES 2X SHORT SK HYNIX DAILY ETF"
+},
+"SKHX": {
+"under": "SK",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG SK HYNIX DAILY ETF"
+},
+"SKUU": {
+"under": "SK",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG SK HYNIX DAILY ETF"
+},
+"SMCC": {
+"under": "SMCI",
+"inverse": false,
+"active": true,
+"name": "CORGI SMCI 2X DAILY ETF"
+},
+"SMCL": {
+"under": "SMCI",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG SMCI DAILY ETF"
+},
+"SMCX": {
+"under": "SMCI",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG SMCI ETF"
+},
+"SMCZ": {
+"under": "SMCI",
+"inverse": true,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X SHORT SMCI ETF"
+},
+"SMRX": {
+"under": "SMR",
+"inverse": false,
+"active": true,
+"name": "CORGI SMR 2X DAILY ETF"
+},
+"SMST": {
+"under": "MSTR",
+"inverse": true,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X SHORT MSTR ETF"
+},
+"SMTG": {
+"under": "SMTC",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG SMTC DAILY ETF"
+},
+"SMU": {
+"under": "SMR",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG SMR DAILY ETF"
+},
+"SMUP": {
+"under": "SMR",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG SMR DAILY TARGET ETF"
+},
+"SMZ": {
+"under": "SMR",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT SMR DAILY ETF"
+},
+"SNAG": {
+"under": "SNAP",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG SNAP DAILY ETF"
+},
+"SNDG": {
+"under": "SNDK",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG SNDK DAILY ETF"
+},
+"SNDQ": {
+"under": "SNDK",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT SNDK DAILY ETF"
+},
+"SNDU": {
+"under": "SOUN",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG SOUN DAILY TARGET ETF"
+},
+"SNOU": {
+"under": "SNOW",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG SNOW DAILY TARGET ETF"
+},
+"SNPX": {
+"under": "SNPS",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG SNPS DAILY ETF"
+},
+"SNXX": {
+"under": "SNDK",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG SNDK DAILY ETF"
+},
+"SOFA": {
+"under": "SOFI",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY SOFI BULL 2X ETF"
+},
+"SOFC": {
+"under": "SOFI",
+"inverse": false,
+"active": true,
+"name": "CORGI SOFI 2X DAILY ETF"
+},
+"SOFX": {
+"under": "SOFI",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG SOFI ETF"
+},
+"SOLX": {
+"under": "SOL",
+"inverse": false,
+"active": false,
+"name": "T-REX 2X LONG SOL DAILY TARGET ETF"
+},
+"SOUX": {
+"under": "SOUN",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG SOUN ETF"
+},
+"SOXM": {
+"under": "SOXX",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG SOXX MONTHLY ETF"
+},
+"SOXW": {
+"under": "SOXX",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG SOXX WEEKLY ETF"
+},
+"SPAX": {
+"under": "SPCX",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG SPCX DAILY TARGET ETF"
+},
+"SPCH": {
+"under": "SPCX",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG SPCX DAILY ETF"
+},
+"SPCQ": {
+"under": "SPCX",
+"inverse": true,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X SHORT SPCX ETF"
+},
+"SPCU": {
+"under": "SPCX",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG SPCX ETF"
+},
+"SPOG": {
+"under": "SPOT",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG SPOT DAILY ETF"
+},
+"SPYM1": {
+"under": "SPY",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG SPY MONTHLY ETF"
+},
+"SPYQ": {
+"under": "SPY",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG SPY QUARTERLY ETF"
+},
+"SRPU": {
+"under": "SRPT",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG SRPT DAILY ETF"
+},
+"SSPC": {
+"under": "SPCX",
+"inverse": true,
+"active": true,
+"name": "LEVERAGE SHARES 2X SHORT SPCX DAILY ETF"
+},
+"STLL": {
+"under": "STRL",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG STRL DAILY ETF"
+},
+"STMX": {
+"under": "STM",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG STM DAILY ETF"
+},
+"STSM": {
+"under": "TSM",
+"inverse": true,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X SHORT TSM ETF"
+},
+"STXL": {
+"under": "STX",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG STX ETF"
+},
+"STXU": {
+"under": "STX",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG STX DAILY ETF"
+},
+"STXX": {
+"under": "STX",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG STX DAILY ETF"
+},
+"TDCL": {
+"under": "TDC",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG TDC DAILY ETF"
+},
+"TELG": {
+"under": "TEL",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG TEL DAILY ETF"
+},
+"TEMC": {
+"under": "TEM",
+"inverse": false,
+"active": true,
+"name": "CORGI TEM 2X DAILY ETF"
+},
+"TEMT": {
+"under": "TEM",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG TEM DAILY ETF"
+},
+"TERC": {
+"under": "TER",
+"inverse": false,
+"active": true,
+"name": "CORGI TER 2X DAILY ETF"
+},
+"TERG": {
+"under": "TER",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG TER DAILY ETF"
+},
+"TEUP": {
+"under": "TE",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG TE DAILY TARGET ETF"
+},
+"TIPD1": {
+"under": "TIPS",
+"inverse": true,
+"active": false,
+"name": "DIREXION DAILY TIPS BEAR 2X SHARES"
+},
+"TIPL": {
+"under": "TIPS",
+"inverse": false,
+"active": false,
+"name": "DIREXION DAILY TIPS BULL 2X SHARES"
+},
+"TLTM": {
+"under": "TLT",
+"inverse": true,
+"active": false,
+"name": "TRADR 2X SHORT TLT MONTHLY ETF"
+},
+"TPLX": {
+"under": "TPL",
+"inverse": false,
+"active": true,
+"name": "CORGI TPL 2X DAILY ETF"
+},
+"TSDD": {
+"under": "TSLA",
+"inverse": true,
+"active": true,
+"name": "GRANITESHARES 2X SHORT TSLA DAILY ETF"
+},
+"TSEG": {
+"under": "TSEM",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG TSEM DAILY ETF"
+},
+"TSEU": {
+"under": "TSEM",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG TSEM DAILY ETF"
+},
+"TSL": {
+"under": "TSLA",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 125X LONG TSLA DAILY ETF"
+},
+"TSLG": {
+"under": "TSLA",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG TSLA DAILY ETF"
+},
+"TSLI1": {
+"under": "TSLA",
+"inverse": true,
+"active": false,
+"name": "GRANITESHARES 1X SHORT TSLA DAILY ETF"
+},
+"TSLL": {
+"under": "TSLA",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY TSLA BULL 2X ETF"
+},
+"TSLQ": {
+"under": "TSLA",
+"inverse": true,
+"active": true,
+"name": "TRADR 2X SHORT TSLA DAILY ETF"
+},
+"TSLR": {
+"under": "TSLA",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG TSLA DAILY ETF"
+},
+"TSLT": {
+"under": "TESLA",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG TESLA DAILY TARGET ETF"
+},
+"TSLZ": {
+"under": "TESLA",
+"inverse": true,
+"active": true,
+"name": "T-REX 2X INVERSE TESLA DAILY TARGET ETF"
+},
+"TSMG": {
+"under": "TSM",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG TSM DAILY ETF"
+},
+"TSMU": {
+"under": "TSM",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG TSM DAILY ETF"
+},
+"TSMX": {
+"under": "TSM",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY TSM BULL 2X ETF"
+},
+"TTDU": {
+"under": "TTD",
+"inverse": false,
+"active": true,
+"name": "T-REX 2X LONG TTD DAILY TARGET ETF"
+},
+"TTMX": {
+"under": "TTMI",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG TTMI DAILY ETF"
+},
+"TXNU": {
+"under": "TXN",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY TXN BULL 2X ETF"
+},
+"TXXH": {
+"under": "HYPE",
+"inverse": false,
+"active": true,
+"name": "21SHARES 2X LONG HYPE ETF"
+},
+"TXXS": {
+"under": "SUI",
+"inverse": false,
+"active": true,
+"name": "21SHARES 2X LONG SUI ETF"
+},
+"UBRL": {
+"under": "UBER",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG UBER DAILY ETF"
+},
+"UCTX": {
+"under": "UCTT",
+"inverse": false,
+"active": true,
+"name": "CORGI UCTT 2X DAILY ETF"
+},
+"UECG": {
+"under": "UEC",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG UEC DAILY ETF"
+},
+"UGLD": {
+"under": "GOLD",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY GOLD BULL 2X ETF"
+},
+"UMAL": {
+"under": "UMAC",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG UMAC ETF"
+},
+"UMCU": {
+"under": "UMC",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG UMC DAILY ETF"
+},
+"UMCX": {
+"under": "UMC",
+"inverse": false,
+"active": true,
+"name": "CORGI UMC 2X DAILY ETF"
+},
+"UN": {
+"under": "UNH",
+"inverse": false,
+"active": true,
+"name": "CORGI UNH 2X DAILY ETF"
+},
+"UNHG": {
+"under": "UNH",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG UNH DAILY ETF"
+},
+"UNHU": {
+"under": "UNH",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY UNH BULL 2X ETF"
+},
+"UNX": {
+"under": "U",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG U DAILY ETF"
+},
+"UPSC": {
+"under": "UPST",
+"inverse": false,
+"active": true,
+"name": "CORGI UPST 2X DAILY ETF"
+},
+"UPSG": {
+"under": "UPS",
+"inverse": false,
+"active": false,
+"name": "LEVERAGE SHARES 2X LONG UPS DAILY ETF"
+},
+"UPSX": {
+"under": "UPST",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG UPST DAILY ETF"
+},
+"USAX": {
+"under": "USAR",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG USAR DAILY ETF"
+},
+"USGG": {
+"under": "USAR",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG USAR DAILY ETF"
+},
+"UUUC": {
+"under": "UUUU",
+"inverse": false,
+"active": true,
+"name": "CORGI UUUU 2X DAILY ETF"
+},
+"UUUG": {
+"under": "UUUU",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG UUUU DAILY ETF"
+},
+"UVIX": {
+"under": "VIX",
+"inverse": false,
+"active": true,
+"name": "2X LONG VIX FUTURES ETF"
+},
+"VALG": {
+"under": "VALE",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG VALE DAILY ETF"
+},
+"VELL": {
+"under": "VELO",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG VELO ETF"
+},
+"VIAG": {
+"under": "VIAV",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG VIAV DAILY ETF"
+},
+"VOYX": {
+"under": "VOYG",
+"inverse": false,
+"active": false,
+"name": "TRADR 2X LONG VOYG DAILY ETF"
+},
+"VRC": {
+"under": "VRT",
+"inverse": false,
+"active": true,
+"name": "CORGI VRT 2X DAILY ETF"
+},
+"VRTL": {
+"under": "VRT",
+"inverse": false,
+"active": true,
+"name": "GRANITESHARES 2X LONG VRT DAILY ETF"
+},
+"VSTL": {
+"under": "VST",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG VST ETF"
+},
+"WDCC": {
+"under": "WDC",
+"inverse": false,
+"active": true,
+"name": "CORGI WDC 2X DAILY ETF"
+},
+"WDCX": {
+"under": "WDC",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG WDC DAILY ETF"
+},
+"WLDU": {
+"under": "WORLD",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG WORLD STOCK DAILY ETF"
+},
+"WULX": {
+"under": "WULF",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG WULF DAILY ETF"
+},
+"WYFL": {
+"under": "WYFI",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG WYFI ETF"
+},
+"XAGI": {
+"under": "AGIX",
+"inverse": false,
+"active": true,
+"name": "CORGI AGIX 2X DAILY ETF"
+},
+"XBNB": {
+"under": "DAILY",
+"inverse": false,
+"active": true,
+"name": "TEUCRIUM XETFS 2X LONG DAILY BNB ETF"
+},
+"XNDX": {
+"under": "XNDU",
+"inverse": false,
+"active": true,
+"name": "TRADR 2X LONG XNDU DAILY ETF"
+},
+"XOMX": {
+"under": "XOM",
+"inverse": false,
+"active": true,
+"name": "DIREXION DAILY XOM BULL 2X ETF"
+},
+"XOVL": {
+"under": "XOVR",
+"inverse": false,
+"active": true,
+"name": "DEFIANCE DAILY TARGET 2X LONG XOVR ETF"
+},
+"XPEG": {
+"under": "XPEV",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG XPEV DAILY ETF"
+},
+"XPM": {
+"under": "PM",
+"inverse": false,
+"active": false,
+"name": "DEFIANCE DAILY TARGET 2X LONG PM ETF"
+},
+"XRPK": {
+"under": "XRP",
+"inverse": false,
+"active": false,
+"name": "T-REX 2X LONG XRP DAILY TARGET ETF"
+},
+"XXRP": {
+"under": "DAILY",
+"inverse": false,
+"active": true,
+"name": "TEUCRIUM 2X LONG DAILY XRP ETF"
+},
+"XYZG": {
+"under": "XYZ",
+"inverse": false,
+"active": true,
+"name": "LEVERAGE SHARES 2X LONG XYZ DAILY ETF"
+},
+"ZETX": {
+"under": "ZETA",
+"inverse": false,
+"active": false,
+"name": "DEFIANCE DAILY TARGET 2X LONG ZETA ETF"
+}
+}
+}

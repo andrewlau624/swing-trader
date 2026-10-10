@@ -16,6 +16,7 @@ ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.pref_ex_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.cef_rv_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.repeat_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.crowd_hold_shadow
+ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.letf_night_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.top2_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.hedge_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.insider_shadow
