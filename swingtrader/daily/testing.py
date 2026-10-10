@@ -200,6 +200,13 @@ def _cef_rv(state: Path, logs: Path) -> dict:
                 else "no forward signals yet (make cef-rv)")
 
 
+def _top2(state: Path, logs: Path) -> dict:
+    from . import top2_shadow as w
+    rows = [r for r in _jsonl(state / w.LOG_NAME) if r.get("judged")]
+    wk = sum(1 for r in rows if r["date"] >= _week_ago())
+    return dict(n=len(rows), week=wk, line=w.line(rows) if rows else "no judged nights yet")
+
+
 def _crowd_hold(state: Path, logs: Path) -> dict:
     from . import crowd_hold_shadow as w
     rows = [r for r in _jsonl(state / w.LOG_NAME) if "hold_bp" in r]
@@ -374,6 +381,11 @@ REGISTRY: list[Test] = [
          "signal; research -255bp vs the rest, not validated), read beside the gate.", "2026-10-09", 60, "closed forward trades", _cef_rv,
          "make cef-rv; research/sim/cef_alpha_out.txt; round1_prose.md Study CEF-ALPHA / CEF-RV-FWD",
          ["cef_rv_shadow"]),
+    Test("TOP2: night leg on only the 2 deepest drops", "every night-rule signal scored close cross -> next opening "
+         "cross (repeat_shadow): does keeping only the night's 2 deepest drops beat the equal-weight night risk-adjusted "
+         "(judge 1999-2015 +14bp/night t 3.4, Sharpe 2.34 vs 2.21; 2016-26 same Sharpe at 1.57x std = mostly leverage)? "
+         "Gate: diff >= +10bp, t >= 2, halves > 0 and TOP2 Sharpe > base; kill <= 0.", "2026-10-10", 60,
+         "judged nights", _top2, "state/top2-shadow.jsonl; round1_prose.md Study CAT-MOM + DEPTH", ["top2_shadow"]),
     Test("Crowded-night hold (OPENSIG lead): hold night picks to the close cross", "every night-rule signal is "
          "scored close cross -> next opening cross -> its closing cross: on crowded nights (>= 16 signals) does holding "
          "to the close beat selling at the open (research: per-trade gains sit on crowded washout days; per-day "
