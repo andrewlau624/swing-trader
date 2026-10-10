@@ -1061,6 +1061,18 @@ def test_moderate10c_is_moderate10_plus_live_conviction(monkeypatch):
     assert roth.conviction_mode == "shadow", "profiles never reach the Roth"
 
 
+def test_nx_s2_profile_raises_only_the_night_weight(monkeypatch):
+    monkeypatch.setenv("DAILY_LIVE_PROFILE", "nx_s2")
+    cfg = Config.load()
+    live, name = cfg.daily.for_account("live")
+    base, _ = cfg.daily.for_account("paper")
+    assert name == "nx_s2" and live.night_weight == 0.65 and live.night_max_name_pct == 0.15
+    assert live.ibs_weight == base.ibs_weight == 0.5, "NX S2 never judged IBS above 0.5"
+    assert live.lever_weight is None, "S2 is a fixed weight, not the gated 1.3x on both legs"
+    roth, rname = cfg.daily.for_account("roth")
+    assert rname == "" and roth.night_weight == base.night_weight, "profiles never reach the Roth"
+
+
 def test_trading_pnl_ignores_capital_changes():
     from swingtrader.daily.book import DailyBook
     b = DailyBook(cash=1000.0, start_equity=1000.0)

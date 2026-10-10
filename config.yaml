@@ -192,6 +192,15 @@ daily:
       night_max_name_pct: 0.15
       lever_weight: null
       conviction_mode: auto
+    # Study NX S2 (2026-10-06, data/research/program/nx_out.txt:81; user "go" 2026-10-10): night leg 0.65, IBS
+    # unchanged at 0.5, name cap .15 = 1.15x gross overnight on the margin book. +0.59bp/night t 3.10 on untouched
+    # 2003-15, all 3 subperiods positive, maxDD 9.2% vs 6.2%. Not `lever_weight` (that lifts IBS too, never judged).
+    # Taxable only (profiles never reach the Roth; a cash account rescales to 1.0x anyway). Keep only while
+    # `make review` 2b / the fills audit keep auction cost ~0bp and taxable equity stays >= $2,000 (margin floor).
+    nx_s2:
+      night_weight: 0.65
+      night_max_name_pct: 0.15
+      lever_weight: null
     aggressive:
       ibs_weight: 0.65           # 1.3x overnight, ungated
       night_weight: 0.65

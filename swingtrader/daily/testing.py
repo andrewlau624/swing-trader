@@ -126,6 +126,17 @@ def _quote_imbalance(state: Path, logs: Path) -> dict:
                 line="15:40 bid/ask sizes logged per night pick; verdict once at 300 (make forward-status)")
 
 
+def _nx_s2(state: Path, logs: Path) -> dict:
+    """Taxable night exits since the profile went live (logs/daily-fills-live.jsonl); the increment itself is read in
+    `make review` (night-leg P&L vs the 0.5 counterfactual on the same fills)."""
+    rows = [r for r in _jsonl(logs / "daily-fills-live.jsonl")
+            if r.get("leg") == "night" and r.get("side") == "sell" and str(r.get("filled_at", ""))[:10] >= "2026-10-10"]
+    wk = [r for r in rows if str(r.get("filled_at", ""))[:10] >= _week_ago()]
+    return dict(n=len(rows), week=len(wk),
+                line=f"{len(rows)} taxable night exits since 2026-10-10 at the S2 weight; set DAILY_LIVE_PROFILE=nx_s2 "
+                     "in .env on him to arm (null = base 0.5)")
+
+
 def _log_tag(tag: str, sub: str = ""):
     """Count `[tag]` lines in the executor's daily logs (logs/daily-YYYY-MM-DD.log); 0 this week = silent.
     `sub` narrows to `[tag] sub...` (the night leg logs hundreds of `[night]` lines; AU3 is only `[night] tow`)."""
@@ -358,6 +369,9 @@ REGISTRY: list[Test] = [
          "2026-09-22", 0, "log lines", _log_tag("roth-cash"), "make review", ["roth_night_cash_log"]),
     Test("Lever gate G1", "day-clustered 95% upper-bound gate beside the live lever gate",
          "2026-09-22", 0, "log lines", _log_tag("lever-g1"), "make review", ["lever_g1_log"]),
+    Test("NX-S2 night size-up (taxable, profile nx_s2)", "night leg at 0.65 (IBS 0.5, cap .15) on the margin book: does "
+         "the +0.59bp/night NX increment show up live while auction cost stays ~0bp?",
+         "2026-10-10", 0, "night exits", _nx_s2, "deploy_loop_2026-10-10.md item 3; make review 2b/4", ["nx_s2"]),
     Test("Wash guard G4s", "what the Roth-first wash-sale guard would change vs the live one",
          "2026-09-22", 0, "log lines", _log_tag("wash-guard"), "make review", ["wash_guard_mode"]),
     Test("Tug-of-war night tilt (AU3)", "tilt night picks by the tug-of-war score (logged, not sized)",
