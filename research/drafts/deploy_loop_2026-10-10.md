@@ -243,3 +243,15 @@ control scored 380
 - Local smoke run (real DIX + SPY SIP minutes + crosses, 09-28..10-09): 10 backfill sessions scored, ALL long gamma (GEX +4.7..
   +8.6B, z -0.9..+1.2), control continuation -1.2bp/day. Short-gamma days are rare in calm tapes: 120 of them may take years;
   the sensor logs regardless.
+
+## Autonomous run — END STATE and APPROVALS (2026-10-10)
+Commits this run: 2ca7cb4 BREAK-REV2 (FAIL), 81b9be7 LETF-NIGHT shadow, 3a231ad GAMMA-FREE shadow + SPLIT-T0 bucket, 70669a0 fallback
+clock weekend fix. Full suite 133 passed on the touched files. Nothing deployed, no live config, no orders, no data bought. N = 932.
+Approvals / user actions, in order of value:
+1. Deploy the two new shadows + the SPLIT-T0 bucket on him: `cd ~/llm-trader && git pull && bash scripts/install-schedule.sh`
+   (regenerates research-shadows.service with the letf_night_shadow and gamma_state_shadow lines). Log-only; no orders.
+2. Live preferred MOC test: BAC.PRP buy Tue 10-14 / sell Wed 10-15 (commands in the user-decisions section). The CUSIP fix is on him.
+3. S2 is ARMED on the taxable book (DAILY_LIVE_PROFILE=nx_s2 on him; profile pulled). First night at 0.65 = Mon 10-12. Nothing to do
+   unless you want it off (remove the .env line).
+4. CPC round-ups POAS / NXGL / ZBAO (effective 10-12): manual 1-share buys only if you want B1 ("does Schwab round up") tested.
+5. Data buys: both declined by the math; BREAK-REV2's result makes the deal-database question moot (class closed).
