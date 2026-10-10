@@ -145,6 +145,14 @@ def _letf_night(state: Path, logs: Path) -> dict:
     return dict(n=s["days"], week=len(wk), line=w.line(rows))
 
 
+def _gamma_state(state: Path, logs: Path) -> dict:
+    from . import gamma_state_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    f = w.summary(rows, True)
+    wk = [r for r in rows if r.get("status") == "scored" and r["date"] >= _week_ago()]
+    return dict(n=f["short"]["n"], week=len(wk), line=w.line(rows))
+
+
 def _log_tag(tag: str, sub: str = ""):
     """Count `[tag]` lines in the executor's daily logs (logs/daily-YYYY-MM-DD.log); 0 this week = silent.
     `sub` narrows to `[tag] sub...` (the night leg logs hundreds of `[night]` lines; AU3 is only `[night] tow`)."""
@@ -423,6 +431,10 @@ REGISTRY: list[Test] = [
          "LETF $vol share > 2%: closing cross -> next opening cross vs the no-LETF control (forward-only registration, N 852)",
          "2026-10-10", 120, "event days", _letf_night, "state/letf-night.jsonl; round1_prose.md Amendment LETF-NIGHT",
          ["letf_night_shadow"]),
+    Test("GAMMA-FREE: SPY last-30-min continuation on short-gamma days", "free SqueezeMetrics GEX sign (prior session) -> SPY "
+         "15:30 -> closing-cross continuation vs long-gamma days (the $0 falsification before any OPRA purchase, N 932)",
+         "2026-10-10", 120, "short-gamma days", _gamma_state, "state/gamma-state.jsonl; round1_prose.md Amendment GAMMA-FREE",
+         ["gamma_state_shadow"]),
     Test("Crowded-night hold (OPENSIG lead): hold night picks to the close cross", "every night-rule signal is "
          "scored close cross -> next opening cross -> its closing cross: on crowded nights (>= 16 signals) does holding "
          "to the close beat selling at the open (research: per-trade gains sit on crowded washout days; per-day "

@@ -6131,3 +6131,16 @@ gate. Shock buckets invert the flow story again: <= -20% breaks -12.1% (new) / -
 outlier draw (ex-top-5 was already negative). Night piece D0c->D1o +1.41% mean / +0.24 median (n 84; unregistered, overlaps the
 night leg's class, not a candidate). CLASS CLOSED: post-deal-break target reversal at daily prices. The free identifier now reaches
 ~6 breaks/yr identified / 128 total; a paid deal database would add events, not change the sign. Do NOT buy one for this. Program N = 931.
+
+## Amendment — Study GAMMA-FREE: signed dealer gamma (free proxy) -> SPY last-30-minute continuation, forward-only (2026-10-10; N 931 -> 932)
+Written before any forward row is read; the 2016-26 minute window is TOUCHED (market-map probe +8.3bp t 1.9; the free proxy also
+failed the untouched 2016-20 window as a night-leg gate), so this is a forward falsification only, as `shadow_dealer_gamma.md`
+specifies and as the data-buy rule requires before any OPRA purchase. Mechanism: dealers short gamma hedge WITH the move into
+the close. Observable: SqueezeMetrics model-signed SPX GEX (DIX.csv, free, published after the close) -> on session D use
+GEX(D-1); short_gamma = GEX(D-1) < 0 (z vs the prior 21 sessions logged, not gated). Trade logged: SPY enter 15:30 in the
+direction of the 09:30 -> 15:30 move (first regular minute's open -> 15:29 bar close), exit at the official closing cross;
+cont = sign(move) x (close/p1530 - 1); net 1bp/side. Long-gamma days = control; long-only half (move > 0) reported for the Roth.
+Gate: 120 forward short-gamma days (FORWARD_FROM 2026-10-13). KILL = mean net <= 0; PASS = mean >= +5bp/trade and t >= 2
+(= the bar for considering ~$180/yr OPRA strike-level data); else HOLD. Ceiling is small by construction (~10-40 short-gamma
+days/yr x <= 10bp on the SPY sleeve): this is a sensor test, not a standalone edge. Runner swingtrader/daily/gamma_state_shadow.py
+(research-shadows), REGISTRY "GAMMA-FREE". Program N = 932.

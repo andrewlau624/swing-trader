@@ -140,8 +140,23 @@ def summary(rows: list[dict]) -> dict:
              and r.get("x") is not None and (r["ex"] >= FORWARD_FROM) == fwd]
         out[tag] = dict(n=len(x), mean_bp=st.mean(x) * 1e4 if x else None, median_bp=st.median(x) * 1e4 if x else None,
                         hit=sum(v > 0 for v in x) / len(x) if x else None)
+    # SPLIT-CROSS (N 900) sub-bucket, REPORTED ONLY (the registered rule and gate are unchanged): forward splits with
+    # ratio <= 2:1 whose signal-day closing cross printed >= $1M (the liquid, small-ratio corner the 2016-20 official-cross
+    # study found best; ADV20 is not in these rows, so the cross $ stands in for it).
+    for tag, fwd in (("forward_filter", True), ("backfill_filter", False)):
+        x = [r["x"] for r in rows if r.get("status") == "scored" and r.get("eligible") and not r.get("fund")
+             and r.get("x") is not None and (r["ex"] >= FORWARD_FROM) == fwd and _filter_ok(r)]
+        out[tag] = dict(n=len(x), mean_bp=st.mean(x) * 1e4 if x else None, median_bp=st.median(x) * 1e4 if x else None)
     out["upcoming"] = sorted({(r["ex"], r["kind"], r["sym"]) for r in rows if r.get("status") == "upcoming"})
     return out
+
+
+FILTER_RATIO_MAX = 2.0
+FILTER_CROSS_USD = 1e6
+
+
+def _filter_ok(r: dict) -> bool:
+    return r.get("kind") == "split" and (r.get("ratio") or 0) <= FILTER_RATIO_MAX and (r.get("close_dollars") or 0) >= FILTER_CROSS_USD
 
 
 def line(rows: list[dict]) -> str:
@@ -151,6 +166,10 @@ def line(rows: list[dict]) -> str:
         v = s[tag]
         parts.append(f"{tag} n {v['n']}" + (f", raw-SPY mean {v['mean_bp']:+.0f}bp median {v['median_bp']:+.0f}bp "
                                              f"hit {v['hit']*100:.0f}%" if v["n"] else ""))
+    for tag in ("forward_filter", "backfill_filter"):
+        v = s[tag]
+        if v["n"]:
+            parts.append(f"{tag.split('_')[0]} liquid<=2:1 splits n {v['n']} mean {v['mean_bp']:+.0f} median {v['median_bp']:+.0f} (reported)")
     nxt = ", ".join(f"{k} {s_} {e}" for e, k, s_ in s["upcoming"][:6])
     verdict = ""
     f = s["forward"]

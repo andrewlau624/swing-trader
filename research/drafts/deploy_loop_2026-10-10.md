@@ -228,3 +228,18 @@ control scored 380
   Two days, not evidence. Caveat logged in the module: the universe cache has no asset class, so the control can include ETFs.
 - **Approval needed to deploy:** on him `git pull` + `bash scripts/install-schedule.sh` (regenerates research-shadows.service with
   the new line). Until then the shadow only exists in the repo.
+
+## Autonomous run — item A3: SPLIT-T0 shadow gets the SPLIT-CROSS corner as a REPORTED sub-bucket (rule and gate unchanged)
+- `exdate_open_shadow.summary/line`: "liquid<=2:1 splits" = kind split, ratio <= 2:1, signal-day closing cross >= $1M (ADV20 is
+  not in the rows; cross $ stands in). Forward and backfill reported beside the registered numbers; no N consumed. Test added.
+  Applies to the server with the same pull as A2 (approval).
+
+## Autonomous run — item A4: GAMMA-FREE forward shadow BUILT (N 931 -> 932; not deployed)
+- `swingtrader/daily/gamma_state_shadow.py` (LOG_NAME gamma-state.jsonl): the $0 falsification the 2(b)(ii) verdict asked for
+  before any OPRA purchase. SqueezeMetrics DIX.csv is live and current (fetched 2026-10-10: last row 10-09, 222 KB, free).
+  Rule frozen in round1_prose.md "Amendment — Study GAMMA-FREE": GEX(D-1) < 0 = short gamma; SPY 15:30 -> closing-cross
+  continuation in the direction of the 09:30 -> 15:30 move, 1bp/side; long-gamma days = control; long-only half for the Roth;
+  gate 120 forward short-gamma days (KILL mean <= 0; PASS >= +5bp t >= 2). REGISTRY "GAMMA-FREE", 4 tests, ExecStart line added.
+- Local smoke run (real DIX + SPY SIP minutes + crosses, 09-28..10-09): 10 backfill sessions scored, ALL long gamma (GEX +4.7..
+  +8.6B, z -0.9..+1.2), control continuation -1.2bp/day. Short-gamma days are rare in calm tapes: 120 of them may take years;
+  the sensor logs regardless.

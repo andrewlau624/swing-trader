@@ -35,3 +35,14 @@ def test_mismatch_and_summary_counts_forward_stock_only():
     assert s["backfill"]["n"] == 1 and s["upcoming"] == [("2026-10-20", "spin", "D")]
     assert "next: spin D 2026-10-20" in W.line(rows)
     json.dumps(rows)
+
+
+def test_split_cross_filter_bucket_is_reported_not_gated():
+    rows = [dict(kind="split", sym="A", ex="2026-10-07", status="scored", eligible=True, fund=False, x=0.01, ratio=2.0, close_dollars=5e6),
+            dict(kind="split", sym="B", ex="2026-10-07", status="scored", eligible=True, fund=False, x=-0.02, ratio=4.0, close_dollars=5e6),
+            dict(kind="split", sym="C", ex="2026-10-07", status="scored", eligible=True, fund=False, x=-0.03, ratio=1.5, close_dollars=2e5),
+            dict(kind="spin", sym="D", ex="2026-10-07", status="scored", eligible=True, fund=False, x=0.05, ratio=0.1, close_dollars=9e6)]
+    s = W.summary(rows)
+    assert s["forward"]["n"] == 4, "the registered arm still counts every eligible stock event"
+    assert s["forward_filter"]["n"] == 1 and abs(s["forward_filter"]["mean_bp"] - 100.0) < 1e-9
+    assert "forward liquid<=2:1 splits n 1 mean +100 median +100 (reported)" in W.line(rows)
