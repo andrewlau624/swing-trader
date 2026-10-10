@@ -292,6 +292,21 @@ class SchwabAdapter:
         return out
 
     # ------------------------------------------------------------ orders
+    def _cusip(self, sym: str) -> str | None:
+        """Preferreds / baby bonds quote as BAC/PRP but the order endpoint rejects the bare symbol
+        ("Could not resolve instrument"); it accepts symbol + cusip (previewOrder 2026-10-10). Only
+        slash symbols are looked up; a lookup failure leaves the order as-is."""
+        if "/" not in sym:
+            return None
+        try:
+            r = self.c.get_instruments(sym, self.c.Instrument.Projection.SYMBOL_SEARCH)
+            for ins in (r.json() or {}).get("instruments", []):
+                if ins.get("symbol") == sym and ins.get("cusip"):
+                    return str(ins["cusip"])
+        except Exception:
+            return None
+        return None
+
     def _today_orders(self) -> list:
         """Orders entered since midnight ET today (never yesterday's: an
         identical SGOV order from yesterday must not look like a duplicate)."""
@@ -351,6 +366,9 @@ class SchwabAdapter:
             if tif == "cls":
                 b = b.set_order_type(OrderType.MARKET_ON_CLOSE)
             order = b.build()
+            cusip = self._cusip(sym)
+            if cusip:
+                order["orderLegCollection"][0]["instrument"]["cusip"] = cusip
             # tif "opg": no market-on-open type at Schwab. A market DAY order
             # placed before 09:30 and DIRECTED to the listing exchange joins
             # its opening auction; undirected, a wholesaler fills it "at the open"

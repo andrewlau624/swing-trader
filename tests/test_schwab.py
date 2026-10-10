@@ -66,6 +66,16 @@ class FakeSchwab:
     def get_order(self, oid, h):
         return Resp(self.order_detail[oid])
 
+    class Instrument:
+        class Projection:
+            SYMBOL_SEARCH = "symbol-search"
+
+    cusips = {"BAC/PRP": "06055H608"}
+
+    def get_instruments(self, sym, projection):
+        c = self.cusips.get(sym)
+        return Resp({"instruments": [{"cusip": c, "symbol": sym, "assetType": "EQUITY"}]} if c else {})
+
 
 def adapter(exchanges=None, **kw):
     ex = exchanges or {}
@@ -464,3 +474,15 @@ def test_unrouted_open_sell_says_why(tmp_path):
     book.positions["PINK"] = {"qty": 3, "avg_px": 6.0, "leg": "night", "entry_date": "2026-09-23"}
     ex._order(book, "2026-09-24", "PINK", "sell", "night", qty=3, tif="opg", ref_px=6.0, kind="exit")
     assert book.route_refused == "" and any("'OTC' has no route" in l for l in ex.lines)
+
+
+def test_preferred_orders_carry_the_cusip():
+    """Schwab's order endpoint cannot resolve BAC/PRP by symbol alone (400 "Could not resolve
+    instrument"); previewOrder accepts symbol + cusip. Plain symbols stay cusip-free."""
+    a = adapter()
+    a.submit("BAC/PRP", "buy", "cls", "pref-test", qty=1)
+    a.submit("JRI", "buy", "cls", "cef-test", qty=1)
+    pref, cef = a.c.placed
+    assert leg(pref)["instrument"] == {"symbol": "BAC/PRP", "assetType": "EQUITY", "cusip": "06055H608"}
+    assert pref["orderType"] == "MARKET_ON_CLOSE"
+    assert "cusip" not in leg(cef)["instrument"]
