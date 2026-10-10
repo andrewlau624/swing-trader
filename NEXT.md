@@ -7,7 +7,108 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 > %/yr at $2-25k (taxable ~$2.3k, Roth $1-3k + $7.5k/yr). Large sizes ($100k/$500k) are one
 > capacity line, not a ranking criterion. (Also in CLAUDE.md.)
 
+
 ---
+
+## Ex-dividend clientele branch (2026-10-06, late): ETDX PASS (capacity for PREF-EX), FXD KILL; N = 870
+- **ETDX (N 869): PASS.** The frozen PREF-EX rule on $25-par baby bonds (SFP ETD) + CEF preferreds. Official crosses
+  2021-26: ETD CO +43.9bp med +40.8 hit 83% t 16, CC +38.6; CEF pref CO +37.9; Sharadar 1998-2026 ETD 28/29 years.
+  Mechanism: baby bonds trade flat, so taxable holders sell before ex (coupon -> capital gain). Adds ~1.5x to the PREF-EX
+  plateau: Roth CO at 5% participation/10bp **$1.1k/yr at $10k (11%), $1.4k at $25k**; CC $737 / $844. Entry ladder over
+  T-2/T-1 closes: CO $2.0k at $25k (open-exit only). Logged forward in the PREF-EX shadow (cls "etd", separate gate 60).
+- **FXD (N 868): KILL.** CEF/ETF ex-night under-adjustment scales with yield (untouched 1998-2004 +3/+22/+42bp) but is
+  +4..+9bp since 2020 and <= 0 with MOC; ETFs ~0. SFP dividend values are split-adjusted for reverse-split funds: always
+  guard |div/P - y(closeadj)| < 10%.
+- **Decision still pending (user):** one tiny live Roth test (MOC buy + pre-open sell) on a liquid preferred AND a baby
+  bond, to verify symbol acceptance and the open fill. This one check decides CO vs CC (~1.5x the dollars).
+- **Not Roth-only:** in the taxable margin account the trade nets (1 - tau) x pre-tax (ordinary distribution vs ST loss).
+  Stacked on the book's ~1.3x spare Reg-T overnight headroom at $2.3k: +$498/yr CO / +$318 CC pre-tax after financing
+  (~+15% / +10% of equity after tax). Roth + taxable share the auction capacity. `etdx_stack_out.txt`.
+- **OVX / OVX-Q (N 870/872): KILL.** Pre-market / BOATS tape sits 47-76bp above the open cross, but that is the spread:
+  09:24 bid -14bp vs the open (half-spread ~24bp). The open auction stays the night exit; 23/5 exit closed.
+- **HYC (N 871): KILL** (REIT/BDC ex-nights ~0 since 2021). Clientele effect only survives in thin $25-par paper.
+- **Later the same night (N 873-875):** PRV KILL (thin $25-par reversal = symmetric bid-ask bounce); PXB KILL as a MOC
+  replacement (passive 14:00 bid is adversely selected, -1.9bp) but a passive ADD-ON tranche still earns +34bp CO on 25%
+  of events (capacity lever where the cross binds); ADR preferreds under the frozen rule CO +60bp, 22/22 yrs (small add);
+  **THN: thin commons had the ex-night effect pre-2021 regardless of tax status and lost it in 2020-21 (thin REIT +30..+50
+  -> negative); preferreds unaffected through 2026.** PREF/ETDX verdict stands; mechanism wording downgraded (tax =
+  contributing). Named risk: the force that arbitraged thin commons in 2020-21 could reach $25-par paper; the forward
+  shadow (deployed on him, forward from 2026-10-07, ETD gated separately) is the monitor.
+
+## Mechanism-jump session (2026-10-06, evening cont.): financing/collateral/margin region measured — PLUM + MFLW KILL; N = 866 (renumbered)
+Pre-test ceiling table recorded in round1_prose.md (CL monthly roll, buyback blackout, SG-CTA, DXJ wedge, div-fail all CEILING-KILLED before any backtest).
+- **PLUM (N 865): KILL.** Daily repo-stress states (SOFR-DTB3 >= 25bp, SOFR-IORB >= 15bp, 2018-04+): 1d ~0 both directions; 3d short mean +44bp t 1.77 but median -18bp (crash-carried). Post-2021 flags benign (SRF absorbs). NOT a risk gate for the book's -10% lever. No SOFR-spread reruns at daily tier.
+- **MFLW (N 866): KILL.** FINRA margin-debt monthly (1997-2026): cascade-bounce +16bp/mo t 0.11 (2008/09 next-months -8..-11%); euphoria-contrarian-short wrong sign t -1.05. Margin debt coincident; monthly-constraint family closed.
+- **Remaining ground:** FINRA ATS venue-mix (free API token needed — USER ACTION: register at api.finra.org, then weekly off-exchange-share panels are buildable as IBS/night conditioning); paid tiers (OPRA gamma, margin-rate archive, borrow fees, PIT ratings, TBA, iShares per-fund NAV, Milliman LDI) all user decisions, none automatic.
+
+---
+
+## Derivatives frontier session (2026-10-06): futures/options as market infrastructure — 3 kills, N renumbered (COTX 862 / CBAS 863 / VTS 864)
+User directive: futures/options as a NEW frontier (mechanism-first, no brute force, no data buys).
+Three pre-registered studies, all judged same day (results in round1_prose.md; runners research/sim/{cotx,cbas,vts}.py; outputs data/research/program/{cotx,cbas,vts}_out.txt):
+- **COTX (N 862): KILL.** CFTC COT weekly positioning (leveraged funds/dealers/asset managers, 9 products, 2006-2026, free Socrata API) — all four frozen arms fail (t 0.25..1.40, wrong signs). The COT participant state carries no tradable 1-2wk footprint. Do not re-run COT positioning tests at weekly tier.
+- **CBAS (N 863): KILL.** ES/NQ cash-futures basis dislocation (front close vs SPY/QQQ, z vs 21d med/MAD). Retail spot legs net-negative both directions 1d; 3d t 1.47. **Mechanism finding: no persistent daily basis dislocation regime exists 2011-2025** (flag z reverts to ~0 next day, 74-86% un-flagged). "Hedged convergence t=18" = 2xMAD regression-to-median baked into the flag, not an edge. Do not re-test basis at the daily tier. DATA BUG FIXED along the way: GLBX daily bars are stamped by SESSION START (evening), trade date = next business day — new consumers of the glbx_*.parquet cache must remap (`research/sim/cbas.py::trade_dates`).
+- **VTS (N 864): KILL.** VIX term structure (Yahoo ^VIX9D/^VIX3M, the only free options-family sensor): contango 5d "+17bp t 5.5" = unconditional SPY drift (not excess; per-year +-5bp noise) — rejected as a sensor; inversion arm wrong sign (market relief-bounces). Unregistered mirror (LONG after inversion, ~+59bp/5d excess, 11% of days, overlapping windows) = observation/forward-shadow only.
+- **Meta answer: free derivative data reveals NO harvestable forced behavior invisible in equity daily prices.** Remaining options→underlying channel = paid OPRA OI/gamma (~$180/yr); its prior is now LOWER (OI-pinning killed + today's 3 kills) — do not fund automatically; user decision.
+- Data-limited (not tested, not rejected): CME margin-hike forced deleveraging (needs historical margin-rate series — CME notices scrape), SOQ/expiration at minute tier, cross-contract spreads (excluded as generic carry without a named constrained participant).
+
+---
+
+## Frontier-reset cycle (2026-10-06, evening 3): margin-data probe dead-end + CEF-TL2 reopen; January = cost-bound class
+- **CME margin-rate history: CONFIRMED NOT FREE-REACHABLE.** cmegroup.com 403s every path (web + the
+  PerformanceBondCircle service); the legacy `ftp.cmegroup.com/pub/span` host resolved but does not
+  serve; wayback CDX rate-limits/blocks. The margin-hike forced-deleveraging family stays DATA-LIMITED
+  in this environment; the canonical silver-2011 casus cannot be run without paid/credential data.
+- **CEF-TL2 (reopen on Sharadar, N 863->864): REJECTED (net).** 1,156 delisted-complete CEF series,
+  27 formation years: Dec leg wrong sign (+0.29 t 0.43); Jan leg REAL gross (+2.72% t 3.28, 22/27 years,
+  ex-best +2.31) and DEAD net (+0.13% t 0.27 at 30bp round trip).
+- **Class verdict upgraded: the December-loser January bounce is a durable GROSS seasonal across
+  three independent panels (stocks t 1.91, CEFs t 3.28) that dies at 25-60bp round trips.** It is a
+  cost-capture problem, not a data problem: no reopening without cheaper execution infrastructure.
+## Category attack (2026-10-06, evening 2): same-issuer / regulatory families — 3 kills, 1 kept observation
+
+- **PAIR-CLASS (N 857->858): KILLED BY SCALE.** Dual-class same-issuer pairs ($20M+ both-class ADV:
+  GOOGL/GOOG, WBD/DISCK, ZG/Z), z<=-2 dislocation long-only 3-session: pooled net ~0 (t -0.61); on the one
+  liquid pair (GOOGL/GOOG) median +13bp/fill but only ~6 fills/yr = ~0.03-0.1pp/yr at $10k. Real
+  micro-mechanism, no account-level payoff; no re-tuning.
+- **FN-LAG filing-delay map: OBSERVATION DEAD.** SF1 publish-date lag vs own 8-q median: every pooled
+  "late-filer premium" (+12.7% per 63d!) decomposes to a sub-$2 artifact pool (+421% 63d there) plus
+  going-private tails; the executable universe ($2-5/$5+) is NEGATIVE in all eras. SF1 `date`-as-filing
+  lag needs restatement dedup; do not reuse without it.
+- **F13C v1+v2 (earlier today): KILL both family arms; dilution-drag screen kept as defensive only.**
+- Net for this cycle: the whole same-issuer relationship / regulatory-positioning category is now
+  **measured at this data tier**: verdicts: no-convergence-force members (preferred/common) pre-killed;
+  disclosure-lag member dead; forced-trim member dead; pair-differential algorithmically alive but
+  commercially negligible. The category does not produce a candidate at retail scale on daily data.
+## Domain-jump session (2026-10-06, cont.): 13F-state family v1 = KILL both arms; dilution-drag screen observed
+- **F13C-TRIM (short): KILL** (as registered): press set = max filer >= 9.5% of shares outstanding AND
+  implied shares down >= 5%/q; mean +1.31%/63-session window t 0.80, ex-top-5-names -0.03. 2x cost +0.31 t
+  0.19. **F13C-FREED (long after unwind): KILL** (-12.2%/window, t -3.2, both halves negative).
+- **Diagnostic kept:** heavy implied share-count shrink (>= 5%/q) names lose ~4.7-5.7%/q vs SPY in BOTH
+  halves (t ~ -2.3..-2.8) — dilution/death-spiral drag = a defensive SCREEN candidate (avoid in long
+  sleeves), forward-watch only; not an alpha arm.
+- **F13C v2 (participant-typed, N->857): KILL** — TRIM2 +0.15%/window t 0.08 (2x cost -0.85), FREED2 n 36
+  noise. 13F-state family FINAL: no tradable footprint at daily tier; possible future = quarterly STATE gate
+  on an existing edge (unspecified). Do not re-run as-registered.
+- Answer to "what category is unmodelled": cross-instrument (same-issuer liability stack: preferred/common,
+  dual class) + funding/settlement — both now mapped; data-feasible open ground is a 13F survivor
+  (participant-typed trim v2) and 1940-Act caps on OTHER periodic filers. No new edge, no deployment.
+## Two-track session (2026-10-06): resurrection track + CLOSE-DISLOC judged; no new edge; N stays 854
+A second research track (DEAD-STRATEGY RESURRECTION, ~25% of this session) was added alongside new-frontier
+discovery. Full inventory + verdicts: `research/drafts/resurrection_inventory_2026-10-06.md`.
+- **CLOSE-DISLOC (N 852->853 registrations; judged): REJECTED.** Data fetch restored through 2026-10-01
+  (566 sessions, 107k name-days, 198 names). k=1%LOC fills 73: +105.7bp mean but t 1.76, halves -77/+153
+  flip, ex-top-5 -11bp; k=0.5% n 1422: +9.2bp t 1.06 (under the 10bp bar); mirror +1%-dislocations lose
+  18bp; control -0.8bp. No stable close-dislocation reversion. Do not re-tune k.
+- **RESURRECTION: ONE candidate passed the reopen test (TL-JAN December losers), judged, REJECTED AGAIN.**
+  Old status: never-run/deprioritized (power); new: 28 formation years delisted-complete 1998-2025
+  (N 853->854). Result: net +2.94%/event-year at 25bp/side, t 1.91; years+ 69%; ex-best +2.07%; but NOT
+  monotone in YTD loss (terciles 2.66/1.94/3.18), 2016-25 dead (+0.53% t 0.30), and 1998-2015 ex-2010/12 =
+  +1.41 t 0.88 (clustered years). June placebo clean (-0.31%). **Final: PERMANENTLY DEAD** (December losers).
+- **Weakest-reason question answered:** the only candidate a reopen test ever passes is *low power*, not
+  proxies/costs/timing - and power is now fixed by Sharadar, so the price-only classes of the old program
+  are exhausted; remaining deaths are structural (spread, gap, arbitrage), not data.
+- Everything-session re-verified: no shadows added, no user-visible bot change.---
 
 ## Golden-egg overnight loop (2026-10-06): forward-split ex-date night = STRONG CANDIDATE; N 843 -> 849
 Data note: `~/data/export/daily-price-history` is a byte-identical copy of the Sharadar bundle at `~/data/sharadar`
@@ -1104,6 +1205,15 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | idea | verdict | why |
 |---|---|---|
+| Post-deal-break target reversal, CIK-widened free sample (BREAK-REV2, N 930 -> 931, 2026-10-10) | **DEAD, wrong-signed; class closed (post-break reversal at daily prices)** | 85 new delisted-era events via Sharadar CIK (+44 old = 128): A2 D0c->D5c -2.84% net t -1.22 median -4.22 hit 32%, A1 -2.26, A3 +1.62 t 0.3 ex-top5 -5.9; pooled all arms <= 0; deeper breaks fall further (<= -20%: -12%). BREAK-REV's +3% on 44 was an outlier draw. A paid deal DB would add events, not flip the sign: do not buy. `research/sim/break_rev2.py`, `break_rev2_out.txt` |
+| Signal COMBOS + window patterns on Sharadar daily bars (C1-C8 snapshot, W1-W6 window, U2-U11 useThinkScript setups; 2026-10-08, combo N +25) | **ALL KILLED** | No pair interacts durably; W3 (pre-ex x selling run, prefs) passed 2016-26 (+35bp, paired t 3.95) and failed 2003-15 (+2.4bp). Every forum trend/breakout setup loses -7..-21bp vs EW. Log: research/drafts/window_signals_loop_2026-10-07.md (COMBO LOOP onwards); harvest: research/drafts/usethinkscript_harvest_2026-10-08.md |
+| Night picks filtered by the stock's own prior trend: c_prev > 200d SMA, 126d ret > 0, 252d ret > 0 (TREND-NIGHT, N 916 -> 919, 2026-10-10) | **DEAD, wrong-signed; class closed (trend-conditioning on MR legs)** | 1999-2015: uptrend-only arm -21/-16/-23bp per night vs base (t -3.7/-3.0/-3.9), halves and ex-top-5 all negative, 2016-26 -12..-16; uptrend picks earn <= downtrend picks per trade. Side observation: young listings (< 252 prior bars) earn ~+40bp/trade more in both eras (peeked; YOUNG-NIGHT to pre-register). `research/sim/trend_night.py`, out `trend_night_out.txt` |
+| SPY 10-month SMA gate on the whole daily-bar book, judged 1999-2015 incl. 2000-02 / 2007-09 (REGIME-10M, N 919 -> 922, 2026-10-10) | **DEAD; class closed (trend/regime gates on the MR book)** | OFF sessions earn +4.9bp/day (1999-2015) and +5.3 (2016-26): book OFF cuts 2000-02 maxDD -25.7% -> -6.3% but costs 3.9pp/yr CAGR; night OFF worse on all counts; IBS-only OFF return-neutral pre-2016 (Sharpe 1.41 -> 1.66, maxDD -17.9%) but costs 1.4pp/yr in 2016-26. A drawdown dial, not edge. `research/sim/regime_10m.py`, out `regime_10m_out.txt` |
+| ETF category / sector time-series momentum as a standalone sleeve (trend loop idea 4, 2026-10-10) | **killed at dedupe + ceiling (no N)** | Lab-BX ETF momentum tied SPY 2017-26, Lab-BZ industry momentum + 10m filter 5.6%/yr vs 15% in 2016-26, 11-ETF TSMOM sleeve dead (add. 26b), 'momentum sleeve at 25%' unvalidated; literature sector-momentum premium ~3-5%/yr pre-2016 and ~0 since -> cannot reach +8pp/yr at 50% capture. No different construction identified. |
+| Listing-age tilt on the night leg: 2x weight on names < 1y old, or young-only nights (YOUNG-NIGHT, N 922 -> 924, 2026-10-10; peeked lead from TREND-NIGHT) | **DEAD at the night level; per-trade gradient real-small** | per trade young +100/+82bp vs 5y+ +50/+21 (1999-2015 / 2016-26), monotone age buckets; per night only +0.6..+7.6bp (t 1.0-1.7), inside the random-subset placebo 99th pct, beats levered base by <= 4bp. Young = 17% of picks on a third of nights: too diluted to matter. No age re-tuning. `research/sim/young_night.py`, out `young_night_out.txt` |
+| Post-deal-break reversal after merger-arb liquidation: buy the target 0-3 sessions after the break, hold 5-20 (BREAK-REV, N 924 -> 927, 2026-10-10) | **UNDERPOWERED / DATA-LIMITED (n 44), edge unproven** | EDGAR FTS 8-K item 1.02 identifies only 2-6 public-target breaks/yr; D0c->D5c +3.0% net (median +2.9, hit 55%, t 1.5, ex-top5 -0.4) vs generic -7% days -0.2%; path peaks +4.4% at day 9 then fades. Even at +3%/event the identifiable rate caps it at ~+0.6pp/yr. Needs a paid deal database (break dates, public targets); re-run only on NEW events. `research/sim/break_rev.py`, `break_fetch.py`, out `break_rev_out.txt` |
+| Dividend PAY-DATE reinvestment pressure (DRIP agents buying on pay date), all payers / top cash-to-volume tercile / intraday (DRIP-PAY, N 927 -> 930, 2026-10-10) | **DEAD, wrong-signed; dividend-calendar flows on common closed** | 25,783 pay dates 2021-26 (Alpaca payable_date; none pre-2021): -15.5bp/day net (t -6.4), top tercile -15.6 (t -4.4), intraday -27.8 (t -8.7); placebos D-5/D+5 equally negative, no tercile gradient. Payers lag SPY every day; pay dates no different. `research/sim/drip_pay.py`, `drip_fetch.py`, data `events/alpaca_cash_divs.parquet` |
+| Radge RSI(2) LIMIT entry at close - ATR10 (U1) and the generic below-close limit (S7) | **FILL ARTIFACT, DEAD** | Daily bars: +60bp/+93bp both eras, replicated independently; but dies at 25bp trade-through and the no-signal limit earns most of it. Alpaca minute bars 2016-26: the edge is the 14% of fills that only touched (+186..+225bp); genuine deep fills (83%) earn ~0 (t 0.34). Any daily-bar limit test must be gated on minute trade-through. research/sim/{uts,u1_minute}.py |
 | IBS leg on untouched 2003-15 ETF data (SHAR-IBS, N 838 -> 839) | **WEAK, not pass** | tier +4.99bp t 1.03 (gross +16.15 t 3.34); halves +11.84/-4.69; beta-adj -8.58bp t -2.89; 2/5 checks; a raw-open split bug was found+fixed (FAIL->WEAK). 2003-15 is now TOUCHED: no IBS variants or tuning on it. `study_shar_ibs.md` |
 | H-POOL pooled insider-buy open->close, judged 2008-15 on Sharadar (N 796) | **PASS, not robust** | tier +21.1bp t 2.71, n 29,285; tier_hi +11.4bp t 1.46; ex-top-1% +5.4bp; decays to ~0 by 2013-15; crisis-concentrated. Window now TOUCHED. `study_hpool_sharadar.md` |
 | Structural events (S&P 500 add/delete, spin-offs, reverse-split round-ups) via Sharadar actions/sp500 | **not run (gate + gap)** | S&P flow is in the announcement gap (post-gap drift ~0); spin-off effect in the distribution gap; round-ups ~$370/yr; all < +8pp/yr at $10k. No generic fundamentals mining. |
@@ -1117,7 +1227,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | CEF year-end tax-loss forced selling -> January reversion (Study CEF-TL, N 823 -> 824) | **REJECTED** | 142 CEFs, adj total returns 2016-26: Dec bottom-YTD quintile +0.27% vs universe (t 0.63, wrong sign), Jan +0.01%, Jan Q1-Q5 -0.93%; the Jan rebound is market beta (2018/2022), no forced signature; cef_taxloss_out.txt |
 | IBS leverage >1.5x (margin or 3x ETF) for small-account capital efficiency (Study CLE, N 821 -> 822) | **PROMISING framework, cap 1.25x; reject 1.5x+** | 3x-ETF financing (~5.5%, non-callable) beats retail margin; attack: actual 3x drags -7.6bp/trade vs synthetic, whole-share effective exposure only 1.33-1.49x, 1.5x maxDD -28% breaches a 25% DD budget, ex-best-10 8.4%. Allocation (current->100% IBS) +5.0pp > leverage +3.9pp. study_cle.md, cle_attack_out.txt |
 | TME month-end (TLT 1x) | **VALIDATED** on untouched 2002-15 | +32.3bp/mo net, t 2.76, 13/14 yrs, duration-monotonic; ~+4.3%/yr, -5.9% DD, $43/k; study_tme.md, tme_out.txt |
-| TME leverage via Treasury ETFs (Study TME-L2, N 822 -> 823) | **PROMISING overlay; reject UBT** | TMF 3x ~9.5%/yr, -21.9% DD, $95/k (vs IBS 1.25x $105/k same DD); 0.5 TLT+0.5 TMF ~6.9%, -14.2%, $69/k; UBT 2x dominated by 15bp/side cost; TMF-3xTLT drag -9.2bp/w. Deployed 14% of sessions -> stacks on IBS. Cap 2.5x @25% DD. Best use: more IBS + modest TME. tme_leverage_out.txt |
+| TME leverage via Treasury ETFs (Study TME-L2, N 822 -> 823) | **PROMISING overlay; reject UBT** | TMF 3x ~9.5%/yr, -21.9% DD, $95/k (vs IBS 1.25x $105/k same DD); 0.5 TLT+0.5 TMF ~6.9%, -14.2%, $69/k; UBT 2x dominated by 15bp/side cost; TMF-3xTLT drag -9.2bp/w. Deployed 14% of sessions -> stacks on IBS. Cap 2.5x @25% DD. Best use: more IBS + modest TME. tme_leverage_out.txt Note 2026-10-08: 'stacks on IBS' = calendar overlap only; Study XB (below) shows funding TME from IBS cash is -2.5pp/yr, so it adds ~0 to the book. |
 | Closed-end fund officers/directors buying their own fund, hold 60 vs PCEF (Goal G54, N 788) | **dead (select)** | 2021-23 n 96, +1.25%, t 0.8, ex-best-5 negative |
 | First 13D on a fund-like subject by any filer OTHER than the CEF activists, hold 60 vs PCEF (Goal G53, N 787) | **dead (select)** | 2021-23 n 96, −8.1%/trade; the G45 effect is activist-specific |
 | CEF activist escalations: stake first >= 15% / first proxy-contest filing, hold 60 vs PCEF (Goal G50 / G51, N 785-786) | **dead (select count / mean)** | G50 n 12 (+3.5%, t 3.7) below n >= 20; G51 +0.4%, t −0.3 |
@@ -1186,6 +1296,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Sector-loser reversal, ETF pairs, international close->open | **dead** | duplicates IBS / no edge after costs (add. 27 R4) |
 | Theme-explosion sleeve (breakouts, top-1% momentum, theme clusters, residual momentum) | **dead** | no rule beats vol-matched random picks; trails SPY; caught quantum late and got stopped out (add. 28) |
 | Pre-boom tail-probability conditioning (vol/range/volume compression, Amihud, idio-vol, corr breakdown, gap frequency, short interest/DTC, FTD, insider buys, earnings proximity) | **dead (outcome B)** | conditions raise P(fwd20>=+30%) 1.3-3.8x OOS, per-year, beyond vol-match and beyond momentum; but they raise the -30% tail as much or more (up-minus-down lift < 0, day-clustered CI excludes 0, or sign-flips), median fwd <= 0 -> predicts big moves, not direction (Study PB, N 826) |
+| TTM Squeeze (YouTube/ToS): histogram zero-cross len 20/100, squeeze-fire red->green entries (diagnostic, no N, 2026-10-08) | **dead** | 13 ETFs 1999-2026: 0/13 beat B&H CAGR in 2016-26 (len100 -8.1pp/yr), only lowers drawdown = an SMA trend filter with less exposure; stocks (1200 incl. delisted) median trade negative, len100 excess t 2.07 then 1.20 (4/11 yrs); bullish fires (hist>0) earn LESS than all days (fwd20 +0.51% vs +0.93%), bearish fires more = PB-C mean reversion. `research/sim/ttm_squeeze.py`, out `data/research/program/ttm_squeeze_out.txt` |
 | Follow the direction once the move starts, filtered by a pre-boom condition (PB-C) | **dead** | early up-move net +0.96% OOS but -0.97% discovery; the same early move measured down is BETTER (+2.00% net) -> early direction mean-reverts, and no condition improves continuation over the plain move (Study PB-C, N 827) |
 | Night pool $5 floor / cost tier / share rounding on split-ADJUSTED prices | **bug, fixed** | 16% of V7 night trades were really < $5; lookahead winners. Every earlier night level ~1/5 too high; use `raw_price=True` (add. 30, 36, 39) |
 | Lower `night_price_min` to $3 / $2 / $1 (raw pool) | **dead** | added names lose 33-73bp in 2021-23, placebo 2-7%; add. 21's live-cost conditional ($3 if sub-$10 costs ≤ ~20bp) still stands (add. 30) |
@@ -1288,6 +1399,11 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | IBS leg: hold until IBS > 0.5 or a close > prior high (Round 19 AV) | **dead** | IBS > 0.5 −5.9pp (t −2.3, both halves); prior-high exit −0.8pp (t −0.1): holds past the overnight bounce |
 | IBS within-leg weights by vol, either sign (sigma^+1 constrained-Kelly / sigma^-1 inverse-vol), per-name James-Stein edge (Study VT-IBS, N 836 -> 838) | **dead** | 2016-20 judge paired vs equal weight: sigma^+1 -0.55bp (t -0.77), sigma^-1 +0.67bp (t 0.87), medians ~0, sign flips 2021-26, DSR ~0; ceiling ~+0.17pp/yr. Leg Kelly f* 7.5-8.6 >> 1: exposure, not weights, is the lever (= ACC overlay). study_ibs_voltilt.md |
 | Night exit later than the open auction (9:35 / 10:00 / 10:30) | **dead** | add. 7: open auction +20.1bp vs +1.9 / −9.3 / −21.5 (was only in RESULTS.md) |
+| Night exit held for an intraday peak: trailing stop, +2% gate then 1% off high (± stop), MACD-hist turn, BB/KC squeeze fade, RSI>70 fade (NEXIT, N 901->907) | **dead** | minute bars, judge 2016-20 + report 2021-26: all 6 lose to the open auction per day (t -2.8..-5.3 both windows); gated rules win the median trade but un-armed names bleed to the close |
+| Open-time signal to hold a night pick to the close: opened red, gap <= -2%, red + SPY red, OLS on gap/SPY gap/drop/price (OPENSIG, N 907->911) | **dead** | judge 2016-20 per-day gain +2..+8bp t < 0.9, ex-top-5 negative; 2021-26 all negative. Per-trade gains are crowded-washout days only |
+| Ban Healthcare-sector names from the night leg (HC-BAN, N 911->912) | **dead** | 1999-2015 HC +57bp vs non-HC +62 (HC better 2007-15); per night -7.7bp t -1.4; 2016-26 per-trade gap +39bp but per night +2bp t 0.3. Re-running OPENSIG ex-HC: still null |
+| Night leg: category momentum (trailing 6/12m category return, keep top half) (CAT-MOM, N 912->914) | **dead, wrong sign** | 1999-2015 -6.7 / -9.3bp per night (t -2.3 / -3.1); 2016-26 ~0 / -7 |
+| Night leg: trade only the 2 deepest drops (TOP2) / depth-weight (DEPTHW) (N 915-916) | **TOP2 PASS on raw mean, but loses to leverage at matched risk (TOP2-SIZE); 1999-2015 gain is crash years** | 1999-2015 +14bp t 3.4, Sharpe 2.34 vs 2.21; 2016-26 +17bp t 2.05 but Sharpe 1.17 vs 1.16 (std 1.57x). DEPTHW t 1.9 fail |
 | Night tilts on gap share, relative volume, late selling, idio move, 20d/52w distance, price | **dead** | add. 23: none monotone, most flip halves (was only in RESULTS.md) |
 | IBS leg decided at 15:50 and bought in the close auction | **dead** | add. 6: QQQ 13.9 → 8.8%; trade at the next open (V6 index version is separate, shadow) |
 | Zero-shot TS foundation models (Chronos/TimesFM/Moirai/Kronos) as filters | **not run: power** | clean post-release holdouts 11-30 months ≈ 1/6 of the trades needed; published: ~51% direction, net-negative at 11-21bp (Round 19 list #35-38) |
@@ -1326,8 +1442,25 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Going-private odd-lot cash-outs (Round 32 B4) | **dead** | ~1 listed/yr, 100-day holds, Anebulo −89% (split abandoned) |
 | Reverse-split round-up (Round 30 #12 "KILL") | **reopened -> PASS (alert)** | Round 32 B1: +$4.36/account/deal if rounded, ~$0 if not; Schwab behaviour is the live check |
 
+| Passive LOC buys at >=1% closing-cross dislocations (Study CLOSE-DISLOC, k 0.5/1%) | **dead** | t 1.76/1.06, ex-top-5 -11bp, halves flip; do not re-tune k |
+| 13F concentrated-holding forced trim, short & freed arms (Study F13C, N 854 -> 856) | **dead** | trim +1.31% t 0.80 ex-top5-names ~0; freed -12.2% t -3.2; do not rerun as-registered; participant-typed v2 = spec only |
+| Heavy implied share-count shrink (>= 5%/q) names | **dead long (+ drag)** | -4.7..-5.7%/q vs SPY both halves: avoidance screen only |
+| | December tax-loss losers -> January reversal (Study TL-JAN, N 853 -> 854, 1998-2025 delisted-complete) | **dead (2nd look)** | +2.94%/event t 1.91, not monotone in YTD, 2016-25 +0.53%, clustered pre-2016 era; June placebo clean |
 | Bond-SPDR premium/discount + creation/redemption flow (Study BSPD, N 834 -> 835) | **dead** | gross spread ~0, net -7 to -9bp/1x, t -4..-12, wrong sign all sub-periods; closes the ETF discount/flow family (with ETC/EF) |
 | Dividend-month clientele premium, payers vs non-payers (Study DM, N 835 -> 836) | **dead** | monthly +66.8bp is a size tilt; the mechanism (ex-date T-5..T+5 vs SPY) is -6.9bp t -0.04; dies at 3x cost |
+| Rule 201 trigger-day long after the -10% cross, minute tier (SSR-TD, N 876) | **dead** | +3.4bp/EW-day t 0.43; discontinuity at -10% WRONG sign (-10.9bp t -9.7); generic +20-27bp at +30/60m after any -8..-12% cross ~= one round trip (intraday loop 2026-10-06) |
+| Single-stock LETF rebalance flow, 15:45 -> close (SS-LETF, N 877) | **dead (mechanism real)** | I x r_pre t 3.11, placebo diff +5.9bp t 2.82, but +3-5bp gross; trade -6.6bp net |
+| Short >= 10% gap-downs 09:31 -> close (GAP-SHORT, N 878) | **dead** | sealed 2016-20 liquid +61bp/EW-day t 2.45 (< 2.5); 2021-26 liquid -8bp; squeeze tail -58%/-212% |
+| BTC ETF NAV-window (15-16 ET) flow (BTC-FIX, N 879) | **dead** | window vol share fell post-launch; fade +0.2bp; flow proxy wrong sign |
+| Long gap-ups in high days-to-cover names (SQZ, N 881) | **dead** | -19bp/EW-day; covering real (HIGH-LOW +83bp t 3.4) but long still loses |
+| Short low-DTC gap-ups (GUF-LOW, N 882) | **dead** | 2021-26 short ~+63bp/day was retail-era; untouched 2018-20 -18bp t -0.43, LOW-HIGH flat. Judge any 2021+ intraday stock pattern on pre-2021 minutes first |
+| Resting 1% dip bids in thin preferreds, exit close (PREF-DIP, N 880; PFF-hedged variant) | **dead** | -7.5bp/fill, halves negative; PFF hedge corr 0.28 removes nothing; "+28bp mkt-adj" was a close-to-close artifact |
+| Fade BTC/ETH perp liquidation cascades (LIQ-CASC, N 883) | **dead** | -14/-20bp at 60m, worse than plain drops; cascades continue |
+| Bids below hedged fair value in thin benchmark ETFs (ETF-THIN, N 884) | **dead** | -22bp/fill hedged, every year negative; thin ETFs quoted tight to FV, fills informed |
+| Intraday headline continuation, Benzinga single-symbol (NEWS-DRIFT, N 885) | **dead** | -12.6bp net at +60m (gross ~+7), halves negative; news absorbed within ~5 min |
+| LLM (deepseek-v4-flash) / FinBERT reading the pre-open earnings release, 2026 post-cutoff (LLM-EARN, N 886-887) | **dead** | 09:35->close LLM -14.4bp net t -0.03, FinBERT -10.1; T+3 LLM confident on 129 only, t 0.02; no-news placebo clean (valid test). Earnings info is in the open |
+| FinBERT tone of CEF N-CSR shareholder reports as a CEF-RV filter (CEF-TXT, N 888-889) + NLP slow-text ledger (lazy prices, PREF-EX/Form 4/FOMC text filters, classifier forced-flow discovery) | **dead** | level spread -58bp t -1.86 (wrong sign), change -31bp t -0.79, placebo 5th/21st pct; tone valid (tracks 2022) but uninformative; other NLP rows killed at the gate (`research/drafts/nlp_ledger_2026-10-06.md`). Do not re-open open-source NLP as a signal source |
+| CEF-RV out of sample 1999-2014 + NAV-fall filter (CEF-OOS/NAVFALL, N 890-891) + alpha vs beta-matched comparators (CEF-ALPHA, N 892-893) | **PASS; alpha ~+125..160bp/trade 2016-26** | OOS +333bp t 5.3. Excess vs EW CEF universe incl. delisted: +125bp t 5.6 (2016-26), +187 t 9.4 (1999-2014); vs out-of-window-beta SPY +159 t 3.5. The earlier '+46bp t 0.74' used an in-window fitted beta (superseded). Raw is ~2/3 market. NAV-fall +376bp OOS, ~half SPY rebound (conditioning only). ~+4.8pp/yr excess on deployed capital. 1999-2014 survivorship MATERIAL (CEF-SURV99, N 895-896): OOS alpha bound ~0..+105bp, so the OOS pass is not established; 2016-26 stands. `cef_oos.py`, `cef_alpha.py`, `cef_surv99.py` |
 
 ## Ideas not yet tested
 
@@ -1454,3 +1587,37 @@ name), and names above ~$150 buy one share or none.
 - Consequence: the night leg is no longer "unproven"; it is VALIDATED-SMALL. Size-ups S1/S2 passed their bar, but are
   a user decision and only while live auction cost stays near 0 (`make review` 2b). Supersedes the "do not size up
   until NX" rule for the night leg; the beta/alpha study's 2021-26 night alpha (~15%) is still regime-flattered.
+
+---
+
+## VENM session (2026-10-06, night): FINRA venue-mix panel built; IBS conditioning KILLED by its own placebo — N = 867
+- Panel: FINRA OTC Transparency `weeklySummary` (key-less; full data documentation in round1_prose.md), EQ18 ETFs, 250 weeks 2021-12..2026-09, per-row publication dates (3.0-wk lag, lookahead-safe strict alignment). Cache data/research/finra/ats_etf.parquet.
+- **VENM (N 867): KILL.** IBS net by off-exchange-share percentile: LOW +10.1 / MID +28.9 / HIGH -4.5 (non-monotone; CENTER bump); change buckets t 1.25/1.93 with halves flipping; PLACEBO (permuted-symbol state) separates MORE (+15.9 t 2.68) — the "conditioning" is sample noise. Economics: ±20bp/trade x ~40 trades/yr ≈ +0.6-0.8pp/yr MAX = an order below the +8pp gate; $12-53/yr at $3k measured.
+- Residuals: 2016-2021 FINRA history needs the web download-portal files (un-scraped); per-stock venue-mix attachment to the night leg feasible but heavy — do NOT pursue without a new mechanism hypothesis (it inherits the placebo failure).
+
+## 2026-10-06 (third-robot session) — PCAL machinery calibration + DDR clean-window judge
+- **PCAL (diagnostic, no N): machinery CALIBRATED — 0/7 pre-named negative controls pass the program's
+  frozen acceptance bar** (night-leg shape, 2021-26, tier net). The PASS verdict list stands with a
+  measured background false-pass rate ~0/7 per look. `research/sim/pcal.py`, `pcal_out.txt`,
+  `study_pcal_machinery.md`. Watch-out recorded: a collapsed o_next (same-day open) produces fake
+  super-edges (+145bp "lag+1") — known bug class, re-validate any new adjusted-series runner.
+- **DDR (N 858 -> 859):** the lag+5 entry of the night signal (PCAL C2 passed only under the bug);
+  clean-window judge 1998-2020. **Still running at session end 2026-10-06** (PID 72717, ~3h CPU,
+  progress ~2014 of 1998-2020, log `/private/tmp/ddr.log`); no `research/sim/ddr_out.txt` yet.
+  Registered gates in round1_prose.md. Expectatory prior = REJECT (the 2021-26 clean rerun was
+  -30.7bp t -2.65). Read the verdict from `research/sim/ddr_out.txt` when the job finishes and
+  record it here.
+## 2026-10-06 (access session): CEF-RV survivorship attack — survives every free variant, stays SURV-LIMITED (no N increment)
+- Runner `research/sim/cef_rv_surv.py` -> `cef_rv_surv_out.txt`; draft `research/drafts/study_cef_rv_surv_2026-10-06.md`.
+- Coverage: the judged panel (CEFConnect, 355 tickers) omits **66% of the CEF universe** — Sharadar has 1,074 CEF permatickers (704 delisted). Survivorship is real and large in count.
+- **Births/cohorts survive:** no fabricated pre-listing history (panel-first vs Sharadar firstpricedate median gap 1d); the 2005+ birth cohort earns +594bp > full +474bp; 11/12 entry years positive; ex-2020 +340bp (2020 +1203bp on 584 trades; worst year 2021 -21bp).
+- **Delisted NAV is NOT free:** CEFConnect nulls dead tickers; EDGAR N-Q/N-CSR = quarterly/semi-annual; N-PORT = monthly 2019+ (scrape target, ~26 filings x ~700 funds) and too coarse for the weekly rule. Cannot be made survivors-free this session.
+- **Bias direction is benign:** delisted CEF final-6m total return +4.96% (68%>0); delisted-complete equal-weight CEF universe 5.2%/yr vs survivors 7.2%/yr => **~2.0pp/yr gap**. CEFs die via liquidation/conversion near NAV, not crashes, so a 2pp/yr average gap cannot manufacture a +340bp/trade (≈12%/yr) effect.
+- **NEW (artifact check):** the return is ~all discount convergence (long price +303bp = NAV +22bp + discount +281bp); the mirror short is symmetric (-219bp); a **permuted-NAV placebo collapses to +34bp** -> the anchor does real work, not generic weekly price bounce. Sole remaining risk: the edge lives entirely in the price leg, so an **official-closing-cross execution test is the gate before any upgrade.**
+- **Retail:** median CEF ADV $962k; $1k = 0.1% of ADV (100% of panel <=10%); median live SIP NBBO spread 26bp. Executable at $250-1k; capacity, not cost, binds. Shadow spec + one-line Roth pilot prepared in the draft, **not deployed**; a testing.py REGISTRY entry is owed in the same commit as any shadow code.
+| CEF discount-to-NAV reversion, weekly panel (CEF-RV, N 859 -> 860) | **PROMISING-SURV-LIMITED (attack run 2026-10-06)** | +474bp/trade net median +359 t 11.3 hit 77% halves both+ ex-top-5 funds/dates + PASS on all gates; LIVE-funds panel only; 2026-10-06 attack (cef_rv_surv.py) shows the missing 66% die benignly (~2pp/yr gap), birth cohort stronger, NAV anchor non-decorative — but the +281bp price leg still needs an official-cross execution test before upgrade. CEFConnect API cached data/research/cefconnect/. `cef_rv.py`, `cef_rv_surv.py` |
+
+## Decision (user, 2026-10-10): night per-name cap 0.10 -> 0.15, both books
+config.yaml night_max_name_pct 0.15 (commit after cfa63d2). Basis: NIGHT-CAP grid (night_cap_grid_out.txt) — at 0.10 the leg averaged ~16% of equity;
+0.15 = best Sharpe in both eras (2.03 / 1.19 vs 1.93 / 1.16), ~+4pp/yr, night-only maxDD -21/-22% vs -15/-18%. Condition (add. 29): keep only while live
+open/close auction cost stays ~0bp (`make review` 2b). Revert = set it back to 0.10.

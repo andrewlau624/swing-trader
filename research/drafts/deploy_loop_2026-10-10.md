@@ -203,3 +203,11 @@ code" list). Nothing to pre-register this wake-up.
 - Item 1 / live preferred MOC test: USER-RUN via `research/sim/pref_cross_test.py` (Roth, 1 share, --go). Candidate: BAC.PRP
   (ex 2026-10-15, div 0.2578): buy MOC Wed 10-14 before 15:43 ET, sell MOC Thu 10-15, `report` after 16:15 ET each day. Alternates:
   NEE.PRW (ex 10-14, buy 10-13), BAC.PRO (ex 10-15). Run `resolve` first for the Schwab symbol format (T/PRA worked on 10-08).
+
+## Autonomous run (user out; approvals deferred to the end) — item A1: BREAK-REV2 (N 930 -> 931) FAIL
+- Free widening done: 710/1,008 FTS hits had no display-name ticker; Sharadar TICKERS carries CIKs (36,723 delisted) -> 85 NEW events
+  (all by CIK), 128 pooled, 5.8 breaks/yr. Pre-registered before any price read (round1_prose.md "Study BREAK-REV2").
+- **FAIL x3, wrong-signed** on the new sample: A2 D0c->D5c -2.84% net (t -1.22, median -4.22, hit 32%); A1 -2.26; A3 +1.62 t 0.3
+  (ex-top5 -5.86). Pooled 128 all <= 0. Deeper breaks fall further. Prediction (thinner targets bounce more) falsified.
+- Consequence for 2(b)(i): the deal-database question is CLOSED, not just "do not buy": more events would not flip the sign.
+  Post-break reversal class closed. No approval needed.
