@@ -122,9 +122,9 @@ def test_fomc_shadow_logs_then_scores_and_places_nothing(tmp_path, monkeypatch):
     ex.phase_close(book, "2026-10-27", dt.datetime(2026, 10, 27, 15, 40, tzinfo=ET), ex.broker.clock())
     sent = [r.symbol for r in ex.broker.client.submitted]
     assert sent == ["LOSER"], "the night leg trades as before; QQQ is shadow only"
-    # budget 0.5 * 3000 = 1500; LOSER 10% cap = 150 -> 16 sh at 9 = 144; spare 1356 -> 2 QQQ at 500
+    # budget 0.5 * 3000 = 1500; LOSER 15% cap = 225 -> 25 sh at 9 = 225; spare 1275 -> 2 QQQ at 500
     p = book.fomc["pending"]
-    assert p["fomc"] == "2026-10-28" and p["shares"] == 2 and p["spare"] == pytest.approx(1500 - 144)
+    assert p["fomc"] == "2026-10-28" and p["shares"] == 2 and p["spare"] == pytest.approx(1500 - 225)
     assert any("[fomc] SHADOW" in l and "would buy 2 QQQ" in l for l in ex.lines)
     # next day: close 10-27 -> open 10-28, net of 2 x 3bp
     b = pd.DataFrame({"open": [499.0, 505.0], "close": [500.0, 503.0]},

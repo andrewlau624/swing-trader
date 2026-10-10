@@ -191,9 +191,9 @@ def test_close_phase_places_whole_share_moc_buys(tmp_path, monkeypatch):
     reqs = {r.symbol: r for r in ex.broker.client.submitted}
     assert "SWINGY" not in reqs, "never trade a symbol the swing book holds"
     assert "FINE" not in reqs, "-1% is not a signal"
-    # $3000 * 0.5 leg * 10% cap = $150 per name
-    assert reqs["LOSER"].qty == 16 and reqs["LOSER"].time_in_force.value == "cls"
-    assert reqs["PRICEY"].qty == 3
+    # $3000 * 0.5 leg * 15% cap = $225 per name
+    assert reqs["LOSER"].qty == 25 and reqs["LOSER"].time_in_force.value == "cls"
+    assert reqs["PRICEY"].qty == 5
     assert all(r.side.value == "buy" for r in reqs.values())
     assert set(book.open_orders()) == {r.client_order_id for r in reqs.values()}
 
@@ -620,8 +620,8 @@ def test_friday_close_buys_half_size(tmp_path, monkeypatch):
         book = DailyBook(cash=3000, start_equity=3000)
         ex.phase_close(book, day, dt.datetime.fromisoformat(f"{day}T15:40").replace(tzinfo=ET), clock)
         qty[day] = float(ex.broker.client.submitted[0].qty)
-    assert qty["2026-09-25"] == math.floor(3000 * 0.5 * 0.10 * 0.5 / 9.0)
-    assert qty["2026-09-24"] == math.floor(3000 * 0.5 * 0.10 / 9.0)
+    assert qty["2026-09-25"] == math.floor(3000 * 0.5 * 0.15 * 0.5 / 9.0)
+    assert qty["2026-09-24"] == math.floor(3000 * 0.5 * 0.15 / 9.0)
 
 
 # --------------------------------------- conviction day trade (addendum 19)
@@ -730,8 +730,8 @@ def test_live_night_probe_buys_one_share_of_a_name_that_rounds_to_zero(tmp_path,
     book = DailyBook(cash=1000, start_equity=1000)
     ex.phase_close(book, "2026-09-23", dt.datetime(2026, 9, 23, 15, 40, tzinfo=ET), ex.broker.clock())
     reqs = {r.symbol: r for r in ex.broker.client.submitted}
-    # $1000 * 0.5 * 10% = $50 a name
-    assert reqs["CHEAP"].qty == 5
+    # $1000 * 0.5 * 15% = $75 a name
+    assert reqs["CHEAP"].qty == 8
     assert reqs["MID"].qty == 1, "rounds to 0 -> one-share probe (<= $150)"
     assert "DEAR" not in reqs, "a probe never costs more than night_probe_max_usd"
     ex.d.night_probe_max_usd = None
@@ -1107,6 +1107,7 @@ def test_impact_cap_shrinks_thin_volatile_names_and_is_off_by_default(tmp_path, 
     monkeypatch.setattr(E.md, "live_rows", lambda s, *a, **k: live.loc[[x for x in s if x in live.index]])
     monkeypatch.setattr(E, "all_assets", lambda: SimpleNamespace(symbols=syms))
     ex = _executor(tmp_path, monkeypatch)
+    ex.d.night_max_name_pct = 0.10   # pinned: this test is about the impact cap, not the name cap
     ex.d.night_tilt_k = 0
     assert ex.d.night_impact_y is None, "off until review section 8 measures Y"
     run = lambda day: (ex.broker.client.submitted.clear(),

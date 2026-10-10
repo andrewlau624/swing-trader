@@ -195,7 +195,7 @@ def test_live_close_phase_routes_through_schwab(tmp_path, monkeypatch):
     book = DailyBook(cash=3000, start_equity=3000)
     ex.phase_close(book, "2026-09-24", dt.datetime(2026, 9, 24, 15, 40, tzinfo=ET), a.clock())
     o = a.c.placed[0]
-    assert o["orderType"] == "MARKET_ON_CLOSE" and leg(o)["quantity"] == 16   # $3000*0.5*10% / $9
+    assert o["orderType"] == "MARKET_ON_CLOSE" and leg(o)["quantity"] == 25   # $3000*0.5*15% / $9
     (coid, info), = book.orders.items()
     assert coid.startswith("dlv.") and info["broker_id"] == "1001"
     saved = json.loads((tmp_path / "book-daily-live.json").read_text())
@@ -366,7 +366,7 @@ def test_live_book_created_before_selling_still_trades_after(tmp_path, monkeypat
     assert book.cash == pytest.approx(2002.48) and book.start_equity == pytest.approx(2002.48)
     ex.phase_close(book, "2026-09-24", dt.datetime(2026, 9, 24, 15, 40, tzinfo=ET), after.clock())
     assert after.c.placed, "must buy with the freed cash, not report 'cash exhausted'"
-    assert leg(after.c.placed[0])["quantity"] == int(2002.48 * 0.5 * 0.10 // 9.0)
+    assert leg(after.c.placed[0])["quantity"] == int(2002.48 * 0.5 * 0.15 // 9.0)
 
 
 

@@ -107,7 +107,7 @@ daily:
   lever_weight: null             # 0.65 = both legs -> 0.65 (1.3x overnight) once signals.lever_ok passes
                                  # (50 night exits <= 10bp/side). null = never. Off 2026-09-29: the gate
                                  # proves costs, not edge; revisit at ~100 live night trades (NEXT.md)
-  night_max_name_pct: 0.10
+  night_max_name_pct: 0.15      # user 2026-10-10 (NIGHT-CAP grid, add. 29/39): 0.10 left the leg ~16% deployed; 0.15 = best Sharpe, ~+4pp/yr
   night_day_ret_max: -0.08
   night_ibs_max: 0.10
   night_price_min: 5.0
