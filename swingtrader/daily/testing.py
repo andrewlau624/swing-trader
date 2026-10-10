@@ -200,6 +200,13 @@ def _cef_rv(state: Path, logs: Path) -> dict:
                 else "no forward signals yet (make cef-rv)")
 
 
+def _hedge(state: Path, logs: Path) -> dict:
+    from . import hedge_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    wk = sum(1 for r in rows if r["date"] >= _week_ago())
+    return dict(n=len(rows), week=wk, line=w.line(rows) if rows else "no scored nights yet")
+
+
 def _top2(state: Path, logs: Path) -> dict:
     from . import top2_shadow as w
     rows = [r for r in _jsonl(state / w.LOG_NAME) if r.get("judged")]
@@ -381,6 +388,10 @@ REGISTRY: list[Test] = [
          "signal; research -255bp vs the rest, not validated), read beside the gate.", "2026-10-09", 60, "closed forward trades", _cef_rv,
          "make cef-rv; research/sim/cef_alpha_out.txt; round1_prose.md Study CEF-ALPHA / CEF-RV-FWD",
          ["cef_rv_shadow"]),
+    Test("Hedge: online learner over night filter configs", "exponential weights (eta 0.5) over 12 fixed night configs "
+         "(cutoff -8/-10/-12/-15% x top-k all/2/4), trained only on forward nights; does the config it picks each night beat "
+         "the fixed live rule? Gate: chosen - live >= +10bp/night, t >= 2, halves > 0; kill <= 0.", "2026-10-10", 120,
+         "scored nights", _hedge, "state/hedge-shadow.jsonl; round1_prose.md HEDGE-SHADOW", ["hedge_shadow"]),
     Test("TOP2: night leg on only the 2 deepest drops", "every night-rule signal scored close cross -> next opening "
          "cross (repeat_shadow): does keeping only the night's 2 deepest drops beat the equal-weight night risk-adjusted "
          "(judge 1999-2015 +14bp/night t 3.4, Sharpe 2.34 vs 2.21; 2016-26 same Sharpe at 1.57x std = mostly leverage)? "

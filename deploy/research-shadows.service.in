@@ -2,7 +2,7 @@
 # odd-lot tender watch (emails a qualifying offer) and, Round 32, the split-off
 # exchange-offer watch; index-beat FOUND: the stacked-book shadow (stack_shadow, logs only). Reads EDGAR at SEC's rate limit (~6-8 min).
 [Unit]
-Description=swing-trader research shadows (stack shadow, ex-date open, PREF-EX, CEF-RV, repeat-loser, crowded-night hold, TOP2, capacity shadow, leap SOXL IBS, pick cost, insider-day, tender watch, split-off watch, round-up watch, CEF activist watch, CPC forward ledger, forced-flow EDGAR discovery)
+Description=swing-trader research shadows (stack shadow, ex-date open, PREF-EX, CEF-RV, repeat-loser, crowded-night hold, TOP2, Hedge learner, capacity shadow, leap SOXL IBS, pick cost, insider-day, tender watch, split-off watch, round-up watch, CEF activist watch, CPC forward ledger, forced-flow EDGAR discovery)
 
 [Service]
 Type=oneshot
@@ -17,6 +17,7 @@ ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.cef_rv_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.repeat_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.crowd_hold_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.top2_shadow
+ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.hedge_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.insider_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.tender_watch
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.splitoff_watch
