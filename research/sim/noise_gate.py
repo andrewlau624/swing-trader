@@ -27,7 +27,7 @@ def say(*a):
 def gate_series(S_qqq: dict) -> pd.Series:
     """True on sessions whose trailing-20 realized intraday vol (to d-1) exceeds its trailing-252 median (to d-1)."""
     days = sorted(S_qqq)
-    oc = pd.Series([S_qqq[d]["close"][-1] / S_qqq[d]["open"][0] - 1.0 for d in days], index=pd.DatetimeIndex(days))
+    oc = pd.Series([S_qqq[d]["close"][-1] / float(S_qqq[d]["open"]) - 1.0 for d in days], index=pd.DatetimeIndex(days))
     rv = oc.rolling(VOL_N).std().shift(1)                       # ends d-1
     med = rv.rolling(MED_N, min_periods=126).median().shift(1)  # ends d-2 of the rv series = uses rv through d-1
     return (rv > med).where(med.notna())

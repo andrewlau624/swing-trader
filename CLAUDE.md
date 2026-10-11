@@ -969,3 +969,7 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
   on the night leg is a closed class per FUND-STATE; median px $7.7 sample barely overlaps the $5+/$10M leg).
 - Digest fix (audit_execution_1002 item 2): the "Overnight 1.3x" re-arm line now shows night open-sell cost vs the OFFICIAL open
   (`sg.night_exit_cost`), not `slippage_bps` drift.
+- **NOISE-GATE (N 933 -> 934, 2026-10-11): WEAK.** A realized-intraday-vol > 1y-median gate lifts the intraday leg to Sharpe 0.82 ON
+  vs -0.41 OFF over 2016-26, but 2026 is ON 61% of sessions with ON Sharpe -1.78: the leg's 2026 loss is high-vol days that do not
+  trend, not calm. Conditioning the noise leg is now a closed class (vol gate tested; do not run a trendiness variant). Leg decision
+  for the user: `daytrade_mode: off`, re-arm on a positive 60-session replay.

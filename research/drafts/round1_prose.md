@@ -6184,3 +6184,12 @@ number is read. One rule, one threshold, no tuning.
   (no live change; report). Also reported, no gate: share of 2025-26 sessions gated OFF, ON/OFF by year, trades/day ON.
 - If PASS: the live change is `daytrade_mode` stays `auto` plus a gate in the executor (user decision, config switch); if KILL/WEAK:
   recommend `daytrade_mode: off` with a vol-based re-arm note. No live change in this loop either way.
+
+## Result — NOISE-GATE (judged 2026-10-11, one look; N 934): WEAK, no live change
+`data/research/program/noise_gate_out.txt`. 2,548 sessions 2016-08..2026-09, gate ON 47%. ON: +5.03bp/trade, Sharpe +0.82 (halves
++0.99 / +0.66), ann +7.7%; OFF: +0.61bp, Sharpe -0.41; ungated +2.60bp, Sharpe +0.14. Placebo 96% (random-mask p95 gap +1.17 vs
++1.23: barely). Fails off_mean <= 0 and ON Sharpe 2021-26 >= 0.8. **Decisive detail: 2026 is ON 61% of sessions and the ON days are
+the losers (ON Sharpe -1.78, OFF -0.11).** The gate rescues the calm years (2017, 2019: OFF Sharpe -1.6 / -2.5) but not 2026, where
+vol is high and breakouts still fail: the 2026 failure is intraday non-persistence (V-shaped high-vol days), not low vol. A
+trendiness gate would be variant 2 of a conditioner on a ~4%/yr leg: not run (anti-local-optimum rule). Recommendation to the user
+unchanged: `daytrade_mode: off`; re-arm only on a positive 60-session replay, not on a vol gate. Program N = 934.

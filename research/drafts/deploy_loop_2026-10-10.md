@@ -328,3 +328,5 @@ Approvals / user actions, in order of value:
 - **Him is at 210336a.** Commits b27adb6 (PREF-EX live), 9cf410d (CEF-RV live) and this one touch executor/brokers (additive,
   off by default). NOT pulled on him while the user is away: pulling is the user's call (`cd ~/llm-trader && git pull && bash
   scripts/install-schedule.sh`), after which both sleeves can be started in `dry` from config.yaml.
+- **NOISE-GATE (N 934): WEAK.** Vol gate helps 2016-26 on average (ON Sharpe 0.82 / OFF -0.41) but 2026's losses are ON high-vol days
+  (ON Sharpe -1.78): not fixable by a vol gate; the 2026 failure is non-persistent intraday moves. Recommendation unchanged: off.
