@@ -973,3 +973,7 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
   vs -0.41 OFF over 2016-26, but 2026 is ON 61% of sessions with ON Sharpe -1.78: the leg's 2026 loss is high-vol days that do not
   trend, not calm. Conditioning the noise leg is now a closed class (vol gate tested; do not run a trendiness variant). Leg decision
   for the user: `daytrade_mode: off`, re-arm on a positive 60-session replay.
+- **Intraday (noise) leg OFF (user, 2026-10-11)** `daytrade_mode: "off"` (quoted: bare off is YAML False). NOISE-DIAG: 2026 QQQ variance
+  ratio 1.02 (vs 1.2-1.5 in 2022-25), first-hour continuation ~0; losses are first-hour and last-90-min entries plus band/VWAP whipsaw;
+  hold-to-close already tested (add. 22, fails 2016-23). The leg's fix space is closed: do not propose exit/entry/time-of-day/gate
+  variants. Re-arm only on a positive 60-session replay (`research/sim/noise_recent.py`).

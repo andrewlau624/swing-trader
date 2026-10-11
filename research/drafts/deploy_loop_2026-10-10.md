@@ -330,3 +330,13 @@ Approvals / user actions, in order of value:
   scripts/install-schedule.sh`), after which both sleeves can be started in `dry` from config.yaml.
 - **NOISE-GATE (N 934): WEAK.** Vol gate helps 2016-26 on average (ON Sharpe 0.82 / OFF -0.41) but 2026's losses are ON high-vol days
   (ON Sharpe -1.78): not fixable by a vol gate; the 2026 failure is non-persistent intraday moves. Recommendation unchanged: off.
+- **Intraday leg switched OFF (user "okay sure", 2026-10-11):** `daytrade_mode: "off"` committed (caf2c90), pulled on him, resolved
+  live config verified (daytrade off, night 0.65, IBS 0.5, cap .15, pref/cef sleeves off). Gating tests now start from auto explicitly.
+- **NOISE-DIAG (diagnostic, no N; `research/sim/noise_diag.py`, `noise_diag_out.txt`): where 2026 loses.** 333 trades Jan-Sep: first-hour
+  entries -8.2bp (n 125) and 14:30+ entries -8.4bp (hit 24%); midday entries +5..+10. Shorts -3.7, longs +1.2. Band/VWAP exits -18.6bp
+  (every year -10..-22), close-held trades +37 (every year +22..+55). Held-to-close the 2026 trades would average +7.7bp vs -1.1 traded,
+  but that gap exists in 10/11 years and hold-to-close is ALREADY TESTED (RESULTS add. 22: best 2024-26, fails 2016-23, "watch, don't
+  adopt"); AH exits (targets/stops/pullback) dead; DS3 no-midday dead; AG confirmations dead; NOISE-GATE weak. Market state: QQQ
+  variance ratio (day var / 13 x 30-min var) 1.02 in 2026 vs 1.19-1.47 in 2022-25; corr(first hour, rest of day) +0.01 vs +0.12..0.14.
+  **Conclusion: 2026 intraday moves do not trend; the leg's whole fix space (entries, exits, cadence, gates, time of day) is already
+  dead or 2026-fitted (skipping the first hour would have cost the best bucket of 2021-24). No honest fix exists; off is correct.**
