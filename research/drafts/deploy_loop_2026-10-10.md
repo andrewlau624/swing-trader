@@ -319,3 +319,12 @@ Approvals / user actions, in order of value:
   that week's entries are `missed`.
 - Switch-on (user decision): `git pull && bash scripts/install-schedule.sh` on him; set `cef_rv_mode: "dry"` in the committed
   config.yaml (make pull resets the file) for >= 1 signal week, read `logs/cef-rv-live.jsonl`, then `"live"`.
+
+### Overnight loop (2026-10-11 00:xx ET)
+- `scripts/review.py --since 2026-09-23` on him is NOT broken: it takes ~3-4 min (Schwab + Alpaca order pulls) and then prints.
+  The earlier "printed nothing" was a cut-off, not a bug. Paper night sells +88.9bp mean (Alpaca paper fakes the open; ignore).
+- Executor: `_cef_rv_held` subtracts `state/cef-rv-held.json` (fresh <= 7 days) from the Roth night leg's cash, beside the
+  PREF-EX reservation. Both modules default off so both hooks are inert until switched on. 505 tests.
+- **Him is at 210336a.** Commits b27adb6 (PREF-EX live), 9cf410d (CEF-RV live) and this one touch executor/brokers (additive,
+  off by default). NOT pulled on him while the user is away: pulling is the user's call (`cd ~/llm-trader && git pull && bash
+  scripts/install-schedule.sh`), after which both sleeves can be started in `dry` from config.yaml.

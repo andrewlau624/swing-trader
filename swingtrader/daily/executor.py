@@ -323,6 +323,19 @@ class DailyExecutor:
         except Exception:  # noqa: BLE001  (no file / unreadable = nothing reserved)
             return 0.0
 
+    def _cef_rv_held(self, today: str) -> float:
+        """Market value of the CEF-RV live module's multi-week Roth holdings (cef_rv_live.py writes
+        state/cef-rv-held.json {"date", "usd", "n"} each run). The night leg sizes from the bot's virtual cash, which
+        never sees those buys; subtract them while the file is fresh (<= 7 days old; the module runs every session)."""
+        if not self.cash_account:
+            return 0.0
+        try:
+            j = json.loads((self.state_dir / "cef-rv-held.json").read_text())
+            age = (dt.date.fromisoformat(today) - dt.date.fromisoformat(str(j.get("date")))).days
+            return max(0.0, float(j.get("usd") or 0.0)) if 0 <= age <= 7 else 0.0
+        except Exception:  # noqa: BLE001  (no file / unreadable = nothing held)
+            return 0.0
+
     def _roth_night_priority(self, book: DailyBook, today: str, cash: float, need: float) -> float:
         """Roth only: the night leg's money is on loan to the 3x noise ETFs (flattened
         15:57, before the 16:00 close) and parked in SGOV at 15:40, so book cash
@@ -1068,6 +1081,11 @@ class DailyExecutor:
             self.log(f"[pref-ex] ${res:,.0f} reserved by pref_ex_live for tonight's preferred MOC buys: "
                      f"night cash ${cash0:,.0f} -> ${cash0 - res:,.0f}")
             cash0 -= res
+        held = self._cef_rv_held(today)
+        if held:
+            self.log(f"[cef-rv] ${held:,.0f} held by cef_rv_live (multi-week CEF positions): "
+                     f"night cash ${cash0:,.0f} -> ${cash0 - held:,.0f}")
+            cash0 -= held
         cash = self._roth_night_priority(book, today, cash0, per * len(picks))
         plan = getattr(self, "_night_plan", None)
         if plan is None:

@@ -194,3 +194,18 @@ def test_score_compares_yesterdays_fills_to_the_opening_cross(tmp_path):
     run("live", tmp_path, ad)                                          # no re-score
     assert sum(1 for r in rows(tmp_path) if r["cmd"] == "score") == 1
     assert "buy +20.0bp" in C.line(rows(tmp_path)) and C.line(rows(tmp_path)).startswith("0/30")
+
+
+def test_executor_roth_night_cash_subtracts_fresh_cef_holdings(tmp_path):
+    import json
+    from swingtrader.config import Config
+    from swingtrader.daily import executor as E
+    from test_daily import FakeBroker
+    ex = E.DailyExecutor(Config.load(), account="roth", broker=FakeBroker(), state_dir=tmp_path, log_dir=tmp_path)
+    assert ex._cef_rv_held("2026-10-14") == 0.0
+    (tmp_path / "cef-rv-held.json").write_text(json.dumps({"date": "2026-10-13", "usd": 1980.0, "n": 2}))
+    assert ex._cef_rv_held("2026-10-14") == 1980.0                       # yesterday's file: fresh
+    assert ex._cef_rv_held("2026-10-25") == 0.0                          # > 7 days: stale, ignored
+    assert ex._cef_rv_held("2026-10-12") == 0.0                          # dated in the future: ignored
+    ex.cash_account = False
+    assert ex._cef_rv_held("2026-10-14") == 0.0                          # taxable book: never
