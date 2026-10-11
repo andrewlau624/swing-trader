@@ -85,7 +85,9 @@ def sessions_for(sym: str, day: pd.Timestamp, lookback: int, source: str) -> dic
 
 
 # ---------------------------------------------------------------- one-instrument replay
-def replay_instrument(S: dict, cfg: DaybookConfig, sym: str, w: float, day: pd.Timestamp) -> list[dict]:
+def replay_instrument(S: dict, cfg: DaybookConfig, sym: str, w: float, day: pd.Timestamp, lag: int = 0) -> list[dict]:
+    """One instrument, one session. `lag` = minutes between the decision print and the fill (live is one 30-min bar late);
+    0 (default) fills at the decision print, unchanged behaviour."""
     days = [d for d in S if d < day]
     if day not in S or len(days) < 5:
         return []
@@ -106,6 +108,9 @@ def replay_instrument(S: dict, cfg: DaybookConfig, sym: str, w: float, day: pd.T
 
     mult = lev * w
     pos, entry_p, entry_m, taken = 0, 0.0, 0, False
+
+    def fm(m):
+        return min(m + lag, cfg.close_min)
     entry_strength = 0.0
     trades: list[dict] = []
 
@@ -143,16 +148,16 @@ def replay_instrument(S: dict, cfg: DaybookConfig, sym: str, w: float, day: pd.T
         p = float(C[m])
         # exits (mirror noise_decide)
         if pos == 1 and p < max(ub[m], pv[m]):
-            rec(m, "band/VWAP exit"); pos = 0
+            rec(fm(m), "band/VWAP exit"); pos = 0
         elif pos == -1 and p > min(lb[m], pv[m]):
-            rec(m, "band/VWAP exit"); pos = 0
+            rec(fm(m), "band/VWAP exit"); pos = 0
         # entries
         if pos == 0:
             d, stg = breakout_strength(p, ub[m], lb[m], sigma[m])
             if d == 1:
-                pos, entry_p, entry_m, entry_strength = 1, p, m, stg
+                pos, entry_p, entry_m, entry_strength = 1, float(C[fm(m)]), m, stg
             elif d == -1:
-                pos, entry_p, entry_m, entry_strength = -1, p, m, stg
+                pos, entry_p, entry_m, entry_strength = -1, float(C[fm(m)]), m, stg
             if d != 0 and sym in cfg.conviction and not taken and stg >= cfg.conviction_strength:
                 taken = True
     if pos != 0:

@@ -340,3 +340,14 @@ Approvals / user actions, in order of value:
   variance ratio (day var / 13 x 30-min var) 1.02 in 2026 vs 1.19-1.47 in 2022-25; corr(first hour, rest of day) +0.01 vs +0.12..0.14.
   **Conclusion: 2026 intraday moves do not trend; the leg's whole fix space (entries, exits, cadence, gates, time of day) is already
   dead or 2026-fitted (skipping the first hour would have cost the best bucket of 2021-24). No honest fix exists; off is correct.**
+
+## Loop tick 2026-10-11 02:20 ET (Sunday)
+- `make cef-rv-panel` run from the Mac and pushed (him `state/cef-rv-panel.json` 06:17 UTC, newest row 2026-10-09). Monday's
+  CEF-RV shadow reads Friday's discounts. (Byte size unchanged vs Friday's file: the panel is a fixed-length weekly window.)
+- BAC.PRP test timers verified on him: ex-date 2026-10-15 (Thu), so buy = Wed 10-14 19:30 UTC, report 20:20; sell = Thu 10-15
+  19:30, report 20:20 (`pref-buy/-sell[-report].timer`, transient). The earlier "Tue/Wed" wording in the notes was wrong by a day.
+- Built `swingtrader/daily/noise_rearm_watch.py` + REGISTRY "Intraday leg re-arm watch (noise, OFF)" + service line + tests
+  (`tests/test_noise_rearm_watch.py`, 3). `replay_instrument(lag=)` added (default unchanged; `tests/test_daybook_shadow.py` green).
+  First real read: last 60 sessions n 85, mean -12.1bp, Sharpe -4.2 -> negative, leg stays off (pre-reg block in round1_prose.md).
+- Pending for the user: `bash scripts/install-schedule.sh` on him (adds the watch to research-shadows and installs the
+  pref-ex-live / cef-rv-live timers, both still "off"). Nothing else changed on the server.

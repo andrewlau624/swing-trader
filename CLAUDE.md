@@ -977,3 +977,7 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
   ratio 1.02 (vs 1.2-1.5 in 2022-25), first-hour continuation ~0; losses are first-hour and last-90-min entries plus band/VWAP whipsaw;
   hold-to-close already tested (add. 22, fails 2016-23). The leg's fix space is closed: do not propose exit/entry/time-of-day/gate
   variants. Re-arm only on a positive 60-session replay (`research/sim/noise_recent.py`).
+- **NOISE-REARM watch (2026-10-11, no N):** `noise_rearm_watch.py` (research-shadows, weekly) applies the accepted re-arm rule
+  forward: PROD replay with `replay_instrument(..., lag=30)` on the last 60 sessions; POSITIVE = n >= 30, Sharpe >= 0.5, mean > 0 at
+  2bp/fill -> re-arm CANDIDATE for the user, never automatic. First read 07-16..10-09: n 85, mean -12.1bp, Sharpe -4.2: off.
+  `replay_instrument` gained `lag` (default 0, unchanged); it reproduces `noise_recent.trades_for(lag=30)` exactly.

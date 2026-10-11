@@ -6193,3 +6193,16 @@ the losers (ON Sharpe -1.78, OFF -0.11).** The gate rescues the calm years (2017
 vol is high and breakouts still fail: the 2026 failure is intraday non-persistence (V-shaped high-vol days), not low vol. A
 trendiness gate would be variant 2 of a conditioner on a ~4%/yr leg: not run (anti-local-optimum rule). Recommendation to the user
 unchanged: `daytrade_mode: off`; re-arm only on a positive 60-session replay, not on a vol gate. Program N = 934.
+
+## Watch — NOISE-REARM (registered 2026-10-11; no N: the accepted decision rule applied forward, not a new hypothesis)
+- Context: `daily.daytrade_mode: "off"` (user 2026-10-11). Accepted re-arm rule: "only on a positive 60-session replay". This
+  freezes what "positive" means and reads it weekly so the leg is neither forgotten nor re-armed on a feeling.
+- Rule: `swingtrader/daily/noise_rearm_watch.py` in research-shadows. PROD daybook replay (`replay_instrument`, the live
+  code's own replay, now with `lag=30`: fills one 30-min bar after the decision print, as live does) on the last 60 complete
+  SIP sessions, QQQ + SMH at .5/.5, 0.5bp per fill. POSITIVE iff n >= 30 trades AND annualised daily-P&L Sharpe >= 0.5 AND
+  mean net per trade > 0 at 2bp per fill. Positive = re-arm CANDIDATE (user decision); nothing switches automatically.
+  No tuning of 60 / 0.5 / 2bp / 30 ever; if the rule needs changing, it is a new registration.
+- Equivalence check: lagged `replay_instrument` reproduces `research/sim/noise_recent.py::trades_for(lag=30)` on the
+  research cache (QQQ, last 70 cached sessions: n 49 both, mean -6.16bp both, max |diff| 0.005bp rounding).
+- First read (2026-10-11, sessions 2026-07-16..2026-10-09): n 85, mean -12.1bp, median -10.9, t -2.07, hit 36.5%,
+  Sharpe -4.2, ann -28%; at 2bp/fill mean -15.1. QQQ -9.4, SMH -14.5. NEGATIVE: leg stays off.

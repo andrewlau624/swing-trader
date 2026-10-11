@@ -145,6 +145,13 @@ def _letf_night(state: Path, logs: Path) -> dict:
     return dict(n=s["days"], week=len(wk), line=w.line(rows))
 
 
+def _noise_rearm(state: Path, logs: Path) -> dict:
+    from . import noise_rearm_watch as w
+    rows = _jsonl(state / w.LOG_NAME)
+    wk = [r for r in rows if r.get("date", "") >= _week_ago()]
+    return dict(n=sum(1 for r in rows if r.get("positive")), week=len(wk), line=w.line(rows))
+
+
 def _pref_ex_live(state: Path, logs: Path) -> dict:
     from . import pref_ex_live as w
     rows = _jsonl(logs / w.LOG_NAME)
@@ -447,6 +454,11 @@ REGISTRY: list[Test] = [
          "LETF $vol share > 2%: closing cross -> next opening cross vs the no-LETF control (forward-only registration, N 852)",
          "2026-10-10", 120, "event days", _letf_night, "state/letf-night.jsonl; round1_prose.md Amendment LETF-NIGHT",
          ["letf_night_shadow"]),
+    Test("Intraday leg re-arm watch (noise, OFF)", "noise_rearm_watch.py: weekly PROD replay of the live intraday rule on the "
+         "last 60 sessions (QQQ+SMH, one-bar lag, 0.5bp/fill). POSITIVE = >= 30 trades, Sharpe >= 0.5 and mean > 0 at 2bp/fill: "
+         "then re-arming daytrade_mode is a user decision; the leg is off (user 2026-10-11, NOISE-GATE N 934, NOISE-DIAG).",
+         "2026-10-11", 0, "positive weeks", _noise_rearm, "state/noise-rearm.jsonl; research/sim/noise_recent.py; CLAUDE.md",
+         ["noise_rearm_watch"]),
     Test("PREF-EX live (Roth, CC form)", "pref_ex_live.py: MOC buy the $25-par preferred / baby bond the session before "
          "its ex-date, MOC sell on it, settled Roth cash only, 5% of the median closing cross, <= 3 names (PREF-EX N 861 "
          "+38bp, ETDX N 869 +44bp, ROTH-STACK N 897). Gate: 30 live round trips with mean buy+sell cost vs the official "
