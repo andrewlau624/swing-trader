@@ -6144,3 +6144,18 @@ Gate: 120 forward short-gamma days (FORWARD_FROM 2026-10-13). KILL = mean net <=
 (= the bar for considering ~$180/yr OPRA strike-level data); else HOLD. Ceiling is small by construction (~10-40 short-gamma
 days/yr x <= 10bp on the SPY sleeve): this is a sensor test, not a standalone edge. Runner swingtrader/daily/gamma_state_shadow.py
 (research-shadows), REGISTRY "GAMMA-FREE". Program N = 932.
+
+## Amendment — Study CEF-PEER: CEF-RV excess vs a SAME-CATEGORY equal-weight CEF peer index (pre-register 2026-10-10; N 932 -> 933)
+Open question left by CEF-ALPHA (N 892): the +125bp/trade excess vs the EW CEF universe could be a category tilt (CEF-RV
+entries cluster in whichever sector just sold off; the EW universe is ~45% muni). Registered BEFORE any peer number is read.
+- Rule under test: the frozen CEF-RV trade list (`data/research/cefconnect/cef_rv_trades.csv`, 2016-26; 1999-2014 reported
+  only, survivorship caveat CEF-SURV99 stands), net of 50bp. Comparator = EW return over the same hold of every Sharadar SFP
+  CEF (delisted included) in the SAME category, category assigned by a frozen name regex written in `research/sim/cef_peer.py`
+  (order: muni, preferred/convertible, sector/real-asset, taxable fixed income, international/global, equity default). The
+  regex is fixed before the run; misclassification is noise, not tuning.
+- Judge (one look, 2016-26, N 933): excess vs same-category peers >= +60bp/trade (the CEF-RV-FWD bar), week-clustered t >= 2,
+  median > 0, both halves (2016-20 / 2021-26) > 0, ex-top-5 > 0, and the peer excess retains >= 50% of the EW-universe excess.
+  PASS = CEF-RV is fund-specific discount reversion, not a category rotation. KILL = peer excess < +30bp or t < 1 (then CEF-RV
+  = buying the sector that fell; the forward shadow's comparator must change to peers before any Roth deployment).
+  Anything between = WEAK: keep the forward shadow, add the peer comparator to it, no deployment on history.
+- Also reported (no gate): category mix of entries vs the universe, per-category excess, 1999-2014 peer excess.
