@@ -83,7 +83,7 @@ daily:
   night_probe_max_usd: 150.0     # real money: a night pick that rounds to 0 shares is bought as 1 share
                                  # if it costs <= this, so the open-sell cost sample is not only cheap names
   quote_source: auto             # 15:40 scan prices: Schwab real-time if logged in, else Alpaca
-  daytrade_mode: off             # user 2026-10-11: off. 2026 YTD Sharpe -0.7..-1.0, live 7 trips -14bp, NOISE-GATE (N 934) no fix.
+  daytrade_mode: "off"            # user 2026-10-11: off. 2026 YTD Sharpe -0.7..-1.0, live 7 trips -14bp, NOISE-GATE (N 934) no fix.
                                  # re-arm (auto) only on a positive 60-session replay (research/sim/noise_recent.py).
                                  # auto = intraday leg live while the ACCOUNT holds >= daytrade_min_equity; off = never
   start_equity: 3000.0           # paper book's virtual start. live uses the real balance
