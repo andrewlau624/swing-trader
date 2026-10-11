@@ -165,8 +165,15 @@ class FakeBroker:
         return SimpleNamespace(equity="97826.56")
 
 
+
+def _auto_cfg():
+    """config.yaml ships daytrade_mode: off (user 2026-10-11); these tests exercise the gating logic itself, so start from auto."""
+    c = Config.load()
+    c.daily.daytrade_mode = "auto"
+    return c
+
 def _executor(tmp_path, monkeypatch, held=None):
-    ex = DailyExecutor(Config.load(), broker=FakeBroker(held), state_dir=tmp_path,
+    ex = DailyExecutor(_auto_cfg(), broker=FakeBroker(held), state_dir=tmp_path,
                        log_dir=tmp_path)
     ex.notifier.send = lambda *a, **k: "notify skipped (test)"
     ex.d.quote_source = "alpaca"      # never let a test reach a real Schwab login
@@ -750,7 +757,7 @@ def test_paper_book_never_probes(tmp_path, monkeypatch):
 
 
 def test_live_cap_below_2k_does_not_keep_the_intraday_leg_shadow(tmp_path, monkeypatch):
-    ex = DailyExecutor(Config.load(), account="live", broker=LiveMarginBroker("5000"),
+    ex = DailyExecutor(_auto_cfg(), account="live", broker=LiveMarginBroker("5000"),
                        state_dir=tmp_path, log_dir=tmp_path)
     book = DailyBook(cash=1000, start_equity=1000)
     ex._gate(book, 1000)                  # $1,000 cap on a $5,000 margin account
@@ -772,7 +779,7 @@ class RothBroker(LiveMarginBroker):
 def test_roth_book_is_its_own_account_and_never_levers(tmp_path, monkeypatch):
     from swingtrader.daily.book import book_file
     assert len({book_file("paper"), book_file("live"), book_file("roth")}) == 3
-    ex = DailyExecutor(Config.load(), account="roth", broker=RothBroker("5000"),
+    ex = DailyExecutor(_auto_cfg(), account="roth", broker=RothBroker("5000"),
                        state_dir=tmp_path, log_dir=tmp_path)
     assert ex.live and ex.cash_account and ex.tag == "-roth"
     book = DailyBook(cash=5000, start_equity=5000)
