@@ -6168,3 +6168,19 @@ caveat stands): +159bp t 12.9, median +133, all six categories > +100. Entry mix
 muni 20 vs 34%): CEF-RV is not a category rotation; the alpha is fund-specific discount reversion. Peer indices include the
 traded fund itself (conservative). No change to the forward shadow's comparator is required (PASS branch); the CEF-RV-FWD gate
 (60 forward trades) still decides deployment. Program N = 933.
+
+## Study NOISE-GATE — a realized-intraday-vol regime gate for the intraday (noise) leg (pre-register 2026-10-11; N 933 -> 934)
+Why: the PROD noise leg (QQQ+SMH 30-min band breakout, hold beyond band/VWAP, flat 15:57) is long volatility: levered Sharpe 1.7-2.9 in
+2018/2020/2022-24 and ~0 or negative in 2017/2019/2025/2026 (noise_audit_out.txt, noise_recent_2026-10-08.md). Costs are not the
+cause (0.4bp/fill live). A Level-5 regime gate (CLAUDE.md "Conditioning / regimes") is the one allowed fix; registered before any gated
+number is read. One rule, one threshold, no tuning.
+- Gate: trade session d only if QQQ's realized intraday vol, std of (close/open - 1) over sessions d-20..d-1, is ABOVE the trailing
+  252-session median of that same series (ending d-1). Computed from the same minute cache the replay uses; no look-ahead.
+- Leg under test: `research/sim/noise_recent.trades_for` with lag 30 (what live does), 0.5bp/fill (1bp RT), PROD weights/vol-target.
+  Runner `research/sim/noise_gate.py`, output `data/research/program/noise_gate_out.txt`.
+- Judge (one look, 2016-01..2026-05 cache, N 934): PASS if ALL: ON-day Sharpe >= 0.8 in both 2016-20 and 2021-26; OFF-day mean net
+  per trade <= 0 over the whole sample; ON mean net >= +4bp/trade; ON Sharpe >= ungated Sharpe + 0.3; the ON-minus-OFF Sharpe gap
+  beats >= 95% of 200 random 50% day-masks (placebo). KILL if ON mean <= OFF mean or either half's ON Sharpe < 0.3. Between = WEAK
+  (no live change; report). Also reported, no gate: share of 2025-26 sessions gated OFF, ON/OFF by year, trades/day ON.
+- If PASS: the live change is `daytrade_mode` stays `auto` plus a gate in the executor (user decision, config switch); if KILL/WEAK:
+  recommend `daytrade_mode: off` with a vol-based re-arm note. No live change in this loop either way.
