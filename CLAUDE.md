@@ -981,3 +981,7 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
   forward: PROD replay with `replay_instrument(..., lag=30)` on the last 60 sessions; POSITIVE = n >= 30, Sharpe >= 0.5, mean > 0 at
   2bp/fill -> re-arm CANDIDATE for the user, never automatic. First read 07-16..10-09: n 85, mean -12.1bp, Sharpe -4.2: off.
   `replay_instrument` gained `lag` (default 0, unchanged); it reproduces `noise_recent.trades_for(lag=30)` exactly.
+- **TME scaling (3x via TMF, Roth), 2026-10-11: CEILING-KILL at honest capture, no N, no backtest.** 12 events/yr x (3 x 32bp)
+  x 100% of account x 50% capture = +5.8pp/yr at every size (full capture +11.5pp): below the +8pp gate, and it would displace
+  the night leg's cash for 3 sessions a month. The "only open Treasury question" is closed; reopen only with a measured forward
+  capture rate for TME itself (none exists: TME was never shadowed).
