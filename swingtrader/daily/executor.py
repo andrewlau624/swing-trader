@@ -312,6 +312,17 @@ class DailyExecutor:
             except Exception as exc:
                 self.log(f"[{tag}] skipped ({type(exc).__name__}: {str(exc)[:80]})")
 
+    def _pref_ex_reserved(self, today: str) -> float:
+        """Dollars the PREF-EX live module (pref_ex_live.py, 15:25 ET, Roth only) already committed to tonight's
+        preferred MOC buys: state/pref-ex-reserved.json {"date", "usd"}, honoured only for today's date."""
+        if not self.cash_account:
+            return 0.0
+        try:
+            j = json.loads((self.state_dir / "pref-ex-reserved.json").read_text())
+            return max(0.0, float(j.get("usd") or 0.0)) if j.get("date") == today else 0.0
+        except Exception:  # noqa: BLE001  (no file / unreadable = nothing reserved)
+            return 0.0
+
     def _roth_night_priority(self, book: DailyBook, today: str, cash: float, need: float) -> float:
         """Roth only: the night leg's money is on loan to the 3x noise ETFs (flattened
         15:57, before the 16:00 close) and parked in SGOV at 15:40, so book cash
@@ -1052,6 +1063,11 @@ class DailyExecutor:
         # never let this book borrow beyond the gross its weights allow
         floor = -(max(1.0, self._w_ibs(book) + self._w_night(book)) - 1.0) * equity
         cash0 = book.cash                  # raw book cash, kept for the [roth-cash] shadow
+        res = self._pref_ex_reserved(today)
+        if res:
+            self.log(f"[pref-ex] ${res:,.0f} reserved by pref_ex_live for tonight's preferred MOC buys: "
+                     f"night cash ${cash0:,.0f} -> ${cash0 - res:,.0f}")
+            cash0 -= res
         cash = self._roth_night_priority(book, today, cash0, per * len(picks))
         plan = getattr(self, "_night_plan", None)
         if plan is None:

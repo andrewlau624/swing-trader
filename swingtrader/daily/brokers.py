@@ -274,7 +274,12 @@ class SchwabAdapter:
         margin = a.get("type") == "MARGIN"
         bp = max(float(bal.get("dayTradingBuyingPower") or 0), float(bal.get("buyingPower") or 0))
         mult = 1.0 if not margin else max(2.0, min(4.0, bp / equity if equity else 2.0))
-        return SimpleNamespace(equity=equity, cash=float(bal.get("cashBalance") or 0),
+        # settled cash (cash accounts: GFV-safe money) = available-for-trading minus unsettled proceeds, when Schwab
+        # reports both; otherwise the cash balance. Used by pref_ex_live, which must never trade unsettled funds.
+        avail, unsettled = bal.get("cashAvailableForTrading"), bal.get("unsettledCash")
+        settled = (max(0.0, float(avail) - float(unsettled or 0)) if avail is not None
+                   else float(bal.get("cashBalance") or 0))
+        return SimpleNamespace(equity=equity, cash=float(bal.get("cashBalance") or 0), settled_cash=settled,
                                multiplier=mult, account_type=a.get("type"),
                                trading_blocked=bool(a.get("isClosingOnlyRestricted")),
                                account_blocked=False, buying_power=bp,

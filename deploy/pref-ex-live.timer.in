@@ -1,0 +1,12 @@
+# Weekdays 15:25 ET: after the PREF-EX shadow's event list is current, before the 15:40 Roth night leg (which reads
+# state/pref-ex-reserved.json) and the 15:45 Schwab MOC cutoff. The module skips non-sessions itself.
+[Unit]
+Description=swing-trader PREF-EX live (Roth preferred ex-dividend MOC/MOC) schedule
+
+[Timer]
+OnCalendar=Mon..Fri *-*-* 15:25:00 America/New_York
+Persistent=false
+Unit=pref-ex-live.service
+
+[Install]
+WantedBy=timers.target

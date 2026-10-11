@@ -280,3 +280,23 @@ Approvals / user actions, in order of value:
   QQQM/SOXX twin trades, no [noise] fills, conviction stays shadow, nothing else moves. Money: the leg is ~0 in 2026 at $2.3k,
   so the decision is about variance and attention, not return.
 - **Digest fix** (audit_execution_1002 item 2): re-arm line uses official-open cost; `_night_exit_cost_vs_open` in digest.py.
+
+## PREF-EX + ETDX live module built (2026-10-11, autonomous; OFF by default, nothing deployed)
+- `swingtrader/daily/pref_ex_live.py` (CC form, Roth only), own timer `deploy/pref-ex-live.{service,timer}.in` weekdays 15:25 ET
+  (wired into `scripts/install-schedule.sh`; harmless while off), `make pref-ex-live`. Config `daily.pref_ex_mode: "off" | dry | live`
+  (quoted: bare `off` is YAML false). Each run: score yesterday's live fills vs the official closing cross -> MOC-sell the names
+  whose ex-date is today (qty <= what the account holds, never short) -> MOC-buy tomorrow's pref/etd ex-dates from
+  `state/pref-ex.jsonl`: whole shares, 5% of the trailing-10-session median closing-cross $, <= 3 names, largest yield first,
+  funded from SETTLED Roth cash only (new `settled_cash` on the Schwab account snapshot = cashAvailableForTrading - unsettledCash,
+  else cashBalance), total <= 50% of Roth equity, BIL/SGOV untouched. Writes `state/pref-ex-reserved.json` before buying; the
+  executor's Roth night leg subtracts it (`_pref_ex_reserved`, `[pref-ex]` log line) so the 15:40 night buys cannot spend the same
+  dollars (ROTH-STACK PREF-first ordering). Logs `logs/pref-ex-live.jsonl`; REGISTRY "PREF-EX live (Roth, CC form)", 30 live round
+  trips. Tests `tests/test_pref_ex_live.py` (11); suite 494.
+- Switch-on (user decision, after the BAC.PRP 1-share test reads clean): on him `git pull && bash scripts/install-schedule.sh`
+  (installs the timer; still off), then `config.yaml daily.pref_ex_mode: dry` for ~a week of sized-but-unplaced logs, then `live`.
+  `config.yaml` is reset by `make pull` on him: set the mode in the committed file, not by hand on the server.
+- Caveats: `unsettledCash` field semantics on a Schwab cash account are unverified against a real snapshot (fallback is the cash
+  balance = may include unsettled proceeds -> GFV risk only if BIL/night sells settled same day; dry mode shows the number first).
+  Executor Roth cash logic: `book.cash` is the bot's own virtual book, not broker cash; PREF-EX money is real settled cash the book
+  never sees, so the reservation is the only link between the two — if the module buys and the file is missing (crash between
+  write and submit is not possible: write precedes submit), the night leg could over-commit by that amount for one night.

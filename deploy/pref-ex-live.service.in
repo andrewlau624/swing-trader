@@ -1,0 +1,11 @@
+# Installed by `make persist`. PREF-EX + ETDX live module (Roth, CC form). Does nothing unless config.yaml
+# daily.pref_ex_mode is dry or live (default off): installing this timer is harmless.
+[Unit]
+Description=swing-trader PREF-EX live (Roth preferred / baby-bond ex-dividend auction capture)
+
+[Service]
+Type=oneshot
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=-__APP_DIR__/.env
+Environment=PYTHONPATH=__APP_DIR__
+ExecStart=__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.pref_ex_live

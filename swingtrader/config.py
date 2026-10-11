@@ -273,6 +273,9 @@ class DailyCfg:
     lever_g1_log: str = "shadow"
     # Wash guard G4s, Roth first (add. 31, post-hoc): log what it would change.
     wash_guard_mode: str = "shadow"
+    # PREF-EX + ETDX live module (pref_ex_live.py, own timer 15:25 ET, Roth only): off | dry | live.
+    # dry = size and log, place nothing; live = MOC buys the session before the ex-date, MOC sells on it.
+    pref_ex_mode: str = "off"
     # Study ACC: log the 1.25x non-callable 3x-ETF IBS overlay vs the live 1x leg
     # (delta, running maxDD, realized exposure); no order path.
     ibs_lev_shadow: str = "shadow"

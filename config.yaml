@@ -166,6 +166,14 @@ daily:
   # loss sales (30d) + names the taxable book holds/has orders in, its IBS leg trades
   # different-index look-alikes (XLK->VGT, SMH->SOXX, sector SPDR->Vanguard). Logs `[wash]`.
   wash_guard: roth_first
+  # PREF-EX + ETDX live (Roth, CC form; swingtrader/daily/pref_ex_live.py, own timer weekdays 15:25 ET). Buy the $25-par
+  # preferred / baby bond at the closing cross the session BEFORE its ex-date, sell at the ex-date's closing cross, keep the
+  # dividend. Pre-registered: PREF-EX N 861 (+38bp/event, official crosses 2021-26, 22/22 yrs on Sharadar 2005-26), ETDX N 869
+  # (+44bp, 28/29 yrs), ROTH-STACK N 897 (idle Roth cash only, 5% of the cross, whole shares: +8.4pp/yr at $3k, +5.4 at $10k;
+  # 3x cost leaves +1.6 / +0.9, so it stands only while the measured cross cost stays ~0bp). Settled cash only, BIL/SGOV never
+  # sold, <= 3 names, <= 50% of Roth equity; writes state/pref-ex-reserved.json so the 15:40 Roth night leg does not spend
+  # the same dollars. off | dry (size + log, no orders) | live. Switch-on is a user decision (first run dry for a week).
+  pref_ex_mode: "off"            # quoted: bare off is YAML false
   noise_lookback: 14
   noise_target_vol: 0.02
   noise_max_lev: 3.5

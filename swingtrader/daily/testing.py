@@ -145,6 +145,14 @@ def _letf_night(state: Path, logs: Path) -> dict:
     return dict(n=s["days"], week=len(wk), line=w.line(rows))
 
 
+def _pref_ex_live(state: Path, logs: Path) -> dict:
+    from . import pref_ex_live as w
+    rows = _jsonl(logs / w.LOG_NAME)
+    s = w.summary(rows)
+    wk = [r for r in rows if r.get("cmd") == "score" and r.get("side") == "sell" and r.get("day", "") >= _week_ago()]
+    return dict(n=s["round_trips"], week=len(wk), line=w.line(rows))
+
+
 def _gamma_state(state: Path, logs: Path) -> dict:
     from . import gamma_state_shadow as w
     rows = _jsonl(state / w.LOG_NAME)
@@ -431,6 +439,11 @@ REGISTRY: list[Test] = [
          "LETF $vol share > 2%: closing cross -> next opening cross vs the no-LETF control (forward-only registration, N 852)",
          "2026-10-10", 120, "event days", _letf_night, "state/letf-night.jsonl; round1_prose.md Amendment LETF-NIGHT",
          ["letf_night_shadow"]),
+    Test("PREF-EX live (Roth, CC form)", "pref_ex_live.py: MOC buy the $25-par preferred / baby bond the session before "
+         "its ex-date, MOC sell on it, settled Roth cash only, 5% of the median closing cross, <= 3 names (PREF-EX N 861 "
+         "+38bp, ETDX N 869 +44bp, ROTH-STACK N 897). Gate: 30 live round trips with mean buy+sell cost vs the official "
+         "closing cross <= 10bp; kill if cost > 25bp or event mean net <= 0. Off until daily.pref_ex_mode is dry/live.",
+         "2026-10-10", 30, "live round trips", _pref_ex_live, "logs/pref-ex-live.jsonl; make pref-ex-live", ["pref_ex_live"]),
     Test("GAMMA-FREE: SPY last-30-min continuation on short-gamma days", "free SqueezeMetrics GEX sign (prior session) -> SPY "
          "15:30 -> closing-cross continuation vs long-gamma days (the $0 falsification before any OPRA purchase, N 932)",
          "2026-10-10", 120, "short-gamma days", _gamma_state, "state/gamma-state.jsonl; round1_prose.md Amendment GAMMA-FREE",
