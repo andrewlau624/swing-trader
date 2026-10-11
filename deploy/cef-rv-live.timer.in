@@ -1,0 +1,12 @@
+# Weekdays 09:05 ET: after the 08:20 research-shadows run has refreshed state/cef-rv.jsonl (the signal rows), before the
+# 09:28 pre-open cutoff so the market orders reach the official 09:30 opening cross. The module skips non-sessions itself.
+[Unit]
+Description=swing-trader CEF-RV live (Roth open-cross entries/exits) schedule
+
+[Timer]
+OnCalendar=Mon..Fri *-*-* 09:05:00 America/New_York
+Persistent=false
+Unit=cef-rv-live.service
+
+[Install]
+WantedBy=timers.target

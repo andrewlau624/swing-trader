@@ -300,3 +300,22 @@ Approvals / user actions, in order of value:
   Executor Roth cash logic: `book.cash` is the bot's own virtual book, not broker cash; PREF-EX money is real settled cash the book
   never sees, so the reservation is the only link between the two — if the module buys and the file is missing (crash between
   write and submit is not possible: write precedes submit), the night leg could over-commit by that amount for one night.
+
+## CEF-RV live module built (OFF by default; autonomous run, 2026-10-11 ~00:30 ET)
+- `swingtrader/daily/cef_rv_live.py` (LOG `logs/cef-rv-live.jsonl`, state `state/cef-rv-live.json`, `state/cef-rv-held.json`),
+  `deploy/cef-rv-live.{service,timer}.in` (weekdays 09:05 ET), `make cef-rv-live`, config `daily.cef_rv_mode: "off"` (off | dry |
+  live), REGISTRY "CEF-RV live (Roth, open-cross OO form)" (30 live round trips, cost vs the opening cross), `tests/test_cef_rv_live.py`.
+- Signals = the CEF-RV shadow's rows (`state/cef-rv.jsonl`, refreshed 08:20 ET): entry when the first session after the Friday
+  signal week is today (forward rows only, `signal >= 2026-10-08`); exit when the first session after `exit_signal` is today or
+  earlier (late exits are sold at the next run and flagged `late`); entries whose session already passed are logged `missed`,
+  never chased. Pre-open market orders (`tif "opg"`, AUTO route: JRI test 0.0bp both legs) reach the 09:30 official open cross.
+- Sizing: equal slots max($500, min($1k, equity/10)), deepest discount vs its own 52-week median first, whole shares, budget =
+  settled Roth cash minus the day's PREF-EX reservation, <= floor(0.5 x equity / slot) positions, BIL/SGOV never sold.
+- NOT wired: an executor reservation for the CEF holdings. The Roth night leg sizes from the bot's virtual book cash, not broker
+  cash, so multi-week CEF holdings are invisible to it; `state/cef-rv-held.json {"usd"}` is written every run for a future hook.
+  Until that hook exists, run `dry` only, or accept that the Roth night leg may be rejected for insufficient funds on CEF days.
+- Operational dependency: on him CEFConnect is blocked, so the shadow's signal rows only advance when the Mac pushes the panel
+  (`make cef-rv-panel`). A stale panel means no entries (safe), not wrong entries; a panel pushed after Monday 09:05 means
+  that week's entries are `missed`.
+- Switch-on (user decision): `git pull && bash scripts/install-schedule.sh` on him; set `cef_rv_mode: "dry"` in the committed
+  config.yaml (make pull resets the file) for >= 1 signal week, read `logs/cef-rv-live.jsonl`, then `"live"`.

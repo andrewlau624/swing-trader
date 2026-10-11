@@ -174,6 +174,15 @@ daily:
   # sold, <= 3 names, <= 50% of Roth equity; writes state/pref-ex-reserved.json so the 15:40 Roth night leg does not spend
   # the same dollars. off | dry (size + log, no orders) | live. Switch-on is a user decision (first run dry for a week).
   pref_ex_mode: "off"            # quoted: bare off is YAML false
+  # CEF-RV live (Roth, OO form; swingtrader/daily/cef_rv_live.py, own timer weekdays 09:05 ET). Buy a closed-end fund at the
+  # opening cross of the first session after its discount hits its own 52-week 10th percentile, sell at the opening cross after
+  # it recovers to its median (or 260 days); signals come from the CEF-RV forward shadow (state/cef-rv.jsonl). Pre-registered:
+  # CEF-OOS N 890 (+333bp/trade, untouched 1999-2014), CEF-ALPHA N 892 (+125bp vs the EW CEF universe 2016-26, t 5.6), CEF-PEER
+  # N 933 (+114bp vs same-category peers, every category positive). CEF-SURV99: the 1999-2014 pass is survivorship-flattered, so
+  # the forward gate CEF-RV-FWD (60 closed trades) decides. ~+4.8pp/yr excess on deployed capital: a Roth upgrade over holding
+  # beta, below the +8pp stand-alone gate. Equal slots max($500, min($1k, equity/10)), settled cash only minus the day's PREF-EX
+  # reservation, <= 50% of Roth equity, BIL/SGOV never sold. off | dry | live. Switch-on is a user decision (dry first).
+  cef_rv_mode: "off"             # quoted: bare off is YAML false
   noise_lookback: 14
   noise_target_vol: 0.02
   noise_max_lev: 3.5

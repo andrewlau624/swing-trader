@@ -1,0 +1,11 @@
+# Installed by `make persist`. CEF-RV live module (Roth, open-cross OO form). Does nothing unless config.yaml
+# daily.cef_rv_mode is dry or live (default off): installing this timer is harmless.
+[Unit]
+Description=swing-trader CEF-RV live (Roth closed-end fund discount reversion at the opening cross)
+
+[Service]
+Type=oneshot
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=-__APP_DIR__/.env
+Environment=PYTHONPATH=__APP_DIR__
+ExecStart=__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.cef_rv_live

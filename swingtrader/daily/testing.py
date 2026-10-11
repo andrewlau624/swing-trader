@@ -153,6 +153,14 @@ def _pref_ex_live(state: Path, logs: Path) -> dict:
     return dict(n=s["round_trips"], week=len(wk), line=w.line(rows))
 
 
+def _cef_rv_live(state: Path, logs: Path) -> dict:
+    from . import cef_rv_live as w
+    rows = _jsonl(logs / w.LOG_NAME)
+    s = w.summary(rows)
+    wk = [r for r in rows if r.get("cmd") == "score" and r.get("side") == "sell" and r.get("day", "") >= _week_ago()]
+    return dict(n=s["round_trips"], week=len(wk), line=w.line(rows))
+
+
 def _gamma_state(state: Path, logs: Path) -> dict:
     from . import gamma_state_shadow as w
     rows = _jsonl(state / w.LOG_NAME)
@@ -444,6 +452,12 @@ REGISTRY: list[Test] = [
          "+38bp, ETDX N 869 +44bp, ROTH-STACK N 897). Gate: 30 live round trips with mean buy+sell cost vs the official "
          "closing cross <= 10bp; kill if cost > 25bp or event mean net <= 0. Off until daily.pref_ex_mode is dry/live.",
          "2026-10-10", 30, "live round trips", _pref_ex_live, "logs/pref-ex-live.jsonl; make pref-ex-live", ["pref_ex_live"]),
+    Test("CEF-RV live (Roth, open-cross OO form)", "cef_rv_live.py: pre-open market buy at the opening cross of the first "
+         "session after a CEF-RV entry signal week, sell at the opening cross after the exit signal, settled Roth cash only, "
+         "equal $500-1k slots, deepest discount first (CEF-ALPHA N 892 +125bp vs EW CEF, CEF-PEER N 933 +114bp vs peers). "
+         "Gate: 30 live round trips with mean buy+sell cost vs the official opening cross <= 10bp; kill if cost > 25bp. "
+         "Off until daily.cef_rv_mode is dry/live.",
+         "2026-10-10", 30, "live round trips", _cef_rv_live, "logs/cef-rv-live.jsonl; make cef-rv-live", ["cef_rv_live"]),
     Test("GAMMA-FREE: SPY last-30-min continuation on short-gamma days", "free SqueezeMetrics GEX sign (prior session) -> SPY "
          "15:30 -> closing-cross continuation vs long-gamma days (the $0 falsification before any OPRA purchase, N 932)",
          "2026-10-10", 120, "short-gamma days", _gamma_state, "state/gamma-state.jsonl; round1_prose.md Amendment GAMMA-FREE",

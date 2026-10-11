@@ -391,6 +391,9 @@ pref-ex: ## PREF-EX shadow: preferred ex-dividend auction capture from official 
 pref-ex-live: ## PREF-EX live module (Roth MOC/MOC preferred ex-div capture); does nothing unless daily.pref_ex_mode is dry|live
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.pref_ex_live
 
+cef-rv-live: ## CEF-RV live module (Roth open-cross CEF discount reversion); does nothing unless daily.cef_rv_mode is dry|live
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.cef_rv_live
+
 cef-rv: ## CEF-RV shadow: CEF discount reversion vs the EW CEF universe from official crosses (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.cef_rv_shadow
 
