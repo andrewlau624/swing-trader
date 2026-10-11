@@ -6159,3 +6159,12 @@ entries cluster in whichever sector just sold off; the EW universe is ~45% muni)
   = buying the sector that fell; the forward shadow's comparator must change to peers before any Roth deployment).
   Anything between = WEAK: keep the forward shadow, add the peer comparator to it, no deployment on history.
 - Also reported (no gate): category mix of entries vs the universe, per-category excess, 1999-2014 peer excess.
+
+## Result — CEF-PEER (judged 2026-10-10, one look; N 933): PASS
+`research/sim/cef_peer_out.txt`. 2016-26, 3,611 trades: excess vs same-category EW peers **+114.2bp/trade, week-clustered t 5.78,
+median +78.3, hit 0.60, halves +127.2 / +102.9, ex-top-5 +108.3**; retains 91% of the +125bp EW-universe excess (N 892). Positive in
+every category (taxable FI +74, muni +94, intl +97, equity +132, pref/conv +148, sector +173). 1999-2014 (report only, survivorship
+caveat stands): +159bp t 12.9, median +133, all six categories > +100. Entry mix is close to the universe mix (equity 25 vs 21%,
+muni 20 vs 34%): CEF-RV is not a category rotation; the alpha is fund-specific discount reversion. Peer indices include the
+traded fund itself (conservative). No change to the forward shadow's comparator is required (PASS branch); the CEF-RV-FWD gate
+(60 forward trades) still decides deployment. Program N = 933.

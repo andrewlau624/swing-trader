@@ -238,6 +238,22 @@ def _sh(shares: list[int]) -> str:
     return f"{lo} sh" if lo == hi else f"{lo}-{hi} sh"
 
 
+def _night_exit_cost_vs_open(sells: list[dict]) -> float:
+    """Mean night open-sell cost in bps/side against the official SIP open (sg.night_exit_cost); nan if unscorable."""
+    if not sells:
+        return float("nan")
+    try:
+        from . import marketdata as md
+        import pandas as pd
+        days = sorted({str(f.get("filled_at", ""))[:10] for f in sells})
+        bars = md.sip_daily(sorted({f["sym"] for f in sells}), pd.Timestamp(days[0]) - pd.Timedelta(days=3), None)
+        opens = {(sym, str(d.date())): float(b.loc[d, "open"]) for sym, b in bars.items() for d in b.index}
+        n, bps = sg.night_exit_cost(sells, opens, window=len(sells))
+        return bps if n else float("nan")
+    except Exception:  # noqa: BLE001  (no data access in tests / offline: show nothing rather than drift)
+        return float("nan")
+
+
 def gates(accts: dict, logs: Path, state: Path) -> list[dict]:
     live = accts.get("live")
     fl = _jsonl(logs / "daily-fills-live.jsonl")
@@ -253,7 +269,9 @@ def gates(accts: dict, logs: Path, state: Path) -> list[dict]:
     def row(name, n, need, action, where, note="", unit=""):
         return dict(gate=name, n=n, need=need, ready=n >= need, action=action, where=where, note=note, unit=unit)
 
-    ms = np.mean([r["slippage_bps"] for r in night_sells]) if night_sells else float("nan")
+    # cost vs the OFFICIAL open print, not `slippage_bps` (that is fill vs a 09:17 broker mark = overnight drift,
+    # ~+43bp, and would mis-state the re-arm case; audit_execution_1002.md fix 2)
+    ms = _night_exit_cost_vs_open(night_sells)
     return [
         row("Conviction trade on", len(intraday_days), 5, "DAILY_LIVE_PROFILE=moderate10c in .env",
             "make review §7", "days with live intraday fills; §7 must call them clean", "intraday days"),

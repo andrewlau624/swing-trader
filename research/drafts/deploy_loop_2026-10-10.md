@@ -255,3 +255,28 @@ Approvals / user actions, in order of value:
    unless you want it off (remove the .env line).
 4. CPC round-ups POAS / NXGL / ZBAO (effective 10-12): manual 1-share buys only if you want B1 ("does Schwab round up") tested.
 5. Data buys: both declined by the math; BREAK-REV2's result makes the deal-database question moot (class closed).
+
+## Evening additions (user: "do everything", 2026-10-10 ~22:30 ET)
+- **Deployed on him** (user ran the pull): LETF-NIGHT + GAMMA-FREE in research-shadows.service (23 ExecStart lines, both import,
+  LETF map 531). First rows Mon 10-12 08:20 ET.
+- **BAC.PRP 1-share MOC test now automated** (user: "do for me"): transient systemd timers on him `pref-buy` Tue 10-14 19:30 UTC,
+  `pref-buy-report` 20:20, `pref-sell` Wed 10-15 19:30, `pref-sell-report` 20:20; output `logs/pref-cross-test.out`. Transient =
+  lost on reboot (recheck Mon). Sell refuses safely if Schwab keys the position other than BAC/PRP. Schwab reachable from the
+  systemd path (resolve: last 15.08 bid 15.03 ask 15.19).
+- **Shorts question answered** (prior-session runs, nothing new ran today): GAP-SHORT (N 878) dead (sealed 2016-20 +61bp/EW-day
+  t 2.45 < 2.5; 2021-26 -8bp; squeeze tail -58%/-212%); SSR-TD (N 876) dead; SSR-LIFT (N 860) forward-only short, +16.7bp/day
+  t 2.72 but cost-bound and below the +8pp gate; Study SH (N 832) dead (ETB+liquid short net -1.5%/20d). No short leg is live or
+  proposed; the account's short access memo is `access_short_leg_2026-10-06.md`.
+- **CEF-PEER (N 933): PASS** — see round1_prose Result. +114bp t 5.8 vs same-category peers; every category positive.
+- **VIX-inversion mirror: CEILING-KILL, not built.** 449 inversion days / 15.5 yrs = ~29/yr, clustered -> ~12-15 non-overlapping
+  5-day entries; x 59bp x 100% capital = ~8pp gross, ~4pp at 50% honest capture; displaces IBS/night capital (not independent);
+  the regime/vol class is closed by the loop prompt. Falls below the +8pp gate; no N consumed.
+- **Dilution avoid-screen: NOT built** — selection-conditioning on the night leg is a closed class (FUND-STATE N 901); the 13F
+  diagnostic sample is median $7.7 names with a quarterly lag; ceiling < 1pp on a ~4%/yr leg.
+- **Noise (intraday) leg: DECISION FOR THE USER, no change made.** Evidence: QQQ+SMH 2026 YTD -0.5bp/trade no-lag, -1.1 lagged
+  (Sharpe -0.7/-1.0 vs +0.6..0.8 in 2021-25); post-2024-05 +3.1..3.7bp/trade at 1bp RT, ~0 at 4bp; 7 live round trips mean -14bp.
+  Residual alpha is real historically (book_decomp 13%/yr t 3) but cost-bound and 2026-negative. Diff to switch it off (taxable;
+  the Roth is a cash IRA and already runs no intraday leg): `config.yaml daily.daytrade_mode: auto -> off`. Side effects: no
+  QQQM/SOXX twin trades, no [noise] fills, conviction stays shadow, nothing else moves. Money: the leg is ~0 in 2026 at $2.3k,
+  so the decision is about variance and attention, not return.
+- **Digest fix** (audit_execution_1002 item 2): re-arm line uses official-open cost; `_night_exit_cost_vs_open` in digest.py.

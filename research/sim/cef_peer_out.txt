@@ -1,0 +1,33 @@
+CEF-PEER: CEF-RV net of same-category EW CEF peers (name-regex categories, delisted included)
+  peer index equity    : 222 tickers, median names/day 103
+  peer index intl      : 120 tickers, median names/day 62
+  peer index muni      : 361 tickers, median names/day 199
+  peer index pref_conv : 36 tickers, median names/day 22
+  peer index sector    : 107 tickers, median names/day 53
+  peer index taxable_fi: 228 tickers, median names/day 105
+  universe mix: muni 34% taxable_fi 21% equity 21% intl 11% sector 10% pref_conv 3%
+
+== 1999-2014: trades 3673 (no category 0, no comparator 0)
+  entry mix:    muni 28% equity 24% taxable_fi 18% intl 13% sector 12% pref_conv 5%
+  raw net        mean +333.4bp t_wk 5.33 median +340.1 hit 0.73 halves +404.4/+296.9 ex-top5 +322.3
+  peer over hold +174.2bp
+  P  net - same-category peers (report): mean +159.2bp t_wk 12.93 median +133.0 hit 0.65 halves +151.7/+163.0 ex-top5 +152.1
+     muni       n 1027 excess +126.7bp median +127.3 hit 0.73
+     equity     n  875 excess +180.4bp median +151.2 hit 0.65
+     taxable_fi n  661 excess +201.7bp median +135.3 hit 0.65
+     intl       n  489 excess +106.0bp median +58.8 hit 0.56
+     sector     n  440 excess +196.5bp median +178.7 hit 0.63
+     pref_conv  n  181 excess +138.2bp median +110.2 hit 0.59
+
+== 2016-2026: trades 3611 (no category 18, no comparator 0)
+  entry mix:    equity 25% taxable_fi 21% muni 20% sector 14% intl 14% pref_conv 6%
+  raw net        mean +449.2bp t_wk 4.62 median +342.2 hit 0.74 halves +590.7/+326.9 ex-top5 +437.7
+  peer over hold +335.0bp
+  P  net - same-category peers (N 933): mean +114.2bp t_wk 5.78 median +78.3 hit 0.60 halves +127.2/+102.9 ex-top5 +108.3
+     equity     n  885 excess +131.7bp median +82.7 hit 0.60
+     taxable_fi n  751 excess +73.5bp median +73.4 hit 0.60
+     muni       n  739 excess +94.3bp median +68.7 hit 0.61
+     sector     n  523 excess +172.6bp median +125.7 hit 0.58
+     intl       n  489 excess +96.8bp median +65.2 hit 0.56
+     pref_conv  n  224 excess +148.2bp median +150.5 hit 0.62
+  GATE N 933: PASS  mean=Y t=Y med=Y halves=Y ex5=Y retain=Y  (retained 91% of the EW-universe excess)

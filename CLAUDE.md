@@ -961,3 +961,11 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
   official open (AUTO route, pre-open market order). PREF-EX shadow 0/60 forward; Sept backfill CO on-backtest, CC weak (t 0.4).
 - **BREAK-REV2 (N 930 -> 931): FAIL, wrong-signed.** CIK-mapped 85 new events: A2 -2.84% median -4.22 hit 32%; pooled 128 <= 0.
   Post-deal-break reversal class CLOSED; do not buy a deal database for it. Program N = 931.
+- **CEF-PEER (N 932 -> 933, 2026-10-10): PASS.** CEF-RV excess vs SAME-CATEGORY EW CEF peers (name-regex, delisted included) is
+  +114bp/trade t 5.8 (2016-26), median +78, every category positive, 91% of the EW-universe excess retained: fund-specific discount
+  reversion, not category rotation. The open CEF-ALPHA question is closed. Deployment still waits on the CEF-RV-FWD forward gate.
+- **Ceiling-killed / closed, 2026-10-10 (no N, no backtest):** VIX-inversion long mirror (~12-15 non-overlapping entries/yr x 59bp x
+  50% honest capture ~ +4pp at $10k, regime class closed); 13F implied-shares dilution screen on the night leg (selection-conditioning
+  on the night leg is a closed class per FUND-STATE; median px $7.7 sample barely overlaps the $5+/$10M leg).
+- Digest fix (audit_execution_1002 item 2): the "Overnight 1.3x" re-arm line now shows night open-sell cost vs the OFFICIAL open
+  (`sg.night_exit_cost`), not `slippage_bps` drift.
