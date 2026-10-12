@@ -6363,3 +6363,12 @@ any return conditioned on a Sharadar EVENTS code or an ACTIONS type.
 - **Gate (decile, 120 forward nights):** mean gross excess >= +5bp/night with t >= 2 and median > 0. Reported, not gated: top-10
   arm, cross-print coverage, share of picks without a cross. PASS -> user decision on an overnight sleeve for idle capital
   (it competes with the night leg's overnight cash). FAIL -> class closed (overnight clientele at retail).
+
+### Result — LUCK-B2 (2026-10-12, discovery 2005-15 only; N 940, 600 trials): LUCK — the date placebo beats the real batch
+`luck_b2_out.txt`, `luck_b2_rules.parquet`. Real passes 5/600 but only 2 distinct rules (generator repeats); permutation nulls
+0 in all 10; **date placebo (same tickers, event moved 250-750 sessions earlier) 34 passes > real 5.** The registered null
+includes the placebo, so the batch FAILS: what passes is the TYPE of firm (frequent small equity issuers / 8-K 3.02 filers, short
+60d +173bp net), not the event's timing - the known issuance/dilution drag (cf. F13C implied-shares diagnostic), short-side only.
+No confirmation look; 2016-20 stays unseen. Deviations: 8-K code = item x10 assumed (codes 34/35/37 unmapped); 'initiated' in
+ACTIONS is a coverage marker, not a dividend initiation. Lesson for grammar 3: dedupe rules; the null must always include a
+same-ticker date placebo (the permutation null alone would have passed this).
