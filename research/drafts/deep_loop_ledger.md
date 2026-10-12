@@ -13,6 +13,7 @@ Program N at start: 934. Ceiling = events/yr x net edge x deployable share x cap
 | 7 | A | LEG-HEALTH: own trailing-63-session P&L kill switch on night + IBS legs | leg P&L persistence / internal replays / US stocks+ETFs / 63d / none (robustness) | robustness bar: <= 1pp cost, maxDD x0.75 | KILL: costs 2-14pp/yr, maxDD below placebo, no P&L persistence | `leg_health_out.txt` |
 | 8 | C | Coinbase US500 / BTC perp funding as carry or cheap leverage | funding carry, financing / Coinbase public API / equity-index + crypto perps / hourly-1y / levered retail longs | unknown: funding swung -5%..+13%/yr across 2 snapshots | DATA-LIMITED (no public funding history; forward logger needs server OK) | `crypto_access_2026-10-12.md` |
 | 9 | A | OVN-MOM: Lou-Polk-Skouras overnight momentum held overnight only, reopened because auction cost is now measured ~0bp | overnight clientele / Sharadar SEP 1998-2015 judge / US stocks / overnight / opening-cross buyers | needs >= +6.5bp/night net excess (250 x 6.5 x 100% x 50% = +8.1pp) | RUNNING (N 939) | round1_prose OVN-MOM |
+| 10 | B | LUCK-B2: 600 random event x price-state rules (8-K codes, actions, dividend changes), 20/60d, discovery 2005-15, confirm 2016-20 | random grammar 2 / Sharadar EVENTS+ACTIONS / US stocks / 20-60d / unknown | n/a until survivors | RUNNING (N 940) | round1_prose LUCK-B2 |
 
 ## Crypto access (date-versioned, checked 2026-10-12)
 - Schwab Crypto spot BTC/ETH (rollout from 2026-05-12, SOL/AVAX/LINK added ~2026-08): via Charles Schwab Premier Bank,
