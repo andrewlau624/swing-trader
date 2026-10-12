@@ -23,3 +23,10 @@ Program N at start: 934. Ceiling = events/yr x net edge x deployable share x cap
 ## Waiting on user
 - OK to add a read-only hourly Coinbase perp funding logger (US5/BIP/ETP public GET) to the server's cron + REGISTRY? Builds the funding history no one publishes; decides iter 8.
 - SEC_USER_AGENT in .env (your name + contact) would unblock EDGAR pulls (DAT holdings rebuild, forced-flow scanner). Low priority: nothing currently gated on it clears +8pp.
+
+## Checkpoint 1 (after iter 8, 2026-10-12)
+- Tried: crypto access + 9 crypto mechanisms (ceiling/access/data kills), box financing (access kill), LEG-HEALTH (KILL, N 938).
+- Running: LUCK-B1 (random batch, N 935), WIKI-ATTN (pageview attention, N 936-937).
+- Survivors: none. Best addition vs index at $2.3k / $10k / $25k: unchanged (book ~10-12%/yr; index 8-10%).
+- Read: crypto for a US retail account is cost/access-bound (Schwab 75bp, no alt shorts); the only open crypto items need data
+  (DAT holdings via EDGAR, perp funding history via a forward logger). Track C should now move to data acquisition, not more ideas.
