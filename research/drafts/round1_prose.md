@@ -6250,3 +6250,23 @@ any return conditioned on pageviews.
   ex-top-5 > 0, and a time-shift placebo (spike dates moved +60 sessions, same names) mean <= one third of the real mean.
   Also reported: overlap with night-leg picks (-8% losers), 2x cost. Kill: any fails. No threshold re-tuning (3x / 100 / 30d frozen).
 - Runner `research/sim/wiki_attn.py` -> `data/research/program/wiki_attn_out.txt`; cache `data/research/wiki/`.
+
+## Study LEG-HEALTH — own-P&L kill switch for the night and IBS legs (pre-register 2026-10-12; N 937 -> 938)
+Deep loop iter 7, Track A (robustness). Not read: any rolling/autocorrelation statistic of leg P&L. Distinct from the closed
+"market-trend gates on the MR book" class (REGIME-10M): the conditioner here is the leg's OWN trailing P&L, not the market.
+- **Question.** Does switching a leg off after a bad trailing stretch cut drawdowns at <= 1pp/yr cost (prompt §1 robustness
+  bar)? Mechanism if true: edge decay arrives in regimes (2017 night leg, 2026 noise leg); if false, leg P&L has no
+  persistence and any controller only costs return.
+- **Data.** Night leg exact 15:40 rule: `data/research/program/night_exact_pre2021.parquet` (2016-20) +
+  `data/research/recent/night_replay.parquet` (2021-26), 7.5bp/side. IBS leg: the live rule replay used by
+  `research/sim/recent_ibs.py` (adjusted ETF panel, 2016-26), 5bp/side. Daily leg P&L = mean net return of that day's picks
+  (leg fully invested in its picks; 0 on no-pick days). No 2003-15 data (touched for both legs).
+- **Controller (frozen).** Leg weight on day t = 0 if the sum of the leg's daily P&L over the previous 63 sessions (t-63..t-1)
+  < 0, else 1. Shadow P&L keeps being computed while off (so it can re-arm).
+- **Report.** Per leg: ann. return, vol, Sharpe, maxDD, worst 12m, for always-on vs controlled; by half (2016-20 / 2021-26);
+  share of days off; lag-1..3 autocorrelation of 63-session P&L blocks (non-overlapping); placebo = 200 random on/off masks
+  with the same off share (percentile of the controlled maxDD and return).
+- **Gate (per leg).** PASS iff in BOTH halves controlled ann. return >= always-on - 1pp AND controlled maxDD <= 0.75 x
+  always-on maxDD, AND the controlled maxDD beats the 90th percentile of the random-mask placebo. WEAK if one half. Kill otherwise.
+  No re-tuning of 63 / 0 threshold.
+- Runner `research/sim/leg_health.py` -> `data/research/program/leg_health_out.txt`.
