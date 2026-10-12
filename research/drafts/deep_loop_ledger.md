@@ -59,3 +59,13 @@ Program N at start: 934. Ceiling = events/yr x net edge x deployable share x cap
 PREF-EX 1/60 forward nights (2 events, CO -84bp: noise at n 1); CEF-RV 0 closed forward (backfill 5 closed +295bp vs EW CEF);
 LETF-NIGHT 3/120 days (-80.6bp/day, t -0.75); GAMMA-FREE 0/120; Ex-date open n 1 forward; PREF-EX / CEF-RV live Roth tests 0/30.
 Nothing decidable yet; earliest reads in weeks (PREF-EX ex-nights cluster mid/late month).
+
+## Checkpoint 3 (after iter 15, 2026-10-12 ~15:30)
+- Since checkpoint 2: WIKI-ATTN KILL (no raw overnight attention effect); LUCK-B3 LUCK; alt-event and Track A sweeps ceiling-killed.
+- Totals for the session: 15 iterations, N 934 -> 941. Tests run: LUCK-B1/B2/B3 (luck x3), WIKI-ATTN (kill), LEG-HEALTH (kill),
+  OVN-MOM (historical PASS, small now). Ceiling/access/data kills: ~20 ideas. New infrastructure: Binance delisted-complete alt
+  panel, Wikipedia pageview cache, Coinbase perp access notes, OVN-MOM forward shadow (not deployed).
+- Best addition vs index at $2.3k / $10k / $25k: none confirmed. Candidate: OVN-MOM, ~+4pp at 2bp/side, ~+9pp if ~0bp auction
+  cost holds on its names (half capture); $100k fine (median pick closing print $5.5M).
+- The loop is now gated on user decisions and forward data, not ideas. Until one of the "Waiting on user" items moves, ticks only
+  read forward shadows (daily) and take a new idea only if it brings a new data family and clears the ceiling first.
