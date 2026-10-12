@@ -54,3 +54,8 @@ Program N at start: 934. Ceiling = events/yr x net edge x deployable share x cap
   user decisions below.
 - Pivot for the next block: Track B paused (3 grammars, 3 LUCKs; reopen only with a new data family). Track A/C only on new
   data sources (Wikipedia result pending) or forward-evidence reads; ceiling first, test only what clears.
+
+## Forward-evidence read (2026-10-12 ~14:45, him read-only)
+PREF-EX 1/60 forward nights (2 events, CO -84bp: noise at n 1); CEF-RV 0 closed forward (backfill 5 closed +295bp vs EW CEF);
+LETF-NIGHT 3/120 days (-80.6bp/day, t -0.75); GAMMA-FREE 0/120; Ex-date open n 1 forward; PREF-EX / CEF-RV live Roth tests 0/30.
+Nothing decidable yet; earliest reads in weeks (PREF-EX ex-nights cluster mid/late month).
