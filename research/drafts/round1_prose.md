@@ -6206,3 +6206,27 @@ unchanged: `daytrade_mode: off`; re-arm only on a positive 60-session replay, no
   research cache (QQQ, last 70 cached sessions: n 49 both, mean -6.16bp both, max |diff| 0.005bp rounding).
 - First read (2026-10-11, sessions 2026-07-16..2026-10-09): n 85, mean -12.1bp, median -10.9, t -2.07, hit 36.5%,
   Sharpe -4.2, ann -28%; at 2bp/fill mean -15.1. QQQ -9.4, SMH -14.5. NEGATIVE: leg stays off.
+
+## Study LUCK-B1 — random-rule discovery batch, grammar 1 (pre-register 2026-10-12; N 934 -> 935, DSR at 934 + 1000 trials)
+Deep loop iter 2, Track B (`research/drafts/prompt_deep_loop_2026-10-12.md`). Not read: any outcome of any rule below.
+- **Data.** Sharadar SEP (stocks.parquet, delisted included) + DAILY (daily.parquet: marketcap, pe, pb, ps, evebitda).
+  Universe per day: domestic common stock (tickers category starts "Domestic Common Stock"), raw close >= $5, 20d median
+  dollar volume >= $5M. Returns from adjusted prices (closeadj; adjusted open = open * closeadj/close). Delisting: last
+  available price, then flat (survivorship-free panel; delisting return not modelled beyond the last print).
+- **Grammar 1 (seeded, seed 20261012, `research/sim/luck_gen.py`).** Features at close t: ret 1/5/20/60/250d, IBS, gap
+  (open/prev close - 1), range/close, vol20, volume ratio (vol/avg20 vol), log $ADV20, log price, dist to 252d high,
+  dist to 252d low, log marketcap, pe, pb, ps, evebitda, day-of-week, month. A rule = feature f1 (cross-sectional decile
+  1 or 10), optionally AND f2 (tercile 1 or 3), x horizon {overnight: close t -> open t+1 (daily-close proxy, optimistic);
+  1d / 5d / 20d: open t+1 -> open t+1+h} x side {long, short}. Calendar features act as day filters on an f1 rule.
+  Need >= 10 names that day. 1000 rules.
+- **Score.** Per signal date: EW selected-name return minus EW universe return (same window), signed by side, minus 20bp
+  round trip (10bp/side). For h > 1 only every h-th signal date (non-overlapping). **Discovery = 2006-01..2015-12 only.**
+- **Pass (discovery).** Net mean > 0, t >= 3.0 on the per-date series, both halves (2006-10, 2011-15) net > 0, median > 0.
+- **Null (mandatory).** 10 replicates of the same 1000 rules with the feature columns permuted across names within each
+  date (seeds 1..10) + 1 time-shift placebo (all features lagged 252 trading days). **The batch counts only if the real pass
+  count > max null pass count AND > 3 x mean null pass count.** Otherwise the batch is luck: log and stop.
+- **Survivors.** At most 5 top-t passing rules that have a plausible after-the-fact mechanism and are NOT a member of a
+  known/dead family (night-leg loser bounce, IBS reversal, momentum/value factor tilts already in NEXT) get a separate
+  amendment, then ONE look on the confirmation set **1998-01..2005-12** at 10bp/side and a 3x cost shock (30bp/side), gate:
+  net mean > 0, t >= 2, median > 0, ex-top-5-dates > 0, DSR > 0.95 at the full trial count. 2016-26 reported descriptive only.
+- Kill: batch fails the null test -> LUCK, no survivors carried. Out: `data/research/program/luck_b1_out.txt`.
