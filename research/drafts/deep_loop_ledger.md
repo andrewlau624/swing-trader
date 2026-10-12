@@ -7,6 +7,7 @@ Program N at start: 934. Ceiling = events/yr x net edge x deployable share x cap
 | 1 | C | Crypto access check + perp funding carry (long spot / short perp) | carry / Binance UM funding dumps / crypto BTC,ETH / multi-week / levered perp longs | ~+1-3pp long-run, ~0 in 2025-26 | CEILING-KILL (no N) | `crypto_access_2026-10-12.md`, `data/research/crypto_funding/` |
 | 2 | B | LUCK-B1: 1000 random price/volume/fundamental cross-sectional rules, Sharadar 2006-15 discovery, permutation null | random grammar / Sharadar SEP+DAILY / US stocks / overnight-20d / unknown | n/a until survivors | RUNNING (N 935) | round1_prose LUCK-B1 |
 | 3 | A | Box-spread financing to replace 12.5% Schwab margin and reopen leverage (Goal L redo) | financing / Schwab margin docs + forums / options boxes / 1d-1y / the broker | 0 at $2-25k: Reg-T requirement ~= box width, so boxes swap buying power for cash; Portfolio Margin needs $125k | ACCESS-KILL (no N) | Bogleheads box thread; schwab.com portfolio-margin page; alphaarchitect short-box primer |
+| 4 | C | Crypto mechanism ceiling table (CME basis, weekend, unlocks, listings, depegs, DAT discount) | various / literature + access / crypto / 1d-1y / various | all < +8pp; DAT discount ~+2.5-5pp | CEILING-KILL x7, DAT discount OPEN (data check) | `crypto_access_2026-10-12.md` |
 
 ## Crypto access (date-versioned, checked 2026-10-12)
 - Schwab Crypto spot BTC/ETH (rollout from 2026-05-12, SOL/AVAX/LINK added ~2026-08): via Charles Schwab Premier Bank,
