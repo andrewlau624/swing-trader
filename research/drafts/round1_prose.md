@@ -6394,3 +6394,10 @@ Prior crypto work touched only majors (BTC/ETH IBS, trend, BTC-FIX, LIQ-CASC); a
   amendment, then ONE look on 2023-01..2026-09 at 80bp and 120bp RT, restricted also to `on_coinbase_us` names (descriptive:
   current listing, not PIT). Gate as discovery with t >= 2 and DSR > 0.95.
 - Out: `data/research/program/luck_b3_out.txt`, `luck_b3_rules.parquet`.
+
+### Result — LUCK-B3 (2026-10-12, discovery 2019-22 only; N 941, 800 trials): LUCK — 0 passes, nulls 0, placebo 0
+`luck_b3_out.txt`. 0/800 deduped long-only alt rules pass at 80bp RT; all 10 permutation nulls and the 365d date placebo 0. Best t
+1.69 (n 38, median negative, ex-top-5 negative). Universe thin early (mean eligible 22 in 2019, 51 in 2020, ~220 in 2021-22).
+Deviations: token-swap price breaks split into new symbols (DREP, LUNA relaunch, COCOS, SUN, VEN); greedy non-overlap; cost on the
+basket only. Confirmation 2023-26 unseen. Reading: at US-retail spot cost (80bp RT), random long-only alt rules at 7-30d have no
+discoverable edge; with B1-B3 all luck, random search on daily price/event data is cost- and null-bound across stocks, events, crypto.
