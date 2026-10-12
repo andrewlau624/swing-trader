@@ -9,6 +9,7 @@ Program N at start: 934. Ceiling = events/yr x net edge x deployable share x cap
 | 3 | A | Box-spread financing to replace 12.5% Schwab margin and reopen leverage (Goal L redo) | financing / Schwab margin docs + forums / options boxes / 1d-1y / the broker | 0 at $2-25k: Reg-T requirement ~= box width, so boxes swap buying power for cash; Portfolio Margin needs $125k | ACCESS-KILL (no N) | Bogleheads box thread; schwab.com portfolio-margin page; alphaarchitect short-box primer |
 | 4 | C | Crypto mechanism ceiling table (CME basis, weekend, unlocks, listings, depegs, DAT discount) | various / literature + access / crypto / 1d-1y / various | all < +8pp; DAT discount ~+2.5-5pp | CEILING-KILL x7, DAT discount OPEN (data check) | `crypto_access_2026-10-12.md` |
 | 5 | A | WIKI-ATTN: Wikipedia pageview spikes -> overnight retail-attention pressure | retail attention / Wikimedia pageviews + Wikidata / US stocks / overnight + 5d / retail open buyers | needs >= +15bp/night (night shape ~+4.7pp at 15bp; +8pp needs ~25bp) | RUNNING (N 936-937) | round1_prose WIKI-ATTN |
+| 6 | C | DAT (crypto-treasury co.) discount to coin NAV: data check | discount reversion / CoinGecko treasury API + EDGAR / crypto-equity / months / issuers, activists | ~+2.5-5pp (iter 4) | DATA-LIMITED (free history 365d; EDGAR needs UA; anecdotes = persistent discounts) | `crypto_access_2026-10-12.md` |
 
 ## Crypto access (date-versioned, checked 2026-10-12)
 - Schwab Crypto spot BTC/ETH (rollout from 2026-05-12, SOL/AVAX/LINK added ~2026-08): via Charles Schwab Premier Bank,
@@ -18,4 +19,4 @@ Program N at start: 934. Ceiling = events/yr x net edge x deployable share x cap
 - Roth crypto exposure = spot ETFs (IBIT/ETHA etc.) during US hours only.
 
 ## Waiting on user
-- (none yet)
+- SEC_USER_AGENT in .env (your name + contact) would unblock EDGAR pulls (DAT holdings rebuild, forced-flow scanner). Low priority: nothing currently gated on it clears +8pp.

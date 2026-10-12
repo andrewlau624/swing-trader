@@ -38,3 +38,14 @@ available to US retail (Coinbase US perps cover a handful of majors). Ceiling at
 Only the DAT discount is not dead on paper, and its ceiling is still near or below the gate. Next Track C step: check
 whether free daily BTC holdings per company exist (bitcointreasuries / 8-K counts) and how many DATs had mNAV < 0.8 for
 more than 20 sessions. If fewer than ~15 names, it is DATA-LIMITED; log it and leave it.
+
+## Iter 6: DAT discount data check -> DATA-LIMITED (no N)
+- CoinGecko `/public_treasury/{entity}/{coin}/holding_chart` (docs.coingecko.com/reference/public-treasury-entity-chart):
+  holdings back to 2020-08, but the free Demo tier is capped at 365 days (Basic $35/mo 2y, Analyst $129/mo max); step series
+  (~weekly / per transaction), not daily. EDGAR 8-K rebuild is feasible but needs SEC_USER_AGENT (absent from .env).
+- Episodes: ~40% of BTC treasuries < 1.0x mNAV in Jan 2026 (Bloomberg/bitcointreasuries via an Empery proxy); Sep 2026 Twenty
+  One 0.73, Nakamoto 0.90; Strategy < 1 around 2026-06-27. Resolutions are anecdotal: Strive/Semler stock merger at ~0.8x
+  (2025-09), ETHZilla sold ETH + buybacks, Empery activist liquidation demand (its own proxy: buybacks narrowed then the
+  discount persisted). No systematic convergence study. MSCI did NOT exclude DATCOs (2026-01-06).
+- Verdict: DATA-LIMITED, and the anecdotes lean to persistent discounts. Ceiling was already ~+2.5-5pp at $10k. Leave it.
+  Reopen only if SEC_USER_AGENT is set and an EDGAR holdings rebuild is wanted for other reasons.
