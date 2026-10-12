@@ -6372,3 +6372,25 @@ includes the placebo, so the batch FAILS: what passes is the TYPE of firm (frequ
 No confirmation look; 2016-20 stays unseen. Deviations: 8-K code = item x10 assumed (codes 34/35/37 unmapped); 'initiated' in
 ACTIONS is a coverage marker, not a dividend initiation. Lesson for grammar 3: dedupe rules; the null must always include a
 same-ticker date placebo (the permutation null alone would have passed this).
+
+## Study LUCK-B3 — random-rule discovery batch, grammar 3: crypto alts, delisted-complete, long-only (pre-register 2026-10-12; N 940 -> 941, DSR at 941 + 800 trials)
+Deep loop iter 13, Track B (grammar change = new asset + new panel). Not read: any return statistic on the Binance alt panel.
+Prior crypto work touched only majors (BTC/ETH IBS, trend, BTC-FIX, LIQ-CASC); alts never studied here.
+- **Data.** `data/research/crypto_spot/panel.parquet` (Binance spot USDT pairs 2017-08..2026-09, 249 delisted kept; UTC days).
+  Universe on day d: not stablecoin/fiat/leveraged-token, >= 60 days since first bar, 30d median quote volume >= $1M.
+  A symbol's last bar is its exit (delisting): return to its last close, then flat (optimistic for delistings; stated).
+- **Grammar 3 (seed 20261014, `research/sim/luck_gen3.py`, rules DEDUPED).** Features at the close of UTC day d: ret 1/3/7/14/30/90d,
+  vol30, range/close, volume ratio (qv/avg30 qv), log qv30, trades ratio, age (days listed), ret vs BTC 7d/30d, dist to 90d high,
+  dist to 90d low, BTC's own ret7/vol30 (regime, as a day filter tercile), day-of-week. Rule = f1 cross-sectional quintile 1 or 5,
+  optionally AND f2 tercile 1 or 3 (or a BTC-regime / weekday filter) x horizon {7, 30 days} x LONG only (no alt shorting for US
+  retail). Need >= 5 names that day. 800 distinct rules.
+- **Score.** Enter at the close of d+1 (one full day of lag), exit at the close of d+1+h; EW selected minus EW universe, minus
+  80bp round trip (Coinbase US maker ~40bp/side at small volume; shock 120bp). Non-overlapping (every h-th signal day).
+- **Discovery = 2019-01..2022-12 only** (halves 2019-20 / 2021-22). Confirmation = **2023-01..2026-09**, unseen.
+- **Pass.** Net mean > 0, t >= 3, both halves > 0, median > 0, ex-top-5 dates > 0, n >= 30 dates.
+- **Null.** 10 replicates of within-date feature permutation (seeds 1..10) AND a date placebo (all features lagged 365 days per
+  symbol). Batch counts only if real passes > max over ALL 11 null runs AND > 3 x their mean.
+- **Survivors.** <= 5 with a plausible mechanism, not a known dead family (crypto IBS/short-term reversal, BTC trend), get an
+  amendment, then ONE look on 2023-01..2026-09 at 80bp and 120bp RT, restricted also to `on_coinbase_us` names (descriptive:
+  current listing, not PIT). Gate as discovery with t >= 2 and DSR > 0.95.
+- Out: `data/research/program/luck_b3_out.txt`, `luck_b3_rules.parquet`.
