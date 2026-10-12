@@ -6342,3 +6342,15 @@ any return conditioned on a Sharadar EVENTS code or an ACTIONS type.
   dividend-initiation drift, spin-off, buyback - all in NEXT) get an amendment, then ONE look on **2016-01..2020-12** (never read
   for these rules; post-2016 regime, stated) at 20bp and 60bp round trip; gate as LUCK-B1 plus DSR > 0.95. 2021-26 descriptive.
 - Out: `data/research/program/luck_b2_out.txt`, rules `luck_b2_rules.parquet`.
+
+### Adversarial check — OVN-MOM (2026-10-12; `ovn_mom_adv.py`, `ovn_mom_adv_out.txt`): PASS stands historically; current regime SMALL
+- Pre-decimal inflates the headline (1998-12..2001-04 +47.6bp); post-decimal 2001-05..2015 still +10.3bp t 12.2.
+- Not bid-ask bounce: a stale (skip-a-night) score keeps +19.0bp gross; edge is flat across $ADV terciles, mildly stronger <$10.
+  Close-to-close excess ~0 (next-day intraday -19.5bp): pure overnight clientele (LPS), nothing for a close-to-close holder.
+- Official crosses 2021-26 (141k pick-nights matched): close == official close; open median 0bp but 15.5% differ > 20bp; on matched
+  nights official-print excess +7.2bp gross / +3.2 net at 2bp/side (t 2.9) vs +9.0 / +5.0 on Sharadar prints.
+- By year (net 2bp/side): 1999 +64, 2003 +18, 2010 +9.5, 2015 -0.3, 2016-19 ~-0.5, 2020 +12, 2021 +7.3, 2022 -0.8, 2023 +0.5, 2024
+  +5.8, 2025 +3.5, 2026 +7.9: decayed, alive at a few bp. Median pick closing print $5.5M (a $1k order is trivial).
+- **Verdict: PASS (registered, historical) / SMALL now.** Current ceiling at $10k: +3.2bp net x 250 x 100% x 50% ~= +4pp at
+  2bp/side; ~+9pp only if the measured ~0bp auction cost holds on these names (7.2bp gross, 50% capture). Forward shadow decides:
+  real cross prints, real decile excess. Not deployable; it also competes with the night leg for overnight capital.
