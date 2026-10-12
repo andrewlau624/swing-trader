@@ -10,6 +10,7 @@ Program N at start: 934. Ceiling = events/yr x net edge x deployable share x cap
 | 4 | C | Crypto mechanism ceiling table (CME basis, weekend, unlocks, listings, depegs, DAT discount) | various / literature + access / crypto / 1d-1y / various | all < +8pp; DAT discount ~+2.5-5pp | CEILING-KILL x7, DAT discount OPEN (data check) | `crypto_access_2026-10-12.md` |
 | 5 | A | WIKI-ATTN: Wikipedia pageview spikes -> overnight retail-attention pressure | retail attention / Wikimedia pageviews + Wikidata / US stocks / overnight + 5d / retail open buyers | needs >= +15bp/night (night shape ~+4.7pp at 15bp; +8pp needs ~25bp) | RUNNING (N 936-937) | round1_prose WIKI-ATTN |
 | 6 | C | DAT (crypto-treasury co.) discount to coin NAV: data check | discount reversion / CoinGecko treasury API + EDGAR / crypto-equity / months / issuers, activists | ~+2.5-5pp (iter 4) | DATA-LIMITED (free history 365d; EDGAR needs UA; anecdotes = persistent discounts) | `crypto_access_2026-10-12.md` |
+| 7 | A | LEG-HEALTH: own trailing-63-session P&L kill switch on night + IBS legs | leg P&L persistence / internal replays / US stocks+ETFs / 63d / none (robustness) | robustness bar: <= 1pp cost, maxDD x0.75 | RUNNING (N 938) | round1_prose LEG-HEALTH |
 
 ## Crypto access (date-versioned, checked 2026-10-12)
 - Schwab Crypto spot BTC/ETH (rollout from 2026-05-12, SOL/AVAX/LINK added ~2026-08): via Charles Schwab Premier Bank,
