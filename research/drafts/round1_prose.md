@@ -6318,3 +6318,27 @@ time-shift placebo 0. Best t 2.27; only 71 rules net-positive after 20bp RT; med
 1d/overnight rules: a one-feature decile rarely earns 20bp per round trip). Confirmation set 1998-2005 untouched. Lesson for
 grammar 2: at retail cost, random single-feature deciles on daily US stocks are cost-dominated; a random grammar needs either
 longer horizons (cost/day small) or event-type features, not more price features.
+
+## Study LUCK-B2 — random-rule discovery batch, grammar 2: events x price state, 20/60-session horizons (pre-register 2026-10-12; N 939 -> 940, DSR at 940 + 600 trials)
+Deep loop iter 10, Track B. Grammar changed per the B1 lesson (cost-dominated short horizons; price-only features). Not read:
+any return conditioned on a Sharadar EVENTS code or an ACTIONS type.
+- **Data.** Sharadar EVENTS (8-K item codes per ticker-date, 1993+) and ACTIONS (dividend, initiated, split, exchangefrom/to,
+  sicchange, namechange, tickerchange, listed, acquisitionby, spinoff ...), SEP prices (delisted incl., last print then flat),
+  DAILY marketcap. Universe: domestic common, raw close >= $5, 20d median $vol >= $2M on the entry day.
+- **Timing guard.** EVENTS date may be the event date, not the filing date (8-K due within 4 business days): entry at the
+  OPEN of the 5th session after the event date. Actions: entry at the open of the 2nd session after the action date.
+- **Grammar 2 (seed 20261013, `research/sim/luck_gen2.py`).** Rule = event type e (one 8-K code, one action type, or a derived
+  dividend change: increase >= 10% / cut >= 10% vs prior regular dividend) x optional price-state filter (tercile 1 or 3 of
+  ret20, ret60, vol20, dist-to-252d-high, log marketcap, measured the session before entry) x horizon {20, 60 sessions} x side
+  {long, short}. 600 rules. Re-arm: one event per ticker per 20 sessions per rule.
+- **Score.** Per event: name open-to-open return minus EW universe same window, signed, minus 20bp round trip. Cluster by
+  entry calendar month. Need n >= 100 events.
+- **Discovery = 2005-01..2015-12 only** (8-K items were renumbered in Aug 2004; earlier codes not comparable).
+- **Pass.** Net mean > 0, month-clustered t >= 3, halves 2005-10 / 2011-15 > 0, median > 0, ex-top-5-events > 0.
+- **Null.** 10 replicates: event types permuted across events within each calendar year (keeps timing and counts), seeds 1..10;
+  plus a date placebo (each event moved to a random date of the same ticker 250-750 sessions earlier). Batch counts only if real
+  passes > max null AND > 3 x mean null.
+- **Survivors.** At most 5 with a plausible mechanism and not a known family (PEAD / earnings 8-K, insider, S&P add/delete,
+  dividend-initiation drift, spin-off, buyback - all in NEXT) get an amendment, then ONE look on **2016-01..2020-12** (never read
+  for these rules; post-2016 regime, stated) at 20bp and 60bp round trip; gate as LUCK-B1 plus DSR > 0.95. 2021-26 descriptive.
+- Out: `data/research/program/luck_b2_out.txt`, rules `luck_b2_rules.parquet`.
