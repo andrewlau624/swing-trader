@@ -145,6 +145,14 @@ def _letf_night(state: Path, logs: Path) -> dict:
     return dict(n=s["days"], week=len(wk), line=w.line(rows))
 
 
+def _ovn_mom(state: Path, logs: Path) -> dict:
+    from . import ovn_mom_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    s = w.summary(rows)
+    wk = {r["date"] for r in rows if r.get("status") == "scored" and r["date"] >= _week_ago()}
+    return dict(n=s["days"], week=len(wk), line=w.line(rows))
+
+
 def _noise_rearm(state: Path, logs: Path) -> dict:
     from . import noise_rearm_watch as w
     rows = _jsonl(state / w.LOG_NAME)
@@ -454,6 +462,10 @@ REGISTRY: list[Test] = [
          "LETF $vol share > 2%: closing cross -> next opening cross vs the no-LETF control (forward-only registration, N 852)",
          "2026-10-10", 120, "event days", _letf_night, "state/letf-night.jsonl; round1_prose.md Amendment LETF-NIGHT",
          ["letf_night_shadow"]),
+    Test("OVN-MOM-FWD: overnight-return momentum held overnight", "top decile (and top 10) of the mean of the last 252 "
+         "overnight returns, liquid common stock: official closing cross -> next opening cross, excess vs SPY. Gate: 120 nights, "
+         "mean >= +5bp/night, t >= 2, median > 0; FAIL closes the overnight-clientele class (N 939, adversarial: small now).",
+         "2026-10-13", 120, "nights", _ovn_mom, "state/ovn-mom.jsonl; round1_prose.md Watch OVN-MOM-FWD", ["ovn_mom_shadow"]),
     Test("Intraday leg re-arm watch (noise, OFF)", "noise_rearm_watch.py: weekly PROD replay of the live intraday rule on the "
          "last 60 sessions (QQQ+SMH, one-bar lag, 0.5bp/fill). POSITIVE = >= 30 trades, Sharpe >= 0.5 and mean > 0 at 2bp/fill: "
          "then re-arming daytrade_mode is a user decision; the leg is off (user 2026-10-11, NOISE-GATE N 934, NOISE-DIAG).",

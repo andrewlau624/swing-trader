@@ -404,6 +404,9 @@ cef-rv-panel: ## Refresh the CEF-RV weekly NAV panel here (CEFConnect blocks the
 exdate-open: ## Ex-date open shadow: split / spin-off ex-date night from official crosses (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.exdate_open_shadow
 
+ovn-mom: ## OVN-MOM-FWD shadow: overnight-momentum decile / top-10 from official crosses (no orders)
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.ovn_mom_shadow
+
 pick-cost: ## Pick-quality lead: live night auction cost + bounce by price bucket from the fill logs (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.pick_cost_watch
 

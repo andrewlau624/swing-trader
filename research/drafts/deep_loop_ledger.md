@@ -23,6 +23,7 @@ Program N at start: 934. Ceiling = events/yr x net edge x deployable share x cap
 - Roth crypto exposure = spot ETFs (IBIT/ETHA etc.) during US hours only.
 
 ## Waiting on user
+- Deploy the OVN-MOM-FWD shadow (log-only, committed locally: `swingtrader/daily/ovn_mom_shadow.py`, research-shadows unit line) to him? Untested against live sip_daily/crosses; first run pulls ~400 days of daily bars for the night universe.
 - OK to add a read-only hourly Coinbase perp funding logger (US5/BIP/ETP public GET) to the server's cron + REGISTRY? Builds the funding history no one publishes; decides iter 8.
 - SEC_USER_AGENT in .env (your name + contact) would unblock EDGAR pulls (DAT holdings rebuild, forced-flow scanner). Low priority: nothing currently gated on it clears +8pp.
 
