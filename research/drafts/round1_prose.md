@@ -6311,3 +6311,10 @@ nights NaN, ex-action nights NaN. **Open risk: Sharadar opens before 2016 may be
 (bid-ask bounce; pre-2001 fractional ticks) - the strongest half is 1998-2006.** Current-regime ceiling at 2016-26: ~+3bp net
 x 250 x 100% x 50% ~= +3.75pp at $10k (full capture at ~0bp measured cost ~ +7bp gross -> ~+17pp excess): the decision hinges
 on the real auction cost on these names and on 2016-26 official-cross prints.
+
+### Result — LUCK-B1 (2026-10-12, discovery 2006-15 only; N 935, 1000 trials): LUCK — 0 passes, null 0/0, placebo 0
+`luck_b1_out.txt`, `luck_b1_rules.parquet`. Real passes 0/1000 (988 scorable); permutation null 0 in all 10 replicates; 252d
+time-shift placebo 0. Best t 2.27; only 71 rules net-positive after 20bp RT; median rule t -5.9 (the cost floor dominates the
+1d/overnight rules: a one-feature decile rarely earns 20bp per round trip). Confirmation set 1998-2005 untouched. Lesson for
+grammar 2: at retail cost, random single-feature deciles on daily US stocks are cost-dominated; a random grammar needs either
+longer horizons (cost/day small) or event-type features, not more price features.
