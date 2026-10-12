@@ -37,3 +37,19 @@ Program N at start: 934. Ceiling = events/yr x net edge x deployable share x cap
 - Survivors: none. Best addition vs index at $2.3k / $10k / $25k: unchanged (book ~10-12%/yr; index 8-10%).
 - Read: crypto for a US retail account is cost/access-bound (Schwab 75bp, no alt shorts); the only open crypto items need data
   (DAT holdings via EDGAR, perp funding history via a forward logger). Track C should now move to data acquisition, not more ideas.
+
+## Checkpoint 2 (after iter 14, 2026-10-12)
+- New this block: LUCK-B1/B2/B3 all LUCK (stocks price grammar, 8-K/actions grammar, crypto alts; nulls and placebos never beaten
+  except B2's permutation null, which its date placebo overturned). OVN-MOM: registered PASS on 1998-2015, adversarially confirmed
+  as an overnight clientele effect (not bounce), but decayed to ~+3bp net now -> forward shadow built (not deployed). LEG-HEALTH
+  KILL. Earnings-delay short, 5 event/flow ideas, crypto alt delisting ideas: ceiling-killed. Crypto alt panel (delisted-complete)
+  built for future use.
+- Survivors: OVN-MOM (forward only). Best addition vs index at $2.3k / $10k / $25k: unchanged until OVN-MOM-FWD reads; if the
+  measured ~0bp auction cost holds, ~+9pp at $10k (half capture), ~+4pp at 2bp/side; $100k: picks' median closing print is
+  $5.5M, so capacity is fine to ~$1M.
+- Structural read: the +8pp gate admits only (a) every-night shapes with >= 15bp, (b) monthly >= 2% on most capital, (c) rare
+  capped contract payoffs. Event strategies at 50-1000 events/yr die on deployable share; random search dies on cost + nulls.
+  The free-data frontier is close to empty; the remaining value is forward evidence (OVN-MOM, PREF-EX, CEF-RV shadows) and the
+  user decisions below.
+- Pivot for the next block: Track B paused (3 grammars, 3 LUCKs; reopen only with a new data family). Track A/C only on new
+  data sources (Wikipedia result pending) or forward-evidence reads; ceiling first, test only what clears.

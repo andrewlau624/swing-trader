@@ -993,3 +993,10 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
 - Box-spread financing: ACCESS-KILL below $125k (Reg-T short box costs ~its width in buying power; PM needs $125k).
 - **LEG-HEALTH (N 938): KILL.** Own trailing-63-session P&L switch costs 2-14pp/yr, no maxDD gain vs random masks; leg
   P&L does not persist. Do not build a leg kill switch on trailing P&L.
+- **OVN-MOM (N 939): PASS historical, SMALL now.** LPS overnight momentum (top decile of 252-night mean overnight return, close->
+  open): 1998-2015 +15.4bp/night net 2bp/side; decayed to ~+3bp net 2016-26 (official prints 2021-26 +7.2 gross). Overnight
+  clientele, not bounce; close-to-close ~0. Forward shadow `ovn_mom_shadow.py` + REGISTRY (OVN-MOM-FWD, 120 nights) committed,
+  NOT deployed (user OK needed).
+- **LUCK-B1/B2/B3 (N 935/940/941): all LUCK.** Random rules on stocks (price), 8-K/actions, crypto alts never beat their nulls; B2's
+  passes were firm type (date placebo 34 > real 5). Always include a same-ticker date placebo in a random-search null.
+- Crypto alt panel: `data/research/crypto_spot/` (Binance USDT spot 2017-08..2026-09, 249 delisted; build `research/sim/crypto_spot_build/`).
