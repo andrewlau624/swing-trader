@@ -6270,3 +6270,11 @@ Deep loop iter 7, Track A (robustness). Not read: any rolling/autocorrelation st
   always-on maxDD, AND the controlled maxDD beats the 90th percentile of the random-mask placebo. WEAK if one half. Kill otherwise.
   No re-tuning of 63 / 0 threshold.
 - Runner `research/sim/leg_health.py` -> `data/research/program/leg_health_out.txt`.
+
+### Result — LEG-HEALTH (judged 2026-10-12, one run; N 938): KILL both legs
+`leg_health_out.txt`. Ann return / maxDD always-on -> controlled. Night 2016-20 +27.3/-64.6 -> +20.2/-63.1; 2021-26
++56.0/-58.1 -> +41.5/-43.0 (off 35%). IBS 2016-20 +11.2/-19.7 -> +9.3/-11.6; 2021-26 +10.7/-21.0 -> +2.9/-31.2 (off 40%).
+Return cost 2-14pp/yr vs the 1pp allowance; controlled maxDD never beats the 90th pct of random masks (night 22nd, IBS 2nd).
+Non-overlapping 63-session leg-P&L blocks have no persistence (lag-1 autocorr -0.21 night, +0.16 IBS). Deviations: IBS starts
+2017-02 (warmup); first 63 sessions dropped. Class "own-P&L kill switches on the MR legs" CLOSED: leg P&L does not persist.
+Program N = 938.

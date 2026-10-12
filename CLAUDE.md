@@ -985,3 +985,11 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
   x 100% of account x 50% capture = +5.8pp/yr at every size (full capture +11.5pp): below the +8pp gate, and it would displace
   the night leg's cash for 3 sessions a month. The "only open Treasury question" is closed; reopen only with a measured forward
   capture rate for TME itself (none exists: TME was never shadowed).
+
+## Research memory — deep loop (2026-10-12, `research/drafts/deep_loop_ledger.md`)
+- Crypto access (date-versioned 2026-10-12): Schwab spot BTC/ETH since 2026-05 (~75bp/trade, taxable only); Coinbase US
+  perp-style nano BTC/ETH (hourly funding); Roth = spot ETFs only. Funding carry, CME basis, unlocks, listings, depegs:
+  CEILING/ACCESS-KILL; DAT mNAV discount DATA-LIMITED (`crypto_access_2026-10-12.md`).
+- Box-spread financing: ACCESS-KILL below $125k (Reg-T short box costs ~its width in buying power; PM needs $125k).
+- **LEG-HEALTH (N 938): KILL.** Own trailing-63-session P&L switch costs 2-14pp/yr, no maxDD gain vs random masks; leg
+  P&L does not persist. Do not build a leg kill switch on trailing P&L.
