@@ -6300,3 +6300,14 @@ decile return, any 2016-20 one.
   Also report: bottom decile, decile monotonicity, names/night, median $ADV of picks, overlap with -8% night-leg picks, share of
   nights with an action dropped. Kill: any fails. No re-tuning of 252 / decile / $20M.
 - Runner `research/sim/ovn_mom.py` -> `data/research/program/ovn_mom_out.txt`.
+
+### Result — OVN-MOM (judged 2026-10-12, one run; N 939): REGISTERED PASS (all 7 gates), pending adversarial check; decaying
+`ovn_mom_out.txt`. Judge 1998-12..2015-12, n 4278 nights, top decile EW minus SPY overnight: gross +19.4bp; net 2bp/side +15.4
+(t 12.3, NW t 12.3, median +11.1, ex-top-5 +14.8, hit 63%); 5bp/side +9.4; 7.5bp/side +4.4. Halves at 2bp/side: 1998-2006 +26.2,
+2007-15 +5.9 (~0 at 5bp/side). Deciles monotone (D1 -6.3 ... D10 +19.4). Descriptive 2016-20 +2.0 (t 1.45), 2021-26 +3.8
+(t 1.70), 2016-26 +3.0 (t 2.18) at 2bp/side, negative at 5bp/side. ~82 names/night, median pick $ADV ~$59M, 2.4% overlap with
+-8% losers. Deviations: split-adjusted open/close (split-invariant), $vol median through t-1, SPY dividend added back, delisting
+nights NaN, ex-action nights NaN. **Open risk: Sharadar opens before 2016 may be first prints, not the official open cross
+(bid-ask bounce; pre-2001 fractional ticks) - the strongest half is 1998-2006.** Current-regime ceiling at 2016-26: ~+3bp net
+x 250 x 100% x 50% ~= +3.75pp at $10k (full capture at ~0bp measured cost ~ +7bp gross -> ~+17pp excess): the decision hinges
+on the real auction cost on these names and on 2016-26 official-cross prints.
