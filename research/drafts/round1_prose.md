@@ -6401,3 +6401,10 @@ Prior crypto work touched only majors (BTC/ETH IBS, trend, BTC-FIX, LIQ-CASC); a
 Deviations: token-swap price breaks split into new symbols (DREP, LUNA relaunch, COCOS, SUN, VEN); greedy non-overlap; cost on the
 basket only. Confirmation 2023-26 unseen. Reading: at US-retail spot cost (80bp RT), random long-only alt rules at 7-30d have no
 discoverable edge; with B1-B3 all luck, random search on daily price/event data is cost- and null-bound across stocks, events, crypto.
+
+### Result — WIKI-ATTN (judged 2026-10-12, one run; N 936-937): KILL
+`wiki_attn_out.txt`. 1,899 in-universe tickers mapped (Wikidata 1:1), pageviews for 1,898. PRIMARY night arm n 5,854 spike events:
+gross -1.0bp (median -1.2, hit 49%, t -0.28); net -16.0bp (t -4.42, ex-top-5 -18.5); halves -12.5 / -18.9; placebo net -9.7.
+SECONDARY 5d drift gross -2.2, net -17.2 (t -1.80). Overlap with -8% losers 2.8% (net +17.8 but median -32.6, t 0.28). No raw
+attention effect overnight at all on Wikipedia spikes 2016-26. Survivorship: current tickers without Wikidata dates accepted.
+Wikipedia-attention family closed (night and 5d). Program N = 941.

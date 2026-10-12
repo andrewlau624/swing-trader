@@ -1000,3 +1000,5 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
 - **LUCK-B1/B2/B3 (N 935/940/941): all LUCK.** Random rules on stocks (price), 8-K/actions, crypto alts never beat their nulls; B2's
   passes were firm type (date placebo 34 > real 5). Always include a same-ticker date placebo in a random-search null.
 - Crypto alt panel: `data/research/crypto_spot/` (Binance USDT spot 2017-08..2026-09, 249 delisted; build `research/sim/crypto_spot_build/`).
+- **WIKI-ATTN (N 936-937): KILL.** Wikipedia pageview spikes -> no overnight or 5d effect (gross -1bp/night, n 5,854, 2016-26).
+  Pageview cache `data/research/wiki/` (1,898 articles, 2015-07+) stays for reuse; do not re-run attention spikes on it.
