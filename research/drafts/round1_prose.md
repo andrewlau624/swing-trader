@@ -6278,3 +6278,25 @@ Return cost 2-14pp/yr vs the 1pp allowance; controlled maxDD never beats the 90t
 Non-overlapping 63-session leg-P&L blocks have no persistence (lag-1 autocorr -0.21 night, +0.16 IBS). Deviations: IBS starts
 2017-02 (warmup); first 63 sessions dropped. Class "own-P&L kill switches on the MR legs" CLOSED: leg P&L does not persist.
 Program N = 938.
+
+## Study OVN-MOM — overnight-return momentum held only overnight, reopened on measured auction cost (pre-register 2026-10-12; N 938 -> 939)
+Deep loop iter 9, Track A. **Resurrection test ("what changed?").** RESULTS.md "Dead" row: overnight momentum (Lou-Polk-Skouras)
+"replicates, monotone deciles, but top decile +8.7bp/night < 15bp auction round trip" (2021-26 cache). What changed: the 15bp
+round trip was an assumption; live auction cost is now MEASURED at ~0bp (213/216 auction fills at the official SIP print,
+2026-10-10 audit). That kill reason is gone; the effect itself was never judged pre-2016. Not read: any pre-2016 overnight
+decile return, any 2016-20 one.
+- **Mechanism.** Clientele persistence (LPS 2019): some names carry a persistent overnight buyer clientele (retail/opening-cross
+  demand) and an intraday seller clientele; the overnight part persists for months. Who pays: opening-cross buyers.
+- **Data.** Sharadar SEP raw open/close (delisted included), splits/dividends guarded (drop nights with an action, |ret|>50%).
+  SPY overnight from SFP. Universe on day t: domestic common, raw close >= $5, 20d median $vol >= $20M.
+- **Rule (frozen).** Score(i,t) = mean of open_s/close_{s-1} - 1 over the 252 sessions ending with day t's open (known before the
+  15:50 MOC cutoff); need >= 200 valid nights. Each day hold the top decile EW: buy the close t, sell the open t+1.
+- **Metric.** Per night: EW top-decile overnight return minus SPY close->open the same night; cost 2bp/side primary (above the
+  measured ~0bp), shocks 5bp and 7.5bp/side.
+- **Judge.** 1998-01..2015-12 (this rule never read there; LPS's own sample overlaps to 2013 = literature-touched, stated);
+  halves 1998-2006 / 2007-2015. Descriptive: 2016-20 and 2021-26 (2021-26 touched by the RESULTS row).
+- **Gate.** Net excess >= +6.5bp/night at 2bp/side (ceiling floor: 250 x 6.5bp x 100% x 50% = +8.1pp/yr at $10k), day-clustered
+  t >= 3, both halves > 0, median night > 0, ex-top-5-nights > 0, still > 0 at 5bp/side, and 2016-26 descriptive > 0 at 2bp/side.
+  Also report: bottom decile, decile monotonicity, names/night, median $ADV of picks, overlap with -8% night-leg picks, share of
+  nights with an action dropped. Kill: any fails. No re-tuning of 252 / decile / $20M.
+- Runner `research/sim/ovn_mom.py` -> `data/research/program/ovn_mom_out.txt`.
