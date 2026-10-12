@@ -28,6 +28,13 @@ Program N at start: 934. Ceiling = events/yr x net edge x deployable share x cap
 - Roth crypto exposure = spot ETFs (IBIT/ETHA etc.) during US hours only.
 
 ## Waiting on user
+- **2026-10-12 evening: user said YES to items 1+2.** The push/pull + unit re-render on him was blocked by the auto-mode
+  classifier (persistence on the server); user is away and will grant later. To run by hand: `git push origin main`, then on him
+  `git pull --ff-only` and re-render research-shadows.service from `deploy/research-shadows.service.in` (sed __APP_DIR__), daemon-reload.
+  The 33 pushed commits touch only research/, NEXT/CLAUDE.md, ovn_mom_shadow.py + test, testing.py REGISTRY, Makefile, the unit file.
+  The funding logger (item 2) is not built yet.
+- **WRDS (Wharton) access: user has it (2026-10-12).** Not usable yet: no `wrds` package, no ~/.pgpass. Needs the user to log in once
+  (Duo MFA) and say which libraries the subscription covers. Triage below.
 - Deploy the OVN-MOM-FWD shadow (log-only, committed locally: `swingtrader/daily/ovn_mom_shadow.py`, research-shadows unit line) to him? Untested against live sip_daily/crosses; first run pulls ~400 days of daily bars for the night universe.
 - OK to add a read-only hourly Coinbase perp funding logger (US5/BIP/ETP public GET) to the server's cron + REGISTRY? Builds the funding history no one publishes; decides iter 8.
 - SEC_USER_AGENT in .env (your name + contact) would unblock EDGAR pulls (DAT holdings rebuild, forced-flow scanner). Low priority: nothing currently gated on it clears +8pp.
@@ -69,3 +76,18 @@ Nothing decidable yet; earliest reads in weeks (PREF-EX ex-nights cluster mid/la
   cost holds on its names (half capture); $100k fine (median pick closing print $5.5M).
 - The loop is now gated on user decisions and forward data, not ideas. Until one of the "Waiting on user" items moves, ticks only
   read forward shadows (daily) and take a new idea only if it brings a new data family and clears the ceiling first.
+
+## WRDS triage (2026-10-12, before any data is read; no N)
+Which mechanisms move from DATA-LIMITED to testable, ranked by gate odds at $10k:
+1. **Borrow fees / utilization (Markit Securities Finance, if subscribed).** The one named counterparty (short sellers) with no data
+   so far. Only shapes that can clear +8pp: a daily-frequency long leg that is paid by constrained shorts (e.g. recall/fee-spike
+   squeeze as an event leg). Selection-conditioning the night leg on fees is a CLOSED class (FUND-STATE): do not run it.
+2. **CRSP 1926-1997 = untouched windows** for rules already validated (OVN-MOM 1992-97 once opens exist; PREF-EX/ETDX pre-1998 if
+   preferreds are in CRSP). Robustness, not new %: confirmation only, one look each.
+3. **OptionMetrics -> signed dealer gamma.** Prior lowered (OI-pin killed, VTS/COTX/CBAS killed); index-level daily state ~<4pp ceiling.
+   Test only if a single-stock gamma-flip event shape clears the gate on paper first.
+4. **Mergent FISD / ratings -> fallen angels.** Equity move likely in the announcement gap; bonds not retail-executable. Low.
+5. **TAQ (millisecond).** Closing/opening imbalance history: closing imbalance already dead (paid data, 2026-10); exact 15:40 night
+   rule is moot (NX done on daily). Low, unless used to price auction cost for OVN-MOM's names historically (that one IS useful:
+   it decides whether OVN-MOM is +4pp or +9pp at $10k).
+Next step once access works: list subscribed libraries (`db.list_libraries()`), then run #5-for-OVN-MOM cost or #1, whichever exists.
