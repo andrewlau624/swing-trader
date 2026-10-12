@@ -6354,3 +6354,12 @@ any return conditioned on a Sharadar EVENTS code or an ACTIONS type.
 - **Verdict: PASS (registered, historical) / SMALL now.** Current ceiling at $10k: +3.2bp net x 250 x 100% x 50% ~= +4pp at
   2bp/side; ~+9pp only if the measured ~0bp auction cost holds on these names (7.2bp gross, 50% capture). Forward shadow decides:
   real cross prints, real decile excess. Not deployable; it also competes with the night leg for overnight capital.
+
+## Watch — OVN-MOM-FWD forward shadow gate (registered 2026-10-12, before any forward read; no new N)
+- Log-only. Each session: rank the live universe (raw close >= $5, 20d median $vol >= $20M, domestic common) by the mean of the
+  last 252 overnight returns ending with today's open; log the top decile (registered) and the top 10 by score (executable at
+  $2-25k, whole shares) at the 16:00 official close; next morning score both against the official open cross, minus SPY
+  close->open.
+- **Gate (decile, 120 forward nights):** mean gross excess >= +5bp/night with t >= 2 and median > 0. Reported, not gated: top-10
+  arm, cross-print coverage, share of picks without a cross. PASS -> user decision on an overnight sleeve for idle capital
+  (it competes with the night leg's overnight cash). FAIL -> class closed (overnight clientele at retail).
