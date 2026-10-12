@@ -49,3 +49,15 @@ more than 20 sessions. If fewer than ~15 names, it is DATA-LIMITED; log it and l
   discount persisted). No systematic convergence study. MSCI did NOT exclude DATCOs (2026-01-06).
 - Verdict: DATA-LIMITED, and the anecdotes lean to persistent discounts. Ceiling was already ~+2.5-5pp at $10k. Leave it.
   Reopen only if SEC_USER_AGENT is set and an EDGAR holdings rebuild is wanted for other reasons.
+
+## Iter 8: Coinbase US perp-style futures as a carry / financing venue (no N)
+- US500 perp (US5-19DEC30-CDE; launched 2026-08-17): tracks the MarketVector MVUS5P index (NOT the S&P 500, though press says
+  "S&P"), contract = 1 index (~$3,150), Sun 20:00 - Fri 17:00 ET, hourly funding = hourly premium/24, 60/40 tax.
+  Public API (api.coinbase.com/api/v3/brokerage/market/products/...) 2026-10-12 16:00Z: US500 funding -0.0006%/h
+  (~-5%/yr, shorts pay), OI 1,204 contracts (~$3.8M), ~$9.6M/day; BTC nano perp +0.0011%/h (~+9.6%/yr). Earlier
+  snapshots (Sep 2026 product pages): US500 +0.0015%/h (~+13%/yr), BTC +0.0019%/h (~+17%/yr).
+- Two ideas checked: (a) cheap leverage for the book via a long perp instead of 12.5% margin: funding swings between about
+  -5% and +13%/yr, so it is not reliably cheaper, and it is index beta, not edge (Goal L / UPRO sleeve = user decision).
+  (b) Harvest rich funding (long VOO / short US500 perp): tracking error MVUS5P vs S&P plus an unknown funding mean.
+- No public funding history ("available on request"); the index level history is not free intraday. Verdict: DATA-LIMITED.
+  Cheapest test = a forward hourly funding logger (one public GET/hour) for US5/BIP/ETP; it needs a server cron = user OK.
