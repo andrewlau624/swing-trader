@@ -755,3 +755,271 @@ ETF panel (SFP ETFs minus leveraged/inverse, raw >= $5, $ADV20 >= $20M). Cost 10
 B = bar t is one of the last 2 trading days of its calendar month (the open t+1 -> close t+5 hold then spans the
 month turn). Combo = an oversold close into month-end (mechanism claim: scheduled month-start contribution/rebalance
 inflows are the buyer that absorbs the oversold liquidity). Excess vs EW ETFs (removes the market-wide TOM drift).
+
+### Combo C7 result: KILL (combo N 7)
+A ETF IBS<0.2 net -6.8 (t -3.9 at this open t+1 -> close t+5 hold; the live IBS edge is open->open t+1->t+2);
+combo n 17,024 net -6.9, improvement -0.1bp, halves -11.0/-29.3. Design note: B is a DATE-level flag, so its excess vs
+the EW universe is identically 0 and the date-paired test is empty (n 0). Date-level states cannot be judged in an
+excess-vs-EW harness; future date-level combos need raw returns vs an unconditional same-asset control.
+
+### Combo C8 (frozen before run): earnings 8-K x 5-day loser (family switch: scheduled information event)
+Liquid SEP stocks, cost 10bp RT. A = Sharadar EVENTS code 22 (8-K item 2.02, results of operations) dated on bars
+t-4..t. B = 5d total return <= -5% (unchanged). Combo = a stock that fell >= 5% across its earnings week.
+Prediction stated in advance: the combo should be WORSE than B (information-driven drops continue: PEAD), so a
+pass would contradict the mechanism and need a second explanation before any confirm look.
+
+### Combo C8 result: KILL (combo N 8), in the predicted direction
+A earnings week net -4.9; combo n 68,696 net -8.6 (median -28.2), improvement -11.7bp, date-paired -4.6bp t -0.5:
+drops across an earnings week continue slightly (PEAD direction), they do not revert.
+
+### Combo ledger (after 8): 8 combos, 0 passes, 0 confirm looks used
+| combo | family | combo net | improvement | paired t | verdict |
+|---|---|---|---|---|---|
+| C1 squeeze x IBS (stocks) | vol-state x close-location | -4.7 | +3.5 (both halves <0) | -0.5 | KILL |
+| C2 TMO x -8% loser (stocks) | oscillator x forced-sell event | +12.3 (median -25) | +22.7 (both halves <0) | -0.5 | KILL |
+| C3 BB re-entry x pre-ex (prefs) | oversold x dividend clientele | +49.8 (n 612) | +28.5 (halves -33/+55) | +1.2 | KILL (closest) |
+| C4 insider buy x loser (stocks) | information x liquidity | -29.4 | -32.5 | -0.2 | KILL |
+| C5 loser x low volume (stocks) | reversal x volume | +1.3 | -1.8 | -0.6 | KILL |
+| C6 loser x cheap P/B (stocks) | reversal x value anchor | +3.5 | +0.4 | +0.5 | KILL |
+| C7 IBS x month-end (ETFs) | liquidity x calendar | -6.9 | -0.1 | n/a (date-level) | KILL |
+| C8 earnings 8-K x loser (stocks) | event x reversal | -8.6 | -11.7 | -0.5 | KILL (as predicted) |
+Program N: +8 (combo cells), to merge into round1_prose.md.
+
+## USER CORRECTION (2026-10-08): "it's not just a number though, it's a window"
+C1-C8 judged SNAPSHOTS (IBS<0.2 on one bar, a 5-day return, a fixed open t+1 -> close t+5 hold). That repeats the
+mistake the L1 lesson names: traders read these as WINDOWS (duration, colour sequence, time in zone, B occurring
+inside A's window) and exit on the pattern, not on day 5. C1-C8 stay counted (N +8, tests consumed) but they are NOT
+tests of the window combos. From W1 on: runner `research/sim/combo_win.py`; each arm is a window pattern with its
+own NATURAL exit (first bar the exit condition is true, cap 15 bars, MOC-close proxy identical for all arms); excess
+vs the EW liquid universe over the EXACT same open t+1 -> close t+k horizon. The frozen combo gate is unchanged
+(per trade, net of cost); per-holding-day bp printed as a diagnostic. Diagnostics D* (each single with the other's
+exit) are printed, not gated.
+
+### Window combo W1 (frozen before run): TTM squeeze fire (as read) x IBS selling window, liquid stocks, 10bp RT
+A = squeeze ON for >= 6 consecutive bars ending t-1, OFF on t (fires), histogram < 0 and rising on t after >= 3
+falling bars (dark red -> light red). A's exit: first bar the histogram falls. B = >= 3 of the last 5 closes (t-4..t)
+with IBS < 0.25 (time in the selling zone); B's exit: first close with IBS > 0.5. Combo = A fires while B's selling
+window holds; exits on A's exit. Mechanism claim: a coil that resolves while sellers keep closing it on the lows is
+exhausted supply, so the first momentum turn carries further than either pattern alone.
+
+### W1 result: KILL - UNDERPOWERED (combo N 9)
+A fired only 307 times in 2016-26 (the same-bar alignment "fires AND first light-red bar" is rare in liquid stocks):
+net -14.1 (median -60, t -0.6, hold 7.5). B selling window n 524k net -7.9 (t -4.9, hold 2.0). Combo n 13 (net +75,
+halves +543/-218): no test possible. Not retuned (the alignment rule is frozen); the lesson for the next window
+combo is to pre-check event counts (>= 300 combo trades expected) from the SINGLE arms' frequencies before freezing.
+
+### Window combo W2 (frozen before run): TMO time-in-oversold turn x REPEAT-loser sequence, liquid stocks, 10bp RT
+Frequency pre-check (counts only, no returns): A 41,244 / B 74,603 / A&B 2,513 trades 2016-26 (>= 300: testable).
+A = TMO main <= -10 for >= 5 consecutive bars ending t-1 (time in the oversold zone), and main crosses ABOVE its signal
+on t. A's exit: first bar main < signal (the cross back). B = >= 2 separate total-return days <= -8% within bars
+t-9..t (a repeated forced-selling episode, the L1 sequence at daily tier). B's exit: first up close (closeadj >
+prior closeadj). Combo = the TMO turn out of a long oversold stay while the repeat-loser episode is live; A's exit.
+Mechanism claim: repeated -8% days = an unfinished liquidation (L1); the oscillator leaving a long oversold stay marks
+its end, so the bounce runs until momentum rolls over.
+
+### W2 result: KILL - WRONG SIGN, strongly (combo N 10)
+A TMO long-oversold turn net -30.7 (median -130, hold 8.3); B repeat-loser episode net -11.4 (hold 2.0); COMBO n 2,513
+net -119.5 (median -326, t -1.3, halves -48/-110); date-paired -82.5bp. A repeat-loser episode is NOT finished when
+TMO turns up: over a multi-day hold the liquidation resumes (the L1 bounce is overnight-only). Caveat for all
+natural exits: deciding on bar j's close and exiting at that close is a mild look-ahead (MOC proxy), same for every arm;
+B's "first up close" exit therefore flatters B's median (+61.7). Read W2's sign, not B's level.
+
+### Window combo W3 (frozen before run): pre-ex WINDOW x persistent-selling SEQUENCE, $25-par prefs + baby bonds, 8bp RT
+The window version of C3 (C3 used a snapshot BB re-entry and a fixed day-5 exit); counted as a new test.
+Frequency pre-check: A 90,577 / B 141,015 / A&B 10,618 (2016-26).
+A = a Sharadar dividend ex-date falls on bars t+5..t+10 (inside the pre-ex window); A's exit: the ex-date close
+(total return incl. the dividend). B = >= 4 of the last 5 closes down (closeadj < prior closeadj), a selling run;
+B's exit: first up close. Combo = a selling run inside the pre-ex window; exits at the ex-date (A's exit).
+Mechanism claim: the dividend clientele that bids prefs into the ex-date (PREF-CHAIN, R21) absorbs a seller who is
+still pushing the price down, so the pre-ex run-up is larger from a sold-down start.
+
+### W3 result: discovery PASS -> CONFIRM 2003-15 KILL (combo N 11; its one look is used)
+2016-26: A pre-ex window +53.2 net (t 15.6); COMBO n 10,618 net +88.7 (median +44.5, t 9.6, halves +77.5/+90.9,
+ex5 +78.7); improvement +35.4 (halves +25.5/+31.4); date-paired +34.9bp t 3.95 -> PASS (all six conditions).
+2003-15 (one look; the pre-ex A arm itself was touched by PREF-CHAIN 2005-15, the combo was not): A +39.2 (t 6.0);
+COMBO n 2,055 net +41.6 (t 1.98); **improvement +2.4bp, halves -15.4/-14.4; date-paired -20.9bp t -1.0 -> KILL.**
+Read: the selling-run lift on top of the pre-ex bid is a 2016-26 feature (retail-era pref flow), absent 2003-15.
+The pre-ex window ALONE stays positive in both eras (already registered as PREF-CHAIN, shadowed live); the COMBO adds
+nothing durable. No subagent re-implementation (only confirmed passes get one). Not retuned.
+
+### Window combo W4 (frozen before run): IBS selling window x LONG-UPTREND window, liquid non-levered ETFs, 10bp RT
+Family switch (trend-state x liquidity provision; Connors "pullback in an uptrend"). Frequency pre-check: A 90,159 /
+B 408,265 / A&B 39,666 (787 ETFs). A = >= 3 of the last 5 closes with IBS < 0.25 (W1's B, unchanged); A's exit: first
+close with IBS > 0.5. B = closeadj above its 200-bar SMA for >= 60 consecutive bars ending t (established uptrend);
+B's exit: first close below the 200-bar SMA (cap 15). Combo = a selling window inside a long uptrend; A's exit.
+Mechanism claim: in an established uptrend the short-term seller is a liquidity demander against a standing
+trend-following bid, so the IBS bounce is larger and more reliable than in a downtrend or a fresh trend.
+
+### W4 result: KILL (combo N 12)
+A selling window net -3.1 (t -3.6, hold 2.0); B uptrend net -11.5; COMBO n 39,663 net -4.2 (median -3.9, t -3.3);
+improvement -1.1bp, date-paired -2.6bp t -0.8. Relative to the EW ETF universe, a pullback in an uptrend is no better
+than any pullback, and neither beats the universe after 10bp. Trend-state x liquidity: dead.
+
+### Window combo W5 (frozen before run): RSI bullish divergence x 52-WEEK-LOW window, liquid stocks, 10bp RT
+Family switch (divergence x anchoring/capitulation; F6 was the closest stand-alone Round 1 rule, +12bp t 1.6).
+Frequency pre-check: A 218,481 / B 316,434 / A&B 80,143. A = F6 unchanged (low below the t-20..t-5 swing low, RSI(14)
+above that window's min RSI, RSI < 40); A's exit: first close with RSI(14) > 50. B = a new 252-bar low printed on any of
+bars t-9..t; B's exit: first close above the 20-bar SMA. Combo = a divergence at a fresh 52-week low; A's exit.
+Mechanism claim: at a fresh 52-week low the marginal seller is the anchored / stop-out seller; momentum divergence
+there means that selling is exhausting, so the RSI recovery is larger than a divergence anywhere else.
+
+### W5 result: KILL (combo N 13)
+A divergence net +16.5 (median +89, t 0.2, halves +25.8/-21.5, hold 11.4); B net +5.1 (t -2.7); COMBO n 80,142 net
++26.3 but date-mean t -1.9, halves -9.7/-71.2, ex5 -48.7; improvement +9.8 pooled, negative both halves; date-paired
+-41.7bp t -2.0. Large positive medians are the exit-on-strength proxy (RSI>50 / close>SMA20 decided at the exit
+close), not edge. Divergence at a 52-week low is worse on a matched date, not better.
+
+### Window-combo ledger (W1-W5) + snapshot C1-C8: 13 combos, 1 discovery pass (W3), 0 confirmed
+
+### Window combo W6 (frozen before run): IBS selling window x LAG-vs-SPY window, liquid non-levered ETFs, 10bp RT
+Family switch (cross-asset lead/lag / relative value). Frequency pre-check: A 90,159 / B 41,963 / A&B 6,385 (518 ETFs).
+A = >= 3 of the last 5 closes IBS < 0.25 (unchanged); A's exit: first close IBS > 0.5. B = SPY's 5-session total
+return >= 0 while the ETF's is <= SPY's - 3% (the ETF has been left behind a flat/rising market for a week); B's exit:
+first close where the ETF's 5-session return is back >= SPY's. Combo = selling window in an ETF that lags a rising
+market; A's exit. Mechanism claim: a week-long idiosyncratic lag that closes on the lows is a sector/country seller
+demanding liquidity against an index that is NOT falling, so relative-value arbitrage closes the gap faster.
+
+### W6 result: KILL (combo N 14)
+A net -3.1; B lag-vs-SPY net -8.4 (hold 6.1); COMBO n 6,385 net -11.2 (t -1.5, halves -6.1/-23.2); improvement -8.1,
+date-paired -3.6bp t -0.3. A lagging ETF that closes on its lows does not catch up faster than any pullback.
+
+## COMBO LOOP END (2026-10-08): 14 combos, 0 validated
+| # | combo (universe) | form | result |
+|---|---|---|---|
+| C1-C8 | squeeze x IBS, TMO x -8%, BB x pre-ex, insider x loser, loser x low vol, loser x cheap, IBS x month-end, earnings x loser | snapshot, fixed day-5 hold | all KILL |
+| W1 | TTM squeeze fire as read x IBS selling window (stocks) | window, natural exits | KILL underpowered (n 13) |
+| W2 | TMO long-oversold turn x repeat-loser episode (stocks) | window | KILL, wrong sign (-120bp) |
+| W3 | pre-ex window x selling run (prefs+baby bonds) | window | **discovery PASS (+35bp, paired t 3.95) -> 2003-15 KILL (+2.4bp, paired t -1.0)** |
+| W4 | IBS selling window x long uptrend (ETFs) | window | KILL |
+| W5 | RSI divergence x fresh 52w low (stocks) | window | KILL (worse on matched dates, t -2.0) |
+| W6 | IBS selling window x lag vs SPY (ETFs) | window | KILL |
+Program N +14 (to merge into round1_prose.md). Read: on Sharadar daily bars no pair of {close-location, oscillator,
+squeeze, divergence, trend, volume, valuation, event, calendar, relative-lag} signals interacts super-additively and
+durably; the only interaction found (W3) is a 2016-26 feature. Every positive single in these tables (pre-ex window
+on prefs) was already known alone. Natural-exit caveat: exits decided and filled on the same close flatter medians.
+Not tried (would need new data or are costumes of dead rounds): CEF NAV-based windows (no NAV in Sharadar), ADRs.
+
+---
+## useThinkScript round (U1-U5), user OK 2026-10-08; ALL FIVE FROZEN HERE BEFORE ANY IS RUN (combo N +5)
+Source triage: `research/drafts/usethinkscript_harvest_2026-10-08.md`. Runner `research/sim/uts.py`.
+Common: liquid SEP stocks (raw >= $5, $ADV20 >= $20M, delisted incl.), signal on close t, entry open t+1 (U1 also a
+LIMIT on bar t+1), **exit at the OPEN after the first close where the exit condition is true** (fixes the same-close
+look-ahead of W1-W6), cap 15 bars (U5 14). Excess = trade return minus the EW liquid universe's open t+1 -> open exit
+return for the same k. Cost 10bp RT. Gate (frozen discovery gate): net >= +25bp/trade, NW t >= 3, halves > 0,
+median > 0, ex-top-5-days > 0. Pass -> one 2003-15 look -> independent subagent re-implementation.
+- **U1 Radge limit reversion (thread 791):** close > SMA100 AND RSI(2) < 10. Entry = LIMIT at close_t - ATR(10)_t on
+  bar t+1 (filled if low_{t+1} <= limit; fill price = min(open_{t+1}, limit)). Exit: first close > prior close -> next
+  open. Also reported: the same signal entered at open t+1 (market). Extra U1 question (not gated): limit minus market.
+- **U2 squeeze duration dose-response (Mobius 8414 / Carter 4021):** squeeze = 2sd(20) < 1.5 ATR(20) (as F1); fire =
+  on through t-1, off on t, histogram > 0 (Carter long). Buckets by squeeze run length 2-3 / 4-8 / 9-20 / > 20 bars.
+  Exit: histogram falls -> next open. PASS = the 4-8 bucket meets the gate AND beats both 2-3 and > 20 by >= +15bp.
+- **U3 Triple Exhaustion (9001):** seller exhaustion = SlowK < 20 (raw %K(10) smoothed SMA 3) AND MACD(12,26) z-score
+  vs its trailing 1000-bar mean/sd < -1 AND DI+(14) < 15. Entry: state true on t-1 and false on t (exhaustion ENDS).
+  Exit: buyer exhaustion (K > 80, z > +1, DI-(14) < 15) -> next open; cap 15.
+- **U4 Stochastic-IFT 21EMA pullback (5586):** close > SMA200, close > EMA21, min(low_t, low_{t-1}) <= EMA21 x 1.01,
+  mean 20-bar (high/low - 1) >= 5%; IFT = tanh(WMA9(0.1 x (%K(5) - 50))) scaled 0-100; trigger IFT_{t-1} <= 10 and
+  IFT_t >= 90 (parameters stated by me: the thread's "IFT_Stoch(3,1)" is ambiguous). Exit: IFT < 50 -> next open.
+- **U5 relative-strength pullback (20950 v2):** 30-session total return > SPY's, AND 10-session return <= -1%, raw
+  price >= $50. Exit: first close above close_{t-10} (pullback recovered) -> next open; cap 14.
+
+### U1-U5 results (combo N 19 after this round)
+- **U1 Radge LIMIT reversion: discovery PASS, CONFIRM 2003-15 PASS (one look used).**
+  2016-26: n 28,302 fills (54% of liquid signals fill), hold 2.8 bars, **net +60.3bp** (median +69.6, NW t 3.67,
+  halves +40.7/+21.7, ex5 +26.0). 2003-15: n 25,615, **net +92.9bp** (median +96.2, t 10.1, halves +69.8/+46.7, ex5 +54.9).
+  The SAME signal entered at the market open t+1: -1.2bp (2016-26) / +5.1bp (2003-15) -> the whole effect is the
+  ENTRY: buying the intraday flush below close - ATR(10) on a resting limit.
+  STATUS: NOT validated. Known daily-bar traps for limit fills, unresolved: (a) touch-fill (low <= limit counted as a
+  fill; a real resting order needs a trade-through and queue priority), (b) the daily low may be a print a retail
+  order could not have hit, (c) the open -> limit decline is booked as alpha by construction. Next: frozen stress
+  checks (below) + independent subagent re-implementation from this spec.
+- U2 squeeze duration: KILL (every bucket negative: 2-3 -20.7, 4-8 -3.5, 9-20 -23.5, >20 -12.4; Mobius's ordering
+  does not hold).  U3 Triple Exhaustion end: KILL (-10.4, t -0.2; holds hit the 15-bar cap).
+  U4 Stoch-IFT: KILL by spec - ZERO trades (IFT 0 -> 90+ in one bar never coincides with the EMA21 touch under my
+  stated parameters; the thread's IFT_Stoch(3,1) is ambiguous; not re-parameterised after the look).
+  U5 RS pullback: KILL (-11.2, t -1.2).
+
+## U1 STRESS CHECKS (frozen before any is run; no rule changes, report only)
+S1 trade-through: fill only if low <= limit x (1 - b), b = 10bp / 25bp / 50bp; fill price still the limit.
+S2 cost shock: 30bp RT.   S3 by year (both eras): count of years with net > 0.
+S4 liquidity tiers: $ADV20 terciles of fills; must stay > 0 in the top tercile.
+S5 price tiers: raw close $5-20 / $20-100 / > $100 (tick-size share of the limit distance).
+S6 ex-crisis: drop 2008-09, 2020-03..06, 2022.
+S7 "limit at close - ATR on ALL liquid stocks" (no RSI/SMA100 condition): if this alone earns the same, the RSI(2)
+   signal adds nothing and the effect is a generic intraday-flush-fill effect (most likely a fill artifact).
+Survival bar (stated now): S1 at 25bp trade-through still net >= +25bp in both eras; S7 at least 25bp worse than U1.
+
+### U1 independent re-implementation + frozen stress checks: REPLICATES, then FAILS its survival bar -> KILL (as a daily-bar result)
+Subagent build from the spec (no access to uts.py): fills 28,576 / 25,827 (mine 28,302 / 25,615). Its "mean" is the
+mean of DAILY means (29.6 / 57.6bp); my gated "net" was the per-TRADE mean (60.3 / 92.9); t, medians (68.7 / 95.5 vs
+69.6 / 96.2) and halves match. Market entry: -8.6 / +6.4bp. Stress (daily-mean bp, 2016-26 | 2003-15):
+| check | 2016-26 | 2003-15 |
+|---|---|---|
+| base limit | +29.6 (t 3.5) | +57.6 (t 10.0) |
+| S1 trade-through 10bp | +22.6 (t 2.5) | +54.1 |
+| **S1 trade-through 25bp** | **+9.0 (t 1.0)** | +44.5 (t 7.3) |
+| S1 trade-through 50bp | -9.5 | +28.1 |
+| S2 cost 30bp | +9.6 (t 1.2) | +37.6 |
+| S4 $ADV top tercile | +40.9 | +67.9 |
+| S6 ex-crises | +32.5 | +51.7 |
+| **S7 same limit on ALL liquid stock-days, no signal** | **+22.9 (t 7.1)** | **+35.9 (t 12.9)** |
+Per year: 2016-26 9/11 > 0 (2022 -69.6, 2020 +134.5); 2003-15 13/13 > 0, fading from 2012 (+71.9 in 2011 -> +23.4 in 2015).
+**Frozen survival bar: FAILED on both legs** - (1) at 25bp trade-through 2016-26 is +9.0 < +25; (2) S7 is only
+6.7bp (2016-26) / 21.7bp (2003-15) below U1, not >= 25. Read: the RSI(2)/SMA100 signal adds little; most of the
+"edge" is the generic daily-bar effect of a limit counted as filled at the flush low, and it decays steeply with
+required trade-through (the artifact signature: value concentrated in fills near the day's extreme). U1 is NOT
+validated. The open question (is a resting limit 1 ATR below the close a real liquidity-provision edge?) cannot be
+settled on daily bars: it needs intraday prints (volume that traded THROUGH the limit) or a forward log. Not retuned.
+
+## U1 MINUTE-BAR FILL CHECK (frozen before any minute bar is fetched; research only, user OK "run everything")
+Question: of U1's daily-bar "fills" (low_{t+1} <= limit), which would a resting retail limit actually have filled,
+and what do those fills earn? Data: Alpaca SIP minute bars (feed sip, raw prices, regular hours 09:30-15:59 ET only),
+all U1 fills 2016-01..2026-09 (Alpaca starts 2016; no 2003-15 check possible). Limit mapped to raw prices with bar
+t+1's closeunadj/close factor. Each fill classified:
+  G0 phantom: minute-bar low over RTH > limit (the daily low is not seen in RTH minute bars);
+  G1 touch-only: minute low <= limit but no minute CLOSE below the limit;
+  G2 trade-through: >= 1 minute close < limit;
+  G3 deep fill: >= 1,000 shares traded in minutes whose HIGH < limit (whole minute below the limit).
+Returns = the U1 trade's excess (unchanged: fill at min(open, limit), exit next open after first higher close, EW
+benchmark), net of 10bp. **Survival bar: G3 per-trade net >= +25bp, NW t >= 3, median > 0, both halves > 0.** If it
+survives, the next step is a forward log (needs the user's deploy OK); if not, U1 is closed as a fill artifact.
+Symbols that Alpaca does not return (renamed/delisted Sharadar tickers) are reported as coverage, not dropped silently.
+
+## useThinkScript round 2 (U6-U11), ALL FROZEN HERE BEFORE ANY IS RUN (combo N +6); same engine/gate as U1-U5
+(liquid stocks, entry open t+1, exit at the open after the exit-condition close, cap 15, EW benchmark, 10bp RT;
+gate net >= +25, NW t >= 3, halves > 0, median > 0, ex5 > 0; pass -> one 2003-15 look -> independent re-implementation)
+- U6 Wide Ranging Day breakout (9767): WRD on bar d = true range_d / ATR10_{d-1} > 1.6. Range = max high / min low of
+  bars d-1..d+2, live for bars d+3..d+10. Signal: first close above the range high (close_{t-1} <= it). Exit: close
+  below the range low; cap 15. Long only.
+- U7 Stockbee 4% burst (7478): close/close_{t-1} - 1 >= 4%, close >= 20-bar max close, volume_t > volume_{t-1},
+  prior 10-bar range (max high - min low over t-10..t-1) / close_{t-1} <= 15%, SPY close > SPY 50-bar SMA.
+  Exit: first down close; cap 5.
+- U8 Market Pulse (2668): stack = VWMA8 > VWMA21 > VWMA34 (volume-weighted). Signal: stack turns on at t while on
+  t-1 the stock was in "accumulation" (no stack, close >= VWMA34). Exit: stack turns off.
+- U9 Elder Impulse (33): green = EMA13 rising AND MACD(12,26,9) histogram rising; red = both falling. Signal: first
+  green bar after >= 3 consecutive red bars. Exit: first red bar.
+- U10 Ichimoku TK cross above the cloud (895/18291): Tenkan = (9-bar max high + min low)/2, Kijun = same over 26,
+  SpanA = (Tenkan+Kijun)/2 and SpanB = 52-bar midpoint, both as computed 26 bars ago (the cloud plotted at t). Signal:
+  Tenkan crosses above Kijun AND low_t > max(SpanA, SpanB). Exit: Tenkan crosses below Kijun.
+- U11 Turtle 20/10 (12231): close > prior 20-bar max high. Exit: close < prior 10-bar min low.
+
+### U6-U11 results: ALL KILL (combo N 25)
+U6 WRD breakout -17.3 (t -3.8) | U7 Stockbee 4% burst -15.5 (t -4.9) | U8 Market Pulse -9.4 (t -2.2) |
+U9 Elder first green -14.5 (t -3.4) | U10 Ichimoku TK above cloud -7.0 (t -1.8) | U11 Turtle 20/10 -20.9 (t -3.5).
+Every trend/breakout/momentum-transition setup from the forum LOSES vs the EW liquid universe 2016-26 after 10bp
+(medians -55..-100bp): consistent with F8/F10 (breakouts fade). The useThinkScript harvest is exhausted at the daily
+tier; its only live question is U1's fill reality (minute check running).
+
+### U1 MINUTE-BAR FILL CHECK RESULT: FAILS -> U1 CLOSED AS A FILL ARTIFACT (`research/sim/u1_minute.py`,
+### out `data/research/program/u1_minute_out.txt`, cache `data/research/u1_minute/`)
+28,302 fills 2016-26, minute coverage 96.9%. Per-trade net (daily-mean t, halves):
+| class | share | net | median | t | halves |
+|---|---|---|---|---|---|
+| G1 touch-only (minute low <= limit, no minute close below) | 6% | **+225.4** | +190.6 | 13.4 | +234/+222 |
+| G2 trade-through (a minute closed below) | 8% | **+186.2** | +164.2 | 12.2 | +162/+180 |
+| **G3 deep fill (>= 1,000 sh traded wholly below the limit)** | **83%** | **+38.2** | +51.2 | **0.34** | **+7.4/-1.8** |
+| G0 phantom / nodata | 0% / 3% | +108.7 / +42.1 | | | |
+The edge lives in the 14% of "fills" where price barely reached the limit and reversed - exactly the fills a resting
+retail order sits behind the queue for and mostly does NOT get. Where a resting limit is genuinely filled (G3), the
+daily-mean excess is ~0 (t 0.34, second half negative). Classic adverse selection: you get filled when the stock keeps
+falling. **U1 and the generic "limit 1 ATR below the close" (S7) are DEAD. Do not re-open limit-entry backtests on
+daily bars: a daily-bar limit test must be gated on minute-bar trade-through from now on.**

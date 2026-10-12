@@ -6230,3 +6230,23 @@ Deep loop iter 2, Track B (`research/drafts/prompt_deep_loop_2026-10-12.md`). No
   amendment, then ONE look on the confirmation set **1998-01..2005-12** at 10bp/side and a 3x cost shock (30bp/side), gate:
   net mean > 0, t >= 2, median > 0, ex-top-5-dates > 0, DSR > 0.95 at the full trial count. 2016-26 reported descriptive only.
 - Kill: batch fails the null test -> LUCK, no survivors carried. Out: `data/research/program/luck_b1_out.txt`.
+
+## Study WIKI-ATTN — Wikipedia pageview spikes -> overnight retail-attention pressure (pre-register 2026-10-12; N 935 -> 937)
+Deep loop iter 5, Track A. New data source for the program (Wikimedia pageviews; no prior study in NEXT/prose). Not read:
+any return conditioned on pageviews.
+- **Mechanism.** Attention-limited retail buyers act on names they just noticed; their market orders arrive at the next
+  open, so attention spikes earn overnight and give it back intraday (Berkman-Koch-Tuttle-Zhang 2012; Da-Engelberg-Gao 2011
+  with Google SVI). Who pays: retail buyers paying the opening cross. Why it persists: retail order flow is structural.
+- **Data.** enwiki daily user pageviews (Wikimedia REST per-article, 2015-07+), ticker -> article via Wikidata (P414/P249,
+  enwiki sitelink; one article per ticker, ambiguous maps dropped). Prices: Sharadar SEP (delisted included), SPY from SFP.
+  Pageview day = UTC day; **day d's count is used only from the close of d+1** (UTC d ends 20:00 ET, after the close).
+- **Signal.** spike(i,d) = views(i,d) / median(views(i,d-30..d-1)) >= 3 AND median >= 100 views/day. Universe: domestic common,
+  raw close >= $5, 20d median $vol >= $10M on d+1. Re-arm only after 10 sessions per name.
+- **PRIMARY arm (night).** Buy the close of d+1, sell the open of d+2; return minus SPY close->open same night; cost 7.5bp/side.
+- **SECONDARY arm (drift).** Buy open d+2, sell open d+7, minus SPY same window, same cost.
+- **Judge.** 2016-01..2026-09, halves 2016-20 / 2021-26 (this rule has never been read on either; same post-2016 regime: stated).
+- **Gate (PRIMARY).** Net mean >= +15bp/event (ceiling floor: ~250 nights x 15bp x 50% capital x 50% capture ~= +4.7pp is
+  already below +8pp, so >= +15bp is necessary not sufficient), day-clustered t >= 2.5, median > 0, both halves > 0,
+  ex-top-5 > 0, and a time-shift placebo (spike dates moved +60 sessions, same names) mean <= one third of the real mean.
+  Also reported: overlap with night-leg picks (-8% losers), 2x cost. Kill: any fails. No threshold re-tuning (3x / 100 / 30d frozen).
+- Runner `research/sim/wiki_attn.py` -> `data/research/program/wiki_attn_out.txt`; cache `data/research/wiki/`.
