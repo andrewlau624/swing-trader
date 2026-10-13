@@ -28,6 +28,7 @@ Program N at start: 934. Ceiling = events/yr x net edge x deployable share x cap
 - Roth crypto exposure = spot ETFs (IBIT/ETHA etc.) during US hours only.
 
 ## Waiting on user
+- (2026-10-13) Items 1+2 DEPLOYED by the user; WRDS login done. Remaining: SEC_USER_AGENT (low).
 - **2026-10-12 evening: user said YES to items 1+2.** The push/pull + unit re-render on him was blocked by the auto-mode
   classifier (persistence on the server); user is away and will grant later. To run by hand: `git push origin main`, then on him
   `git pull --ff-only` and re-render research-shadows.service from `deploy/research-shadows.service.in` (sed __APP_DIR__), daemon-reload.
@@ -92,3 +93,11 @@ Which mechanisms move from DATA-LIMITED to testable, ranked by gate odds at $10k
    rule is moot (NX done on daily). Low, unless used to price auction cost for OVN-MOM's names historically (that one IS useful:
    it decides whether OVN-MOM is +4pp or +9pp at $10k).
 Next step once access works: list subscribed libraries (`db.list_libraries()`), then run #5-for-OVN-MOM cost or #1, whichever exists.
+
+## WRDS access verified (2026-10-13)
+Connected (pgpass). Subscribed and useful: CRSP daily (delisted, OPENPRC from 1992), Compustat (incl. sec_shortint 1973+),
+OptionMetrics opprcd 1996-2025, TAQ millisecond taqm_2003..2026 (+ ISSM 1983-92), TRACE + FISD, IBES, TR 13F/insiders,
+CBOE, Datastream futures/equities. **NOT subscribed: Markit/IHS securities lending -> borrow fees stay DATA-LIMITED.**
+Re-rank of the triage: TAQ auction cost for OVN-MOM is low value (live fills already print at the official cross, ~0bp; the
+open question is forward return, not cost). First WRDS study = CRSP-EARLY (N 942-943): night leg + OVN-MOM on untouched 1992-97.
+Deploys done by user 2026-10-12 night: OVN-MOM shadow in research-shadows (first run 10-13 08:20 ET), cb-funding hourly timer.
