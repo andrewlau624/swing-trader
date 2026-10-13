@@ -145,6 +145,14 @@ def _letf_night(state: Path, logs: Path) -> dict:
     return dict(n=s["days"], week=len(wk), line=w.line(rows))
 
 
+def _cb_funding(state: Path, logs: Path) -> dict:
+    from . import cb_funding_log as w
+    rows = _jsonl(state / w.LOG_NAME)
+    s = w.summary(rows)
+    wk = {r["ts"][:10] for r in rows if r["ts"][:10] >= _week_ago()}
+    return dict(n=s["days"], week=len(wk), line=w.line(rows))
+
+
 def _ovn_mom(state: Path, logs: Path) -> dict:
     from . import ovn_mom_shadow as w
     rows = _jsonl(state / w.LOG_NAME)
@@ -466,6 +474,11 @@ REGISTRY: list[Test] = [
          "overnight returns, liquid common stock: official closing cross -> next opening cross, excess vs SPY. Gate: 120 nights, "
          "mean >= +5bp/night, t >= 2, median > 0; FAIL closes the overnight-clientele class (N 939, adversarial: small now).",
          "2026-10-13", 120, "nights", _ovn_mom, "state/ovn-mom.jsonl; round1_prose.md Watch OVN-MOM-FWD", ["ovn_mom_shadow"]),
+    Test("CB-FUNDING: Coinbase US perp funding history", "cb_funding_log.py (hourly timer): logs the public funding rate, price "
+         "and OI of every Coinbase Derivatives US perp-style future (BIP=BTC, ETP=ETH summarized). No one publishes this history; "
+         "read after 90 days: is US funding big and steady enough to carry a spot-vs-perp basis at $2-25k after fees? Log-only.",
+         "2026-10-13", 90, "days", _cb_funding, "state/cb-funding.jsonl; research/drafts/crypto_access_2026-10-12.md",
+         ["cb_funding_log"]),
     Test("Intraday leg re-arm watch (noise, OFF)", "noise_rearm_watch.py: weekly PROD replay of the live intraday rule on the "
          "last 60 sessions (QQQ+SMH, one-bar lag, 0.5bp/fill). POSITIVE = >= 30 trades, Sharpe >= 0.5 and mean > 0 at 2bp/fill: "
          "then re-arming daytrade_mode is a user decision; the leg is off (user 2026-10-11, NOISE-GATE N 934, NOISE-DIAG).",

@@ -1,0 +1,9 @@
+# Installed by `make persist`. Read-only Coinbase US perp funding logger (public GET, no key, no orders).
+[Unit]
+Description=swing-trader Coinbase perp funding logger (research, log-only)
+
+[Service]
+Type=oneshot
+WorkingDirectory=__APP_DIR__
+Environment=PYTHONPATH=__APP_DIR__
+ExecStart=__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.cb_funding_log

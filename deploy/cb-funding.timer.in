@@ -1,0 +1,11 @@
+# Hourly, 5 minutes after each funding stamp (Coinbase CDE funding is hourly, 24/7).
+[Unit]
+Description=swing-trader Coinbase perp funding logger schedule
+
+[Timer]
+OnCalendar=*-*-* *:05:00
+Persistent=false
+Unit=cb-funding.service
+
+[Install]
+WantedBy=timers.target
