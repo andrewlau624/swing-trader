@@ -6622,3 +6622,34 @@ flow features are coarse; fund age from the earliest namedt; last Dec-2012 21d e
 Best (all fail): premium top decile x 21d loser 21d +145bp t 2.06 median +1 (outlier-carried); old fund x 252d winner +43bp t 2.03
 (5%/yr); 63d flow top decile x 5d outflow +241bp t 1.90 n 32, first half negative. ETF fund-level features add nothing.
 Program N = 949.
+
+## Study MODERN-XS — which stock characteristics pick winners in the modern regime (pre-register 2026-10-13; N 949 -> 977, 28 candidates scored)
+User request 2026-10-13: "strategy picking specific stocks that succeed especially well during the current modern timeframe ...
+categories ... volume". Inventory (agent, 2026-10-13): monthly 12-1 momentum, 52w-high, low-vol, 1m reversal, sector/industry
+momentum, theme clusters, calendar seasonality are ALL already judged on 2017-26 and dead (NEXT 1386-1400, 1308) -> excluded.
+Never judged here as a monthly sort on any window: value, profitability/quality, size, investment, issuance, leverage, turnover,
+dollar-volume trend. Not read: any monthly return sorted on these features.
+- **Honesty caveat (stated before running).** Discovery 2021-23 and judge 2024-26 are the SAME regime (CLAUDE.md "two halves is
+  not OOS"). The user asked for modern-regime-specific edges on purpose, so the within-regime judge is the design; a PASS is
+  therefore a forward-shadow candidate only, never sized on the backtest. The 1998-2015 run is descriptive (always-worked vs
+  modern-only), not a gate.
+- **Data.** Sharadar SEP (raw close for price filters, closeadj for returns), DAILY (marketcap, pb, pe, ps, evebitda), SF1 ARQ/ART
+  usable from datekey + 1 trading day, TICKERS (category Domestic Common Stock*, sector); delisted included; SFP QQQ/SPY closeadj.
+- **Universe at each month-end t.** Domestic common, raw close >= $5, 63d median $vol >= $10M, >= 252 sessions listed.
+- **Features (14, each scored in BOTH directions = 28 candidates).** ln marketcap; book-to-market (1/pb); earnings yield (1/pe, all
+  signs as is); sales yield (1/ps); EV/EBITDA inverse; gross profitability (gp / assets, ART); ROE (netinc / equity, ART); accruals
+  ((netinc - ncfo) / assets, ART); asset growth (assets yoy, ARQ); share issuance (sharesbas yoy); leverage (debt / assets); turnover
+  (63d mean volume / shares outstanding); dollar-volume trend (21d / 252d median $vol); ln 63d median $vol.
+- **Rule.** Each month-end: EW top decile of the feature (direction as the candidate says), buy the close of the first session of
+  t+1 (one-session lag), hold to the close of the first session of t+2. Cost 10bp round trip (shock 30bp). Delisting: last close,
+  -30% if delisted for cause (Sharadar action), as SHAR-SURV.
+- **Metrics per month.** Excess vs QQQ (the user's real benchmark) and vs the EW universe (alpha vs beta); report beta to QQQ,
+  sector mix of picks (the "categories" read), median pick $ADV.
+- **Discovery 2021-01..2023-12 (36 months).** Rank the 28 by t of excess vs the EW universe; keep the top 3 with t >= 2.
+- **Judge (one look) 2024-01..2026-09 (33 months), each of the <= 3 kept.** PASS all: annualized net excess vs QQQ >= +16%/yr
+  (= +8pp at $10k at 50% capture); excess vs EW universe t >= 2; median month vs QQQ > 0; ex-top-3 months > 0; 30bp shock still
+  > 0 vs QQQ; DSR > 0.95 at N 977. Otherwise KILL (or WEAK if vs-EW t >= 2 but vs-QQQ fails: a beta-matched tilt, not an index beater).
+- **Descriptive.** 1998-2015 same rule for all 28 (sign/magnitude: always vs modern-only); per-year table; liquidity buckets ($10-50M,
+  $50-500M, > $500M ADV) for the kept features. No re-tuning of decile, universe, lag or features after outcomes.
+- Runner `research/sim/modern_xs.py` -> `data/research/program/modern_xs_out.txt`.
+Program N = 977.
