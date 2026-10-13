@@ -6408,3 +6408,28 @@ gross -1.0bp (median -1.2, hit 49%, t -0.28); net -16.0bp (t -4.42, ex-top-5 -18
 SECONDARY 5d drift gross -2.2, net -17.2 (t -1.80). Overlap with -8% losers 2.8% (net +17.8 but median -32.6, t 0.28). No raw
 attention effect overnight at all on Wikipedia spikes 2016-26. Survivorship: current tickers without Wikidata dates accepted.
 Wikipedia-attention family closed (night and 5d). Program N = 941.
+
+## Study CRSP-EARLY — night leg + OVN-MOM on untouched 1992-97 CRSP (pre-register 2026-10-13; N 941 -> 943)
+Registered before any CRSP price was loaded. New data source: WRDS CRSP daily stock file (user's Wharton access, 2026-10-12),
+delisted-complete (dlret), permno ids, shrcd/exchcd security type. **1992-97 has never been read by any rule in this program**
+(Sharadar starts 1997-12-31; all Alpaca work is 2016+). Purpose = robustness: does the live night leg's mechanism and the
+OVN-MOM clientele effect exist in a regime they were not chosen on? Pre-decimal (1/8-1/16 ticks), so this confirms SIGN and
+mechanism; the net economics of today's market are not judged here.
+- **Window.** CRSP OPENPRC starts mid-1992. Start = first month with OPENPRC on >= 90% of eligible common-stock days on
+  NYSE/AMEX/Nasdaq (coverage check reads no returns), through 1997-12-31. Days with BIDLO/ASKHI < 0 or missing (bid/ask
+  stand-ins, no trades) are ineligible for IBS. Universe: shrcd 10/11, exchcd 1/2/3. Splits: cfacpr. Delisting: dlret
+  (missing -> -30% for performance codes 500-599, else 0, Shumway), applied to a pick with no next open.
+- **N1 night leg (N 942).** The Study NX primary rule verbatim (daily-bar form: drop <= -8%, IBS < 0.10, $5-2000,
+  vol20 >= 0.60, 20d mean $vol >= $10M nominal, crowd 30, corr-0.7 dedupe, night_tilt v1, cap 10%, gap_scale), buy close,
+  sell next open. Gate: per-night equity-weighted GROSS mean > 0 with night-clustered t >= 2; median trade > 0; mean > 0 ex
+  best 5 nights; both halves (start..1994-12 / 1995-01..1997-12) > 0. Reported: tier, tier_hi, beta x same-night small-cap
+  EW close->open residual, $10M-bar count by year. FAIL: gross mean <= 0 or t < 1; else WEAK.
+- **N2 OVN-MOM (N 943).** The Study OVN-MOM rule verbatim (252-night mean overnight return, >= 200 valid, |night| > 50%
+  dropped, close >= $5, 20d median $vol >= $20M, no funds; top decile EW; excess vs same-night CRSP VW-index proxy =
+  EW of the top-500 $vol names close->open, since SPY did not exist before 1993-01). Judge from the first night with 252
+  prior nights. Gate: gross excess mean > 0, night-clustered t >= 2, median night > 0, both halves > 0. Reported: net at
+  2bp/side vs the registered +6.5bp economic bar (expected to fail it in a pre-decimal market), ex-top-5, top-10 arm.
+- One run each, no re-tuning, no second look. A FAIL on N1 is recorded as evidence against the night leg's durability
+  (the user's S2 size-up is not changed by this study; any sizing reaction is a user decision).
+
+Program N = 943.
