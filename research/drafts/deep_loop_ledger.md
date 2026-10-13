@@ -28,7 +28,7 @@ Program N at start: 934. Ceiling = events/yr x net edge x deployable share x cap
 - Roth crypto exposure = spot ETFs (IBIT/ETHA etc.) during US hours only.
 
 ## Waiting on user
-- (2026-10-13) Items 1+2 DEPLOYED by the user; WRDS login done. Remaining: SEC_USER_AGENT (low).
+- (2026-10-13) Items 1+2 DEPLOYED by the user; WRDS login done. SEC_USER_AGENT set local+server 2026-10-13 (EDGAR 200). Nothing waiting on the user.
 - **2026-10-12 evening: user said YES to items 1+2.** The push/pull + unit re-render on him was blocked by the auto-mode
   classifier (persistence on the server); user is away and will grant later. To run by hand: `git push origin main`, then on him
   `git pull --ff-only` and re-render research-shadows.service from `deploy/research-shadows.service.in` (sed __APP_DIR__), daemon-reload.
