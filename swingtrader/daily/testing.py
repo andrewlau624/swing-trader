@@ -161,6 +161,14 @@ def _ovn_mom(state: Path, logs: Path) -> dict:
     return dict(n=s["days"], week=len(wk), line=w.line(rows))
 
 
+def _arete_dip(state: Path, logs: Path) -> dict:
+    from . import arete_dip_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    s = w.summary(rows)
+    wk = {r["date"] for r in rows if r.get("status") == "scored" and r["date"] >= _week_ago()}
+    return dict(n=s["days"], week=len(wk), line=w.line(rows))
+
+
 def _noise_rearm(state: Path, logs: Path) -> dict:
     from . import noise_rearm_watch as w
     rows = _jsonl(state / w.LOG_NAME)
@@ -474,6 +482,12 @@ REGISTRY: list[Test] = [
          "overnight returns, liquid common stock: official closing cross -> next opening cross, excess vs SPY. Gate: 120 nights, "
          "mean >= +5bp/night, t >= 2, median > 0; FAIL closes the overnight-clientele class (N 939, adversarial: small now).",
          "2026-10-13", 120, "nights", _ovn_mom, "state/ovn-mom.jsonl; round1_prose.md Watch OVN-MOM-FWD", ["ovn_mom_shadow"]),
+    Test("ARETE-DIP-FWD: momentum names bought on a down day (from alpha-chasers)", "liquid, high-momentum, top-third-vol "
+         "names (60d >= +20 %, > 50d avg, beat SPY 20d) on a -2 % day closing in the bottom 20 % of its range: close d -> "
+         "close d+5 (and d+3) vs the EW eligible universe, 20bp RT. Gate: 60 signal days, mean > 0, t >= 2, median > 0. "
+         "Historically KILL on untouched 2016-20; this tests whether the post-2020 regime persists (N 946).",
+         "2026-10-14", 60, "signal days", _arete_dip, "state/arete-dip.jsonl; round1_prose.md Watch ARETE-DIP-FWD",
+         ["arete_dip_shadow"]),
     Test("CB-FUNDING: Coinbase US perp funding history", "cb_funding_log.py (hourly timer): logs the public funding rate, price "
          "and OI of every Coinbase Derivatives US perp-style future (BIP=BTC, ETP=ETH summarized). No one publishes this history; "
          "read after 90 days: is US funding big and steady enough to carry a spot-vs-perp basis at $2-25k after fees? Log-only.",

@@ -407,6 +407,9 @@ exdate-open: ## Ex-date open shadow: split / spin-off ex-date night from officia
 ovn-mom: ## OVN-MOM-FWD shadow: overnight-momentum decile / top-10 from official crosses (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.ovn_mom_shadow
 
+arete-dip: ## ARETE-DIP-FWD shadow: momentum names on a down day, d+3/d+5 vs EW universe (no orders)
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.arete_dip_shadow
+
 pick-cost: ## Pick-quality lead: live night auction cost + bounce by price bucket from the fill logs (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.pick_cost_watch
 

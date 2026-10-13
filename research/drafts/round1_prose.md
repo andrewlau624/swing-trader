@@ -6507,3 +6507,21 @@ as a filter on night picks (QI-HIST, dead). Not read: any return conditioned on 
   owns. Reported: top-FLOW decile (buy pressure; expect negative), deciles monotone?, 5bp/side shock, overlap with the night leg's
   picks, top-10-by-FLOW arm. Kill: any gate fails. No re-tuning of the 15:00-15:45 window, decile or 1000-name universe.
 Program N = 945.
+
+## Watch — ARETE-DIP-FWD forward shadow (registered 2026-10-13, before any forward read; N 945 -> 946)
+Origin: `../alpha-chasers` (Andrew's Discord alert-service study, arete1061, 1,912 messages 2023-26). Not discovered in this
+repo; imported with its full record so the count stays honest. alpha-chasers N for this family ≈ 6 cells × 4 exits × 3 eras +
+6 state gates + 39k-trade options sweep (PREREG2-4 there).
+- **What was found there.** His alerts buy liquid, high-momentum, high-vol names AFTER a 1-2 week run; from the alert on they go
+  nowhere (paired edge vs ±5/±10-day shifted copies −1.9 % [−2.9, −0.9], n 331). The same profile bought on a dip (IBS < 0.2,
+  1d <= −2 %) beat the EW liquid universe by +0.60 % (d+5, 2021-24, CI ∋ 0) and +1.47 % (2025-26, CI > 0, ex-top-5 +0.89 %),
+  but LOST −0.46 % on untouched 2016-20 (this repo's bars_pre2021). Frozen bar there: **KILL**. No market-state gate (SPY trend,
+  calm, dip regime, momentum in favour, dispersion, SPY 60d) made it positive in all three eras. Options versions lose.
+- **So this watch tests one narrow claim:** the post-2020 regime that paid for it persists. It is NOT a validated edge.
+- **Rule (frozen).** Session d, eligible: close >= $5, 20d mean $vol >= $20M. Profile: 60d >= +20 %, close > 50d avg, 20d return >
+  SPY's, 20d vol in the top third of eligible names. Dip: IBS < 0.2 and 1d <= −2 %. Log every hit at d's close; score close d ->
+  close d+5 (primary) and d+3 minus the EW return of all names eligible on d, minus 20bp RT. Bar close stands in for the cross.
+- **Gate (60 signal days scored at d+5):** per-signal-day mean > 0, t >= 2, median day > 0 -> PASS -> user decision on a small
+  sleeve. Mean <= 0 -> FAIL, family closed for good. Otherwise HOLD. No parameter changes; no sizing on the backtest.
+- Code: `swingtrader/daily/arete_dip_shadow.py` (logs only), `make arete-dip`, research-shadows service; REGISTRY entry in
+  `testing.py`. Program N = 946.
