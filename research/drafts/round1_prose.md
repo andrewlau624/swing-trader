@@ -6613,3 +6613,12 @@ discounts (EF). Not read: any cross-sectional ETF rule on flow/premium/age/size 
   reversion), get an amendment, then ONE look on 2013-19 at 5bp and 15bp/side; gate as discovery with t >= 2 and DSR > 0.95.
 - Out: `data/research/program/luck_b6_out.txt`, `luck_b6_rules.parquet`.
 Program N = 949.
+
+### Result — LUCK-B6 (2026-10-13, discovery 2004-12 only; N 949, 800 trials): LUCK — 0 passes, nulls 0 (10/10), placebo 0
+`luck_gen6.py` (pull `luck_b6_pull.py`, cache data/research/wrds_b6/), out `luck_b6_out.txt`; scorer from luck_gen4 unchanged
+(halves split set to 2009-01-01 as registered). NAV link 94% of ETF-days (fund_hdr cusip8 -> ncusip), so premium features kept;
+universe ~95 (2004) -> 465 (2012) funds/day. Disclosed: CRSP ETF shrout updates irregularly (5d change exactly 0 on 80% of rows), so
+flow features are coarse; fund age from the earliest namedt; last Dec-2012 21d exits dropped. Confirmation 2013-19 NOT pulled.
+Best (all fail): premium top decile x 21d loser 21d +145bp t 2.06 median +1 (outlier-carried); old fund x 252d winner +43bp t 2.03
+(5%/yr); 63d flow top decile x 5d outflow +241bp t 1.90 n 32, first half negative. ETF fund-level features add nothing.
+Program N = 949.
