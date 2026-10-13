@@ -6589,3 +6589,27 @@ D10 -0.5); overnight +1.0 / day -1.5; per-year negative except 2009. Disclosed: 
 `cmsn_trd IS DISTINCT FROM 'Y'` (first pull wrongly dropped NULLs; re-pulled before scoring); issuer->permno link resolves 32.6% of
 issuer-days (ambiguous cusip6 links dropped); IG/HY split skipped. Read: stocks already price same-day bond moves; no lead to harvest.
 Program N = 948.
+
+## Study LUCK-B6 — random-rule discovery batch, grammar 6: ETF cross-section with fund-level features (pre-register 2026-10-13; N 948 -> 949, DSR at 949 + 800 trials)
+Deep loop iter 22, Track B. Grammar change per checkpoint 4: leaves the single-stock cross-section (B1/B2/B4/B5 were stocks, B3
+crypto alts). Asset = all US exchange-traded funds/notes in CRSP (shrcd 73, delisted included), Roth-eligible. New feature family:
+fund flows (shares-outstanding change), premium/discount to NAV (CRSP MF daily NAV), fund age/size. Touched for ETFs before: IBS on
+equity ETFs (live rule; 2003-15 SHAR-IBS, 2016-20 OOS), SPY creation flow (ETC 2016+), bond-SPDR premium (BSPD 2007+), broad SPDR
+discounts (EF). Not read: any cross-sectional ETF rule on flow/premium/age/size features.
+- **Data.** CRSP daily dsf/dsenames/dsedelist for shrcd 73 (2003-07..2013-01 for discovery features and exits). CRSP MF daily_nav
+  linked to permno (via fund_hdr ticker/cusip -> dsenames ncusip; disclose the link rate; if < 50% of ETF-days link, the premium
+  features are dropped and disclosed, the rest of the grammar runs). Universe on d: close >= $5, 20d median $vol >= $1M, listed >= 60d.
+- **Grammar 6 (seed 20261015, `research/sim/luck_gen6.py`, deduped).** Features known at the close of d: shares-outstanding change
+  5d / 21d / 63d (flow), premium to NAV (close/NAV - 1) and its 21d z-score, dollar volume / 63d avg, ln(market cap), fund age,
+  ret 1/5/21/63/252d, 21d vol, 252d max drawdown, distance to 52w high. Rule = f1 cross-sectional decile 1 or 10, optionally AND f2
+  tercile 1 or 3 x horizon {overnight (close d+1 -> open d+2), 5d, 21d} x LONG only, excess vs EW universe. 800 distinct rules.
+- **Score.** Enter at the close of d+1, cost 5bp/side (shock 15bp), non-overlapping for 5d/21d. Same scorer frame as LUCK-B4.
+- **Discovery = 2004-01..2012-12 only** (halves 2004-08 / 2009-12). Confirmation = **2013-01..2019-12**, not pulled. 2020+ unused.
+- **Pass (discovery).** Net mean > 0, t >= 3, both halves > 0, median > 0, ex-top-5 dates > 0, n >= 30 dates, annualized net excess
+  at 100% deployment >= 16%/yr.
+- **Null.** 10 within-date feature permutations + a date placebo (features lagged 252 trading days per fund). Batch counts only if
+  real passes > max over all 11 null runs AND > 3 x their mean.
+- **Survivors.** <= 5 with a plausible mechanism, not a known dead family (IBS/short-term reversal, leverage-only, ETF discount
+  reversion), get an amendment, then ONE look on 2013-19 at 5bp and 15bp/side; gate as discovery with t >= 2 and DSR > 0.95.
+- Out: `data/research/program/luck_b6_out.txt`, `luck_b6_rules.parquet`.
+Program N = 949.
