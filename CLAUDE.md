@@ -1002,3 +1002,8 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
 - Crypto alt panel: `data/research/crypto_spot/` (Binance USDT spot 2017-08..2026-09, 249 delisted; build `research/sim/crypto_spot_build/`).
 - **WIKI-ATTN (N 936-937): KILL.** Wikipedia pageview spikes -> no overnight or 5d effect (gross -1bp/night, n 5,854, 2016-26).
   Pageview cache `data/research/wiki/` (1,898 articles, 2015-07+) stays for reuse; do not re-run attention spikes on it.
+- **WRDS (user's Wharton access, 2026-10-13):** CRSP, Compustat (sec_shortint 1973+), OptionMetrics 1996-2025, TAQ ms 2003-26,
+  TRACE/FISD, IBES, TR 13F/insiders, CBOE, Datastream. NO Markit lending (borrow fees stay DATA-LIMITED). `wrds` in .venv, ~/.pgpass.
+- **CRSP-EARLY (N 942-943): night leg NOT CONFIRMED on 1992-97** (gross t 2.5 is bid-ask bounce: from the closing mid t 1.33);
+  **OVN-MOM mechanism CONFIRMED** (+16.6bp t 8.4, survives midquote/NYSE-only/stale scores) but pre-decimal spreads make the
+  net untestable; forward shadow decides. 1992-97 is now TOUCHED for both rules.

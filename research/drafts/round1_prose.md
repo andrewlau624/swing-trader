@@ -6433,3 +6433,20 @@ mechanism; the net economics of today's market are not judged here.
   (the user's S2 size-up is not changed by this study; any sizing reaction is a user decision).
 
 Program N = 943.
+
+### Result — CRSP-EARLY (judged 2026-10-13, one run; N 942-943) + adversarial check
+Window 1992-11..1997-12 (coverage rule: first month OPENPRC >= 90%). `crsp_early.py` -> `crsp_early_out.txt`; adversary
+`crsp_early_adv.py` -> `crsp_early_adv_out.txt` (closing bid/ask from CRSP dsf).
+- **N1 night leg: registered PASS (gross +2.87bp/night, t 2.47, median trade +58.6bp, halves +1.58/+3.80) -> NOT CONFIRMED.**
+  The pick's close sits 27bp below the closing midquote (median 24): from the mid the gross is +1.55bp t 1.33 (fails t >= 2), from
+  the ask -1.7bp; top-10 nights = 68% of P&L; 1996-97 negative on trade and mid bases; beta-adjusted residual ~0 (+1.08 t 0.99).
+  Read: in 1992-97 the night leg is bid-ask bounce + small-cap beta. Adds to the regime-concentration evidence (exact 2016-20, NX
+  small). No sizing reaction from this study (S2 is a user decision on live cost/forward fills).
+- **N2 OVN-MOM: registered PASS -> MECHANISM CONFIRMED, economics not judged.** Excess +16.55bp t 8.4, median +16.8, deciles
+  monotone (-7.5..+16.5), halves +8.3/+19.7. Survives the closing midquote (+16.2 t 8.1; mid-ranked +16.4, 86% overlap), NYSE
+  alone (+10.6 t 4.6; Nasdaq +18.0), no high-spread concentration, stale scores (lag 126/252/504 nights +14.5/+13.0/+10.5),
+  random-decile placebo +1.4. Next-day open->close -17.1bp (t -4.3), close->close ~0: night-only clientele, as in LPS.
+  **The registered "net +12.6bp at 2bp/side" is INVALID** for 1992-97: half-spreads were ~37bp (buy-at-ask vs mid benchmark
+  -22bp). So 1992-97 confirms the effect exists in a third, untouched era (now 1993-2026 all positive gross), not that it paid.
+  Today's cost question stays with the OVN-MOM-FWD forward shadow (live from 2026-10-13).
+Program N = 943.
