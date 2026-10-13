@@ -6557,3 +6557,26 @@ Best rules (all fail: t <= 2.00 vs 3, ann <= 11%/yr vs 16%): FY1 1m revision bot
 +161/-19); 5d loser x high earnings yield 21d +92bp t 2.00 (both halves +, known reversal family); high EY x low coverage +71bp t 1.97.
 Analyst-forecast state adds nothing beyond known families (revision drift, reversal, value).
 Program N = 947.
+
+## Study BOND-LEAD — corporate-bond price moves lead the issuer's stock, next day (pre-register 2026-10-13; N 947 -> 948)
+Deep loop iter 21, Track A. New data family (TRACE enhanced, `wrdsapps_bondret.trace_enhanced_clean`, never used here), new
+mechanism (cross-market information flow: informed institutional bond traders vs a stock that under-reacts), counterparty = the
+equity side that is slow to price credit news. Literature is mixed (Downing-Underwood-Xing 2009: bonds lag; Hotchkiss-Ronen 2002:
+no lead); this is a cheap kill test, not a prior. Not read: any stock return conditioned on a bond-trade feature.
+- **Ceiling.** Daily x top decile (~50-150 issuers; 10 names executable at $2-25k) x 100% of the overnight/day capital x 50% capture:
+  needs >= +6.5bp/day net excess -> 250 x 6.5 x 50% = +8.1pp/yr at $10k; $100k fine (large-cap bond issuers).
+- **Rule (frozen).** Bond day-price for (cusip_id, d) = the last trade with entrd_vol_qt >= 100,000 executed by 15:59:59 ET on d
+  (trd_exctn_tm), excluding when-issued, commissioned, special-condition (spcl_trd_fl) and as-of trades; the enhanced-clean table's
+  cancel/correction handling is taken as given. Bond return = day-price(d) / day-price(prev day the bond had one) - 1, only if that
+  prev day is within 5 trading days. BRET(issuer, d) = median bond return over the issuer's bonds (issuer = first 6 CUSIP chars),
+  needs >= 1 bond. Map issuer -> CRSP permno by ncusip[:6] valid on d (CRSP common shrcd 10/11, exchcd 1/2/3). Universe on d: has
+  BRET, prior close >= $5, 20d median $vol >= $10M. Pick = top decile of BRET (bonds up most). Hold the stock from the 16:00 close of
+  d to the 16:00 close of d+1 (CRSP ret d+1); excess = EW pick minus EW universe. Delisting returns as in CRSP-EARLY.
+- **Window.** Judge 2006-01-03..2015-12-31 (full TRACE dissemination from 2005-02; enhanced TRACE). Halves 2006-10 / 2011-15.
+  2016+ not used (kept for a confirmation look if this ever passes).
+- **Gate (all).** Net excess >= +6.5bp/day at 2bp/side; day-clustered t >= 2; median day > 0; ex-top-5 days > 0; both halves > 0;
+  AND the WITHIN-stock-return-tercile spread (top-BRET decile vs universe inside terciles of the stock's own close-to-close return on
+  d, averaged) > 0 with t >= 2, so the effect is bond information, not the stock's own momentum/reversal. Reported: bottom-BRET decile
+  (expect negative), decile monotonicity, overnight (close d -> open d+1) vs day split, 5bp/side shock, IG vs HY issuers (by the
+  bond's FISD rating if cheaply available; else skip). Kill: any gate fails. No re-tuning of size cut, time cut, decile or horizon.
+Program N = 948.
