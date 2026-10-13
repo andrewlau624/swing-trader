@@ -1008,3 +1008,4 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
   **OVN-MOM mechanism CONFIRMED** (+16.6bp t 8.4, survives midquote/NYSE-only/stale scores) but pre-decimal spreads make the
   net untestable; forward shadow decides. 1992-97 is now TOUCHED for both rules.
 - **LUCK-B4 (N 944): LUCK.** 1000 random long-only rules on OptionMetrics IV/skew/PC-volume + Compustat short interest (2001-10): 0 passes, nulls 0. Per-stock option state adds nothing beyond known families (high-IV overnight premium, reversal).
+- **LUCK-B5 (N 947): LUCK.** 1000 random long-only rules on IBES consensus/dispersion/revision/LTG features (2001-10): 0 passes, nulls 0, placebo 0; best t 2.00 = revision drift / reversal x value. IBES summary features add nothing.

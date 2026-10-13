@@ -6548,3 +6548,12 @@ return conditioned on an IBES consensus/dispersion/revision feature here. Same s
   reversal, IBS, size), get an amendment, then ONE look on 2011-19 at 5bp and 15bp/side; gate as discovery with t >= 2 and DSR > 0.95.
 - Out: `data/research/program/luck_b5_out.txt`, `luck_b5_rules.parquet`.
 Program N = 947.
+
+### Result — LUCK-B5 (2026-10-13, discovery 2001-10 only; N 947, 1000 trials): LUCK — 0 passes, nulls 0 (10/10), placebo 0
+`luck_gen5.py` (pull `luck_b5_pull.py`, cache data/research/wrds_b5/), out `luck_b5_out.txt`; scoring imported unchanged from
+luck_gen4. Disclosed choices: IBES measure='EPS'; ibcrsphist lowest score kept; revisions vs the prior snapshot of the same fiscal
+period (1m: 20-45d gap, 3m: 70-120d); float64 casts; late-2010 exits use Jan-2011 closes. Confirmation 2011-19 NOT pulled or read.
+Best rules (all fail: t <= 2.00 vs 3, ann <= 11%/yr vs 16%): FY1 1m revision bottom decile x low dispersion 21d +75bp t 2.00 (halves
++161/-19); 5d loser x high earnings yield 21d +92bp t 2.00 (both halves +, known reversal family); high EY x low coverage +71bp t 1.97.
+Analyst-forecast state adds nothing beyond known families (revision drift, reversal, value).
+Program N = 947.
