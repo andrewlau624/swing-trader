@@ -6525,3 +6525,26 @@ repo; imported with its full record so the count stays honest. alpha-chasers N f
   sleeve. Mean <= 0 -> FAIL, family closed for good. Otherwise HOLD. No parameter changes; no sizing on the backtest.
 - Code: `swingtrader/daily/arete_dip_shadow.py` (logs only), `make arete-dip`, research-shadows service; REGISTRY entry in
   `testing.py`. Program N = 946.
+
+## Study LUCK-B5 — random-rule discovery batch, grammar 5: analyst-forecast (IBES) features (pre-register 2026-10-13; N 946 -> 947, DSR at 947 + 1000 trials)
+Deep loop iter 19, Track B (grammar change = new data family: IBES summary statistics, never used in this program). Not read: any
+return conditioned on an IBES consensus/dispersion/revision feature here. Same scoring frame as LUCK-B4 so the nulls are comparable.
+- **Data.** CRSP daily (cached `data/research/wrds_b4/` dsf 2000-06..2011-02 + delist/names) linked to IBES via
+  wrdsapps.ibcrsphist (score <= 2 only). IBES unadjusted summary `ibes.statsumu_epsus`, FY1 (fpi '1') and LTG (fpi '0'), usable from
+  the trading day AFTER statpers. Universe on d: CRSP common, close >= $5, 20d median $vol >= $10M, has a FY1 consensus within 45d.
+- **Grammar 5 (seed 20261014, `research/sim/luck_gen5.py`, deduped).** Features known at the close of d: consensus earnings yield
+  (FY1 mean / price), dispersion (stdev / |price|), dispersion / |mean|, 1m and 3m revision of the FY1 mean / price, net revision
+  breadth (numup - numdown) / numest, numest, numest change 3m, LTG mean, LTG minus its 3m-ago value, mean-vs-median gap / price;
+  plus controls ret 5/21d, size. Rule = f1 cross-sectional decile 1 or 10, optionally AND f2 tercile 1 or 3 x horizon {overnight
+  (close d+1 -> open d+2), 5d, 21d} x LONG only (excess vs EW universe). 1000 distinct rules.
+- **Score.** Enter at the close of d+1, cost 5bp/side (shock 15bp), non-overlapping for 5d/21d.
+- **Discovery = 2001-01..2010-12 only** (halves 2001-05 / 2006-10). Confirmation = **2011-01..2019-12**, unseen for these features
+  (not pulled in this run). 2020+ not used.
+- **Pass (discovery).** Net mean > 0, t >= 3, both halves > 0, median > 0, ex-top-5 dates > 0, n >= 30 dates, AND annualized net
+  excess at 100% deployment >= 16%/yr (the +8pp-at-50%-capture ceiling).
+- **Null.** 10 within-date feature permutations + a date placebo (features lagged 252 trading days per stock). Batch counts only if
+  real passes > max over all 11 null runs AND > 3 x their mean.
+- **Survivors.** <= 5 with a plausible mechanism, not a known dead family (PEAD/revision drift is in the gap per CLAUDE.md, short-term
+  reversal, IBS, size), get an amendment, then ONE look on 2011-19 at 5bp and 15bp/side; gate as discovery with t >= 2 and DSR > 0.95.
+- Out: `data/research/program/luck_b5_out.txt`, `luck_b5_rules.parquet`.
+Program N = 947.
