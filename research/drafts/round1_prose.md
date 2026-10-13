@@ -6485,3 +6485,25 @@ Best rules (all fail): top-ATM-IV decile overnight +3.9..5.3bp/night t 2.4-3.1 (
 as the night leg / OVN-MOM, ~+10-13%/yr at 100% gross, below the 16% floor); 5d short-term reversal x short interest +52..68bp
 on 224 dates (known reversal family, t < 3). Per-stock option-implied state + short interest add nothing beyond known families.
 Program N = 944.
+
+## Study LATE-FLOW — late-day signed trade flow -> overnight reversal, stock cross-section (pre-register 2026-10-13; N 944 -> 945)
+Deep loop iter 18, Track A. New data source (WRDS TAQ millisecond trades, taqm_YYYY.ctm_YYYYMMDD + complete_nbbo), new
+mechanism vs the book (ORDER FLOW, not price: the night leg/IBS select on the price path), counterparty = late-day liquidity
+demanders (institutional/benchmark-close sellers) paying an overnight premium to the closing liquidity supplier. Prior tests
+here are different objects: closing-cross IMBALANCE (Lab-BB, dead), opening quote imbalance on ETFs (AT), 15:40 quote imbalance
+as a filter on night picks (QI-HIST, dead). Not read: any return conditioned on intraday signed trade flow.
+- **Ceiling.** Every night x top decile (~50-100 names, top 10 executable at $2-25k) x 100% of the overnight capital x 50% capture:
+  needs >= +6.5bp/night net excess -> 250 x 6.5 x 50% = +8.1pp/yr at $10k; $100k fine (closing auction of top-1000 names).
+- **Rule (frozen).** Universe on d: CRSP common (shrcd 10/11, exchcd 1/2/3), prior close >= $5, top 1000 by 20d median $vol (from
+  days before d). FLOW(i,d) = sum over regular-hours trades 15:00:00-15:44:59 of sign x size / 20d median daily share volume, sign
+  by Lee-Ready (trade vs prevailing NBBO mid at 1ms-before; at the mid -> tick test), excluding odd-lot-flagged/out-of-sequence/
+  corrected trades and auction prints (cond codes O,Q,6,M). Pick = bottom decile of FLOW (heaviest net selling). Buy the 16:00
+  close of d (CRSP prc), sell the next open (CRSP openprc); excess = EW pick close->open minus EW universe close->open.
+- **Window.** Judge 2010-01-04..2015-12-31 (post-Reg NMS, millisecond TAQ, decimal; this rule never read anywhere). Halves
+  2010-12 / 2013-15. Overnight returns: CRSP, ex-dividend nights dropped, delisting as in CRSP-EARLY.
+- **Gate (all).** Net excess >= +6.5bp/night at 2bp/side; night-clustered t >= 2; median night > 0; ex-top-5 nights > 0; both
+  halves > 0; AND the WITHIN-day-return-tercile spread (bottom-FLOW decile vs universe, computed inside terciles of the day's
+  close-to-close return and averaged) > 0 with t >= 2 — so the effect is order flow, not the price reversal the night leg already
+  owns. Reported: top-FLOW decile (buy pressure; expect negative), deciles monotone?, 5bp/side shock, overlap with the night leg's
+  picks, top-10-by-FLOW arm. Kill: any gate fails. No re-tuning of the 15:00-15:45 window, decile or 1000-name universe.
+Program N = 945.
