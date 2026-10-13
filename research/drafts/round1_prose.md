@@ -6476,3 +6476,12 @@ index-level: OPEX pin, VTS, gamma proxy; per-stock option-implied features never
   ONE look on 2011-19 at 5bp and 15bp/side; gate as discovery with t >= 2 and DSR > 0.95.
 - Out: `data/research/program/luck_b4_out.txt`, `luck_b4_rules.parquet`.
 Program N = 944.
+
+### Result — LUCK-B4 (2026-10-13, discovery 2001-10 only; N 944, 1000 trials): LUCK — 0 passes, nulls 0 (10/10), placebo 0
+`luck_gen4.py` (pull `luck_b4_pull.py`, cache data/research/wrds_b4/), out `luck_b4_out.txt`. Disclosed: one NA-dtype crash fixed
+before any scoring (dsf/dlret cast to float64); SI-feature rules split halves at their own median date (sec_shortint starts
+2006-07, so the registered 2001-05 half is empty for them); 10bp RT; link score 1. Confirmation 2011-19 NOT pulled or read.
+Best rules (all fail): top-ATM-IV decile overnight +3.9..5.3bp/night t 2.4-3.1 (the known high-vol overnight premium, same family
+as the night leg / OVN-MOM, ~+10-13%/yr at 100% gross, below the 16% floor); 5d short-term reversal x short interest +52..68bp
+on 224 dates (known reversal family, t < 3). Per-stock option-implied state + short interest add nothing beyond known families.
+Program N = 944.

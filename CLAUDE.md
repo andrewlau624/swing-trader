@@ -1007,3 +1007,4 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
 - **CRSP-EARLY (N 942-943): night leg NOT CONFIRMED on 1992-97** (gross t 2.5 is bid-ask bounce: from the closing mid t 1.33);
   **OVN-MOM mechanism CONFIRMED** (+16.6bp t 8.4, survives midquote/NYSE-only/stale scores) but pre-decimal spreads make the
   net untestable; forward shadow decides. 1992-97 is now TOUCHED for both rules.
+- **LUCK-B4 (N 944): LUCK.** 1000 random long-only rules on OptionMetrics IV/skew/PC-volume + Compustat short interest (2001-10): 0 passes, nulls 0. Per-stock option state adds nothing beyond known families (high-IV overnight premium, reversal).
