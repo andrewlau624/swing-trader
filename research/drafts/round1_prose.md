@@ -6664,3 +6664,13 @@ t -3.5). Disclosed choices: SF1 strict datekey < t with a 450d staleness cap; RO
 close x volume; turnover via marketcap/raw close; for-cause delisting = bankruptcy/regulatory action within 10d; ticker as key.
 Read: no untested characteristic beats QQQ in 2024-26; modern winners were index/tech beta, which a QQQ benchmark already holds.
 Program N = 977.
+
+### Result — LATE-FLOW (2026-10-13, 2010-01..2015-12, one full run; N 945): KILL, 0/6 gates
+`late_flow.py` (aggregation `late_flow_run.py`/`late_flow_day.py`, cache data/research/late_flow/), out `late_flow_out.txt`. 1510 days,
+universe 1000/day, link 0.976, flow rate 0.968, 2072 trades/name in the window, 9.5% signed by tick test. Bottom-FLOW decile: gross
++0.87bp/night, net -3.13bp at 2bp/side (t -9.6), median -3.3, ex-top-5 -3.4, halves -2.5 / -3.8; 5bp/side -9.1. Deciles monotone
+(D1 +0.9 t 2.7 ... D10 -1.3 t -3.5, Spearman -0.85); top-FLOW decile -5.2 net; within-day-return-tercile spread gross +0.55 t 1.72.
+Disclosed: excluded cond codes O,Q,6,M plus I,Z,U (odd-lot / out-of-sequence) and tr_corr != 00; the runner agent read a 166-day
+(2010) preview (-2.1bp net) before the run finished; the design was not changed. Read: late-day order flow does carry a real
+overnight premium, but ~1bp/night, an order of magnitude below the gate and below any realistic cost.
+Program N = 977.
