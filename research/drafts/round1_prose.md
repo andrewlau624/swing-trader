@@ -6653,3 +6653,14 @@ dollar-volume trend. Not read: any monthly return sorted on these features.
   $50-500M, > $500M ADV) for the kept features. No re-tuning of decile, universe, lag or features after outcomes.
 - Runner `research/sim/modern_xs.py` -> `data/research/program/modern_xs_out.txt`.
 Program N = 977.
+
+### Result — MODERN-XS (2026-10-13, one look; N 977): KILL
+`modern_xs.py`, out `modern_xs_out.txt`. Panel 1999-01..2026-09, median 1,405 names/month. Discovery 2021-23 top 5 by t vs EW: sales
+yield+ 2.20, issuance- 2.09, b2m+ 1.75, ey+ 1.70, evebitda_inv+ 1.57 -> kept sy+ and issuance- (selection written before 2024+ was
+computed). Judge 2024-01..2026-09: sy+ vs QQQ -1.10%/mo (t -1.07), vs EW -0.17 (t -0.38), median -2.37, hit 39%; issuance- vs QQQ
+-1.09%/mo (t -1.17), vs EW -0.16 (t -0.56); all gates FAIL, DSR 0. Picks tilt Consumer Cyclical/Defensive and Financials, away from
+Tech; beta to QQQ 0.26-0.43 in the judge window. 1998-2015 descriptive: sy+ +0.20%/mo t 0.70, issuance- +0.31 t 1.42 (issuance+ -0.67
+t -3.5). Disclosed choices: SF1 strict datekey < t with a 450d staleness cap; ROE needs positive equity; $vol from split-adjusted
+close x volume; turnover via marketcap/raw close; for-cause delisting = bankruptcy/regulatory action within 10d; ticker as key.
+Read: no untested characteristic beats QQQ in 2024-26; modern winners were index/tech beta, which a QQQ benchmark already holds.
+Program N = 977.
