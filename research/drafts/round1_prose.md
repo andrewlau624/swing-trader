@@ -6580,3 +6580,12 @@ no lead); this is a cheap kill test, not a prior. Not read: any stock return con
   (expect negative), decile monotonicity, overnight (close d -> open d+1) vs day split, 5bp/side shock, IG vs HY issuers (by the
   bond's FISD rating if cheaply available; else skip). Kill: any gate fails. No re-tuning of size cut, time cut, decile or horizon.
 Program N = 948.
+
+### Result — BOND-LEAD (2026-10-13, 2006-01..2015-12, one look; N 948): KILL, 0/6 gates
+`bond_lead.py` (pull `bond_lead_pull.py`, cache data/research/bond_lead/), out `bond_lead_out.txt`. 2515 days, ~1161 issuers/day with
+BRET, universe 327/day, 33 picks/day. Net excess -4.51bp/day at 2bp/side (gross -0.51), t -3.95, median -5.97, ex-top-5 -5.42; halves
+-4.53 / -4.50; within-stock-return-tercile spread +0.03bp t 0.03. Bottom decile -3.0bp (t -2.3); deciles not monotone (D8/D9 +1.9/+2.8,
+D10 -0.5); overnight +1.0 / day -1.5; per-year negative except 2009. Disclosed: cmsn_trd is NULL from 2012-02 on, so the filter is
+`cmsn_trd IS DISTINCT FROM 'Y'` (first pull wrongly dropped NULLs; re-pulled before scoring); issuer->permno link resolves 32.6% of
+issuer-days (ambiguous cusip6 links dropped); IG/HY split skipped. Read: stocks already price same-day bond moves; no lead to harvest.
+Program N = 948.
