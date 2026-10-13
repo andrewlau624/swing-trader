@@ -32,7 +32,8 @@ Program N at start: 934. Ceiling = events/yr x net edge x deployable share x cap
   classifier (persistence on the server); user is away and will grant later. To run by hand: `git push origin main`, then on him
   `git pull --ff-only` and re-render research-shadows.service from `deploy/research-shadows.service.in` (sed __APP_DIR__), daemon-reload.
   The 33 pushed commits touch only research/, NEXT/CLAUDE.md, ovn_mom_shadow.py + test, testing.py REGISTRY, Makefile, the unit file.
-  The funding logger (item 2) is not built yet.
+  Funding logger (item 2) BUILT + committed (6c45622: `cb_funding_log.py`, cb-funding hourly timer, install-schedule lines,
+  REGISTRY CB-FUNDING, 2 tests); live dry run parsed 29 CDE perps. Same deploy step, plus `scripts/sysd.sh enable --now cb-funding.timer`.
 - **WRDS (Wharton) access: user has it (2026-10-12).** Not usable yet: no `wrds` package, no ~/.pgpass. Needs the user to log in once
   (Duo MFA) and say which libraries the subscription covers. Triage below.
 - Deploy the OVN-MOM-FWD shadow (log-only, committed locally: `swingtrader/daily/ovn_mom_shadow.py`, research-shadows unit line) to him? Untested against live sip_daily/crosses; first run pulls ~400 days of daily bars for the night universe.
