@@ -24,6 +24,7 @@ Program N at start: 934. Ceiling = events/yr x net edge x deployable share x cap
 | 17 | B | LUCK-B4: 1000 random long-only rules on OptionMetrics IV/skew/PC volume + Compustat short interest (grammar 4) | random / OptionMetrics + Compustat SI via WRDS / US stocks / overnight-5d-21d / none named | gate inside the batch: >= 16%/yr at 100% | LUCK: 0 passes, null 0/10, placebo 0; best = high-IV overnight premium (known) | `luck_b4_out.txt` |
 | 18 | A | LATE-FLOW: late-day (15:00-15:45) Lee-Ready signed trade flow -> overnight, top-1000 stocks, judge 2010-15 | order-flow liquidity premium / WRDS TAQ ms / US stocks / overnight / late-day liquidity demanders | needs >= +6.5bp/night net | RUNNING (TAQ aggregation ~6.9h; 166-day preview -2.1bp t -2.3 read by the runner agent before completion, disclosed) | `late_flow_out.txt` (pending) |
 | 19 | B | LUCK-B5: 1000 random long-only rules on IBES consensus/dispersion/revision/LTG features (grammar 5) | random / IBES statsumu via WRDS / US stocks / overnight-5d-21d / none named | gate inside the batch: >= 16%/yr at 100% | LUCK: 0 passes, null 0/10, placebo 0; best t 2.00 (revision x dispersion, reversal x EY: known families) | `luck_b5_out.txt` |
+| 20 | A | WRDS ceiling sweep 2: daily bond->equity lead (TRACE), mutual-fund fire-sale pressure (CRSP MF holdings), closing-volume-share overnight reversal (TAQ), SPY signed dealer gamma as a leg gate (OptionMetrics) | informed bond trading / redemption-forced funds / closing-cross pressure / dealer hedging; TRACE, CRSP MF, TAQ, OptionMetrics; US stocks + SPY; daily-quarterly | BOND-LEAD clears on paper (night shape, needs >= +6.5bp/night) but prior low (Hotchkiss-Ronen: no lead post-dissemination); MF fire-sale ~2-4pp (quarterly lag, Wardlaw mechanical critique); close-volume reversal = LATE-FLOW's family; GEX gate needs a second look at touched IBS windows | BOND-LEAD = next Track A candidate; MF fire-sale CEILING-KILL; close-volume DEFERRED to LATE-FLOW verdict (dies with it); GEX gate KILL (touched windows) | this row |
 ## Crypto access (date-versioned, checked 2026-10-12)
 - Schwab Crypto spot BTC/ETH (rollout from 2026-05-12, SOL/AVAX/LINK added ~2026-08): via Charles Schwab Premier Bank,
   ~75bp per trade (secondary sources), not in NY/LA. Not an IRA product as far as the sources say: assume NOT Roth.
@@ -105,3 +106,18 @@ CBOE, Datastream futures/equities. **NOT subscribed: Markit/IHS securities lendi
 Re-rank of the triage: TAQ auction cost for OVN-MOM is low value (live fills already print at the official cross, ~0bp; the
 open question is forward return, not cost). First WRDS study = CRSP-EARLY (N 942-943): night leg + OVN-MOM on untouched 1992-97.
 Deploys done by user 2026-10-12 night: OVN-MOM shadow in research-shadows (first run 10-13 08:20 ET), cb-funding hourly timer.
+
+## Checkpoint 4 (after iter 20, 2026-10-13 ~03:00 ET)
+- Since checkpoint 3: CRSP-EARLY (night leg NOT confirmed on 1992-97: bid-ask bounce; OVN-MOM mechanism CONFIRMED, net untestable
+  pre-decimal), LUCK-B4 (options/SI: luck), LUCK-B5 (IBES: luck), WRDS ceiling sweep 2 (row 20). LATE-FLOW (TAQ, row 18) still
+  aggregating (~6.9h; 2010 preview -2.1bp/night, far below the +6.5bp gate, not a verdict).
+- Totals: 20 iterations, N 934 -> 947. Luck track 0 signal in 5 batches across 5 data families (price, events, crypto alts, options/SI,
+  analysts): the random-rule search keeps reproducing known families (reversal, high-vol overnight premium, value) and nothing else.
+- Best addition vs index at $2.3k / $10k / $25k: still none confirmed. OVN-MOM (forward shadow live since 10-13) is the only
+  candidate; ~+4pp at 2bp/side, ~+9pp if ~0bp auction cost holds (half capture); $100k fine.
+- **Pivot (last ~10 iterations nothing above the gate):** Track C is PAUSED. Every crypto mechanism reachable from this user's
+  access is dead or ceiling-killed (funding carry, CME basis, unlocks, listings, depegs, cascades, trend, IBS, alt luck); DAT discount
+  is DATA-LIMITED; the only open item is the Coinbase CDE funding log (90 days -> 2027-01-11). Its 30% goes to Track A on the
+  WRDS-unlocked data families (TAQ, TRACE, FISD, CRSP MF, OptionMetrics). Track B: next grammar must leave stock cross-sections
+  (5 batches there were all luck): e.g. bond/fund panels, or stop B until a new asset panel exists.
+- Waiting on user: nothing. Forward shadows: OVN-MOM (first 08:20 ET 10-13), CB-FUNDING (hourly), PREF-EX, CEF-RV, LETF-NIGHT, ARETE-DIP.
