@@ -6450,3 +6450,29 @@ Window 1992-11..1997-12 (coverage rule: first month OPENPRC >= 90%). `crsp_early
   -22bp). So 1992-97 confirms the effect exists in a third, untouched era (now 1993-2026 all positive gross), not that it paid.
   Today's cost question stays with the OVN-MOM-FWD forward shadow (live from 2026-10-13).
 Program N = 943.
+
+## Study LUCK-B4 — random-rule discovery batch, grammar 4: options-implied + short-interest features (pre-register 2026-10-13; N 943 -> 944, DSR at 944 + 1000 trials)
+Deep loop iter 17, Track B (grammar change = new feature families + new data source, WRDS). Not read: any return statistic
+conditioned on an OptionMetrics or Compustat short-interest feature by this program (the only prior options-state work is
+index-level: OPEX pin, VTS, gamma proxy; per-stock option-implied features never studied here).
+- **Data.** CRSP daily (prices, delisting dlret, shrcd 10/11, exchcd 1/2/3) linked to OptionMetrics via
+  wrdsapps_link_crsp_optionm (score >= 1 best links only), and Compustat comp.sec_shortint (via CCM link, as of the
+  settlement date, usable from the PUBLICATION lag: settlement + 8 business days). Universe on d: close >= $5, 20d median
+  $vol >= $10M, has an IV surface that day.
+- **Grammar 4 (seed 20261013, `research/sim/luck_gen4.py`, deduped).** Features known at the close of d: from optionm.vsurfd
+  (30-day): ATM IV (call delta 50), put-call IV spread (put -50 minus call 50), skew (put -25 minus ATM), IV minus RV20, IV
+  change 5d/21d, IV term slope (91d minus 30d ATM); from optionm.opvold: log option volume / 20d avg, put/call volume ratio,
+  option $-volume / stock $-volume; from sec_shortint: SI/shares, SI change vs prior report, days-to-cover; plus controls
+  ret 5/21d, size. Rule = f1 cross-sectional decile 1 or 10, optionally AND f2 tercile 1 or 3 x horizon {overnight (close d+1
+  -> open d+2), 5d, 21d} x LONG only (excess vs EW universe). 1000 distinct rules.
+- **Score.** Enter at the close of d+1 (one day lag), cost 5bp/side (shock 15bp), non-overlapping for 5d/21d.
+- **Discovery = 2001-01..2010-12 only** (halves 2001-05 / 2006-10). Confirmation = **2011-01..2019-12**, unseen for these
+  features. 2020+ is not used.
+- **Pass (discovery).** Net mean > 0, t >= 3, both halves > 0, median > 0, ex-top-5 dates > 0, n >= 30 dates, AND an annualized
+  net excess at 100% deployment >= 16%/yr (the +8pp-at-50%-capture ceiling).
+- **Null.** 10 within-date feature permutations + a date placebo (features lagged 252 trading days per stock). Batch counts only
+  if real passes > max over all 11 null runs AND > 3 x their mean.
+- **Survivors.** <= 5 with a plausible mechanism, not a known dead family (short-term reversal, IBS, size), get an amendment, then
+  ONE look on 2011-19 at 5bp and 15bp/side; gate as discovery with t >= 2 and DSR > 0.95.
+- Out: `data/research/program/luck_b4_out.txt`, `luck_b4_rules.parquet`.
+Program N = 944.
