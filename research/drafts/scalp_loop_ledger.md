@@ -90,3 +90,20 @@ half-spread in + out, median; means ~1.5-2x medians, driven by the open).
 - **Next class (opened at iteration 10):** session horizon with auction execution (c ~ 0), where a few bp of open->close drift is
   enough. Then, if needed: other universes (crypto spot at 75bp is out; futures need account size), longer horizons.
 - **Waiting on user:** none.
+
+### Checkpoint 3 (2026-10-14, after iterations 1-11) — CONCLUSION
+**Small intraday scalps do not survive retail costs at any confidence level we can measure.** Evidence:
+- **Single stocks, 1-60 min (7 studies, TAQ 2010-15 + Alpaca 2016-19):** gross drift after every signal family within +-3bp of zero;
+  best calibrated top bucket p 0.43 vs p* 0.56. Dead as a class (checkpoint 2).
+- **ETFs, 30 min (ETF-CLF):** c only ~1-3bp, yet the best bucket drifts +2.4bp/30m (t 1.1) and hits 0.46 vs p* 0.57. The two classifiers
+  (stocks and ETFs) both learn volatility, not direction: AUC ~= the time-shift null.
+- **Session horizon via auctions (UPG-DAY0):** c ~0, but the only event effect found (pre-open upgrades, +10bp in 2010-14) decayed to
+  +2bp (t 0.4) in 2015-19; its TP/stop version loses 30bp to wide post-open quotes.
+- **Cost facts that any future idea must respect:** large caps 3-10bp RT, thin names 12-80bp, ETFs ~0.5bp; limit TP "through" fills are
+  ~half of touches; passive entries are adversely selected exactly when a momentum entry is wrong.
+- **Why it fails:** a TP/stop cannot create edge (optional stopping); "confidence" = drift. No observable intraday state in the data we
+  have (TAQ trades/quotes/ISO/retail prints, cross-asset ETFs, IBES) moves expected 1-60 min drift by more than a few bp after 2014.
+- **What is NOT excluded:** paid data we do not have (L2 depth, signed dealer gamma), futures (account size), and the post-hoc UPG-DAY0
+  pocket (user decision above). Each is a low prior.
+- **Loop stopped here (2026-10-14)** rather than consuming more N on low-prior variants (CLAUDE.md anti-local-optimum rule: "when a
+  direction yields only tiny gains, that is evidence the whole direction is wrong; name the class and stop"). N used: 978-986.
