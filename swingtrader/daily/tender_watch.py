@@ -1,5 +1,9 @@
 """Odd-lot tender watch (Round 31, research/drafts/study_oddlot_tenders.md) — ALERT ONLY, never trades.
 
+RETIRED 2026-10-13 (user): tender cash takes weeks to arrive, so the odd lot ties up capital far longer than the
++5% median pays for. No longer run by research-shadows and off the weekly digest; the module stays only because
+forced_flow_discovery and tender_buy import its parsers and LOG_NAME.
+
 An oversubscribed issuer tender prorates every holder of >= 100 shares, but when the offer grants odd-lot
 priority a holder of <= 99 shares who tenders all of them is bought in full. 2016-26: cash offers with odd-lot
 priority whose guaranteed price (fixed, or the low end of a Dutch range) was >= 1% above the market made money
@@ -23,6 +27,7 @@ import numpy as np
 from .insider_shadow import _read, _sec_get, filing_days
 
 LOG_NAME = "tender-watch.jsonl"
+RETIRED = "2026-10-13"   # see docstring; exempts this module from the REGISTRY coverage test
 MONEY = r"\$\s?(\d[\d,]*\.\d{2,4})"
 MIN_FLOOR = 0.01
 BAD = ("par value", "dividend", "exercise price", "conversion price", "warrant", "liquidation preference")

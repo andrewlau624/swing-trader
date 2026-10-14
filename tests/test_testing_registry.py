@@ -16,7 +16,7 @@ def _covered() -> set[str]:
 
 def test_every_module_with_a_state_log_is_registered():
     mods = [p.stem for p in (ROOT / "swingtrader/daily").glob("*.py")
-            if re.search(r"^LOG_NAME\s*=", p.read_text(), re.M)]
+            if re.search(r"^LOG_NAME\s*=", p.read_text(), re.M) and not re.search(r"^RETIRED\s*=", p.read_text(), re.M)]
     assert mods, "expected shadow modules with LOG_NAME"
     missing = sorted(set(mods) - _covered())
     assert not missing, f"add these to swingtrader/daily/testing.py REGISTRY (weekly digest): {missing}"
@@ -41,7 +41,6 @@ def test_status_reads_logs_and_never_raises(tmp_path):
     assert st["Insider-day (ID3)"]["n"] == 2
     assert st["EV2: first insider buy in 2+ years"]["n"] == 1
     assert st["EV2 x buy >= $500k"]["n"] == 1
-    assert st["Odd-lot tenders"]["n"] == 1
     assert st["FOMC-eve QQQ filler (F3)"]["n"] == 1
     assert st["M1 ID1: every insider buy, ADV >= $1M"]["n"] == 0          # pre-M1 rows are not ID1's forward base
     assert st["M1 N2: night leg on CPI/NFP mornings"]["n"] == 0
