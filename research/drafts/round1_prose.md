@@ -6707,3 +6707,11 @@ Scalp loop iteration 2 (`research/drafts/prompt_scalp_loop_2026-10-13.md`, ledge
 - **Reported.** p, p*, gross, net 1x/2x, optimistic vs pessimistic, by sector, by spread bucket, by time of day, trades/day.
 - Runner `research/sim/sect_lag.py` -> `data/research/program/sect_lag_out.txt`.
 Program N = 978.
+
+### Result — SECT-LAG (2026-10-13, discovery 2010-14 only; N 978): KILL at the registered early-kill
+`sect_lag.py`, out `sect_lag_out.txt:18-34`. 120 days, 3,334 laggard trades (27.8/day). Pessimistic: gross +0.08bp, net 1x -9.27bp
+(day-clustered t -24), net 2x -18.9, median -16.3, ex-top-5 -9.3; optimistic net 1x -4.6. Measured c 9.35bp vs mean G=S 16.7bp:
+p(TP/all) 0.254 vs p* 0.786. Non-laggard control gross -0.05bp, +60m placebo +0.15bp: laggards no different. Halves -8.6 / -9.9;
+every sector negative. **The 2015-19 judge era was NOT opened.** Read: there is no 1-15 min catch-up in thin same-sector names after
+a 2-sd sector-ETF move even in 2010-14; the cross-asset lag is gone inside the first minute. Disclosed choices 1-12 in the out file.
+Program N = 978.

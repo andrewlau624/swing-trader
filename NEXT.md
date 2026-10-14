@@ -1463,6 +1463,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Bond-SPDR premium/discount + creation/redemption flow (Study BSPD, N 834 -> 835) | **dead** | gross spread ~0, net -7 to -9bp/1x, t -4..-12, wrong sign all sub-periods; closes the ETF discount/flow family (with ETC/EF) |
 | Dividend-month clientele premium, payers vs non-payers (Study DM, N 835 -> 836) | **dead** | monthly +66.8bp is a size tilt; the mechanism (ex-date T-5..T+5 vs SPY) is -6.9bp t -0.04; dies at 3x cost |
 | Rule 201 trigger-day long after the -10% cross, minute tier (SSR-TD, N 876) | **dead** | +3.4bp/EW-day t 0.43; discontinuity at -10% WRONG sign (-10.9bp t -9.7); generic +20-27bp at +30/60m after any -8..-12% cross ~= one round trip (intraday loop 2026-10-06) |
+| Sector-ETF 2-sd 5-min up move -> buy laggard same-SIC thin constituents, 1-15 min scalp (SECT-LAG, N 978, scalp loop) | **dead** | 2010-14 discovery: gross +0.08bp, net -9.3bp t -24 (c 9.4bp), p 0.25 vs p* 0.79; non-laggard control and +60m placebo identical; judge era 2015-19 never opened |
 | Single-stock LETF rebalance flow, 15:45 -> close (SS-LETF, N 877) | **dead (mechanism real)** | I x r_pre t 3.11, placebo diff +5.9bp t 2.82, but +3-5bp gross; trade -6.6bp net |
 | Short >= 10% gap-downs 09:31 -> close (GAP-SHORT, N 878) | **dead** | sealed 2016-20 liquid +61bp/EW-day t 2.45 (< 2.5); 2021-26 liquid -8bp; squeeze tail -58%/-212% |
 | BTC ETF NAV-window (15-16 ET) flow (BTC-FIX, N 879) | **dead** | window vol share fell post-launch; fade +0.2bp; flow proxy wrong sign |

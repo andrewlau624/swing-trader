@@ -1014,3 +1014,8 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
 - **MODERN-XS (N 977, user request): KILL.** Monthly top-decile sorts on 14 untested traits (value/quality/size/investment/issuance/turnover/$vol), discover 2021-23 -> judge 2024-26: kept sales-yield+ / low-issuance both -13%/yr vs QQQ. With momentum/52w/low-vol/sector/theme already dead, monthly characteristic stock-picking in the modern regime is closed: holding QQQ is the modern "winner" trait.
 - **LATE-FLOW (N 945, TAQ 2010-15): KILL.** Late-day signed flow -> overnight: real (+0.9bp gross, monotone deciles) but ~1bp; net -3.1bp. Closing-pressure family closed.
 - **Odd-lot tender watch RETIRED (user, 2026-10-13):** tender proceeds take weeks to arrive, locking capital. Not run, not on the digest; `tender_watch.py` keeps a `RETIRED` marker (the registry test skips RETIRED modules) because other modules import its parsers. Do not re-propose odd-lot tenders.
+
+## Research memory — scalp loop (2026-10-13, `research/drafts/scalp_loop_ledger.md`)
+- **SECT-LAG (N 978): KILL.** Sector-ETF 2-sd 5-min move -> thin laggard constituents: gross +0.08bp over 1-15 min (TAQ 2010-14), c ~9bp;
+  no cross-asset catch-up survives the first minute even pre-2015. Judge era 2015-19 untouched for this class.
+- WRDS standby is read-only (no temp tables) and NBBO day scans are ~40s/query: always pass an explicit `sym_root IN (...)` list (15s -> 0.5s).
