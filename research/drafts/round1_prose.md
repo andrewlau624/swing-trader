@@ -6674,3 +6674,36 @@ Disclosed: excluded cond codes O,Q,6,M plus I,Z,U (odd-lot / out-of-sequence) an
 (2010) preview (-2.1bp net) before the run finished; the design was not changed. Read: late-day order flow does carry a real
 overnight premium, but ~1bp/night, an order of magnitude below the gate and below any realistic cost.
 Program N = 977.
+
+## Study SECT-LAG — sector ETF -> laggard constituent catch-up scalp (pre-register 2026-10-13; N 977 -> 978)
+Scalp loop iteration 2 (`research/drafts/prompt_scalp_loop_2026-10-13.md`, ledger `scalp_loop_ledger.md`). Track A. Nothing read.
+- **Mechanism / counterparty.** When a sector ETF moves sharply in 5 minutes, the move is priced first in the ETF and the most
+  liquid members; stale limit orders in thinner same-sector names are picked off over the next minutes as market makers re-quote and
+  index/ETF arbitrage plus sector traders buy the laggards. Counterparty: resting liquidity in the laggard that has not updated. Why it
+  could survive at $2-25k: the laggards are thin ($10M-$1B ADV), where HFT cross-asset arb has a small notional per event.
+- **Note (written before any data).** A TP/stop/time-out does not create edge (optional stopping): the scalp nets > 0 only if the mean
+  move to exit beats c. The barriers only shape the distribution; p vs p* is reported as the user's "confidence" read.
+- **Data.** WRDS TAQ ms (ctm trades, complete_nbbo) built server-side into per-minute NBBO mid/ask/bid marks per symbol; CRSP dsf for
+  universe, hsiccd for sector, taqmclink for the link. Regular hours only.
+- **Sectors (ETF -> CRSP SIC set, as of the prior day):** XLF/KRE -> 6020-6029 (banks); XBI -> 2833-2836 (drugs/biotech); XLE -> 1311,
+  1381-1389, 2911 (oil & gas); SMH -> 3674 (semis); GDX -> 1040 (gold miners); XHB -> 1520-1531 (homebuilders). ETF used for a sector
+  = the first listed that traded that day (KRE exists from 2006, XBI 2006, GDX 2006, SMH 2000/2011 relaunch: use whichever SMH ticker
+  trades).
+- **Universe (per day, from data up to d-1).** Common (shrcd 10/11), price >= $5, 20d median $vol $10M-$1B, SIC in a sector set.
+- **Signal at minute t, 10:00 <= t <= 15:30.** ETF mid return over (t-5, t] >= +2 x sd, sd = the ETF's 5-min mid-return std over the
+  prior 20 trading days (10:00-15:30 only). Laggard: constituent mid return over (t-5, t] <= 0.25 x the ETF return. Quoted spread at t
+  <= 30bp. One entry per name per day; at most 3 names per signal (the lowest own-return ones); ETF signals spaced >= 15 min.
+- **Trade.** Long only. Entry = NBBO ask at t + 1s. G = clamp(0.5 x ETF 5-min return, 15bp, 50bp); S = G; time-out T = 15 min.
+  - Pessimistic fill: TP fills only if a lit trade (exchange != 'D', regular condition, size >= 100) prints strictly above entry x (1+G);
+    stop triggers when the NBBO bid <= entry x (1-S) and exits at that bid (or the next trade if lower); time-out exits at the bid.
+  - Optimistic fill: TP on touch of any trade at/above the level; exits at mid.
+  - c (reported) = entry ask vs mid + exit vs mid, as measured in-trade. "2x cost" = net minus one more measured round-trip spread.
+- **Eras.** Discover 2010-2014 (120 random trading days, fixed seed 978); judge 2015-2019 (120 random days, seed 979), one look.
+  If discovery is net < 0 at 1x on the pessimistic bound, KILL without opening the judge era.
+- **Gate (judge era, pessimistic fills).** Net at 2x cost > 0 with day-clustered t >= 2; hit rate p > p* = (S + c)/(G + S) on the
+  measured c; ex-top-5 trades > 0; both halves of the judge era (2015-17 / 2018-19) > 0; >= 200 trades; control beaten: the same entry
+  rule on NON-laggard constituents (own return >= 0.75 x ETF) and a time-shift placebo (same names, signal minute shifted by +60 min,
+  same day) must both be below the laggard arm. Ceiling at $10k must clear +8pp/yr. Otherwise KILL (WEAK if 1x passes, 2x fails).
+- **Reported.** p, p*, gross, net 1x/2x, optimistic vs pessimistic, by sector, by spread bucket, by time of day, trades/day.
+- Runner `research/sim/sect_lag.py` -> `data/research/program/sect_lag_out.txt`.
+Program N = 978.
