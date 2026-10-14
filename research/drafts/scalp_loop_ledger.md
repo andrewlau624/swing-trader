@@ -11,7 +11,7 @@ p* = (S + c) / (G + S). Ceiling at $10k = trades/day x net bp x share deployed x
 | 2 | A | SECT-LAG: sector ETF 5-min 2-sd up move -> buy laggard same-SIC constituents, G=S=0.5xETF move (15-50bp), T 15m (N 978) | lead-lag / TAQ 2010-19 / $10M-1B sector names / 10:00-15:30 / stale limit orders | 0.786 (c 9.4bp, G=S 16.7) | negative (net 1x -9.3bp) | **KILL** (judge era unopened): gross +0.08bp, p 0.25 vs p* 0.79; control/placebo identical | `sect_lag_out.txt:18-34` |
 | 3 | A | ISO-BURST: ISO buy sweep >= 0.25% of ADV in 1 min (3x sell ISO) in large caps -> long, G=S=20bp, T 10m (N 979) | order-flow / TAQ 2010-19 / >=$200M ADV large caps / 10:00-15:30 / urgent institutional parent | ~(20+c)/40 ~0.6 | gate binds on net | running | round1_prose ISO-BURST |
 | 4 | B | SCALP-CLF: GBM P(+30 before -30bp, 30m) on F1 price/volume path, >$1B names, 10:30-15:00; purged WF 2016-18, judge 2019 (N 980) | classifier / Alpaca SIP minute / >$1B ADV / midday / none named (pattern) | 0.56 (1x) / 0.62 (2x) | negative | **KILL**: 2019 top bucket p 0.431 (lo 0.420); net -6.6bp 2x t -12.5; time-shift null 0.413 ~= real (model learns vol, not direction) | `scalp_clf_out.txt:28-55` |
-| 5 | C | SCALP-PASSIVE: buy limit at the NBB, fill only on trade-through (pess) / at-or-below (opt), 1/5/15m markout vs aggressive entry; reuses iteration-1 samples | infra / Alpaca SIP cached / all buckets + ETFs / all day / adverse selection | n.a. | n.a. | running | `research/sim/scalp_passive.py` |
+| 5 | C | SCALP-PASSIVE: buy limit at the NBB, fill only on trade-through (pess) / at-or-below (opt), 1/5/15m markout vs aggressive entry; reuses iteration-1 samples | infra / Alpaca SIP cached / all buckets + ETFs / all day / adverse selection | n.a. | n.a. | **DONE**: passive saves ~2bp in >$1B (c 7-10 vs 9-12bp; midday 1-5bp) at 40-46% fill; nothing for ETFs; in thin names the saving is adverse selection (15m markout -15..-21bp) | `scalp_passive_out.txt` |
 
 ## Cost table (Track C output, used by every A/B idea)
 
@@ -37,6 +37,11 @@ half-spread in + out, median; means ~1.5-2x medians, driven by the open).
   Entry at the ask with S < spread triggers immediately (trigger rate ~0.9 at S 10bp).
 - Rule of thumb for every idea: single-stock scalps need a 1-30 min gross drift of >= ~2x the c above (>= 10-20bp in large caps
   midday, >= 40bp in $10-50M names); only ETFs have c small enough for a few-bp edge, and ETF minute momentum is already dead.
+- **Passive entry (iteration 5, `scalp_passive_out.txt`):** a bid at the NBB fills (trade-through) 40-46% in >$1B, 14-26% in thinner
+  names; effective round trip ~2bp below aggressive in >$1B (midday ~1-5bp), no gain in ETFs, and in $10M-$50M / $2-10M names the
+  fills are adversely selected (unfilled drift up, filled drift -20..-41bp). **For a MOMENTUM scalp passive entry is structurally
+  wrong:** a resting bid fills when the price falls, i.e. exactly when the momentum signal is failing; the 2bp saving applies only to
+  mean-reversion entries.
 
 ## Waiting on user
 
