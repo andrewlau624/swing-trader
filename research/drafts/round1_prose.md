@@ -6983,3 +6983,25 @@ AUC 0.775 vs shift-null 0.767: it sorts by volatility (rv30 importance 0.093, al
 +2.4bp at +5/+15/+30 (t 1.9 / 1.9 / 1.1); OOF the same drift was only +0.4-0.5bp. Read: even with c ~1-3bp the cross-asset state gives
 ~2bp of 30-min drift at best, below the 15bp-barrier cost.
 Program N = 986.
+
+## Study UPG-POCKET — UPG-DAY0 post-hoc pocket (gap <= 0), open cross -> close cross, untouched 2020-24 (pre-register 2026-10-14; N 986 -> 987)
+Nothing from 2020-24 read. **Low prior:** a post-hoc pocket of a dead rule (UPG-DAY0 killed: 2010-14 +10.3bp, 2015-19 +1.9bp t 0.4). The pocket
+was picked AFTER the 2015-19 judge look (gap <= 0 +28.0bp t 2.9 n 1,008; adv >= $1B +27.3bp n 250), so 2015-19 is touched for it and the only
+clean test is a period never seen: 2020-24. 2004-09 stays untouched and is NOT opened.
+- **Rule (frozen = UPG-DAY0 arm A).** Same event definition (IBES recddet, broker's new rating strictly better than its own prior, announced
+  after 16:00 d-1 / before 09:00 d, strictly > 16:00 and < 09:00 so the 16:00 anntims spike and 09:00-09:30 are excluded; one event per firm-day,
+  firm-days with both up and down dropped; CRSP common shrcd 10/11, pclose >= $5, adv (20d median $vol, lagged) >= $50M). Buy the CRSP open
+  (official open cross), sell the CRSP close (official close cross). **Definitions reused verbatim:** gap = openprc / prior-close - 1 (prior close
+  = |prc| of the previous trading day); ">$1B" = adv >= 1e9. PRIMARY = gap <= 0. SECONDARY (reported only, no gate) = adv >= $1B.
+- **Data.** IBES recddet + ibcrsphist link + CRSP dsf as in `upg_day0.py` (CRSP dsf/names and the link end 2024-12-31), WRDS standby.
+- **Judge window.** 2020-01-01..2024-12-31, one look. Halves: 2020-22 / 2023-24. Cost 2bp/side (1x) and 4bp/side (2x).
+- **Gate (PASS), all required, primary arm.** Mean net at 2bp/side > 0 with day-clustered t >= 2; median > 0; ex-top-5 mean > 0; both halves > 0;
+  mean still > 0 at 4bp/side; n >= 200. Else KILL (WEAK if only t < 2 with every other item met).
+- **Ceiling (reported; PASS also needs it for deployment).** days_with_event/yr x net bp(2bp/side) x share deployed (1.0, one name per day,
+  whole shares) x 50% capture x (1 - 35% tax, taxable) at $2.3k / $10k / $25k; deployment gate +8pp/yr at $10k. A statistical PASS below +8pp
+  is PASS-SMALL.
+- **Failure-mode checks.** Announcement timestamp before 09:30 of day 0 (hand-check sample), 16:00 spike, link/survivorship (CRSP incl. delisted),
+  overlapping events (one per firm-day; same-day multiple names reported), year-by-year, 2x cost, median vs ex-top-5, control = all universe
+  name-days with gap <= 0 (unconditional), event minus control.
+- DSR computed at N 987. Runner `research/sim/upg_pocket.py` -> `data/research/program/upg_pocket_out.txt`.
+Program N = 987.
