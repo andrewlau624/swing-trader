@@ -1030,3 +1030,6 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
   quiet breaches revert. No stop-cascade overshoot.
 - **LEVEL-BOUNCE (N 984): KILL.** Quiet prior-day-low touch in mid caps: +3bp gross, same as a placebo level; prior-day levels carry no
   support liquidity worth a scalp.
+- **SCALP-OFI (N 982): KILL.** Order-flow classifier (OFI, quote imbalance, ISO, BJZZ): top bucket p 0.38 vs p* 0.61, drift ~0.
+- **CLASS VERDICT (checkpoint 2): minute-scale directional scalps in single US stocks are dead at retail costs** — no signal family moves
+  1-60 min drift by more than a few bp (7 studies). The loop moved to auction-executed session-horizon trades (c ~ 0).

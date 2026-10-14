@@ -6932,3 +6932,12 @@ timestamps (point-in-time).
   Ceiling at $10k >= +8pp (events/day x net x deployed share x 50% x 250). Else KILL.
 - Runner `research/sim/upg_day0.py` -> `data/research/program/upg_day0_out.txt`.
 Program N = 985.
+
+### Result — SCALP-OFI (2026-10-14, WF 2011-13 + one 2015 look; N 982): KILL, 2/8 gate items
+`scalp_ofi.py`, out `scalp_ofi_out.txt:28-59`. ~30-40 names/day (>= $500M), 120 + 60 days. 2015 top bucket (frozen thr 0.361): n 4,490,
+p 0.376 (Wilson lo 0.362) vs p* 0.605 (1x) / 0.711 (2x); c 4.2bp; net -3.97bp 1x (t -7.4), -8.20bp 2x (t -14.5); ex-top-5 -8.2. Top-bucket
+mid drift minus all decisions: +1m -0.05bp, +5m +0.21, +15m +0.60 (t < 1). Time-shift null top bucket 0.353 (vs real 0.376); the permuted
+null produced no scores above its threshold (reported as FAIL). Importance: ret15, ret5, minute of day, relative spread; order-flow
+features (OFI, quote imbalance, BJZZ, ISO) add ~0.001-0.003 AUC each. Read: with the strongest documented order-flow features the top
+bucket still has ~0 directional drift; the model again ranks volatility/resolution, not direction.
+Program N = 985.

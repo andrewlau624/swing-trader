@@ -13,7 +13,7 @@ p* = (S + c) / (G + S). Ceiling at $10k = trades/day x net bp x share deployed x
 | 4 | B | SCALP-CLF: GBM P(+30 before -30bp, 30m) on F1 price/volume path, >$1B names, 10:30-15:00; purged WF 2016-18, judge 2019 (N 980) | classifier / Alpaca SIP minute / >$1B ADV / midday / none named (pattern) | 0.56 (1x) / 0.62 (2x) | negative | **KILL**: 2019 top bucket p 0.431 (lo 0.420); net -6.6bp 2x t -12.5; time-shift null 0.413 ~= real (model learns vol, not direction) | `scalp_clf_out.txt:28-55` |
 | 5 | C | SCALP-PASSIVE: buy limit at the NBB, fill only on trade-through (pess) / at-or-below (opt), 1/5/15m markout vs aggressive entry; reuses iteration-1 samples | infra / Alpaca SIP cached / all buckets + ETFs / all day / adverse selection | n.a. | n.a. | **DONE**: passive saves ~2bp in >$1B (c 7-10 vs 9-12bp; midday 1-5bp) at 40-46% fill; nothing for ETFs; in thin names the saving is adverse selection (15m markout -15..-21bp) | `scalp_passive_out.txt` |
 | 6 | A | RETAIL-HERD: 09:30-10:30 BJZZ retail buy imbalance >= 0.5 (retail $ >= 0.5% ADV) and up -> long top 5 at 10:30, G=S=40bp, T 60m (N 981) | retail herding / TAQ sub-penny TRF / $50M-1B / 10:30 fixed / wholesaler hedge + late retail | 0.554 (c 4.4bp) | negative | **KILL** (judge unopened): gross -0.10bp, net -4.5bp; herd fades -4.5bp by +60m vs no-retail momentum +4.4 (t -1.3) | `retail_herd_out.txt` |
-| 7 | B | SCALP-OFI: GBM on order-flow/quote features (Cont OFI, quote imbalance, signed $, ISO/retail/odd-lot shares) for +20 before -20bp in 15m, >$500M names; WF 2011-13, judge 2015 (N 982) | classifier / TAQ quotes+trades / >$500M / 10:00-15:30 / informed + liquidity demanders | ~0.58 (1x) | gate binds on precision | running | round1_prose SCALP-OFI |
+| 7 | B | SCALP-OFI: GBM on order-flow/quote features (Cont OFI, quote imbalance, signed $, ISO/retail/odd-lot shares) for +20 before -20bp in 15m, >$500M names; WF 2011-13, judge 2015 (N 982) | classifier / TAQ quotes+trades / >$500M / 10:00-15:30 / informed + liquidity demanders | 0.605 (1x) / 0.711 (2x), c 4.2 | negative | **KILL** 2/8: 2015 top p 0.376 (lo 0.362); net -8.2bp 2x t -14.5; top-bucket drift +0.6bp at 15m (t 0.7); OFI/QI/BJZZ/ISO add ~0 AUC | `scalp_ofi_out.txt:28-59` |
 | 8 | A | STOP-RUN: first prior-day-low breach with 3x volume footprint -> long at breach+3m, G=S=30bp, T 30m; controls no-footprint + PDL+50bp placebo level (N 983) | forced stops (reversal) / TAQ 2010-19 / >$500M / 10:00-15:00 / stop-loss sellers | 0.579 (c 4.7bp) | -0.16pp (0.14 events/day) | **KILL**: n 14 in 100 days (registration error: universe too small, 200-trade gate unreachable); footprint arm -14.5bp at +30m vs no-footprint +36.9 (mechanism sign wrong) | `stop_run_out.txt:18-64` |
 | 9 | A | LEVEL-BOUNCE: quiet first touch of prior-day low (< 1.5x vol) in $50-500M names -> long at m+4, G=S=40bp, T 30m; controls burst / PDL+50bp / random minute (N 984) | resting liquidity at a level / TAQ 2010-19 / $50-500M / 10:00-15:00 / limit buyers at support | 0.578 (c 6.2bp) | negative | **KILL** (judge unopened): gross +3.0bp, net -3.2bp; +30m drift = placebo level (+7.3 both): generic dip reversal, not a level | `level_bounce_out.txt` |
 | 10 | A | UPG-DAY0: pre-open analyst upgrade (IBES PIT) -> buy official open, sell TP +50bp limit or official close; c ~0 via crosses (N 985) | broker-client flow / IBES + CRSP + TAQ / >= $50M / session / slow institutional clients | A: mean > 0; B: ~0.5 | events ~10/day x net x share | running | round1_prose UPG-DAY0 |
@@ -70,4 +70,20 @@ half-spread in + out, median; means ~1.5-2x medians, driven by the open).
 - **Read so far:** optional stopping makes the TP/stop frame equivalent to "mean drift to exit > c"; none of the three mechanisms
   produced ANY drift, so the problem is not cost, it is the absence of minute-scale predictability. Continue with different
   counterparties/horizons (retail flow running); if iterations 6-10 are also ~0 gross, name single-stock minute momentum dead as a class.
+- **Waiting on user:** none.
+
+### Checkpoint 2 (2026-10-14, after iterations 1-10) — CLASS VERDICT
+- **Tried since checkpoint 1:** RETAIL-HERD (retail flow), SCALP-OFI (order-flow classifier), STOP-RUN (forced stops), LEVEL-BOUNCE
+  (support liquidity); FOMC/macro ETF momentum ceiling-killed. UPG-DAY0 (auction-to-auction, iter 10) running.
+- **Every minute-scale single-stock test had gross drift within ~+-3bp of zero** (SECT-LAG +0.08, ISO-BURST +0.10, RETAIL-HERD -0.10,
+  LEVEL-BOUNCE +3.0, SCALP-CLF/SCALP-OFI top buckets ~+0.6bp at 15m vs all decisions), across five counterparty stories, two
+  classifiers with calibrated nulls, three liquidity tiers and TAQ 2010-15 (the easier pre-2016 era).
+- **Best hit rate vs p*:** SCALP-CLF 0.431 vs 0.560; SCALP-OFI 0.376 vs 0.605; STOP-RUN 0.50 vs 0.58 on n 14 (noise).
+- **Best net bp/trade (pessimistic, 1x):** STOP-RUN +4.3bp on n 14 (infeasible, mechanism sign wrong); every feasible rule negative.
+- **Class verdict: minute-scale (1-60 min) directional scalps in single US stocks are DEAD at retail costs.** The binding fact is not cost
+  (c 3-10bp in liquid names): it is that no observable signal — lead-lag, sweeps, order-flow imbalance, retail flow, price-path
+  features, reference levels — moves the expected 1-60 min drift by more than a few bp, so P(+G before -S) stays at the
+  driftless value and p < p* by 0.1-0.5. Barriers do not change that (optional stopping). Do not re-open with new features or filters.
+- **Next class (opened at iteration 10):** session horizon with auction execution (c ~ 0), where a few bp of open->close drift is
+  enough. Then, if needed: other universes (crypto spot at 75bp is out; futures need account size), longer horizons.
 - **Waiting on user:** none.
