@@ -6905,3 +6905,30 @@ Program N = 984.
 2015-19 NOT opened.** Read: the "bounce" after a quiet low touch is the same as after crossing any nearby level (a generic short-term
 reversal after a dip), not support liquidity; and it is smaller than c. The STOP-RUN control lead does not replicate in mid caps.
 Program N = 984.
+
+## Study UPG-DAY0 — pre-open analyst upgrade, buy the opening cross, scalp or sell the closing cross (pre-register 2026-10-14; N 984 -> 985)
+Scalp loop iteration 10, Track A. **New class:** execution through the auctions (entry at the official open, exit at a take-profit limit
+or the official close), so c ~ 0 instead of 3-10bp (live audit: 213/216 auction fills at the official SIP price). Changes vs the last
+rows: horizon (session, not minutes), counterparty (broker clients acting on the call through the day), data (IBES point-in-time
+recommendations), execution (crosses). Nothing read. Not a redo: J7 (two upgrades in 10 days, small caps, multi-day), LLM-EARN
+(earnings text) and NEWS-DRIFT (headline minutes) are different events/horizons; RESULTS "analyst-ratings trap" is solved by IBES recdet
+timestamps (point-in-time).
+- **Mechanism / counterparty.** A broker's upgrade issued before the open is acted on by its clients through the session (sales-desk
+  calls, PM decisions), not all at 09:30; the opening cross prices the headline, the day's order flow follows. Counterparty: slower
+  institutional clients of the issuing broker.
+- **Events.** IBES recommendation detail (`ibes.recddet`), US firms: a broker's new rating strictly better than its own prior rating for
+  the same firm (ireccd decreases), announced (anndats/anntims) after 16:00 on d-1 and before 09:00 on d (pre-open only). CRSP link via
+  ibcrsphist / ncusip. One event per firm-day (any broker).
+- **Universe (d-1).** CRSP common, price >= $5, 20d median $vol >= $50M.
+- **Trades.** (A) Auction-to-auction: buy the official open (CRSP openprc), sell the official close (CRSP prc). c = 0, reported also at
+  2bp/side shock. (B) Scalp: same entry; sell a limit at open x 1.005 (G = 50bp) if a lit TAQ trade prints strictly above it with size
+  >= 100 before 15:55; stop at -50bp exits at the NBB when the NBB <= open x 0.995 (pays the half-spread); else the closing cross.
+- **Controls.** (a) downgrades (mirror, sign check); (b) same firms' non-event days matched on open gap decile (gap-continuation
+  baseline); (c) upgrades announced 09:30-16:00 on d (excluded from the trade; drift reported).
+- **Eras.** (A) runs on ALL days: discover 2010-14, judge 2015-19 (one look). (B) TAQ: 100 random event-days per era (seeds 990/991).
+  Early kill: discovery (A) mean net at 2bp/side < 0 -> KILL, judge era unopened.
+- **Gate (judge, A and B separately, pessimistic).** Mean net at 2x cost (4bp/side for A; 2x measured stop half-spread for B) > 0 with
+  day-clustered t >= 2; median > 0 (A) / p > p* (B); ex-top-5 > 0; both halves > 0; >= 200 events; beats control (b) with t >= 2.
+  Ceiling at $10k >= +8pp (events/day x net x deployed share x 50% x 250). Else KILL.
+- Runner `research/sim/upg_day0.py` -> `data/research/program/upg_day0_out.txt`.
+Program N = 985.
