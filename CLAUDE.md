@@ -1025,3 +1025,4 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
   features forecast volatility, not direction.
 - **ISO-BURST (N 979): KILL.** Large-cap ISO buy sweeps: drift vs matched control ~0 at 1-10 min (TAQ 2010-14). After SECT-LAG/ISO/CLF:
   no minute-scale directional footprint found; the scalp problem is zero gross drift, not cost.
+- **RETAIL-HERD (N 981): KILL.** First-hour BJZZ retail buy imbalance in mid caps: no intraday continuation (fades -4.5bp by +60m, ns).

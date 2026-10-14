@@ -6831,3 +6831,11 @@ Scalp loop iteration 7, Track B, feature family F2 (order flow / quotes; F1 pric
   Also reported: mean mid drift at +1/+5/+15 min in the top bucket vs all decisions (direction check). Else KILL.
 - Runner `research/sim/scalp_ofi.py` -> `data/research/program/scalp_ofi_out.txt`.
 Program N = 982.
+
+### Result — RETAIL-HERD (2026-10-14, discovery 2010-14 only; N 981): KILL at the registered early-kill
+`retail_herd.py`, out `retail_herd_out.txt`. 100 days, ~487 names/day in universe, 412 herd trades (4.1/day). Pessimistic gross -0.10bp,
+net 1x -4.45bp (t -1.89), net 2x -9.66; optimistic net 1x -2.47; ex-top-5 -5.0; halves -7.1 / -0.6. c 4.35bp; p 0.313 vs p* 0.554.
+Mid drift herd +5/+15/+30/+60m: +0.09/-0.16/-2.46/-4.52bp vs control (a, momentum without retail) +0.75/+2.40/+5.16/+4.43 (herd minus
+control at +60m -10.2bp, t -1.3). **Judge era 2015-19 NOT opened.** Read: first-hour retail buy imbalance carries no continuation; if
+anything the herd names fade over the next hour (not significant). Retail $ ~0.8% of ADV, ~19% of TRF volume.
+Program N = 982.
