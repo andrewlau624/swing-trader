@@ -7,12 +7,34 @@ p* = (S + c) / (G + S). Ceiling at $10k = trades/day x net bp x share deployed x
 
 | iter | track | idea | class tags (mech / data / universe / tod / counterparty) | p* | ceiling $10k | status | evidence |
 |---|---|---|---|---|---|---|---|
-| 1 | C | TAQ cost table: quoted/effective spread, TP touch-vs-through, stop slippage by liquidity x time of day (2012/2018/2025) | infra / TAQ->Alpaca SIP / all common + ETFs / all day / n.a. | n.a. | n.a. | rerunning on Alpaca (WRDS standby too slow: read-only, 40s+ per NBBO scan, connection cap) | `research/sim/scalp_cost.py` |
+| 1 | C | TAQ cost table: quoted/effective spread, TP touch-vs-through, stop slippage by liquidity x time of day (2012/2018/2025) | infra / TAQ->Alpaca SIP / all common + ETFs / all day / n.a. | n.a. | n.a. | **DONE** (Alpaca SIP 2018+2025, 2,357 samples; WRDS attempt stalled) | `research/sim/scalp_cost_alpaca.py`, `scalp_cost_out.txt` |
 | 2 | A | SECT-LAG: sector ETF 5-min 2-sd up move -> buy laggard same-SIC constituents, G=S=0.5xETF move (15-50bp), T 15m (N 978) | lead-lag / TAQ 2010-19 / $10M-1B sector names / 10:00-15:30 / stale limit orders | 0.786 (c 9.4bp, G=S 16.7) | negative (net 1x -9.3bp) | **KILL** (judge era unopened): gross +0.08bp, p 0.25 vs p* 0.79; control/placebo identical | `sect_lag_out.txt:18-34` |
 | 3 | A | ISO-BURST: ISO buy sweep >= 0.25% of ADV in 1 min (3x sell ISO) in large caps -> long, G=S=20bp, T 10m (N 979) | order-flow / TAQ 2010-19 / >=$200M ADV large caps / 10:00-15:30 / urgent institutional parent | ~(20+c)/40 ~0.6 | gate binds on net | running | round1_prose ISO-BURST |
+
 ## Cost table (Track C output, used by every A/B idea)
 
-(pending iteration 1)
+Source `data/research/program/scalp_cost_out.txt` (Alpaca SIP, 10 days/yr, ~30 name-days per bucket-year; c = quoted
+half-spread in + out, median; means ~1.5-2x medians, driven by the open).
+
+2025 round-trip c (bp), by 20d $vol bucket x time of day:
+
+| bucket | 0930-45 | 0945-1030 | 1030-12 | 12-14 | 14-1530 | 1530-16 |
+|---|---|---|---|---|---|---|
+| >$1B | 10.2 | 9.1 | 7.1 | 5.6 | 5.0 | 3.4 |
+| $200M-1B | 19.7 | 11.2 | 9.0 | 6.9 | 5.5 | 3.9 |
+| $50-200M | 33.5 | 18.2 | 10.2 | 10.2 | 7.7 | 6.3 |
+| $10-50M | 78 | 29 | 22 | 15 | 15 | 12 |
+| $2-10M | 82 | 55 | 37 | 20 | 19 | 17 |
+| ETFs (SPY/QQQ/IWM/SMH/TQQQ) | 0.4-0.7 all day | | | | | |
+
+- 2018 is cheaper in large caps (>$1B 4.7 -> 2.7bp across the day); $2-10M 66 -> 14bp.
+- **Minimum G (c <= 25% of G):** >$1B 2025 14-41bp (midday ~22); $2-10M 67-327bp; ETFs 2-3bp.
+- **Limit TP realism (G 20bp, 30m):** touch 0.44-0.51 but THROUGH (lit, size >= 100) only 0.08-0.29 (2025). A bar/touch backtest
+  overstates TP fills ~2x: always use "through".
+- **Stops:** median slippage ~0 in liquid names; thin names have fat tails ($2-10M 2025: mean 33-39bp, p90 ~105-113bp past the stop).
+  Entry at the ask with S < spread triggers immediately (trigger rate ~0.9 at S 10bp).
+- Rule of thumb for every idea: single-stock scalps need a 1-30 min gross drift of >= ~2x the c above (>= 10-20bp in large caps
+  midday, >= 40bp in $10-50M names); only ETFs have c small enough for a few-bp edge, and ETF minute momentum is already dead.
 
 ## Waiting on user
 
