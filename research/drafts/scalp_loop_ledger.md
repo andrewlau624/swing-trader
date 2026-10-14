@@ -16,7 +16,7 @@ p* = (S + c) / (G + S). Ceiling at $10k = trades/day x net bp x share deployed x
 | 7 | B | SCALP-OFI: GBM on order-flow/quote features (Cont OFI, quote imbalance, signed $, ISO/retail/odd-lot shares) for +20 before -20bp in 15m, >$500M names; WF 2011-13, judge 2015 (N 982) | classifier / TAQ quotes+trades / >$500M / 10:00-15:30 / informed + liquidity demanders | 0.605 (1x) / 0.711 (2x), c 4.2 | negative | **KILL** 2/8: 2015 top p 0.376 (lo 0.362); net -8.2bp 2x t -14.5; top-bucket drift +0.6bp at 15m (t 0.7); OFI/QI/BJZZ/ISO add ~0 AUC | `scalp_ofi_out.txt:28-59` |
 | 8 | A | STOP-RUN: first prior-day-low breach with 3x volume footprint -> long at breach+3m, G=S=30bp, T 30m; controls no-footprint + PDL+50bp placebo level (N 983) | forced stops (reversal) / TAQ 2010-19 / >$500M / 10:00-15:00 / stop-loss sellers | 0.579 (c 4.7bp) | -0.16pp (0.14 events/day) | **KILL**: n 14 in 100 days (registration error: universe too small, 200-trade gate unreachable); footprint arm -14.5bp at +30m vs no-footprint +36.9 (mechanism sign wrong) | `stop_run_out.txt:18-64` |
 | 9 | A | LEVEL-BOUNCE: quiet first touch of prior-day low (< 1.5x vol) in $50-500M names -> long at m+4, G=S=40bp, T 30m; controls burst / PDL+50bp / random minute (N 984) | resting liquidity at a level / TAQ 2010-19 / $50-500M / 10:00-15:00 / limit buyers at support | 0.578 (c 6.2bp) | negative | **KILL** (judge unopened): gross +3.0bp, net -3.2bp; +30m drift = placebo level (+7.3 both): generic dip reversal, not a level | `level_bounce_out.txt` |
-| 10 | A | UPG-DAY0: pre-open analyst upgrade (IBES PIT) -> buy official open, sell TP +50bp limit or official close; c ~0 via crosses (N 985) | broker-client flow / IBES + CRSP + TAQ / >= $50M / session / slow institutional clients | A: mean > 0; B: ~0.5 | events ~10/day x net x share | running | round1_prose UPG-DAY0 |
+| 10 | A | UPG-DAY0: pre-open analyst upgrade (IBES PIT) -> buy official open, sell TP +50bp limit or official close; c ~0 via crosses (N 985) | broker-client flow / IBES + CRSP + TAQ / >= $50M / session / slow institutional clients | A: c ~0-8bp RT; B: 0.607 | -2.6pp (judge) | **KILL**: disc A +10.3bp at 2bp/side (t 2.1) -> judge +1.9 (t 0.4), median -3.1; B net -30bp (stops on wide post-open quotes) | `upg_day0_out.txt:24-80` |
 
 ## Cost table (Track C output, used by every A/B idea)
 
@@ -50,7 +50,9 @@ half-spread in + out, median; means ~1.5-2x medians, driven by the open).
 
 ## Waiting on user
 
-(none yet)
+- **UPG-DAY0 post-hoc pockets (optional):** pre-open upgrades where the stock opens flat/down (+28bp open->close, t 2.9, n 1,008 in
+  2015-19) and >$1B names (+27bp). Found AFTER the judge look, so they can only be tested on an untouched era (2020-24 or 2004-09) as a
+  new registration; it is a filter on a dead rule (low prior). Your call whether that is worth an N; the loop will not do it by default.
 
 ## Checkpoints
 

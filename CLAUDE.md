@@ -1033,3 +1033,5 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
 - **SCALP-OFI (N 982): KILL.** Order-flow classifier (OFI, quote imbalance, ISO, BJZZ): top bucket p 0.38 vs p* 0.61, drift ~0.
 - **CLASS VERDICT (checkpoint 2): minute-scale directional scalps in single US stocks are dead at retail costs** — no signal family moves
   1-60 min drift by more than a few bp (7 studies). The loop moved to auction-executed session-horizon trades (c ~ 0).
+- **UPG-DAY0 (N 985): KILL.** Pre-open upgrade, open cross -> close cross: +10bp in 2010-14, ~+2bp (t 0.4) in 2015-19. Post-hoc pocket
+  (gap <= 0, +28bp) is a user decision, untested.

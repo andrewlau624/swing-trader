@@ -6941,3 +6941,14 @@ null produced no scores above its threshold (reported as FAIL). Importance: ret1
 features (OFI, quote imbalance, BJZZ, ISO) add ~0.001-0.003 AUC each. Read: with the strongest documented order-flow features the top
 bucket still has ~0 directional drift; the model again ranks volatility/resolution, not direction.
 Program N = 985.
+
+### Result — UPG-DAY0 (2026-10-14, discovery 2010-14 + one 2015-19 look; N 985): KILL (A and B)
+`upg_day0.py`, out `upg_day0_out.txt:24-80`. Discovery A (open cross -> close cross, 5,437 upgrades, 4.3/day): +14.3bp gross, +10.3 at
+2bp/side (t 2.10), event minus same-firm gap-matched control +12.5 (t 2.54); downgrade mirror -21.2bp (t -4.8). **Judge 2015-19 A (6,910):
++5.9bp gross, +1.9 at 2bp/side (t 0.44), -2.1 at 4bp/side; median -3.1, ex-top-5 -3.5, halves -2.6/-1.6; minus control +3.0 (t 0.71).
+Ceiling -2.6pp (discovery's +7.4pp was also under the gate).** Downgrade shorts +12.2bp (t 3.2): sign right, not tradable long-only.
+B (TP +50 / stop -50): judge p 0.368 vs p* 0.607, net 1x -30.1bp; ~62% stopped out on wide post-open quotes (stop half-spread ~41bp).
+Read: the pre-open upgrade's day-0 drift halved after 2014 and is now inside one tick of cost; the opening cross prices most of it.
+Post-hoc pockets (NOT gated, judge era now TOUCHED for them): gap <= 0 +28.0bp (t 2.9, n 1,008), $vol >= $1B +27.3bp. Data caveats:
+recddet holds revised ratings (PIT not guaranteed); a 16:00 anntims spike (22k rows) unresolved.
+Program N = 985.
