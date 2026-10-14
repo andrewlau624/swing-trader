@@ -6741,3 +6741,29 @@ names), counterparty (urgent institutional parent order, not stale quotes). Noth
   +10m mid drift beats the matched control with t >= 2. Otherwise KILL (WEAK if 1x passes and 2x fails).
 - Runner `research/sim/iso_burst.py` -> `data/research/program/iso_burst_out.txt`.
 Program N = 979.
+
+## Study SCALP-CLF — honest classifier for P(+30bp before -30bp) in large caps, midday (pre-register 2026-10-13; N 979 -> 980)
+Scalp loop iteration 4, Track B (first B batch; feature family F1 = price/volume path). Nothing read. Costs from the Track C table
+(`scalp_cost_out.txt`, ledger "Cost table").
+- **Label.** For name i at decision minute t (10:30 <= t <= 15:00, one decision per name every 15 min): entry = minute-t close + the
+  measured 2018 >$1B half-spread for that time bucket; y = 1 if the minute high reaches entry x 1.003 + one half-spread (pessimistic
+  "through" proxy) before the minute low reaches entry x 0.997 within 30 min; if both inside one bar -> stop first; neither -> time-out at
+  the t+30 close minus a half-spread (P&L still counted). G = S = 30bp, T = 30m (large-cap 30-min sd ~ 40bp; min G for >$1B midday ~22bp).
+- **Breakeven.** c ~ 5-7bp midday (2025) / ~3-4bp (2018): p* = (30 + c)/60 ~ 0.56-0.62 at 1x, ~0.61-0.72 at 2x.
+- **Universe.** Alpaca SIP minute bars, raw (split-adjusted only) prices; common stocks with 20d median $vol >= $1B as of d-1 (Sharadar
+  SEP, delisted included). Regular hours.
+- **Features F1 (all <= t):** own returns over 1/5/15/30/60 min and since open, gap vs prior close, minute range and its 20-min mean,
+  relative volume (last 15 min vs the same clock window over the prior 20 days), distance to session VWAP, HOD and LOD, SPY return over
+  5/30 min and since open, name minus SPY over 30 min, minute of day, realized 30-min vol.
+- **Model.** sklearn HistGradientBoostingClassifier (defaults, max_iter 200, learning_rate 0.05), isotonic calibration on the inner
+  validation fold. Purged walk-forward on 2016-01..2018-12: train on all months before month m minus a 5-session embargo, predict month m
+  (m from 2017-01). Top-confidence bucket = predictions >= the 95th percentile of the out-of-fold scores of the training window.
+- **Nulls (mandatory).** (a) labels permuted within day; (b) time-shift placebo: features from t paired with the label at t+60min.
+  Same model, same threshold rule.
+- **Judge (one look): 2019-01..2019-12**, model retrained on 2016-2018 once, threshold frozen from 2016-18 out-of-fold scores.
+  2019 single-stock minute data is TOUCHED only by the night exact study (different class: 15:40 close->open), disclosed.
+- **Gate (2019, pessimistic labels).** Top-bucket hit rate p > p* at 2x cost with binomial lower 95% bound > p*(1x); net/trade at 2x
+  > 0 with day-clustered t >= 2; top bucket beats BOTH nulls' top buckets on hit rate; reliability curve monotone in the top 3 deciles;
+  ex-top-5 > 0; >= 300 trades; non-overlapping per name (one open trade per name). Ceiling at $10k >= +8pp. Otherwise KILL.
+- Runner `research/sim/scalp_clf.py` -> `data/research/program/scalp_clf_out.txt`.
+Program N = 980.
