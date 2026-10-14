@@ -12,6 +12,7 @@ p* = (S + c) / (G + S). Ceiling at $10k = trades/day x net bp x share deployed x
 | 3 | A | ISO-BURST: ISO buy sweep >= 0.25% of ADV in 1 min (3x sell ISO) in large caps -> long, G=S=20bp, T 10m (N 979) | order-flow / TAQ 2010-19 / >=$200M ADV large caps / 10:00-15:30 / urgent institutional parent | ~(20+c)/40 ~0.6 | gate binds on net | running | round1_prose ISO-BURST |
 | 4 | B | SCALP-CLF: GBM P(+30 before -30bp, 30m) on F1 price/volume path, >$1B names, 10:30-15:00; purged WF 2016-18, judge 2019 (N 980) | classifier / Alpaca SIP minute / >$1B ADV / midday / none named (pattern) | 0.56 (1x) / 0.62 (2x) | negative | **KILL**: 2019 top bucket p 0.431 (lo 0.420); net -6.6bp 2x t -12.5; time-shift null 0.413 ~= real (model learns vol, not direction) | `scalp_clf_out.txt:28-55` |
 | 5 | C | SCALP-PASSIVE: buy limit at the NBB, fill only on trade-through (pess) / at-or-below (opt), 1/5/15m markout vs aggressive entry; reuses iteration-1 samples | infra / Alpaca SIP cached / all buckets + ETFs / all day / adverse selection | n.a. | n.a. | **DONE**: passive saves ~2bp in >$1B (c 7-10 vs 9-12bp; midday 1-5bp) at 40-46% fill; nothing for ETFs; in thin names the saving is adverse selection (15m markout -15..-21bp) | `scalp_passive_out.txt` |
+| 6 | A | RETAIL-HERD: 09:30-10:30 BJZZ retail buy imbalance >= 0.5 (retail $ >= 0.5% ADV) and up -> long top 5 at 10:30, G=S=40bp, T 60m (N 981) | retail herding / TAQ sub-penny TRF / $50M-1B / 10:30 fixed / wholesaler hedge + late retail | ~(40+10)/80 = 0.63 | 5/day x net x 1.0 x .5 x 250 | queued (WRDS busy) | round1_prose RETAIL-HERD |
 
 ## Cost table (Track C output, used by every A/B idea)
 
@@ -48,3 +49,7 @@ half-spread in + out, median; means ~1.5-2x medians, driven by the open).
 (none yet)
 
 ## Checkpoints
+
+## Ceiling-killed before coding (no N)
+- **Post-FOMC 14:00-14:30 ETF momentum + 10:00 macro-release momentum (SPY/QQQ/TLT), 2026-10-13.** ~8 FOMC + ~60 10:00 releases/yr:
+  0.27 events/day x ~10bp net x 4x intraday BP x 50% x 250 ~ +3pp/yr at the optimistic end; below +8pp. Pre-FOMC drift already dead.

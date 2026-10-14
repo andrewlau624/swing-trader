@@ -6775,3 +6775,27 @@ p 0.431 (Wilson lo 0.420) vs p* 0.560 (1x) / 0.619 (2x); net -2.97bp 1x (t -5.7)
 Importance led by rv30, rng20: the model learns that high-vol states resolve inside 30 min, not direction. OOF 2017-18 the same
 (p 0.411, nulls 0.400/0.413). A lookahead (r60 wrap at 10:30) was found and fixed before any run. Disclosed choices in the out file.
 Program N = 980.
+
+## Study RETAIL-HERD — first-hour retail buy imbalance -> 10:30-11:30 continuation scalp (pre-register 2026-10-13; N 980 -> 981)
+Scalp loop iteration 6, Track A. Changes vs the last rows: counterparty (retail herd + wholesaler hedging, not institutions or stale
+quotes), data field (BJZZ sub-penny TRF prints), universe ($50M-$1B mid caps), time of day (fixed 10:30 decision). Nothing read.
+- **Mechanism / counterparty.** Retail attention clusters within the day (Barber, Huang, Odean & Schwarz 2022 herding). Marketable retail
+  orders are internalized by wholesalers, who hedge part of the net inventory on lit markets; persistent first-hour retail BUY pressure
+  in a name that is also up should keep lifting offers as more retail arrives. Counterparty: wholesaler hedging plus late retail.
+- **Retail sign (BJZZ 2021).** TAQ trades on exchange 'D' with price p >= $1: Z = 100 x (p mod 0.01) in cents; 0.6 < Z < 1 = retail BUY,
+  0 < Z < 0.4 = retail SELL, else unsigned. Known caveat (Barber et al. 2023): sign accuracy is imperfect; disclosed.
+- **Data.** WRDS TAQ ms ctm, server-side per-day aggregation with explicit sym_root lists; NBBO + trades only for triggered names 10:30-
+  11:31. CRSP dsf / dsf_v2 universe. Reuse `research/sim/iso_burst.py` / `sect_lag.py` fill and cost code.
+- **Universe (from d-1).** Common (shrcd 10/11), price >= $5, 20d median $vol $50M-$1B.
+- **Signal at 10:30.** Over 09:30-10:30: retail $ (buy + sell) >= 0.5% of 20d median $vol; RIB = (buy$ - sell$)/(buy$ + sell$) >= 0.5;
+  09:30->10:30 last-trade return > 0. Take the top 5 by RIB (ties: larger retail $).
+- **Trade.** Long. Entry = NBBO ask at 10:30:01. G = 40bp, S = 40bp, T = 60 min (mid-cap 60-min sd ~ 60-80bp; 2025 c for this bucket at
+  10:30-12 is ~9-10bp, so G >= 4c). Pessimistic / optimistic fills, c and 2x cost exactly as ISO-BURST.
+- **Controls.** (a) momentum without retail: same universe, top 5 by 09:30->10:30 return among names with RIB <= 0 and the same retail-$
+  floor; (b) +60 min time-shift: the same picks entered at 11:30. Also reported: mid drift +5/+15/+30/+60 min.
+- **Eras.** Discover 2010-14 (100 random days, seed 982); judge 2015-19 (100 days, seed 983), one look. Early kill: discovery net 1x
+  pessimistic < 0 -> KILL, judge era unopened.
+- **Gate (judge, pessimistic).** Net 2x > 0 with day-clustered t >= 2; p > p*; ex-top-5 > 0; both halves > 0; >= 200 trades; beats control
+  (a) on net with t >= 2. Ceiling at $10k >= +8pp. Else KILL (WEAK if 1x passes, 2x fails).
+- Runner `research/sim/retail_herd.py` -> `data/research/program/retail_herd_out.txt`.
+Program N = 981.
