@@ -1,12 +1,14 @@
-# Prompt: momentum scalp loop (confident +0.15% intraday signals)
+# Prompt: momentum scalp loop (confident small intraday gains)
 
 Paste this as the /loop prompt, or run `/loop follow research/drafts/prompt_scalp_loop_2026-10-13.md`.
 
 ---
 
 You are running an open-ended research loop on the swing-trader repo, focused on ONE question the user asked for:
-**can we find intraday momentum signals confident enough that the price goes up at least +0.15% (15bp) before it goes
-against us, and scalp that profitably after real costs?** Do not stop, summarize-and-wait, or ask "should I continue?".
+**can we find intraday momentum signals confident enough that the price goes up a small amount (a scalp: roughly
+0.1-0.5%, whatever the mechanism naturally delivers) before it goes against us, and trade that profitably after real
+costs?** The target size is NOT fixed: pick it per idea from the mechanism and the measured move distribution,
+pre-register it, and never tune it after outcomes. Do not stop, summarize-and-wait, or ask "should I continue?".
 Keep iterating until the user says stop. When a line of work ends (pass, kill, blocked), write it up and start the next.
 If blocked on a user decision, log it under "Waiting on user" in the ledger and move on.
 
@@ -20,14 +22,15 @@ If blocked on a user decision, log it under "Waiting on user" in the ledger and 
   class tags (mechanism / data / universe / time-of-day / counterparty), breakeven hit rate, ceiling at $10k, status, evidence.
 
 ## 1. The target, written as math (do this before every idea)
-A scalp is: enter long at the decision time, exit at **take-profit +15bp**, a **stop at -S bp**, or a **time-out T**.
-"Confident" means a **calibrated hit rate**, not a big mean: P(touch +15bp before -S) measured out of sample.
-- Breakeven hit rate: `p* = (S + c) / (15 + S)`, where `c` = round-trip cost in bp (spread paid + slippage + fees).
-  Example: S = 15, c = 4 -> p* = 63%. S = 10, c = 8 -> p* = 72%. Report p* and the measured p (with a CI) for every rule.
-- Net per trade = `p x 15 - (1 - p) x S - c` (time-outs at their actual exit price). This must be > 0 at 2x cost.
+A scalp is: enter long at the decision time, exit at a **take-profit +G bp**, a **stop at -S bp**, or a **time-out T**
+(G, S, T chosen per idea before testing; G is small, roughly 10-50bp). "Confident" means a **calibrated hit rate**,
+not a big mean: P(touch +G before -S) measured out of sample.
+- Breakeven hit rate: `p* = (S + c) / (G + S)`, where `c` = round-trip cost in bp (spread paid + slippage + fees).
+  Report p* and the measured p (with a CI) for every rule. Small G makes cost a bigger share: say how big G must be
+  for this universe's spread before testing.
+- Net per trade = `p x G - (1 - p) x S - c` (time-outs at their actual exit price). This must be > 0 at 2x cost.
 - Ceiling gate (kill before coding if it fails): `trades/day x net bp/trade x share of account deployed x 50% capture
   x 250 >= +8pp/yr at $10k`. Report at $2.3k / $10k / $25k plus a $100k capacity line (thin names cap out fast).
-- If the user meant **$0.15 per share**, not 0.15%, convert per name (15c on a $20 stock = 75bp) and say which you used.
 
 ## 2. What is already dead here (do not redo, do not re-costume)
 Grep NEXT/RESULTS/daytrade before any idea. Dead with numbers: the live noise-area breakout leg on QQQ/SMH and EVERY
@@ -45,14 +48,14 @@ Any new idea must explain why its gross move is several times the cost, not just
   aggressive buy-sweep bursts / order-flow imbalance at the minute scale (TAQ trade signs), ETF-to-constituent and
   leader-to-laggard lead/lag inside a sector at 1-5 min, index-futures/ETF lead on single names, short-sale-restriction
   (Rule 201) days and squeeze dynamics, new-high-of-day on abnormal relative volume with a tight spread, liquidity
-  vacuum after a large print. Each idea states the counterparty and why it has not been arbitraged at 15bp.
-- **B. Honest classifier search (25%).** A model that outputs P(+15bp before -S) from microstructure features
+  vacuum after a large print. Each idea states the counterparty and why it has not been arbitraged at that size.
+- **B. Honest classifier search (25%).** A model that outputs P(+G before -S) from microstructure features
   (spread, depth proxy, signed volume, return path, relative volume, time of day, sector move). Purged, embargoed
   walk-forward CV only; calibrate (reliability curve) and act only on the top-confidence bucket. Mandatory nulls:
   label permutation within day and a time-shift placebo. The batch counts only if top-bucket precision beats both
   nulls AND clears p* at 2x cost. Change the feature family every 3rd B iteration.
 - **C. Execution realism / infrastructure (15%).** Measure what a scalp actually pays per name and time of day:
-  quoted vs effective spread from NBBO, fill rates of a +15bp limit take-profit (did trades print THROUGH it with size?),
+  quoted vs effective spread from NBBO, fill rates of a small limit take-profit (did trades print THROUGH it with size?),
   stop slippage, queue position for passive entries. Build reusable cost tables that A and B must use.
 
 ## 4. Data, windows and fills
@@ -102,5 +105,5 @@ Any new idea must explain why its gross move is several times the cost, not just
 Append to the ledger: what was tried, what died and why, the best measured hit rate vs its p*, the best net bp/trade
 under pessimistic fills, the cost table so far, and "Waiting on user". If ~10 iterations produce nothing above the gate,
 say so plainly in the checkpoint, name the class as dead, and open a different class (a new universe, horizon or
-counterparty), not more variants. If the honest conclusion is that 15bp scalps do not survive retail costs at any
+counterparty), not more variants. If the honest conclusion is that small scalps do not survive retail costs at any
 confidence level, write that conclusion with its evidence; that is a valid result.
