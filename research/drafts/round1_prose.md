@@ -6864,3 +6864,14 @@ signal geometry (a price level). Nothing read.
   beats BOTH (a) and (b) on +30m mid drift with t >= 2. Ceiling at $10k >= +8pp. Else KILL (WEAK if 1x passes, 2x fails).
 - Runner `research/sim/stop_run.py` -> `data/research/program/stop_run_out.txt`.
 Program N = 983.
+
+### Result — STOP-RUN (2026-10-14, discovery 2010-14 only; N 983): KILL (infeasible + mechanism sign wrong); judge era not opened
+`stop_run.py`, out `stop_run_out.txt:18-64`. **Registration error disclosed:** the >= $500M universe is only 24-55 linked names/day, so
+the rule fires 14 times in 100 days (0.14/day); the >= 200-trade gate is unreachable even on every 2015-19 day (~175), so the judge era
+was not opened although the letter of the early kill (net 1x pess < 0) did not trip (+4.26bp, t 0.54; net 2x -0.92; p 0.50 vs p* 0.58).
+Mechanism test fails in sign: the stop-cascade footprint arm drifts -14.5bp at +30m vs +36.9bp for breaches WITHOUT the footprint (a,
+n 20, t 2.1); placebo level (b) -30bp. Ceiling at $10k -0.16pp. Read: no stop-cascade overshoot to buy; the footprint marks real
+selling, not exhausted stops. Disclosed: footprint read as a per-minute rate (mean of m..m+2 >= 3x baseline); decision at (m+4) min.
+Observation only (not a test, tiny n, 2010-14 >= $500M now TOUCHED for it): first breaches of the prior-day low WITHOUT a volume burst
+(+36.9bp, n 20) and of the prior-day high (+35.4bp mirror, n 13) both reverted.
+Program N = 983.
