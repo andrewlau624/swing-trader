@@ -6715,3 +6715,29 @@ p(TP/all) 0.254 vs p* 0.786. Non-laggard control gross -0.05bp, +60m placebo +0.
 every sector negative. **The 2015-19 judge era was NOT opened.** Read: there is no 1-15 min catch-up in thin same-sector names after
 a 2-sd sector-ETF move even in 2010-14; the cross-asset lag is gone inside the first minute. Disclosed choices 1-12 in the out file.
 Program N = 978.
+
+## Study ISO-BURST — intermarket-sweep buy bursts in large caps, 1-10 min continuation scalp (pre-register 2026-10-13; N 978 -> 979)
+Scalp loop iteration 3, Track A. Changes vs SECT-LAG: mechanism (order flow, not lead-lag), universe (large caps, not thin sector
+names), counterparty (urgent institutional parent order, not stale quotes). Nothing read.
+- **Mechanism / counterparty.** An intermarket sweep order (ISO, TAQ sale condition 'F') takes every displayed offer at once instead
+  of working the book: the buyer pays for immediacy, which is the signature of an urgent, informed or deadline-bound parent order
+  (Chakravarty, Jain, Upson & Wood 2012: ISOs carry more information than other trades). If the parent is not done, its remaining
+  child orders keep lifting offers for minutes. Large caps (c ~ a few bp) are where c is smallest relative to a minute-scale drift.
+- **Data.** WRDS TAQ ms ctm (trades) aggregated server-side per name per minute with an explicit `sym_root IN (...)` list; NBBO only for
+  triggered names in the 10 minutes after a signal. CRSP dsf / dsf_v2 for universe. Regular hours.
+- **Universe (from d-1).** CRSP common (shrcd 10/11), price >= $10, 20d median $vol >= $200M. ~top 300-600 names per day.
+- **Signal at minute end t, 10:00 <= t <= 15:30.** In the minute (t-1, t]: ISO buy $ (ISO trades signed buy by the tick test, i.e. price
+  > previous trade, or equal and previous sign buy) >= 0.25% of the name's 20d median $vol, AND ISO buy $ >= 3 x ISO sell $, AND the
+  minute's last-trade return > 0. One entry per name per day. Tick-test signing is disclosed (no quote join needed for the signal).
+- **Trade.** Long only. Entry = NBBO ask at t + 1s. G = 20bp, S = 20bp, T = 10 min (fixed; a large cap's 10-min sd is ~20-30bp).
+  - Pessimistic fill: TP only if a lit trade (exchange != 'D', regular condition, size >= 100) prints strictly above entry x 1.002; stop
+    when the NBBO bid <= entry x 0.998, exit at that bid (or the next trade if lower); time-out at the bid.
+  - Optimistic: TP on touch, exits at mid. c = entry vs mid + exit vs mid, measured. 2x cost = net minus the entry quoted spread x 1.
+- **Also reported (the real edge test):** mid drift from t+1s to +1, +5, +10 min, gross, vs (a) a matched control: same name, same day,
+  a random minute with no burst; (b) bursts on the SELL side (mirror) — sign check, not traded.
+- **Eras.** Discover 2010-14 (100 random days, seed 980); judge 2015-19 (100 random days, seed 981), one look. Early kill: discovery
+  net < 0 at 1x pessimistic -> KILL without opening 2015-19.
+- **Gate (judge era, pessimistic).** Net at 2x cost > 0, day-clustered t >= 2; p > p*; ex-top-5 > 0; both judge halves > 0; >= 200 trades;
+  +10m mid drift beats the matched control with t >= 2. Otherwise KILL (WEAK if 1x passes and 2x fails).
+- Runner `research/sim/iso_burst.py` -> `data/research/program/iso_burst_out.txt`.
+Program N = 979.
