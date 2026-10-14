@@ -6839,3 +6839,28 @@ Mid drift herd +5/+15/+30/+60m: +0.09/-0.16/-2.46/-4.52bp vs control (a, momentu
 control at +60m -10.2bp, t -1.3). **Judge era 2015-19 NOT opened.** Read: first-hour retail buy imbalance carries no continuation; if
 anything the herd names fade over the next hour (not significant). Retail $ ~0.8% of ADV, ~19% of TRF volume.
 Program N = 982.
+
+## Study STOP-RUN — prior-day-low stop cascade exhaustion, long reversal scalp (pre-register 2026-10-14; N 982 -> 983)
+Scalp loop iteration 8, Track A. New mechanism class: forced stop-loss selling and its overshoot (reversal, not continuation; the last
+four mechanisms showed zero continuation). Changes vs the last rows: mechanism (forced stops), counterparty (stop-loss sellers),
+signal geometry (a price level). Nothing read.
+- **Mechanism / counterparty.** Stop-loss sell orders cluster just below obvious levels such as the prior day's low (Osler 2003/2005 for
+  FX; retail and algo stops in equities). A breach triggers them as market orders; the cascade pushes price below where unconstrained
+  liquidity would set it, then reverts once the stops are exhausted. Counterparty: stop-loss sellers who must sell at any price.
+- **Data.** WRDS TAQ ms, server-side per-day per-minute aggregation with explicit sym_root lists; NBBO + lit trades for event names only.
+  CRSP dsf universe; prior-day regular-session low from TAQ (09:30-16:00 trades, regular conditions), not CRSP (CRSP low can include
+  odd prints / is not regular-hours only).
+- **Universe (d-1).** Common, price >= $10, 20d median $vol >= $500M.
+- **Event.** First minute m in 10:00-15:00 whose minute low (regular lit trades) is <= PDL x (1 - 0.001) with the session low before m
+  still > PDL (first breach of the day). Cascade footprint: volume over minutes m..m+2 >= 3 x the name's mean per-minute volume from
+  09:30 to m-1. Decision t = end of minute m+3 (exhaustion window; fixed). One event per name per day.
+- **Trade.** Long. Entry = NBBO ask at t + 1s. G = 30bp, S = 30bp, T = 30 min. Pessimistic/optimistic fills, c and 2x cost exactly as
+  ISO-BURST.
+- **Controls.** (a) mechanism test: breaches WITHOUT the volume footprint (< 1.5x), same entry; (b) placebo level: first crossing of
+  PDL x 1.005 from above with the same volume footprint (a level with no stop cluster); (c) mirror: prior-day-HIGH breach with footprint,
+  sign check only (not traded). Mid drift +1/+5/+15/+30 min reported for all.
+- **Eras.** Discover 2010-14 (100 days, seed 986); judge 2015-19 (100 days, seed 987), one look. Early kill as before.
+- **Gate (judge, pessimistic).** Net 2x > 0 with day-clustered t >= 2; p > p*; ex-top-5 > 0; both halves > 0; >= 200 trades; event arm
+  beats BOTH (a) and (b) on +30m mid drift with t >= 2. Ceiling at $10k >= +8pp. Else KILL (WEAK if 1x passes, 2x fails).
+- Runner `research/sim/stop_run.py` -> `data/research/program/stop_run_out.txt`.
+Program N = 983.
