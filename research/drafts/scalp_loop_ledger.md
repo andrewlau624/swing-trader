@@ -18,6 +18,7 @@ p* = (S + c) / (G + S). Ceiling at $10k = trades/day x net bp x share deployed x
 | 9 | A | LEVEL-BOUNCE: quiet first touch of prior-day low (< 1.5x vol) in $50-500M names -> long at m+4, G=S=40bp, T 30m; controls burst / PDL+50bp / random minute (N 984) | resting liquidity at a level / TAQ 2010-19 / $50-500M / 10:00-15:00 / limit buyers at support | 0.578 (c 6.2bp) | negative | **KILL** (judge unopened): gross +3.0bp, net -3.2bp; +30m drift = placebo level (+7.3 both): generic dip reversal, not a level | `level_bounce_out.txt` |
 | 10 | A | UPG-DAY0: pre-open analyst upgrade (IBES PIT) -> buy official open, sell TP +50bp limit or official close; c ~0 via crosses (N 985) | broker-client flow / IBES + CRSP + TAQ / >= $50M / session / slow institutional clients | A: c ~0-8bp RT; B: 0.607 | -2.6pp (judge) | **KILL**: disc A +10.3bp at 2bp/side (t 2.1) -> judge +1.9 (t 0.4), median -3.1; B net -30bp (stops on wide post-open quotes) | `upg_day0_out.txt:24-80` |
 | 11 | B | ETF-CLF: GBM on cross-asset state (SPY/TLT/GLD/USO/EEM/HYG) for +15 before -15bp in 30m on 26 non-QQQ ETFs; WF 2016-18, judge 2019 (N 986) | classifier / Alpaca minute / ETFs / 10:00-15:20 / none named | 0.572 (1x) / 0.643 (2x) | -26pp | **KILL** 3/8: 2019 top p 0.464 (lo 0.440); net -3.1bp 2x; drift +2.4bp at 30m (t 1.1); model = volatility sorter | `etf_clf_out.txt:104-114` |
+| 12 | A | UPG-POCKET: UPG-DAY0 pocket gap <= 0 (post-hoc), open cross -> close cross, untouched 2020-24 (N 987) | broker-client flow / IBES + CRSP / >= $50M / session | c ~0 (2bp/side) | -1.5pp after tax (net -3.7bp x 126 days/yr) | **KILL** 2/7: P1 n 1,496 net2 -3.7bp (t -0.35), median +7.2, ex-top-5 -8.6, halves -8.2/+6.1; event minus all gap<=0 name-days +0.1bp; P2 >$1B +16.0bp t 1.13 (report only) | `upg_pocket_out.txt:36-60` |
 
 ## Cost table (Track C output, used by every A/B idea)
 
@@ -51,9 +52,7 @@ half-spread in + out, median; means ~1.5-2x medians, driven by the open).
 
 ## Waiting on user
 
-- **UPG-DAY0 post-hoc pockets (optional):** pre-open upgrades where the stock opens flat/down (+28bp open->close, t 2.9, n 1,008 in
-  2015-19) and >$1B names (+27bp). Found AFTER the judge look, so they can only be tested on an untouched era (2020-24 or 2004-09) as a
-  new registration; it is a filter on a dead rule (low prior). Your call whether that is worth an N; the loop will not do it by default.
+- **UPG-DAY0 post-hoc pockets: DONE, KILL (UPG-POCKET, N 987, 2026-10-14).** Untouched 2020-24, gap <= 0: n 1,496, net 2bp/side -3.7bp (t -0.35), ex-top-5 -8.6, halves -8.2/+6.1, indistinguishable from all gap<=0 name-days (+0.1bp). The 2015-19 +28bp was a pocket-mining artifact. >$1B (+16.0bp t 1.13) is report-only, not gated. No further UPG variants.
 
 ## Checkpoints
 

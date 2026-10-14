@@ -7005,3 +7005,10 @@ clean test is a period never seen: 2020-24. 2004-09 stays untouched and is NOT o
   name-days with gap <= 0 (unconditional), event minus control.
 - DSR computed at N 987. Runner `research/sim/upg_pocket.py` -> `data/research/program/upg_pocket_out.txt`.
 Program N = 987.
+
+### Result — UPG-POCKET (2026-10-14, one look 2020-24; N 987): KILL, 2/7 gate items
+`upg_pocket.py`, out `upg_pocket_out.txt:36-60`. PRIMARY gap <= 0: n 1,496 (0.50 of days): net 2bp/side **-3.7bp** (t -0.35), 4bp/side -7.7; median +7.2,
+ex-top-5 -8.6; halves 2020-22 -8.2 / 2023-24 +6.1; years -4.8/-12.7/-9.7/+20.2/-9.4. Equals unconditional gap<=0 name-days (-3.8bp): event minus control +0.1bp
+(day-level +1.3bp t 0.17). All upgrades 2020-24: +4.3bp net (t 0.71). SECONDARY adv >= $1B (report only): n 707, +16.0bp (t 1.13), 4bp/side +12.0; its gap<=0
+overlap n 178 +2.0. Ceiling -1.5pp/yr after tax. Read: the 2015-19 pocket was mined noise; UPG family closed.
+Program N = 987.
