@@ -6952,3 +6952,25 @@ Read: the pre-open upgrade's day-0 drift halved after 2014 and is now inside one
 Post-hoc pockets (NOT gated, judge era now TOUCHED for them): gap <= 0 +28.0bp (t 2.9, n 1,008), $vol >= $1B +27.3bp. Data caveats:
 recddet holds revised ratings (PIT not guaranteed); a 16:00 anntims spike (22k rows) unresolved.
 Program N = 985.
+
+## Study ETF-CLF — honest classifier for P(+15bp before -15bp in 30 min) on 26 non-QQQ ETFs with cross-asset features (pre-register 2026-10-14; N 985 -> 986)
+Scalp loop iteration 11, Track B, feature family F3 (cross-asset state). New universe after the single-stock class verdict: ETFs, where
+c ~0.5-3bp, so a few bp of drift would clear p*. Nothing read. QQQ and SMH (TOUCHED 2016-26 intraday) and TQQQ are excluded.
+- **Universe (fixed list):** SPY, IWM, DIA, XLF, XLE, XLK, XLV, XLI, XLY, XLP, XLU, XLB, EEM, EFA, EWJ, FXI, TLT, IEF, HYG, LQD, GLD, SLV,
+  USO, GDX, XBI, KRE. Alpaca SIP minute bars, split-adjusted only (no dividend adjustment), regular hours.
+- **Cost.** Half-spread 0.25bp for SPY/IWM/DIA, 1.5bp for every other ETF (pessimistic vs the measured ~0.25bp ETF median; per-ETF quotes
+  not measured). 2x cost doubles both.
+- **Label (pessimistic).** Decision every 10 min 10:00-15:20. Entry = minute-t close + half-spread. y = 1 if the minute high >= entry x 1.0015
+  + half-spread before the minute low <= entry x 0.9985; same-bar conflicts -> stop; else time-out at the t+30 close - half-spread.
+- **Features F3 (all <= t):** own returns 1/5/15/30/60 min and since open; own minus SPY over 30 min; SPY, TLT, GLD, USO, EEM, HYG returns
+  over 5 and 30 min; own realized 30-min vol; relative volume (last 30 min vs same clock 20d mean); distance to session VWAP; overnight gap;
+  minute of day; ETF id (categorical).
+- **Model / nulls / threshold.** As SCALP-CLF: sklearn HistGradientBoostingClassifier (max_iter 200, lr 0.05), isotonic calibration;
+  purged walk-forward on 2016-01..2018-12 (monthly, 5-session embargo, predictions from 2017-01); threshold = 95th pct of the training
+  window's OOF scores; nulls (a) labels permuted within day, (b) features at t with labels at t+60.
+- **Judge (one look): 2019,** model retrained on 2016-18, threshold frozen.
+- **Gate (2019, pessimistic).** Top-bucket p > p*(2x) with Wilson lower bound > p*(1x); net/trade at 2x > 0 with day-clustered t >= 2; beats
+  both nulls; reliability monotone top 3 deciles; ex-top-5 > 0; >= 300 trades; one open trade per ETF; ceiling at $10k >= +8pp (4x intraday
+  BP allowed in the deployed share). Also: top-bucket mean mid drift at +5/+15/+30 vs all decisions. Else KILL.
+- Runner `research/sim/etf_clf.py` -> `data/research/program/etf_clf_out.txt`.
+Program N = 986.
