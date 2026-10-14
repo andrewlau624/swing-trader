@@ -995,8 +995,9 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
   P&L does not persist. Do not build a leg kill switch on trailing P&L.
 - **OVN-MOM (N 939): PASS historical, SMALL now.** LPS overnight momentum (top decile of 252-night mean overnight return, close->
   open): 1998-2015 +15.4bp/night net 2bp/side; decayed to ~+3bp net 2016-26 (official prints 2021-26 +7.2 gross). Overnight
-  clientele, not bounce; close-to-close ~0. Forward shadow `ovn_mom_shadow.py` + REGISTRY (OVN-MOM-FWD, 120 nights) committed,
-  NOT deployed (user OK needed).
+  clientele, not bounce; close-to-close ~0. Forward shadow `ovn_mom_shadow.py` + REGISTRY (OVN-MOM-FWD, 120 nights) runs in
+  research-shadows (log-only; OOM-killed until 2026-10-14, now a wide panel, ~200MB peak; first scored night 10-13).
+  Live trading needs the user's OK.
 - **LUCK-B1/B2/B3 (N 935/940/941): all LUCK.** Random rules on stocks (price), 8-K/actions, crypto alts never beat their nulls; B2's
   passes were firm type (date placebo 34 > real 5). Always include a same-ticker date placebo in a random-search null.
 - Crypto alt panel: `data/research/crypto_spot/` (Binance USDT spot 2017-08..2026-09, 249 delisted; build `research/sim/crypto_spot_build/`).
