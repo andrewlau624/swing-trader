@@ -26,7 +26,7 @@ import numpy as np
 import pandas as pd
 
 LOG_NAME = "ovn-mom.jsonl"
-PANEL = "ovn-mom-panel.parquet"
+PANEL = "ovn-mom-panel.pkl"
 ASSETS = "ovn-mom-assets.json"
 START = "2026-10-13"       # first forward session (watch registered 2026-10-12)
 NEED = 120
@@ -40,6 +40,7 @@ TOP_N = 10
 BENCH = "SPY"
 HIST_DAYS = 400
 LOOKBACK_DAYS = 10
+CHUNK = 200                # symbols per bar pull: the full 400-day universe pull in one go OOM-killed the 2GB server
 
 
 def _read(path: Path) -> list[dict]:
@@ -173,37 +174,42 @@ def line(rows: list[dict]) -> str:
 
 
 def update_panel(state_dir: Path, uni: list[str], today: dt.date, bars_fn) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    """Incrementally maintained long panel (date, sym, r, close, usd) of completed sessions; returns the wide frames."""
+    """Incrementally maintained wide panel (R, C, U: session x symbol) of completed sessions. Stored wide, not long: the
+    ~1M-row long table took ~300MB in pandas and OOM-killed the 2GB server; three ~280 x 3,600 frames are ~25MB."""
     path = Path(state_dir) / PANEL
-    old = pd.read_parquet(path) if path.exists() else pd.DataFrame(columns=["date", "sym", "r", "close", "usd"])
-    old["date"] = pd.to_datetime(old["date"])
-    have = set(old["sym"])
-    new_syms = [s for s in uni if s not in have]
     cut = pd.Timestamp(today)
-    parts = [old]
-    if len(old):
-        last = old["date"].max()
+    old = pd.read_pickle(path) if path.exists() else None
+    R, C, U = (old["r"], old["close"], old["usd"]) if old else (pd.DataFrame(index=pd.DatetimeIndex([])),) * 3
+    have = set(C.columns)
+    new_syms = [s for s in uni if s not in have]
+    if len(C):
+        last = C.index.max()
         fresh = [s for s in uni if s in have]
-        if fresh:
-            parts.append(_long(*wide(bars_fn(fresh, last - pd.Timedelta(days=7), today)), after=last, today=cut))
-        if new_syms:
-            parts.append(_long(*wide(bars_fn(new_syms, cut - pd.Timedelta(days=HIST_DAYS), today)), after=None, today=cut))
-    elif uni:
-        parts.append(_long(*wide(bars_fn(uni, cut - pd.Timedelta(days=HIST_DAYS), today)), after=None, today=cut))
-    df = pd.concat([p for p in parts if len(p)], ignore_index=True).drop_duplicates(["date", "sym"], keep="first")
-    df = df[df["date"] >= cut - pd.Timedelta(days=HIST_DAYS + 30)]
+        R, C, U = _pull(fresh, last - pd.Timedelta(days=7), today, last, cut, bars_fn, (R, C, U))
+        R, C, U = _pull(new_syms, cut - pd.Timedelta(days=HIST_DAYS), today, None, cut, bars_fn, (R, C, U))
+    else:
+        R, C, U = _pull(uni, cut - pd.Timedelta(days=HIST_DAYS), today, None, cut, bars_fn, (R, C, U))
+    keep = lambda f: f.loc[f.index >= cut - pd.Timedelta(days=HIST_DAYS + 30)].sort_index()  # noqa: E731
+    R, C, U = keep(R), keep(C), keep(U)
     Path(state_dir).mkdir(parents=True, exist_ok=True)
-    df.to_parquet(path, index=False)
-    return tuple(df.pivot(index="date", columns="sym", values=v).sort_index() for v in ("r", "close", "usd"))
+    pd.to_pickle(dict(r=R, close=C, usd=U), path)
+    return R, C, U
 
 
-def _long(R, C, U, after, today: pd.Timestamp) -> pd.DataFrame:
-    out = pd.DataFrame({"r": R.stack(future_stack=True), "close": C.stack(future_stack=True), "usd": U.stack(future_stack=True)}).dropna(subset=["close"])
-    out = out.rename_axis(["date", "sym"]).reset_index()
-    out = out[out["date"] < today]
-    if after is not None:
-        out = out[out["date"] > after]
-    return out
+def _pull(syms: list[str], start, today: dt.date, after, cut: pd.Timestamp, bars_fn, base):
+    """Merge bars into the wide frames CHUNK symbols at a time; existing cells win (as keep="first" did), new cells are
+    only sessions after `after` and before `cut`, and a session with no close is left out (all three frames NaN)."""
+    R, C, U = base
+    for i in range(0, len(syms), CHUNK):
+        r, c, u = wide(bars_fn(syms[i:i + CHUNK], start, today))
+        if c.empty:
+            continue
+        r.index = c.index = u.index = pd.to_datetime(c.index)
+        ok = (c.index < cut) & ((c.index > after) if after is not None else True)
+        r, c, u = r.loc[ok], c.loc[ok], u.loc[ok]
+        r, u = r.where(c.notna()), u.where(c.notna())
+        R, C, U = (R.combine_first(r) if len(R) else r), (C.combine_first(c) if len(C) else c), (U.combine_first(u) if len(U) else u)
+    return R, C, U
 
 
 def sessions_to_scan(bench_bars: pd.DataFrame, done: set[str], today: dt.date) -> list[str]:
