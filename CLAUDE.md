@@ -1035,3 +1035,4 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
   1-60 min drift by more than a few bp (7 studies). The loop moved to auction-executed session-horizon trades (c ~ 0).
 - **UPG-DAY0 (N 985): KILL.** Pre-open upgrade, open cross -> close cross: +10bp in 2010-14, ~+2bp (t 0.4) in 2015-19. Post-hoc pocket
   (gap <= 0, +28bp) is a user decision, untested.
+- **ETF-CLF (N 986): KILL.** Cross-asset ETF classifier: top bucket p 0.46 vs p* 0.57; ~2bp/30m drift. ETF minute-scale scalps also dead.

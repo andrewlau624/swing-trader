@@ -6974,3 +6974,12 @@ c ~0.5-3bp, so a few bp of drift would clear p*. Nothing read. QQQ and SMH (TOUC
   BP allowed in the deployed share). Also: top-bucket mean mid drift at +5/+15/+30 vs all decisions. Else KILL.
 - Runner `research/sim/etf_clf.py` -> `data/research/program/etf_clf_out.txt`.
 Program N = 986.
+
+### Result — ETF-CLF (2026-10-14, OOF 2017-18 + one 2019 look; N 986): KILL, 3/8 gate items
+`etf_clf.py`, out `etf_clf_out.txt:104-114`. 26 ETFs, 0 fetch errors; a lookahead (30-bar lookbacks wrapping at 10:00) was caught by the
+corruption test and fixed before any model ran. 2019 top bucket: n 1,659, p 0.464 (Wilson lo 0.440) vs p* 0.572 (1x) / 0.643 (2x); net
+-1.15bp 1x (t -2.2), -3.14bp 2x (t -6.1); ex-top-5 -3.2. Beats both nulls (perm 0.360, shift 0.430) and is calibrated (D10 0.430), but
+AUC 0.775 vs shift-null 0.767: it sorts by volatility (rv30 importance 0.093, all else < 0.011). Top-bucket drift minus all: +1.2 / +2.3 /
++2.4bp at +5/+15/+30 (t 1.9 / 1.9 / 1.1); OOF the same drift was only +0.4-0.5bp. Read: even with c ~1-3bp the cross-asset state gives
+~2bp of 30-min drift at best, below the 15bp-barrier cost.
+Program N = 986.
