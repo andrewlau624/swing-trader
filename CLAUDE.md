@@ -1019,3 +1019,7 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
 - **SECT-LAG (N 978): KILL.** Sector-ETF 2-sd 5-min move -> thin laggard constituents: gross +0.08bp over 1-15 min (TAQ 2010-14), c ~9bp;
   no cross-asset catch-up survives the first minute even pre-2015. Judge era 2015-19 untouched for this class.
 - WRDS standby is read-only (no temp tables) and NBBO day scans are ~40s/query: always pass an explicit `sym_root IN (...)` list (15s -> 0.5s).
+- **Scalp cost table (Alpaca SIP 2018/2025, `scalp_cost_out.txt`, ledger):** RT c median >$1B 3-10bp (midday ~6), $10-50M 12-78bp, ETFs ~0.5bp;
+  limit TP "through" fill rate ~half of "touch". A single-stock scalp needs >= ~2x these in gross 1-30 min drift.
+- **SCALP-CLF (N 980): KILL.** Price/volume-path GBM for +30 before -30bp: top-5% p 0.43 vs p* 0.56-0.62; time-shift null equal. Path
+  features forecast volatility, not direction.

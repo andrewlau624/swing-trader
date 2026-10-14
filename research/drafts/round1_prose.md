@@ -6767,3 +6767,11 @@ Scalp loop iteration 4, Track B (first B batch; feature family F1 = price/volume
   ex-top-5 > 0; >= 300 trades; non-overlapping per name (one open trade per name). Ceiling at $10k >= +8pp. Otherwise KILL.
 - Runner `research/sim/scalp_clf.py` -> `data/research/program/scalp_clf_out.txt`.
 Program N = 980.
+
+### Result — SCALP-CLF (2026-10-13, OOF 2017-18 + one 2019 look; N 980): KILL, 3/8 gate items
+`scalp_clf.py`, out `scalp_clf_out.txt:5-55`. 79 names (>$1B $vol), 525k decisions. 2019 top bucket (frozen thr 0.428): n 7,742 (31/day),
+p 0.431 (Wilson lo 0.420) vs p* 0.560 (1x) / 0.619 (2x); net -2.97bp 1x (t -5.7), -6.60bp 2x (t -12.5), ex-top-5 -6.6. Nulls: permuted
+0.335, +60m time-shift 0.413 (AUC 0.730 real vs 0.722 shift). Calibration good (D10 hit 0.423 vs score 0.434); base rate 0.205.
+Importance led by rv30, rng20: the model learns that high-vol states resolve inside 30 min, not direction. OOF 2017-18 the same
+(p 0.411, nulls 0.400/0.413). A lookahead (r60 wrap at 10:30) was found and fixed before any run. Disclosed choices in the out file.
+Program N = 980.
