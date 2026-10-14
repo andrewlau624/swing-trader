@@ -6807,3 +6807,27 @@ same-name no-burst minute: +1m -0.17bp, +5m +0.11, +10m +0.06 (t 0.1). Sell mirr
 NOT opened.** Read: ISO buy sweeps carry no 1-10 min continuation in large caps even in 2010-14. Disclosed: universe ~100-150 linked
 names/day (fewer than the prose guess); ~45% of entries at 10:00-10:01; clustered t not bootstrap-validated.
 Program N = 981.
+
+## Study SCALP-OFI — honest classifier on ORDER-FLOW features for P(+20bp before -20bp in 15 min), large caps (pre-register 2026-10-13; N 981 -> 982)
+Scalp loop iteration 7, Track B, feature family F2 (order flow / quotes; F1 price path died in SCALP-CLF). Changes vs SCALP-CLF: data
+(TAQ quotes + signed trades, not minute bars), features, era, horizon. Nothing read.
+- **Why it could differ.** SCALP-CLF's features forecast volatility, not direction. Order-flow imbalance (Cont, Kukanov & Stoikov 2014)
+  and quote imbalance are the strongest documented short-horizon DIRECTION predictors; the question is whether any of it survives c.
+- **Label (pessimistic).** Name i, decision minute t (10:00-15:30, every 5 min). Entry = NBBO ask at t. y = 1 if a lit trade (exch != 'D',
+  regular condition, size >= 100) prints strictly above entry x 1.002 before the NBB falls to <= entry x 0.998, within 15 min; same-minute
+  conflicts -> stop first. P&L: TP = +20bp - exit half... exactly as ISO-BURST (stop exits at the bid, time-out at the bid at t+15).
+- **Universe (d-1).** CRSP common, price >= $10, 20d median $vol >= $500M (TAQ-linked). Sample <= 120 names/day (fixed seed).
+- **Features F2 (all strictly <= t):** Cont OFI over 1/5/15 min normalized by mean depth; quote imbalance (bidsz - asksz)/(bidsz + asksz)
+  at t and its 5-min mean; Lee-Ready signed $ imbalance over 1/5/15 min / 20d $vol; ISO share of volume 5 min; BJZZ retail imbalance
+  15 min; trade-count intensity vs the name's same-clock 20d mean; spread at t / day-to-t median; odd-lot share 15 min; own mid return
+  5/15 min; SPY mid return 5/15 min; minute of day.
+- **Model.** sklearn HistGradientBoostingClassifier (max_iter 200, lr 0.05), isotonic calibration. Purged walk-forward on 2011-13 sampled
+  days (120 days, seed 984): train on earlier months, 5-session embargo, predict month m (m from 2012-01). Threshold = 95th pct of the
+  training window's OOF scores.
+- **Nulls.** (a) labels permuted within day; (b) time-shift: features at t paired with the label at t+60. Same model/threshold rule.
+- **Judge (one look): 2015, 60 random days (seed 985)**, model retrained once on all 2011-13 data, threshold frozen.
+- **Gate (2015, pessimistic).** Top-bucket p > p*(2x) with Wilson lower bound > p*(1x); net/trade at 2x > 0 with day-clustered t >= 2;
+  top bucket beats both nulls; reliability monotone top 3 deciles; ex-top-5 > 0; >= 300 trades; one open trade per name. Ceiling >= +8pp.
+  Also reported: mean mid drift at +1/+5/+15 min in the top bucket vs all decisions (direction check). Else KILL.
+- Runner `research/sim/scalp_ofi.py` -> `data/research/program/scalp_ofi_out.txt`.
+Program N = 982.
