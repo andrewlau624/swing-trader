@@ -6875,3 +6875,25 @@ selling, not exhausted stops. Disclosed: footprint read as a per-minute rate (me
 Observation only (not a test, tiny n, 2010-14 >= $500M now TOUCHED for it): first breaches of the prior-day low WITHOUT a volume burst
 (+36.9bp, n 20) and of the prior-day high (+35.4bp mirror, n 13) both reverted.
 Program N = 983.
+
+## Study LEVEL-BOUNCE — quiet first touch of the prior-day low in mid caps, long reversal scalp (pre-register 2026-10-14; N 983 -> 984)
+Scalp loop iteration 9, Track A. Origin: STOP-RUN's control (a) (quiet breaches reverted, n 20, 2010-14 >= $500M; that universe is now
+touched for this idea and is EXCLUDED here). Changes vs STOP-RUN: mechanism (resting liquidity at a reference level, not forced
+stops), universe ($50M-$500M, untouched for this), counterparty (limit buyers at support). Nothing read on this universe.
+- **Mechanism / counterparty.** Limit orders cluster at salient reference prices (prior-day extremes; Kavajecz & Odders-White 2004:
+  technical support/resistance levels coincide with depth peaks in the book). A quiet first touch (no volume burst = no informed seller)
+  meets that depth and bounces. Counterparty: the patient limit buyers at the level, plus sellers who run out at it.
+- **Data / fills / c / 2x cost.** As STOP-RUN (reuse `stop_run.py`): TAQ ms, explicit sym_root lists, prior-day regular-hours lit low
+  from TAQ, NBBO + lit trades for event names.
+- **Universe (d-1).** Common, price >= $5, 20d median $vol $50M-$500M.
+- **Event.** First minute m in 10:00-15:00 with minute low <= PDL x 0.999 and session low before m > PDL. Quiet: mean per-minute volume
+  over m..m+2 < 1.5 x the name's mean per-minute volume 09:30..m-1. Decision t = (m+4) min (same as STOP-RUN). One event per name/day.
+- **Trade.** Long. Entry = NBBO ask at t + 1s. G = 40bp, S = 40bp, T = 30 min.
+- **Controls.** (a) burst breaches (>= 3x, same entry); (b) placebo level PDL x 1.005 quiet first crossing from above; (c) same name-day
+  random minute in 10:00-15:00 (no level). Mirror PDH quiet breach reported as sign check only.
+- **Eras.** Discover 2010-14 (100 days, seed 988); judge 2015-19 (100 days, seed 989), one look. Early kill: discovery net 1x
+  pessimistic < 0, or < 200 discovery trades -> KILL, judge era unopened.
+- **Gate (judge, pessimistic).** Net 2x > 0 with day-clustered t >= 2; p > p*; ex-top-5 > 0; both halves > 0; >= 200 trades; event beats
+  (b) and (c) on +30m mid drift with t >= 2. Ceiling at $10k >= +8pp. Else KILL (WEAK if 1x passes, 2x fails).
+- Runner `research/sim/level_bounce.py` -> `data/research/program/level_bounce_out.txt`.
+Program N = 984.
