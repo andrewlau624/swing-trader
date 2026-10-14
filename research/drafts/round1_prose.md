@@ -6799,3 +6799,11 @@ quotes), data field (BJZZ sub-penny TRF prints), universe ($50M-$1B mid caps), t
   (a) on net with t >= 2. Ceiling at $10k >= +8pp. Else KILL (WEAK if 1x passes, 2x fails).
 - Runner `research/sim/retail_herd.py` -> `data/research/program/retail_herd_out.txt`.
 Program N = 981.
+
+### Result — ISO-BURST (2026-10-13, discovery 2010-14 only; N 979): KILL at the registered early-kill
+`iso_burst.py`, out `iso_burst_out.txt:2-16`. 100 days, 6,995 trades (~70/day). Pessimistic gross +0.10bp, net 1x -3.26bp (t -12.1),
+net 2x -7.04, ex-top-5 -3.27; optimistic net 1x -1.58. c 3.36bp; p 0.248 vs p* 0.584. Mid drift after a buy-ISO burst minus a matched
+same-name no-burst minute: +1m -0.17bp, +5m +0.11, +10m +0.06 (t 0.1). Sell mirror not a continuation either. **Judge era 2015-19
+NOT opened.** Read: ISO buy sweeps carry no 1-10 min continuation in large caps even in 2010-14. Disclosed: universe ~100-150 linked
+names/day (fewer than the prose guess); ~45% of entries at 10:00-10:01; clustered t not bootstrap-validated.
+Program N = 981.

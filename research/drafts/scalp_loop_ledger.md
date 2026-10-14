@@ -9,7 +9,7 @@ p* = (S + c) / (G + S). Ceiling at $10k = trades/day x net bp x share deployed x
 |---|---|---|---|---|---|---|---|
 | 1 | C | TAQ cost table: quoted/effective spread, TP touch-vs-through, stop slippage by liquidity x time of day (2012/2018/2025) | infra / TAQ->Alpaca SIP / all common + ETFs / all day / n.a. | n.a. | n.a. | **DONE** (Alpaca SIP 2018+2025, 2,357 samples; WRDS attempt stalled) | `research/sim/scalp_cost_alpaca.py`, `scalp_cost_out.txt` |
 | 2 | A | SECT-LAG: sector ETF 5-min 2-sd up move -> buy laggard same-SIC constituents, G=S=0.5xETF move (15-50bp), T 15m (N 978) | lead-lag / TAQ 2010-19 / $10M-1B sector names / 10:00-15:30 / stale limit orders | 0.786 (c 9.4bp, G=S 16.7) | negative (net 1x -9.3bp) | **KILL** (judge era unopened): gross +0.08bp, p 0.25 vs p* 0.79; control/placebo identical | `sect_lag_out.txt:18-34` |
-| 3 | A | ISO-BURST: ISO buy sweep >= 0.25% of ADV in 1 min (3x sell ISO) in large caps -> long, G=S=20bp, T 10m (N 979) | order-flow / TAQ 2010-19 / >=$200M ADV large caps / 10:00-15:30 / urgent institutional parent | ~(20+c)/40 ~0.6 | gate binds on net | running | round1_prose ISO-BURST |
+| 3 | A | ISO-BURST: ISO buy sweep >= 0.25% of ADV in 1 min (3x sell ISO) in large caps -> long, G=S=20bp, T 10m (N 979) | order-flow / TAQ 2010-19 / >=$200M ADV large caps / 10:00-15:30 / urgent institutional parent | 0.584 (c 3.4bp) | negative | **KILL** (judge unopened): gross +0.10bp; drift vs matched control +0.06bp at 10m (t 0.1) | `iso_burst_out.txt:2-16` |
 | 4 | B | SCALP-CLF: GBM P(+30 before -30bp, 30m) on F1 price/volume path, >$1B names, 10:30-15:00; purged WF 2016-18, judge 2019 (N 980) | classifier / Alpaca SIP minute / >$1B ADV / midday / none named (pattern) | 0.56 (1x) / 0.62 (2x) | negative | **KILL**: 2019 top bucket p 0.431 (lo 0.420); net -6.6bp 2x t -12.5; time-shift null 0.413 ~= real (model learns vol, not direction) | `scalp_clf_out.txt:28-55` |
 | 5 | C | SCALP-PASSIVE: buy limit at the NBB, fill only on trade-through (pess) / at-or-below (opt), 1/5/15m markout vs aggressive entry; reuses iteration-1 samples | infra / Alpaca SIP cached / all buckets + ETFs / all day / adverse selection | n.a. | n.a. | **DONE**: passive saves ~2bp in >$1B (c 7-10 vs 9-12bp; midday 1-5bp) at 40-46% fill; nothing for ETFs; in thin names the saving is adverse selection (15m markout -15..-21bp) | `scalp_passive_out.txt` |
 | 6 | A | RETAIL-HERD: 09:30-10:30 BJZZ retail buy imbalance >= 0.5 (retail $ >= 0.5% ADV) and up -> long top 5 at 10:30, G=S=40bp, T 60m (N 981) | retail herding / TAQ sub-penny TRF / $50M-1B / 10:30 fixed / wholesaler hedge + late retail | ~(40+10)/80 = 0.63 | 5/day x net x 1.0 x .5 x 250 | queued (WRDS busy) | round1_prose RETAIL-HERD |
@@ -53,3 +53,17 @@ half-spread in + out, median; means ~1.5-2x medians, driven by the open).
 ## Ceiling-killed before coding (no N)
 - **Post-FOMC 14:00-14:30 ETF momentum + 10:00 macro-release momentum (SPY/QQQ/TLT), 2026-10-13.** ~8 FOMC + ~60 10:00 releases/yr:
   0.27 events/day x ~10bp net x 4x intraday BP x 50% x 250 ~ +3pp/yr at the optimistic end; below +8pp. Pre-FOMC drift already dead.
+
+### Checkpoint 1 (2026-10-13, after iterations 1-5)
+- **Tried:** cost table (C), SECT-LAG lead-lag (A), ISO-BURST order-flow (A), SCALP-CLF classifier on price paths (B), passive-entry
+  markouts (C). RETAIL-HERD (A, iter 6) running. FOMC/10:00-release ETF momentum ceiling-killed.
+- **Died and why:** every signal had gross drift ~0 over 1-30 min (SECT-LAG +0.08bp, ISO-BURST +0.10bp, CLF top bucket net < 0 with a
+  time-shift null equal to the real model). The loss is exactly c plus the barrier asymmetry. No sign of a minute-scale directional
+  footprint from lead-lag, sweeps or price/volume paths, even in 2010-14.
+- **Best hit rate vs p*:** SCALP-CLF top 5% p 0.431 vs p* 0.560 (1x). ISO-BURST 0.248 vs 0.584; SECT-LAG 0.254 vs 0.786.
+- **Best net bp/trade (pessimistic, 1x):** ISO-BURST -3.26bp (cheapest names). Nothing positive.
+- **Cost table:** see above (large caps 3-10bp RT, mid caps 7-20, thin 12-80, ETFs 0.5; passive saves ~2bp in large caps only).
+- **Read so far:** optional stopping makes the TP/stop frame equivalent to "mean drift to exit > c"; none of the three mechanisms
+  produced ANY drift, so the problem is not cost, it is the absence of minute-scale predictability. Continue with different
+  counterparties/horizons (retail flow running); if iterations 6-10 are also ~0 gross, name single-stock minute momentum dead as a class.
+- **Waiting on user:** none.
