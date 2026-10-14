@@ -6897,3 +6897,11 @@ stops), universe ($50M-$500M, untouched for this), counterparty (limit buyers at
   (b) and (c) on +30m mid drift with t >= 2. Ceiling at $10k >= +8pp. Else KILL (WEAK if 1x passes, 2x fails).
 - Runner `research/sim/level_bounce.py` -> `data/research/program/level_bounce_out.txt`.
 Program N = 984.
+
+### Result — LEVEL-BOUNCE (2026-10-14, discovery 2010-14 only; N 984): KILL at the registered early-kill
+`level_bounce.py`, out `level_bounce_out.txt`. 100 days, 387 events (3.9/day). Pessimistic gross +2.99bp, net 1x -3.24bp (t -1.39), net
+2x -10.6; optimistic net 1x +0.18; median -7.4, ex-top-5 -5.7; halves -0.2 / -6.8. c 6.23bp; p 0.380 vs p* 0.578. +30m mid drift: event
++7.3bp vs placebo level PDL x 1.005 (b) +7.3, burst (a) +18.4, random minute (c) -9.1; event minus (b) -5.8 (t -1.25). **Judge era
+2015-19 NOT opened.** Read: the "bounce" after a quiet low touch is the same as after crossing any nearby level (a generic short-term
+reversal after a dip), not support liquidity; and it is smaller than c. The STOP-RUN control lead does not replicate in mid caps.
+Program N = 984.

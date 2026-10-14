@@ -1028,3 +1028,5 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
 - **RETAIL-HERD (N 981): KILL.** First-hour BJZZ retail buy imbalance in mid caps: no intraday continuation (fades -4.5bp by +60m, ns).
 - **STOP-RUN (N 983): KILL.** Prior-day-low breach + volume burst: 0.14 events/day in >$500M names; the burst arm falls (-14.5bp/30m) while
   quiet breaches revert. No stop-cascade overshoot.
+- **LEVEL-BOUNCE (N 984): KILL.** Quiet prior-day-low touch in mid caps: +3bp gross, same as a placebo level; prior-day levels carry no
+  support liquidity worth a scalp.
