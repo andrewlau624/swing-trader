@@ -7046,3 +7046,46 @@ agree: r/algotrading 1x2owmo (SMC/FVG on 4H, 477 stocks 2023-26: win rate = rand
 1qvovpv (order blocks, 30 futures incl. GC, 1m-1d: negative almost everywhere). The 1:1 + BE-at-0.68R win rate is a stop/target geometry property
 (random walk 40.5/19/40.5), not a setup property. Do not reopen ICT/SMC/FVG/IFVG/order-block patterns on any instrument without a stated mechanism.
 Program N = 988.
+
+## Amendment — Study VOLDAY: standard day-trading alerts on a point-in-time volatile-liquid watchlist (pre-register; program N 988 -> 993)
+`date`: Thu Oct 15 2026, before any minute bar is read. User request: day trade especially volatile stocks, hybrid automatic + alert.
+What is NEW vs the day-trading lab (Lab-AS gap/VWAP, Lab-AU ORB on stocks-in-play, halts, scalp loop): the UNIVERSE (liquid high-vol names whose
+spread is small relative to the range, picked point-in-time, not gappers) and a same-geometry random-entry placebo on every arm.
+- **Watchlist (frozen).** On the last session of each month, from Sharadar SEP (delisted included), Domestic Common Stock, closeunadj >= $10,
+  20d median $vol (closeunadj x volume) >= $500M, rank by 20d realized vol of closeadj returns; the top 10 trade the next month. 2016-01..2026-09.
+- **Data.** Alpaca SIP 1m bars, adjustment raw, 09:30-16:00 ET (signals.regular_clock / RTH only). Name-days with < 300 bars dropped.
+- **Arms (5, all frozen, one trade per arm per name-day, exit by 15:55 at the latest, path on 1m bars, stop-first on a bar touching both):**
+  A1 ORB15: 15m opening range; first 1m close beyond it 09:45-11:00 -> trade that side; stop = opposite side of the range; target 2R.
+  A2 VWAP-RECLAIM (long): before 11:00 price trades >= 1% below session VWAP, then the first 1m close back above VWAP -> long; stop = session low so far; target 2R.
+  A3 HOD-BREAK (long): 11:00-15:00, first 1m close above the prior high of day with that minute's volume >= 2x the session's mean 1m volume so far;
+     stop = low of the last 15 bars; target 2R.
+  A4 FLUSH-REVERSAL (long): at 10:30, if price <= open x 0.985 and (price - low)/(high - low) of the session so far < 0.15 -> long; stop = session low
+     so far - 0.25 x (high - low); hold to 15:55 (no target).
+  A5 GAP-FADE (short): gap (open / prior RTH close - 1) >= +3% and the first 5m bar closes below its open -> short at 09:35 close; stop = session high
+     so far; target = prior close (gap fill) else 15:55.
+- **Placebo.** Per arm: same name-day, same entry time, same stop distance and target rule, direction from a fixed-seed coin flip (A4 and A5
+  flip the side), 200 draws. Also the arm minus the same-name-day open->close drift (A4, A5) reported.
+- **Costs.** 5bp/side (1x) and 10bp/side (2x) on notional; R = return / stop distance; mean reported in bp of notional and in R.
+- **Gate (per arm, PASS needs all):** mean net at 1x > 0 with day-clustered t >= 2; > 0 at 2x; halves 2016-20 / 2021-26 both > 0; median > 0 or (hit
+  rate x avg win) > (miss x avg loss) stated; ex-top-5 > 0; real gross mean above the placebo 95th pct; n >= 300. DSR at N 993.
+- **Ceiling (report).** trades/yr x net bp x 100% of account per trade (one at a time, whole shares) x 50% capture at $2.3k / $10k / $25k, taxable
+  (shorts margin only; post-2026-06 intraday margin rules, no PDT count). Deployment gate +8pp/yr at $10k.
+- **Human layer.** Not backtestable. A PASS arm (or, failing that, the best arm as a control) becomes a forward alert + decision journal:
+  every alert logged, the human marks TAKE/SKIP within 2 minutes, outcomes scored for TAKEN vs SKIPPED vs ALL vs placebo.
+- Runner `research/sim/volday.py` -> `data/research/program/volday_out.txt`.
+Program N = 993.
+- **Deviation (fetch, before any outcome).** Sharadar suffixes reused delisted tickers (APC1); the fetcher queries the base symbol (APC resolves to
+  Anadarko 2019 on Alpaca) and maps it back. Coverage 1,285 / 1,290 name-months (missing UAA 2016-02, TFCFA, SAVEQ, PSKY, WBD 2021-04).
+
+### Result — VOLDAY (2026-10-15, one look 2016-01..2026-09; N 993): KILL, all 5 arms
+`volday.py`, out `volday_out.txt`. 26,244 name-days, 46,007 trades. Net at 5bp/side (1x):
+A1 ORB15 n 23,430 gross +4.1bp, net -5.9 (t -2.54), median -30.9, halves -5.6/-6.1, placebo pct 92%;
+A2 VWAP-RECLAIM n 12,639 gross -1.8, net -11.8 (t -2.84), placebo pct 7%;
+A3 HOD-BREAK n 5,906 gross +4.8, net -5.2 (t -5.49), halves -3.5/-6.7, placebo pct 94%;
+A4 FLUSH-REVERSAL n 2,940 gross -5.3, net -15.3 (t -1.28), placebo pct 22%;
+A5 GAP-FADE n 1,092 gross +5.2, net -4.8 (t -0.75), halves +21.0/-14.8, placebo pct 68%.
+Read: the breakout arms (ORB, HOD) carry a real but tiny continuation (~+2-3bp over same-geometry random entries, below the 95th pct) that a 10bp
+round trip eats 2-3x over; win rates 35-44% at 2R targets are the stop/target geometry. The (open->close minus) column for A4/A5 is report-only and
+conditioned on the trigger, not informative. Ceiling negative at every size. Volatile liquid names do not rescue retail day-trading alert setups;
+with Lab-AS/AU/halts and the scalp loop this closes the class. Human layer: no PASS arm, so no forward journal is built by default.
+Program N = 993.

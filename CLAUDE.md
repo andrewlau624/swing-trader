@@ -1041,3 +1041,6 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
 - **GOLD-IFVG (N 988, 2026-10-15): closed unjudged, treated dead.** Reddit "first 15m IFVG in Asia, gold, 1:1" = 50% in its own claimed month;
   outside systematic tests of SMC/FVG/order blocks match random entries. ICT-style chart patterns are a closed class; no reopen without a mechanism.
   Reddit access: reddit.com and PullPush block/429 this machine; Arctic Shift API works with a User-Agent and ~6s pacing (title search on big subs).
+- **VOLDAY (N 989-993, 2026-10-15): KILL all 5.** Retail alert setups (ORB15, VWAP reclaim, HOD break, flush reversal, gap fade) on a
+  point-in-time top-10 realized-vol, ADV >= $500M watchlist, Alpaca SIP 1m 2016-26, 46k trades: net -5..-15bp/trade at 5bp/side; breakout arms
+  ~+3bp over random entries (tiny real continuation), cost 10bp. Volatile names do not rescue day-trading alerts; class closed.
