@@ -1,0 +1,16 @@
+PREF-DIP universe name-days 511800 over 1442 days, 803 names; candidate name-days 208804
+
+k 0.005: fills 175653 on 1442 days (121.81/universe-day)
+  net/fill mean -16.1bp med -7.6 hit 0.45 | EWday -0.9 t -0.77 | ex-top5 -1.6 | halves -19.7 / -11.3 | 20bp exit -31.1 | mkt-adj +6.3
+  med win +41 med loss -49 | worst fill -6129 | worst day -318 | fill-minute $vol median $10,432 | 20d $vol median $373,414
+  yrs 2021:-5 2022:-25 2023:-21 2024:-12 2025:-13 2026:-8
+
+k 0.010  PRIMARY: fills 84966 on 1442 days (58.92/universe-day)
+  net/fill mean -7.5bp med +0.5 hit 0.50 | EWday +13.9 t +8.97 | ex-top5 +12.7 | halves -10.5 / -2.5 | 20bp exit -22.5 | mkt-adj +28.2
+  med win +58 med loss -59 | worst fill -6108 | worst day -386 | fill-minute $vol median $10,828 | 20d $vol median $352,865
+  yrs 2021:+5 2022:-12 2023:-13 2024:-5 2025:-4 2026:+4
+
+k 0.015: fills 44126 on 1437 days (30.60/universe-day)
+  net/fill mean -1.3bp med +7.9 hit 0.53 | EWday +24.1 t +9.84 | ex-top5 +21.9 | halves -4.2 / +4.1 | 20bp exit -16.3 | mkt-adj +45.4
+  med win +76 med loss -68 | worst fill -6089 | worst day -920 | fill-minute $vol median $11,367 | 20d $vol median $337,942
+  yrs 2021:+15 2022:-3 2023:-10 2024:+3 2025:+1 2026:+11

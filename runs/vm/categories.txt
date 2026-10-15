@@ -1,0 +1,17 @@
+CATEGORY ABLATION (live-like rule, one ban at a time; net bp/day of account; holdout 2024-10..2026-10 locked)
+picks per category: ADR_China 968, ADR_other 1374, CEF 31, ETF_crypto 42, ETF_unlevered 356, LEV_index_sector_cmdty 1982, LEV_single_stock 1515, Stock_biotech_pharma 2530, Stock_crypto_linked 517, Stock_healthcare_other 908, Stock_other 8269, Stock_recent_IPO(<1y) 1009
+
+(none: live-like)                                          worst   +4.05 | 16-19 +16.08 (t 1.6)  20-22  +4.05 (t 0.3)  23-24 +22.37 (t 1.4) | holdout +31.26 (t 1.9, n 4255)
+ban ADR_China                                              worst   +3.51 | 16-19 +14.86 (t 1.5)  20-22  +3.51 (t 0.3)  23-24 +19.19 (t 1.3) | holdout +25.53 (t 1.5, n 4075)
+ban ADR_other                                              worst   +0.94 | 16-19 +19.77 (t 2.0)  20-22  +0.94 (t 0.1)  23-24 +19.85 (t 1.4) | holdout +27.13 (t 1.5, n 4000)
+ban CEF                                                    worst   +4.05 | 16-19 +16.08 (t 1.6)  20-22  +4.05 (t 0.3)  23-24 +22.15 (t 1.4) | holdout +32.03 (t 1.9, n 4247)
+ban ETF_crypto                                             worst   +4.05 | 16-19 +16.17 (t 1.7)  20-22  +4.05 (t 0.3)  23-24 +22.22 (t 1.4) | holdout +31.32 (t 1.9, n 4252)
+ban ETF_unlevered                                          worst   +5.26 | 16-19 +15.55 (t 1.6)  20-22  +5.26 (t 0.4)  23-24 +20.22 (t 1.3) | holdout +31.21 (t 1.9, n 4237)
+ban LEV_index_sector_cmdty                                 worst   +9.05 | 16-19 +13.16 (t 1.4)  20-22  +9.05 (t 0.8)  23-24 +21.45 (t 1.4) | holdout +29.15 (t 1.7, n 3979)
+ban LEV_single_stock                                       worst   +4.00 | 16-19 +16.14 (t 1.6)  20-22  +4.00 (t 0.3)  23-24 +24.34 (t 1.5) | holdout +27.33 (t 1.7, n 3692)
+ban Stock_biotech_pharma                                   worst   -6.15 | 16-19 +11.71 (t 1.4)  20-22  -6.15 (t -0.5)  23-24 +30.70 (t 1.8) | holdout +31.89 (t 1.9, n 3890)
+ban Stock_crypto_linked                                    worst   +5.64 | 16-19 +17.84 (t 1.9)  20-22  +5.64 (t 0.5)  23-24 +16.01 (t 1.0) | holdout +28.50 (t 1.7, n 4205)
+ban Stock_healthcare_other                                 worst   +6.07 | 16-19 +17.40 (t 1.8)  20-22  +6.07 (t 0.5)  23-24 +17.09 (t 1.1) | holdout +31.84 (t 1.9, n 4127)
+ban Stock_other                                            worst   +8.82 | 16-19 +14.48 (t 1.7)  20-22  +8.82 (t 0.6)  23-24 +27.57 (t 1.4) | holdout +34.71 (t 1.9, n 3262)
+ban Stock_recent_IPO(<1y)                                  worst   +7.13 | 16-19 +11.97 (t 1.2)  20-22  +7.13 (t 0.6)  23-24 +28.15 (t 1.8) | holdout +34.22 (t 2.0, n 4143)
+ban Stock_biotech_pharma+Stock_healthcare_other            worst   -2.60 | 16-19 +12.61 (t 1.5)  20-22  -2.60 (t -0.2)  23-24 +25.86 (t 1.5) | holdout +32.78 (t 1.9, n 3754)

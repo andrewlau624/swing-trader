@@ -1,0 +1,37 @@
+1998: picked 37 (med ytd -0.38, med px $9.4, med adv $4.8M)
+1999: picked 46 (med ytd -0.37, med px $10.3, med adv $5.8M)
+2000: picked 40 (med ytd -0.36, med px $13.2, med adv $12.4M)
+2001: picked 11 (med ytd -0.38, med px $9.8, med adv $18.7M)
+2002: picked 27 (med ytd -0.38, med px $8.0, med adv $15.8M)
+2003: picked 9 (med ytd -0.36, med px $6.9, med adv $6.1M)
+2004: picked 2 (med ytd -0.43, med px $16.7, med adv $6.1M)
+2005: picked 8 (med ytd -0.35, med px $8.5, med adv $8.9M)
+2006: picked 5 (med ytd -0.39, med px $5.6, med adv $6.5M)
+2007: picked 18 (med ytd -0.45, med px $8.9, med adv $7.7M)
+2008: picked 11 (med ytd -0.37, med px $11.6, med adv $21.9M)
+2009: picked 5 (med ytd -0.37, med px $6.1, med adv $2.6M)
+2010: picked 2 (med ytd -0.31, med px $12.3, med adv $2.2M)
+2011: picked 3 (med ytd -0.36, med px $9.1, med adv $4.4M)
+2012: picked 2 (med ytd -0.41, med px $4.0, med adv $6.3M)
+2013: picked 7 (med ytd -0.34, med px $10.1, med adv $4.0M)
+2014: picked 16 (med ytd -0.36, med px $8.6, med adv $5.0M)
+2015: picked 29 (med ytd -0.37, med px $11.0, med adv $23.3M)
+2016: picked 4 (med ytd -0.44, med px $7.1, med adv $16.3M)
+2017: picked 4 (med ytd -0.35, med px $9.1, med adv $4.3M)
+2018: picked 43 (med ytd -0.34, med px $15.6, med adv $20.4M)
+2019: picked 7 (med ytd -0.43, med px $5.4, med adv $12.8M)
+2020: picked 8 (med ytd -0.34, med px $9.5, med adv $12.7M)
+2021: picked 43 (med ytd -0.37, med px $8.6, med adv $13.4M)
+2022: picked 25 (med ytd -0.39, med px $7.5, med adv $7.7M)
+2023: picked 4 (med ytd -0.34, med px $7.6, med adv $17.7M)
+2024: picked 35 (med ytd -0.36, med px $13.1, med adv $11.5M)
+2025: picked 17 (med ytd -0.42, med px $5.6, med adv $6.0M)
+[cost 25bp/side] years 2000-2025 n 26, fills 468, trunc 0%
+  mean/yr +2.94% t(yr) 1.91 median-yr +2.87%  years+ 69%  ex-best-yr +2.07%  worst-yr -10.6%
+[cost 2x 50bp/side] years 2000-2025 n 26, fills 468, trunc 0%
+  mean/yr +2.44% t(yr) 1.58 median-yr +2.37%  years+ 65%  ex-best-yr +1.57%  worst-yr -11.1%
+  1998-2015: n 16 mean +4.45% t 2.02 years+ 75%
+  2016-2025: n 10 mean +0.53% t 0.30 years+ 60%
+  years: {2000: 8.5, 2001: -3.4, 2002: 5.9, 2003: 1.2, 2004: 3.8, 2005: 7.0, 2006: 2.0, 2007: 4.6, 2008: 0.4, 2009: 9.1, 2010: 15.5, 2011: 12.7, 2012: 24.7, 2013: -2.0, 2014: -8.1, 2015: -10.6, 2016: 8.2, 2017: 0.7, 2018: 5.6, 2019: -9.4, 2020: 1.7, 2021: -6.1, 2022: 4.4, 2023: 4.8, 2024: -4.2, 2025: -0.5}
+  YTD-loss tercile mean return (gross, in tercile order worst->least): [2.66, 1.94, 3.18]
+  [placebo June]: n years 26, fills 335, mean/yr -0.31% t -0.15 years+ 42% median-yr -2.54%

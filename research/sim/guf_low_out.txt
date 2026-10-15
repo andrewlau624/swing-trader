@@ -1,0 +1,19 @@
+GUF-LOW judge 2018-01-12..2020-10: gap-ups 13409 (dropped 5565); arms {'MID': 5222, 'HIGH': 3982, 'LOW': 3317, 'NA': 888}
+descriptive 2016-17 ALL-DTC short: n 3158 EWday +23.1bp t +1.67 trade med +20.5
+
+LOW PRIMARY: n 3317 days 463 (7.2/day) | SHORT net EWday -18.3bp t -0.43 | trade mean -60.0 med -38.5 hit 0.47 | ex-top5 -62.4 | halves +23.2 / -73.5 | 25bp/side -90.0
+   med win +349 med loss -370 worst trade -10106 share losing >20% 0.013 worst day -10106 | p90 adverse +1258 | 2018:+93 2019:-68 2020:-73
+
+LOW liquid $10/$20M: n 2033 days 345 (5.9/day) | SHORT net EWday -65.1bp t -1.45 | trade mean -87.7 med -72.1 hit 0.44 | ex-top5 -102.7 | halves -78.0 / -89.2 | 25bp/side -117.7
+   med win +310 med loss -353 worst trade -10106 share losing >20% 0.006 worst day -10106 | p90 adverse +1037 | 2018:+13 2019:-190 2020:-89
+
+MID: n 5222 days 582 (9.0/day) | SHORT net EWday -1.6bp t -0.08 | trade mean -61.9 med -30.9 hit 0.48 | ex-top5 -20.4 | halves +4.8 / -78.8 | 25bp/side -91.9
+   med win +299 med loss -355 worst trade -4777 share losing >20% 0.007 worst day -2171 | p90 adverse +1052 | 2018:+15 2019:-8 2020:-79
+
+HIGH: n 3982 days 622 (6.4/day) | SHORT net EWday -9.5bp t -0.57 | trade mean -43.4 med -18.1 hit 0.49 | ex-top5 -22.0 | halves -33.2 / -50.3 | 25bp/side -73.4
+   med win +331 med loss -351 worst trade -7919 share losing >20% 0.009 worst day -2339 | p90 adverse +1076 | 2018:-40 2019:-27 2020:-50
+
+NA: n 888 days 320 (2.8/day) | SHORT net EWday +12.1bp t +0.30 | trade mean -9.5 med +22.1 hit 0.53 | ex-top5 -17.7 | halves +39.9 / -25.8 | 25bp/side -39.5
+   med win +357 med loss -420 worst trade -4970 share losing >20% 0.020 worst day -4321 | p90 adverse +1370 | 2018:+45 2019:+35 2020:-26
+
+LOW short - HIGH short (EW-day pooled): -8.8bp t -0.19

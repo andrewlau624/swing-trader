@@ -1,0 +1,10 @@
+ETF-THIN universe name-days 87083 (433 ETFs, 1442 days); candidates 60820
+benchmarks used: {'SPY': 25218, 'EFA': 7996, 'MDY': 7234, 'IEF': 6006, 'EEM': 5530, 'IJR': 5491, 'QQQ': 5091, 'IWM': 4736}
+
+k 0.005  PRIMARY: fills 1761 on 705 days (2.5/fill-day), 290 ETFs
+  HEDGED net/fill mean -22.0bp med -4.9 hit 0.43 | EWday -18.8 t -2.14 | ex-top5 -19.6 | halves -27.8 / -16.1 | 20bp exit -37.0 | UNHEDGED -14.9 med +2.4
+  med win +20 med loss -22 worst -6628 worst day -4970 | 20d $vol med $480,123 | 2021:-6 2022:-12 2023:-57 2024:-28 2025:-4 2026:-34
+
+k 0.010: fills 263 on 179 days (1.5/fill-day), 118 ETFs
+  HEDGED net/fill mean -86.4bp med +7.9 hit 0.55 | EWday -73.4 t -1.51 | ex-top5 -80.0 | halves -111.3 / -62.0 | 20bp exit -101.4 | UNHEDGED -78.4 med +15.8
+  med win +74 med loss -51 worst -6611 worst day -5007 | 20d $vol med $421,470 | 2021:+28 2022:-1 2023:-258 2024:-220 2025:+31 2026:-182

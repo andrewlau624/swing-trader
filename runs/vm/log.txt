@@ -1,0 +1,14 @@
+
+Fri Oct  9 13:07:23 2026 start; 0.02h; live-like baseline +4.05 bp/day worst fold; holdout {"n": 4255, "bp_day": 31.257486707799583, "t": 1.8868936667943998, "med_trade": 17.415390014648438, "ex_top5_bp_day": 16.467346442905}
+Fri Oct  9 13:07:29 2026 epoch 1 trials 21984 champion +29.78 -> holdout +6.59 bp/day
+Fri Oct  9 13:07:35 2026 epoch 2 trials 43920 champion +30.43 -> holdout +23.53 bp/day
+Fri Oct  9 13:07:41 2026 epoch 3 trials 66000 champion +29.75 -> holdout +20.91 bp/day
+Fri Oct  9 13:07:47 2026 epoch 4 trials 87888 champion +29.72 -> holdout +38.72 bp/day
+Fri Oct  9 13:07:53 2026 epoch 5 trials 108816 champion +29.95 -> holdout +49.14 bp/day
+Fri Oct  9 13:07:59 2026 epoch 6 trials 129120 champion +31.70 -> holdout +57.21 bp/day
+Fri Oct  9 13:08:05 2026 epoch 7 trials 148944 champion +29.34 -> holdout +68.71 bp/day
+Fri Oct  9 13:08:11 2026 epoch 8 trials 169248 champion +30.43 -> holdout +36.32 bp/day
+Fri Oct  9 13:08:17 2026 epoch 9 trials 191088 champion +28.12 -> holdout +39.19 bp/day
+Fri Oct  9 13:08:23 2026 epoch 10 trials 212256 champion +29.96 -> holdout +18.85 bp/day
+Fri Oct  9 13:08:29 2026 epoch 11 trials 233136 champion +28.28 -> holdout +110.48 bp/day
+Fri Oct  9 13:08:29 2026 done; trials 233136

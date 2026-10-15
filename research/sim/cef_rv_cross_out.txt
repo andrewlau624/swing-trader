@@ -1,0 +1,7 @@
+CEF-RV cross repricing: 3548 of 3636 2016+ trades have both crosses
+closing cross vs Sharadar raw close at entry: median |dev| 0.0bp, p95 13.9bp
+Sharadar closeadj (reference)    n 3548 net mean  +447.8bp med  +343.8 hit 0.74 t_wk  8.82 | halves +588.2 / +328.3 | 2x cost +397.8
+CC official closing crosses      n 3054 net mean  +409.2bp med  +333.9 hit 0.73 t_wk  8.32 | halves +538.2 / +331.4 | 2x cost +359.2
+OO official opening crosses      n 3528 net mean  +486.1bp med  +353.2 hit 0.76 t_wk  9.52 | halves +642.6 / +354.3 | 2x cost +436.1
+entry closing-cross $ size: median $4,894, p25 $2,179, p10 $1,070; opening-cross median $46,440
+GATE PASS=False

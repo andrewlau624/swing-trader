@@ -1,0 +1,11 @@
+ARM O (N 890) CEF-RV 1999-2014 entries: trades 3673 funds 276
+  mean net +333.4bp median +340.1 hit 0.73 t_wk 5.33
+  halves 1999-06 +404.4 (n 1247) / 2007-14 +296.9 (n 2426); ex-top-5 +322.3; ex-2008-09 +325.2; 2x/3x cost +283.4 / +233.4; mean hold 13.9wk
+  by entry year: 1999:+171(174.0) 2000:+474(141.0) 2001:+620(68.0) 2002:+342(161.0) 2003:+604(112.0) 2004:+533(202.0) 2005:+315(248.0) 2006:+403(141.0) 2007:+87(316.0) 2008:-78(465.0) 2009:+2094(123.0) 2010:+561(222.0) 2011:+369(364.0) 2012:+380(263.0) 2013:+141(367.0) 2014:+198(306.0)
+  ARM O: PASS  n=Y t=Y halves=Y med=Y hit=Y ex5=Y
+
+ARM F (N 891) NAV-fall: trades with navtr26 3598 of 3673; corr(navtr26, nav26) 0.98
+  navtr26: LOW n 1194 mean +585.9 vs rest +209.8  SPREAD +376.1bp t_wk 3.45 med-diff +120.6 hit 0.76/0.72  halves +17.7/+549.8  ex-top5 +351.5  ex-08/09 +70.7  by disc tercile (deep..shallow) +509/+316/+222
+  nav26: LOW n 1194 mean +611.9 vs rest +196.8  SPREAD +415.1bp t_wk 3.68 med-diff +158.4 hit 0.77/0.72  halves +30.6/+601.4  ex-top5 +381.9  ex-08/09 +124.9  by disc tercile (deep..shallow) +529/+370/+281
+  PLACEBO navtr26: shuffled mean +1.9 p95 +56.1 -> real at 100th pct
+  ARM F: PASS  spread=Y t=Y halves=Y med=Y ex5=Y placebo=Y ex0809=Y disc=Y

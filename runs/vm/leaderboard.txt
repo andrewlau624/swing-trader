@@ -1,0 +1,91 @@
+VARIANCE MACHINE  FINAL  Fri Oct  9 13:08:29 2026  elapsed 0.02h  gen 11  trials 233136  sigma 0.000
+DISCOVERY ONLY: candidates to pre-register and shadow forward. Expected max |t| from pure noise at this many trials ~ 5.0; a fold t below that is not evidence.
+objective = worst-fold net bp/day of account (15bp round trip, no-pick days = 0); live-like baseline +4.05  folds 16-19 +16.08 (t 1.6), 20-22 +4.05 (t 0.3), 23-24 +22.37 (t 1.4)
+live-like on LOCKED holdout 2024-10..2026-10: {"n": 4255, "bp_day": 31.257486707799583, "t": 1.8868936667943998, "med_trade": 17.415390014648438, "ex_top5_bp_day": 16.467346442905}
+SHRINKAGE over 11 independent searches: champion in-sample worst-fold mean +29.77 bp/day -> holdout mean +42.69 (median +38.72); share of champions beating the live-like rule on holdout 64%; corr(in-sample, holdout) -0.34
+CATEGORY BANS among the champions (share that banned it; mean holdout bp/day when banned vs kept):
+   CEF                        banned   36%  holdout banned +44.17 vs kept +41.85
+   ETF_crypto                 banned   45%  holdout banned +40.14 vs kept +44.82
+   ETF_unlevered              banned    9%  holdout banned +57.21 vs kept +41.24
+   LEV_single_stock           banned   55%  holdout banned +52.64 vs kept +30.76
+   Stock_healthcare_other     banned    9%  holdout banned +39.19 vs kept +43.04
+
+#1  worst-fold +31.70 bp/day  16-19: +31.70bp/d +70bp/tr n505 t3.4  20-22: +32.49bp/d +45bp/tr n878 t2.0  23-24: +34.54bp/d +57bp/tr n507 t1.4
+    rule {"max_dr": -0.0981, "max_ibs": 0.0891, "min_vol": 0.5197, "min_ladv": 7.0402, "spy_lo": -0.0282, "spy_hi": 0.0524, "max_crowd": 24.2813, "min_prev": 0.0, "top_k": 2.0842, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 727, "bp_day": 57.20539534068529, "t": 2.015013139290892, "med_trade": 20.141708374023438, "ex_top5_bp_day": 28.357544503652278}
+
+#2  worst-fold +31.28 bp/day  16-19: +31.28bp/d +73bp/tr n502 t3.4  20-22: +32.96bp/d +45bp/tr n892 t2.0  23-24: +33.87bp/d +52bp/tr n497 t1.4
+    rule {"max_dr": -0.0955, "max_ibs": 0.089, "min_vol": 0.6124, "min_ladv": 7.1021, "spy_lo": -0.0317, "spy_hi": 0.0544, "max_crowd": 25.3072, "min_prev": 0.2638, "top_k": 1.907, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 728, "bp_day": 51.28275528403771, "t": 1.8370582709261414, "med_trade": 16.624436378479004, "ex_top5_bp_day": 22.434904447004698}
+
+#3  worst-fold +31.26 bp/day  16-19: +31.26bp/d +75bp/tr n477 t3.4  20-22: +32.05bp/d +43bp/tr n835 t1.9  23-24: +35.41bp/d +53bp/tr n466 t1.4
+    rule {"max_dr": -0.097, "max_ibs": 0.089, "min_vol": 0.6735, "min_ladv": 7.1013, "spy_lo": -0.0296, "spy_hi": 0.0521, "max_crowd": 24.5061, "min_prev": 0.2541, "top_k": 2.3567, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 704, "bp_day": 49.24567504950263, "t": 1.7440427900634103, "med_trade": 30.648813247680664, "ex_top5_bp_day": 20.397824212469615}
+
+#4  worst-fold +31.09 bp/day  16-19: +31.09bp/d +66bp/tr n516 t3.3  20-22: +34.89bp/d +47bp/tr n906 t2.1  23-24: +35.62bp/d +58bp/tr n515 t1.4
+    rule {"max_dr": -0.0974, "max_ibs": 0.0893, "min_vol": 0.5488, "min_ladv": 7.038, "spy_lo": -0.0282, "spy_hi": 0.0522, "max_crowd": 29.4432, "min_prev": 0.0, "top_k": 1.8967, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 765, "bp_day": 49.86422350645534, "t": 1.733741527641847, "med_trade": 13.73539924621582, "ex_top5_bp_day": 21.01637266942232}
+
+#5  worst-fold +30.89 bp/day  16-19: +30.89bp/d +74bp/tr n476 t3.3  20-22: +39.03bp/d +55bp/tr n837 t2.5  23-24: +32.73bp/d +53bp/tr n478 t1.3
+    rule {"max_dr": -0.0971, "max_ibs": 0.0893, "min_vol": 0.6359, "min_ladv": 7.1007, "spy_lo": -0.0356, "spy_hi": 0.0533, "max_crowd": 21.2767, "min_prev": 0.6227, "top_k": 2.1006, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 690, "bp_day": 50.53501942302951, "t": 1.9123428611590407, "med_trade": 20.786033630371094, "ex_top5_bp_day": 22.87560545765815}
+
+#6  worst-fold +30.53 bp/day  16-19: +30.53bp/d +73bp/tr n473 t3.3  20-22: +32.40bp/d +46bp/tr n870 t1.9  23-24: +31.62bp/d +52bp/tr n486 t1.3
+    rule {"max_dr": -0.0978, "max_ibs": 0.0894, "min_vol": 0.5293, "min_ladv": 7.102, "spy_lo": -0.0274, "spy_hi": 0.0541, "max_crowd": 30.5829, "min_prev": 0.1953, "top_k": 2.2391, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 740, "bp_day": 48.16443402265987, "t": 1.7140026099746675, "med_trade": 16.624436378479004, "ex_top5_bp_day": 19.316583185626857}
+
+#7  worst-fold +30.43 bp/day  16-19: +30.71bp/d +98bp/tr n411 t3.7  20-22: +30.43bp/d +51bp/tr n621 t2.3  23-24: +33.82bp/d +57bp/tr n363 t1.4
+    rule {"max_dr": -0.0952, "max_ibs": 0.0607, "min_vol": 0.0, "min_ladv": 7.1155, "spy_lo": -0.0478, "spy_hi": 0.06, "max_crowd": 8.0513, "min_prev": 0.0, "top_k": 9.601, "cats_off": ["LEV_single_stock", "Stock_crypto_linked"], "weight": "depth"}
+    LOCKED holdout: {"n": 394, "bp_day": 23.52774172931385, "t": 1.0888115490326196, "med_trade": 8.82040023803711, "ex_top5_bp_day": -6.514867227347552}
+
+#8  worst-fold +30.43 bp/day  16-19: +30.43bp/d +58bp/tr n647 t3.4  20-22: +31.13bp/d +29bp/tr n1476 t2.3  23-24: +31.55bp/d +54bp/tr n684 t1.4
+    rule {"max_dr": -0.0947, "max_ibs": 0.0893, "min_vol": 0.6458, "min_ladv": 7.1087, "spy_lo": -0.0355, "spy_hi": 0.0256, "max_crowd": 19.5961, "min_prev": 0.0, "top_k": 14.6203, "cats_off": ["ETF_crypto", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 1363, "bp_day": 36.31701762477637, "t": 1.8266596610669232, "med_trade": 18.800601959228516, "ex_top5_bp_day": 15.772877010768264}
+
+#9  worst-fold +30.39 bp/day  16-19: +30.39bp/d +72bp/tr n487 t3.3  20-22: +35.98bp/d +48bp/tr n892 t2.2  23-24: +31.53bp/d +51bp/tr n491 t1.3
+    rule {"max_dr": -0.0963, "max_ibs": 0.0889, "min_vol": 0.556, "min_ladv": 7.1075, "spy_lo": -0.0313, "spy_hi": 0.0562, "max_crowd": 28.3849, "min_prev": 0.0, "top_k": 2.4335, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 748, "bp_day": 48.921269561078084, "t": 1.7418928117946129, "med_trade": 15.962824821472168, "ex_top5_bp_day": 20.07341872404507}
+
+#10  worst-fold +30.37 bp/day  16-19: +30.37bp/d +66bp/tr n536 t3.3  20-22: +32.74bp/d +46bp/tr n917 t2.0  23-24: +34.69bp/d +54bp/tr n515 t1.4
+    rule {"max_dr": -0.0956, "max_ibs": 0.0884, "min_vol": 0.6214, "min_ladv": 7.0418, "spy_lo": -0.0283, "spy_hi": 0.0542, "max_crowd": 28.7143, "min_prev": 0.1831, "top_k": 2.1015, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 764, "bp_day": 54.64269833667807, "t": 1.903590155147007, "med_trade": 14.205083847045898, "ex_top5_bp_day": 25.794847499645062}
+
+#11  worst-fold +30.36 bp/day  16-19: +30.36bp/d +67bp/tr n516 t3.2  20-22: +33.19bp/d +47bp/tr n884 t2.0  23-24: +32.28bp/d +49bp/tr n507 t1.3
+    rule {"max_dr": -0.0966, "max_ibs": 0.0881, "min_vol": 0.6356, "min_ladv": 7.0443, "spy_lo": -0.0289, "spy_hi": 0.0527, "max_crowd": 25.2304, "min_prev": 0.0644, "top_k": 2.436, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 737, "bp_day": 55.422852724146516, "t": 1.932423889743558, "med_trade": 16.99934959411621, "ex_top5_bp_day": 26.5750018871135}
+
+#12  worst-fold +30.35 bp/day  16-19: +30.80bp/d +73bp/tr n496 t3.3  20-22: +33.06bp/d +45bp/tr n875 t2.0  23-24: +30.35bp/d +46bp/tr n484 t1.3
+    rule {"max_dr": -0.0954, "max_ibs": 0.0893, "min_vol": 0.6209, "min_ladv": 7.1234, "spy_lo": -0.0297, "spy_hi": 0.0534, "max_crowd": 24.0848, "min_prev": 0.4675, "top_k": 1.9811, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 716, "bp_day": 57.1404674919743, "t": 2.0611336362884645, "med_trade": 16.624436378479004, "ex_top5_bp_day": 28.29261665494128}
+
+#13  worst-fold +30.32 bp/day  16-19: +30.32bp/d +67bp/tr n509 t3.2  20-22: +35.97bp/d +49bp/tr n881 t2.2  23-24: +39.85bp/d +56bp/tr n502 t1.5
+    rule {"max_dr": -0.0969, "max_ibs": 0.0871, "min_vol": 0.635, "min_ladv": 7.041, "spy_lo": -0.0293, "spy_hi": 0.0531, "max_crowd": 26.1218, "min_prev": 0.7344, "top_k": 2.1541, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 737, "bp_day": 51.19919939734378, "t": 1.7863367243185673, "med_trade": 20.141708374023438, "ex_top5_bp_day": 22.351348560310768}
+
+#14  worst-fold +30.30 bp/day  16-19: +30.30bp/d +65bp/tr n553 t3.2  20-22: +32.84bp/d +38bp/tr n937 t2.0  23-24: +30.55bp/d +43bp/tr n504 t1.3
+    rule {"max_dr": -0.0905, "max_ibs": 0.0892, "min_vol": 0.672, "min_ladv": 7.1226, "spy_lo": -0.0393, "spy_hi": 0.0561, "max_crowd": 24.1777, "min_prev": 0.2965, "top_k": 2.323, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 736, "bp_day": 52.01792437903773, "t": 1.8728391659362815, "med_trade": 16.9594144821167, "ex_top5_bp_day": 23.17007354200472}
+
+#15  worst-fold +30.15 bp/day  16-19: +30.15bp/d +74bp/tr n473 t3.3  20-22: +31.92bp/d +44bp/tr n899 t1.9  23-24: +36.58bp/d +56bp/tr n483 t1.5
+    rule {"max_dr": -0.0972, "max_ibs": 0.0881, "min_vol": 0.5112, "min_ladv": 7.1036, "spy_lo": -0.029, "spy_hi": 0.054, "max_crowd": 32.6554, "min_prev": 0.0, "top_k": 1.593, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 750, "bp_day": 52.2095331911488, "t": 1.854416048296325, "med_trade": 18.570528984069824, "ex_top5_bp_day": 23.361682354115786}
+
+#16  worst-fold +30.10 bp/day  16-19: +30.10bp/d +68bp/tr n532 t3.3  20-22: +33.12bp/d +44bp/tr n951 t2.0  23-24: +32.01bp/d +47bp/tr n521 t1.3
+    rule {"max_dr": -0.0927, "max_ibs": 0.0884, "min_vol": 0.5754, "min_ladv": 7.1093, "spy_lo": -0.03, "spy_hi": 0.0553, "max_crowd": 30.9802, "min_prev": 0.8148, "top_k": 2.0399, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 773, "bp_day": 49.031101333603175, "t": 1.7530333703716, "med_trade": 13.55062484741211, "ex_top5_bp_day": 20.18325049657016}
+
+#17  worst-fold +30.10 bp/day  16-19: +30.89bp/d +74bp/tr n480 t3.3  20-22: +32.76bp/d +44bp/tr n845 t2.0  23-24: +30.10bp/d +50bp/tr n474 t1.2
+    rule {"max_dr": -0.0974, "max_ibs": 0.0892, "min_vol": 0.6424, "min_ladv": 7.0972, "spy_lo": -0.029, "spy_hi": 0.0522, "max_crowd": 24.9187, "min_prev": 0.6971, "top_k": 2.1777, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 709, "bp_day": 53.863734142251005, "t": 1.9147184859104611, "med_trade": 23.204193115234375, "ex_top5_bp_day": 25.01588330521799}
+
+#18  worst-fold +30.06 bp/day  16-19: +30.06bp/d +64bp/tr n558 t3.2  20-22: +33.13bp/d +48bp/tr n954 t2.0  23-24: +30.42bp/d +45bp/tr n537 t1.2
+    rule {"max_dr": -0.0933, "max_ibs": 0.0864, "min_vol": 0.5391, "min_ladv": 7.0428, "spy_lo": -0.0308, "spy_hi": 0.0563, "max_crowd": 29.2474, "min_prev": 0.5817, "top_k": 2.1101, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 782, "bp_day": 47.90826517566014, "t": 1.6730246333078536, "med_trade": 13.643012046813965, "ex_top5_bp_day": 19.060414338627123}
+
+#19  worst-fold +30.04 bp/day  16-19: +30.04bp/d +93bp/tr n426 t3.5  20-22: +30.62bp/d +55bp/tr n658 t2.2  23-24: +33.20bp/d +55bp/tr n379 t1.4
+    rule {"max_dr": -0.0958, "max_ibs": 0.0645, "min_vol": 0.0, "min_ladv": 7.107, "spy_lo": -0.0444, "spy_hi": 0.059, "max_crowd": 8.0238, "min_prev": 0.0948, "top_k": 9.3586, "cats_off": ["LEV_single_stock", "Stock_crypto_linked"], "weight": "depth"}
+    LOCKED holdout: {"n": 418, "bp_day": 23.079159097888997, "t": 1.101787646469577, "med_trade": 13.172731399536133, "ex_top5_bp_day": -4.974104587076728}
+
+#20  worst-fold +30.04 bp/day  16-19: +30.10bp/d +69bp/tr n499 t3.2  20-22: +38.13bp/d +54bp/tr n896 t2.3  23-24: +30.04bp/d +43bp/tr n499 t1.2
+    rule {"max_dr": -0.0973, "max_ibs": 0.0864, "min_vol": 0.508, "min_ladv": 7.0582, "spy_lo": -0.0309, "spy_hi": 0.0548, "max_crowd": 30.752, "min_prev": 0.5073, "top_k": 2.0817, "cats_off": ["ETF_crypto", "ETF_unlevered", "LEV_single_stock", "Stock_crypto_linked"], "weight": "equal"}
+    LOCKED holdout: {"n": 753, "bp_day": 49.79611883931638, "t": 1.7405257024512866, "med_trade": 16.99934959411621, "ex_top5_bp_day": 20.948268002283363}

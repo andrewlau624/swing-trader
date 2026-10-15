@@ -1,0 +1,21 @@
+GAP-SHORT rows 8755 (2016-01-06 .. 2026-09-30)
+
+PRIMARY $10/$20M 2016-20 JUDGE: n 2031 days 714 (2.8/day)
+  net EWday +61.0bp t +2.45 | trade mean +90.9 med +79.5 hit 0.55 | ex-top5 +40.1 | halves +46.2 / +119.3 | 20bp/side +70.9 | SPY-adj +48.4
+  med win +414 med loss -360 | worst trade -5768 | worst day -3196 | trades losing >10% 0.060 | max adverse excursion p90 +1332 | short to +60m -64.9
+  yrs 2016:+60 2017:+68 2018:+17 2019:-27 2020:+156
+
+PRIMARY $10/$20M 2021-26 touched: n 3070 days 1038 (3.0/day)
+  net EWday -8.2bp t -0.37 | trade mean -25.9 med -2.5 hit 0.50 | ex-top5 -22.3 | halves -10.7 / -37.2 | 20bp/side -45.9 | SPY-adj -21.4
+  med win +466 med loss -492 | worst trade -21249 | worst day -4774 | trades losing >10% 0.104 | max adverse excursion p90 +1480 | short to +60m -21.7
+  yrs 2021:+120 2022:-63 2023:-105 2024:-108 2025:+38 2026:-60
+
+BROAD $5/$5M 2016-20 JUDGE: n 3423 days 951 (3.6/day)
+  net EWday +43.8bp t +1.98 | trade mean +77.4 med +58.8 hit 0.54 | ex-top5 +26.1 | halves +28.5 / +111.3 | 20bp/side +57.4 | SPY-adj +41.1
+  med win +454 med loss -415 | worst trade -7431 | worst day -3869 | trades losing >10% 0.079 | max adverse excursion p90 +1480 | short to +60m -68.6
+  yrs 2016:-15 2017:+15 2018:+80 2019:+32 2020:+138
+
+BROAD $5/$5M 2021-26 touched: n 5332 days 1257 (4.2/day)
+  net EWday +48.6bp t +2.45 | trade mean -5.6 med +4.6 hit 0.50 | ex-top5 +35.6 | halves -12.7 / +0.1 | 20bp/side -25.6 | SPY-adj +0.3
+  med win +522 med loss -543 | worst trade -21249 | worst day -4774 | trades losing >10% 0.121 | max adverse excursion p90 +1650 | short to +60m -1.9
+  yrs 2021:+79 2022:-102 2023:-29 2024:-46 2025:+43 2026:-4

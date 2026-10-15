@@ -1,0 +1,25 @@
+CEF-TXT judge  trades 2016+ 3636  reports scored 8160  funds 332
+trades with a report in the prior 400d: 3562 of 3636 (excluded 74); median report age 85d
+base: mean +451.4bp  median +344.1  hit 0.74  t_wk 4.57
+tone: mean -0.038 sd 0.125; dist_cut flagged 0.48; corr(tone, ret) +0.036
+A1 tone level (drop most-negative tercile): n 3562 keep 2372 drop 1190  SPREAD -58.4bp t_wk -1.86  lift -19.5  med-diff -39.4  hit keep/drop 0.74/0.75  halves -86.0/-35.2  ex-top5 -60.1
+A2 tone change (drop most-deteriorated): n 3558 keep 2371 drop 1187  SPREAD -31.1bp t_wk -0.79  lift -10.4  med-diff -40.6  hit keep/drop 0.73/0.75  halves +11.6/-69.0  ex-top5 -28.5
+C1a size (drop largest tercile): n 3562 keep 2374 drop 1188  SPREAD +20.5bp t_wk 0.54  lift +6.8  med-diff -26.7  hit keep/drop 0.73/0.76  halves +103.6/-50.4  ex-top5 +19.4
+C1b size (drop smallest tercile): n 3562 keep 2377 drop 1185  SPREAD -69.6bp t_wk -2.11  lift -23.2  med-diff -23.9  hit keep/drop 0.74/0.73  halves -94.9/-47.5  ex-top5 -71.3
+C2 distribution-cut keyword (drop flagged): n 3562 keep 1853 drop 1709  SPREAD +2.0bp t_wk 0.05  lift +0.9  med-diff -9.6  hit keep/drop 0.74/0.74  halves -29.9/-4.1  ex-top5 -9.2
+C3 trailing 26w NAV return (drop lowest): n 3562 keep 2377 drop 1185  SPREAD -705.4bp t_wk -5.08  lift -234.7  med-diff -429.3  hit keep/drop 0.69/0.84  halves -1015.7/-440.3  ex-top5 -685.3
+C4 entry discount (drop shallowest): n 3562 keep 2372 drop 1190  SPREAD +120.9bp t_wk 1.53  lift +40.4  med-diff +12.4  hit keep/drop 0.75/0.71  halves +287.0/-21.5  ex-top5 +109.9
+
+PLACEBO A1: real -58.4bp vs shuffled mean -2.2 p95 +56.5  -> real at 5th pct
+PLACEBO A2: real -31.1bp vs shuffled mean +1.4 p95 +65.4  -> real at 21th pct
+
+A1 tone tercile (0.00,0.33]: n 1186 mean +454.1bp median +341.6 hit 0.72
+A1 tone tercile (0.33,0.67]: n 1186 mean +409.6bp median +329.5 hit 0.75
+A1 tone tercile (0.67,1.01]: n 1190 mean +490.2bp median +374.2 hit 0.75
+
+GATE (each arm): spread>=+150bp, t_wk>=2, halves>0, med-diff>0, ex-top5>0, placebo>=95th pct, beats best non-NLP control by >=+50bp
+best control spread +120.9bp
+A1: KILL  spread=n t=n halves=n med=n ex5=n placebo=n control=n
+A2: KILL  spread=n t=n halves=n med=n ex5=n placebo=n control=n
+
+cost shock: spreads are kept-minus-dropped, so a uniform round-trip cost cancels; at 100/150bp the kept leg mean is +401.4 / +351.4bp before filtering

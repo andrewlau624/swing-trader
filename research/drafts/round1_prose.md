@@ -7012,3 +7012,37 @@ ex-top-5 -8.6; halves 2020-22 -8.2 / 2023-24 +6.1; years -4.8/-12.7/-9.7/+20.2/-
 (day-level +1.3bp t 0.17). All upgrades 2020-24: +4.3bp net (t 0.71). SECONDARY adv >= $1B (report only): n 707, +16.0bp (t 1.13), 4bp/side +12.0; its gap<=0
 overlap n 178 +2.0. Ceiling -1.5pp/yr after tax. Read: the 2015-19 pocket was mined noise; UPG family closed.
 Program N = 987.
+
+## Amendment — Study GOLD-IFVG: Reddit "first 15m IFVG in the Asia session, gold, 1:1" (pre-register; program N 987 -> 988)
+`date`: Wed Oct 14 2026, before any GC bar is read. Source: r/Daytrading "First 10k month" (claims 75% WR this month, ~65% normal, 1:1 RR,
+BE at 68% of TP). Not a structural mechanism; tested because the claim is specific and the data costs $0.47. Prior: random-walk 1:1 with a BE
+move at 0.68R gives win 40.5% / BE 19% / loss 40.5%, expectancy 0.
+- **Data.** Databento GLBX.MDP3 ohlcv-1m GC.v.0 (continuous front, calendar roll), 2016-01-01..2025-12-31; 15m bars built from 1m (ET clock,
+  bars on :00/:15/:30/:45). Sessions with a roll jump inside the window dropped. Plus Yahoo GC=F 15m last 60d (2026-08..10) as a direct check of
+  the claimed month (report only).
+- **Rule (frozen).** Asia window = 19:00-03:00 ET (America/New_York). FVG at 15m bar i: bull if high[i-2] < low[i], bear if low[i-2] > high[i],
+  i inside the window. Inversion at a later bar j (j - i <= 16, j in window): a bull FVG closed below high[i-2] -> SHORT at close[j]; a bear FVG
+  closed above low[i-2] -> LONG at close[j]. Take only the FIRST inversion of the session. Stop: S1 = the gap's far edge (short: low[i]; long:
+  high[i]); S2 = extreme of bars i-2..j (short: max high; long: min low). PRIMARY = S2 (S1 report only). Skip if risk < 0.5 $/oz. TP = entry +/- 1R;
+  once price reaches 0.68R move stop to entry. Path on 1m bars; stop-first when a 1m bar touches both. Unfilled at 12:00 ET -> exit at the 12:00
+  close. Cost 0.20 $/oz RT (1x, ~2 ticks), 0.40 (2x).
+- **Placebo.** Same entry time and stop distance, direction from a fixed-seed coin flip (200 draws -> distribution of mean R).
+- **Gate (PASS), all required, PRIMARY.** Mean net R > 0 at 1x with day-clustered t >= 2; both halves (2016-20 / 2021-25) > 0; still > 0 at 2x;
+  win rate (TP hits / trades) >= 50% AND mean above the placebo 95th pct; n >= 300. Else KILL. Reddit claim test (report): win rate near 65-75%.
+- **Ceiling (report).** Futures = taxable only. MGC (10 oz) whole-contract risk; trades/yr x net R x risk per trade (1% of account, rounded to
+  whole MGC; if one MGC's risk > 2% of account, the account cannot trade it) at $2.3k / $10k / $25k.
+- Runner `research/sim/gold_ifvg.py` -> `data/research/program/gold_ifvg_out.txt`.
+Program N = 988.
+- **Deviation (2026-10-14, before any valid result).** GC.c.0 (calendar front) is a thin serial month for most of the year (~2 1m bars/hour,
+  15m sessions median 3 bars): that run is VOID as a data bug and its numbers are not a verdict. The registered data line now reads GC.v.0
+  (volume front). The 2016-25 GC.v.0 pull costs $12.73 (Databento) and waits on the user's OK (data-buy rule). Yahoo 60d check (report only):
+  S2 n 46, TP 22 / SL 15 / BE 8, gross +0.16R; Oct 2026 n 10, TP 4 / SL 4 (50%, vs the claimed 75%).
+Program N = 988 (study open, judge not run).
+
+### Result — GOLD-IFVG (2026-10-15; N 988): CLOSED UNJUDGED, treated as dead (user: do not buy the $12.73 GC.v.0 pull)
+The registered 2016-25 judge was never run (data not bought); this is NOT a gate verdict. Evidence on file: Yahoo GC=F 15m 60d (report only)
+S2 n 46, TP 22 / SL 15 / BE 8, gross +0.16R (t ~1.3); the claimed month Oct 2026 n 10, TP 4 / SL 4 (50% vs claimed 75%). Outside systematic tests
+agree: r/algotrading 1x2owmo (SMC/FVG on 4H, 477 stocks 2023-26: win rate = random entries with the same stop/target, 3.8-16.5bp/trade worse) and
+1qvovpv (order blocks, 30 futures incl. GC, 1m-1d: negative almost everywhere). The 1:1 + BE-at-0.68R win rate is a stop/target geometry property
+(random walk 40.5/19/40.5), not a setup property. Do not reopen ICT/SMC/FVG/IFVG/order-block patterns on any instrument without a stated mechanism.
+Program N = 988.

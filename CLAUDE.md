@@ -1038,3 +1038,6 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
   (gap <= 0, +28bp) tested below.
 - **ETF-CLF (N 986): KILL.** Cross-asset ETF classifier: top bucket p 0.46 vs p* 0.57; ~2bp/30m drift. ETF minute-scale scalps also dead.
 - **UPG-POCKET (N 987): KILL.** UPG-DAY0 pocket gap <= 0 on untouched 2020-24: n 1,496, net 2bp/side -3.7bp (t -0.35), ex-top-5 -8.6, halves -8.2/+6.1; equals all gap<=0 name-days. Post-hoc pockets of a dead rule are mining artifacts; UPG family closed.
+- **GOLD-IFVG (N 988, 2026-10-15): closed unjudged, treated dead.** Reddit "first 15m IFVG in Asia, gold, 1:1" = 50% in its own claimed month;
+  outside systematic tests of SMC/FVG/order blocks match random entries. ICT-style chart patterns are a closed class; no reopen without a mechanism.
+  Reddit access: reddit.com and PullPush block/429 this machine; Arctic Shift API works with a User-Agent and ~6s pacing (title search on big subs).

@@ -1,0 +1,26 @@
+press events 6243 (3456 names), freed 427, placebo 5950 (2914 names); press2 2040
+== PLACEBO (long) == events 2791, names 1886
+  [net] days 36: mean/day -4.74%  t -2.33  med-day -4.71%  days+ 28%  ex-top5 -8.02%
+  [net2] days 36: mean/day -5.74%  t -2.82  med-day -5.71%  days+ 25%  ex-top5 -9.02%
+  halves: -4.57% / -4.86%
+  name-level med -5.42%  ex-top5-names -7.44%  trunc 17%  med px $7.7
+== F13C-TRIM (short, 50bp/side; unborrow excluded) == events 4817, names 2863
+  [net] days 34: mean/day +1.31%  t 0.80  med-day +0.89%  days+ 53%  ex-top5 -0.74%
+  [net2] days 34: mean/day +0.31%  t 0.19  med-day -0.11%  days+ 50%  ex-top5 -1.74%
+  halves: +1.33% / +1.30%
+  name-level med +1.98%  ex-top5-names -0.03%  trunc 9%  med px $16.4
+== F13C-FREED (long, 50bp/side) == events 213, names 208
+  [net] days 33: mean/day -12.18%  t -3.23  med-day -12.88%  days+ 18%  ex-top5 -18.39%
+  [net2] days 33: mean/day -13.18%  t -3.50  med-day -13.88%  days+ 15%  ex-top5 -19.39%
+  halves: -17.87% / -7.98%
+  name-level med -9.96%  ex-top5-names -15.62%  trunc 1%  med px $8.3
+== F13C-TRIM2 (short, participant-typed) == events 1888, names 1207
+  [net] days 33: mean/day +0.15%  t 0.08  med-day +0.11%  days+ 52%  ex-top5 -2.86%
+  [net2] days 33: mean/day -0.85%  t -0.48  med-day -0.89%  days+ 45%  ex-top5 -3.86%
+  halves: +1.41% / -0.67%
+  name-level med +0.74%  ex-top5-names -1.10%  trunc 11%  med px $30.4
+== F13C-FREED2 (long, participant-typed) == events 36, names 36
+  [net] days 18: mean/day -0.31%  t -0.03  med-day -6.50%  days+ 44%  ex-top5 -22.83%
+  [net2] days 18: mean/day -1.31%  t -0.12  med-day -7.50%  days+ 44%  ex-top5 -23.83%
+  halves: +18.55% / -5.70%
+  name-level med -8.83%  ex-top5-names -18.44%  trunc 0%  med px $11.2

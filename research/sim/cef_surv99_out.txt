@@ -1,0 +1,28 @@
+[0] CEF tickers with SFP bars <=2015: 985 (dead 681, live 304, panel276 276)
+[1] eligible fund-weeks 454762 (dead share 63.6%); signal fund-weeks 45843
+[2] proxy trades 6655: {'DEAD': 4639, 'PANEL': 1881, 'LIVE_OTHER': 135}; ended-early 1.3% (dead 1.8%)
+[3] proxy results, alpha = net - 0.53*SPY (bp):
+    PANEL       n  1881 funds 254 net  +228.1 med  +207.1 spy   +254 alpha   +93.6 med    +3.4 t +0.58 exTop5   +65.4 hit 0.59 5pct   -1642
+    LIVE_OTHER  n   135 funds  17 net  +250.1 med  +231.2 spy   +167 alpha  +161.4 med  +100.8 t +1.23 exTop5    +8.6 hit 0.61 5pct   -1264
+    DEAD        n  4639 funds 598 net    -3.6 med   +56.4 spy   +167 alpha   -92.4 med  -124.7 t -0.46 exTop5  -103.0 hit 0.53 5pct   -1750
+    ALL         n  6655 funds 869 net   +67.0 med  +100.4 spy   +192 alpha   -34.7 med   -83.9 t -0.11 exTop5   -43.8 hit 0.55 5pct   -1710
+    LIVE(all)   n  2016 funds 271 net  +229.5 med  +208.5 spy   +248 alpha   +98.1 med   +14.0 t +0.60 exTop5   +71.8 hit 0.59 5pct   -1638
+    by entry-year DEAD vs PANEL alpha (bp, n): 1999: -304(331)/-81(72), 2000: +78(230)/-18(65), 2001: -50(204)/+394(65), 2002: +337(210)/+46(89), 2003: -0(332)/+306(69), 2004: +59(373)/+330(86), 2005: -31(339)/+136(89), 2006: -18(364)/+276(101), 2007: -524(333)/-147(89), 2008: -1087(266)/-686(133), 2009: +648(321)/+1474(162), 2010: -61(324)/+191(164), 2011: +131(269)/-55(151), 2012: +38(269)/+39(193), 2013: -522(305)/-423(153), 2014: -129(169)/-182(200)
+[4] refit beta 0.92: alpha PANEL -4.2, LIVE_OTHER +96.9, DEAD -156.9
+[5] delta PANEL-DEAD: raw +185.9bp (naive t 5.33), year-reweighted +181.0bp
+[5] delta LIVE(all)-DEAD: raw +190.5bp (naive t 5.61), year-reweighted +190.1bp
+[6] bootstrap delta PANEL-DEAD bp: mean +189 p10 +84 p90 +310; LIVE(all)-DEAD: mean +188 p90 +300
+[7] dead share: of PANEL+DEAD proxy trades 71.2%; of all proxy trades 69.7%; of eligible fund-weeks 63.6%
+[8] ex-2008-09: PANEL alpha +18 (n 1586), DEAD -86 (n 4052), delta +104
+[8] 1999-2006: PANEL alpha +176 (n 636), DEAD -7 (n 2383), delta +184
+[8] 2007-2014: PANEL alpha +51 (n 1245), DEAD -182 (n 2256), delta +233
+[9] 2x cost: PANEL alpha +44, DEAD -142 (delta unchanged)
+[9] 3x cost: PANEL alpha -6, DEAD -192 (delta unchanged)
+[10] calibration: PANEL proxy entries falling inside an actual CEF-RV hold: 986/1881 = 52.4% (CEF-RV holds cover 22.7% of fund-time); PANEL proxy alpha +94 vs CEF-RV alpha +237
+[11] BOUND point (raw delta): delta +186bp, p 0.712 -> adj_alpha = 237 - p*delta = +105bp
+[11] BOUND year-reweighted: delta +181bp, p 0.712 -> adj_alpha = 237 - p*delta = +108bp
+[11] BOUND bootstrap p90 PANEL: delta +310bp, p 0.712 -> adj_alpha = 237 - p*delta = +17bp
+[11] BOUND bootstrap p90 LIVE(all): delta +300bp, p 0.712 -> adj_alpha = 237 - p*delta = +24bp
+[12] break-even: dead-fund CEF-RV alpha needed for pooled alpha 0 = -96bp/trade (actual DEAD proxy alpha -92, p5 -1750); with p = dead share of all trades 0.697: -103
+[13] LEVEL bound (dead funds' CEF-RV alpha = DEAD proxy alpha -92): pooled = (1-p)*237 + p*dead = +3bp; p10 of resampled dead mean -> -11
+[14] scaled-delta bound (delta x CEF-RV/proxy PANEL alpha ratio 2.53): -98bp (ERASED if <=0)

@@ -1,0 +1,6 @@
+trades 3731 funds 336 weeks 484
+mean net 443.2bp med 337.5bp t_cl 8.98 hit 73.5%
+halves 345.6 / 249.0bp; ex-top-5 432.1bp
+shock2x 393.2bp shock3x 343.2bp
+gross pctiles [-2185.8, -541.1, 387.5, 1505.0, 4781.7]
+PASS=True

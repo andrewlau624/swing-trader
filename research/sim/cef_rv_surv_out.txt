@@ -1,0 +1,24 @@
+[0] CEF permatickers 1074: live 370 / delisted 704; panel has 355 tickers
+    missing live CEFs from panel: 20; delisted CEFs the panel can never see: 704 (66% of the universe)
+[a] panel-first vs Sharadar firstpricedate: median gap 1d, panel-earlier (>5d) 109/351
+    (panel history before the price series exists cannot create a trade: entry needs an SFP close)
+    birth-cohort: trades in funds whose panel history starts 2005+: n 1455 mean 594bp vs full 474bp
+[b] entry-year means (bp): {2015: 470, 2016: 578, 2017: 173, 2018: 253, 2019: 230, 2020: 1203, 2021: -21, 2022: 135, 2023: 545, 2024: 382, 2025: 453, 2026: 498}
+    trades 3765 mean hold 14.0 weeks; 3 worst years {2021: -21, 2022: 135, 2017: 173}
+    effect present in 11/12 entry years; ex-2020 mean 340bp (2020 contributes 1203bp on 584 trades)
+[c] CEFConnect dead-ticker probe {'FHY': 'err:The read operation t', 'BBF': 'err:The read operation t', 'MHN': 'err:The read operation t', 'ADX': 'err:The read operation t', 'note': 'unreachable this run; verified earlier this session: FHY -> Data:null, DPG/GAB -> NAVData'}
+    EDGAR N-PORT (monthly NAV/returns) filings found for sample delisted CEFs: {'BLACKROCK MUNIHOLD': 26, 'BLACKROCK MUNICIPA': 6}
+    N-Q/N-CSR give only quarterly/semi-annual NAV; N-PORT is monthly (2019+) and needs a per-fund
+    scrape (~26 filings x ~700 funds). No free DAILY/weekly delisted NAV source exists.
+[d] delisted CEF final-window TOTAL returns (div-incl) %: {'r12m': 7.98, 'r20': 0.43, 'r5': -0.0, 'r6m': 4.96}
+    equal-weight CEF universe 2000+: delisted-complete 5.2%/yr vs survivors-only 7.2%/yr -> survivorship gap 2.0pp/yr
+    liquidating CEFs pay out near NAV (final 6m +4.8%/68% positive): CEFs die benignly, unlike delisted equity losers
+[e] anchor decomposition 2016+ (no dividends): long price 303bp of which NAV-return 22bp (disc component 281bp)
+    mirror short price -219bp (symmetric reversion); permuted-NAV placebo long 34bp (n 10745) -> the NAV anchor does real work
+    => return is ~all discount convergence (price leg), NOT NAV drift; an official-cross execution test
+       is still required before any upgrade (CEF weekly close may be a thin last trade).
+[f] retail feasibility: median CEF daily $vol $962k (p5 $152k); $1k position = 0.10% of median ADV
+    $250 <= 10% of ADV for 100% of CEFs; trades in ADV>=$250k: 87%, >=$1M: 49%
+    $1000 <= 10% of ADV for 100% of CEFs; trades in ADV>=$250k: 87%, >=$1M: 49%
+    live SIP NBBO 345 CEFs: rel spread p25/50/75/90 = 16/26/45/73bp
+    ex-2020 edge ~340bp/trade at a 14-wk hold >> a ~26bp median round-trip spread -> executable at $250-1k; capacity (not cost) is the constraint

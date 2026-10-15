@@ -1,0 +1,47 @@
+[0] delisted CEFs with >=40 SFP bars: 700 of 704; with CIK 700
+[1] price endgame (closeadj total return, final window) by delist era:
+             n  r6m_med  r6m_mean  share_lt_m10  share_lt_m25  r20_med  last_vs_med60  last_day_ret_med
+era                                                                                                    
+1998-2004  137    0.015     0.039         0.190         0.029    0.007          0.007             0.000
+2005-09    110    0.029     0.081         0.127         0.055    0.007          0.009             0.001
+2010-14    156    0.036     0.027         0.083         0.013    0.006          0.007             0.001
+2015-26    297    0.048     0.053         0.061         0.020    0.008          0.010             0.000
+[2] end class by era (counts):
+end        LIQUIDATION  MERGER  OPEN-END/CONVERSION  UNKNOWN
+era                                                         
+1998-2004           10       3                    8      116
+2005-09             23      66                    1       20
+2010-14             14     137                    1        4
+2015-26             47     167                   10       73
+[2b] end class by era (shares):
+end        LIQUIDATION  MERGER  OPEN-END/CONVERSION  UNKNOWN
+era                                                         
+1998-2004         0.07    0.02                 0.06     0.85
+2005-09           0.21    0.60                 0.01     0.18
+2010-14           0.09    0.88                 0.01     0.03
+2015-26           0.16    0.56                 0.03     0.25
+[3] classification method:
+how        box  kw  late-filings  no-N8F
+era                                     
+1998-2004   13   0             8     116
+2005-09     76  13             1      20
+2010-14    107  44             1       4
+2015-26    128  86            10      73
+[4] final-6m return by era x class (median, share < -10%, n):
+    1998-2004 LIQUIDATION          n  10 med r6m +0.001 share<-10% 0.00
+    1998-2004 MERGER               n   3 med r6m -0.047 share<-10% 0.33
+    1998-2004 OPEN-END/CONVERSION  n   8 med r6m +0.059 share<-10% 0.00
+    1998-2004 UNKNOWN              n 116 med r6m +0.015 share<-10% 0.22
+    2005-09 LIQUIDATION          n  23 med r6m +0.088 share<-10% 0.00
+    2005-09 MERGER               n  66 med r6m +0.024 share<-10% 0.15
+    2005-09 OPEN-END/CONVERSION  n   1 med r6m -0.125 share<-10% 1.00
+    2005-09 UNKNOWN              n  20 med r6m -0.001 share<-10% 0.15
+    2010-14 LIQUIDATION          n  14 med r6m +0.043 share<-10% 0.00
+    2010-14 MERGER               n 137 med r6m +0.038 share<-10% 0.08
+    2010-14 OPEN-END/CONVERSION  n   1 med r6m -0.201 share<-10% 1.00
+    2010-14 UNKNOWN              n   4 med r6m -0.065 share<-10% 0.25
+    2015-26 LIQUIDATION          n  47 med r6m +0.057 share<-10% 0.09
+    2015-26 MERGER               n 167 med r6m +0.046 share<-10% 0.07
+    2015-26 OPEN-END/CONVERSION  n  10 med r6m +0.011 share<-10% 0.10
+    2015-26 UNKNOWN              n  73 med r6m +0.048 share<-10% 0.01
+[5] share final-6m < -10%: pre-2010 16.2% (n 247) vs 2015-26 6.1% (n 297); diff +10.1pp -> FLAG: older eras die less benignly

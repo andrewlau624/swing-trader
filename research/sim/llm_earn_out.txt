@@ -1,0 +1,27 @@
+LLM-EARN events 6347 on 178 days (2026-01-06 .. 2026-09-30); scored rows 13240, parse failures 48
+
+[news] A 09:35->close
+  LLM conf>=0.6 (news)               n 4700 net mean   -14.4bp med   -20.0 hit 0.47 EWday t -0.03 | halves   -4.5 /  -32.1 | ex-top5  -30.2 | long-only  +11.2 (n 1860) | 20bp/side  -34.4
+  HEADLINE beat/miss control         n 4558 net mean    +2.6bp med    -9.8 hit 0.49 EWday t -1.45 | halves  +23.4 /  -35.5 | ex-top5  -58.1 | long-only   -1.7 (n 3605) | 20bp/side  -17.4
+  GAP continuation control           n 6263 net mean    -8.0bp med   -16.6 hit 0.48 EWday t -1.03 | halves   +1.9 /  -25.9 | ex-top5  -36.8 | long-only   +4.2 (n 3191) | 20bp/side  -28.0
+  LLM - HEADLINE on shared events: n 3462 +52.1bp t +1.30
+
+[news] B close->T+3
+  LLM conf>=0.6 (news)               n  129 net mean   +55.4bp med   +32.3 hit 0.52 EWday t +0.02 | halves  -15.6 / +213.2 | ex-top5  -69.1 | long-only  +69.8 (n 80) | 20bp/side  +35.4
+  HEADLINE beat/miss control         n 4558 net mean   -10.4bp med   -25.4 hit 0.48 EWday t -2.26 | halves  -36.3 /  +37.1 | ex-top5  -89.0 | long-only   +4.3 (n 3605) | 20bp/side  -30.4
+  GAP continuation control           n 6263 net mean   -28.2bp med   -28.0 hit 0.47 EWday t -0.66 | halves  -25.3 /  -33.3 | ex-top5  -38.6 | long-only   +2.1 (n 3191) | 20bp/side  -48.2
+  LLM - HEADLINE on shared events: n 93 +49.6bp t +0.71
+
+[placebo] A 09:35->close
+  LLM conf>=0.6 (placebo)            n 1475 net mean   -27.0bp med   -21.6 hit 0.48 EWday t +1.13 | halves  -51.5 /  +13.7 | ex-top5   -9.3 | long-only  -61.0 (n 85) | 20bp/side  -47.0
+
+[placebo] B close->T+3
+  LLM conf>=0.6 (placebo)            n 3 (too few)
+
+[finbert] A 09:35->close
+  FINBERT |pos-neg|>=0.3             n 4266 net mean   -10.1bp med   -13.9 hit 0.48 EWday t +0.94 | halves  -12.9 /   -6.3 | ex-top5   -3.7 | long-only   -1.3 (n 2456) | 20bp/side  -30.1
+  LLM - FINBERT on shared events: n 3132 -20.8bp t -1.03; sign agreement 0.57
+
+[finbert] B close->T+3
+  FINBERT |pos-neg|>=0.3             n 4266 net mean   -13.0bp med   -16.9 hit 0.48 EWday t -1.02 | halves  -36.6 /  +20.7 | ex-top5  -52.8 | long-only  +14.7 (n 2456) | 20bp/side  -33.0
+  LLM - FINBERT on shared events: n 92 +68.9bp t +1.03; sign agreement 0.67

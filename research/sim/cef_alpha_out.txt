@@ -1,0 +1,20 @@
+EW CEF universe: 1074 tickers, 1998-01-02..2026-10-05, median names/day 533
+
+== 1999-2014: trades 3673 (dropped 0 without comparator)
+  raw net        mean +333.4bp t_wk 5.33 median +340.1 hit 0.73 halves +404.4/+296.9 ex-top5 +322.3
+  EW-CEF over hold +146.1bp; SPY over hold +171.7bp
+  B  net - EW CEF (report): mean +187.3bp t_wk 9.42 median +158.9 hit 0.64 halves +174.5/+193.8 ex-top5 +178.1
+  A  net - 0.76*SPY (report): mean +202.9bp t_wk 4.41 median +202.2 hit 0.63 halves +224.0/+192.1 ex-top5 +193.5
+  SPY-dip control: 31% of entries on SPY bottom-tercile dates; SPY over hold dip -130 vs other +308bp; CEF-RV excess vs EW CEF dip +254 vs other +157bp
+
+== 2016-2026: trades 3629 (dropped 0 without comparator)
+  raw net        mean +447.8bp t_wk 4.60 median +342.2 hit 0.74 halves +587.7/+327.5 ex-top5 +436.4
+  EW-CEF over hold +322.5bp; SPY over hold +544.2bp
+  B  net - EW CEF (N 892): mean +125.3bp t_wk 5.59 median +91.9 hit 0.59 halves +158.5/+96.8 ex-top5 +118.7
+  A  net - 0.53*SPY (N 893): mean +159.4bp t_wk 3.49 median +155.0 hit 0.62 halves +248.1/+83.0 ex-top5 +151.3
+  SPY-dip control: 50% of entries on SPY bottom-tercile dates; SPY over hold dip +679 vs other +408bp; CEF-RV excess vs EW CEF dip +179 vs other +71bp
+  GATE N 892 (B, EW CEF): PASS  mean=Y t=Y med=Y halves=Y ex5=Y
+  GATE N 893 (A, fixed-beta SPY): PASS  mean=Y t=Y med=Y halves=Y ex5=Y
+  economics $2,300: 2 x $1k slots, excess vs EW CEF ~+4.8pp/yr on deployed capital (3.8 turns/yr) before capacity limits
+  economics $10,000: 10 x $1k slots, excess vs EW CEF ~+4.8pp/yr on deployed capital (3.8 turns/yr) before capacity limits
+  economics $25,000: 25 x $1k slots, excess vs EW CEF ~+4.8pp/yr on deployed capital (3.8 turns/yr) before capacity limits

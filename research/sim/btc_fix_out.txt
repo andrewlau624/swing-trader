@@ -1,0 +1,19 @@
+BTC-FIX days 1437 pre 755 post 682
+(1) mean |return| by hour (bp), pre -> post, ratio
+   W    pre   52.9 post   38.8 ratio 0.73
+   H13  pre   51.6 post   43.4 ratio 0.84
+   H11  pre   56.9 post   53.1 ratio 0.93
+   R    pre   65.6 post   45.7 ratio 0.70
+   W ratio / mean(H13,H11) ratio = 0.83
+(2) corr(W, R) reversal; corr(pre, W) continuation
+   pre: corr(W,R) -0.051  corr(pre,W) +0.078  mean W +4.4bp (t +1.39)  mean H13 -4.7
+   post: corr(W,R) -0.159  corr(pre,W) -0.081  mean W -2.0bp (t -0.94)  mean H13 +2.7
+(3) trades, net 5bp/side
+   FLOWPROXY sign(pre) x W    pre-2024     n  755 mean   -6.6bp t -2.08 med  -12.5 hit 0.41 ex-top5   -9.8
+   FLOWPROXY sign(pre) x W    post         n  682 mean  -11.7bp t -5.49 med  -12.8 hit 0.37 ex-top5  -13.2
+   FLOWPROXY sign(pre) x W    post 2024    n  244 mean   -5.0bp t -1.15 med   -9.2 hit 0.44 ex-top5   -9.0
+   FLOWPROXY sign(pre) x W    post 2025-26 n  438 mean  -15.5bp t -6.85 med  -16.0 hit 0.32 ex-top5  -17.4
+   FADE -sign(W) x R          pre-2024     n  755 mean   -9.4bp t -2.61 med   -3.4 hit 0.48 ex-top5  -12.6
+   FADE -sign(W) x R          post         n  682 mean   +0.2bp t +0.09 med   -2.3 hit 0.48 ex-top5   -1.7
+   FADE -sign(W) x R          post 2024    n  244 mean   +3.4bp t +0.67 med   -1.0 hit 0.49 ex-top5   -1.7
+   FADE -sign(W) x R          post 2025-26 n  438 mean   -1.6bp t -0.56 med   -3.3 hit 0.47 ex-top5   -4.1

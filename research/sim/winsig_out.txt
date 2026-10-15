@@ -1,0 +1,447 @@
+# F1 2026-10-07 21:54
+F1 squeeze release, hist>0 rising [2016-26]  n  29983 (  2790/yr) | H1   -0.9 (t -1.1)  H3   -4.0 (t -2.4)  H5   -7.5 (t -1.8)  H10  -11.3 (t -2.3) | H5 net  -17.5 med -11.0 hit 49% halves -16.6/ -6.4 ex5 -15.7 shock  -37.5 -> fail
+F1 control: release, hist<0 falling [2016-26] n  24871 (  2314/yr) | H1   -0.8 (t -0.3)  H3   +5.6 (t +0.9)  H5   +5.5 (t +0.8)  H10  +10.2 (t +0.9) | H5 net   -4.5 med  -4.9 hit 49% halves  -4.7/+16.3 ex5  +0.5 shock  -24.5 -> fail
+
+# F2 2026-10-07 21:54
+F2 TMO oversold cross-up [2016-26]           n  56790 (  5285/yr) | H1   +1.2 (t +0.8)  H3   -0.8 (t +1.1)  H5   -0.4 (t +0.2)  H10   -0.4 (t +0.2) | H5 net  -10.4 med -10.5 hit 49% halves +14.7/-11.1 ex5  -3.4 shock  -30.4 -> fail
+
+# F3 2026-10-07 21:55
+F3 MACD hist turns + after >=5 neg, MACD<0 [2016-26] n  78334 (  7290/yr) | H1   -2.6 (t -1.5)  H3   -6.3 (t -1.1)  H5   -8.6 (t -2.0)  H10   +0.3 (t -0.5) | H5 net  -18.6 med -10.3 hit 49% halves -10.6/-13.8 ex5 -15.8 shock  -38.6 -> fail
+
+# F4 2026-10-07 21:55
+F4 Stoch cross-up <20 after >=3 bars [2016-26] n 100708 (  9372/yr) | H1   -0.1 (t +0.5)  H3   +2.3 (t +1.5)  H5   +2.7 (t +1.2)  H10   +2.1 (t -0.0) | H5 net   -7.3 med  -7.5 hit 49% halves +16.5/ -0.7 ex5  +2.5 shock  -27.3 -> fail
+
+# F5 2026-10-07 21:55
+F5 BB lower re-entry after >=2 closes below [2016-26] n  58843 (  5476/yr) | H1   -0.3 (t +2.5)  H3   +0.8 (t +0.6)  H5   +1.9 (t -0.0)  H10   +1.1 (t -0.7) | H5 net   -8.1 med  -6.4 hit 49% halves  +3.7/ -3.9 ex5  -5.1 shock  -28.1 -> fail
+
+# F6 2026-10-07 21:56
+F6 RSI bullish divergence (RSI<40) [2016-26] n 218481 ( 20331/yr) | H1   +3.3 (t +1.5)  H3   +9.4 (t +1.9)  H5  +12.3 (t +1.6)  H10   +9.9 (t +0.6) | H5 net   +2.3 med  +1.5 hit 50% halves +17.2/ +0.0 ex5  +5.9 shock  -17.7 -> fail
+
+# F7 2026-10-07 21:56
+F7 ADX>25 uptrend, reclaim EMA20 after >=3 below [2016-26] n  12012 (  1118/yr) | H1   -7.1 (t -1.9)  H3  -13.5 (t -0.3)  H5  -19.0 (t -0.8)  H10  -23.9 (t -0.1) | H5 net  -29.0 med -23.9 hit 48% halves -21.8/ +0.5 ex5 -24.2 shock  -49.0 -> fail
+
+# F8 2026-10-07 21:56
+F8 NR7 inside day, close > its high [2016-26] n  69526 (  6470/yr) | H1   +0.4 (t -0.6)  H3   -1.8 (t -1.8)  H5   -5.7 (t -3.0)  H10   -5.3 (t -2.3) | H5 net  -15.7 med  -9.7 hit 49% halves -17.5/ -9.9 ex5 -16.4 shock  -35.7 -> fail
+
+# F9 2026-10-07 21:57
+F9 20d low close, OBV above its 20d low [2016-26] n 174915 ( 16277/yr) | H1   -0.0 (t -0.3)  H3   +4.5 (t +1.4)  H5   +8.5 (t +2.0)  H10  +10.8 (t +2.1) | H5 net   -1.5 med  -0.7 hit 50% halves +16.1/ +3.4 ex5  +6.3 shock  -21.5 -> fail
+
+# F10 2026-10-07 21:57
+F10 BB width 120d low, close > 20d high [2016-26] n   5437 (   506/yr) | H1   -6.0 (t -1.9)  H3   -6.8 (t -0.6)  H5   -8.3 (t -0.8)  H10  -19.5 (t -1.2) | H5 net  -18.3 med  -6.8 hit 49% halves -18.2/ +1.0 ex5 -18.1 shock  -38.3 -> fail
+
+# F11 2026-10-07 21:57
+F11 weekly MACD hist turns +, MACD<0 [2016-26] n  17889 (  1665/yr) | H1   +4.0 (t +1.7)  H3   -4.4 (t +0.4)  H5   -1.3 (t +0.3)  H10  -14.4 (t -1.7) | H5 net  -11.3 med -11.6 hit 49% halves +16.8/-12.0 ex5 -11.7 shock  -31.3 -> fail
+
+# F6 2026-10-07 21:58
+F6 RSI bullish divergence (RSI<40) THIN [2016-26] n 210510 ( 19589/yr) | H1   +1.0 (t -0.2)  H3   +7.2 (t +0.7)  H5  +10.6 (t +0.4)  H10  +14.0 (t +0.3) | H5 net  -29.4 med  -4.7 hit 50% halves +17.6/-13.2 ex5  -0.3 shock  -89.4 -> fail
+
+# F9 2026-10-07 21:59
+F9 20d low close, OBV above its 20d low THIN [2016-26] n 194919 ( 18139/yr) | H1   -2.2 (t -3.0)  H3   -0.3 (t -0.8)  H5   -0.4 (t -0.8)  H10   +4.8 (t -0.1) | H5 net  -40.4 med  -5.0 hit 49% halves  -1.4/ -6.6 ex5  -6.5 shock -100.4 -> fail
+
+# F1 2026-10-07 21:59
+F1 squeeze release, hist>0 rising ETF [2016-26] n   3642 (   339/yr) | H1   +2.1 (t +0.5)  H3   -1.5 (t -2.3)  H5   -6.6 (t -2.4)  H10  -18.5 (t -3.3) | H5 net  -16.6 med  -2.4 hit 49% halves -13.5/-20.4 ex5 -22.7 shock  -36.6 -> fail
+F1 control: release, hist<0 falling ETF [2016-26] n   2631 (   245/yr) | H1   -3.8 (t -1.4)  H3   -5.3 (t -0.1)  H5   -8.1 (t +0.7)  H10   -2.7 (t +0.6) | H5 net  -18.1 med -13.7 hit 46% halves  +4.7/ +7.2 ex5  -0.3 shock  -38.1 -> fail
+
+# F2 2026-10-07 22:00
+F2 TMO oversold cross-up ETF [2016-26]       n   9852 (   917/yr) | H1   -0.6 (t -1.5)  H3   -3.1 (t +0.1)  H5   -7.1 (t +0.1)  H10   +2.0 (t +0.1) | H5 net  -17.1 med  -8.4 hit 48% halves +12.2/ -8.5 ex5  -5.6 shock  -37.1 -> fail
+
+# F3 2026-10-07 22:00
+F3 MACD hist turns + after >=5 neg, MACD<0 ETF [2016-26] n  15385 (  1432/yr) | H1   -0.1 (t -0.0)  H3   +3.7 (t +0.6)  H5   +1.3 (t -0.9)  H10   +6.2 (t -1.5) | H5 net   -8.7 med  +0.8 hit 50% halves  +6.9/-14.3 ex5  -8.8 shock  -28.7 -> fail
+
+# F4 2026-10-07 22:00
+F4 Stoch cross-up <20 after >=3 bars ETF [2016-26] n  16469 (  1533/yr) | H1   -1.0 (t +0.2)  H3   +3.1 (t -0.4)  H5   +3.1 (t +0.0)  H10   -2.1 (t -0.9) | H5 net   -6.9 med  +6.1 hit 52% halves  +9.6/ -7.3 ex5  -4.7 shock  -26.9 -> fail
+
+# F5 2026-10-07 22:00
+F5 BB lower re-entry after >=2 closes below ETF [2016-26] n  12449 (  1158/yr) | H1   -4.3 (t -0.7)  H3   -1.6 (t +1.5)  H5   -0.7 (t +1.9)  H10   +2.3 (t +0.6) | H5 net  -10.7 med  -2.6 hit 49% halves +19.5/+13.6 ex5  +8.2 shock  -30.7 -> fail
+
+# F6 2026-10-07 22:00
+F6 RSI bullish divergence (RSI<40) ETF [2016-26] n  39679 (  3692/yr) | H1   +3.0 (t -0.7)  H3   +3.7 (t +0.1)  H5   +4.0 (t +0.0)  H10   +3.5 (t -0.1) | H5 net   -6.0 med  +6.4 hit 52% halves  -4.1/ +3.8 ex5  -3.9 shock  -26.0 -> fail
+
+# F7 2026-10-07 22:00
+F7 ADX>25 uptrend, reclaim EMA20 after >=3 below ETF [2016-26] n   1323 (   123/yr) | H1   -4.6 (t +0.2)  H3  -23.2 (t -1.2)  H5  -14.2 (t -1.3)  H10   +7.9 (t -1.1) | H5 net  -24.2 med  -3.9 hit 49% halves -32.9/ -2.4 ex5 -30.3 shock  -44.2 -> fail
+
+# F8 2026-10-07 22:00
+F8 NR7 inside day, close > its high ETF [2016-26] n  13467 (  1253/yr) | H1   -2.7 (t -0.9)  H3   -4.3 (t -0.4)  H5   -7.5 (t -0.6)  H10  -10.3 (t -1.3) | H5 net  -17.5 med  -6.8 hit 48% halves  +5.0/ -9.5 ex5  -7.4 shock  -37.5 -> fail
+
+# F9 2026-10-07 22:00
+F9 20d low close, OBV above its 20d low ETF [2016-26] n  34395 (  3201/yr) | H1   +1.1 (t +1.3)  H3   +1.8 (t +0.5)  H5   +2.8 (t -0.3)  H10   -0.6 (t -1.0) | H5 net   -7.2 med  +0.8 hit 50% halves  -0.5/ -2.9 ex5  -5.6 shock  -27.2 -> fail
+
+# F10 2026-10-07 22:00
+F10 BB width 120d low, close > 20d high ETF [2016-26] n   1949 (   181/yr) | H1   +2.7 (t +1.6)  H3   +0.9 (t +0.4)  H5   -7.5 (t -0.4)  H10   -7.0 (t -1.6) | H5 net  -17.5 med -16.0 hit 44% halves -13.8/ +6.3 ex5 -10.1 shock  -37.5 -> fail
+
+# F11 2026-10-07 22:00
+F11 weekly MACD hist turns +, MACD<0 ETF [2016-26] n   3135 (   292/yr) | H1   +6.3 (t -0.0)  H3   -0.9 (t -0.5)  H5   -1.4 (t -0.9)  H10   +1.8 (t -2.0) | H5 net  -11.4 med  -0.8 hit 50% halves  -3.3/-13.9 ex5 -21.0 shock  -31.4 -> fail
+
+# G3/G4 2026-10-07 22:01
+G3 breadth os top-decile -> SPY H5 [2016-26]: days 305 | SPY H5 cond  +29.8bp vs all  +27.1 | excess   +2.6 (NW t +0.1) med  +28.2 halves  -23.4/ +22.5 net(10bp)   -7.4 -> fail
+G3 breadth os top-decile -> SPY H5 [2003-15 (diagnostic only if 2016-26 passes)]: days 365 | SPY H5 cond  +41.0bp vs all  +15.8 | excess  +25.3 (NW t +0.9) med  +26.1 halves  -13.4/ +65.0 net(10bp)  +15.3 -> fail
+G3 breadth sq top-decile -> SPY H5 [2016-26]: days 280 | SPY H5 cond  +31.9bp vs all  +27.1 | excess   +4.8 (NW t +0.2) med  +32.9 halves   +3.9/  +5.7 net(10bp)   -5.2 -> fail
+G3 breadth sq top-decile -> SPY H5 [2003-15 (diagnostic only if 2016-26 passes)]: days 376 | SPY H5 cond   -4.6bp vs all  +15.8 | excess  -20.4 (NW t -0.8) med  +30.1 halves  -60.8/ +20.9 net(10bp)  -30.4 -> fail
+G4 base IBS<0.2 liquid ETFs 2016-26: n 175365, open->open excess +2.2bp, raw +9.3bp
+G4 IBS<0.2 ETFs split TMO oversold >=5/10 vs <5         : A n  15893   +4.8bp | B n 159468   +1.9bp | paired A-B   +3.1 (t +0.9, nights 1496) halves   +4.8/  +1.4 -> fail
+G4 IBS<0.2 ETFs split squeeze ON vs OFF                 : A n  18316   -0.7bp | B n 157045   +2.5bp | paired A-B   -3.0 (t -1.4, nights 2215) halves   -0.4/  -5.5 -> fail
+G4 IBS<0.2 ETFs split MACD hist <0 vs >=0               : A n 101165   +2.4bp | B n  74196   +1.8bp | paired A-B   -2.8 (t -1.4, nights 2531) halves   -5.5/  -0.0 -> fail
+
+# H1 2026-10-07 22:02
+H1 TD Sequential buy setup 9 [2016-26]       n  50779 (  4725/yr) | H1   +0.2 (t -1.2)  H3   +7.5 (t +1.6)  H5   +6.9 (t +1.4)  H10   +6.3 (t +1.9) | H5 net   -3.1 med  -3.8 hit 50% halves +24.2/ -1.0 ex5  +2.6 shock  -23.1 -> fail
+
+# H1 2026-10-07 22:02
+H1 TD Sequential buy setup 9 ETF [2016-26]   n   8996 (   837/yr) | H1   +4.0 (t -0.6)  H3   +2.8 (t -0.3)  H5   +6.3 (t -0.1)  H10   +5.3 (t -0.5) | H5 net   -3.7 med  +8.8 hit 52% halves  +8.2/ -8.2 ex5  -7.8 shock  -23.7 -> fail
+
+# H2 2026-10-07 22:02
+H2 selling climax (3d<=-5%, vol>=3x, close top 40%) [2016-26] n   4567 (   425/yr) | H1   -1.3 (t -0.2)  H3  -23.4 (t -1.1)  H5  -12.3 (t -0.5)  H10   +2.7 (t +0.6) | H5 net  -22.3 med -42.4 hit 47% halves -19.4/ -1.6 ex5 -35.3 shock  -42.3 -> fail
+
+# H2 2026-10-07 22:02
+H2 selling climax (3d<=-5%, vol>=3x, close top 40%) ETF [2016-26] n    439 (    41/yr) | H1  +23.3 (t -0.0)  H3  -13.4 (t -1.4)  H5  -37.6 (t -0.7)  H10  -46.7 (t -0.4) | H5 net  -47.6 med -13.9 hit 48% halves +77.5/-149.0 ex5 -86.1 shock  -67.6 -> fail
+
+# H3 2026-10-07 22:02
+H3 pocket pivot [2016-26]                    n 312593 ( 29089/yr) | H1   -1.3 (t -2.3)  H3   -4.8 (t -2.6)  H5   -5.6 (t -2.9)  H10   -4.2 (t -2.4) | H5 net  -15.6 med -12.0 hit 49% halves -17.8/-11.8 ex5 -17.0 shock  -35.6 -> fail
+
+# H3 2026-10-07 22:02
+H3 pocket pivot ETF [2016-26]                n  55689 (  5182/yr) | H1   -1.6 (t -2.2)  H3   -2.0 (t -1.1)  H5   -2.9 (t -1.1)  H10   +2.9 (t -0.5) | H5 net  -12.9 med  -2.6 hit 49% halves  -0.9/ -9.0 ex5  -7.5 shock  -32.9 -> fail
+
+# H4 2026-10-07 22:03
+H4 island reversal (1-5 bar island) [2016-26] n  12819 (  1193/yr) | H1   +1.1 (t -0.8)  H3   +5.8 (t +0.3)  H5  +10.5 (t -0.5)  H10  +15.6 (t -0.5) | H5 net   +0.5 med  -0.1 hit 50% halves  -7.5/ -2.1 ex5 -11.1 shock  -19.5 -> fail
+
+# H4 2026-10-07 22:03
+H4 island reversal (1-5 bar island) ETF [2016-26] n  16065 (  1495/yr) | H1   -0.1 (t -1.1)  H3   -0.7 (t -0.4)  H5   +2.8 (t -1.1)  H10   +1.7 (t -1.5) | H5 net   -7.2 med  +0.1 hit 50% halves -12.6/ -0.2 ex5  -9.1 shock  -27.2 -> fail
+
+# H5 2026-10-07 22:03
+H5 Heikin-Ashi first green after >=5 red [2016-26] n 154354 ( 14364/yr) | H1   -0.4 (t +1.7)  H3   -4.2 (t +0.7)  H5   -8.8 (t +0.0)  H10   -7.4 (t +0.1) | H5 net  -18.8 med -13.0 hit 48% halves  +5.2/ -4.8 ex5  -3.2 shock  -38.8 -> fail
+
+# H5 2026-10-07 22:04
+H5 Heikin-Ashi first green after >=5 red ETF [2016-26] n  26749 (  2489/yr) | H1   -0.5 (t -0.8)  H3   -3.0 (t -1.0)  H5   -9.2 (t -1.4)  H10  -10.6 (t -1.6) | H5 net  -19.2 med  -5.8 hit 48% halves -11.3/ -5.8 ex5 -12.9 shock  -39.2 -> fail
+
+# H6 2026-10-07 22:04
+H6 IBS<0.2 ETFs split weekly RSI<35 vs >=35: A n 12462 +7.7bp | B n 162889 +1.7bp | paired -4.6 (t -1.1, nights 1360) halves +2.0/-11.3 -> fail
+
+# Round 4 2026-10-07 22:05
+I1 ETF gap <= -1% fade (open->close): n 62890 (5878/yr) days 2327 | raw +3.5bp excess -0.2 (NW t -3.6) med +0.9 hit 51% halves -4.9/-10.1 ex5 -9.1 net -5.2 shock -15.2 -> fail
+I2 stock gap <= -3% fade (open->close): n 94052 (8790/yr) days 2689 | raw +8.8bp excess +19.8 (NW t +0.5) med +20.5 hit 53% halves +6.5/-1.5 ex5 -1.6 net +9.8 shock -10.2 -> fail
+I3 SPY 5d/60d vol <= 0.5 -> H5: days 508 | cond +29.8bp vs all +27.1 | excess +2.7 (t +0.2) halves -7.0/+17.6 -> fail
+I3 QQQ 5d/60d vol <= 0.5 -> H5: days 477 | cond +43.9bp vs all +36.6 | excess +7.3 (t +0.6) halves -5.9/+28.7 -> fail
+I3 IWM 5d/60d vol <= 0.5 -> H5: days 341 | cond +15.4bp vs all +19.1 | excess -3.6 (t -0.2) halves -22.2/+28.5 -> fail
+
+# Round 5 2026-10-07 22:05
+K1 resid r5 bottom decile [2016-26]          n 430780 ( 40087/yr) | H1   +0.0 (t +0.1)  H3   +6.1 (t +1.5)  H5   +8.6 (t +1.4)  H10   +7.9 (t +1.0) | H5 net   -1.4 med -13.1 hit 49% halves +14.9/ +3.6 ex5  +5.5 shock  -21.4 -> fail
+K3 resid r5 bottom decile, ADV $20-100M [2016-26] n 273832 ( 25482/yr) | H1   +0.2 (t +0.2)  H3   +4.7 (t +1.2)  H5   +7.5 (t +1.2)  H10   +6.8 (t +0.8) | H5 net   -2.5 med -15.4 hit 49% halves +16.8/ -0.9 ex5  +4.4 shock  -22.5 -> fail
+K2 resid r2 bottom decile [2016-26]          n 430781 ( 40087/yr) | H1   -1.8 (t -1.2)  H3   +4.6 (t +1.3)  H5   +9.5 (t +1.8)  H10   +9.7 (t +1.2) | H5 net   -0.5 med -11.6 hit 49% halves +11.0/ +8.6 ex5  +6.5 shock  -20.5 -> fail
+
+# gap-location diagnostic 2026-10-07 22:07
+K1 resid r5 bottom decile                    n  430780 | close->next open excess   +2.9bp (NW t  +3.3, med  -1.3) | open t+1->close t+5   +8.6bp
+F6 RSI bullish divergence (RSI<40)           n  218481 | close->next open excess   +0.5bp (NW t  +1.4, med  -1.4) | open t+1->close t+5  +12.3bp
+F9 20d low close, OBV above its 20d low      n  174915 | close->next open excess   -0.4bp (NW t  +0.6, med  -0.8) | open t+1->close t+5   +8.5bp
+H1 TD Sequential buy setup 9                 n   50779 | close->next open excess   -0.4bp (NW t  -0.7, med  -1.2) | open t+1->close t+5   +6.9bp
+F1 squeeze release, hist>0 rising            n   29983 | close->next open excess   -0.2bp (NW t  -1.3, med  -2.4) | open t+1->close t+5   -7.5bp
+F1 control: release, hist<0 falling          n   24871 | close->next open excess   +0.2bp (NW t  +0.1, med  -1.4) | open t+1->close t+5   +5.5bp
+H3 pocket pivot                              n  312593 | close->next open excess   +2.2bp (NW t  +3.2, med  -2.4) | open t+1->close t+5   -5.6bp
+F8 NR7 inside day, close > its high          n   69526 | close->next open excess   -0.0bp (NW t  +1.2, med  -3.1) | open t+1->close t+5   -5.7bp
+
+# Round 6 2026-10-07 22:08
+night picks 2016-26 (daily-bar proxy): n 10693, nights 2097, mean overnight +41.7bp
+L1 repeat loser (picked <=5 sessions ago)    A n  1674  +67.6bp med +41.0 | B n  9019  +36.9bp med +36.4 | paired A-B  +85.2 (t +3.4, nights 813) halves  +81.5/ +88.9 med-diff  +0.0 -> fail
+L2 3-day slide vs fresh drop after up day    A n  2689  +43.3bp med +36.4 | B n  5252  +34.4bp med +35.6 | paired A-B  -24.3 (t -1.0, nights 847) halves  -35.1/ -13.5 med-diff  +0.0 -> fail
+L3 >=3 picks same industry vs alone          A n  3072  +28.9bp med +25.4 | B n  5543  +38.4bp med +37.5 | paired A-B  +22.8 (t +0.9, nights 413) halves   +8.7/ +36.7 med-diff  -2.0 -> fail
+  L3 portfolio view, nights with an industry cluster >= 3: nights 434, EW night +37.4bp, sd of night EW 286bp, worst -1099bp, 5th pct -383bp
+  L3 portfolio view, nights without                      : nights 702, EW night +54.3bp, sd of night EW 361bp, worst -2544bp, 5th pct -380bp
+
+# Round 6 2026-10-07 22:09
+night picks 2016-26 (daily-bar proxy): n 10693, nights 2097, mean overnight +41.7bp
+L1 repeat loser (picked <=5 sessions ago)    A n  1674  +67.6bp med +41.0 | B n  9019  +36.9bp med +36.4 | paired A-B  +85.2 (t +3.4, nights 813) halves  +81.5/ +88.9 med-diff  +0.0 -> fail
+L2 3-day slide vs fresh drop after up day    A n  2689  +43.3bp med +36.4 | B n  5252  +34.4bp med +35.6 | paired A-B  -24.3 (t -1.0, nights 847) halves  -35.1/ -13.5 med-diff  +0.0 -> fail
+L3 >=3 picks same industry vs alone          A n  3072  +28.9bp med +25.4 | B n  5543  +38.4bp med +37.5 | paired A-B  +22.8 (t +0.9, nights 413) halves   +8.7/ +36.7 med-diff  -2.0 -> fail
+  L3 portfolio view, nights with an industry cluster >= 3: nights 434, EW night +37.4bp, sd of night EW 286bp, worst -1099bp, 5th pct -383bp
+  L3 portfolio view, nights without                      : nights 702, EW night +54.3bp, sd of night EW 361bp, worst -2544bp, 5th pct -380bp
+
+# Round 7 2026-10-07 22:10
+M1 2nd consecutive IBS<0.2 vs first            A n  37072   +3.6bp med  +1.0 | B n 138293   +1.8bp med  -1.0 | paired   -1.4 (t -0.7) halves  -3.8/ +1.0 -> fail
+M2 >=2 IBS<0.2 days in prior 5 vs none         A n  51992   +4.3bp med  +0.7 | B n  54759   -0.9bp med  -2.5 | paired   +1.8 (t +0.8) halves  -2.2/ +5.8 -> fail
+
+# Round 8 2026-10-07 22:12
+P1 gap 1    : n   437 mean  +94.9 med +31.4 | vs none paired  +92.4 (t +1.9, nights 286)
+P1 gap 2-3  : n   679 mean  +47.2 med +49.9 | vs none paired  +90.8 (t +2.3, nights 415)
+P1 gap 4-5  : n   558 mean  +71.2 med +25.3 | vs none paired  +98.4 (t +3.7, nights 345)
+P1 gap 6-20 : n  1972 mean  +37.2 med +44.9 | vs none paired   +2.3 (t +0.1, nights 821)
+P1 none (>20 or never): n 7047 mean +36.8 med +34.2
+P2 price tercile lo : A n   700  +42.8 | B  +45.7 | paired  +53.1 (t +1.1)
+P2 price tercile mid: A n   568  +93.8 | B  +25.9 | paired  +56.6 (t +1.1)
+P2 price tercile hi : A n   406  +73.9 | B  +39.2 | paired  +53.8 (t +1.6)
+P2 vol20 tercile lo : A n   159  +17.2 | B  +34.3 | paired  +10.0 (t +0.3)
+P2 vol20 tercile mid: A n   526  +27.7 | B  +30.7 | paired  +28.4 (t +1.4)
+P2 vol20 tercile hi : A n   989  +97.0 | B  +47.5 | paired +119.8 (t +2.2)
+P3 ex 2020-03..06 & 2021-01..03: paired +74.7 (t +2.8, nights 740)
+
+# F1 2026-10-07 22:15
+F1 squeeze release, hist>0 rising CEF [2016-26] n   3425 (   319/yr) | H1   +0.6 (t +0.3)  H3   -0.3 (t +0.0)  H5   -2.4 (t -0.8)  H10   -5.1 (t +0.2) | H5 net  -22.4 med  -6.7 hit 48% halves  -7.8/ +0.5 ex5  -8.3 shock  -62.4 -> fail
+F1 control: release, hist<0 falling CEF [2016-26] n   2695 (   251/yr) | H1   +0.2 (t -1.0)  H3   -0.8 (t -2.1)  H5   -2.5 (t -1.6)  H10   +1.5 (t -0.4) | H5 net  -22.5 med  -2.6 hit 49% halves -12.5/ -6.0 ex5 -12.6 shock  -62.5 -> fail
+
+# F2 2026-10-07 22:15
+F2 TMO oversold cross-up CEF [2016-26]       n   7274 (   677/yr) | H1   +6.8 (t +1.8)  H3  +10.4 (t +1.2)  H5   +5.5 (t -0.1)  H10  +11.9 (t +0.4) | H5 net  -14.5 med  -1.2 hit 50% halves  +3.1/ -3.8 ex5  -4.6 shock  -54.5 -> fail
+
+# F4 2026-10-07 22:15
+F4 Stoch cross-up <20 after >=3 bars CEF [2016-26] n  11632 (  1082/yr) | H1   +6.4 (t +3.4)  H3  +15.5 (t +4.1)  H5  +17.6 (t +2.6)  H10  +19.7 (t +1.7) | H5 net   -2.4 med  +7.3 hit 52% halves +17.7/ +7.5 ex5  +8.8 shock  -42.4 -> fail
+
+# F5 2026-10-07 22:15
+F5 BB lower re-entry after >=2 closes below CEF [2016-26] n   8297 (   772/yr) | H1   +3.0 (t +3.2)  H3   +4.9 (t +1.8)  H5   +5.7 (t +1.4)  H10   +9.1 (t +2.5) | H5 net  -14.3 med  +3.6 hit 51% halves +12.4/ +2.7 ex5  +3.4 shock  -54.3 -> fail
+
+# F6 2026-10-07 22:15
+F6 RSI bullish divergence (RSI<40) CEF [2016-26] n  28468 (  2649/yr) | H1   +3.4 (t +2.7)  H3   -0.6 (t +1.3)  H5   +1.1 (t +1.1)  H10  +12.5 (t +0.9) | H5 net  -18.9 med  +0.9 hit 50% halves  +3.5/ +8.7 ex5  +3.0 shock  -58.9 -> fail
+
+# F9 2026-10-07 22:15
+F9 20d low close, OBV above its 20d low CEF [2016-26] n  19487 (  1813/yr) | H1   -5.1 (t -2.6)  H3   -6.7 (t -0.5)  H5   -5.4 (t +0.2)  H10   -3.8 (t +0.6) | H5 net  -25.4 med  -1.9 hit 49% halves  +2.2/ -0.5 ex5  -4.0 shock  -65.4 -> fail
+
+# H1 2026-10-07 22:15
+H1 TD Sequential buy setup 9 CEF [2016-26]   n   6109 (   568/yr) | H1   +7.8 (t -0.3)  H3   +9.9 (t +0.4)  H5  +16.6 (t +1.0)  H10  +18.2 (t +1.2) | H5 net   -3.4 med  +6.1 hit 52% halves  -1.6/+15.6 ex5  -1.0 shock  -43.4 -> fail
+
+# F2 2026-10-07 22:16
+F2 TMO oversold cross-up PREF [2016-26]      n  14681 (  1366/yr) | H1   +1.9 (t +1.6)  H3   -1.4 (t +2.4)  H5   +4.9 (t +2.2)  H10  +18.4 (t +3.5) | H5 net  -35.1 med  +5.5 hit 52% halves  +4.4/+24.2 ex5  +7.5 shock -115.1 -> fail
+
+# F4 2026-10-07 22:16
+F4 Stoch cross-up <20 after >=3 bars PREF [2016-26] n  21355 (  1987/yr) | H1   +3.6 (t +0.9)  H3  +10.7 (t +2.1)  H5  +18.0 (t +2.6)  H10  +23.7 (t +4.2) | H5 net  -22.0 med  +8.7 hit 53% halves  +8.7/+25.8 ex5  +8.6 shock -102.0 -> fail
+
+# F5 2026-10-07 22:16
+F5 BB lower re-entry after >=2 closes below PREF [2016-26] n  16928 (  1575/yr) | H1   +5.2 (t +1.1)  H3   +6.2 (t +2.4)  H5   +9.9 (t +2.8)  H10  +18.5 (t +3.8) | H5 net  -30.1 med  +9.6 hit 53% halves  +8.2/+29.1 ex5 +12.0 shock -110.1 -> fail
+
+# H1 2026-10-07 22:16
+H1 TD Sequential buy setup 9 PREF [2016-26]  n  11591 (  1079/yr) | H1   +7.5 (t -0.3)  H3   +9.8 (t +0.9)  H5   +5.3 (t +1.4)  H10  +10.9 (t +3.1) | H5 net  -34.7 med  +8.4 hit 53% halves  +5.5/+18.3 ex5  +3.3 shock -114.7 -> fail
+
+# Round 12 diag 2026-10-07 22:18
+CEF  F4 Stoch cross-up <20 after >=3 bars       n  11632 | co   +0.3 (t -0.6, med  -1.2) | f5  +17.6 (t +2.6, med  +7.3) | cc3  +15.9 (t +3.9, med  +7.9) | cc5  +18.4 (t +2.4, med  +6.4)
+CEF  F5 BB lower re-entry after >=2 closes below n   8297 | co   -0.5 (t -0.7, med  -0.7) | f5   +5.7 (t +1.4, med  +3.6) | cc3   +5.0 (t +1.4, med  +3.2) | cc5   +5.6 (t +1.1, med  +2.2)
+PREF F4 Stoch cross-up <20 after >=3 bars       n  21355 | co   +1.9 (t +2.2, med  +0.0) | f5  +18.0 (t +2.6, med  +8.7) | cc3  +12.8 (t +2.6, med  +4.6) | cc5  +19.8 (t +3.0, med  +8.3)
+PREF F5 BB lower re-entry after >=2 closes below n  16928 | co   -2.1 (t +0.4, med  -0.4) | f5   +9.9 (t +2.8, med  +9.6) | cc3   +4.3 (t +2.4, med  +5.8) | cc5   +7.7 (t +2.9, med  +7.6)
+
+# F4 2026-10-07 22:18
+F4 Stoch cross-up <20 after >=3 bars ADR [2016-26] n  23259 (  2164/yr) | H1   -0.5 (t +0.2)  H3   -2.1 (t +0.4)  H5   -2.1 (t -0.0)  H10   -7.0 (t -0.0) | H5 net  -22.1 med -18.5 hit 48% halves  -6.5/ +6.3 ex5 -19.9 shock  -62.1 -> fail
+
+# F5 2026-10-07 22:18
+F5 BB lower re-entry after >=2 closes below ADR [2016-26] n  11460 (  1066/yr) | H1   -6.4 (t -2.6)  H3  -15.7 (t -1.6)  H5   -4.4 (t +0.5)  H10  -13.4 (t +0.2) | H5 net  -24.4 med -20.8 hit 48% halves +71.2/-30.8 ex5 -27.7 shock  -64.4 -> fail
+
+# H1 2026-10-07 22:18
+H1 TD Sequential buy setup 9 ADR [2016-26]   n  11076 (  1031/yr) | H1   -1.1 (t -1.3)  H3   -0.8 (t -1.3)  H5   +1.1 (t -1.0)  H10   +0.0 (t +0.4) | H5 net  -18.9 med -14.2 hit 48% halves  +1.4/-21.4 ex5 -17.6 shock  -58.9 -> fail
+
+# F4 2026-10-07 22:19
+F4 Stoch cross-up <20 after >=3 bars REIT [2016-26] n  10418 (   969/yr) | H1   -3.5 (t -1.6)  H3   -6.6 (t -0.3)  H5   -4.1 (t +0.4)  H10   -4.8 (t +0.2) | H5 net  -24.1 med  -4.1 hit 49% halves  -9.0/+16.1 ex5  -7.9 shock  -64.1 -> fail
+
+# F4 2026-10-07 22:19
+F4 Stoch cross-up <20 after >=3 bars [2016-26] n 100708 (  9372/yr) | H1   -0.1 (t +0.5)  H3   +2.3 (t +1.5)  H5   +2.7 (t +1.2)  H10   +2.1 (t -0.0) | H5 net   -7.3 med  -7.5 hit 49% halves +16.5/ -0.7 ex5  +2.5 shock  -27.3 -> fail
+
+# F5 2026-10-07 22:19
+F5 BB lower re-entry after >=2 closes below REIT [2016-26] n   7209 (   671/yr) | H1   +0.5 (t +1.0)  H3   +1.8 (t +1.8)  H5   +3.7 (t +0.6)  H10   -0.3 (t -0.9) | H5 net  -16.3 med  +0.4 hit 50% halves  +5.5/ +4.4 ex5  -2.8 shock  -56.3 -> fail
+
+# F5 2026-10-07 22:19
+F5 BB lower re-entry after >=2 closes below [2016-26] n  58843 (  5476/yr) | H1   -0.3 (t +2.5)  H3   +0.8 (t +0.6)  H5   +1.9 (t -0.0)  H10   +1.1 (t -0.7) | H5 net   -8.1 med  -6.4 hit 49% halves  +3.7/ -3.9 ex5  -5.1 shock  -28.1 -> fail
+
+# F4 2026-10-07 22:19
+F4 Stoch cross-up <20 after >=3 bars mREIT [2016-26] n   1529 (   142/yr) | H1   -2.5 (t -0.2)  H3   -2.1 (t +0.4)  H5   -0.4 (t +0.6)  H10   +7.7 (t +0.1) | H5 net  -20.4 med  +3.3 hit 51% halves  -8.9/+17.2 ex5  -4.7 shock  -60.4 -> fail
+
+# F5 2026-10-07 22:19
+F5 BB lower re-entry after >=2 closes below mREIT [2016-26] n   1172 (   109/yr) | H1   -3.7 (t -0.1)  H3   -3.5 (t -0.1)  H5   +1.2 (t +0.6)  H10   -1.4 (t -0.1) | H5 net  -18.8 med  -0.5 hit 50% halves +10.2/ +2.8 ex5  -7.8 shock  -58.8 -> fail
+
+# Round 15 2026-10-07 22:20
+R15 PREF F4 below $24 n 10432 +29.5bp med +9.2 | >= $24 n 10923 +10.4bp med +7.9 | paired +35.8 (t +2.3, days 1308) halves +44.1/+27.6 -> fail
+
+# Round 16 2026-10-07 22:20
+R16 CEF distribution cuts 2016-26: events 363 (34/yr), funds 210
+  xpre10  mean  -151.8bp med -112.7 hit 29% t -5.2 halves -151.0/-152.8 ex-top5 -172.8
+  x5      mean   -53.6bp med  -35.2 hit 41% t -3.6 halves  -81.1/ -15.9 ex-top5  -64.6
+  x10     mean   -87.8bp med  -44.5 hit 40% t -3.8 halves  -66.6/-116.9 ex-top5 -101.8 net -107.8 -> fail
+  x20     mean   -98.6bp med  -75.1 hit 38% t -3.4 halves  -68.4/-140.6 ex-top5 -119.0
+
+# Round 17 2026-10-07 22:25
+R17 CEF-RV trades 3731 (2016-26 panel): after-cut n 83 excess -260bp med -240 | rest n 3648 +62bp med +60 | diff -322bp (t -3.3) halves -328/-321 -> PASS (avoid-screen)
+
+# Round 17 confirm 2026-10-07 22:27
+R17 CONFIRM 2003-14: CEF-RV trades 3171: after-cut n 62 excess -182bp med -117 | rest n 3109 +163bp med +104 | diff -344bp (t -2.6) halves -518/-183 -> CONFIRMED
+
+# Round 18 2026-10-07 22:29
+R18 CEF distribution increases 2016-26: events 418 (39/yr), funds 209
+  xpre10  mean  +109.8bp med  +85.7 hit 66% t +4.5 halves  +85.3/+126.5 ex-top5  +95.7
+  x5      mean   -15.7bp med   -6.6 hit 47% t -2.3 halves  -29.4/  -6.5 ex-top5  -22.2
+  x10     mean    +1.5bp med   -9.4 hit 48% t -0.4 halves  -40.7/ +30.4 ex-top5  -12.9 net -18.5 -> fail
+  x20     mean   -18.3bp med   -7.3 hit 49% t -1.3 halves  -34.1/  -7.4 ex-top5  -30.1
+
+# Round 19 2026-10-07 22:29
+R19 2016-26: days with raw <= -8% but total-return > -8% due to an ex-div >= 3%: 428 (40.0/yr); real -8% days: 130167
+   fake-signal names overnight (close->open, total return): mean -15.6bp med -1.4; real -8% days overnight mean +44.6bp
+   recent fakes: YB 2026-07-02 div 8% raw -8% adj -1%; YIN 2017-03-21 div 4% raw -9% adj -6%; ZIM 2022-03-22 div 19% raw -12% adj +7%; ZIM 2022-08-26 div 10% raw -15% adj -5%; ZIM 2022-11-28 div 11% raw -17% adj -6%; ZIM 2023-04-04 div 27% raw -17% adj +10%; ZIM 2024-12-02 div 17% raw -10% adj +6%; ZIM 2025-03-24 div 18% raw -12% adj +5%
+
+# Round 20 2026-10-07 22:32
+R20 2016-2026 PREF-EX CC events 15289: mean +30.0bp med +27.0
+  prior 10d <= -3% vs > -3%          A n   1224  +34.0bp med +24.5 | B n  14065  +29.7 med +27.1 | paired  +21.7 (t +2.1, days 311) halves  +21.7/ +21.8 -> fail
+  diag: F4 oversold at T-1 vs not    A n    183  +29.4bp med +36.6 | B n  15106  +30.0 med +26.9 | paired   +7.4 (t +0.8, days 110) halves  +12.0/  +2.7 -> fail
+
+# Round 21 2026-10-07 22:33
+R21 CEF pre-ex T-10->T-1: events 16030 (1498/yr) | excess +29.8bp med +18.8 hit 54% NW t +8.7 halves +34.6/+24.8 ex5 +38.3 net +9.8 -> fail
+
+# Round 22 2026-10-07 22:35
+R22 PREF pre-ex T-10->T-1: events 12404 (1159/yr) | excess +39.0bp med +25.5 hit 57% NW t +7.3 halves +23.0/+51.5 ex5 +45.0 net -1.0 -> fail
+
+# Round 22 diag 2026-10-07 22:35
+R22 diag PREF n 12404: pre-ex +44.8 | ex-night +23.3 | chained T-10->ex close +68.2bp (med +48.4, NW t +10.2); net of ONE 40bp round trip +28.2
+  ex-night by pre-ex run-up tercile: lo +31.3 | mid +21.2 | hi +17.4
+
+# PREF-CHAIN judge 2026-10-07 22:35
+PREF-CHAIN JUDGE 2005-15 n 1540: pre-ex +46.3 | ex-night +21.0 | chained T-10->ex close +65.6bp (med +56.8, NW t +4.0); net of ONE 40bp round trip +25.6
+  ex-night by pre-ex run-up tercile: lo +32.3 | mid +23.3 | hi +7.4
+
+PREF-CHAIN verdict: n 1540 net +25.6bp shock -54.4 NW t +4.0 halves +33.4/+74.7 med +56.8 ex5 +34.3 -> PASS
+  by year: 2005:+44(n35) 2006:+28(n47) 2007:+32(n46) 2008:+26(n58) 2009:+27(n72) 2010:+43(n79) 2011:+7(n83) 2012:+39(n116) 2013:+65(n137) 2014:+80(n122) 2015:+89(n745)
+
+# Round 23 2026-10-07 22:38
+[2016-2026] chained +68.2bp (n 12404) | Q1a post-ex T+5->T+15 -1.8 | Q1b random far-from-ex 10d -11.2 (n 510846)
+   Q2 ADV>=$1M: +55.0 (n 3907) | Q3 SEP pref +67.0 (n 10403) ETD +74.1 (n 2001) | Q4 monthly +95.6 (n 865) quarterly +66.2 (n 11357)
+[2005-2015] chained +65.6bp (n 1540) | Q1a post-ex T+5->T+15 -0.9 | Q1b random far-from-ex 10d -6.1 (n 104782)
+   Q2 ADV>=$1M: +28.9 (n 611) | Q3 SEP pref +98.5 (n 902) ETD +19.1 (n 638) | Q4 monthly +40.9 (n 171) quarterly +69.9 (n 1346)
+
+# CEF-CHAIN JUDGE 2026-10-07 22:40
+CEF-CHAIN JUDGE n 10926: pre-ex +33.7 | ex-night -5.0 | chained T-10->ex close +28.9bp (med +21.8, NW t +5.9); net of ONE 20bp round trip +8.9
+  ex-night by pre-ex run-up tercile: lo +2.2 | mid -1.7 | hi -15.6
+
+CEF-CHAIN JUDGE verdict: n 10926 net +8.9bp shock -31.1 NW t +5.9 halves +35.6/+25.4 med +21.8 ex5 +27.5 -> KILL
+  by year: 2003:+8(n284) 2004:+27(n549) 2005:+6(n492) 2006:+18(n545) 2007:+5(n728) 2008:+69(n614) 2009:+106(n545) 2010:-3(n885) 2011:+55(n869) 2012:+27(n1103) 2013:+6(n1525) 2014:+38(n1369) 2015:+32(n1418)
+
+# CEF-CHAIN CONTEXT 2026-10-07 22:40
+CEF-CHAIN CONTEXT n 16030: pre-ex +29.5 | ex-night -7.5 | chained T-10->ex close +21.9bp (med +15.5, NW t +6.2); net of ONE 20bp round trip +1.9
+  ex-night by pre-ex run-up tercile: lo -1.3 | mid -4.7 | hi -16.4
+
+CEF-CHAIN CONTEXT verdict: n 16030 net +1.9bp shock -38.1 NW t +6.2 halves +26.2/+17.4 med +15.5 ex5 +27.8 -> KILL
+  by year: 2016:+39(n1528) 2017:+24(n1515) 2018:+22(n1504) 2019:+21(n1493) 2020:+32(n1488) 2021:+15(n1568) 2022:+27(n1510) 2023:+38(n1236) 2024:+14(n1449) 2025:+4(n1463) 2026:+5(n1276)
+
+# Round 25 2026-10-07 22:42
+R25 2016-2026 new issues n 964 (90/yr) | s5->s30 excess -30.2bp med +15.8 hit 53% NW t -1.3 halves -13.0/-61.6 ex5 -43.8 net -70.2 | s5->s45 +4.0 (med +41.4) | entry px med $25.18 -> fail
+
+# Round 26 2026-10-07 22:44
+R26 2016-2026 high-yield commons n 1617 (147/yr, 288 names) | A pre-ex -14.3 (med -30.9) | B chain -17.5 med -38.9 hit 46% t -0.2 halves +5.3/-36.1 ex5 -27.3 net -27.5 -> fail
+
+# Round 27 2026-10-07 22:45
+R27 2016-2026 issuer-crash pref events 3002 (458 prefs): +1d +5.7 (med -0.1, t +0.2) | +5d +14.8 (med -1.3, t +0.8) | +10d +123.5 (med +67.8, t +2.4)
+  avoid-screen on PREF-CHAIN: after-crash n 311 +164.7bp (med +96.9) | rest n 12093 +65.7 | diff +99.0 (t +1.7) halves +153.5/+8.7 -> fail
+
+# PREF-CRASH judge 2026-10-07 22:46
+PREF-CRASH verdict 2005-15: n 51 (32 prefs) excess +83.3bp med +23.0 hit 55% NW t +nan halves +nan/+83.3 ex5 -64.3 net +43.3 -> KILL
+  by year: 2014:-78/med+21(n12) 2015:+133/med+23(n39)
+
+# Round 28 2026-10-07 22:50
+R28 CEF-RV trades 3731 (2016-26 panel): pre-ex-entry n 1179 excess +66bp med +74 | rest n 2552 +49bp med +44 | diff +16bp (t +0.5) halves +29/+3 -> fail
+
+R29 2005-2015 PREF-CHAIN raw chain +90.7bp (med +79.7) vs adjusted +90.7 (med +79.2); |adj-raw| median 0.2bp, >50bp in 0.1% of events
+R29 2016-2026 PREF-CHAIN raw chain +89.4bp (med +73.9) vs adjusted +90.0 (med +74.2); |adj-raw| median 0.1bp, >50bp in 0.2% of events
+R29 R27 windows: share of issuer-crash pref windows (t, t+10] containing an ex-date 13.6% vs all liquid pref rows 13.9%
+
+# Round 30 2026-10-07 22:52
+R30 PREF-CHAIN 2021-26: 7411 events (1289/yr) | open windows per day: median 45, 10th pct 27, 90th 82
+   entry $ADV (20d): median $535k, 25th pct $314k | a $500 position = 0.09% of median daily $vol, $1,000 = 0.19%
+   entry price median $23.54 (whole shares: $25 lots, no rounding problem)
+   capital at $10k with 20 slots of $500: always full if median open windows >= 20 -> yes
+
+# Round 31 2026-10-07 22:54
+PREF-CHAIN book (net)    CAGR +8.8%  vol 22.4%  maxDD -80.0%
+EW pref buy&hold         CAGR +8.6%  vol 18.4%  maxDD -55.4%
+by year chain/EW: 2005:-0%/+2% 2006:+3%/+9% 2007:-32%/-14% 2008:-42%/-10% 2009:+44%/+82% 2010:+22%/+24% 2011:+10%/+8% 2012:+13%/+22% 2013:+4%/+0% 2014:+23%/+12% 2015:+17%/+4% 2016:+18%/+5% 2017:+14%/+10% 2018:+2%/-5% 2019:+22%/+18% 2020:+33%/+21% 2021:+12%/+8% 2022:-9%/-16% 2023:+29%/+17% 2024:+25%/+12% 2025:+19%/+8% 2026:+7%/+0%
+days with no open window: 5.4% (cash)
+
+# Round 31 2026-10-07 22:54
+PREF-CHAIN book (net)    CAGR +8.8%  vol 22.4%  maxDD -80.0%
+EW pref buy&hold         CAGR +8.6%  vol 18.4%  maxDD -55.4%
+by year chain/EW: 2005:-0%/+2% 2006:+3%/+9% 2007:-32%/-14% 2008:-42%/-10% 2009:+44%/+82% 2010:+22%/+24% 2011:+10%/+8% 2012:+13%/+22% 2013:+4%/+0% 2014:+23%/+12% 2015:+17%/+4% 2016:+18%/+5% 2017:+14%/+10% 2018:+2%/-5% 2019:+22%/+18% 2020:+33%/+21% 2021:+12%/+8% 2022:-9%/-16% 2023:+29%/+17% 2024:+25%/+12% 2025:+19%/+8% 2026:+7%/+0%
+days with no open window: 5.4% (cash)
+
+chain 2005-2009          CAGR -10.1%  vol 37.0%  maxDD -80.0%
+EW    2005-2009          CAGR +9.5%  vol 30.8%  maxDD -55.4%
+   open windows/day median 2
+chain 2010-2026          CAGR +15.2%  vol 15.6%  maxDD -44.5%
+EW    2010-2026          CAGR +8.3%  vol 12.6%  maxDD -42.4%
+   open windows/day median 29
+chain 2013-2026          CAGR +15.2%  vol 15.6%  maxDD -44.5%
+EW    2013-2026          CAGR +6.3%  vol 13.0%  maxDD -42.4%
+   open windows/day median 34
+# Round 31 2026-10-07 22:56
+PREF-CHAIN book (net)    CAGR +8.8%  vol 22.4%  maxDD -80.0%
+EW pref buy&hold         CAGR +8.6%  vol 18.4%  maxDD -55.4%
+by year chain/EW: 2005:-0%/+2% 2006:+3%/+9% 2007:-32%/-14% 2008:-42%/-10% 2009:+44%/+82% 2010:+22%/+24% 2011:+10%/+8% 2012:+13%/+22% 2013:+4%/+0% 2014:+23%/+12% 2015:+17%/+4% 2016:+18%/+5% 2017:+14%/+10% 2018:+2%/-5% 2019:+22%/+18% 2020:+33%/+21% 2021:+12%/+8% 2022:-9%/-16% 2023:+29%/+17% 2024:+25%/+12% 2025:+19%/+8% 2026:+7%/+0%
+days with no open window: 5.4% (cash)
+
+chain 2005-2009          CAGR -10.1%  vol 37.0%  maxDD -80.0%
+EW    2005-2009          CAGR +9.5%  vol 30.8%  maxDD -55.4%
+   open windows/day median 2
+chain 2010-2026          CAGR +15.2%  vol 15.6%  maxDD -44.5%
+EW    2010-2026          CAGR +8.3%  vol 12.6%  maxDD -42.4%
+   open windows/day median 29
+chain 2013-2026          CAGR +15.2%  vol 15.6%  maxDD -44.5%
+EW    2013-2026          CAGR +6.3%  vol 13.0%  maxDD -42.4%
+   open windows/day median 34
+R32 edge-only spread 2010-26: CAGR +6.5%, vol 7.3%, maxDD -17.9%, worst year -7.9% (2012), years > 0: 15/17
+    issuer concentration: top issuer share of open windows median 16%, 90th pct 33%
+
+# PREF-CHAIN judge 2026-10-07 23:02
+PREF-CHAIN JUDGE 2005-15 n 1168: pre-ex +39.0 | ex-night +19.7 | chained T-10->ex close +57.0bp (med +58.3, NW t +3.5); net of ONE 40bp round trip +17.0
+  ex-night by pre-ex run-up tercile: lo +32.5 | mid +19.9 | hi +6.7
+
+PREF-CHAIN verdict: n 1168 net +17.0bp shock -63.0 NW t +3.5 halves +32.6/+66.2 med +58.3 ex5 +31.4 -> KILL
+  by year: 2005:+48(n33) 2006:+42(n41) 2007:+36(n45) 2008:+22(n53) 2009:+20(n71) 2010:+39(n76) 2011:+3(n78) 2012:+42(n100) 2013:+63(n131) 2014:+130(n76) 2015:+72(n464)
+
+# Round 22 diag 2026-10-07 23:02
+R22 diag PREF n 12033: pre-ex +44.7 | ex-night +23.3 | chained T-10->ex close +68.1bp (med +48.3, NW t +11.5); net of ONE 40bp round trip +28.1
+  ex-night by pre-ex run-up tercile: lo +31.5 | mid +20.6 | hi +17.9
+
+# Round 16 2026-10-07 23:02
+R16 CEF distribution cuts 2016-26: events 349 (33/yr), funds 203
+  xpre10  mean  -146.5bp med -109.7 hit 30% t -4.7 halves -142.4/-152.0 ex-top5 -168.3
+  x5      mean   -58.7bp med  -36.5 hit 40% t -3.6 halves  -93.1/ -13.7 ex-top5  -70.3
+  x10     mean   -92.3bp med  -49.2 hit 39% t -3.7 halves  -79.7/-108.7 ex-top5 -109.5 net -112.3 -> fail
+  x20     mean  -106.4bp med  -83.1 hit 38% t -3.3 halves  -88.0/-130.7 ex-top5 -126.5
+
+# Round 17 2026-10-07 23:04
+R17 CEF-RV trades 3731 (2016-26 panel): after-cut n 82 excess -251bp med -224 | rest n 3649 +61bp med +60 | diff -312bp (t -3.2) halves -312/-321 -> PASS (avoid-screen)
+
+# Round 17 confirm 2026-10-07 23:06
+R17 CONFIRM 2003-14: CEF-RV trades 3171: after-cut n 62 excess -182bp med -117 | rest n 3109 +163bp med +104 | diff -344bp (t -2.6) halves -518/-183 -> CONFIRMED
+
+# Round 21 2026-10-07 23:06
+R21 CEF pre-ex T-10->T-1: events 15981 (1494/yr) | excess +30.2bp med +19.1 hit 54% NW t +8.8 halves +35.2/+25.1 ex5 +38.9 net +10.2 -> fail
+
+# Round 18 2026-10-07 23:06
+R18 CEF distribution increases 2016-26: events 407 (38/yr), funds 209
+  xpre10  mean  +112.9bp med  +91.6 hit 67% t +4.5 halves  +89.8/+128.7 ex-top5  +98.5
+  x5      mean   -17.8bp med   -6.5 hit 47% t -2.5 halves  -38.2/  -4.1 ex-top5  -23.7
+  x10     mean    -4.5bp med  -14.4 hit 47% t -0.7 halves  -52.2/ +28.0 ex-top5  -19.4 net -24.5 -> fail
+  x20     mean   -27.4bp med   -8.9 hit 48% t -1.7 halves  -50.1/ -12.0 ex-top5  -36.9
+
+# CEF-CHAIN JUDGE 2026-10-07 23:06
+CEF-CHAIN JUDGE n 10703: pre-ex +33.8 | ex-night -5.0 | chained T-10->ex close +29.0bp (med +21.7, NW t +5.9); net of ONE 20bp round trip +9.0
+  ex-night by pre-ex run-up tercile: lo +2.2 | mid -1.7 | hi -15.5
+
+CEF-CHAIN JUDGE verdict: n 10703 net +9.0bp shock -31.0 NW t +5.9 halves +36.4/+25.2 med +21.7 ex5 +28.0 -> KILL
+  by year: 2003:+10(n253) 2004:+31(n521) 2005:+6(n471) 2006:+13(n532) 2007:+6(n695) 2008:+69(n614) 2009:+107(n544) 2010:-2(n874) 2011:+57(n853) 2012:+25(n1086) 2013:+5(n1492) 2014:+39(n1362) 2015:+31(n1406)
+
+# Round 23 2026-10-07 23:06
+[2016-2026] chained +68.1bp (n 12033) | Q1a post-ex T+5->T+15 -1.2 | Q1b random far-from-ex 10d -11.2 (n 510846)
+   Q2 ADV>=$1M: +57.4 (n 3750) | Q3 SEP pref +67.1 (n 10126) ETD +73.6 (n 1907) | Q4 monthly +97.3 (n 851) quarterly +65.9 (n 11009)
+[2005-2015] chained +57.0bp (n 1168) | Q1a post-ex T+5->T+15 +1.6 | Q1b random far-from-ex 10d -6.1 (n 104782)
+   Q2 ADV>=$1M: +26.3 (n 451) | Q3 SEP pref +99.0 (n 569) ETD +17.1 (n 599) | Q4 monthly +68.0 (n 140) quarterly +56.6 (n 1008)
+
+# Round 31 2026-10-07 23:06
+PREF-CHAIN book (net)    CAGR +8.8%  vol 22.5%  maxDD -79.9%
+EW pref buy&hold         CAGR +8.6%  vol 18.4%  maxDD -55.4%
+by year chain/EW: 2005:+1%/+2% 2006:+9%/+9% 2007:-33%/-14% 2008:-41%/-10% 2009:+38%/+82% 2010:+21%/+24% 2011:+7%/+8% 2012:+12%/+22% 2013:+4%/+0% 2014:+28%/+12% 2015:+13%/+4% 2016:+20%/+5% 2017:+14%/+10% 2018:+3%/-5% 2019:+22%/+18% 2020:+31%/+21% 2021:+12%/+8% 2022:-9%/-16% 2023:+28%/+17% 2024:+26%/+12% 2025:+20%/+8% 2026:+7%/+0%
+days with no open window: 6.0% (cash)
+
+chain 2005-2009          CAGR -9.7%  vol 37.3%  maxDD -79.9%
+EW    2005-2009          CAGR +9.5%  vol 30.8%  maxDD -55.4%
+   open windows/day median 2
+chain 2010-2026          CAGR +15.0%  vol 15.6%  maxDD -44.6%
+EW    2010-2026          CAGR +8.3%  vol 12.6%  maxDD -42.4%
+   open windows/day median 27
+chain 2013-2026          CAGR +15.4%  vol 15.5%  maxDD -44.6%
+EW    2013-2026          CAGR +6.3%  vol 13.0%  maxDD -42.4%
+   open windows/day median 33
+R32 edge-only spread 2010-26: CAGR +6.3%, vol 7.3%, maxDD -22.7%, worst year -7.9% (2012), years > 0: 14/17
+    issuer concentration: top issuer share of open windows median 17%, 90th pct 50%
+
+# Round 17 2026-10-07 23:13
+R17 CEF-RV trades 3731 (2016-26 panel): after-cut n 82 excess -141bp med -120 | rest n 3649 +115bp med +88 | diff -255bp (t -2.9) halves -188/-363 -> PASS (avoid-screen)
+
+# Round 17 confirm 2026-10-07 23:15
+R17 CONFIRM 2003-14: CEF-RV trades 3171: after-cut n 62 excess -15bp med +41 | rest n 3109 +175bp med +159 | diff -191bp (t -2.0) halves -218/-165 -> NOT confirmed
+

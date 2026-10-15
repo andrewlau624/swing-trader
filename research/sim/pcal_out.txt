@@ -1,0 +1,8 @@
+C0 exact rule          nights  1252 trades   7792 mean    16.13bp med    10.19bp t   1.11 halves    23.1 /     9.1 ex5     7.7 | PASS=False | {'open': 7788, 'nobar_halt': 3, 'delist_nopx': 1}
+C1 lag+1               nights  1251 trades   7792 mean   -13.65bp med   -15.22bp t  -0.85 halves   -16.6 /   -10.7 ex5   -45.1 | PASS=False | {'open': 7757, 'nobar_halt': 32, 'delist_price': 2, 'delist_nopx': 1}
+C2 lag+5               nights  1246 trades   7748 mean   -30.70bp med   -15.00bp t  -2.65 halves   -25.8 /   -35.6 ex5   -22.7 | PASS=False | {'open': 7734, 'nobar_halt': 13, 'delist_nopx': 1}
+C3 IBS>=0.90           nights    98 trades    106 mean  -125.54bp med   -36.66bp t  -2.57 halves  -162.8 /   -88.3 ex5  -161.3 | PASS=False | {'open': 106}
+C4 momentum mirror     nights   119 trades    124 mean   157.10bp med    21.70bp t   1.90 halves    61.7 /   250.9 ex5    28.8 | PASS=False | {'open': 124}
+C5 IBS permuted in-day nights  1272 trades   8560 mean   -24.45bp med    -7.92bp t  -1.53 halves   -33.8 /   -15.1 ex5   -23.6 | PASS=False | {'open': 8552, 'nobar_halt': 5, 'delist_nopx': 2, 'delist_price': 1}
+C6 random names        nights  1252 trades   7792 mean   -29.28bp med    -9.67bp t  -2.47 halves   -35.3 /   -23.3 ex5   -18.9 | PASS=False | {'open': 7788, 'nobar_halt': 3, 'delist_nopx': 1}
+C7 lag+10              nights  1241 trades   7701 mean   -31.73bp med   -24.46bp t  -2.78 halves   -29.5 /   -34.0 ex5   -38.7 | PASS=False | {'open': 7691, 'nobar_halt': 9, 'delist_nopx': 1}

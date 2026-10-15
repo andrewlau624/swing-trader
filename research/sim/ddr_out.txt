@@ -1,0 +1,1 @@
+DDR lag+5payer         nights  3389 trades  17207 mean    11.86bp med    11.95bp t   2.02 halves    24.7 /    -0.9 ex5    22.7 | PASS=False | {'open': 17182, 'nobar_halt': 22, 'delist_nopx': 3}
