@@ -7089,3 +7089,64 @@ round trip eats 2-3x over; win rates 35-44% at 2R targets are the stop/target ge
 conditioned on the trigger, not informative. Ceiling negative at every size. Volatile liquid names do not rescue retail day-trading alert setups;
 with Lab-AS/AU/halts and the scalp loop this closes the class. Human layer: no PASS arm, so no forward journal is built by default.
 Program N = 993.
+
+## Amendment — Study INPLAY: in-play scanner (RVOL + catalyst + two-way liquidity + levels) x 3 trade styles (pre-register; N 993 -> 996)
+`date`: Thu Oct 15 2026, before any minute bar is read. User follow-up to VOLDAY: not one-way volatile names but liquid, high-volume, two-way
+"stocks in play", cherry-picked; styles = fade extremes, ride volume bursts, and a mix where the bot states the direction.
+- **Universe / scanner (all ex-ante).** Sharadar SEP Domestic Common, prior close >= $10, ADV20 $ (closeunadj x volume, through d-1) >= $200M.
+  POOL-G (catalyst proxy): top 25 by |gap| = |open_d / close_{d-1} - 1| (adjusted, both known at 09:30), |gap| >= 1%.
+  POOL-C (two-way chop): among ADV20 >= $500M not in POOL-G, top 10 by twoway20 x range20, twoway = 1 - |close-open|/(high-low), range = (high-low)/close,
+  20-day means through d-1. Window 2019-01-02..2026-09-30. Alpaca SIP 1m raw, RTH; SPY 1m for the market term.
+  At 10:00 a name is IN PLAY if RVOL30 = $vol(09:30-10:00) / ADV20$ >= 0.30 (normal ~0.12-0.15, i.e. >= ~2x). Only IN-PLAY name-days trade.
+  Name-days with < 300 bars dropped. Leakage check: none (no full-day field used).
+- **Styles (entries 10:00-15:30, one trade per style per name-day, flat by 15:55, stop-first on a 1m bar touching both):**
+  S1 FADE: dev = close - VWAP; sd = std of dev over the session so far (>= 30 bars). When |dev| >= 2 sd and the next bar closes back inside 2 sd,
+     enter against the deviation at that close; target VWAP (at entry); stop = session extreme on that side + 0.25 x |entry - VWAP|.
+  S2 BURST: levels = prior-day RTH high/low (Sharadar adjusted high/low x closeunadj/close of d-1) and the 09:30-10:00 range high/low. First 1m close
+     through a level with bar volume >= 3x the session mean 1m volume -> trade the break side; stop = the breakout bar's opposite extreme; target 2R;
+     time exit 30 min.
+  S3 MIX (bot direction): event = first 1m bar after 10:00 that touches any level above or VWAP. Direction score D = sign(c - VWAP) + sign(c - open)
+     + sign(SPY c - SPY open) + sign(gap). Trade sign(D) if |D| >= 2 (else no trade); stop = 1.5 x mean 1m range of the last 30 bars x sqrt(15)... frozen as
+     stop distance = 1.5 x ATR15, ATR15 = mean(high-low) of the last 15 bars x sqrt(15); target 1.5R; time exit 60 min.
+- **Placebo.** Per style: same name-day, entry bar, stop distance and target rule, coin-flip direction, 200 draws. S3 also: the opposite of the bot
+  direction (direction value = S3 minus its mirror / 2).
+- **Costs.** 5bp/side (1x), 10bp/side (2x). Halves 2019-22 / 2023-26.
+- **Gate (per style, PASS needs all):** mean net 1x > 0, day-clustered t >= 2; > 0 at 2x; both halves > 0; ex-top-5 > 0; median > 0 or stated payoff
+  asymmetry; real gross above the placebo 95th pct; n >= 300. DSR at N 996.
+- **Cherry-pick diagnostics (report only, no gate):** each style by RVOL30 tercile, by pool (G/C), by level type (S2/S3), by |D| (S3), by gap sign.
+  A monotone, both-halves improvement is a hypothesis for a forward test, never a pass.
+- **Ceiling.** trades/yr x net x 100% x 50% capture at $10k (+8pp gate). Forward human TAKE/SKIP journal is built only for a PASS style.
+- Runner `research/sim/inplay.py` -> `data/research/program/inplay_out.txt`.
+Program N = 996.
+- **Deviation (before any minute bar or outcome).** POOL-C as registered (twoway20 x range20) selected one-way high-vol names (AAOI, CIFR, IONQ...),
+  which the user excluded. Frozen replacement: among ADV20 >= $1B with range20 >= 2%, not in POOL-G, top 10 by twoway20.
+
+### Study ROTH-COMBO (pre-register 2026-10-15, before the runner exists; N 996 -> 997)
+Question (portfolio construction, no new signal): on a cash Roth, does adding a CEF-RV sleeve and a Treasury month-end (TME) sleeve to the
+ROTH-STACK book (AL1 IBS .5 + night .5, PREF+ETDX CO on the book's idle cash, STRICT night-first) raise total %/yr once the three compete for
+the same cash? Every component is judged elsewhere (CEF-RV/CEF-PEER, TME 2002-15, ROTH-STACK); this run is arithmetic on touched data.
+Ceiling (before running): CEF-RV ~+3.8%/trade raw over ~13 weeks, ~-0.5% cost -> ~+13%/yr on the sleeve's deployed cash, but its alternative
+is the book (~10-20%/yr on the same cash in 2021-26), so the increment from a carve-out may be ~0 or negative; TME +32bp x 12 = ~3.8%/yr on
+its sleeve for 3 sessions/month, displacing the book for those sessions. Prior: increment small (< +2pp) unless the book leaves the carved
+cash idle most days.
+Rule: days = ROTH-STACK book days (2021-02-01..2026-09-18). Each day the book runs `roth_stack.book_day` on E_book = E x (1 - f - g_d) and PREF
+takes `alloc(free)` exactly as ROTH-STACK STRICT night-first. CEF sleeve = f x E, 8 equal slots; CEF-RV trades from `cef_rv_trades.csv`
+(frozen rule; entry = first SFP close after the signal week, exit = first close after the exit-signal week), new signals of a week ranked by
+disc_in - med ascending, fill free slots, whole shares at the raw entry close, marked daily on SFP closeadj, 25bp per side; empty slots earn
+BIL. TME sleeve: on the book days whose close is T-3, T-2, T-1 of each month (T = last TLT trading day), g_d = g, and g x E is held in TLT
+close(T-3) -> close(T) (Yahoo adjclose), 1bp per side. Configs: f in {0, .25, .5} x g in {0, .5}; PRIMARY = f .25, g .5; baseline = f 0, g 0.
+Sizes $3k / $10k / $25k fixed equity. Metrics per config: total %/yr, increment vs baseline (pp/yr), halves 2021-23 / 2024-26, 3x cost (PREF
+30bp RT, CEF 150bp RT, TME 6bp RT), maxDD of the daily total, NW t of the daily increment; per sleeve: CEF trades taken, mean net, hit.
+Gate (PASS, PRIMARY at $10k): increment >= +2pp/yr, both halves > 0, increment > 0 at 3x cost, NW t >= 2. Kill: increment <= 0 at $10k or
+negative in a half. A non-primary config that beats PRIMARY is a hypothesis for the forward gates, never a pass. Survivorship: the CEF panel
+is live funds only (2016-26 benign-death era, CEF-SURV99); stated, not corrected. One run, no tuning.
+Runner research/sim/roth_combo.py -> data/research/program/roth_combo_out.txt. Program N = 997.
+
+#### Result — ROTH-COMBO (judged 2026-10-15, one run; N 997): KILL
+Runner research/sim/roth_combo.py -> data/research/program/roth_combo_out.txt (run under pandas 3: the night/sim caches are pandas-3 pickles,
+.venv has pandas 2.2.3 since 10-12). Baseline (book + PREF) +21.8 / +19.3 / +17.9 %/yr at $3k / $10k / $25k. PRIMARY (f .25, g .5) increment
+-3.0 / -0.8 / -0.1pp, both halves negative at $10k, NW t -0.33. Every config is <= +0.5pp at every size. The CEF sleeve itself is fine (187 trades,
++426bp net, hit 78%, ~17.6%/yr on its cash) and TME adds +1.2pp on its sleeve, but each only matches what the same cash earns in the book in
+2021-26, so carving cash out of the book buys nothing. Side effect, not a pass: f .25 cuts maxDD (-13.5% -> -10.2% at $10k). Caveat: the
+comparison prices the book at its in-window 2021-26 return (~19%/yr), above the ~8-15% forward estimate; if the book delivers only that,
+a CEF sleeve would add. That is a forward question (CEF-RV-FWD gate), not this study's. Do not re-run sleeve weights.
