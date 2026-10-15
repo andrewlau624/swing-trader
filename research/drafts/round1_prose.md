@@ -7150,3 +7150,14 @@ Runner research/sim/roth_combo.py -> data/research/program/roth_combo_out.txt (r
 2021-26, so carving cash out of the book buys nothing. Side effect, not a pass: f .25 cuts maxDD (-13.5% -> -10.2% at $10k). Caveat: the
 comparison prices the book at its in-window 2021-26 return (~19%/yr), above the ~8-15% forward estimate; if the book delivers only that,
 a CEF sleeve would add. That is a forward question (CEF-RV-FWD gate), not this study's. Do not re-run sleeve weights.
+
+### Result — INPLAY (2026-10-15, one look 2019-01..2026-09; N 996): KILL, all 3 styles
+`inplay.py`, out `inplay_out.txt`. 63,050 candidate name-days, 13,186 in play (RVOL30 >= 0.30), 23,473 trades. (A first run crashed on `df.style`, the
+pandas Styler, before printing anything; fixed, then the single look.) Net at 5bp/side:
+S1 FADE n 12,652 gross -4.3bp, net -14.3 (t -9.0), halves -11.1/-16.9, placebo pct 4%, direction value -3.2 (fading VWAP extremes is WORSE than riding them);
+S2 BURST n 1,131 gross +1.5, net -8.5 (t -2.6), halves -11.2/-6.0, placebo pct 79%;
+S3 MIX (bot direction) n 9,690 gross -4.4, net -14.4 (t -4.2), halves -15.9/-13.1, placebo pct 2%, direction value -4.0 (|D| = 4, all signals agree: -6.8):
+the composite direction call is mildly ANTI-predictive at level touches; its mirror (+4bp gross) is still under the 10bp round trip.
+Cherry-pick diagnostics: no RVOL tercile, pool (gap vs two-way chop), level type or |D| bucket is positive in both halves (best: S3 chop pool -11.0/+2.7 n 428;
+S2 PDH +6.2/-13.8). Scanner features do not separate good from bad in-play trades. Ceiling negative. No forward human journal (no PASS style).
+Program N = 996.

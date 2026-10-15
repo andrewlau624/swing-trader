@@ -1044,3 +1044,6 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
 - **VOLDAY (N 989-993, 2026-10-15): KILL all 5.** Retail alert setups (ORB15, VWAP reclaim, HOD break, flush reversal, gap fade) on a
   point-in-time top-10 realized-vol, ADV >= $500M watchlist, Alpaca SIP 1m 2016-26, 46k trades: net -5..-15bp/trade at 5bp/side; breakout arms
   ~+3bp over random entries (tiny real continuation), cost 10bp. Volatile names do not rescue day-trading alerts; class closed.
+- **INPLAY (N 994-996, 2026-10-15): KILL all 3.** In-play scanner (RVOL30, gap catalyst, two-way deep-liquidity names, PDH/PDL/OR/VWAP levels) x
+  fade / burst / bot-direction mix, 2019-26, 23k trades: net -8.5..-14.4bp/trade; fade and the direction score are worse than random; no scanner
+  feature separates good trades in both halves. Day-trading alert scanners on bar data are closed (with VOLDAY, Lab-AS/AU, scalp loop).
