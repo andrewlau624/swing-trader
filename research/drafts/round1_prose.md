@@ -7509,3 +7509,23 @@ open(t)->open(t+1) return, IBIT Roth-eligible, ~5-10bp spread.
   before the open. No decision taken; user call.** Note: ISA mirror `isaergun/etf-flows-data`
   excluded from BTC-ETF-FLOW validation — its "flow" is ΔAUM (price-inclusive), median |diff| vs
   Farside IBIT $143.8m. Program N = 1011.
+
+## NBH: night-leg market beta hedge + market-state gates (2026-10-16, N 1011 -> 1014)
+- **Why:** live Oct-2026 night trips lost -119bp (live) / -272bp (Roth) per trip, but after the QQQ overnight
+  move the loss is ~-17 / -63bp: picks carry ~3-5x QQQ overnight beta. Question: does removing the market part
+  (hedge) or skipping bad-market nights improve the leg? Prior evidence (downday_buckets, regime_tilt, REGIME-10M)
+  says the leg earns MORE on bad days, so gates are expected to fail; the overnight beta HEDGE is untested anywhere.
+- **Data (all TOUCHED for the night leg -> exploratory; forward shadow decides):** exact 15:40 pick panels
+  `night_exact_pre2021.parquet` (2016-02..2020-10) + `recent/night_replay.parquet` (2020-11..2026-09-18);
+  QQQ daily `etf_daily.parquet`, QQQ 15:40 from `night/m1/QQQ_YYYY.parquet`. Equal-weight picks per night,
+  7.5bp/side on picks, 1bp/side on QQQ hedge notional, nights with no picks = 0. Eras 2016-20 / 2021-26.
+- **Arms (frozen):**
+  - H1 (N 1012) beta hedge: short b_t x QQQ close->next open, b_t = OLS beta of the net night-portfolio return on
+    QQQ overnight over the prior 250 pick-nights (min 60), clipped [0, 6]. Roth form = long PSQ/SQQQ (same math).
+  - G1 (N 1013) skip the night if QQQ(15:40)/prev close - 1 <= -1.0%.
+  - G2 (N 1014) skip the night if QQQ(15:40) < mean of its prior 20 daily closes.
+- **PASS (per arm):** in BOTH eras, Sharpe of the night series up >= 0.15 AND maxDD smaller; hedge also needs
+  annual return to fall <= 25%; gates also need skipped nights net-negative in both eras. Report mean, median,
+  day t, ex-top-5, %/yr at night weight 0.65, H1 residual alpha (mean, t, halves).
+- **Kill:** fail -> record; no threshold/window re-tuning. Runner `research/sim/nbh.py` ->
+  `data/research/program/nbh_out.txt`. Program N = 1014.
