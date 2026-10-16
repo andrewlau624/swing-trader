@@ -7161,3 +7161,351 @@ the composite direction call is mildly ANTI-predictive at level touches; its mir
 Cherry-pick diagnostics: no RVOL tercile, pool (gap vs two-way chop), level type or |D| bucket is positive in both halves (best: S3 chop pool -11.0/+2.7 n 428;
 S2 PDH +6.2/-13.8). Scanner features do not separate good from bad in-play trades. Ceiling negative. No forward human journal (no PASS style).
 Program N = 996.
+
+## Study CRYPTO-TA — MACD / RSI pattern rules on the five Schwab-tradable coins (pre-register 2026-10-15, before the runner exists; N 997 -> 998, DSR at 998 + 8 rules)
+User request: MACD/RSI strategies on swing + crypto. Swing side NOT re-run (window_signals_loop rounds 1-11: F3/F4/F6/F11/H6 dead in liquid
+stocks/ETFs; usethinkscript harvest dead). Untested cell: oscillator patterns on crypto majors (prior crypto work = SMA trend, IBS only).
+- **Data.** Binance USDT spot daily (UTC days), BTC ETH SOL AVAX LINK (Schwab Crypto list 2026-10), 2018-01-01..2026-09-30, each coin from
+  its first 200 bars. Signal at the close of UTC day d, fill at the close of d (24/7 market, no gap; Schwab trades 24/7). Long only.
+- **Rules (frozen, long-only, indicators on closes, standard parameters; lookback patterns per lesson L1):**
+  R1 RSI(14) crosses back above 30 after >= 3 days below; exit RSI(14) >= 50 or 20 days.
+  R2 RSI(2) < 10 with close > SMA200; exit close > SMA5 or 10 days.
+  R3 MACD(12,26,9) line crosses above signal while MACD < 0; exit at the cross back down.
+  R4 MACD histogram turns > 0 after >= 5 bars < 0; hold 10 days.
+  R5 MACD zero-line cross up; exit at the zero-line cross down (trend).
+  R6 RSI(14) bullish divergence: low_d < min(low d-20..d-5), RSI_d > RSI at that prior low, RSI_d < 40; hold 10 days.
+  R7 RSI(14) crosses above 70 (momentum); exit RSI(14) < 50 or 20 days.
+  R8 regime: in when MACD > 0 AND close > SMA200, out otherwise (time-in-market).
+- **Benchmark.** Exposure-matched: trade return minus the coin's own mean daily log return x days held (full-sample drift of that coin);
+  plus whole-period CAGR / Sharpe / maxDD vs buy-and-hold of an equal-weight basket of the coins (rule capital split equally per coin,
+  cash 0% when out).
+- **Costs.** Schwab 75bp/side (150bp RT) = judge; 2x shock 300bp RT; report 25bp/side (Coinbase/IBIT-like) as information only.
+- **Gate (per rule, trades pooled across coins, date-clustered t).** PASS needs ALL: mean excess net of 150bp > 0 with t >= 2.0; halves
+  2018-22 / 2023-26 both > 0; median excess net > 0; ex-top-5 trades > 0; survives 300bp RT. For R5/R8 (time-in-market) instead: Sharpe net
+  >= B&H Sharpe + 0.2 in BOTH halves and maxDD better than B&H. DSR reported at N 998 + 8. Any PASS -> forward shadow only; no live order.
+- **Kill rule.** No rule passes -> MACD/RSI on crypto majors CLOSED at Schwab cost; record in NEXT do-not-redo.
+- Runner `research/sim/crypto_ta.py` -> `data/research/program/crypto_ta_out.txt`.
+Program N = 998.
+- **RESULT (2026-10-15): no usable rule; R7 = WEAK (passed the registered gate, failed the adversarial checks).** EW B&H basket CAGR +32.7%,
+  Sharpe 0.76, maxDD -85%. Net of 150bp RT: R1 -120bp t -0.01, R2 -111 t -1.70, R3 +250 t 0.97 (median -545), R4 -76, R6 -265 t -2.08 (wrong
+  sign): FAIL. R5 zero-line trend Sharpe 1.14/0.99 vs B&H 0.69/0.92 and R8 (MACD>0 & >SMA200) 1.28/0.99, maxDD -49%: FAIL (second half +0.07
+  < +0.2; the gain is dodging the 2018 and 2022 bears, 2023-26 CAGR +32% vs B&H +46%). **R7 (RSI14 crosses above 70, exit <50 or 20d)**: +777bp
+  mean, median +22, date-clustered t 2.50, halves +964/+606, ex-top-5 +322, 2x cost +627 -> registered PASS, book CAGR +27.9% Sh 1.01 mDD -26%.
+  But the coins move together: week-clustered t 2.09, **month-clustered t 1.25**; carried by SOL/AVAX (+1641/+2266, survivor coins Schwab
+  picked in 2026) and 2020-21/2023; 2024-26 ~0 with negative medians; **2022+ net +542 median -5, month t -0.06**; BTC alone +487 median +395
+  t 1.95 (n 34); thresholds 60/65 dead (median -544/-593), 75/80 stronger. Placebo 100th pct (random holds +189bp gross). Read: R7 is crypto
+  time-series momentum (known trend family), real gross in 2019-23 but not a robust net edge at Schwab cost, and it has not worked since 2024.
+  Lesson for the gate: date-clustered t is too generous for a basket of ~0.8-correlated coins; cluster by month.
+
+## Study CRYPTO-TA12 — the CRYPTO-TA rules on 12-hour bars (pre-register 2026-10-15, before any 12h data is read; N 998 -> 999)
+User follow-up: "fails on a daily scale, how about half day". Same five coins, same 8 rules with the SAME parameters in BARS (RSI 14/2, MACD
+12/26/9, SMA200/5, hold caps 10/20 bars = 5/10 days), on Binance spot 12h klines (UTC 00-12, 12-24), 2018-01-01..2026-09-30, signal and fill
+at the bar close (Schwab trades 24/7). Same exposure-matched excess, costs (judge 150bp RT, shock 300bp, info 50bp).
+- Gate: as CRYPTO-TA, but the t-stat is **clustered by calendar month** (lesson from CRYPTO-TA: coin entries in the same weeks are one bet),
+  and a PASS also needs the 2023-26 half > 0 with month t computed on 2022+ >= 1.0. Regime rules (R5/R8): Sharpe (annualised x sqrt(730))
+  >= B&H + 0.2 in both halves and better maxDD. Prior: worse than daily (twice the turnover at 150bp RT); the daily R7 is NOT re-judged here.
+- Runner `research/sim/crypto_ta12.py` -> `data/research/program/crypto_ta12_out.txt`; data `data/research/crypto_spot/raw12h/`.
+- **Amendment (2026-10-15, before any intraday bar was read; user: "or quarter day / or third / etc"):** run the identical design on 12h, 8h,
+  6h and 4h bars (four timeframes, each its own judged family; N 998 -> 1002). Hold caps stay in BARS (so 4h caps = 40/80h). Annualise Sharpe by
+  bars/yr. Data `data/research/crypto_spot/raw{12h,8h,6h,4h}/`. Report every timeframe; no picking the best one after the fact.
+Program N = 1002.
+- **RESULT CRYPTO-TA12 (2026-10-15): KILL, 0 of 32 cells pass (8 rules x 12h/8h/6h/4h).** Results get worse as bars get shorter. Oversold / MACD-
+  cross / divergence rules are negative net at every timeframe (RSI2 month t -3.5 -> -8.9 from 12h to 4h). R7 RSI>70 net mean +534/+239/+168/+24bp
+  with NEGATIVE medians (-159..-245) and 2022+ month t <= 0 at every timeframe. Trend filters R5/R8 2023-26 CAGR +19/+16/+10/-16% net vs B&H +46%;
+  even at 25bp/side (info) their 2023-26 Sharpe is 0.47-1.11 vs B&H 0.91-0.92: all of the gain came from dodging the 2018 and 2022 crashes.
+  (B&H differs from daily only because the 200-bar warm-up is shorter in calendar time.) Out `crypto_ta12_out.txt`.
+  Class verdict: MACD/RSI on crypto majors is CLOSED at every bar size from 4h to 1d at Schwab cost and, for 2022+, even at 25bp/side.
+
+## Study IND-SWING — 38 swing indicators, extreme "confident" tails + combos + an ML composite, 2-30 day holds (pre-register 2026-10-15, before the runner exists; N 1002 -> 1003, DSR at 1002 + all trials)
+User request: test a pasted list of 65 indicators (volatility, volume, statistical, options, microstructure, positioning) "for very confident
+picks at a high interval". Not read: any outcome of any rule below. Runner `research/sim/ind_swing.py` -> `data/research/program/ind_swing_out.txt`.
+- **Data.** Sharadar SEP, domestic common stock, delisted included; load 2002-01..2026-10 (warm-up). Universe per day: raw close >= $5, 20d median
+  $vol >= $5M. Returns from adjusted prices (adjusted open = open*closeadj/close). Signals at close t on every 5th trading day (weekly);
+  entry open t+1, exit open t+1+h, **h in {2, 5, 10, 20, 30}**; non-overlapping (h > 5 uses every ceil(h/5)-th signal date).
+- **Features (40 — 13 vol + 14 volume + 13 stat, count corrected before any run; daily-bar computable; cross-sectional percentile among eligible names).** Volatility: VCP (range5/range20 x range20/range60),
+  TTM squeeze ratio (BB20 width / KC20 width), TTM squeeze days-on, HVP (vol20 percentile in own 252d), Parkinson / Garman-Klass /
+  Rogers-Satchell / Yang-Zhang 20d each / own 252d level, Choppiness 14, Ulcer 14, FDI 30 (Sevcik), Hurst (variance-ratio proxy, 120d), Donchian
+  20 width / close. Volume: CMF 20, Klinger (34/55), NVI and PVI vs own 255-EMA, EMV 14, VPT 20d change / avg vol, Twiggs MF 21, Elder force 13
+  / $ADV, close vs rolling 50d VWAP, close vs VWAP anchored at the 252d-high date, pocket pivot flag (up day, vol > max down-day vol of prior
+  10, close > 10d and 50d SMA), VDU (vol5/vol50), up/down volume ratio 50d, RVOL (vol/avg20). Statistical: OU half-life (AR1 of log price
+  minus 20d mean, 60d), variance ratio VR(5) 120d, z of 5d return vs own 252d, residual momentum (12-1 vs EW-universe beta), idio vol 60d,
+  trend t-stat (60d log-price regression; Kalman stand-in), CUSUM break (mean ret 20d minus 120d, / vol), sign entropy 20d, permutation entropy
+  (order 3, 60d), beta instability (beta60 - beta250), lag-1 autocorr 60d, Amihud 20d, Roll spread 60d.
+- **Not run (reason stated, not tested here):** HMM regimes (#32; market-regime gates dead, NOISE-GATE/regime rows); cointegration pairs (#37;
+  ETF pairs dead); volume profile HVN/LVN (#22; needs intraday volume-at-price); options #39-50 (LUCK-B4 tested IV/skew/PC on OptionMetrics,
+  OI-pin killed, signed gamma ceiling < 4pp); microstructure #51-53, 55, 57-59 (minute/book scale; scalp loop 7 studies dead); short interest
+  #61-62 (LUCK-B4); borrow #63-64 (no data); PEAD #65 (effect in the announcement gap).
+- **Rules (long-only).** (a) TAILS: each feature's top 2% and bottom 2% of the cross-section (pocket pivot: flag = 1 only) x 5 horizons.
+  (b) COMBOS, frozen: C1 user's combo = ret120 pct >= 0.8 & VDU of the prior 10 sessions (vol10[t-1]/vol50) pct <= 0.2 & today RVOL >= 2 & up
+  day; C2 VCP pct <= 0.1 & pocket pivot; C3 TTM squeeze on >= 5 of the prior 6 days & off today & close > 20d high; C4 Donchian width pct
+  <= 0.1 & close > prior 20d high & RVOL >= 1.5; C5 CMF pct >= 0.9 & up/down vol pct >= 0.9 & ret120 pct >= 0.8. x 5 horizons.
+  (c) ML: sklearn HistGradientBoosting on all 38 percentiles, target = 10d excess-return percentile, trained on the prior 5 years of weekly
+  rows ending 30 sessions before each test year (retrained yearly), long the top 1% predicted names, x 5 horizons.
+  Min 3 names on a signal date, >= 30 dates.
+- **Score.** Per signal date: EW selected minus EW eligible-universe return (same window), minus 20bp round trip. Raw (not excess) reported.
+- **Discovery 2004-01..2014-12 (ML: 2009-14).** Pass = net mean > 0, t >= 3, both halves (2004-09, 2010-14) > 0, median > 0.
+  **Null:** 5 permutations of every feature across names within date, tails only; the tail batch counts only if real passes > max null and
+  > 3 x mean null. Otherwise LUCK.
+- **Judge 2015-01..2026-09, one look** for every discovery pass (and every combo/ML cell regardless): net > 0, t >= 2, median > 0,
+  ex-top-5-dates > 0, both halves (2015-20, 2021-26) > 0. Robust only if also > 0 at 3x cost (60bp RT). DSR at the full trial count.
+  Family flags: momentum, ST reversal, vol/size/liquidity tilt (known; a pass that is only one of these is not new).
+- **Kill:** no judged cell passes -> the indicator list is closed at the daily tier. No retuning of tails, windows or horizons after reading.
+Program N = 1003.
+- **Amendment IND-SWING-PAIRS (2026-10-15, user: "combinations of strategies change the outcome"; written while the main run was scoring, before
+  any IND-SWING outcome was read; N 1003 -> 1004).** Every PAIR of the 40 features: intersection of decile tails (each feature top 10% or bottom
+  10%; pocket = flag), 4 sign pairs x 780 pairs x 5 horizons (~15.6k cells), same universe, score, discovery/judge windows and gates as the
+  tails. Triples are NOT enumerated (~400k cells; the ML composite is the interaction test). **Null:** 3 replicates in which each date's
+  forward returns are shuffled across eligible names (keeps every feature's joint structure, breaks only the link to returns); the pair batch
+  counts only if real discovery passes > max null and > 3 x mean null. Judged pairs must also not be a single known family (momentum, ST
+  reversal, vol/size tilt) by inspection. Runner `research/sim/ind_pairs.py` -> `data/research/program/ind_pairs_out.txt`.
+Program N = 1004.
+- **RESULT IND-SWING + PAIRS (2026-10-15): KILL, LUCK.** Tails: 0/395 discovery passes (max discovery t 0.92), random same-size null 0 x5. Combos C1-C5
+  negative in both windows (user's RS + dry-up + volume expansion -63..-183bp/trade net vs universe 2015-26; TTM fire -14..-55). ML top 1%: -21..+5bp,
+  t <= 0.2 at its best horizons. Pairs: 0/15,210 discovery passes vs shuffled-return null 1/1/2. Positive "raw" returns are market drift. Outputs
+  `ind_swing_out.txt`, `ind_pairs_out.txt`. **2015-26 is now TOUCHED for the daily-indicator family.** Class closed: OHLCV indicators (vol/volume/stat)
+  and their pairwise combinations carry no cross-sectional selection edge at 2-30 day holds for $5+/$5M names.
+
+## Study CUST-MOM — customer-supplier momentum (Cohen-Frazzini 2008), long-only, post-publication (pre-register 2026-10-15, before any customer/return data is pulled; N 1004 -> 1005)
+User-forwarded advice ("customer-supplier momentum"); the only item of that list not already in NEXT/prose. Mechanism: investors under-react to news about a
+supplier's major customer (limited attention to economic links); named, persistent information friction. **Ceiling (pre-test, stated):** CF long-short
+~1.2-1.5%/mo 1981-2004; long-only top quintile plausibly +0.5-1.0%/mo excess -> ~3-6pp/yr at 50% capture: BELOW the +8pp gate. Run as a one-look
+kill test at the user's explicit request (WRDS login approved for it); a pass would still need the gate argued with measured numbers.
+- **Data.** WRDS `compseg.wrds_seg_customer` (ctype COMPANY, salecs) -> customer name matched to Compustat/CRSP firm names (normalized: upper case,
+  punctuation and legal suffixes INC/CORP/CO/LTD/LLC/PLC/HOLDINGS/GROUP/THE stripped; exact match on the normalized name, else unique-prefix match
+  with >= 8 chars; drop generic names: "NOT REPORTED", "\d+ CUSTOMERS", "GOVERNMENT", "DISTRIBUTOR", etc.). Supplier and customer gvkey -> CRSP permno
+  via CCM (LU/LC, primary). Link usable from srcdate + 6 months to srcdate + 18 months (point-in-time; the next filing replaces it). CRSP monthly
+  returns incl. delisting returns, common shares (shrcd 10/11), NYSE/AMEX/Nasdaq.
+- **Signal.** Month m: customer return of supplier s = sales-weighted (salecs; EW if missing) month-m return of its linked customers. Suppliers with price
+  >= $5 and market cap >= $50M at end of m are sorted into quintiles; **long Q5 (best customer returns), EW, hold month m+1, skipping m+1's first trading
+  day** (the signal uses m's last close; entry is the close of day 1 of m+1; return = (1+ret_m+1)/(1+ret_day1) - 1).
+- **Benchmarks.** (B1) EW all CRSP names passing the same price/cap filter; (B2) EW same-SIC2 peers passing the filter (industry-adjusted);
+  also Q5 - Q1 (diagnostic). Cost 30bp round trip per month (full turnover assumed), shock 90bp.
+- **Judge = 2005-01..2026-latest (post-publication, never read by this repo), ONE look.** Pass: B1 excess net mean > 0, t >= 2, median > 0,
+  ex-top-5-months > 0, both halves (2005-15, 2016-26) > 0, AND B2 excess > 0 with t >= 2. Replication 1981-2004 reported only as a data check
+  (expect positive; if not, the matching is broken and the judge is void, not a fail). Runner `research/sim/cust_mom.py` ->
+  `data/research/program/cust_mom_out.txt`; caches `data/research/wrds_cust/`.
+- **Kill:** any judge gate fails -> customer-supplier momentum closed at retail long-only; no re-tuning of quintile, lag, filters or weights.
+Program N = 1005.
+- **RESULT CUST-MOM (2026-10-15): KILL.** Replication 1981-2004 reproduces Cohen-Frazzini (Q5-Q1 gross +1.13%/mo, t 3.95): matching works. Judge
+  2005-2024 (CRSP ends 2024-12): long Q5 vs EW universe net 30bp -0.29%/mo (t -2.23), vs SIC2 peers -0.32 (t -3.57); halves -0.08 / -0.54; even the
+  gross long-short decays +0.49 (2005-15, t 2.3) -> 0.00 (2016-24). Published anomaly arbitraged after 2008; long-only side never paid net. Closed.
+## Study BORROW-XS — option-implied borrow-rate cross-section (pre-register 2026-10-16, before any borrate value is read; N 1005 -> 1006, DSR at 1006)
+New WRDS data unlocks the implied borrow rate (`optionm.borrateYYYY`, 1996-2025), which the program has never read.
+Mechanism: short-sale constraints (Miller 1977) — a high borrow fee is a *binding* constraint, so hard-to-short names are
+overpriced and underperform. Named counterparty = short sellers. **Ceiling (pre-test, stated):** literature fee-sorted
+extreme-decile LS is ~0.5-1.0%/mo gross, mostly microcap and decaying post-2008; the LS side is NOT deployable for this
+account (Roth cannot short; the high-fee leg pays its own fee), so the only deployable form is a long-only avoidance/low-fee
+tilt, plausibly +1-2pp/yr. Run as a **one-look kill test**; a pass earns at most a forward shadow, never a size-up.
+- **Data.** `optionm.borrateYYYY` 1996-2025; one rate per (securityid, month) = the LAST valid daily row in the month with
+  tenor nearest 30d (`borrowrate > -99`; sentinel is exactly -99.99). `securityid` -> CRSP `permno` via
+  `wrdsapps_link_crsp_optionm.opcrsphist` (score=1, overlap join on `sdate <= obsdate <= edate`). CRSP monthly `crsp.msf`
+  (`ret`,`prc`,`shrout`,`hexcd`) for common shares (`crsp.dsenames` shrcd in (10,11)); delisting returns from
+  `crsp.dsedelist.dlret` applied in the delisting month when `msf` has no row.
+- **Signal (formation = end of month m, hold month m+1).** Arm A (level): cross-sectional deciles of the borrow rate in m;
+  Arm B (change): deciles of borrowrate(m) - borrowrate(m-3). Portfolios EW within decile: LS = D1 - D10 (low-fee minus
+  high-fee, expected > 0); long-only reference = D1 excess over EW eligible universe. Universe at formation: prc >= $5,
+  shrcd 10/11, non-missing borrow rate and next-month return (or a delisting return).
+- **Costs.** 20bp round trip + borrow on the short leg at the *actual* implied rate (annual/12, D10 average); 2x shock.
+- **Benchmark.** EW eligible universe same month. LS reported gross and net; long-only reported as excess over universe.
+- **Judge = 1996-2025 (full), sub-periods 1996-2007 / 2008-2015 / 2016-2025; ONE look, no parameter selection.**
+  Pass: LS gross mean > 0, month-clustered t >= 2, median > 0, ex-top-5-months > 0, >= 2 of 3 sub-periods > 0, AND LS net
+  (20bp + actual borrow) > 0, AND long-only D1 excess net > 0 with t >= 2. DSR at N 1006 (2 arms).
+- **Kill:** any gate fails -> borrow-rate cross-section closed at the monthly tier; no re-tuning of tenor, deciles, lag,
+  price filter, or arm definitions. Runner `research/sim/borrow_xs.py` -> `data/research/program/borrow_xs_out.txt`;
+  cache `data/research/borrate/`.
+Program N = 1006.
+- **RESULT BORROW-XS (2026-10-16, one look 1996-2025, N 1006): Arm A = PASS-statistical / NOT DEPLOYABLE; Arm B = FAIL.**
+  Arm A (fee level): LS gross FULL +106.5bp/mo (month-clustered t 6.43), net of 20bp + actual borrow +84.0bp (t 5.08),
+  median +89.3, ex-top-5 +91.8; sub-period gross +142.9 / +96.7 / +66.3 (all t >= 2.56); monotone decile ladder
+  D1=119 ... D5=99 ... D10=13bp/mo (D1-D5 +19.7 t 2.84; D5-D10 +86.8 t 5.88). Long-only D1-EW net +22.3bp/mo (t 3.58).
+  Arm B (3m change): net FULL +41.3bp t 3.69 but dead in the modern regime (2016-25 net +1.1bp t 0.05) and long-only ~0 -> FAIL.
+  **Disposition:** the cross-section is real and monotone (short-sale constraints are priced), but it is not a new edge for this
+  account: (i) the payoff is concentrated in the high-fee tail = the SHORT leg the account cannot take (Roth cannot short;
+  the same "profitable side is unharvestable" pattern as SSR-LIFT and threshold-flow), (ii) the long-only D1 form is a
+  size/low-vol/quality tilt the program already killed in the modern regime (MODERN-XS), and (iii) the effect decays
+  (2016-25 net t 1.65). No live change, no size-up, no shadow. The only open follow-up is a pre-registered size/vol-neutral
+  long-only test; absent that, BORROW-XS is a new-data replication of a known constraint, not a deployable strategy. Output
+  `data/research/program/borrow_xs_out.txt`. 1996-2025 borrow-rate cross-section is now TOUCHED.
+Program N = 1006.
+## Study BORROW-XS2 — is the low-fee long-only tilt alpha, or size/vol? (pre-register 2026-10-16, before reading any bucketed outcome; N 1006 -> 1007)
+Motivated by the BORROW-XS confound (D1-EW +22bp/mo net may be a size/low-vol tilt). Same panel/rule as BORROW-XS (formation
+end of m, hold m+1, EW, 1996-2025, common shares $5+). Arm 1 (size): each month split eligible names into size terciles by
+market cap (prc*shrout), and WITHIN each tercile decile by borrow rate; report long-only D1 - EW_within_tercile and LS D1-D10
+per tercile. Arm 2 (vol): identical but terciles by trailing 24-month return volatility. Report 1996-2025 and 2016-2025.
+- **Pass (resolves the confound):** long-only D1 - EW(within tercile) net of 10bp > 0 with t >= 2 in the MID and LARGE size
+  terciles AND in the LOW and MID vol terciles -> the tilt is not merely size/vol and earns a forward shadow.
+- **Kill:** survives only in the small/high-vol tercile -> BORROW-XS is size/vol beta; cross-section closed, no shadow.
+Runner `research/sim/borrow_xs2.py` -> `data/research/program/borrow_xs2_out.txt`; reuses the BORROW-XS panel/cache.
+Program N = 1007.
+- **RESULT BORROW-XS2 (2026-10-16, N 1007): KILL — the long-only tilt is size/vol beta.**
+  Identical panel (717,758 rows, 8,046 names). FULL 1996-2025 long-only D1 - EW(within tercile) net 10bp: SIZE small +44.5bp
+  t 4.46, MID +20.6 t 2.38, LARGE +8.2 t 1.29; VOL low -0.6 t -0.11, MID +13.2 t 1.70, HIGH +57.2 t 5.33. Required {MID,LARGE}
+  size and {LOW,MID} vol -> fails both -> KILL. 2016-2025: nothing clears t>=2 (best VOL HIGH +37.3bp t 1.80). The long-only
+  tilt lives in exactly the small-cap and high-vol buckets — the confound is confirmed. (LS D1-D10 stays significant inside
+  MID/LARGE size and MID vol, so the *level* information is not pure beta, but the deployable long-only form is.) BORROW-XS
+  closed: short-sale-constraint cross-section replicated, no deployable edge. Output `data/research/program/borrow_xs2_out.txt`.
+Program N = 1007.
+
+## Study REV-TONE — does Amazon review tone predict sales / EA returns? (pre-register 2026-10-16, before any tone is computed; N 1007 -> 1008)
+User request (Jin 2023 JBFA "More than words"; the "review tone called Nike's fall" anecdote). Live Amazon scraping is not
+possible (review pages need sign-in; checked 2026-10-16), so the data is McAuley-Lab Amazon Reviews 2023 (HF, reviews to
+2023-09, exact timestamps), streamed and filtered by `store` to 20 firms fixed here, chosen as US-listed consumer brands with a
+big Amazon presence (not by outcome): NKE (Nike, Jordan, Converse), UAA, CROX, SKX, HBI (Hanes, Champion, Maidenform, Bali),
+LEVI, COLM (+Sorel, Mountain Hardwear, prAna), DECK (UGG, HOKA, Teva, Sanuk), YETI, HELE (OXO, Hydro Flask, PUR), IRBT, GPRO,
+SONO, LOGI (+Logitech G, Ultimate Ears, Astro, Blue Microphones), GRMN, HAS (+Nerf, Play-Doh, Hasbro Gaming), MAT (+Barbie,
+Hot Wheels, Fisher-Price, Mega Bloks), ELF, NWL (Rubbermaid, Sharpie, Crock-Pot, Mr. Coffee, Coleman, Yankee Candle, Graco,
+Oster, Sunbeam, Paper Mate, Expo, Elmer's, Calphalon, Contigo, FoodSaver), ENR (Energizer, Rayovac, Armor All).
+- Tone: `cardiffnlp/twitter-roberta-base-sentiment-latest`, tone = p(pos) - p(neg) on title + text (256 tokens); random cap
+  1,000 reviews per firm-month (seed 0). Reason tags: fixed keyword aspect lexicon (fit/size, quality/durability,
+  defect/broken, comfort, price/value, shipping/packaging, fake, service, battery/connectivity/app), descriptive only.
+- Firm-quarter (Sharadar SF1 ARQ fiscal quarters): TONE = mean tone of reviews dated inside the fiscal quarter; dTONE =
+  TONE_q - TONE_{q-4} (seasonality-safe); controls dRATING (mean stars, same diff) and dlogN. Needs >= 100 reviews in both q, q-4.
+- H1 sales: ACC_q = ln(Rev_q/Rev_{q-4}) - ln(Rev_{q-1}/Rev_{q-5}) on dTONE + dRATING + dlogN, quarter-clustered t.
+- H2 market: CAR[-1,+1] vs SPY around the quarter's earnings 8-K (Sharadar EVENTS item 2.02) on the same regressors.
+- H3 tradable: each fiscal-quarter end, rank firms by dTONE within the calendar quarter; hold quarter-end+1 close -> EA+1
+  close, beta-adjusted vs SPY (252d beta before entry). Report bottom tercile, top - bottom, net 10bp/side, ex-top-5,
+  halves, hit rate; plus the "always" check: P(next ACC < 0 / CAR < 0 / H3 return < 0 | bottom-tercile dTONE) vs base rate.
+- Windows: report 2014Q1-2018Q4 (the paper's era); **judge 2019Q1-2023Q2** (after the paper's data).
+- **PASS:** judge-window H1 dTONE t >= 2 (with dRATING, dlogN in) AND H3 top - bottom > 0 net, t >= 2, both judge halves > 0,
+  ex-top-5 > 0. **KILL:** H3 fails (H1 alone = information that is already in the price). Ceiling note (priority gate): ~4
+  rebalances/yr on 20 names needs >= ~4%/quarter spread at 50% capture to reach +8pp: run at the user's explicit request.
+- Caveats fixed in advance: Nike left Amazon as a direct seller 2019-11 (later reviews are 3P listings); review deletions and
+  2023 listing survivorship are unfixable; the Nike 2023-12 / 2024-06 drops fall after the data ends (descriptive only).
+Runner `research/sim/rev_tone.py` -> `data/research/program/rev_tone_out.txt`; data `data/research/reviews/`.
+Program N = 1008.
+## Study GAMMA-MKT — index dealer-gamma exposure and next-day return/vol (pre-register 2026-10-16, before reading any gamma value; N 1007 -> 1008)
+options-induced underlying flow, index-level. OPEX OI-pinning was killed (K1/K2); this is the untested signed-gamma state.
+- **Data.** `optionm.opprcdYYYY` for SPY (secid 109820; confirm vs `optionm.secnmd` ticker='SPY'), 1996-2025. Daily, per
+  contract: sum `open_interest * gamma * contract_size` separately for calls (CG) and puts (PG); underlying spot ~ `optionm.secprdYYYY`
+  (or SPY close). Dollar-gamma per 1% = value * spot^2 * 0.01.
+- **Signal (dealer proxy).** Dealers are assumed net short customer index-option demand: net dealer gamma
+  `DG = PG - CG` (short call gamma + long put gamma). Standardize DG by its trailing 252d mean/MAD. Also report the raw
+  put/call gamma ratio.
+- **Mechanism / pre-signed predictions.** Negative DG (dealers short gamma) -> hedging AMPLIFIES moves: next-day realized vol
+  HIGHER, and returns trend (today's sign persists). Positive DG -> hedging DAMPENS: vol LOWER, returns mean-revert.
+  Arms: (V) next-day realized vol |ret|/range ~ DG, expect negative slope; (M) 5-day return ~ DG x sign(today's ret),
+  expect positive slope on DG*sign (i.e. short-gamma trends).
+- **Judge = 1996-2025, halves 1996-2010 / 2011-2025; ONE look, no tuning.** Pass: pre-signed slope with day-clustered
+  t >= 2 in BOTH halves and ex-top-5 intact (cost 2bp round trip on the directional arm). Kill: fail -> index gamma/pinning
+  family closed for this account. Runner `research/sim/gamma_mkt.py` -> `data/research/program/gamma_mkt_out.txt`.
+Program N = 1008.
+
+## Study SKEW-MKT — index option skew / term structure and forward returns (pre-register 2026-10-16, before reading any vsurf value; N 1008 -> 1009)
+The vol-surface row was "UNEXPLORED"; vsurf is now free. Lab-CC used the Cboe SKEW *index* (z->20d -30/-110bp); this is the
+purer per-delta surface. Distinct dataset, same economic family -> run as a kill test.
+- **Data.** `optionm.vsurfdYYYY` for SPY, sigma=30, delta ladder -90..+90. Risk reversal `RR30 = IV(delta=+25) - IV(delta=-25)`
+  (call minus put; negative = puts bid = fear). Term slope `TS = IV(30d, delta~ -10) - IV(180d, delta~ -10)`.
+- **Pre-signed prediction.** Low/negative RR30 (expensive puts, fear) -> LOWER forward 5d and 20d SPY returns (the SKEW
+  direction). High TS (near fear) same sign. Standardize each vs trailing 252d.
+- **Judge = 1996-2025, halves 1996-2010 / 2011-2025; ONE look.** Pass: 20d forward return slope with the pre-signed sign,
+  Newey-West (or day-clustered) t >= 2 in BOTH halves, ex-top-5 > 0. Kill: fail -> skew/term family closed. Runner
+  `research/sim/skew_mkt.py` -> `data/research/program/skew_mkt_out.txt`.
+Program N = 1009.
+- **RESULT GAMMA-MKT (2026-10-16, one look; N 1008): KILL.** Material coverage caveat: `optionm.opprcd` has NO SPY rows
+  before 2005-01-10, so the registered H1 is really 2005-2010 (28% of sample), not 1996-2010; 2025 partial. Arm V
+  (|next-day ret| ~ DG_z, pre-signed negative): slope +11.6bp/1sd (NW t 9.85), decile-monotone (D1 51bp -> D10 105bp) — but
+  the WRONG sign, and it is a contemporaneous vol-regime proxy (vol clusters), not a hedging-direction signal. Arm M
+  (5d fwd ~ DG_z*sign(ret), pre-signed positive): -1.95bp (t -0.97), null; the mechanism-consistent form is right-signed only
+  in H2 (-7.45, t -2.57) and flips in H1. No arm has the pre-signed slope with t>=2 in both halves -> KILL. Index
+  gamma/pinning family closed. Output `data/research/program/gamma_mkt_out.txt`.
+Program N = 1008.
+- **RESULT SKEW-MKT (2026-10-16, one look; N 1009): KILL.** Coverage caveat: `optionm.vsurfd` has no SPY before 2005-01-10,
+  so the judge is 2005-2025 (5,193 days), not 1996-2025. Grid used: delta +25/-25 (exact), days 30 exact vs 182 (proxy for
+  180). Pre-signed z_RR30 -> fwd20 positive, z_TS -> fwd20 negative. RR30 H2_reg (>=2011) has the WRONG sign (t -1.67); H1_reg
+  right sign but t 1.44 (<2); ex-top-5 fails in H2; deciles non-monotone (D1 +142bp > D10 +85bp, no fear->lower-return ladder).
+  TS fails the same way. Every limb fails -> KILL. Skew/term family closed. Output `data/research/program/skew_mkt_out.txt`.
+Program N = 1009.
+- **RESULT REV-TONE (2026-10-16, N 1008): KILL — review tone predicts neither sales nor returns for these 20 firms.**
+  8.5M matched reviews (2014-01..2023-09), 1.99M scored. Judge 2019Q1-2023Q2 (338 firm-quarters): H1 acc ~ dTONE t -0.68
+  (with controls -1.17); H2 CAR t -0.45; H3 top-bottom net +63bp t 0.46, ex-top-5 -201bp; short-bottom -112bp. Paper era
+  2014-18 also null (H1 t -0.82, H3 net -282bp t -1.46): the effect does not replicate even where Jin's data lived. "Always"
+  check: bottom-tercile dTONE -> P(acc<0) 57% vs base 49%, P(CAR<0) 52% vs 52%. Tone and stars are 0.97 correlated (tone
+  adds no separate information here). Per-firm corr(dTONE, acc) spans -0.51 (YETI) .. +0.57 (SKX), sign random.
+  Nike: tone fell 0.68 (2015) -> 0.42 (2021) while revenue and the stock rose to their 2021 peak; the fall happened in
+  ALL 20 firms (median -0.20; IRBT -0.56, NKE -0.27, DECK -0.20, CROX -0.05): a platform-wide drift in Amazon reviews, not a
+  Nike signal. Nike's "fake" tag rose 0.5% -> 2.0% after it left Amazon in 2019 (3P listings). Output `rev_tone_out.txt`.
+Program N = 1008.
+
+## Study TOK-GAP (pre-register 2026-10-16, before reading any token outcome or drift; N 1009 -> 1010)
+Source: mega_research_out_2026-10-15.md rank 1. Tokenized US-stock certificates on Gate
+(MSTRX/NVDAX/AAPLX/TSLAX_USDT; 24/7, NOT tradeable by US persons — used ONLY as a free overnight
+sensor; the account would trade the US-listed underlying at the ~0bp 09:30 open auction). New data
+channel, not the dead cross-asset lead-lag class (that tested venue-to-venue return transfers; here
+the token prices information that arrived while the primary market was closed). Evidence base:
+arXiv 2610.21491 (NEST, posted 2026-10-15; spot-verified): token explains 15.7% of the MSTRx
+gap-variation residual after BTC/mark-age/premarket controls (frontier 0.031); "NVDAX and AAPLX
+clear their frontiers, whereas TSLAX does not". **NEST predicts the GAP only; this study judges the
+open->close DRIFT, which is the thing NEST deliberately did not test.**
+- **Data.** Gate public 5m candles, 4 tokens + BTC_USDT, 2025-06-01..2026-10 (backfill to API limit);
+  cache `data/research/tok/`. US daily OHLC Sharadar SEP (MSTR/NVDA/AAPL/TSLA), ET calendar from
+  America/New_York (DST handled); no premarket data — declared limitation.
+- **Marks (per token-day).** M09 = last token candle close with open time <= 09:00 ET on day t;
+  M04 = same at <= 04:00 ET; R(t-1) = first candle close at/after 16:00 ET on the prior US trade
+  day. Signals: tok_day = log(M09/R)-1... log; tok_late = log(M09/M04); btc_day = BTC_USDT log
+  return over the same [R(t-1), M09] window. Stale-mark guard: >= 8 zero-volume-excluded candles in
+  the window AND the M09 candle opened within 30 min of 09:00 ET; exclude stock split days (and the
+  day after) and days with no US bar.
+- **Judge tokens = {NVDAX, AAPLX, MSTRX} (NEST frontier-clearers); TSLAX pre-registered PLACEBO
+  (NEST failed it; expected null).**
+- **Residual (pre-specified).** Per token, rolling trailing-60-obs OLS of tok_day on [btc_day,
+  tok_late] -> resid, standardized by trailing-60-obs MAD -> resid_z. Only past data used.
+- **Trade (one look).** Panel OLS drift = log(close_t/open_t) on resid_z, day-clustered; the
+  account would buy at the 09:30 open (official cross) and hold to the 16:00 close.
+- **Pre-signed prediction: b CONTINUATION > 0** (token sign slowly absorbed in the session).
+- **Pass:** pooled day-clustered t >= 2, both halves (2025-06..2025-12 / 2026-01..2026-10) positive,
+  ex-top-5 |contributions| > 0, survives 10bp RT and reported at 30bp RT (3x) stress. **Anti-check:
+  TSLAX placebo must NOT pass at the same bar.**
+- **Kill:** fail -> tokenized-twins sensor closed for this account (do not re-open with other
+  certificates). TSLAX passing while judged tokens fail = anti-validation, kill likewise.
+- **Ceiling context:** ~200 qualified token-days/yr x drift x ~100% deployable x 50% capture ->
+  needs >= 8bp/day at $10k to clear +8pp.
+- Runner `research/sim/tok_gap.py` -> `data/research/program/tok_gap_out.txt`. Program N 1010.
+
+## Study BTC-ETF-FLOW (pre-register 2026-10-16, before reading any flow outcome; N 1010 -> 1011)
+Source: mega_research_out_2026-10-15.md rank 2 (practitioner screen). Daily US spot-BTC ETF net
+flow state (AP creations/redemptions are forced same-day BTC basket trades) -> next-day IBIT
+open(t)->open(t+1) return, IBIT Roth-eligible, ~5-10bp spread.
+- **Data (locked).** Farside full daily flow table (per-ticker + Total, US$m, 707 rows 2024-01-11
+  .. 2026-10-09) via the Wayback capture 2026-10-10 of `farside.co.uk/bitcoin-etf-flow-all-data/`
+  (live site Cloudflare-blocked); CROSS-VALIDATE the Total column against two independent mirrors:
+  github canadiancode/btc-etf-flows (Jan 2024 - May 2025) and github isaergun/etf-flows-data
+  (2026+); report |disagreement| > 5% rows. IBIT/FBTC/ETHA daily OHLC from Sharadar SFP (SFP ends
+  2026-10-05). Cache `data/research/crypto_etf/`.
+- **Signal.** f(t-1) = Total net flow on t-1; z = f / trailing-60-trade-day MAD; buckets: STRONG
+  (|z| >= 1), off (else). Decision at open(t) using flow(t-1) (finalized EOD t-1; no lookahead).
+- **Judge (one look).** Mean IBIT open(t)->open(t+1) on STRONG-IN minus STRONG-OUT days, day-clus-
+  tered t, 10bp RT stress and 30bp (3x) shock; halves 2024-01..2025-06 / 2025-07..2026-10; ex-top-5
+  days; secondary arms (report only): FBTC price leg; flow-t signal (lag -1) contemporaneous check
+  to prove the timing bar.
+- **Pass:** IN-minus-OUT >= 25bp net at 10bp RT, day-clustered t >= 2, both halves positive,
+  ex-top-5 > 0.
+- **Kill:** fail or sign-flip -> crypto-ETF flow family closed like CBAS/BSPD.
+- **Ceiling context:** ~120 STRONG-day pairs/yr x 30bp x ~100% deployable x 50% = +18pp IF the raw
+  spread >= 60bp; effect UNVERIFIED anywhere.
+- Runner `research/sim/btc_etf_flow.py` -> `data/research/program/btc_etf_flow_out.txt`.
+  Program N 1011.
+- **RESULT BTC-ETF-FLOW (2026-10-16, one look; N 1011): KILL.** Farside flow series validated: 705
+  daily rows 2024-01-11..2026-10-09, Total internally exact (0 mismatches vs per-ticker sum) and
+  exact vs the canadiancode mirror (328 rows). IBIT judge (total-flow 1d-lag, |z|>=1, open->open):
+  IN n=208 mean 43.9bp vs OUT n=117 mean 20.3bp; pair spread 23.7bp (bar 35bp raw / 25bp net);
+  net@10bpRT 13.7bp, net@30bpRT -6.3bp; day-cluster t 1.39; **halves FLIP (-36.6 / +69.1)**;
+  ex-top-5 7.6bp. FBTC leg identical (24.5bp, t 1.44). **Read: strong-flow days are momentum days
+  (~44bp unconditional drift) but the predictive pair residual fails every registered gate — the
+  flow state is contemporaneous BTC momentum already in the 09:30 price, exactly the memo's
+  biggest-fail-reason. Crypto-ETF flow family closed.** Output `data/research/program/btc_etf_flow_out.txt`.
+  Program N = 1011.
+- **STATUS TOK-GAP (2026-10-16): DATA-BLOCKED at $0; the registered one look is NOT consumed.**
+  Gate's public API serves only ~2 weeks of 5m history (all four xStock-style pairs begin
+  2026-10-01); Kraken does not expose xStock pairs to the public API (AssetPairs returns none);
+  GeckoTerminal minute OHLCV depth is far short of the registered 2025-06 window; iShares/Kraken/
+  SoSoValue routes are blocked or keyed. NEST's own trade-level Gate reconstruction (arXiv
+  2610.21491, gap-prediction only) could not be replicated forward for drift. Runner staged
+  (`research/sim/tok_gap.py`) with a declared minimum-n guard (>= 60 qualified days per half per
+  judged token); it refuses to judge below it. Cache `data/research/tok/` (2-week Gate sample).
+  **Two honest paths to a judge: (i) start a log-only Gate 5m collector now (free, ~6 months to a
+  forward sample; needs a place to run + REGISTRY entry), or (ii) buy token-mark history (Gate/
+  Kraken export or Dune) — data-buy rule applies, and the prior stays LOW because NEST's controls
+  already ate the mechanical fit and the 04:00-09:30 premarket may arbitrage the token's edge
+  before the open. No decision taken; user call.** Note: ISA mirror `isaergun/etf-flows-data`
+  excluded from BTC-ETF-FLOW validation — its "flow" is ΔAUM (price-inclusive), median |diff| vs
+  Farside IBIT $143.8m. Program N = 1011.

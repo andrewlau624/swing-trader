@@ -50,6 +50,9 @@ install_systemd() {
   sed -e "s|__APP_DIR__|$APP|g" \
       "$APP/deploy/cb-funding.service.in" > "$HOME/.config/systemd/user/cb-funding.service"
   cp "$APP/deploy/cb-funding.timer.in" "$HOME/.config/systemd/user/cb-funding.timer"
+  sed -e "s|__APP_DIR__|$APP|g" \
+      "$APP/deploy/ovn-235-recorder.service.in" > "$HOME/.config/systemd/user/ovn-235-recorder.service"
+  cp "$APP/deploy/ovn-235-recorder.timer.in" "$HOME/.config/systemd/user/ovn-235-recorder.timer"
   "$APP/scripts/sysd.sh" daemon-reload
   if swing_on; then
     "$APP/scripts/sysd.sh" enable --now swing-trader.timer
@@ -64,6 +67,7 @@ install_systemd() {
   "$APP/scripts/sysd.sh" enable --now pref-ex-live.timer
   "$APP/scripts/sysd.sh" enable --now cef-rv-live.timer
   "$APP/scripts/sysd.sh" enable --now cb-funding.timer
+  "$APP/scripts/sysd.sh" enable --now ovn-235-recorder.timer
   if ! loginctl show-user "$USER_" -p Linger 2>/dev/null | grep -q "Linger=yes"; then
     echo ""
     echo "  ############################################################"
@@ -77,7 +81,7 @@ install_systemd() {
     echo "  ############################################################"
   fi
   echo ""
-  "$APP/scripts/sysd.sh" list-timers swing-trader.timer daily-trader.timer schwab-reminder.timer weekly-digest.timer research-shadows.timer pref-ex-live.timer cef-rv-live.timer cb-funding.timer --no-pager || true
+  "$APP/scripts/sysd.sh" list-timers swing-trader.timer daily-trader.timer schwab-reminder.timer weekly-digest.timer research-shadows.timer pref-ex-live.timer cef-rv-live.timer cb-funding.timer ovn-235-recorder.timer --no-pager || true
 }
 
 install_cron() {

@@ -1,0 +1,12 @@
+# Installed by `make persist`. OVN-23/5 recorder (from 2026-12-06): log-only overnight-session
+# bid/ask/last nearest 04:00 ET vs the 09:30 official opening cross on the previous session's
+# night-book names. Exits without logging before the 23/5 start; harmless installed now.
+[Unit]
+Description=swing-trader OVN-23/5 overnight-session recorder (log-only, night-leg exit re-timing)
+
+[Service]
+Type=oneshot
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=-__APP_DIR__/.env
+Environment=PYTHONPATH=__APP_DIR__
+ExecStart=__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.ovn_235_recorder

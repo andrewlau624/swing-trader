@@ -161,6 +161,21 @@ def _ovn_mom(state: Path, logs: Path) -> dict:
     return dict(n=s["days"], week=len(wk), line=w.line(rows))
 
 
+def _tok_mark(state: Path, logs: Path) -> dict:
+    from . import tok_mark_collector as w
+    rows = _jsonl(state / w.LOG_NAME)
+    wk = [r for r in rows if r.get("date", "") >= _week_ago()]
+    return dict(n=w.qualified_dates("MSTRX_USDT"), week=len(wk), line=w.line())
+
+
+def _ovn235(state: Path, logs: Path) -> dict:
+    from . import ovn_235_recorder as w
+    lines = w.line()
+    rows = _jsonl(state / w.LOG_NAME)
+    wk = [r for r in rows if r.get("date", "") >= _week_ago()]
+    return dict(n=len({r.get("date") for r in rows}), week=len({r["date"] for r in wk}), line=lines)
+
+
 def _arete_dip(state: Path, logs: Path) -> dict:
     from . import arete_dip_shadow as w
     rows = _jsonl(state / w.LOG_NAME)
@@ -479,6 +494,21 @@ REGISTRY: list[Test] = [
          "overnight returns, liquid common stock: official closing cross -> next opening cross, excess vs SPY. Gate: 120 nights, "
          "mean >= +5bp/night, t >= 2, median > 0; FAIL closes the overnight-clientele class (N 939, adversarial: small now).",
          "2026-10-13", 120, "nights", _ovn_mom, "state/ovn-mom.jsonl; round1_prose.md Watch OVN-MOM-FWD", ["ovn_mom_shadow"]),
+    Test("TOK-GAP-FWD: log-only Gate token-mark collector", "tok_mark_collector.py (research-shadows): appends the last "
+         "3 days of Gate 5m candles for the four tokenized US-stock certificates (MSTRX/NVDAX/AAPLX/TSLAX) to "
+         "data/research/tok/, no orders. TOK-GAP (prose N 1010, DATA-BLOCKED at $0) is judged by the guarded runner "
+         "research/sim/tok_gap.py only at >= 60 qualified days per half per token; judge tokens NVDAX/AAPLX/MSTRX, "
+         "placebo TSLAX; the token indicates the 09:30 open's under-repriced overnight info, the account would only "
+         "ever trade the US-listed underlying at the ~0bp open auction.",
+         "2026-10-16", 120, "qualified token-days", _tok_mark, "state/tok-mark.jsonl; research/drafts/mega_research_out_2026-10-15.md",
+         ["tok_mark_collector"]),
+    Test("OVN-23/5 recorder: overnight-session exit vs the 09:30 open (log-only)", "ovn_235_recorder.py (09:35 "
+         "weekdays, starts 2026-12-06): for the previous session's night-book names logs the 23/5 overnight-session "
+         "bid/ask/last nearest 04:00 ET vs the official 09:30 opening cross (Alpaca SIP; overnight availability "
+         "UNVERIFIED until the session exists, logged honestly per name). Read at 60 trade dates: does a 21:00-04:00 "
+         "exit beat the open? From mega_research rank 4 (FR 2026-20799); no orders while the night leg is live.",
+         "2026-12-06", 60, "trade dates", _ovn235, "state/ovn-235.jsonl; research/drafts/mega_research_out_2026-10-15.md",
+         ["ovn_235_recorder"]),
     Test("ARETE-DIP-FWD: momentum names bought on a down day (from alpha-chasers)", "liquid, high-momentum, top-third-vol "
          "names (60d >= +20 %, > 50d avg, beat SPY 20d) on a -2 % day closing in the bottom 20 % of its range: close d -> "
          "close d+5 (and d+3) vs the EW eligible universe, 20bp RT. Gate: 60 signal days, mean > 0, t >= 2, median > 0. "
