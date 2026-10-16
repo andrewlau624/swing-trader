@@ -7571,3 +7571,21 @@ open(t)->open(t+1) return, IBIT Roth-eligible, ~5-10bp spread.
   holdout: the weak negatives turn positive in 2023-26 and all 10 computable ones are positive in 2003-15. **Read:
   losing nights are not identifiable from anything known at 15:40; the loss is the overnight move itself.** Do not
   re-scan conditioning features on the night leg. Output `data/research/program/ndisc_out.txt`. Program N = 1015.
+
+## PMX: pre-market exit of night picks when QQQ falls overnight (2026-10-16, N 1015 -> 1016)
+- **Why:** NBH/NDISC show losing nights are not identifiable at 15:40; the loss is the overnight move. PMX acts after
+  entry: if QQQ is down hard pre-market, sell the picks before the open instead of at the 09:30 cross. Exploratory
+  (night-leg data touched); the pre-market exit itself is untested anywhere (OPENSIG was an open-time exit).
+- **Data:** exact 15:40 pick panels 2016-02..2026-09 (as NDISC); Alpaca SIP minute bars incl. extended hours for each
+  pick on day d+1 04:00-09:30 ET (fetched to `data/research/pmx/`) and QQQ from `night/m1`.
+- **Rule (frozen):** q_pm = QQQ 08:59 bar close (d+1) / QQQ 15:59 bar close (d) - 1. If q_pm <= -1.0%, sell every
+  pick at its own pre-market price = close of its last 1-min bar in 08:30-08:59 ET; if the pick has no print in that
+  window it is held to the open (counted, reported). Otherwise hold to the open as now.
+- **Costs:** open exit 7.5bp/side as base; pre-market exit 50bp/side (thin extended-hours book); also report at
+  100bp/side (shock) and 7.5bp (lower bound).
+- **Primary stat:** on flagged pick-nights, d = (pm-exit net) - (open-exit net) per trade, night-clustered.
+- **PASS:** mean d > 0 with night-clustered t >= 2 at 50bp in BOTH eras 2016-20 and 2021-26; leg Sharpe up >= 0.1 and
+  maxDD smaller in both eras; ex-top-5-nights d still > 0. Descriptive only (not judged): thresholds -0.5/-1.5%, exit
+  time 08:00 / 09:15, QQQ pm->open continuation vs reversal on all nights.
+- **Kill:** fail -> pre-market exits closed for the night leg; no re-tuning of threshold/time. Runner
+  `research/sim/pmx.py` -> `data/research/program/pmx_out.txt`. Program N = 1016.
