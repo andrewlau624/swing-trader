@@ -7529,3 +7529,10 @@ open(t)->open(t+1) return, IBIT Roth-eligible, ~5-10bp spread.
   day t, ex-top-5, %/yr at night weight 0.65, H1 residual alpha (mean, t, halves).
 - **Kill:** fail -> record; no threshold/window re-tuning. Runner `research/sim/nbh.py` ->
   `data/research/program/nbh_out.txt`. Program N = 1014.
+- **RESULT NBH (2026-10-16, one look; N 1012-1014): all three FAIL as registered.** H1 hedge: ex-ante beta of the
+  equal-weight night portfolio is ~1.2 (p10 0.56, p90 1.75), not the 3-5x seen in 4 weeks of live trips; hedging
+  removes QQQ's +6bp overnight drift with it: Sharpe 0.48->0.04 (2016-20), 1.06->0.79 (2021-26), maxDD worse.
+  Residual alpha +11bp/night t 1.45 (2016-20 +1bp). G1 (skip QQQ 15:40 <= -1%): skipped nights ~0 net (-13bp /
+  +5bp), Sharpe +0.14 / +0.05, maxDD -47->-36% in 2016-20 only: a near-miss risk dial, not alpha. G2 (skip QQQ <
+  MA20): maxDD -47->-23% in 2016-20 but costs ~10pp/yr in 2021-26 (skipped nights +17bp). No re-tuning.
+  Output `data/research/program/nbh_out.txt`. Program N = 1014.
