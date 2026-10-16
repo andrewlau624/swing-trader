@@ -7564,3 +7564,10 @@ open(t)->open(t+1) return, IBIT Roth-eligible, ~5-10bp spread.
   maxDD smaller; %/yr not lower than base - 2pp. Report per-candidate holdout results individually too.
 - **Kill:** holdout fail -> record the candidates as DISCOVERY-ONLY; no re-scan, no re-cut. Runner
   `research/sim/ndisc.py` -> `data/research/program/ndisc_out.txt`. Program N = 1015.
+- **RESULT NDISC (2026-10-16, one look; N 1015): FAIL - scan uninformative.** 47 features / 210 buckets on discovery
+  2016-22 (10,912 trades): ZERO buckets met the registered rule; placebo (500 night-block shuffles) mean 0.15, p95 1.
+  Strongest negatives sign-flip between halves (LETF picks +47/-50bp, ETF +46/-40, gap -3..-1% +14/-30, 8+ picks
+  -42/+14); only Friday (-28/-72, t -0.79) and deep intraday path (-10/-13, t -0.99) agree, both noise. Descriptive
+  holdout: the weak negatives turn positive in 2023-26 and all 10 computable ones are positive in 2003-15. **Read:
+  losing nights are not identifiable from anything known at 15:40; the loss is the overnight move itself.** Do not
+  re-scan conditioning features on the night leg. Output `data/research/program/ndisc_out.txt`. Program N = 1015.
