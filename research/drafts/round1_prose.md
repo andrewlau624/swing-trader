@@ -7589,3 +7589,12 @@ open(t)->open(t+1) return, IBIT Roth-eligible, ~5-10bp spread.
   time 08:00 / 09:15, QQQ pm->open continuation vs reversal on all nights.
 - **Kill:** fail -> pre-market exits closed for the night leg; no re-tuning of threshold/time. Runner
   `research/sim/pmx.py` -> `data/research/program/pmx_out.txt`. Program N = 1016.
+- **RESULT PMX (2026-10-16, one look; N 1016): FAIL both eras.** Flagged (QQQ 08:59 <= -1%): 54 nights / 541 trades
+  (2016-20), 120 / 1636 (2021-26); 65% / 83% had an 08:30-08:59 print. d (pm exit - open exit) at 50bp: -39.6bp t -2.44
+  / -20.3bp t -1.98; at 7.5bp -7.0 / +16.2 (t 1.59). Leg Sharpe -0.09 / -0.10, maxDD slightly worse. Every descriptive
+  cell (08:00/08:59/09:15 x -0.5/-1/-1.5%) negative at 50bp. QQQ 08:59->open slightly REVERTS (+2.9bp t 1.28 after
+  <= -1%), no continuation. Pre-market exits closed for the night leg.
+  **Descriptive lead (not judged, not a pass):** pick last pre-market prints sit ABOVE the 09:30 bar open on most
+  nights (+35bp mean / +27 median on random nights, +15/+9 on flagged): a general gap-to-open effect, unconditional on
+  QQQ. Last print is not an executable bid; only a forward test of real pre-market bids could tell if any of it is
+  capturable. Output `data/research/program/pmx_out.txt`. Program N = 1016.
