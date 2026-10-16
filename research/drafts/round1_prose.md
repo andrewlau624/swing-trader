@@ -7536,3 +7536,31 @@ open(t)->open(t+1) return, IBIT Roth-eligible, ~5-10bp spread.
   +5bp), Sharpe +0.14 / +0.05, maxDD -47->-36% in 2016-20 only: a near-miss risk dial, not alpha. G2 (skip QQQ <
   MA20): maxDD -47->-23% in 2016-20 but costs ~10pp/yr in 2021-26 (skipped nights +17bp). No re-tuning.
   Output `data/research/program/nbh_out.txt`. Program N = 1014.
+
+## NDISC: when does the night leg lose? Discovery -> holdout conditioning search (2026-10-16, N 1014 -> 1015)
+- **Why:** user asked to search hard for conditions that predict losing night-leg nights/picks. NBH showed single
+  hand-picked market gates fail. This is an explicit SEARCH, so the protocol controls for it. All night-leg data is
+  touched; the conditioning features are mostly not (exceptions disclosed: QQQ 15:40 / MA20 (NBH), SPY same-day bucket
+  and crowding (downday_buckets), SPY vol / d-1 (regime_tilt), stock trend (TREND-NIGHT), pe sign (FUND-STATE), QI (QI-HIST)).
+- **Data:** exact 15:40 picks 2016-02..2026-09 (`night_exact_pre2021` + `recent/night_replay`); market from SIP m1
+  (QQQ/SPY/IWM etc.), `etf_daily`, CBOE VIX/VIX9D csv; 2003-15 daily-close proxy picks via `nx.collect_trades`.
+  Net = gross - 7.5bp/side.
+- **Splits (frozen):** DISCOVERY = 2016-02..2022-12 (exact), with sub-halves 2016-19 / 2020-22.
+  HOLDOUT A = 2023-01..2026-09 (exact). HOLDOUT B = 2003-2015 (Sharadar daily proxy; only daily-computable features).
+- **Feature families (all known by 15:40 on day d):** (M) market: QQQ/SPY/IWM 15:40 day return, 5d/20d return,
+  vs MA20/50/200, intraday range, IWM-QQQ spread, VIX prior close level / 1d / 5d change / 252d pct, VIX9D/VIX,
+  realized vol 20d; (C) calendar: weekday, pre-weekend/holiday, month-end +-2, FOMC eve, OPEX week; (B) breadth:
+  number of candidates, share of candidates that are ETFs, mean candidate day_ret; (P) pick: day_ret depth, ibs, vol20,
+  adv, price, leveraged/inverse ETF flag, intraday path (p40 vs open; open gap), prior-night repeat, 5d prior return.
+  Each continuous feature -> quintiles on DISCOVERY breakpoints; categorical as-is.
+- **Discovery selection rule:** a bucket is a candidate if its net mean is < 0 in BOTH discovery sub-halves AND
+  day-clustered t <= -2.0 on discovery AND it holds >= 5% of discovery trades. Family-wise control: 500 date-shuffle
+  placebos of the whole scan (feature series permuted across nights; pick features permuted within night-date blocks
+  preserved) -> report the count of candidates per placebo; the scan is informative only if the real count exceeds
+  the placebo 95th pct.
+- **Combined rule (frozen at discovery end, before any holdout read):** HALVE size on picks/nights in any candidate
+  bucket (and SKIP when >= 2 candidates fire). Also report the pure-skip version.
+- **PASS (holdout A, and B where features exist):** flagged trades net-negative; Sharpe of the rule >= base + 0.15;
+  maxDD smaller; %/yr not lower than base - 2pp. Report per-candidate holdout results individually too.
+- **Kill:** holdout fail -> record the candidates as DISCOVERY-ONLY; no re-scan, no re-cut. Runner
+  `research/sim/ndisc.py` -> `data/research/program/ndisc_out.txt`. Program N = 1015.
