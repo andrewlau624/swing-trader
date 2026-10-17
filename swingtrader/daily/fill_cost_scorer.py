@@ -73,7 +73,7 @@ def _leg_kind(filled_at: str) -> str:
         hh, mm = t.hour, t.minute
         if hh == 9 and 25 <= mm < 45:
             return "open"
-        if hh == 16 or (hh == 15 and mm >= 40):
+        if hh == 16:
             return "close"
         return "mid_unclosed"
     except Exception:
