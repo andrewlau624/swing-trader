@@ -121,3 +121,9 @@ rows (all candidate:false); daytrade/cef_rv modes off as registered.
 - Decoys verified with numbers: BSBR (converged to -3.4% spread), PCRX (+0.44% at announcement).
 
 ## Night complete — morning memo in research/drafts/morning_memo_2026-10-17.md
+
+## Morning user ruling (2026-10-17)
+1) Tenders DEAD permanently (capital-lock kills them at this turnover; see prose).
+2) "Easy things" = approved: SWVXX sweep move, FUND-LADDER cards (user opens accounts), the
+   liquidation-8-K flag ONLY if log-only-trivial; BMEZ/HERZ-style tender flags NOT built.
+3) Morning memo delivered in simple terms.

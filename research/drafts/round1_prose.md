@@ -7698,3 +7698,13 @@ Kill: any failure = SMALL/KILL, no re-tuning of tax rate, interest rate or arms.
   $10k CASH pref-first +6.8/+4.4, MARGIN +11.6/+7.5; $25k +4.1/+2.6, +5.6/+3.6; $100k +1.3/+0.8, +1.5/+0.9 (capacity-bound). Margin interest drag (12.5%, unverified) -1.0pp at $10k, -2.7pp at $2.3k; halves both > 0
   (10k margin A +8.7/+6.2); ex-top-5 same sign; median +27bp, hit 72%. **3x cost (30bp RT) leaves +0.6pp after-tax at $10k margin (+1.1 at $2.3k): cost-fragile.** View B (pref price loss NOT usable against gains, 35% on dividends) is
   deeply negative at every size (-18pp at $10k margin): the result depends on the loss offsetting the book's short-term gains and on wash-sale rules not deferring it (monthly payers re-bought within 30 days). Preferred/baby-bond marginability UNVERIFIED. Runner research/sim/tax_stack.py, out data/research/program/tax_stack_out.txt. Uses cached raw night pool (s.N) because night_trades.v2.pkl is unreadable under the venv's pandas 2.2.3.
+
+## STANDING USER RULING (2026-10-17 morning): TENDERS ARE DEAD — user, permanently
+"No tenders — tenders are dead because they take too long." Scope: ALL tender-offer classes
+(odd-lot tenders, CEF trigger tenders like BMEZ/HERZ, issuer self-tenders, tender-style NAV
+payouts with multi-week capital locks). The lock (weeks-months of capital) kills them at this
+program's capital turnover regardless of win rate (odd-lot: 14/15, +5.5% median — still dead).
+Also retired by the same ruling: voluntary-liquidation multi-tranche classes where the FIRST
+distribution has passed (the remainder locks). Do not re-propose any of these.
+Scanner extensions for tender flags: NOT BUILT (dropped with the ruling). Liquidation 8-K flag:
+built ONLY as a log-only flag if trivially cheap (it feeds nothing else); deprioritized.
