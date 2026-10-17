@@ -1107,3 +1107,8 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
 - Shadow status 10-17: OVN-MOM 2/120, CEF-RV-FWD 0/60 (12 open), PREF-EX shadow 4/60, PREF-EX live 0/30 (orders from 10-21),
   split 1/40. events.py CPI/NFP calendar extended through 2027-12 (BLS pages, fetched 10-17). Program N = 1017
   (the 10-16 burst reused 1011-1015; numbering continues from PMX 1016).
+- **SSR-LIFT-FWD shadow LIVE on him (2026-10-17, log-only, no N):** `swingtrader/daily/ssr_lift_shadow.py` in research-shadows
+  (frozen rule: RTH low <= -10% on T, $10+, ADV20 >= $20M, no T+1 re-trigger; short T+2 open cross -> cover T+2 close cross,
+  +1.5x SPY hedge; net = 5bp/side + 2bp borrow; Alpaca ETB flag at detection). Gate 60 forward event-days, net > 0, day-t >= 2.
+  Local 20-session backfill +115bp net/event (raw short +214bp, median +233): a look-alike, NOT evidence. The research-shadows
+  unit on him was re-rendered with absolute paths (was `~/llm-trader/`). Any live pilot = user decision.
