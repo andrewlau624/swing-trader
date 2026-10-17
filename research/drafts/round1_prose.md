@@ -7666,3 +7666,35 @@ for TME itself — `research.sim.tme_shadow forward` is already in research-shad
 - **TME-BOOST (N 1015 slot; no new look):** `research.sim.tme_shadow forward` already measures the forward capture
   rate; the 3x reopen decision reads THAT when enough sessions accumulate. Nothing to run today.
 Program N = 1015.
+
+## PROVOL: size the overnight legs UP on high-vol states (2026-10-17): CEILING-KILL, no N consumed, no backtest
+- **Idea:** night weight x1.3 (cap .15/name, 2x gross) when a pre-15:40 vol state is in its top trailing-1y tercile.
+- **Dedupe:** not tested as a within-leg pro-vol size-up, but every neighbour is dead: vol-targeted gross (add. 32, NW t -1.8/-2.4),
+  cross-leg regime tilt (add. 26a, placebo-level), night size-up after big down days (add. 34), SPY/VIX/QQQ-state gates (NBH G1/G2, REGIME-10M),
+  NDISC (47 features incl. vix_pct252, rv20: 0 buckets pass, strongest sign-flip between halves; vix mid-bucket +133/+24bp, rv20 -50/+228bp), VTS.
+- **Ceiling (gate arithmetic):** base night series %/yr at weight 0.65 = +23.9 (2016-26; nbh_out.txt), +11.4 (2016-20), +35.3 (2021-26).
+  x1.3 on one tercile of nights adds at most 0.3 x 23.9 = +7.2pp/yr gross even if ALL P&L sat in that tercile (it does not: terciles are roughly
+  equal-weighted in ndisc/downday_buckets, so ~+2.4pp), minus ~0.7bp/night margin interest (12.5%/yr on ~0.2 of account), x 50% honest capture
+  = ~+1.2pp (range +1..+3.6pp). Same at $2.3k/$10k/$25k (rate, not dollars); Roth cannot lever, so the Roth is the same math with 0.65 -> 1.0 cash cap. 
+  Even a 2x multiplier is bounded by the .15 name cap and the 2x Reg T gross. All << the +8pp gate.
+- **Verdict: CEILING-KILL.** Selection/sizing conditioning on the night leg is a closed class (FUND-STATE, NDISC, NBH, add. 32). Reopen only with a
+  forward-shadow-measured high-vol-tercile excess that is a multiple of the leg mean. No code, no shadow, no REGISTRY entry.
+
+## Study TAX-STACK (pre-register 2026-10-17, N 1016 -> 1017)
+Question (portfolio construction, no new signal): in the TAXABLE margin account running the live nx_s2 book (night .65, name cap .15, IBS .5 = 1.15x gross overnight),
+how much %/yr do PREF-EX + ETDX CO ex-nights add after 35% tax and Schwab margin interest (assumed 12.5%/yr, unverified; the repo has no number)?
+Ceiling math (before running): ROTH-STACK STRICT pref-first (cash Roth, book 1.0x) = +10.5pp ($3k) / +7.1pp ($10k) / +4.5pp ($25k) pre-tax. Taxable book is 1.15x so
+idle cash is smaller; margin lets PREF borrow up to Reg T 2x (preferred/baby-bond marginability UNVERIFIED; assumed marginable) at 3.4bp/night vs ~27bp median net edge.
+Tax: dividends held <61d are non-qualified; price drop is a short-term loss. View A: loss offsets the book's STCG, after-tax = 0.65 x pre-tax. View B (bound): loss unusable,
+tax = 35% x dividend $ (wash sales on monthly payers push toward B). Expected: $10k pre ~+6, after-tax A ~+4, B possibly <= 0; $100k capacity-bound ~+1. Ceiling at $10k
+after tax A is > +2pp so not ceiling-killed; B decides robustness.
+Rule: roth_stack.load_groups events + alloc (equal split per night, 5% of min ex-ante auction $, whole shares, 10bp RT); buy d0 close, sell ex-date open. Book: AL1 cash logic
+with night cash 1.15E and IBS .5 (BIL on idle IBS slice). Arms: CASH night-first, CASH pref-first (pref from own cash only), MARGIN 2x (night undisturbed, PREF may use
+headroom to 2E, BIL sold when needed with yield lost, interest 12.5% x calendar gap on incremental debit). Incremental = with-PREF minus no-PREF book.
+Data: official crosses 2021-26 (touched; economics only). Sizes $2.3k/$10k/$25k/$100k, fixed equity. Out: data/research/program/tax_stack_out.txt.
+Gate (PASS): at $10k, best executable arm adds >= +2pp/yr after tax (view A), halves both > 0, 3x cost > 0 (after tax A), ex-top-5 > 0. View B reported, not gated.
+Kill: any failure = SMALL/KILL, no re-tuning of tax rate, interest rate or arms.
+- **RESULT TAX-STACK (run 2026-10-17, one run, N 1017): PASS-SMALL, tax-fragile.** Added %/yr, pre-tax / after-tax view A (loss offsets book STCG, x0.65): $2.3k CASH pref-first +12.4/+8.1, MARGIN 2x +24.5/+15.9;
+  $10k CASH pref-first +6.8/+4.4, MARGIN +11.6/+7.5; $25k +4.1/+2.6, +5.6/+3.6; $100k +1.3/+0.8, +1.5/+0.9 (capacity-bound). Margin interest drag (12.5%, unverified) -1.0pp at $10k, -2.7pp at $2.3k; halves both > 0
+  (10k margin A +8.7/+6.2); ex-top-5 same sign; median +27bp, hit 72%. **3x cost (30bp RT) leaves +0.6pp after-tax at $10k margin (+1.1 at $2.3k): cost-fragile.** View B (pref price loss NOT usable against gains, 35% on dividends) is
+  deeply negative at every size (-18pp at $10k margin): the result depends on the loss offsetting the book's short-term gains and on wash-sale rules not deferring it (monthly payers re-bought within 30 days). Preferred/baby-bond marginability UNVERIFIED. Runner research/sim/tax_stack.py, out data/research/program/tax_stack_out.txt. Uses cached raw night pool (s.N) because night_trades.v2.pkl is unreadable under the venv's pandas 2.2.3.

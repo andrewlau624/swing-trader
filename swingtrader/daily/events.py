@@ -92,14 +92,19 @@ def fomc_score(history: list[dict]) -> tuple[int, float, bool]:
 # release (+18.7bp of equity vs other nights 2021-23, t 2.44; +9.0bp 2024-26, t 0.74). Killed on the judge t; Track M1
 # (round1_prose.md) scores it forward on the live taxable book's own night round trips: log-only, no sizing.
 # 2026 dates copied from research/sim/event_calendar.py; Oct-Dec 2026 from bls.gov/schedule/news_release/cpi.htm and
-# empsit.htm (fetched 2026-10-04; BLS had not posted 2027). Append each new schedule; `release_stale_warning` says when.
+# empsit.htm (fetched 2026-10-04); 2027 from the same pages (fetched 2026-10-17). Append each new schedule;
+# `release_stale_warning` says when.
 CPI_RELEASES = """
 2026-01-13 2026-02-13 2026-03-11 2026-04-10 2026-05-12 2026-06-10 2026-07-14 2026-08-12 2026-09-11
 2026-10-14 2026-11-10 2026-12-10
+2027-01-13 2027-02-11 2027-03-10 2027-04-13 2027-05-12 2027-06-10 2027-07-14 2027-08-11 2027-09-14
+2027-10-14 2027-11-10 2027-12-10
 """
 NFP_RELEASES = """
 2026-01-09 2026-02-11 2026-03-06 2026-04-03 2026-05-08 2026-06-05 2026-07-02 2026-08-07 2026-09-04
 2026-10-02 2026-11-06 2026-12-04
+2027-01-08 2027-02-05 2027-03-05 2027-04-02 2027-05-07 2027-06-04 2027-07-02 2027-08-06 2027-09-03
+2027-10-08 2027-11-05 2027-12-03
 """
 N2_PRED_BP, N2_NEED, N2_STOP = 8.8, 48, "2028-10-04"     # prediction: 0.63 x pooled +14.0bp; sign read at 48 event nights
 

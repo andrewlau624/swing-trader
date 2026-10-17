@@ -10,6 +10,22 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## WRDS data-unlock session (2026-10-16): 4 "blocked/paid" rows already licensed; Tor NULL; N = 1009
+- **WRDS entitlement reconciliation** (`research/drafts/wrds_recon_2026-10-16.md`, `data/research/wrds_recon/`): the program's
+  "BLOCKED / DATA-LIMITED / paid" labels were a source assumption, not an entitlement check. Now licensed at $0:
+  `optionm.borrate{1996..2025}` (borrow/HTB fee history), `optionm.opprcd{1996..2025}` (per-contract open interest + gamma),
+  `optionm.vsurfd{1996..2025}` (vol surface / skew), `crsp_q_mutualfunds.daily_nav`+`monthly_tna` (per-fund daily NAV; ETFs
+  via `et_flag='F'`, NO CEFs). Still blocked: PIT ratings (`ciqsamp_ratings` sample only), margin-rate history, `cboe.*`
+  (schema `cboe_eod` permission denied). Caveats: `borrate` is option-implied (not the custodial loan fee; sentinel -99.99);
+  `opprcd` is OptionMetrics-filtered EOD (not raw NBBO); SPY option coverage starts 2005-01.
+- **Tor survey: NULL** (`research/tor_intelligence/`). Tor installed + reachable; the `.onion` financial space is darknet
+  markets + stolen-data shops + SEO spam; no legitimate dataset/tech/mechanism found. Recorded so it is not repeated.
+- **New studies, all closed:** BORROW-XS/XS2 (N 1006-1007) cross-sectional borrow rate = real monotone signal but the payoff
+  is the short leg this account cannot take and the long-only form is size/vol beta; GAMMA-MKT (N 1008) and SKEW-MKT (N 1009)
+  KILL. Rows in the do-not-redo table; details in `round1_prose.md`.
+
+---
+
 ## Ex-dividend clientele branch (2026-10-06, late): ETDX PASS (capacity for PREF-EX), FXD KILL; N = 870
 - **ETDX (N 869): PASS.** The frozen PREF-EX rule on $25-par baby bonds (SFP ETD) + CEF preferreds. Official crosses
   2021-26: ETD CO +43.9bp med +40.8 hit 83% t 16, CC +38.6; CEF pref CO +37.9; Sharadar 1998-2026 ETD 28/29 years.
@@ -1311,6 +1327,8 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Theme-explosion sleeve (breakouts, top-1% momentum, theme clusters, residual momentum) | **dead** | no rule beats vol-matched random picks; trails SPY; caught quantum late and got stopped out (add. 28) |
 | Pre-boom tail-probability conditioning (vol/range/volume compression, Amihud, idio-vol, corr breakdown, gap frequency, short interest/DTC, FTD, insider buys, earnings proximity) | **dead (outcome B)** | conditions raise P(fwd20>=+30%) 1.3-3.8x OOS, per-year, beyond vol-match and beyond momentum; but they raise the -30% tail as much or more (up-minus-down lift < 0, day-clustered CI excludes 0, or sign-flips), median fwd <= 0 -> predicts big moves, not direction (Study PB, N 826) |
 | TTM Squeeze (YouTube/ToS): histogram zero-cross len 20/100, squeeze-fire red->green entries (diagnostic, no N, 2026-10-08) | **dead** | 13 ETFs 1999-2026: 0/13 beat B&H CAGR in 2016-26 (len100 -8.1pp/yr), only lowers drawdown = an SMA trend filter with less exposure; stocks (1200 incl. delisted) median trade negative, len100 excess t 2.07 then 1.20 (4/11 yrs); bullish fires (hist>0) earn LESS than all days (fwd20 +0.51% vs +0.93%), bearish fires more = PB-C mean reversion. `research/sim/ttm_squeeze.py`, out `data/research/program/ttm_squeeze_out.txt` |
+| 40 daily swing indicators (VCP, TTM, HVP, Parkinson/GK/RS/YZ, chop, ulcer, FDI, Hurst, Donchian, CMF, Klinger, NVI/PVI, EMV, VPT, Twiggs, force, VWAP/AVWAP, pocket pivot, VDU, up/down vol, RVOL, OU, VR, z5, resmom, ivol, trend t, CUSUM, entropies, beta instability, autocorr, Amihud, Roll): 2% tails, 5 combos incl. RS+dry-up+volume expansion, ML top 1%, all 15,210 decile pairs, h 2-30d (IND-SWING N 1003-1004, 2026-10-15) | **dead, LUCK** | tails 0/395 (null 0), pairs 0 vs null 1-2, combos negative both eras, ML t<=0.2; 2015-26 now TOUCHED for this family. `research/sim/ind_swing.py`, `ind_pairs.py` |
+| Customer-supplier momentum (Cohen-Frazzini; Compustat customer segments -> CRSP, long Q5 suppliers of the best-month customers, skip day 1) (CUST-MOM, N 1005, 2026-10-15) | **dead** | replication 1981-2004 Q5-Q1 +1.13%/mo t 3.95; judge 2005-24 long Q5 net -0.29%/mo vs universe, -0.32 vs SIC2 peers; long-short decays to 0.00 in 2016-24. `research/sim/cust_mom.py` |
 | Follow the direction once the move starts, filtered by a pre-boom condition (PB-C) | **dead** | early up-move net +0.96% OOS but -0.97% discovery; the same early move measured down is BETTER (+2.00% net) -> early direction mean-reverts, and no condition improves continuation over the plain move (Study PB-C, N 827) |
 | Night pool $5 floor / cost tier / share rounding on split-ADJUSTED prices | **bug, fixed** | 16% of V7 night trades were really < $5; lookahead winners. Every earlier night level ~1/5 too high; use `raw_price=True` (add. 30, 36, 39) |
 | Lower `night_price_min` to $3 / $2 / $1 (raw pool) | **dead** | added names lose 33-73bp in 2021-23, placebo 2-7%; add. 21's live-cost conditional ($3 if sub-$10 costs ≤ ~20bp) still stands (add. 30) |
@@ -1490,12 +1508,16 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | FinBERT tone of CEF N-CSR shareholder reports as a CEF-RV filter (CEF-TXT, N 888-889) + NLP slow-text ledger (lazy prices, PREF-EX/Form 4/FOMC text filters, classifier forced-flow discovery) | **dead** | level spread -58bp t -1.86 (wrong sign), change -31bp t -0.79, placebo 5th/21st pct; tone valid (tracks 2022) but uninformative; other NLP rows killed at the gate (`research/drafts/nlp_ledger_2026-10-06.md`). Do not re-open open-source NLP as a signal source |
 | CEF-RV out of sample 1999-2014 + NAV-fall filter (CEF-OOS/NAVFALL, N 890-891) + alpha vs beta-matched comparators (CEF-ALPHA, N 892-893) | **PASS; alpha ~+125..160bp/trade 2016-26** | OOS +333bp t 5.3. Excess vs EW CEF universe incl. delisted: +125bp t 5.6 (2016-26), +187 t 9.4 (1999-2014); vs out-of-window-beta SPY +159 t 3.5. The earlier '+46bp t 0.74' used an in-window fitted beta (superseded). Raw is ~2/3 market. NAV-fall +376bp OOS, ~half SPY rebound (conditioning only). ~+4.8pp/yr excess on deployed capital. 1999-2014 survivorship MATERIAL (CEF-SURV99, N 895-896): OOS alpha bound ~0..+105bp, so the OOS pass is not established; 2016-26 stands. `cef_oos.py`, `cef_alpha.py`, `cef_surv99.py` |
 
+| Option-implied borrow-rate cross-section, monthly (BORROW-XS/XS2, N 1006-1007, 2026-10-16) | **REAL signal, NOT deployable; long-only = size/vol beta** | 1996-2025 (`optionm.borrate`), decile LS D1-D10 gross +106bp/mo t 6.43, monotone D1 119 -> D10 13bp/mo; but the payoff is the SHORT leg (Roth cannot short) and long-only D1-EW net +22bp/mo is confined to the small + high-vol terciles (BORROW-XS2 KILL; nothing clears t>=2 in 2016-25). Do not re-tune tenor/deciles/lag. `borrow_xs.py`, `borrow_xs2.py` |
+| Index dealer-gamma / OI state (GAMMA-MKT, N 1008) + index option skew/term structure (SKEW-MKT, N 1009), 2026-10-16 | **dead** | SPY `optionm.opprcd`/`vsurfd` (coverage 2005+, not 1996). GAMMA: |next-day ret| ~ dealer-gamma z is significant but the WRONG sign (a vol-regime proxy, not hedging) and the directional arm is null; SKEW: RR30/TS fail both halves (wrong sign H2, t<2 H1). Index gamma/pinning + skew/term families closed. `gamma_mkt.py`, `skew_mkt.py` |
+
 ## Ideas not yet tested
 
 - Multiple formation horizons (5/10/20d) simultaneously — the one remaining
   structural fix for 14% capital utilisation
 - Cross-sectional ranking instead of a binary z-threshold (always deployed)
 - ~~Crypto sleeve~~ (already dead: RESULTS.md "crypto trend (BTC/ETH SMA...) = buy-and-hold Sharpe, −60% DDs; basket negative after 25bp fees")
+- ~~MACD/RSI on Schwab crypto (BTC ETH SOL AVAX LINK)~~ (CRYPTO-TA N 998 daily + CRYPTO-TA12 N 999-1002 on 12h/8h/6h/4h, 2026-10-15: 8 frozen rules, 0/40 cells usable, shorter bars worse; oversold/MACD-cross/divergence dead net of 150bp; RSI>70 momentum gross real 2019-23 but month-clustered t 1.25, 2022+ median ~0, carried by SOL/AVAX; MACD trend filters cut maxDD -85% -> -49% but lag B&H 2023-26. Do not re-tune thresholds.)
 - Limit orders at the bid instead of market-on-open — bounded by addendum 13:
   paying 0 vs 20bps is worth ~+2pp CAGR, so the upside is real but modest
 
@@ -1649,3 +1671,8 @@ name), and names above ~$150 buy one share or none.
 config.yaml night_max_name_pct 0.15 (commit after cfa63d2). Basis: NIGHT-CAP grid (night_cap_grid_out.txt) — at 0.10 the leg averaged ~16% of equity;
 0.15 = best Sharpe in both eras (2.03 / 1.19 vs 1.93 / 1.16), ~+4pp/yr, night-only maxDD -21/-22% vs -15/-18%. Condition (add. 29): keep only while live
 open/close auction cost stays ~0bp (`make review` 2b). Revert = set it back to 0.10.
+
+## 2026-10-16: REV-TONE (Amazon review tone -> sales/returns, N 1008) — KILL, do not redo
+- 20 firms, 8.5M reviews 2014-23, 1.99M scored. Null in the judge window (2019-23) and in the paper era (2014-18) for sales, EA
+  reaction and a tradable hold. Tone declined across all 20 brands (platform drift); Nike's decline is not special. Details
+  in round1_prose.md and `data/research/program/rev_tone_out.txt`.

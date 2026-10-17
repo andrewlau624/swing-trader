@@ -410,6 +410,9 @@ exdate-open: ## Ex-date open shadow: split / spin-off ex-date night from officia
 ovn-mom: ## OVN-MOM-FWD shadow: overnight-momentum decile / top-10 from official crosses (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.ovn_mom_shadow
 
+ssr-lift: ## SSR-LIFT-FWD shadow: Rule 201 lift-day short T+2 open->close, SPY-hedged (no orders; ARGS="--backfill 20")
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.ssr_lift_shadow $(ARGS)
+
 arete-dip: ## ARETE-DIP-FWD shadow: momentum names on a down day, d+3/d+5 vs EW universe (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.arete_dip_shadow
 

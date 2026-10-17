@@ -161,6 +161,13 @@ def _ovn_mom(state: Path, logs: Path) -> dict:
     return dict(n=s["days"], week=len(wk), line=w.line(rows))
 
 
+def _ssr_lift(state: Path, logs: Path) -> dict:
+    from . import ssr_lift_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    wk = {r["d2"] for r in rows if r.get("status") == "scored" and not r.get("backfill") and r["d2"] >= _week_ago()}
+    return dict(n=w.summary(rows)["days"], week=len(wk), line=w.line(rows))
+
+
 def _fill_costs(state: Path, logs: Path) -> dict:
     from . import fill_cost_scorer as w
     wk = _jsonl(state / w.LOG_NAME)
@@ -500,6 +507,12 @@ REGISTRY: list[Test] = [
          "overnight returns, liquid common stock: official closing cross -> next opening cross, excess vs SPY. Gate: 120 nights, "
          "mean >= +5bp/night, t >= 2, median > 0; FAIL closes the overnight-clientele class (N 939, adversarial: small now).",
          "2026-10-13", 120, "nights", _ovn_mom, "state/ovn-mom.jsonl; round1_prose.md Watch OVN-MOM-FWD", ["ovn_mom_shadow"]),
+    Test("SSR-LIFT-FWD: Rule 201 lift-day short, SPY-hedged (log-only)", "ssr_lift_shadow.py (research-shadows): liquid common "
+         "stock (raw close >= $10, 20d ADV >= $20M) whose regular-hours low hit -10% on day T and did not re-trigger on T+1: short the "
+         "T+2 official open cross, cover the T+2 official close cross, hedge 1.5x SPY; net of 5bp/side + 2bp borrow, easy-to-borrow "
+         "flag logged. Gate: 60 forward event-days, hedged net EW-day mean > 0, day-clustered t >= 2 (registered 120-session gate "
+         "read by hand; SSR-LIFT N 860, T+2 window kept by SSR-T1). Short-only: taxable margin >= $2k, never the Roth.",
+         "2026-10-17", 60, "event-days", _ssr_lift, "state/ssr-lift.jsonl; round1_prose.md SSR-LIFT", ["ssr_lift_shadow"]),
     Test("Fill-cost ledger (official-print truth)", "fill_cost_scorer.py (research-shadows): scores every daily-fills "
          "row's cost vs the official SIP auction print of its own session (the executor's slippage_bps is "
          "decision-reference drift, not cost: audit_execution_1002). Intraday/noise fills logged as mid_unclosed. "

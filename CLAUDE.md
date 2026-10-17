@@ -1047,3 +1047,63 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
 - **INPLAY (N 994-996, 2026-10-15): KILL all 3.** In-play scanner (RVOL30, gap catalyst, two-way deep-liquidity names, PDH/PDL/OR/VWAP levels) x
   fade / burst / bot-direction mix, 2019-26, 23k trades: net -8.5..-14.4bp/trade; fade and the direction score are worse than random; no scanner
   feature separates good trades in both halves. Day-trading alert scanners on bar data are closed (with VOLDAY, Lab-AS/AU, scalp loop).
+
+## Research memory — CRYPTO-TA (2026-10-15, N 997 -> 998)
+- MACD/RSI on the five Schwab coins (Binance daily 2018-26, 150bp RT): 8 frozen rules, no usable rule. Oversold / MACD-cross / divergence dead;
+  RSI(14)>70 momentum passed the registered (date-clustered) gate but month-clustered t 1.25, 2022+ median ~0, SOL/AVAX-carried = WEAK;
+  MACD>0 & >SMA200 trend filter: maxDD -85% -> -49%, Sharpe +0.07 over B&H in 2023-26 (a risk choice, not alpha). Swing-side MACD/RSI stays
+  dead (window_signals_loop). For coin baskets cluster t by month: date clustering overstates t for ~0.8-correlated coins.
+- **CRYPTO-TA12 (N 999-1002): KILL.** Same 8 rules on 12h/8h/6h/4h bars: 0/32 pass, worse as bars shrink; 2022+ nothing beats holding even at
+  25bp/side. MACD/RSI on crypto is closed at every bar size 4h-1d. Program N = 1002.
+## Research memory — session "WRDS entitlement unlock + Tor null" (2026-10-16)
+- **The binding constraint was mis-stated.** The program's DATA-LIMITED/BLOCKED rows were a *source* assumption, not a WRDS
+  entitlement check. Reconciliation (`research/drafts/wrds_recon_2026-10-16.md`, `data/research/wrds_recon/`, `Make`-free):
+  already licensed at $0 -> `optionm.borrate{1996..2025}` (borrow/HTB fee history), `optionm.opprcd{1996..2025}`
+  (per-contract open_interest + gamma + delta; ETFs incl. SPY=109820), `optionm.vsurfd{1996..2025}` (per-delta vol surface /
+  skew / term), `crsp_q_mutualfunds.daily_nav` + `monthly_tna` + `fund_hdr_hist` (et_flag). STILL blocked: borrow/recall
+  *fee* history in the custodial sense (borrate is option-implied), PIT ratings (`ciqsamp_ratings` = 1,322-row sample),
+  margin-rate history, CBOE (`cboe.*` = schema `cboe_eod` permission denied). Data facts: `borrate` year tables, sentinel
+  exactly -99.99 (not NULL), %/yr, grain (securityid,date,expirationdate) -> pick nearest-30d tenor; `opprcd` is
+  OptionMetrics-filtered EOD, NOT raw NBBO, and SPY/QQQ option coverage starts 2005-01 (1996-2004 empty); CRSP MF has
+  **no CEFs** (`et_flag` F=ETF/N=ETN/blank=open-end) and CRSP prices end 2024-12-31; links `wrdsapps_link_crsp_optionm.opcrsphist`
+  (secid->permno, score=1) and `crsp.dsenames` (`shrcd`).
+- **Tor: null, permanently.** Tor installed + reachable; `research/tor_intelligence/` documents the survey. The `.onion`
+  financial space is darknet markets + stolen-data/CVV/account shops + templated SEO spam; the only legitimate artifacts
+  (Rauzy, delvingbitcoin) are dead v2 mirrors with clearnet duplicates. No legitimate PIT dataset, technology, or mechanism.
+  Do not re-run Tor as a data source.
+- **BORROW-XS / BORROW-XS2 (N 1006-1007): real signal, no deployable edge.** The option-implied borrow-rate cross-section,
+  1996-2025, is monotone (D1 119 -> D10 13 bp/mo) and the LS D1-D10 is +106bp/mo gross (t 6.43); net of 20bp + actual borrow
+  +84bp. But the payoff is the SHORT leg (the account cannot short a cash Roth; the same "profitable side is unharvestable"
+  pattern as SSR-LIFT / threshold-flow), and the deployable long-only D1 tilt is a size/vol beta (survives only in the small
+  + high-vol terciles; nothing clears t>=2 in 2016-25). Closed: no re-tuning of tenor/deciles/lag.
+- **GAMMA-MKT (N 1008) + SKEW-MKT (N 1009): KILL.** Index dealer-gamma state: |next-day ret| ~ dealer-gamma z is significant
+  but *positive* (a vol-regime proxy, not dealer hedging) and the directional arm ~0; index option skew (RR30) and term slope
+  (TS) fail both halves (wrong sign post-2011, t<2 pre-2011). Index gamma/pinning + skew/term families closed.
+- **Rule reinforced:** "blocked by data" must be verified against actual entitlements before it is written down; and a
+  statistically-passing cross-section whose payoff is the unshortable side is not a candidate. Program N = 1009.
+
+## Research memory — REV-TONE (2026-10-16, N 1008): Amazon review tone, KILL
+- Jin (2023 JBFA) review-tone replication on 20 Amazon-heavy consumer firms (McAuley Amazon Reviews 2023 via HF, streamed
+  and filtered by `store`; live Amazon review pages need sign-in). 1.99M reviews scored with cardiffnlp roberta sentiment.
+  dTONE (YoY) predicts neither sales acceleration (t -0.7), EA CAR (t -0.5) nor a hold to EA+1 (top-bottom net +63bp t 0.5,
+  ex-top-5 negative); the 2014-18 paper era is null too. Tone ~ stars (corr 0.97). The "tone called Nike's fall" story is
+  hindsight: tone fell in all 20 firms 2015-23 (platform drift), Nike's mid-pack, and it bottomed in 2021 at the stock's peak.
+  Data/code: `data/research/reviews/`, `research/sim/rev_tone.py`, `research/sim/rev_tone_build/`. Do not re-open review
+  sentiment without a per-product sales panel or a cross-section of hundreds of firms.
+
+## Research memory — session "four levers" (2026-10-17)
+- **TAX-STACK (N 1017): PASS-SMALL, tax- and cost-fragile.** PREF-EX/ETDX + CEF-RV + BIL on the taxable book's idle cash
+  (live nx_s2), 2021-26 (touched: economics, not OOS). Added after-tax %/yr, cash-only / margin-to-2x: +8.1/+15.9 at $2.3k,
+  +4.4/+7.5 at $10k, +2.6/+3.6 at $25k, ~+0.9 at $100k; halves both positive. Holds ONLY if the ex-date price drop is a
+  short-term loss that offsets the book's ST gains (view A); if not (wash-sale deferral on monthly payers re-bought <30d,
+  view B) it is ~-18pp at $10k. 3x cost leaves +0.6pp at $10k. Unverified: Schwab marginability of preferreds/baby bonds,
+  the 12.5% margin rate, wash-sale treatment. `research/sim/tax_stack.py`, `tax_stack_out.txt`. Not deployed: a tax-advice
+  check and the PREF-EX live 30-trip cost gate come first.
+- **PROVOL (no N): CEILING-KILL.** Night-leg size-up on high-vol days: NDISC already scanned rv20 / vix_pct252 (signs flip
+  between halves); ceiling ~+1.2pp at honest capture. Sizing conditioning on the night leg is closed.
+- **Tax placement memo** (`research/drafts/tax_placement_2026-10-17.md`, no N): the current split is near-optimal; the only
+  gain is letting the Roth run IBS (wash_guard roth_first + SGOV parking keep it tiny): +1.4 / +2.1 / +2.5pp after tax at
+  now / $10k / $25k combined (model; cause of the suppression inferred, not read from executor code). User decision.
+- Shadow status 10-17: OVN-MOM 2/120, CEF-RV-FWD 0/60 (12 open), PREF-EX shadow 4/60, PREF-EX live 0/30 (orders from 10-21),
+  split 1/40. events.py CPI/NFP calendar extended through 2027-12 (BLS pages, fetched 10-17). Program N = 1017
+  (the 10-16 burst reused 1011-1015; numbering continues from PMX 1016).

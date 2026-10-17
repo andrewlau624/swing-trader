@@ -1,0 +1,22 @@
+TAX-STACK N 1017: PREF+ETDX CO stacked on taxable book (night 0.65, IBS 0.5, 1.15x), tax 35%, margin 12.5%, tier costs, whole shares
+book days 2021-02-01..2026-09-18; events 7265; yrs 5.63
+
+== equity $2,300 ==
+CASH night-first            : pre-tax  +7.4pp ($171) | after-tax A(loss offsets STCG)  +4.8 | B(loss unusable)  -9.0 | halves(pre)  +7.7/ +7.1 (after A  +5.0/ +4.6) | 3x cost pre  +1.6 afterA  +1.0 | ex-top5 pre  +7.0 | interest drag  +0.0pp, BIL lost  +0.0pp, book displacement  +0.0pp | events 4652, median +26bp, hit 71% | NW t(pre) 11.79
+CASH pref-first             : pre-tax +12.4pp ($286) | after-tax A(loss offsets STCG)  +8.1 | B(loss unusable) -17.5 | halves(pre) +13.6/+11.3 (after A  +8.8/ +7.3) | 3x cost pre  +1.7 afterA  +1.1 | ex-top5 pre +11.9 | interest drag  -0.3pp, BIL lost  +0.0pp, book displacement  -0.4pp | events 6998, median +27bp, hit 72% | NW t(pre) 4.80
+MARGIN 2x night-undisturbed : pre-tax +24.5pp ($564) | after-tax A(loss offsets STCG) +15.9 | B(loss unusable) -39.4 | halves(pre) +24.9/+24.3 (after A +16.2/+15.8) | 3x cost pre  +1.8 afterA  +1.1 | ex-top5 pre +23.6 | interest drag  -2.7pp, BIL lost  -0.4pp, book displacement  +0.0pp | events 7171, median +27bp, hit 72% | NW t(pre) 12.54
+
+== equity $10,000 ==
+CASH night-first            : pre-tax  +4.4pp ($439) | after-tax A(loss offsets STCG)  +2.9 | B(loss unusable)  -6.1 | halves(pre)  +4.7/ +4.1 (after A  +3.0/ +2.7) | 3x cost pre  +0.7 afterA  +0.5 | ex-top5 pre  +4.2 | interest drag  +0.0pp, BIL lost  +0.0pp, book displacement  +0.0pp | events 5716, median +27bp, hit 72% | NW t(pre) 11.19
+CASH pref-first             : pre-tax  +6.8pp ($678) | after-tax A(loss offsets STCG)  +4.4 | B(loss unusable) -10.8 | halves(pre)  +7.5/ +6.0 (after A  +4.9/ +3.9) | 3x cost pre  +0.4 afterA  +0.3 | ex-top5 pre  +6.5 | interest drag  -0.2pp, BIL lost  +0.0pp, book displacement  -0.9pp | events 7174, median +27bp, hit 72% | NW t(pre) 3.49
+MARGIN 2x night-undisturbed : pre-tax +11.6pp ($1,155) | after-tax A(loss offsets STCG)  +7.5 | B(loss unusable) -18.2 | halves(pre) +13.4/ +9.6 (after A  +8.7/ +6.2) | 3x cost pre  +0.9 afterA  +0.6 | ex-top5 pre +10.6 | interest drag  -1.0pp, BIL lost  -0.2pp, book displacement  +0.0pp | events 7174, median +27bp, hit 72% | NW t(pre) 9.08
+
+== equity $25,000 ==
+CASH night-first            : pre-tax  +3.1pp ($776) | after-tax A(loss offsets STCG)  +2.0 | B(loss unusable)  -3.8 | halves(pre)  +3.4/ +2.8 (after A  +2.2/ +1.8) | 3x cost pre  +0.7 afterA  +0.4 | ex-top5 pre  +2.9 | interest drag  +0.0pp, BIL lost  +0.0pp, book displacement  +0.0pp | events 5693, median +27bp, hit 72% | NW t(pre) 11.00
+CASH pref-first             : pre-tax  +4.1pp ($1,017) | after-tax A(loss offsets STCG)  +2.6 | B(loss unusable)  -6.9 | halves(pre)  +4.3/ +3.8 (after A  +2.8/ +2.5) | 3x cost pre  +0.0 afterA  +0.0 | ex-top5 pre  +3.8 | interest drag  -0.1pp, BIL lost  +0.0pp, book displacement  -0.7pp | events 7174, median +27bp, hit 72% | NW t(pre) 2.56
+MARGIN 2x night-undisturbed : pre-tax  +5.6pp ($1,391) | after-tax A(loss offsets STCG)  +3.6 | B(loss unusable)  -8.4 | halves(pre)  +6.8/ +4.3 (after A  +4.4/ +2.8) | 3x cost pre  +0.5 afterA  +0.3 | ex-top5 pre  +4.9 | interest drag  -0.3pp, BIL lost  -0.1pp, book displacement  +0.0pp | events 7174, median +27bp, hit 72% | NW t(pre) 7.47
+
+== equity $100,000 ==
+CASH night-first            : pre-tax  +1.1pp ($1,131) | after-tax A(loss offsets STCG)  +0.7 | B(loss unusable)  -1.5 | halves(pre)  +1.4/ +0.8 (after A  +0.9/ +0.5) | 3x cost pre  +0.2 afterA  +0.1 | ex-top5 pre  +1.0 | interest drag  +0.0pp, BIL lost  +0.0pp, book displacement  +0.0pp | events 5681, median +27bp, hit 72% | NW t(pre) 6.66
+CASH pref-first             : pre-tax  +1.3pp ($1,303) | after-tax A(loss offsets STCG)  +0.8 | B(loss unusable)  -2.1 | halves(pre)  +1.3/ +1.3 (after A  +0.9/ +0.8) | 3x cost pre  +0.0 afterA  +0.0 | ex-top5 pre  +1.1 | interest drag  -0.0pp, BIL lost  +0.0pp, book displacement  -0.2pp | events 7174, median +27bp, hit 72% | NW t(pre) 2.04
+MARGIN 2x night-undisturbed : pre-tax  +1.5pp ($1,456) | after-tax A(loss offsets STCG)  +0.9 | B(loss unusable)  -2.0 | halves(pre)  +1.8/ +1.1 (after A  +1.1/ +0.7) | 3x cost pre  +0.2 afterA  +0.1 | ex-top5 pre  +1.3 | interest drag  -0.0pp, BIL lost  -0.0pp, book displacement  +0.0pp | events 7174, median +27bp, hit 72% | NW t(pre) 7.71
