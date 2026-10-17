@@ -71,9 +71,9 @@ def _leg_kind(filled_at: str) -> str:
             t = t.replace(tzinfo=dt.timezone.utc)
         t = t.astimezone(_et())
         hh, mm = t.hour, t.minute
-        if 9 <= hh <= 10 and mm < 45 and mm >= 25:
+        if hh == 9 and 25 <= mm < 45:
             return "open"
-        if 15 <= hh <= 17 and mm >= 40:
+        if hh == 16 or (hh == 15 and mm >= 40):
             return "close"
         return "mid_unclosed"
     except Exception:
@@ -88,12 +88,16 @@ def _trade_date(filled_at: str) -> str:
 
 
 def official(H: dict, sym: str, date: str, kind: str):
-    """(official_px, print_size) of the largest auction print for that session; None if not on tape."""
+    """(official_px, print_size) of the largest auction print for that session; None if not on tape.
+    kind: 'open' -> the 'O'-flag auction in the 'o' array, 'close' -> the auction after 15:00 in the 'c' array."""
     j = _get(AU_URL, dict(symbols=sym, start=date, end=date, feed="sip", limit=10000), H)
     rows = ((j or {}).get("auctions") or {}).get(sym) or []
+    key = "o" if kind == "open" else "c"
     for x in rows:
-        if str(x.get("d", "")).startswith(date) and x.get(kind):
-            p = max(x[kind], key=lambda q: q.get("s", 0))
+        if str(x.get("d", "")).startswith(date) and x.get(key):
+            arr = [q for q in x[key]
+                   if (kind == "open" and str(q.get("c")) == "O") or kind == "close"]
+            p = max(arr or x[key], key=lambda q: q.get("s", 0))
             return p.get("p"), p.get("s", 0)
     return None, None
 
