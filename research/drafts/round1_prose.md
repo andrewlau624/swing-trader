@@ -7598,3 +7598,19 @@ open(t)->open(t+1) return, IBIT Roth-eligible, ~5-10bp spread.
   nights (+35bp mean / +27 median on random nights, +15/+9 on flagged): a general gap-to-open effect, unconditional on
   QQQ. Last print is not an executable bid; only a forward test of real pre-market bids could tell if any of it is
   capturable. Output `data/research/program/pmx_out.txt`. Program N = 1016.
+
+## Amendments 2026-10-16 (improvement set deployed, no N consumed)
+- **NAVFALL is a KEEP-constraint, not a filter.** Re-read of the session memory: CEF-RV entries after a trailing-26w
+  NAV fall are the rule's BEST trades (dropping them costs -705bp t -5.1). The deployed rule already keeps them; the
+  only work is informational: `cef_rv_shadow` now stores NAV in the weekly panel `(date, discount, nav)` triples
+  (legacy pairs tolerated) and backfills `navfall26w` onto every logged row, with the digest line reporting
+  NAVFALL-on vs NAVFALL-off excess so no future session "improves" the rule by dropping them. No gate change.
+- **Fill-cost ledger built** (`swingtrader/daily/fill_cost_scorer.py`, REGISTRY "Fill-cost ledger", audit
+  `audit_execution_1002.md` item 1): every daily-fills row scored vs the official SIP auction print of its own
+  session (night sells vs 'O' open, night buys / MOC legs vs '6' close), intraday legs logged mid_unclosed.
+  `state/fill-costs.jsonl`; idempotent on (coid, filled_at, fill_px). Executor `ref_px`/`slippage_bps` stay as the
+  decision reference; cost is now a separate computed field (items 3/4 of the audit reduce to this for any consumer
+  of cost numbers).
+- **PREF-first wiring verified (no change needed).** `executor.py` already subtracts `state/pref-ex-reserved.json`
+  (dated, cash/Roth account only) from the night leg's sizing, and `pref_ex_live` writes the reservation in dry as
+  well as live; CEF-RV held value is subtracted separately. The ROTH-STACK +2pp PREF-first ordering holds.

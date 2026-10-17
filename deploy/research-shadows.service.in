@@ -34,5 +34,6 @@ ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.size_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.leap.shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m research.sim.tme_shadow forward
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.tok_mark_collector
+ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.fill_cost_scorer
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daybook.shadow forward
 TimeoutStartSec=1800

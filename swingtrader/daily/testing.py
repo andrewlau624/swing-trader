@@ -161,6 +161,12 @@ def _ovn_mom(state: Path, logs: Path) -> dict:
     return dict(n=s["days"], week=len(wk), line=w.line(rows))
 
 
+def _fill_costs(state: Path, logs: Path) -> dict:
+    from . import fill_cost_scorer as w
+    wk = _jsonl(state / w.LOG_NAME)
+    return dict(n=sum(1 for r in wk if r.get("cost_bp") is not None), week=0, line=w.line(state))
+
+
 def _tok_mark(state: Path, logs: Path) -> dict:
     from . import tok_mark_collector as w
     rows = _jsonl(state / w.LOG_NAME)
@@ -494,6 +500,12 @@ REGISTRY: list[Test] = [
          "overnight returns, liquid common stock: official closing cross -> next opening cross, excess vs SPY. Gate: 120 nights, "
          "mean >= +5bp/night, t >= 2, median > 0; FAIL closes the overnight-clientele class (N 939, adversarial: small now).",
          "2026-10-13", 120, "nights", _ovn_mom, "state/ovn-mom.jsonl; round1_prose.md Watch OVN-MOM-FWD", ["ovn_mom_shadow"]),
+    Test("Fill-cost ledger (official-print truth)", "fill_cost_scorer.py (research-shadows): scores every daily-fills "
+         "row's cost vs the official SIP auction print of its own session (the executor's slippage_bps is "
+         "decision-reference drift, not cost: audit_execution_1002). Intraday/noise fills logged as mid_unclosed. "
+         "Read: true per-leg cost; feeds the digest cost compare and any sizing decision.",
+         "2026-10-16", 0, "scored fills", _fill_costs, "state/fill-costs.jsonl; research/drafts/audit_execution_1002.md",
+         ["fill_cost_scorer"]),
     Test("TOK-GAP-FWD: log-only Gate token-mark collector", "tok_mark_collector.py (research-shadows): appends the last "
          "3 days of Gate 5m candles for the four tokenized US-stock certificates (MSTRX/NVDAX/AAPLX/TSLAX) to "
          "data/research/tok/, no orders. TOK-GAP (prose N 1010, DATA-BLOCKED at $0) is judged by the guarded runner "

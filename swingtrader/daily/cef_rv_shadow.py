@@ -96,8 +96,32 @@ def _cefc(path: str):
     return None
 
 
-def panel(state_dir: Path, today: dt.date, log=print) -> dict[str, list[tuple[str, float]]]:
-    """sym -> [(week date, discount)] oldest first, from CEFConnect; refetched when a newer weekly point is due."""
+def navfall26w(rows) -> float | None:
+    """% change of NAV over the trailing ~26 weeks (182d) ending at the LATEST week all-covered-by rows (oldest-first).
+
+    Works on both the new (date, discount, nav) and legacy (date, discount) row shapes; returns None when the
+    panel lacks NAV (legacy rows, or the series is too short for 182d)."""
+    if not rows or not rows[-1] or not rows[-1][0]:
+        return None
+    if len(rows[0]) < 3:
+        return None
+    latest_d = rows[-1][0]
+    then = (dt.date.fromisoformat(latest_d) - dt.timedelta(days=182))
+    nav_now = rows[-1][2]
+    if nav_now is None:
+        return None
+    nav_then = None
+    for r in reversed(rows):
+        if r[0] <= then.isoformat():
+            nav_then = r[2]
+            break
+    if not nav_then:
+        return None
+    return nav_now / nav_then - 1
+
+
+def panel(state_dir: Path, today: dt.date, log=print) -> dict[str, list]:
+    """sym -> [(week date, discount[, NAV])] oldest first, from CEFConnect; refetched when a newer weekly point is due."""
     p = state_dir / PANEL_NAME
     old = json.loads(p.read_text()) if p.exists() else {}
     last = max((r[-1][0] for r in old.values() if r), default="")
@@ -119,8 +143,9 @@ def panel(state_dir: Path, today: dt.date, log=print) -> dict[str, list[tuple[st
             if sym in old:
                 new[sym] = old[sym]
             continue
-        rows = sorted((r["DataDate"][:10], (r["Data"] / r["NAVData"] - 1) if r.get("Data") and r.get("NAVData")
-                       else None) for r in hist)
+        rows = sorted((r["DataDate"][:10],
+                       (r["Data"] / r["NAVData"] - 1) if r.get("Data") and r.get("NAVData") else None,
+                       r.get("NAVData")) for r in hist)
         new[sym] = rows[-KEEP_WEEKS:]
         time.sleep(0.3)
     if new:
@@ -213,6 +238,8 @@ def summary(rows: list[dict]) -> dict:
                                and (r["signal"] >= FORWARD_FROM) == fwd)
         out[tag]["cut"] = _stats([r for r in c if r.get("cut42")], "x_oo")
         out[tag]["nocut"] = _stats([r for r in c if r.get("cut42") is False], "x_oo")
+        out[tag]["nav_on"] = _stats([r for r in c if r.get("navfall26w") is True], "x_oo")
+        out[tag]["nav_off"] = _stats([r for r in c if r.get("navfall26w") is False], "x_oo")
     return out
 
 
@@ -231,7 +258,10 @@ def line(rows: list[dict]) -> str:
                      f"{n['mean_bp']:+.0f}bp"
                      + (f"; cut42-flagged {v['cut']['n']} at {v['cut']['mean_bp']:+.0f}bp vs unflagged "
                         f"{v['nocut']['mean_bp']:+.0f}bp" if v["cut"].get("n") and v["nocut"].get("n") else
-                        f"; cut42-flagged {v['cut'].get('n', 0)}"))
+                        f"; cut42-flagged {v['cut'].get('n', 0)}")
+                     + (f"; NAVFALL-on {v['nav_on']['n']} at {v['nav_on']['mean_bp']:+.0f}bp vs "
+                        f"NAVFALL-off {v['nav_off']['mean_bp']:+.0f}bp (informational: NAV-fall entries are "
+                        f"the rule's best trades; the deployed rule keeps them)" if v["nav_on"].get("n") else ""))
     f = s["forward"]["x_oo"]
     verdict = ""
     if f["n"] >= NEED and f.get("weeks", 0) >= MIN_WEEKS:
@@ -255,7 +285,7 @@ def run(state_dir: Path, logs_dir: Path, log=print, today: dt.date | None = None
             except (ValueError, KeyError):
                 continue
     for sym, rows in pan.items():
-        for sg in signals([d for d, _ in rows], [x if x is not None else float("nan") for _, x in rows]):
+        for sg in signals([d for d, *_ in rows], [x if x is not None else float("nan") for _, x, *_ in rows]):
             if sg["signal"] < BACKFILL:
                 continue
             k = (sym, sg["signal"])
@@ -285,6 +315,21 @@ def run(state_dir: Path, logs_dir: Path, log=print, today: dt.date | None = None
                          str(dt.date.fromisoformat(min(r["signal"] for r in need)) - dt.timedelta(days=500)), str(today), H)
         for r in need:
             r["cut42"] = cut42(hist.get(r["sym"], []), r["signal"])
+    navflag = [r for r in old.values() if "navfall26w" not in r]
+    for r in navflag:
+        # nav change over the trailing ~26 weeks (182d) ending AT the signal week; None when the panel has no NAV
+        rows = pan.get(r["sym"], [])
+        r["navfall26w"] = None
+        if rows and isinstance(rows[0], (list, tuple)) and len(rows[0]) >= 3:
+            nav_now = nav_then = None
+            then = (dt.date.fromisoformat(r["signal"]) - dt.timedelta(days=182)).isoformat()
+            for rr in rows:
+                if rr[0] <= r["signal"]:
+                    nav_now = rr[2]
+                if rr[0] <= then:
+                    nav_then = rr[2]
+                    break
+            r["navfall26w"] = None if not (nav_now and nav_then) else (nav_now / nav_then - 1 < 0)
     rows = sorted(old.values(), key=lambda r: (r["signal"], r["sym"]))
     state_dir.mkdir(parents=True, exist_ok=True)
     path.write_text("".join(json.dumps(r) + "\n" for r in rows))
