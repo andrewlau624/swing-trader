@@ -33,3 +33,11 @@ Read: the noise leg has been ~0 or negative for all of 2026 (Sharpe -0.7 to -1.0
 
 ## Verdict
 Night: recent regime is positive in the aggregate (2026-06..10-07 +113bp gross, +98 at 7.5bp/side, t 1.8-2.3), far above the 2021-26 average (+26 / +11), so the live shortfall is a two-week sample, not a regime break. Because 2026 gains are concentrated in Jun-Jul and the replay is un-deduped, do not read +93bp as the book's expectation; no sizing change. Noise: no evidence of an edge in 2026 at any cost (consistent with earlier verdict: marginal, cost-bound). Keep as is; revisit the noise leg at user's discretion.
+
+## Addendum 2026-10-17: 15:40 IBS range fix (lookahead audit)
+`recent_night.py` took the 15:40 low/high from the 15:30-15:40 minutes alone when a post-15:40 minute set the day's
+extreme (40% of picks). That shortcut decided IBS<0.10 for 2,298 picks. Refetched 09:30-15:40 SIP minutes for them
+(`data/research/recent/lmfull/`): 1,626 truly pass, 669 fail (the failing ones averaged +108bp gross, so dropping them hurts).
+Net 7.5bp/side, replay -> true: 2021-26 baseline +11.0 (t 2.65) -> **+6.8 (t 1.99)**, n 13,356; 2026-06..10-07 +97.7 -> **+72.8**
+(t 1.58); 2026 YTD +77.7 -> +67.4. True baseline gross +21.8bp. 53 of the resolved cases fall slightly outside the bound
+(minute vs daily-panel H/L mismatch); not chased. Read the "+11 / +98" figures above as "+7 / +73".
