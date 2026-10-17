@@ -7614,3 +7614,35 @@ open(t)->open(t+1) return, IBIT Roth-eligible, ~5-10bp spread.
 - **PREF-first wiring verified (no change needed).** `executor.py` already subtracts `state/pref-ex-reserved.json`
   (dated, cash/Roth account only) from the night leg's sizing, and `pref_ex_live` writes the reservation in dry as
   well as live; CEF-RV held value is subtracted separately. The ROTH-STACK +2pp PREF-first ordering holds.
+
+## Pre-registrations 2026-10-16 evening burst (user: "everything on, as much as possible"; N 1011 -> 1015)
+PREF-EX mode flips OFF -> LIVE this commit (dry's 10-20 run will place Tuesday's real MOC buy; kill rule unchanged:
+>25bp live cost or event mean net <= 0 at 30 trips).
+
+### Study PREF-PART (N 1012) — participation-impact ladder for the PREF stack (the v2-raise question)
+Replay the PREF-EX shadow's scored events (state/pref-ex.jsonl, official sizes on disk) at participation 5% (the
+registered setting), 10%, 20%, 50% of the trailing median closing cross; fill capped by the event's own cross size;
+sizes rounded to whole shares at the $25-par price. ONE LOOK. Judged statistic: mean extra cross-cost per event
+(marginal impact) at 10% and 20% vs the 5% baseline. PASS = extra cost <= 10bp at 10% AND <= 20bp at 20%; the 50% run
+is report-only (it informs, not decides). In-sample (2026 backfill + these sessions); the v2 raise itself waits for
+the live 30-trip gate. Runner `research/sim/pref_part.py` (data from him's state/pref-ex.jsonl) -> out txt. N 1012.
+
+### Study SSR-T1 (N 1013) — did T+1 settlement (2024-05-28) shift the Rule 201 lift-day executable window?
+SSR-LIFT confirmed the trigger->lift mechanism (-43bp diff-in-disc) and an executable short T+2-open -> T+2-close
+2021-26 (+16.7bp/day t 2.72, official crosses). Pre-signed: post-T+1 (2024-06-01+) the forced buy arrives ~1 day
+earlier, so the SAME-session short (short T+1 open -> cover T+1 close, arm B) should hold/recover excess vs arm A
+(longer window). Judge = post-T+1 era only (2024-06..2026-10), official crosses, tier costs, day-clustered; one look.
+PASS = arm B era mean >= arm A era mean + 10bp with t >= 2 in the era; else the executable window stays T+2 as deployed.
+Runner `research/sim/ssr_t1.py` (reuses data/research/ssr events + research/sim/ssr_cross.py plumbing). N 1013.
+
+### Study CEF-ACCEL (N 1014) — faster exit arm for CEF-RV (forward-only)
+CEF-RV exits at its own trailing-52w 50th percentile. Pre-registered arm: exit at the 60th percentile instead
+(accelerated), same entry rule. Judge = FORWARD (CEF-RV-FWD's own pipeline; the shadow logs the accelerated exit
+signal beside the registered one; NO backtest look: the family's 1999-2014 and 2016-26 windows are touched).
+Decision at cef_rv_mode enable time: adopt the accelerated exit only if at 60-closed-trade read it keeps excess
+>= 60bp per trade AND yields >= 1.5x the events at equal t. Until then the deployed exit stays the registered median.
+Built into `swingtrader/daily/cef_rv_shadow.py` (adds `exit_signal_accel` + summary readouts). N 1014.
+
+### No new registration
+TME-BOOST (3x via TMF) stays per the 2026-10-11 ceiling-kill: reopenable only with a measured FORWARD capture rate
+for TME itself — `research.sim.tme_shadow forward` is already in research-shadows and is the measurement. No backtest.

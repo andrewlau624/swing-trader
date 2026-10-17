@@ -175,7 +175,7 @@ daily:
   # 3x cost leaves +1.6 / +0.9, so it stands only while the measured cross cost stays ~0bp). Settled cash only, BIL/SGOV never
   # sold, <= 3 names, <= 50% of Roth equity; writes state/pref-ex-reserved.json so the 15:40 Roth night leg does not spend
   # the same dollars. off | dry (size + log, no orders) | live. Switch-on is a user decision (first run dry for a week).
-  pref_ex_mode: "dry"            # quoted: bare off is YAML false; user OK 2026-10-16 (dry first, live go pending)
+  pref_ex_mode: "live"           # quoted: bare off is YAML false; user OK 2026-10-16 (dry->live same day, cluster starts 10-21; kill rule = >25bp cost / event mean net <=0 at 30 trips)
   # CEF-RV live (Roth, OO form; swingtrader/daily/cef_rv_live.py, own timer weekdays 09:05 ET). Buy a closed-end fund at the
   # opening cross of the first session after its discount hits its own 52-week 10th percentile, sell at the opening cross after
   # it recovers to its median (or 260 days); signals come from the CEF-RV forward shadow (state/cef-rv.jsonl). Pre-registered:
