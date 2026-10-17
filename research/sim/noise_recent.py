@@ -18,7 +18,7 @@ def trades_for(S, sym, w, lag):
         sigma = np.nanmean(moves, axis=0)
         ub, lb = noise_bounds(T["open"], S[prev[-1]]["close"][-1], sigma)
         pv = np.cumsum(C*V)/np.maximum(np.cumsum(V),1); pv = np.where(np.isfinite(pv), pv, C)
-        closes = np.array([S[d]["close"][-1] for d in days[:k+1]])
+        closes = np.array([S[d]["close"][-1] for d in days[:k]])
         lev = vol_leverage(closes, cfg.target_vol, cfg.max_lev)
         if lev <= 0: continue
         mult = lev*w; pos = 0; ep = 0.0

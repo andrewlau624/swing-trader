@@ -101,7 +101,7 @@ def replay_instrument(S: dict, cfg: DaybookConfig, sym: str, w: float, day: pd.T
     ub, lb = noise_bounds(openp, prev_close, sigma)
     pv = np.cumsum(C * V) / np.maximum(np.cumsum(V), 1)
     pv = np.where(np.isfinite(pv), pv, C)
-    closes_all = np.array([S[d]["close"][-1] for d in sorted(S) if d <= day])
+    closes_all = np.array([S[d]["close"][-1] for d in sorted(S) if d < day])
     lev = vol_leverage(closes_all, cfg.target_vol, cfg.max_lev)
     if lev <= 0:
         return []
