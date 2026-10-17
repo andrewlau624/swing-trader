@@ -90,16 +90,41 @@ def _trade_date(filled_at: str) -> str:
 def official(H: dict, sym: str, date: str, kind: str):
     """(official_px, print_size) of the largest auction print for that session; None if not on tape.
     kind: 'open' -> the 'O'-flag auction in the 'o' array, 'close' -> the auction after 15:00 in the 'c' array."""
+    tbl = auction_table(H, sym, date)
+    if tbl is None:
+        return None, None
+    key = "o" if kind == "open" else "c"
+    arr = [q for q in tbl[key] if (kind == "open" and str(q.get("c")) == "O")]
+    p = max(arr or tbl[key], key=lambda q: q.get("s", 0))
+    return p.get("p"), p.get("s", 0)
+
+
+def auction_table(H: dict, sym: str, date: str) -> dict | None:
+    """The one auction row for (sym, date); cached file state/fill-costs-auctions.json to survive restarts."""
+    cache = state_dir_cache(H)
+    if date in cache and sym in cache[date]:
+        return cache[date][sym]
     j = _get(AU_URL, dict(symbols=sym, start=date, end=date, feed="sip", limit=10000), H)
     rows = ((j or {}).get("auctions") or {}).get(sym) or []
-    key = "o" if kind == "open" else "c"
+    row = None
     for x in rows:
-        if str(x.get("d", "")).startswith(date) and x.get(key):
-            arr = [q for q in x[key]
-                   if (kind == "open" and str(q.get("c")) == "O") or kind == "close"]
-            p = max(arr or x[key], key=lambda q: q.get("s", 0))
-            return p.get("p"), p.get("s", 0)
-    return None, None
+        if str(x.get("d", "")).startswith(date):
+            row = x
+    cache.setdefault(date, {})[sym] = row
+    path = ROOT / "state" / "fill-costs-auctions.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(cache))
+    return row
+
+
+def state_dir_cache(H) -> dict:
+    p = ROOT / "state" / "fill-costs-auctions.json"
+    if p.exists():
+        try:
+            return json.loads(p.read_text())
+        except ValueError:
+            return {}
+    return {}
 
 
 def _read(p: Path) -> list[dict]:
@@ -121,6 +146,8 @@ def run(state_dir: Path, logs_dir: Path) -> int:
     now = dt.datetime.now(dt.timezone.utc)
     scored = 0
     rows = []
+    # prefetch: one call per missing trade DATE over the distinct symbols of that date (~17 calls, not 183)
+    todo_all = []
     for fn in ("daily-fills-live.jsonl", "daily-fills-roth.jsonl"):
         p = Path(logs_dir, fn)
         if not p.exists():
@@ -130,37 +157,58 @@ def run(state_dir: Path, logs_dir: Path) -> int:
                 f = json.loads(ln)
             except ValueError:
                 continue
-            key = (f.get("coid"), f.get("filled_at"), f.get("fill_px"))
-            if key in done or not f.get("fill_px") or not key[0]:
+            if (f.get("coid"), f.get("filled_at"), f.get("fill_px")) in done:
                 continue
-            fa = str(f.get("filled_at", ""))
-            kind = _leg_kind(fa)
-            row = dict(coid=f["coid"], sym=f["sym"], leg=f.get("leg"), side=f.get("side"), qty=f.get("qty"),
-                       fill_px=f["fill_px"], filled_at=fa, cost_kind=kind, src="alpaca_auctions")
-            if kind == "mid_unclosed":
-                row.update(official_px=None, print_size=None, cost_bp=None, note="intraday fill; NBBO mid check not per-fill")
-            else:
-                # age gate: prints publish with a lag
+            kind = _leg_kind(str(f.get("filled_at", "")))
+            if kind != "mid_unclosed" and f.get("fill_px") and f.get("coid"):
                 try:
-                    t = dt.datetime.fromisoformat(fa.replace("+0000", "+00:00").replace("Z", "+00:00"))
+                    t = dt.datetime.fromisoformat(str(f["filled_at"]).replace("+0000", "+00:00").replace("Z", "+00:00"))
                     if t.tzinfo is None:
                         t = t.replace(tzinfo=dt.timezone.utc)
                 except Exception:
-                    rows.append(row)
-                    scored += 1
                     continue
-                if now - t < LATER:
-                    continue
-                td = _trade_date(fa)
-                px, size = official(H, f["sym"], td, kind)
-                if px:
-                    row.update(official_px=px, print_size=size,
-                               cost_bp=round((f["fill_px"] / px - 1) * 1e4 * (1 if f.get("side") == "buy" else -1), 2))
-                else:
-                    row.update(official_px=None, print_size=None, cost_bp=None, note="print not yet on tape")
-            rows.append(row)
-            done.add(key)
-            scored += 1
+                if now - t >= LATER:
+                    todo_all.append((f, kind))
+    by_date: dict[str, set[str]] = {}
+    for f, _k in todo_all:
+        by_date.setdefault(_trade_date(f["filled_at"]), set()).add(f["sym"])
+    cache = state_dir_cache(H)
+    for d, syms in by_date.items():
+        missing = [s for s in sorted(syms) if s not in cache.get(d, {})]
+        for i in range(0, len(missing), 100):
+            j = _get(AU_URL, dict(symbols=",".join(missing[i:i + 100]), start=d, end=d, feed="sip", limit=10000), H)
+            got = (j or {}).get("auctions") or {}
+            for s, rs in got.items():
+                row = next((x for x in rs if str(x.get("d", "")).startswith(d)), None)
+                cache.setdefault(d, {})[s] = row
+            for s in missing[i:i + 100]:
+                cache.setdefault(d, {}).setdefault(s, None)
+        (ROOT / "state" / "fill-costs-auctions.json").write_text(json.dumps(cache))
+    for f, kind in todo_all:
+        fa = str(f.get("filled_at", ""))
+        row = dict(coid=f["coid"], sym=f["sym"], leg=f.get("leg"), side=f.get("side"), qty=f.get("qty"),
+                   fill_px=f["fill_px"], filled_at=fa, cost_kind=kind, src="alpaca_auctions")
+        if kind == "mid_unclosed":
+            row.update(official_px=None, print_size=None, cost_bp=None,
+                       note="intraday fill; NBBO mid check not per-fill")
+        else:
+            td = _trade_date(fa)
+            tbl = auction_table(H, f["sym"], td)
+            px, size = (None, None) if tbl is None else (None, None)
+            if tbl:
+                key = "o" if kind == "open" else "c"
+                arr = [q for q in (tbl.get(key) or []) if not (kind == "open" and str(q.get("c")) != "O")]
+                if arr:
+                    p = max(arr, key=lambda q: q.get("s", 0))
+                    px, size = p.get("p"), p.get("s", 0)
+            if px:
+                row.update(official_px=px, print_size=size,
+                           cost_bp=round((f["fill_px"] / px - 1) * 1e4 * (1 if f.get("side") == "buy" else -1), 2))
+            else:
+                row.update(official_px=None, print_size=None, cost_bp=None, note="print not on tape")
+        rows.append(row)
+        done.add((f.get("coid"), f.get("filled_at"), f.get("fill_px")))
+        scored += 1
     if rows:
         spat.parent.mkdir(parents=True, exist_ok=True)
         with spat.open("a") as fh:
