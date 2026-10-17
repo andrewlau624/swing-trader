@@ -1,0 +1,8 @@
+PREF-PART on 319 scored eligible events (state/pref-ex.jsonl)
+
+participation   5.0%   mean added impact +1.79bp (worst single event +1.79bp)
+participation  10.0%   mean added impact +2.53bp (worst single event +2.53bp)
+participation  20.0%   mean added impact +3.58bp (worst single event +3.58bp)
+participation  50.0%   mean added impact +5.66bp (worst single event +5.66bp)
+
+VERDICT: PASS (model-based; the live 30-trip record is the real judge)

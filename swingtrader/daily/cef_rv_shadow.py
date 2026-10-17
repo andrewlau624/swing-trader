@@ -60,7 +60,9 @@ def signals(dates: list[str], disc: list[float]) -> list[dict]:
     """Entry/exit signal weeks of the frozen CEF-RV rule over one fund's weekly series (oldest first).
 
     Mirrors research/sim/cef_rv.build_trades, without prices: returns [{signal, exit_signal|None}], the last one
-    open when the fund is still held.
+    open when the fund is still held. Also logs exit_signal_accel (CEF-ACCEL, prose N 1014): the same entry, exit at
+    the trailing 60th percentile instead of the median (fires no later than exit_signal; forward arm, never acted on
+    until cef_rv_mode's enable talk).
     """
     out, cur = [], None
     for i in range(56, len(disc)):
@@ -71,13 +73,25 @@ def signals(dates: list[str], disc: list[float]) -> list[dict]:
             continue
         if cur is None:
             if x <= q10:
-                cur = dict(signal=dates[i], exit_signal=None)
+                cur = dict(signal=dates[i], exit_signal=None, exit_signal_accel=None)
                 out.append(cur)
         else:
             held = (dt.date.fromisoformat(dates[i]) - dt.date.fromisoformat(cur["signal"])).days
             if x >= med or held > MAX_HOLD_DAYS:
                 cur["exit_signal"] = dates[i]
                 cur = None
+    # accel exits: re-walk and flag the first week where x >= q60 (60th pct) inside the hold
+    for t in out:
+        if t["exit_signal_accel"] is not None:
+            continue
+        seg = [i for i, d in enumerate(dates) if t["signal"] <= d <= (t["exit_signal"] or dates[-1])]
+        for i in seg:
+            win = disc[max(0, i - 51): i + 1]
+            q60 = _pct(win, 60)
+            x = disc[i]
+            if x is not None and math.isfinite(x) and x >= q60:
+                t["exit_signal_accel"] = dates[i]
+                break
     return out
 
 

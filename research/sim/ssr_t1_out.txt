@@ -1,0 +1,18 @@
+SSR-T1 judged POST-T+1 era: 45037 events, 585 sessions (2024-06-03 00:00:00 .. 2026-10-01 00:00:00)
+TREATED L<=-10%    A   n 16612 mean  +42.5 med  +52.0 hit 0.55 | day-t +1.80
+TREATED L<=-10%    Ah  n 16612 mean  +33.5 med  +45.5 hit 0.55 | day-t +2.50
+TREATED L<=-10%    T1  n 16612 mean -116.9 med  -43.4 hit 0.45 | day-t -9.87
+TREATED L<=-10%    T1h n 16612 mean  -92.0 med  -16.3 hit 0.48 | day-t -10.67
+
+TREATED ADV>=$20M  A   n 11384 mean  +43.9 med  +51.2 hit 0.55 | day-t +2.20
+TREATED ADV>=$20M  Ah  n 11384 mean  +30.9 med  +41.7 hit 0.55 | day-t +2.81
+TREATED ADV>=$20M  T1  n 11384 mean -115.2 med  -38.6 hit 0.46 | day-t -8.00
+TREATED ADV>=$20M  T1h n 11384 mean  -88.4 med   -9.8 hit 0.49 | day-t -8.42
+
+CONTROL L -10..-7  A   n 28425 mean   -9.7 med  +11.5 hit 0.51 | day-t -0.35
+CONTROL L -10..-7  Ah  n 28425 mean   +6.8 med  +10.7 hit 0.51 | day-t -0.02
+CONTROL L -10..-7  T1  n 28425 mean  -60.1 med  -33.4 hit 0.46 | day-t -5.75
+CONTROL L -10..-7  T1h n 28425 mean  -38.8 med   -9.5 hit 0.49 | day-t -6.73
+
+open-cross $ size on T+1 (treated): median $353,611, p10 $40,385
+T1 minus A (treated): -37.2bp

@@ -7646,3 +7646,23 @@ Built into `swingtrader/daily/cef_rv_shadow.py` (adds `exit_signal_accel` + summ
 ### No new registration
 TME-BOOST (3x via TMF) stays per the 2026-10-11 ceiling-kill: reopenable only with a measured FORWARD capture rate
 for TME itself — `research.sim.tme_shadow forward` is already in research-shadows and is the measurement. No backtest.
+
+### RESULTS (2026-10-16 evening burst, one look each; program N = 1015)
+- **PREF-PART (N 1012): PASS (model-based).** 319 scored eligible events; square-root-impact ladder on the events'
+  own cross dollars: participation 5% -> 10% adds ~+0.7bp/event, -> 20% ~ +1.8bp, 50% ~ +3.9bp — every rung inside
+  the +38bp/event trade. The registered bar (<=10bp extra at 10%, <=20bp at 20%) is comfortably met, so the v2
+  participation raise (5% -> 10% at first) is bookable at the live 30-trip gate's discretion. Caveat once: it is an
+  impact MODEL; the real judge is live cost at raised participation. Output `research/sim/pref_part_out.txt`.
+- **SSR-T1 (N 1013): KILL.** Post-T+1 era judged, official crosses (45,037 events, 585 sessions, trigger
+  2024-06-03..2026-10-01). Arm A (deployed: short T+2 open, cover T+2 close) SURVIVES the T+1 era: treated mean
+  +42.5bp (day-t 1.80), hedged +33.5 (day-t 2.50), ADV>=$20M mean +43.9 (day-t 2.20). The pre-signed T+1 arm is the
+  OPPOSITE: T+1 open -> T+1 close = -116.9bp mean (day-t -9.87), hit 45%, also negative on the control set (-60.1bp
+  day-t -5.75) — the T+1 open->close leg is a losing leg broadly, not a timing upgrade. Verdict: the executable
+  Rule-201 window stays T+2 open -> close, as deployed. Positive confirmation for the aggressed sleeve. Output
+  `research/sim/ssr_t1_out.txt`.
+- **CEF-ACCEL (N 1014): deployed forward-shadow arm only.** `cef_rv_shadow` now logs exit_signal_accel (60th-pct
+  exit) beside the registered median exit; adopted or killed at cef_rv_mode enable (60 forward trades, excess>=60bp
+  AND >=1.5x the events at equal t). NO backtest look taken.
+- **TME-BOOST (N 1015 slot; no new look):** `research.sim.tme_shadow forward` already measures the forward capture
+  rate; the 3x reopen decision reads THAT when enough sessions accumulate. Nothing to run today.
+Program N = 1015.
