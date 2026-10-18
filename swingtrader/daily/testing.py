@@ -212,6 +212,18 @@ def _pref_ex_live(state: Path, logs: Path) -> dict:
     return dict(n=s["round_trips"], week=len(wk), line=w.line(rows))
 
 
+def _rare_watch(state: Path, logs: Path) -> dict:
+    rows = _jsonl(Path(__file__).resolve().parents[2] / "data/research/rare_watch/watch.jsonl")
+    last = {r["watch"]: r for r in rows}
+    fired = sorted(k for k, r in last.items() if r.get("fired"))
+    errs = sorted(k for k, r in last.items() if r.get("status") == "error")
+    wk = [r for r in rows if r.get("fired") and r.get("date", "") >= _week_ago()]
+    days = len({r.get("date") for r in rows})
+    line = (f"{days} scan days; last {max((r.get('date', '') for r in rows), default='never')}: "
+            f"FIRED {', '.join(fired) if fired else 'none'}" + (f"; errors {', '.join(errs)}" if errs else ""))
+    return dict(n=len([r for r in rows if r.get("fired")]), week=len(wk), line=line)
+
+
 def _cef_rv_live(state: Path, logs: Path) -> dict:
     from . import cef_rv_live as w
     rows = _jsonl(logs / w.LOG_NAME)
@@ -480,7 +492,10 @@ REGISTRY: list[Test] = [
          "the close 10 sessions earlier, vs PFF; added 2026-10-08; own gate at 60 forward nights: >= +20bp vs PFF net of "
          "MEASURED cost, t >= 2, and beats T-1) and the measured closing-cross cost vs the 15:59 mid. ROTH-STACK arm (from 2026-10-09, log-only): each ex-eve "
          "snapshots the cash-Roth idle cash and logs strict/lenient x PREF-first/night-first whole-share allocation at the 5% "
-         "cap plus realized CC cost vs the 10bp assumption (state/pref-ex-roth-stack.jsonl; research/sim/roth_stack.py).",
+         "cap plus realized CC cost vs the 10bp assumption (state/pref-ex-roth-stack.jsonl; research/sim/roth_stack.py). "
+         "CEF y>5% arm (CEFX5-FWD, added 2026-10-18, LOG-ONLY, cls cef, never live): CEF-RV-panel funds with a distribution > 5% of the "
+         "prior close, same CO/CC at official crosses; post-hoc CEFX5 CO +52bp t 2.85 (CC primary killed); own gate 30 forward "
+         "events: net CO >= +20bp, median > 0, day-t >= 2; kill <= +5bp (read in the line below as 'CEF y>5%').",
          "2026-10-07", 60, "forward ex-nights", _pref_ex,
          "make pref-ex; research/sim/pref_exec_out.txt; round1_prose.md Study PREF-EX", ["pref_ex_shadow"]),
     Test("CEF-RV: CEF discount reversion vs the CEF universe", "buy a CEF at its own 52-week 10th-percentile "
@@ -507,6 +522,12 @@ REGISTRY: list[Test] = [
          "overnight returns, liquid common stock: official closing cross -> next opening cross, excess vs SPY. Gate: 120 nights, "
          "mean >= +5bp/night, t >= 2, median > 0; FAIL closes the overnight-clientele class (N 939, adversarial: small now).",
          "2026-10-13", 120, "nights", _ovn_mom, "state/ovn-mom.jsonl; round1_prose.md Watch OVN-MOM-FWD", ["ovn_mom_shadow"]),
+    Test("RARE-WATCH: rare-trigger watchtower (log-only)", "research/sim/rare_watch.py scan (research-shadows): frozen "
+         "triggers from the mechanism loop -- cef_pref_floor (SPY >= 25% off its 252d high AND the $25-par CEF-preferred "
+         "basket median <= $20), pref_arrears (a preferred pays >= 3x its prior-4 median, yield 4-30%), ofac_cmic (a new OFAC "
+         "CMIC entity maps to a US ADR), rating_equity (manual reminder). Alert only: a fire is a research prompt, never an order.",
+         "2026-10-19", 0, "fires", _rare_watch, "data/research/rare_watch/watch.jsonl; make rare-watch; "
+         "research/drafts/mech_loop_2026-10-17.md branch T", ["rare_watch"]),
     Test("SSR-LIFT-FWD: Rule 201 lift-day short, SPY-hedged (log-only)", "ssr_lift_shadow.py (research-shadows): liquid common "
          "stock (raw close >= $10, 20d ADV >= $20M) whose regular-hours low hit -10% on day T and did not re-trigger on T+1: short the "
          "T+2 official open cross, cover the T+2 official close cross, hedge 1.5x SPY; net of 5bp/side + 2bp borrow, easy-to-borrow "

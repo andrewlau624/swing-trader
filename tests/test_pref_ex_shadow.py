@@ -120,3 +120,60 @@ def test_roth_stack_alloc_caps_at_part_of_cross_and_night_first_leaves_less():
     assert a["strict_pref"]["qty"] == {"AAA": 4, "BBB": 20}          # AAA capped at 5% x 2000 = $100; BBB gets the rest
     assert a["strict_night"]["avail"] == 100.0 and a["strict_night"]["qty"]["AAA"] == 2
     assert a["lenient_pref"]["avail"] == 1000.0
+
+
+def _cef_hist(px=10.0, size=1000):
+    p = {f"2026-10-{d:02d}": (px, 100, px, size) for d in range(1, 15)}     # $10k cross each session
+    return p
+
+
+def test_cef_arm_is_classed_cef_with_its_own_yield_band():
+    p = _cef_hist()
+    p["2026-10-16"] = (9.50, 400, 9.60, 300)
+    hi = W.score(dict(sym="CEFA", ex="2026-10-16", div=0.60, cls="cef"), {"CEFA": p})     # y 6%
+    assert hi["eligible"] and hi["cls"] == "cef" and abs(hi["yld"] - 0.06) < 1e-12
+    lo = W.score(dict(sym="CEFA", ex="2026-10-16", div=0.30, cls="cef"), {"CEFA": p})     # y 3%: pref-band yield, not cef
+    assert not lo["eligible"]
+    assert W.score(dict(sym="CEFA", ex="2026-10-16", div=3.5, cls="cef"), {"CEFA": p})["status"] == "mismatch"  # y 35%
+    pref = W.score(dict(sym="CEFA", ex="2026-10-16", div=0.60, cls="pref"), {"CEFA": p})    # 6% is above the pref band
+    assert not pref["eligible"]
+
+
+def test_cef_rows_do_not_touch_pref_etd_gates_or_allocation():
+    cef = dict(sym="CEFA", cls="cef", ex="2026-10-20", status="scored", eligible=True, co=0.01, cc=0.005, net_co=0.008,
+               net_cc=0.004, order_usd=200.0, part_close=0.04, close_px=10.0, close_usd=5e3, open_usd=5e3,
+               exit_close_usd=5e3, med_cross_usd=10_000.0, d0="2026-10-19")
+    pref = dict(sym="P.PRA", cls="pref", ex="2026-10-20", status="scored", eligible=True, co=0.004, cc=0.003,
+                net_co=0.003, net_cc=0.002, order_usd=200.0, part_close=0.04, close_px=25.0, close_usd=5e3,
+                open_usd=5e3, exit_close_usd=5e3, med_cross_usd=10_000.0, d0="2026-10-19")
+    rows = [cef, pref]
+    assert W._rc(dict(sym="CEFA", cls="cef")) == "cef" and W._rc(dict(sym="P.PRA")) == "pref"   # legacy row: no cls
+    assert W.summary(rows)["forward"]["co"]["n"] == 1 and W.summary(rows, "etd")["forward"]["co"]["n"] == 0
+    assert W.summary(rows, "cef")["forward"]["co"]["n"] == 1
+    assert "forward 1/30 events" in W.cef_line(rows) and "CEF y>5% (log-only)" in W.lines(rows)
+    assert W.chain_summary([r for r in rows if W._rc(r) != "cef"]).get("n") == 0
+    ex = [dict(cef, ex="2026-10-21"), dict(pref, ex="2026-10-21")]
+    for r in ex:                                    # execution: pref keeps the full ACCT, cef is a separate night
+        r.pop("net_co", None)
+    W.execution(ex, acct=10_000, part=0.05)
+    assert ex[1]["order_usd"] == 500.0 and ex[0]["order_usd"] == 500.0
+    snap = dict(cash=1000.0, tbill_usd=0.0, night_budget=0.0)
+    assert W.stack_rows(rows, {"2026-10-19": snap})[0]["syms"] == ["P.PRA"]
+
+
+def test_cef_universe_degrades_when_panel_absent(tmp_path):
+    msgs = []
+    assert W.cef_universe(tmp_path, msgs.append) == frozenset() and "skipped" in msgs[0]
+    (tmp_path / W.CEF_PANEL).write_text(json.dumps({"CEFA": [], "X.PRA": [], "SOJD": []}))
+    assert W.cef_universe(tmp_path) == frozenset({"CEFA"})
+
+
+def test_cef_rows_are_never_live_candidates():
+    import datetime
+    from swingtrader.daily import pref_ex_live as L
+    assert "cef" not in L.CLASSES
+    today = datetime.date(2026, 10, 19)
+    ex = L.next_session(today).isoformat()
+    rows = [dict(sym="CEFA", ex=ex, cls="cef", div=0.6, status="upcoming"),
+            dict(sym="P.PRA", ex=ex, cls="pref", div=0.4, status="upcoming")]
+    assert [r["sym"] for r in L.candidates(rows, today)] == ["P.PRA"]

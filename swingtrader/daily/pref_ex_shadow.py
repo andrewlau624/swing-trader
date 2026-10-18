@@ -22,6 +22,13 @@ listed in etd_symbols.txt; CEF preferreds are ".PR" and already in the preferred
 +39bp. Logged in the same file with cls="etd" and gated separately with the same thresholds; the preferred gate counts
 preferreds only. Both classes share the account on a night (the combined book).
 
+CEF y>5% arm (CEFX5-FWD, round1_prose.md, 2026-10-18; LOG-ONLY, cls="cef"): CEF-RV-panel symbols whose cash distribution is
+> 5% (<= 30%) of the prior close, $5-60, same E-1 close -> E open (CO) / close (CC) scoring at official crosses. A forward
+measurement of a post-hoc observation (CEFX5 CO +52bp t 2.85, registered CC primary KILLED). Own gate: CEF_NEED forward
+events, pass = mean net CO >= +20bp, median > 0, day-clustered t >= 2; kill <= +5bp. Sized on its own ACCT (never shares
+the night with pref/etd), excluded from the pref/etd gates, chain arm and ROTH-STACK. pref_ex_live trades only
+cls in ("pref", "etd"), so cef rows are never live candidates.
+
 PREF-CHAIN arm (window-signal loop 2026-10-07, research/drafts/window_signals_loop_2026-10-07.md): buy the closing
 cross 10 sessions before E instead of E-1, same exit (E's closing cross), dividend included. Research: 2016-26 +68bp
 excess vs the EW preferred universe, 2005-15 +57bp gross (every year > 0) but +17bp net of 40bp RT -> failed its net
@@ -58,6 +65,11 @@ MIN_CROSS = 1_400.0                   # = research screen 20d median $vol >= $10
 AU_URL = "https://data.alpaca.markets/v2/stocks/auctions"
 QURL = "https://data.alpaca.markets/v2/stocks/quotes"
 BENCH = "PFF"
+CEF_PANEL = "cef-rv-panel.json"       # state/: CEF-RV weekly panel (sym -> weeks), pushed from the Mac (make cef-rv-panel)
+CEF_FORWARD_FROM = "2026-10-18"
+CEF_NEED = 30
+CEF_MIN_YLD, CEF_MAX_YLD = 0.05, 0.30  # div / prior close; the FXD y>5% bin, 30% cap drops mis-recorded rates
+CEF_MIN_PX, CEF_MAX_PX = 5.0, 60.0
 CHAIN_N = 10                          # sessions before E for the PREF-CHAIN entry
 ETD = frozenset(ln.strip() for ln in (Path(__file__).with_name("etd_symbols.txt")).read_text().splitlines()
                 if ln.strip() and not ln.startswith("#"))
@@ -67,8 +79,25 @@ def _cls(sym: str) -> str:
     return "pref" if ".PR" in sym else "etd"
 
 
-def events(today: dt.date, H: dict) -> list[dict]:
-    """Preferred ('XXX.PRY') and baby-bond (ETD list) cash dividends with process date in [today-60, today+90]."""
+def _rc(r: dict) -> str:
+    """A logged row's class: its own `cls` (set since the first rows), else the symbol rule."""
+    return r.get("cls") or _cls(r["sym"])
+
+
+def cef_universe(state_dir: Path, log=print) -> frozenset:
+    """CEF symbols from the CEF-RV panel (state/cef-rv-panel.json); empty (arm skipped, logged) if it is absent."""
+    f = Path(state_dir) / CEF_PANEL
+    try:
+        syms = json.loads(f.read_text())
+    except (OSError, ValueError):
+        log(f"[pref-ex] {CEF_PANEL} absent/unreadable: CEF y>5% arm skipped (make cef-rv-panel)")
+        return frozenset()
+    return frozenset(s for s in syms if ".PR" not in s and s not in ETD)
+
+
+def events(today: dt.date, H: dict, cef: frozenset = frozenset()) -> list[dict]:
+    """Preferred ('XXX.PRY'), baby-bond (ETD list) and CEF (`cef` universe, cls "cef") cash dividends with process date in
+    [today-60, today+90]. The yield bound is applied in score()."""
     out, tok = [], None
     while True:
         q = {"types": "cash_dividend", "start": str(today - dt.timedelta(days=60)),
@@ -78,8 +107,8 @@ def events(today: dt.date, H: dict) -> list[dict]:
         j = _get(CA_URL, q, H)
         for x in (j.get("corporate_actions") or {}).get("cash_dividends", []):
             s = x.get("symbol", "")
-            if (".PR" in s or s in ETD) and not x.get("special") and not x.get("foreign") and (x.get("rate") or 0) > 0:
-                out.append(dict(sym=s, ex=x["ex_date"], div=float(x["rate"]), cls=_cls(s)))
+            if (".PR" in s or s in ETD or s in cef) and not x.get("special") and not x.get("foreign") and (x.get("rate") or 0) > 0:
+                out.append(dict(sym=s, ex=x["ex_date"], div=float(x["rate"]), cls=_cls(s) if (".PR" in s or s in ETD) else "cef"))
         tok = j.get("next_page_token")
         if not tok:
             return list({(e["sym"], e["ex"]): e for e in out}.values())
@@ -213,9 +242,13 @@ def score(ev: dict, X: dict) -> dict | None:
     if abs(co) > 0.25 or abs(cc) > 0.25:                       # tape and dividend record disagree
         return dict(ev, status="mismatch", co=co, cc=cc)
     yld = ev["div"] / c0
+    if ev.get("cls") == "cef":
+        ok = CEF_MIN_PX <= c0 <= CEF_MAX_PX and CEF_MIN_YLD < yld <= CEF_MAX_YLD and med_cross >= MIN_CROSS
+    else:
+        ok = MIN_PX <= c0 <= MAX_PX and MIN_YLD <= yld <= MAX_YLD and med_cross >= MIN_CROSS
     return dict(ev, status="scored", d0=d0, close_px=c0, close_usd=c0 * cs0, open_px=o1, open_usd=o1 * (os1 or 0),
                 exit_close_px=c1, exit_close_usd=c1 * (cs1 or 0), med_cross_usd=med_cross, yld=yld, co=co, cc=cc,
-                eligible=(MIN_PX <= c0 <= MAX_PX and MIN_YLD <= yld <= MAX_YLD and med_cross >= MIN_CROSS))
+                eligible=ok)
 
 
 def execution(rows: list[dict], acct: float = ACCT, part: float = PART) -> None:
@@ -224,7 +257,7 @@ def execution(rows: list[dict], acct: float = ACCT, part: float = PART) -> None:
     by_night: dict[str, list[dict]] = {}
     for r in rows:
         if r.get("status") == "scored" and r.get("eligible"):
-            by_night.setdefault(r["ex"], []).append(r)
+            by_night.setdefault((_rc(r) == "cef", r["ex"]), []).append(r)     # the cef arm has its own night / ACCT
     for night in by_night.values():
         rem = acct
         for k, r in enumerate(sorted(night, key=lambda r: r["med_cross_usd"])):
@@ -256,10 +289,11 @@ def _stats(rows: list[dict], key: str) -> dict:
 
 def summary(rows: list[dict], cls: str = "pref") -> dict:
     out = {}
-    rows = [r for r in rows if _cls(r["sym"]) == cls]
+    rows = [r for r in rows if _rc(r) == cls]
+    f0 = CEF_FORWARD_FROM if cls == "cef" else FORWARD_FROM
     for tag, fwd in (("forward", True), ("backfill", False)):
         x = [r for r in rows if r.get("status") == "scored" and r.get("eligible") and "net_co" in r
-             and (r["ex"] >= FORWARD_FROM) == fwd]
+             and (r["ex"] >= f0) == fwd]
         out[tag] = {k: _stats(x, k) for k in ("co", "net_co", "cc", "net_cc")}
         out[tag]["order_usd_per_night"] = (sum(r["order_usd"] for r in x) / len({r["ex"] for r in x})) if x else None
         parts = [r["part_close"] for r in x if r.get("part_close") is not None]
@@ -353,8 +387,25 @@ def line(rows: list[dict], cls: str = "pref") -> str:
     return "; ".join(parts) + (f"; next: {nxt}" if nxt else "") + verdict
 
 
+def cef_line(rows: list[dict]) -> str:
+    """CEFX5-FWD: forward events vs the CEF_NEED gate (event count, day-clustered t), CO beside the Schwab-safe CC."""
+    v = summary(rows, "cef")["forward"]
+    n = v["co"]["n"]
+    if not n:
+        return f"forward 0/{CEF_NEED} events"
+    f = v["net_co"]
+    t = f["t"] if f["t"] is None else round(f["t"], 2)
+    verdict = ""
+    if n >= CEF_NEED:
+        verdict = (" -> PASS (net CO >= 20bp, median > 0, t >= 2)" if f["night_mean_bp"] >= 20 and f["median_bp"] > 0
+                   and (f["t"] or 0) >= 2 else " -> KILL (net CO <= 5bp)" if f["night_mean_bp"] <= 5 else " -> HOLD")
+    return (f"forward {n}/{CEF_NEED} events/{v['co']['nights']} nights: net CO {f['night_mean_bp']:+.0f}bp (median "
+            f"{f['median_bp']:+.0f}, t {t}), net CC {v['net_cc']['night_mean_bp']:+.0f}bp{verdict}")
+
+
 def lines(rows: list[dict]) -> str:
-    return f"{line(rows)} | ETDX: {line(rows, 'etd')} | {chain_line(rows)}"
+    return (f"{line(rows)} | ETDX: {line(rows, 'etd')} | CEF y>5% (log-only): {cef_line(rows)} | "
+            f"{chain_line([r for r in rows if _rc(r) != 'cef'])}")
 
 
 STACK_SNAP = "pref-ex-roth-snap.jsonl"
@@ -394,7 +445,8 @@ def stack_rows(rows: list[dict], snaps: dict[str, dict]) -> list[dict]:
     """One ROTH-STACK line per scored forward ex-night that has an ex-eve snapshot; realized CC cost vs the 10bp assumption."""
     by: dict[str, list[dict]] = {}
     for r in rows:
-        if r.get("status") == "scored" and r.get("eligible") and r["ex"] >= FORWARD_FROM and r["d0"] in snaps:
+        if (r.get("status") == "scored" and r.get("eligible") and r["ex"] >= FORWARD_FROM and r["d0"] in snaps
+                and _rc(r) != "cef"):
             by.setdefault(r["ex"], []).append(r)
     out = []
     for ex, night in sorted(by.items()):
@@ -432,7 +484,7 @@ def run(state_dir: Path, logs_dir: Path, log=print, today: dt.date | None = None
                 old[(r["sym"], r["ex"])] = r
             except (ValueError, KeyError):
                 continue
-    evs = [e for e in events(today, H) if BACKFILL <= e["ex"] <= str(today + dt.timedelta(days=14))]
+    evs = [e for e in events(today, H, cef_universe(state_dir, log)) if BACKFILL <= e["ex"] <= str(today + dt.timedelta(days=14))]
     def _done(o: dict) -> bool:
         st_ = o.get("status")
         return st_ in ("mismatch", "no_cross") or (st_ == "scored" and "chain_v" in o)
@@ -451,8 +503,9 @@ def run(state_dir: Path, logs_dir: Path, log=print, today: dt.date | None = None
     for e in todo:
         r = score(e, X) if e["ex"] < str(today) else None
         if r is not None and r.get("status") == "scored":
-            r.update(chain(r, X.get(e["sym"], {}), X.get(BENCH, {}), hist))
-            r["stable"] = stable(hist.get(e["sym"], []), e["ex"], e["div"])
+            if e.get("cls") != "cef":                       # the chain arm is a preferred-universe read
+                r.update(chain(r, X.get(e["sym"], {}), X.get(BENCH, {}), hist))
+                r["stable"] = stable(hist.get(e["sym"], []), e["ex"], e["div"])
             r["chain_v"] = 1
             scored.append(r)
         if r is None:

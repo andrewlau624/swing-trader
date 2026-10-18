@@ -7708,3 +7708,181 @@ Also retired by the same ruling: voluntary-liquidation multi-tranche classes whe
 distribution has passed (the remainder locks). Do not re-propose any of these.
 Scanner extensions for tender flags: NOT BUILT (dropped with the ruling). Liquidation 8-K flag:
 built ONLY as a log-only flag if trivially cheap (it feeds nothing else); deprioritized.
+
+## Study PANIC-IDX — rare index washout buy (pre-register 2026-10-17, before any outcome read; N 1017 -> 1018)
+User ask: "rare through signals, but when it hits you make a lot." Mechanism: forced de-risking (margin calls, vol-target /
+risk-parity cuts, redemptions) peaks in fast index selloffs inside a drawdown; the forced sellers' price concession pays the
+buyer over the next ~2 weeks. Named counterparty = levered/vol-targeted holders who must cut. Index-level, so whole-share and
+liquidity limits do not bind at $2-25k; Roth-eligible (long only, no margin).
+- Data: Sharadar SFP SPY closeadj (total return), 1998-01..2026-10. Not untouched in the human sense (2008/2020 are famous)
+  but this rule has never been run in the program.
+- Signal at close T: SPY drawdown from trailing-252-session max close >= 15% AND SPY 5-session return <= -7%.
+- Trade: buy close T, sell close T+10 sessions. No new entry while a trade is open (non-overlapping). Cost 2bp/side.
+- Statistic: excess = trade return minus the mean of all 10-session SPY returns (unconditional drift). Report raw, excess,
+  median, hit rate, events/yr, halves 1998-2011 / 2012-2026, ex-top-5, worst trade, per-event list, and a 3x (UPRO-like,
+  daily-rebalanced synthetic) column. Sensitivity grid (dd {10,15,20} x 5d {-5,-7,-10} x hold {5,10,20}) is DESCRIPTIVE only.
+- Gate: mean excess >= +2%/event, median raw > 0, hit >= 60%, both halves mean > 0, ex-top-5 mean > 0. Else KILL.
+- Ceiling check (research-priority gate) reported alongside: events/yr x net edge x 100% of account (Roth idle cash or the
+  book's cash) x 50% capture.
+Runner research/sim/panic_idx.py; out data/research/program/panic_idx_out.txt. One run.
+### Result — PANIC-IDX (2026-10-17, one run, N 1018): KILL
+Out data/research/program/panic_idx_out.txt. n 18 (0.65/yr): raw -0.94% mean, median +0.34%, hit 56%, excess -1.35% (t -0.80), halves -1.19 / -1.79,
+ex-top-5 -4.21%; 3x synthetic worst -52.7% (2020-03-09). 2008-09 and 2020 fired early and kept falling. Gate 1/5. Grid (descriptive, NOT a candidate):
+only the 5d <= -10% cells are positive (+1..+6% excess, n 6-15, the same 4-5 crises counted repeatedly); ceiling there ~0.4/yr x ~4% x 50% ~ +0.8pp/yr
+(3x ~ +2.5pp). Index washout buying is closed: rare + large does not clear the +8pp gate unless the payoff per event is >> 10% or the event is frequent.
+
+## Study PCP-HTB — hard-to-borrow conversion carry (pre-register 2026-10-17, before any outcome read; N 1018 -> 1019)
+Mechanism (contractual, not predictive): when a stock is hard to borrow, option market makers who must short stock to hedge
+puts/synthetic shorts pass the borrow fee into put-call parity (puts rich, calls cheap). A holder who BUYS the stock, BUYS
+the K put and SELLS the K call (a same-strike collar = conversion) locks payoff = K at expiry whatever the price does, and
+earns ~ r + borrow fee on cost S + P - C. Who pays: short sellers / put buyers who cannot borrow. Why it persists: it is the
+lending fee, paid for supplying borrow; retail long holders rarely lend and institutions lend directly. Why small accounts
+can harvest it: 1-10 contracts per name, no capacity limit at $2-25k; Roth-legal (long stock + long put + covered call).
+This is NOT a premium-buying options trade (closed class): delta-neutral, payoff fixed at entry. Never run in the program.
+- Data: WRDS optionm.opprcd (EOD best_bid/best_offer, OI, contract_size), optionm.borrate (prefilter), CRSP dsf (closing
+  ask, dividends, delistings), FRED DTB3 (T-bill). CRSP ends 2024-12 -> window 2005-2024.
+- Universe/date: every Wednesday close t (next session if holiday); prefilter borrate (nearest-30d tenor) >= 10%/yr at t.
+- Contract: expiry with 21 <= DTE <= 70 nearest 45; strikes with |K/S-1| <= 15%, standard contracts only (contract_size 100,
+  no adjusted roots), call best_bid > 0 and put best_offer > 0, both OI > 0. Exclude windows with a CRSP ordinary dividend
+  ex-date before expiry (exclusion only; count reported).
+- Far-side cost/share = stock closing ask (CRSP; else close x 1.005) + put offer - call bid; + $2.60/contract reserve
+  (Schwab $0.65 x 2 legs + exit/exercise reserve). Locked payoff = K. yield_ann = (K - cost)/cost x 365/DTE;
+  excess = yield_ann - DTB3. Signal at t: best strike excess >= 10%/yr. Staleness guard: the SAME (K, expiry) must still show
+  excess >= 10%/yr on the next session's quotes, and the trade ENTERS at those next-session (t+1) prices. Hold to expiry
+  (payoff K; delisted/merged before expiry = K with the adjusted deliverable, counted).
+- Portfolio sim (cash account, Roth-like, no margin), $2.3k / $10k / $25k / $100k: each entry day fill free cash with the
+  highest-excess confirmed conversions, 1 position per name, whole contracts, <= 10 contracts and <= 5% of the smaller leg's
+  OI; idle cash at DTB3. Report %/yr and excess over T-bill by year, utilization, names, events/yr.
+- Gate (judge 2016-2024): (1) $10k excess >= +8pp/yr; (2) 2016-20 and 2021-24 both > 0 at $10k; (3) >= 100 confirmed
+  entries/yr pooled, and report the t -> t+1 survival rate (low survival = stale quote artifact); (4) 2x spread shock (each leg
+  pays one more half-spread) keeps $10k excess > 0; (5) ex-top-5 names > 0; (6) 2005-2015 $10k excess > 0.
+  Fail (1) with the rest passing = SMALL; any other fail = KILL. No re-tuning of 10%, DTE window, strike band or prefilter.
+- Not testable on EOD data (forward step if it passes): fill at the NBBO for 1-10 contracts on live Schwab quotes, Roth
+  approval for same-strike collars, early-assignment handling.
+Runner research/sim/pcp_htb.py; out data/research/program/pcp_htb_out.txt. One run.
+
+## Study BK-EMERGE-GV — Chapter 11 emergence equity (pre-register 2026-10-17, before any outcome read; N 1019 -> 1020)
+Reopen reason (low power, not proxies): jump R2-14 had n 4 (name match). Mechanism: the plan hands new equity to old creditors
+(banks, CLOs, distressed/HY bond funds) who are mandated or built to hold debt, not small-cap equity; they sell into a stock with
+no analyst coverage and no index membership, so the new equity starts at a concession that later re-rates (Eberhart-Altman-Aggarwal
+1999 report positive post-emergence excess returns). Queue: research/drafts/mechanism_queue_2026-10-17.md #3.
+- Events: Compustat gvkey continuity via CCM link (crsp.ccmxpf_lnkhist, linktype LU/LC) from an OLD permno whose CRSP delisting
+  code is bankruptcy/performance related (dlstcd 574, or 550-585 with a bankruptcy name flag if 574 is sparse — report counts) to a
+  NEW permno first trading within 36 months after the old delisting. Common shares (shrcd 10/11), first price >= $1. 1990-2024.
+- Entry: close of the 5th trading day of the new permno. Hold 120 trading days (exit earlier only on delisting, using dlret).
+- Benchmark: CRSP EW return of the same NYSE size decile over the same window. Cost 50bp/side (thin new listings); 2x cost column.
+- Report: n, n/yr, mean/median raw and excess, hit rate, halves 1990-2007 / 2008-2024, ex-top-5, worst, per-event list,
+  listing venue mix, ceiling %/yr at $2.3k/$10k/$25k (whole shares, up to 5 concurrent equal positions, 50% capture).
+- Gate: n >= 100; median excess >= +4% per 120d; mean excess > 0 net; both halves mean > 0; ex-top-5 mean > 0; 2x cost mean > 0.
+  Any fail = KILL. No re-tuning of entry day, hold, benchmark or cost.
+Runner research/sim/bk_emerge.py; out data/research/program/bk_emerge_out.txt. One run.
+### Result — PCP-HTB (2026-10-17, one run, N 1019): KILL (and a sign error in the registration, disclosed)
+Out data/research/program/pcp_htb_out.txt. Prefilter borrowrate >= 10% gave 359 Wednesday name-dates (3 before 2016: OptionMetrics
+borrow is ~empty pre-2016); 163 had a valid same-strike conversion; best-strike far-side excess median -77.7%/yr, p90 -23.4, max -3.7:
+ZERO signals, 0 entries, gate 0/6. **Registration error:** with borrow fee b, C - P = S e^-bT - K e^-rT, so the conversion (long stock,
+long put, short call) costs MORE than PV(K) and earns r - b, not r + b. The fee accrues to the SYNTHETIC LONG (long call, short put),
+which is directional: it earns the HTB stock's return + b (= BORROW-XS long D10 + fee) and is not hedgeable without shorting. Either way
+the four-leg far-side spreads in HTB chains (OI 1-10, wide quotes) dwarf any fee, and the mid-implied rate is uncorrelated with
+OptionMetrics borrowrate (r ~ 0, n 163): EOD quotes in these chains are not tradable prices. **Class closed: retail cannot harvest the
+borrow fee through options parity; it needs a lending program (Schwab fully-paid lending), not a trade.** Not re-run reversed (unregistered).
+### Result — BK-EMERGE-GV (2026-10-17, one run, N 1020): KILL
+Out data/research/program/bk_emerge_out.txt. Registered set (dlstcd 574 + gvkey continuity) n 58 (1.7/yr) < 100; registered fallback
+(dlstcd 550-585, no extra name flag — the flag was undefined in the registration, disclosed) n 153: median excess -6.5% / 120d (set A +0.3%),
+mean net +1.4% t 0.27, ex-top-5 -6.9% (A -5.0%), hit 44%; mean carried by Bradlees +515%, TWA, Core Scientific. Ceiling ~+0.7pp/yr excess.
+Post-Chapter-11 equity is a lottery, not a creditor-dump concession; class closed at CRSP/Compustat (do not re-run with other links/holds).
+
+## Study INCOME-SHOCK — dormant $25-par panic rule with an issuer-quality screen (pre-register 2026-10-17, N 1020 -> 1021)
+Source card: research/drafts/branch_A_dysfunction_2026-10-17.md (INCOME-PAPER-SHOCK). Mechanism: in a funding panic, levered income
+holders (CEFs, BDCs, mREITs, fund redemptions) dump $25-par preferreds/baby bonds together regardless of issuer solvency; paper of
+issuers that stay solvent recovers toward the pre-shock price/par. Touched already (descriptive, unscreened): 2020 strongly +, 2008
+triggers -25..-27% at 60d. The ONLY open question this study answers: does a point-in-time issuer-quality screen, knowable on the
+trigger day, separate the recoveries from the 2008 losses? Rare trigger, effective n of events tiny: judged per event, not by t-stat.
+- Universe: Sharadar SEP "Domestic Preferred Stock" + SFP ETD, raw price, 20d median $vol >= $50k, 2002-2026.
+- Trigger (frozen from the card): universe EW 10-session return <= -10% AND universe median price <= 0.90 x $25; one event per
+  episode (no new trigger within 120 sessions after a fire).
+- Screen (PIT, trigger-day knowable): issuer has a WRDS TRACE senior unsecured bond trade in the prior 10 sessions with yield < 8%,
+  OR FISD issuer/issue rating (as of trigger date) investment grade. Matched by issuer (FISD issuer_cusip / name link; report match rate).
+- Trade: equal-weight screened names, entry 1/3 each at trigger close, +5, +10 sessions (raw closes + 50bp/side); exit +120 sessions
+  (also report +60, +250); dividends included (Sharadar dividends with the FXD guard); delisted = last price.
+- Report per event: n screened / unscreened, screened vs unscreened return, worst name, % of names < -30%.
+- Gate (PASS = worth a dormant live monitor + tiny staged real-money rule): screened basket +120d return > 0 in EVERY fired event incl.
+  each 2008 fire; median across events >= +10%; screened beats unscreened in >= 75% of events. Else KILL (record which event broke it).
+  No change of trigger, screen thresholds, or horizons after reading.
+Runner research/sim/income_shock.py; out data/research/program/income_shock_out.txt. One run.
+### Result — INCOME-SHOCK (2026-10-17, one run, N 1021): KILL
+Out data/research/program/income_shock_out.txt. Fires 2008-07-14 / 2009-01-20 / 2020-03-16 (120-session lockout suppressed 2008-09-15).
+Screened +120d: -13.0% / +34.6% / +24.9% (unscreened -16.4 / +35.1 / +39.3); screened beat unscreened 1/3; 43% of 2008-07 screened names
+< -30% at +60d. Gate: every-event > 0 FAILS (2008-07), median +24.9% passes, screen-beats 33% FAILS. Failure type: BAD HYPOTHESIS — an
+issuer-quality screen (TRACE yield < 8% or PIT IG) does not separate a solvency crisis from a funding panic at trigger time; the early fire
+in a solvency crisis loses even in IG paper. Caveats: FISD link by name (match 9/34, 9/28, 243/619; 16/20 hand-checked), Sharadar pref
+panel thin pre-2014; two FISD bugs fixed after a first (empty) output was seen (disclosed). $25-par panic class closed; no trigger/screen variants.
+
+## Study INTL-PREF — PREF-EX replication on Canadian (TSX) $25-par preferreds (pre-register 2026-10-17, N 1021 -> 1022)
+Source: research/drafts/branch_H_access_unlocks_2026-10-17.md H-2. Purpose: a genuinely untouched market for the program's one alive
+mechanism (dividend-proportional ex-date under-adjustment in thin retail $25-par paper). Different tax clientele (Canadian eligible-
+dividend credit; prefs held in taxable and TFSA/RRSP): the test is whether the effect is a thin-inventory/retail-paper property, not US tax.
+- Data: WRDS Datastream (or any WRDS source with TSX preferred daily raw prices + dividend ex-dates/amounts); the runner may first
+  check DATA AVAILABILITY (coverage, opens present?) without computing returns. If unavailable -> DATA-LIMITED, no N consumed.
+- Universe: TSX-listed preferred shares, par C$25, raw price C$10-30, 20d median C$ value traded >= C$50k, 2005-2025 (all untouched).
+- Primary statistic: CO = close(E-1) -> open(E) + dividend, in % of close(E-1), net of 10bp round trip, per ex-event. If Datastream has
+  no reliable opens, primary becomes CC = close(E-1) -> close(E) + dividend (stated before reading). Also report drop/dividend ratio.
+- Gate: net mean >= +15bp/event, median > 0, day-clustered t >= 2, >= 80% of years > 0, drop/div <= 0.9, ex-top-5 > +10bp, both halves
+  2005-14 / 2015-25 > 0. Else KILL. Report by yield bin and liquidity tier (descriptive). No re-tuning.
+- Trading would need IBKR + CAD (user decision); this study decides only whether the mechanism transfers.
+Runner research/sim/intl_pref.py; out data/research/program/intl_pref_out.txt. One run.
+### Result — INTL-PREF (2026-10-17, one run, N 1022): PASS (gate 7/7), pending adversarial checks on opens + execution
+Out data/research/program/intl_pref_out.txt. WRDS Datastream tr_ds_equities (ds2ctryqtinfo CA/PREF, ds2primqtprc exch 197 raw CAD,
+ds2div); 1,166 CA pref quotes of which 999 delisted (survivorship-free); eligible 471 names / 12,460 ex-events 2005-2025. Deviation
+(disclosed): runner also applied the US rule's yield filter 0.2-4%/payment, not in the INTL-PREF text. CO primary (reliability rule fixed
+before reading: opens present 100%, open==prior close 16.6% of non-ex days / 3.4% of ex-events). CO net 10bp RT: mean +32.1bp, median
++30.4, day-clustered t 31, ex-top-5 +31.8, hit 72%, 21/21 years, halves +38.8 / +27.1, drop/div 0.66; monotone in yield (<1% +11.6,
+1-1.5% +31, >=1.5% +54); flat across liquidity tiers; non-ex nights -0.2bp; offsets -2..+2 flat. CC +15.8bp mean / +14.8 median
+(drop/div 0.79): misses the 15bp bar on the median. **Mechanism transfers to an untouched market with a different tax regime: the
+ex-date under-adjustment is a property of retail $25-par paper, not of US tax.** Open caveats: Datastream opens may be back-filled
+(not proven to be TSX opening-auction prints); executability (IBKR + CAD, TSX opening/closing auction depth, Canadian 15% withholding on
+dividends vs the US-IRA treaty exemption) unverified. No trading until those are checked.
+- **INTL-PREF verification (2026-10-17, research/drafts/intl_pref_verify_2026-10-17.md): PASS survives.** No lookahead; yield filter is a no-op
+  (n 12,462, +32.1 / +30.4 without it); issuer-clustered t 12 (+51bp issuer-mean) — the day-clustered t 31 overstated; 2023-25 +33.5bp (no
+  decay); Yahoo .TO matches Datastream open/close/div on 28/28 sampled 2023-25 events. Unverified: retail IBKR MOO fill at the TSX open print,
+  MOC eligibility for prefs, Roth withholding at IBKR (DTC says IRAs exempt; custodians often withhold 15%: +33 -> ~+13bp). Executable at $10k
+  (5% of auction, 50% capture, auction = 10-25% of day volume): ~6-9%/yr at 0% withholding, ~2-3% at 15%. **Additive to US PREF-EX/ETDX
+  (different auctions, capacity binds per market).**
+
+## Study CEFX5 — CEF large-distribution (>5%/payment) ex-night at OFFICIAL crosses (pre-register 2026-10-18, N 1022 -> 1023)
+`date`: Sun Oct 18 2026, before any official-cross number for this bin is read. Schwab-only ruling (2026-10-18) applies.
+- **Already seen (touched):** FXD (N 868) REPORTED but did not judge the CEF y>5% bin on Sharadar vendor bars
+  (`data/research/program/fxd_out.txt:12-13,34-35,62`): 1998-2004 xCC +123bp med +54 (n 45); 2005-26 xCO +98 / xCC +68,
+  med +45, t 5.0, blocks +128/+85/+84/+77/+47 (2025 n 11). Vendor opens/closes only; official SIP crosses never read.
+- **Mechanism.** Same clientele under-adjustment as PREF-EX, concentrated in rare large CEF distributions (year-end capital
+  gain / special / ROC-heavy payouts) held by taxable retail; no creation/redemption arb in a CEF (unlike ETFs, where the
+  >5% bin shows drop/div 1.01).
+- **Rule (frozen = FXD rule, bin y > 5%).** SFP CEF, raw price >= $5, 20d median $vol >= $200k, regular-or-special cash
+  distribution with ex-date T, y = div/close(T-1) > 5%, FXD dividend guard |div/P - y(closeadj)| < 10%. Buy the official
+  closing cross T-1; sell the official closing cross T (CC, Schwab MOC both legs) [primary]; CO (official opening cross T)
+  reported. Excess = same as FXD (minus the fund's mean non-ex return over the prior 60 sessions). Events 2021-01..2026-09.
+- **Gate (one look).** CC excess net of 10bp round trip: mean >= +20bp AND median > 0 AND day-clustered t >= 2 AND
+  ex-top-5 mean > 0; report 3x-cost, per-year, drop/div. Ceiling (stated now): ~13 events/yr x ~45bp x up to 100% of a
+  $10k account x 50% capture ~ +3pp/yr: below the +8pp stand-alone gate, so a PASS = additive Roth-sleeve candidate only.
+- **Kill.** Any gate leg fails, or the official-cross effect is < half the vendor-bar effect (vendor print artifact).
+- Runner `research/sim/cefx5.py` -> `data/research/program/cefx5_out.txt`.
+
+### Result — CEFX5 (2026-10-18, one run, N 1023)
+Runner `research/sim/cefx5.py`, out `data/research/program/cefx5_out.txt`, official-cross cache `data/research/cefx5/auctions.json`. 68 events / 38 funds
+(FXD CEF y>5% bin, 2021-01..2026-09); all 68 had both official crosses (0 missing, 0 unmappable tickers). Excess baseline = FXD vendor non-ex 60-session
+mean; net = minus 10bp RT. **CC official: mean +15.2bp, median +21.6, day-t +0.46, ex-top-5 -17.4, hit 0.56**; CO official +52.4 (med +45.7, t +2.85,
+ex-top-5 +24.1, hit 0.65) reported only. Vendor bars on the same events: CC +14.2 / CO +55.2 (official ~= vendor, so no print artifact). Drop/div 0.96.
+3x cost CC -4.8bp. Per year CC: 2021 +45.8 (24), 2022 -13.0 (17), 2023 +34.7 (8), 2024 -36.1 (8), 2025 +15.5 (11). Median cross $ ~$10k (T-1) / $7k (T).
+Gate: mean >= +20bp FAIL; median > 0 PASS; day-t >= 2 FAIL; ex-top-5 > 0 FAIL; official >= half vendor PASS. **VERDICT: KILL (primary CC arm).**
+The CO arm looks better but is not the registered primary (no gate applied; Schwab has no MOO). No deviations. Do not retune bin/horizon.
+
+### CEFX5-FWD (forward shadow arm, no N consumed, 2026-10-18)
+Registered BEFORE any code. Forward measurement of a POST-HOC observation (CEFX5's CO arm; the registered primary CC arm was KILLED), not a pass.
+- **Rule.** `cls="cef"` arm inside the PREF-EX shadow (`pref_ex_shadow.py`), log-only, never orders. Universe = the CEF-RV panel symbols
+  (`state/cef-rv-panel.json`; arm skipped with a log line if absent), excluding ".PR" and ETD symbols. Alpaca cash dividend (non-special, non-foreign)
+  with div / prior-session closing cross > 5% and <= 30%; prior close $5-60; ex-ante 20-session median closing-cross $ >= the shadow's MIN_CROSS.
+  Scored exactly like the pref arm at official SIP crosses: buy E-1 closing cross, sell E opening cross (CO) / E closing cross (CC), dividend included,
+  net of the shadow's COST (10bp RT) + modeled impact, own $10k ACCT split across the night's cef events only (never shares cash with pref/etd).
+- **Gate.** 30 forward events (ex >= 2026-10-18). PASS = mean net CO >= +20bp, median > 0, day-clustered t >= 2. KILL = mean net CO <= +5bp at 30. Else HOLD.
+- **Execution caveat.** CO needs an open-cross sell Schwab cannot place as MOO (the JRI CEF AUTO pre-open test filled at the official open, 0.0bp, 2026-10-10),
+  so CC (MOC both legs, the Schwab-safe form) is reported beside CO. CEFX5 CC was +15bp / t 0.46 (KILL); CO +52bp / t 2.85.
+- No live trading of this class: `pref_ex_live.CLASSES = ("pref", "etd")` must stay as is; any live use is a separate user decision after the gate.

@@ -7,7 +7,7 @@ crosses 2021-26), ETDX (N 869, +44bp), ROTH-STACK (N 897: +8.4pp/yr at $3k, +5.4
 
 Each run: (1) score yesterday's live fills against the official closing cross, (2) SELL (MOC) the names bought yesterday
 whose ex-date is today, (3) BUY (MOC) tomorrow's ex-date names from the PREF-EX shadow's event list, whole shares, 5% of the
-name's trailing-10-session median closing-cross $, at most 3 names, largest dividend yield first, funded ONLY from settled
+name's trailing-10-session median closing-cross $ (10% once 30 scored round trips cost <= 10bp vs the cross), at most 3 names, largest dividend yield first, funded ONLY from settled
 Roth cash (BIL/SGOV are never sold; GFV-safe) and at most 50% of Roth equity. Before placing buys it writes
 state/pref-ex-reserved.json so the Roth night leg (executor, 15:40) does not spend the same dollars. `dry` does everything
 but submit. Never shorts: a sell is capped at the shares the account holds.
@@ -30,6 +30,8 @@ EVENTS_NAME = "pref-ex.jsonl"            # state/: the PREF-EX shadow's event ro
 ET = ZoneInfo("America/New_York")
 CUTOFF = dt.time(15, 43)                 # Schwab MOC cutoff 15:45
 PART = 0.05                              # of the trailing median closing-cross $
+PART_UP = 0.10                           # after the NEED-trip cost gate passes (user OK 2026-10-18)
+STEP_MAX_RT_BP = 10.0                    # measured buy + sell cost vs the cross that allows PART_UP (the research model's RT)
 LOOKBACK = 10                            # sessions for that median
 MAX_NAMES = 3
 MAX_EQUITY_FRAC = 0.50
@@ -80,8 +82,9 @@ def auction_usd(sym: str, today: dt.date, crosses_fn, H: dict | None) -> float:
     return float(statistics.median(usd)) if usd else 0.0
 
 
-def size(cands: list[dict], last: dict[str, float], auction: dict[str, float], settled: float, equity: float) -> list[dict]:
-    """Whole-share MOC buys: PART of the name's median cross $, largest yield first, <= MAX_NAMES, total <= settled cash
+def size(cands: list[dict], last: dict[str, float], auction: dict[str, float], settled: float, equity: float,
+         part: float = PART) -> list[dict]:
+    """Whole-share MOC buys: `part` of the name's median cross $, largest yield first, <= MAX_NAMES, total <= settled cash
     and <= MAX_EQUITY_FRAC x equity. Zero-share names are skipped, never forced to 1 share."""
     budget = max(0.0, min(settled, MAX_EQUITY_FRAC * equity))
     order = sorted(cands, key=lambda r: -(float(r["div"]) / last.get(r["sym"], float("inf")) if last.get(r["sym"]) else 0.0))
@@ -92,7 +95,7 @@ def size(cands: list[dict], last: dict[str, float], auction: dict[str, float], s
         px = last.get(r["sym"])
         if not px or px <= 0:
             continue
-        qty = math.floor(PART * auction.get(r["sym"], 0.0) / px)
+        qty = math.floor(part * auction.get(r["sym"], 0.0) / px)
         if qty < 1:
             continue
         usd = qty * px
@@ -157,6 +160,7 @@ def score(rows: list[dict], ad, today: dt.date, crosses_fn, H: dict | None, log_
         cross = X[2] if X else None
         log_row(dict(cmd="score", sym=r["sym"], side=r["cmd"], order_id=r["order_id"], day=day, qty=q, fill=fill,
                      close_cross=cross, close_cross_size=X[3] if X else None,
+                     share=round(q / X[3], 4) if q and X and X[3] else None,     # our shares / the cross's shares
                      diff_bp=round((fill / cross - 1) * 1e4, 1) if fill and cross else None))
         n += 1
     return n
@@ -173,11 +177,21 @@ def summary(rows: list[dict]) -> dict:
                 sell_cost_bp=-statistics.fmean(sells) if sells else None)   # + = sold below the cross
 
 
+def part(rows: list[dict]) -> float:
+    """PART_UP once NEED live round trips are scored and the measured buy + sell cost vs the closing cross is <=
+    STEP_MAX_RT_BP; PART otherwise. Re-read every run from all scored trips, so a cost drift above the bar steps back."""
+    s = summary(rows)
+    if s["round_trips"] < NEED or s["buy_cost_bp"] is None or s["sell_cost_bp"] is None:
+        return PART
+    return PART_UP if s["buy_cost_bp"] + s["sell_cost_bp"] <= STEP_MAX_RT_BP else PART
+
+
 def line(rows: list[dict]) -> str:
     s = summary(rows)
     f = lambda v: "n/a" if v is None else f"{v:+.1f}bp"  # noqa: E731
     return (f"{s['round_trips']}/{NEED} live round trips; cost vs closing cross buy {f(s['buy_cost_bp'])} (n {s['buys']}), "
-            f"sell {f(s['sell_cost_bp'])} (n {s['sells']}); {s['live_orders']} live / {s['dry_orders']} dry orders")
+            f"sell {f(s['sell_cost_bp'])} (n {s['sells']}); {s['live_orders']} live / {s['dry_orders']} dry orders; "
+            f"participation {part(rows):.0%}")
 
 
 def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | None = None, now: dt.datetime | None = None,
@@ -251,14 +265,15 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
         q = quotes_fn(ad, sorted(set(bmap.values())))
         last = {s: q[b] for s, b in bmap.items() if b in q}
         auction = {c["sym"]: auction_usd(c["sym"], today, crosses_fn, H) for c in cands}
-        orders = size(cands, last, auction, settled, equity)
+        p = part(rows)
+        orders = size(cands, last, auction, settled, equity, p)
         total = round(sum(o["usd"] for o in orders), 2)
-        log(f"[pref-ex-live] {len(cands)} candidates for ex {next_session(today)}, {len(orders)} sized, ${total:,.0f} of "
-            f"settled ${settled:,.0f} (equity ${equity:,.0f})")
+        log(f"[pref-ex-live] {len(cands)} candidates for ex {next_session(today)}, {len(orders)} sized at {p:.0%} of the cross, "
+            f"${total:,.0f} of settled ${settled:,.0f} (equity ${equity:,.0f})")
         for c in cands:
             if c["sym"] not in {o["sym"] for o in orders}:
                 log_row(dict(cmd="buy-skip", sym=c["sym"], ex=c["ex"], last=last.get(c["sym"]),
-                             auction_usd=round(auction.get(c["sym"], 0.0)), reason="0 shares at 5% of the cross or no budget"))
+                             auction_usd=round(auction.get(c["sym"], 0.0)), reason=f"0 shares at {p:.0%} of the cross or no budget"))
         if orders:
             resp.write_text(json.dumps({"date": today.isoformat(), "usd": total, "mode": mode}))
             out["reserved"] = total

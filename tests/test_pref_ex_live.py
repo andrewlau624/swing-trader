@@ -158,6 +158,23 @@ def test_score_compares_yesterdays_fills_to_the_closing_cross(tmp_path):
     P.run("live", tmp_path, tmp_path, log=lambda *_: None, today=TODAY, now=NOW, ad=ad, crosses_fn=crosses, H={})
     assert sum(1 for x in (tmp_path / P.LOG_NAME).read_text().splitlines() if json.loads(x)["cmd"] == "score") == 1
     assert "1/30" not in P.line(rows) and "buy +20.0bp" in P.line(rows)
+    assert sc[0]["share"] == 0.05                                         # 20 of the 400-share cross
+
+
+def _trips(n, buy_bp, sell_bp):
+    rows = [dict(cmd="score", side="buy", diff_bp=buy_bp) for _ in range(n)]
+    return rows + [dict(cmd="score", side="sell", diff_bp=-sell_bp) for _ in range(n)]
+
+
+def test_participation_steps_to_ten_percent_only_after_the_cost_gate():
+    assert P.part([]) == P.PART == 0.05
+    assert P.part(_trips(29, 0.0, 0.0)) == 0.05                           # gate needs 30 round trips
+    assert P.part(_trips(30, 4.0, 5.0)) == 0.10                           # 9bp round trip <= 10bp
+    assert P.part(_trips(30, 6.0, 5.0)) == 0.05                           # 11bp: stays (and steps back) at 5%
+    assert "participation 10%" in P.line(_trips(30, 0.0, 0.0))
+    cands, last, auction = [ev("BAC.PRP")], {"BAC.PRP": 25.0}, {"BAC.PRP": 10_000.0}
+    assert P.size(cands, last, auction, settled=5000, equity=20000)[0]["qty"] == 20
+    assert P.size(cands, last, auction, settled=5000, equity=20000, part=P.part(_trips(30, 0.0, 0.0)))[0]["qty"] == 40
 
 
 def test_executor_roth_night_cash_honours_todays_reservation(tmp_path):
