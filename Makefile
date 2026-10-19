@@ -419,6 +419,9 @@ ovn-mom: ## OVN-MOM-FWD shadow: overnight-momentum decile / top-10 from official
 ssr-lift: ## SSR-LIFT-FWD shadow: Rule 201 lift-day short T+2 open->close, SPY-hedged (no orders; ARGS="--backfill 20")
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.ssr_lift_shadow $(ARGS)
 
+night-band: ## NIGHT-BAND-FWD shadow: the night rule between -4% and -8% at the 15:40 state, official crosses (no orders; ARGS="--backfill 5")
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.night_band_shadow $(ARGS)
+
 arete-dip: ## ARETE-DIP-FWD shadow: momentum names on a down day, d+3/d+5 vs EW universe (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.arete_dip_shadow
 

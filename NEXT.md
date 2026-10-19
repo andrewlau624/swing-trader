@@ -1677,3 +1677,40 @@ open/close auction cost stays ~0bp (`make review` 2b). Revert = set it back to 0
 - 20 firms, 8.5M reviews 2014-23, 1.99M scored. Null in the judge window (2019-23) and in the paper era (2014-18) for sales, EA
   reaction and a tradable hold. Tone declined across all 20 brands (platform drift); Nike's decline is not special. Details
   in round1_prose.md and `data/research/program/rev_tone_out.txt`.
+
+## 2026-10-18: SEL-NIGHT / SEL-NIGHT-B / SEL-CEF / SEL-PREF (N 1030-1033) — within-leg selection tie-breaks: all current rules stand
+- Night survivor (keep the most-beaten twin in `dedupe_correlated`): best of 7 orders on Sharadar 1999-2026 (least-beaten -1.5bp/night t -3.0,
+  random -0.8 t -1.8). Cash-starvation order (day_ret asc) beats random by 5bp/night t -4 when cash binds; tilt-desc is a tie. CEF-RV depth
+  rank-1 vs cohort +277bp t 6.2 (deep picks exit in 9 vs 15 weeks). PREF-EX yield-desc top-3 vs rest +21bp t 5.4 (2021-26 crosses),
+  +16-18bp t 4-8 (Sharadar 2005-26); the shadow/research smallest-cross-first order is WORSE (-10bp t -2.9). IBS leg has no ranking to test
+  (every top-3 name with IBS < 0.2 is bought; only Roth whole-share rounding selects).
+- **Do not redo:** survivor-twin rules (vol/price/ADV/random), cash-order rules, CEF slot rules (random/newest/shallowest/oldest), PREF bundle
+  rules (div-$/cross/price/random). Only open item: dedupe-before-vol20 ordering (36-39 lost twins/yr, <= +0.2-0.6pp/yr upper bound) =
+  code-order cleanup, user decision. Runners `research/sim/sel_{night,night_b,cef,pref}.py`; outputs `data/research/program/sel_*_out.txt`.
+- **THEME-NIGHT (N 1034, 2026-10-18): KILL.** Mania-theme (top-decile industry momentum) night picks vs others same night -7.7bp t -0.36
+  (halves flip, perm p 0.72); healthcare / biotech picks 2016-26 -34 / -44bp t -1.7 / -1.9 but outlier-carried (ex-bottom-5 ~-7) and
+  dropping them moves the leg +0.4 / -0.1 bp/night (t ~0). Quantum names 2024-26: 42 picks, mean ~+150bp ex-QMCO, no gate. **Do not redo**
+  theme / sector / industry / bubble conditioning on the night leg (CAT-MOM, HC-BAN, L3, K1-K3, NDISC, THEME-NIGHT all dead).
+- **SSR-NIGHT (N 1035): FAIL** (Rule 201 trigger RD on night picks: +74bp t 1.3, ex-top-5 -9, pre-2011 placebo same size). **PATTERN-NIGHT
+  (N 1036): FAIL** (31-feature GBM ranker, judge 2016-26 +29bp t 1.6, walk-forward +14 t 1.1; vol20 carries it = the live tilt).
+  Night-pick selection by SNAPSHOT features (rank, sector/theme, fundamentals, news, QI, SSR, multivariate snapshot) is closed.
+  Not tested at N 1036: indicator SEQUENCES over the lookback (-> SEQ-NIGHT N 1038 below); learned models as a standalone entry
+  (-> SEQ-ENTRY N 1039). Timing -> NIGHT-TAU below.
+- **NIGHT-TAU (N 1037): KILL.** Decision time 15:35..15:59 vs 15:40 on 2020-26 minutes: every feasible tau -3..+2 bp/night, |t| <= 1.1; only
+  the close itself is +9.4 (t 2.6) and that is the auction print (look-ahead), i.e. the closing-imbalance information already tested dead.
+  Night-leg timing is closed; keep the ~15:43 submit. Note: `data/research/night/panel.pkl` does not load under pandas 2.2.3; rebuild from
+  `sipd/*.parquet` (night_tau.panel_from_parquet) instead of unpickling.
+  Not tested: nothing in the feasible MOC window remains; the only larger cell (the close itself) is the auction print.
+- **THEME-NIGHT not tested:** themes defined from text/news or ETF flows (only price-momentum industry themes were run).
+- **SEL-* not tested:** the dedupe-before-vol20 code-order fix (bounded <= +0.6pp/yr; user decision, no study needed).
+- **NIGHT-BAND (N 1040, 2026-10-19): FAILS the bar, UNPROVEN -> forward shadow.** The night rule between -4% and -8% on the Sharadar
+  daily proxy: band +17.9bp gross (+7.6 in 2013-26), net +2.9 at 7.5bp/side vs an +8 bar; union leg +3.5 bp/night t 3.3 gross but
+  -1.3 net of 15bp; band alone on the 26% of no-pool nights +9.7 bp/night t 5.7. Inside the live auction cost: decided forward.
+  `night_band_shadow.py` LIVE in research-shadows from 2026-10-20 (REGISTRY NIGHT-BAND-FWD, 60 band nights). Not tested: exact
+  15:40 band replay (no minutes), band IBS cutoffs, band under dedupe/tilt.
+
+### Unproven (right sign, mechanism, under the bar) -- forward-shadow candidates, NOT dead (user rule 2026-10-19)
+| idea | best cell | why under the bar | natural next try |
+|---|---|---|---|
+| NIGHT-BAND: night rule at -4..-8% | union leg +3.5 bp/night t 3.3 gross; added nights +9.7 bp/night t 5.7 | 2013-26 band ~+4bp exact, inside auction cost | `night_band_shadow.py` (live, 60 nights) |
+| SEQ-NIGHT sequence tilt (N 1038) | walk-forward tilt +1.4 bp/night t 1.5 (+2.3pp/yr at w .65); Ridge top-minus-bottom +31.6bp t 2.1 | GBM t 1.1, placebo 95th +32 not beaten; 2023-25 negative | log-only tilt shadow (Ridge scores) if the band shadow passes first |

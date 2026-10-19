@@ -169,6 +169,14 @@ only raises Sharpe by 0.05 inside 2021-26, it is not this. Say so and stop.
 - Record the dead ends and the audit results where the next agent will look (NEXT.md's
   do-not-redo table, `research/sim/*_out.txt`, this section) — the local optimum is built
   out of forgotten failures.
+- **A kill must say what was tested AND what was not (user, 2026-10-19).** Every verdict names the exact form:
+  features (snapshot values vs sequences over the lookback), period, and shape (fixed rule / learned model;
+  filter / tilt / standalone entry). "Closed as a class" is allowed only when every form is listed as tried.
+  Each do-not-redo row carries a `not tested:` field. A verdict that cannot name the untested forms is a result
+  about one form, not a class. (Origin: PATTERN-NIGHT snapshot-only was reported as closing selection; sequences
+  were untested until SEQ-NIGHT.)
+- **Test before pushing back.** If the user's idea can be run in under an hour on data already on disk, register
+  and run it first; argue after there is a number. Pushback without a cheap test is not a verdict.
 
 ### Do not assume the current legs are the answer
 The live book (IBS + night + intraday) is a local optimum, not the global one. Its Sharpe is

@@ -168,6 +168,14 @@ def _ssr_lift(state: Path, logs: Path) -> dict:
     return dict(n=w.summary(rows)["days"], week=len(wk), line=w.line(rows))
 
 
+def _night_band(state: Path, logs: Path) -> dict:
+    from . import night_band_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    wk = {r["T"] for r in rows if r.get("status") == "scored" and r.get("cls") == "band" and not r.get("backfill")
+          and r["T"] >= _week_ago()}
+    return dict(n=w.summary(rows)["nights"], week=len(wk), line=w.line(rows))
+
+
 def _fill_costs(state: Path, logs: Path) -> dict:
     from . import fill_cost_scorer as w
     wk = _jsonl(state / w.LOG_NAME)
@@ -543,6 +551,13 @@ REGISTRY: list[Test] = [
          "flag logged. Gate: 60 forward event-days, hedged net EW-day mean > 0, day-clustered t >= 2 (registered 120-session gate "
          "read by hand; SSR-LIFT N 860, T+2 window kept by SSR-T1). Short-only: taxable margin >= $2k, never the Roth.",
          "2026-10-17", 60, "event-days", _ssr_lift, "state/ssr-lift.jsonl; round1_prose.md SSR-LIFT", ["ssr_lift_shadow"]),
+    Test("NIGHT-BAND-FWD: the night rule between -4% and -8% (log-only)", "night_band_shadow.py (research-shadows): the live "
+         "night universe at the exact 15:40 state (SIP minutes), IBS < 0.10, $5-2000, vol20 >= 0.6, ADV >= $10M, with "
+         "-8% < day_ret <= -4% (band) next to the live <= -8% pool; buy the official close cross, sell the next official open "
+         "cross. Gate: 60 forward band nights, band EW-night mean >= +5bp gross, t >= 2, median > 0; the added-nights and "
+         "paired-vs-pool reads are taken by hand (NIGHT-BAND N 1040: daily proxy +17.9bp gross, +7.6 in 2013-26, fails the "
+         "registered bar; the answer sits inside the live auction cost). PASS = propose lowering the cutoff, user decision.",
+         "2026-10-20", 60, "band nights", _night_band, "state/night-band.jsonl; round1_prose.md NIGHT-BAND", ["night_band_shadow"]),
     Test("Fill-cost ledger (official-print truth)", "fill_cost_scorer.py (research-shadows): scores every daily-fills "
          "row's cost vs the official SIP auction print of its own session (the executor's slippage_bps is "
          "decision-reference drift, not cost: audit_execution_1002). Intraday/noise fills logged as mid_unclosed. "

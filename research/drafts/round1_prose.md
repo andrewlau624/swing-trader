@@ -8000,3 +8000,304 @@ Out `data/research/program/tax_nowash_out.txt`; runner `research/sim/tax_nowash.
 - **Roth overlap kills it**: the live Roth PREF-EX/ETDX buys the same nightly events, so 99.9% of taxable price losses have a Roth buy of the same symbol within 30d (permanent disallowance). With it: $10k cash -10.7 (S) / -10.0 (I) (halves -9.5/-12.1; 3x -17.0); $2.3k -17.5; $25k -6.9; margin $10k -17.9. Gate (>= +3pp at $10k cash, Roth-inclusive) FAILS.
 - Escape (DISJOINT: taxable trades only even-hash issuers, Roth the odd): $10k cash +2.0 (halves +2.8/+1.1, 3x -0.3) FAILS +3.0; $2.3k +5.6, $25k +1.0; margin $10k +3.7. It also halves the Roth's events, which is not costed here.
 - Verdict: taxable PREF-EX is viable only if the Roth does NOT trade the same symbols/issuers within +-30d of any taxable sale (or taxable skips pref entirely). Not both. Unverified: issuer proxy for ETDX tickers (over-groups), deferral vs permanent for taxable-only washes (modelled as permanent: conservative), Roth assumed $3k buying every event with whole-share alloc > 0.
+
+## Amendment - Study SEL-NIGHT: the night leg's duplicate-bet survivor tie-break (pre-register 2026-10-18, BEFORE any pair-level return is computed; N 1029 -> 1030)
+
+Motivation (measured 2026-10-18 from live logs on him): the night leg has no top-k; its only ranking decision that actually binds nightly is `signals.dedupe_correlated` (executor.py:1052-1056, keep whoever comes first in `day_ret`-ascending order). Live: taxable dropped 118 duplicate names over 17 sessions (57 on 10-16), Roth 130 over 14; buys otherwise equal the post-vol count (taxable cash never bound; Roth cash bound 4/14 sessions; 0-4 names/night die to whole-share rounding or the $150 probe cap). The survivor choice is therefore the one live selection lever that acts every night (~7 swaps/night).
+Dead-list dedupe: idea_scan_2026-10-08 #1 (cross-sectional rank of same-day candidates) is DEAD - that ranked DISTINCT bets; here the bet set is fixed and only WHICH TWIN of one correlated bet is held changes. Study W (night_letf, dead) compared LETF picks vs same-vol non-LETF picks as groups; PQ1 (exclude LETF picks, dead) removed names; neither tested the within-pair survivor. Ceiling: ~2,000-4,000 twin-swaps/yr across both books x $10-150 notional/name; delta >= +15-30bp per swapped name moves >= +0.5pp/yr at $10k -> in gate range.
+- **Pairs.** Frozen live rule on Sharadar SEP+SFP (delisted included, permaticker ids, raw-price filters; `research/sim/nx.py` loaders), 1999-01-02..2026-09-30, both universes (primary common; all-listed incl funds, reported). Each night: `loser_picks` then the exact `signals.dedupe_correlated`; every `(dropped, kept_as)` pair recorded with both names' overnight outcomes.
+- **Outcome.** r(x) = next official open / close_t - 1 (NX scoring: unadjusted close, split at the open; delisting price or -100%). Pair-night delta_alt = r(alt survivor) - r(current survivor), bp.
+- **Alternative survivor rules (fixed now, 6).** A1 least-beaten (last in day_ret order); A2 higher vol20 twin; A3 lower vol20 twin; A4 lower raw price; A5 higher ADV20; A6 random twin (placebo; must show ~0 or the harness is broken).
+- **Gate per rule (its own direction).** n_nights >= 300; night-clustered t >= 2; mean, median, both halves (1999-2012 / 2013-2026) and ex-top-5-pair-nights all same sign as the rule's direction; AND the full-leg replay (same engine, survivor rule swapped in) improves leg bp/night by >= +0.5pp/yr at $10k. Otherwise NO CHANGE.
+- **Kill.** All six (incl placebo) within noise -> survivor tie is neutral; record; current rule stands.
+- **Windows.** Every window is touched for the LEG (NX 2003-15, CRSP-EARLY 1992-97, fitting 2021-23, live); no survivor rule was ever examined on any window. Pair test is within-night by construction (a period confounder cannot create a within-pair delta); leg-replay numbers are labelled not-OOS.
+- Runner `research/sim/sel_night.py`; out `data/research/program/sel_night_out.txt`.
+
+## Amendment - Study SEL-NIGHT-B: night-leg cash-starvation order (pre-register 2026-10-18; N 1030 -> 1031)
+
+Motivation: when the Roth night budget binds, buys go in `day_ret`-ascending order (executor.py:1121) and the least-beaten tail starves (10-16: 12/41 skipped for cash; 10-08: 7/10; 10-05: 3/3). Alternatives: (A) current day_ret asc; (B) raw price asc (cheap-first, max names per dollar); (C) tilt weight desc (`night_tilt` value, deepest x most volatile first); (D) random.
+- **Sim.** Frozen rule picks 1999-2026; per night target = per x w_i (live formula, node x crowd x gs); buy loop with whole shares, probe=1 share when target<1 and price<=$150, filling in the rule's order from a cash pool = kappa x sum(targets); kappa in {1.0, 0.5, 0.25} at book equity $2.3k/$4k/$10k. Metric: per-night total return ($ and bp on deployed), binding-nights count, and paired per-night deltas vs (A).
+- **Gate.** An order beats (A) by >= +0.5pp/yr at $10k (paired night-clustered t >= 2, both halves same sign, ex-top-5 nights) else NO CHANGE. Kill: all orders within noise -> the starvation order is neutral; record.
+- Runner same file; out same.
+
+## Amendment - Study SEL-CEF: CEF-RV slot ranking among concurrent signals (pre-register 2026-10-18; N 1031 -> 1032)
+
+Motivation: the live CEF-RV leg has `max_positions = floor(0.50 x equity / slot)` with `slot = max($500, min($1000, equity/10))` (cef_rv_live.py:68-73) and ranks candidates by `depth = discount(signal week) - trailing-52w median`, most negative first (cef_rv_live.py:121). At $1k Roth that is ONE slot vs ~12 open signals in the first live week; at $10k it is 5 slots vs ~45 signals/yr backlog. The slot choice has never been tested (CEF-RV/PEER/OOS studies assumed all signals taken).
+- **Data.** `data/research/cefconnect/cef_panel.parquet` + all signals behind `cef_rv_trades.csv` (3,629 rows 2016-2026; edate/xdate/ret/disc_in/med/q10/hold_weeks; ret = the leg's recorded per-trade return, cost convention as in cef_rv.py, verified before results).
+- **Test A (paired cohorts).** By edate: delta = ret(rank-1 by depth) - mean(ret(others)), bp; entry-date-clustered t; halves 2016-20 / 2021-26; ex-top-5; within-cohort Spearman(ret, depth) over all members.
+- **Test B (slot simulation).** Chronological weekly replay at $2.3k/$10k/$25k: slots per live formula; free slot takes the rule's rank-1 among pool (signals not held/not exited); hold to the CSV xdate. Rules: R0 depth (current), R1 random, R2 newest signal, R3 shallowest. Compare $/yr and per-trade means vs R0 (block bootstrap by year).
+- **Gate.** Adopt an alternative only if (Test B) it beats R0 by >= +0.5pp/yr at $10k AND (Test A) its delta_alt has t >= 2 with both halves same sign. Depth itself is "validated as principled" only if rank-1 >= cohort mean with t >= 2 in the positive direction; otherwise the tie is neutral and is reported as such (no change).
+- **Kill.** No stable sign anywhere -> ranking neutral at these sizes; record and stop.
+- **Windows.** 2016-26 is the leg's own validated data (touched by CEF-RV/PEER/OOS); the RANKING contrast is new on all of it; levels are in-sample and labelled.
+- Runner `research/sim/sel_cef.py`; out `data/research/program/sel_cef_out.txt`.
+
+## Amendment - Study SEL-PREF: PREF-EX/ETDX same-ex-date bundle ranking (pre-register 2026-10-18; N 1032 -> 1033)
+
+Motivation: pref_ex_live.size() buys up to MAX_NAMES=3 candidates per ex-date ranked by yield = div/price descending (pref_ex_live.py:90). From `data/research/pref/events.parquet`: 47.7% of ex-dates have >3 candidates, carrying 88% of event volume (ETDX: 42%/82%). Live starts 2026-10-21 (0/30 trips so far); the ranking has never been tested.
+- **Data.** `data/research/pref/{events,cross_rows}.parquet`, `data/research/etdx/{events,cross_rows}.parquet` (official crosses 2021-26; raw-close rows 2005-26 reported separately). Live-form capture (CC): (cc_T + div) / cc_{T-1} - 1 where cc = official closing cross (raw close when a cross is missing). CO form reported alongside.
+- **Test.** On each ex-date with k > 3 candidates: delta = mean(capture of yield-top-3) - mean(capture of the rest); ex-date-clustered t; halves (2005-15 / 2016-26, and 2021-26 crosses); ex-top-5 dates; medians; 2x cost shock (10bp -> 20bp RT); within-date Spearman(capture, yield). Alternatives: div-$ absolute, cross-size, price, random top-3 (placebo).
+- **Gate.** Adopt an alternative only if it beats yield-top3 by >= +0.5pp/yr at $10k (approx >= +20bp x ~250 trades x ~$200) with t >= 2 both halves same sign. Yield itself is "right" only if its own delta >= 0 with t >= 2 in the positive direction; otherwise the ranking is neutral/arbitrary and reported so.
+- **Kill.** No stable sign anywhere -> neutral; record; do not change the live order silently.
+- Runner `research/sim/sel_pref.py`; out `data/research/program/sel_pref_out.txt`.
+
+(DSR note for all four: 16 alternative rules total are examined across these studies; the report applies a deflation for 16 trials to any passing cell.)
+
+## RESULTS - SEL-NIGHT / SEL-NIGHT-B / SEL-CEF / SEL-PREF (2026-10-18, one look each; outputs data/research/program/sel_{night,night_b,cef,pref}_out.txt)
+- **SEL-NIGHT (N 1030): current survivor rule STANDS; every alternative worse or neutral.** Sharadar 1999-2026, primary (common) universe,
+  5,636 activity nights, 22,098 dedupe pairs on 1,591 nights (80% of nights have >= 1 dedupe). Leg bp/night vs current: A1 least-beaten
+  -1.50 t -2.97 (h1 -1.10 / h2 -1.84, ex5 -1.90); A2 hi-vol -0.47 t -1.43; A3 lo-vol -1.22 t -2.48; A4 cheap -0.77 t -1.93; A5 liquid
+  -0.58 t -1.61; A6 random -0.80 t -1.83. All-listed universe: same signs (A1 -1.43 t -2.09; A2 +0.08 t 0.18 = noise). Ann. Sharpe
+  current 2.10 vs 2.01-2.07 (primary); 2.11 vs 2.09-2.16 (all): the current rule has the best mean and a tied Sharpe. Pair level: the kept
+  (most-beaten) twin earns +207bp vs the dropped twin +47bp (median +132 vs +64; night-clustered t -2.74 on dropped-kept; 20/28 years;
+  crash nights carry the mean, the night-weighted delta is ~-30bp). Kept twins are the higher-vol, lower-priced member (vol20 1.07 vs
+  0.85): "most-beaten" = the leveraged/beta-heavier version, consistent with the vol-proportional premium. Placebo A6 ~0 at the pair
+  level (t -0.2 all / -3.6 primary, pair-weighted). No alternative clears +0.5pp/yr; A1 is rejected in its own direction. NO CHANGE.
+  Bug fixed before the judged run: `sel_night.py` indexed tickers from the pre-filter frame (df.index) instead of picks.index.
+- **Ordering flaw measured (not a rule):** dedupe runs before the vol20 filter (executor.py:1052 then signals.night_sizing), so a kept twin
+  that then fails vol20 silently kills its passing twin: 1,002 lost twins 1999-2026 (36/yr, 4.5% of pairs; all-listed 39/yr), mean r
+  +19bp (all-listed +39). Upper bound if re-admitted: +30bp of leg budget/yr = +0.2pp/yr of equity (primary), +0.6pp (all-listed).
+  Zero-cost code-order cleanup candidate (filter vol20 before the correlation walk); below the tie-breaker gate on the common universe.
+- **SEL-NIGHT-B (N 1031): current cash-starvation order (day_ret asc) STANDS.** Names from the current rule, kappa x needed cash.
+  kappa 1.0 binds 0.5-3.0% of nights; at kappa 0.5 (always binding): C tilt-desc +0.35-0.40 bp/night of leg t 1.2-1.5 (identical to A on
+  93% of nights), B price-asc -1.2..-1.5 t -1..-1.3, D random -5.1..-5.5 t -4 (= -8..-9pp/yr of equity at w .65). kappa 0.25: same signs.
+  Buying the deepest first when cash binds is right; cheap-first is worse; tilt order is a tie. NO CHANGE.
+- **SEL-CEF (N 1032): live depth ranking VALIDATED as principled.** 3,731 trades / 404 multi-signal cohorts 2015-12..2026-09 (in-sample for
+  the leg, new for the ranking). Test A: rank-1-by-depth minus cohort rest +277bp/trade, week-clustered t 6.21, median +290, hit 69%,
+  halves +204 / +341, ex-top-5 +239; shallowest-first -179bp t -3.27; random +1.8bp t 0.04 (placebo clean). Within-cohort Spearman(net,
+  depth) -0.26; terciles deep +617 / mid +435 / shallow +327bp. Deep picks also exit FASTER (8.9 vs 14.8 weeks): per week held +64bp
+  t 6.1. Test B slot replay: R0 depth $2.3k +28.6%/yr (2 slots), $10k +27.0% (5 slots), $25k +21.0% (12 slots) vs random +9-11%/yr
+  (R0 = 100th pct of 20 random seeds), newest +6-8%, shallow -0.1..+3%, oldest +7-11% (late entries credited with the original per-trade
+  net: a bound). Levels are in-sample and the leg still waits on CEF-RV-FWD; the RANKING contrast is the finding. NO CHANGE.
+- **SEL-PREF (N 1033): live yield-desc ranking VALIDATED; the research/shadow order (smallest cross first) is a worse ranking.**
+  Official crosses 2021-26, live pool (PREF+ETDX): 411 of 857 ex-dates have k > 3 (6,527 of 7,265 events). CC form net 10bp: yield-top3
+  minus rest +21.1bp t(date) 5.35, median +19, hit 61%, halves +19.6 / +22.5, ex-top-5 +18.2; CO +20.1 t 7.50. Alternatives paired vs
+  yield-top3 (CC): div-$ -6.3 t -2.7; cross-asc (shadow/research order) -10.2 t -2.9; cross-desc -17.5 t -4.9; price-asc -12.4 t -3.5;
+  random -14.0 t -3.9. Sharadar raw closes 2005-26 (916 multi-candidate dates): yield-top3 vs rest +15.9 t 4.08 (CC), +18.4 t 8.41 (CO),
+  both halves positive, every alternative <= yield. Mechanism: capture is dividend-proportional under-adjustment (drop ~0.8 x div), so the
+  highest yield carries the most bp. Worth ~+14bp x 3 names x ~72 dates/yr vs random = ~$60/yr at $200 tickets ($10k): principled, small.
+  Flag (unchanged): live ranks by div / live last with no yield cap (shadow screens y <= 4%); a mis-keyed special dividend ranks first.
+  NO CHANGE to the order; the shadow's allocation order understates the live rule.
+- **Deflation:** 16 alternative rules across the four studies; the passing cells are the CURRENT rules (CEF depth t 6.2, PREF yield t 5-8),
+  which survive a 16-trial deflation (max-of-16 null 95th pct t ~2.9). No alternative passes before or after deflation. Program N = 1033.
+
+## Amendment - Study THEME-NIGHT: night picks in a "bubble" theme, and healthcare/biotech avoidance (pre-register 2026-10-18, user request; N 1033 -> 1034)
+
+User hypothesis (2026-10-18): inside the night leg, prefer dips in the theme that is currently the speculative mania (e.g. quantum 2025-26)
+and avoid medtech/biotech drops. Dead-list: CAT-MOM (N 912-914) tested the TOP HALF of categories by momentum (wrong sign, -7..-9bp);
+HC-BAN (N 911-912) tested banning healthcare on 1999-2015 (-7.7bp t -1.4). This reopens both only in the forms not yet examined: the
+EXTREME theme state (mania tail, not top half) and healthcare/biotech on 2016-2026 (never judged by HC-BAN). Declared a reopen, not new ground.
+- **Data.** Kept night picks from SEL-NIGHT's current-rule replay (`sel_night_names_primary.parquet`, Sharadar common stocks 1999-2026,
+  r = close -> next official open, delisting-complete) joined to Sharadar `tickers` sector/industry. Industry daily EW return = mean log
+  close-to-close return of all SEP common stocks with prior close >= $5 in that industry (>= 10 members that day).
+- **Theme state (fixed now).** mom126(ind, t-1) = sum of the industry EW log returns over the 126 sessions ending the PRIOR session.
+  BUBBLE = industry in the top decile of mom126 across industries that day AND mom126 >= +0.40 (log, ~+50%). Anchors reported: top-half
+  (CAT-MOM replication), bottom decile, and vol state (industry 20d EW vol top quintile) x BUBBLE.
+- **Arm T1 (bubble tilt).** Paired same-night: delta = mean r(picks in BUBBLE industries) - mean r(other picks), nights with both present.
+  User's prediction: delta > 0. Gate: n_nights >= 150, day-clustered t >= 2, both halves (1999-2012 / 2013-2026) same sign, ex-top-5
+  nights same sign, median same sign, placebo (industry labels permuted within night, 200 draws) p <= 0.05, and leg ceiling >= +0.5pp/yr
+  at $10k (delta x share of picks re-weighted x leg weight). Either sign qualifies as a finding; a tilt is adopted only in the measured sign.
+- **Arm T2 (healthcare/biotech avoid, 2016-2026 judge; 1999-2015 reported as HC-BAN's window).** Paired same-night: delta = mean r(picks
+  with sector Healthcare) - mean r(other picks); sub-arm biotech/medical-devices industries only. User's prediction: delta < 0 (avoid).
+  Same gate, plus the avoid-rule leg replay: drop those picks, re-normalise weights, bp/night vs current.
+- **Descriptive only (no gate): quantum 2024-26.** Picks in IONQ/RGTI/QBTS/QUBT/ARQQ/LAES/QMCO-like names and their 2x ETFs: count, mean
+  and median r, vs the same-night other picks.
+- **Kill.** Any gate fails -> the theme/sector dimension of night-pick selection is CLOSED at the extreme tail too; no further sector,
+  theme, or industry conditioning on the night leg without a new data source. Ceiling note: any pick-level tilt acts on a ~4%/yr leg.
+- Runner `research/sim/theme_night.py`; out `data/research/program/theme_night_out.txt`.
+
+## RESULT - THEME-NIGHT (N 1034, 2026-10-18, one look): KILL both arms; theme/sector conditioning on night picks CLOSED at the extreme tail too
+- T1 bubble tilt (1,907 picks in top-decile-momentum industries, 328 nights): delta in-minus-out -7.7bp, night t -0.36, halves -40 / +30
+  (flip), perm p 0.72; x vol-top-quintile -21.9 t -0.99. Up-weighting x2 changes the leg by -0.06 bp/night; dropping them +0.33 t 0.64.
+  Anchors: top-half momentum +2.6 t 0.20 (CAT-MOM form, now ~0 on the delisted-complete panel), bottom decile +9.9 t 0.62. Mania-theme
+  dips bounce like any other dip. User's prediction (delta > 0) not supported; the opposite tilt is not supported either.
+- T2 healthcare avoid, judge 2016-26 (2,764 HC picks / 1,068 nights): -34.4bp t -1.68, med -14.6, halves -15 / -42, ex-top-5 -52,
+  ex-bottom-5 -6.7, perm p 0.105. Biotech+devices: -43.9bp t -1.87, perm p 0.050, ex-bottom-5 -8.7. Leg replay dropping them with
+  re-normalised weights: HC +0.43 bp/night t 0.16 (~+0.7pp/yr at w .65), bio -0.11 t -0.04. The per-night deficit is carried by a handful
+  of nights (2017, 2022, 2024) and vanishes at the leg level because those picks already carry small weights. 1999-2015: HC +0.2 t 0.01,
+  bio -10 t -0.37 (matches HC-BAN). FAILS the gate (t < 2, outlier-carried, leg ceiling < +1pp and insignificant). No avoid rule.
+- Quantum 2024-26 (descriptive, no gate): 52 picks / 41 nights, mean +47bp med +79 vs +62 for the other picks on those nights. QMCO
+  (Quantum Corp, storage, mis-listed in the registered set) is -487bp x 10; the computing names IONQ +213 (n 12), RGTI +128 (10), QUBT
+  +108 (9), ARQQ +135 (9), QBTS/LAES 1 each. 42 picks is not evidence; the leg already buys these names on every -8% day.
+- Kill rule applies: no further sector, theme, industry or "next bubble" conditioning on the night leg without a new data source.
+  Runner research/sim/theme_night.py; out data/research/program/theme_night_out.txt. Program N = 1034.
+
+## Amendment - Study SSR-NIGHT: Rule 201 short-sale restriction state as a night-pick selector (pre-register 2026-10-18, before any outcome; N 1034 -> 1035)
+
+Mechanism: Rule 201 (effective 2011-02-28) switches the uptick test on for the rest of day T and all of T+1 once a stock's price falls
+10% below the prior close. At the T+1 09:30 open, where the night leg sells, short sellers cannot hit the bid in SSR-on names. Named
+constrained counterparty: short sellers. The program confirmed the mechanism from the lift side (SSR-LIFT, N 860: -43bp diff-in-disc
+on the lift day). Prediction: among night picks, SSR-on names open higher than otherwise-identical SSR-off names, post-2011 only.
+- **Data.** SEL-NIGHT kept picks (current rule, Sharadar common stocks 1999-2026) + Sharadar daily low/prev close (raw). low_ret =
+  low_T / close_{T-1} - 1. SSR-on at the T+1 open = low_ret_T <= -10% OR low_ret_{T-1} <= -10%. Daily close stands in for 15:40 (labelled).
+- **Design (RD / diff-in-disc).** Bins of low_ret, 0.5pp wide. Discontinuity D = mean r(bin [-10.5,-10)) - mean r(bin [-9.5,-10)),
+  computed within night (same-night pairs, picks of both bins present) and pooled. Trend control = mean of the adjacent-bin steps
+  ([-10,-10.5) vs [-10.5,-11)) and ([-9,-9.5) vs [-9.5,-10)). diff-in-disc = D - trend. Judge 2011-03..2026-09; placebo 1999-2010
+  (no rule: must be ~0); adjacent-cutoff placebos at -9% and -11% post-2011 (must be ~0). Secondary: SSR-on vs SSR-off within night among
+  picks with close day_ret in [-9.5%, -8%] (band where both states occur).
+- **Gate.** Post-2011 diff-in-disc > 0, night-clustered t >= 2, halves 2011-18 / 2019-26 same sign, ex-top-5 nights same sign, median
+  same sign; pre-2011 placebo |t| < 2 and |effect| < half the post-2011 one; adjacent cutoffs clean. Ceiling check: effect x share of
+  picks affected x leg weight >= +0.5pp/yr at $10k, else report-only. Kill: any gate fails -> SSR state is not a night-pick selector;
+  class closed (the last mechanism-based selector on the leg).
+- Runner `research/sim/ssr_night.py`; out `data/research/program/ssr_night_out.txt`.
+
+## Amendment - Study PATTERN-NIGHT: multivariate ranker over everything knowable at the close (pre-register 2026-10-18; N 1035 -> 1036)
+
+User question (2026-10-18): "there must be a common pattern among the picks that worked". This is the strongest form of that search the
+data allows: one learner over all pick-level features at once, pairwise within night, judged on years it never saw. Prior univariate
+scans (NDISC 47 x 210 buckets), random-rule batches (LUCK-B1..B6) and Study E (ml_picker, 15:50 features 2021-26) found nothing; a
+multivariate pass on the 28-year delisted-complete panel either finds the pattern or closes the class.
+- **Sample.** SEL-NIGHT kept picks 1999-2026 (primary), r = close -> next official open. Label = r demeaned within night, winsorised at
+  +-50%.
+- **Features (fixed now, all known by the close of T).** day_ret, ibs, vol20, log adv, log price, low_ret, high_ret, gap (open/prev
+  close), ret5, ret20, ret63, ret252 (adjusted, ending T-1), distance to 252d high, volume / 20d median volume (full-day proxy),
+  prev-day low_ret, SSR flag, repeat-pick flag (picked in prior 5 sessions), n_picks that night, SPY day return, day of week, sector
+  (11 one-hots). No names, no future data, no fundamentals (FUND-STATE dead).
+- **Model.** sklearn HistGradientBoostingRegressor (max_iter 300, lr 0.05, max_leaf_nodes 15, min_samples_leaf 200, l2 1.0; fixed, no
+  tuning). Fit 1999-2015 -> judge 2016-2026 (primary). Walk-forward expanding by year from 2006 (secondary). Ridge on the same features
+  as the linear anchor.
+- **Judge.** Within night: top-half by prediction minus bottom-half (nights with >= 4 picks), night-clustered t; Spearman(pred, r) per
+  night; prediction-decile means; both halves 2016-20 / 2021-26; ex-top-5 nights. Placebo: 20 fits on within-night-shuffled labels; the
+  real top-minus-bottom must exceed the placebo 95th percentile. Leg replay: shipped weight form clip(1 + 0.25 z_pred, 0.25, 2)/mean
+  applied to the current per-name weights -> bp/night vs current. Permutation feature importance reported (which features carry it).
+- **Gate.** Top-minus-bottom >= +20bp, t >= 2, both halves same sign, ex-top-5 same sign, placebo-beaten, and leg replay >= +1pp/yr at
+  $10k. Kill: pattern search on night picks is CLOSED as a class; do not re-run with another learner or feature list without new data.
+- Runner `research/sim/pattern_night.py`; out `data/research/program/pattern_night_out.txt`.
+
+## RESULTS - SSR-NIGHT (N 1035) and PATTERN-NIGHT (N 1036), 2026-10-18, one look each (picks deduplicated to the current-rule rows; a first pass on a file carrying one row per survivor rule was discarded)
+- **SSR-NIGHT: FAIL.** 24,417 picks; 76% of post-2011 picks are SSR-on (the -8% close with IBS < 0.1 usually means the low crossed
+  -10%), so the RD lives in a thin band. Post-2011 within-night step at -10%: +74bp, night t 1.32, median +8, hit 0.51, ex-top-5 nights
+  -8.9bp (outlier-carried); pooled +5.5bp. Pre-2011 placebo (no rule) +19bp / diff-in-disc +33: not clean. Adjacent cutoffs -16 / +18 =
+  noise of the same size. Secondary band test (close -8..-9.5%, SSR-on vs off, same night): +2.2bp t 0.19 post-2011, -7.6 pre-2011.
+  Rule 201 state does not move the next open for these names: by the time a name qualifies for the leg, short pressure at the open is
+  not the marginal flow. Kill rule applies: the last mechanism-based night-pick selector is closed.
+- **PATTERN-NIGHT: FAIL (gate), with the one real pattern named.** 31 close-time features, GBM fit 1999-2015 -> judge 2016-26 (809
+  nights): top-half minus bottom-half +29.1bp, t 1.63, median +14.5, hit 53.5%, halves +11 / +35, ex-top-5 +6.6; Spearman 0.024;
+  beats the shuffled-label placebo 95th pct (+20.8) narrowly. In-sample +118bp t 9.7 (Spearman 0.16): the usual fit-then-fade.
+  Ridge -10.6 t -0.62. Walk-forward 2006-26: +14.3bp t 1.05, ex-top-5 +1.4, 11/17 years > 0. Leg replay with the shipped tilt form:
+  +1.6 bp/night t 1.4 (judge), +1.1 t 1.3 (walk-forward). Permutation importance: vol20 carries +26 of the +29bp, then low_ret and
+  day_ret: the learner re-discovers the vol/depth tilt the leg already runs (night_tilt k .25); nothing else is in the residual. Fails
+  t >= 2, ex-top-5 >= 20, and +1pp at t >= 2. Class closed: no further learners or feature lists on night-pick selection without new data.
+- Runner research/sim/pattern_night.py; outputs data/research/program/{ssr_night,pattern_night}_out.txt. Program N = 1036.
+- Follow-up noted, not registered: the decision-to-auction gap (15:43 submit vs 16:00 close) costs ~half the edge per NX's daily-close
+  vs 15:40 comparison; a later submit (as close to the exchange MOC cutoff as Schwab allows) is a TIMING study on the 2016-26 minute
+  panel, not a selection study, and is the one night-leg lever left with a known upper bound.
+
+## Amendment - Study NIGHT-TAU: decision time of the night leg (pre-register 2026-10-18, before any outcome; N 1036 -> 1037)
+
+Mechanism: the leg is paid for providing liquidity into the close; the entry is the 16:00 auction regardless of when the decision is
+made, so a later decision only improves the INFORMATION about the closing state (which names are still -8% at the low). NX measured
+the rule at the actual close at ~1.7x the 15:40 rule. The bot submits at ~15:43. Question: how much of that gap is recoverable at times
+Schwab can still place a MOC order (NYSE cutoff 15:50, Nasdaq 15:55).
+- **Data.** `data/research/night/lm1` + `data/research/recent/lm1`: SIP minute bars 15:30-16:00 for every name whose daily low
+  touched -8% (eligibility superset), 2020-11-05..2026-10-07, plus the daily panel (`panel()`) for prev close, H/L, vol20, ADV20,
+  close and next open. Same code path as `research/sim/recent_night.py`. No pre-2021 minutes exist past 15:40 (not fetched).
+- **Rule at tau.** For tau in {15:35, 15:40, 15:45, 15:48, 15:50, 15:52, 15:55, 15:58, 15:59, close}: p = last minute close <= tau
+  (close: the daily close), H/L through tau (day extreme if it occurred before tau, else running extreme), day_ret = p/prev_close-1
+  <= -8%, IBS < 0.10, p in [5, 2000], vol20 >= 0.60, ADV20 >= $10M. Entry = daily close, exit = next daily open, r = open/close - 1.
+  No dedupe/tilt (equal weight); leg proxy per night = min(1, 0.15 x n_picks) x mean r (the live per-name cap, no crowd scaling).
+- **Report per tau.** n picks, nights, mean/median r bp, day-clustered t, hit, at 0 and 7.5bp/side; per year; set change vs 15:40
+  (common / added / dropped and each group's r); paired per-night leg delta vs 15:40 (nights where either has picks), day-clustered t,
+  halves 2020-11..2023-06 / 2023-07..2026-10, ex-top-5 nights, median.
+- **Gate (per tau, its own cell).** Leg delta vs 15:40 >= +1.0 bp/night (~+1.6pp/yr of equity at w .65), paired day-clustered t >= 2,
+  both halves same sign, ex-top-5 same sign. Feasible set = tau <= 15:48 (NYSE names) / 15:53 (Nasdaq names); later taus are the
+  ceiling only. Nine taus examined: deflate (report the max-of-9 null t ~2.6 alongside). Window is the leg's own 2021-26 (touched);
+  the timing contrast is new on all of it and is within-night by construction.
+- **Kill.** No feasible tau clears the gate -> the 15:40 decision stands; record the ceiling at the close for the record.
+- Runner `research/sim/night_tau.py`; out `data/research/program/night_tau_out.txt`.
+
+## RESULT - NIGHT-TAU (N 1037, 2026-10-18, one look): KILL in the feasible window; the "close" edge is the auction print, not clock time
+- lm1 minute panel 2020-11..2026-10, 1,485 sessions, ~14-15k picks per tau. Per-pick gross r: 15:35 +24.3, 15:40 +25.5, 15:45 +22.2,
+  15:48 +24.1, 15:50 +22.0, 15:52 +29.2, 15:55 +36.0, 15:58 +37.7, 15:59 +37.9, close +46.7bp. Leg proxy (min(1, .15n) x mean r):
+  15:40 +24.7 bp/night; paired deltas vs 15:40: 15:45 -2.1 (t -0.9), 15:48 -1.1 (t -0.4), 15:50 -3.3 (t -1.1), 15:52 -0.6 (t -0.2),
+  15:55 +0.1 (t 0.04, halves +5.9 / -4.6), 15:58 +1.8 (t 0.5), 15:59 +1.3 (t 0.4), close +9.4 (t 2.56, both halves, ex-top-5 +7.0).
+  No feasible tau (<= 15:48 NYSE / 15:53 Nasdaq) clears any gate; none is even positive. The pick set is ~fixed by 15:35 (11.7k of 14.1k
+  common); late additions after 15:55 earn +32-53bp and the names that recover after 15:40 earn ~0, but that information exists only in
+  the last 1-2 minutes and in the auction print itself (the 16:00 cell is a look-ahead: it conditions on the closing price).
+- Reading: NX's "rule at the close earns ~1.7x" (here 1.38x) is not a decision-time effect; it is the closing auction's own information
+  (a sell-imbalance print at the low), which the ledger already tested as the closing-imbalance feed (dead, paid). Decision time stands at
+  the current ~15:43 submit; moving it earlier or later within the MOC window changes nothing. Timing on the night leg is CLOSED.
+- Runner research/sim/night_tau.py (builds the daily panel from sipd parquet; data/research/night/panel.pkl no longer loads under pandas
+  2.2.3, left untouched); out data/research/program/night_tau_out.txt, picks night_tau_picks.parquet. Program N = 1037.
+
+## Amendment - Studies SEQ-NIGHT (A) and SEQ-ENTRY (B): indicator SEQUENCES as a ranker and as an entry (pre-register 2026-10-19, before any outcome; N 1037 -> 1039)
+
+User question: "hundreds of indicators mixed together could create a working signal". Every indicator is a transform of OHLCV, so a
+single model over a wide, sequence-shaped feature set searches every hand-mix at once. PATTERN-NIGHT (N 1036) tested SNAPSHOT
+features only (today's values); a trader's combo is a sequence (squeeze held k days then released, histogram run then flip, divergence
+over 20 bars). Sequences are untested here. Two labels on one feature set.
+
+- **Features (shared, ~150, computed at the decision bar T from the 60 prior daily bars, Sharadar raw OHLCV, no look past T).**
+  Sequences: TTM squeeze state (BB(20,2) inside Keltner(20,1.5)) days-on, days-since-release, momentum-histogram sign and run
+  length; Squeeze Pro compression level (KC 1.0/1.5/2.0); Explosive-bandwidth (60d mean BB width > 30 and current < 15, and the
+  ratio); MACD(12,26,9) histogram sign run length, days since cross, slope; RSI(14) level, days < 30 / > 70, bullish/bearish
+  divergence over 20 bars (price lower low, RSI higher low); RSI-Laguerre(0.8) state; ADX(14) level, DI cross age; Hull MA(20)
+  concavity and days since turning point; SlimRibbons alignment (8/13/21/34/55 EMA stack order, days held); SMA 20/50/200 stack
+  state and age, days since each cross; Three-weeks-tight (15-day close range < 1.5%); consecutive down/up days, count of <= -3% days
+  in 20; days since 52w high / low; volume climax (vol > 3x 20d median) age, dry-up (< 0.5x) run; gap count in 20; "buy the dip"
+  proxy (close near 20d low, RSI < 30, above SMA200); plus PATTERN-NIGHT's snapshots (ret5/20/63/252, dist_hi, volratio, vol20,
+  log_adv, log_px, gap, low_ret, day_ret, ibs). Excluded: the forum's most-viewed "Repainting Trend Reversal" (it repaints: uses
+  future bars). Scan sources: usethinkscript threads 2751 (TTM), 4021 (Squeeze Pro), 3840 (bandwidth), 1094 (3-weeks-tight),
+  3553 (buy the dip), 8853 (common set: Hull, MACD_BB, RSI, ADX/DMI, Squeeze Pro).
+- **Model.** HistGradientBoostingRegressor (max_iter 300, lr .05, 15 leaves, min_leaf 200, l2 1.0), Ridge anchor; fit 1999-2015,
+  judge 2016-2026, one look; 20 shuffled-label (within-day) placebo fits; permutation importance; walk-forward by year as a secondary.
+- **A: SEQ-NIGHT (N 1038).** Rows = SEL-NIGHT current-rule picks (`sel_night_names_primary.parquet`, rule == current, 24,417 picks
+  1999-2026; daily-bar proxy of the 15:40 rule, same as PATTERN-NIGHT). Label = r minus the night's mean r (clip +-50%). Judge:
+  within-night top-half minus bottom-half of predicted score, bp, day-clustered t; quintile means; leg replay as tilt (k .25) and as a
+  FILTER (drop the bottom predicted quintile, cap .15n). Gate: top-minus-bottom >= +15bp, t >= 2, halves 2016-20 / 2021-26 same sign,
+  ex-top-5 nights same sign, beats the placebo 95th pct, AND either tilt gain >= +0.5pp/yr or filter gain >= +1.0pp/yr of equity at
+  w .65 (the SEL task's own bars). Kill otherwise; a pass carried by vol20/day_ret alone (permutation importance) = the live tilt, KILL.
+- **B: SEQ-ENTRY (N 1039).** Universe = Sharadar common stocks (SEP, category Domestic/ADR common), closeunadj >= $5, ADV20 >= $10M,
+  every trading day 1999-2026 (train rows subsampled to ~1.5M for the fit; judge on all 2016-26 rows). Two labels, both fixed now:
+  L1 = next open / close - 1 (one night, auction-to-auction) and L3 = close(T+3) / close(T) - 1, each minus SPY over the same window.
+  Portfolio: each day long the top decile of predicted score, equal weight (L3: 1/3 of capital per daily cohort), 10bp round trip.
+  Judge 2016-26: mean net excess per trade, day-clustered t, median, hit, halves 2016-20 / 2021-26, 2022 alone, ex-top-5 days,
+  placebo 95th pct; alpha vs window-matched SPY beta (t); and total 2016-26 net return vs holding QQQ (MODERN-XS bar). Gate (per label,
+  its own cell): net excess >= +5bp per night (L1) / >= +15bp per 3d trade (L3), t >= 2, both halves and 2022 positive, median > 0,
+  ex-top-5 positive, placebo beaten, alpha t >= 2, and the leg beats QQQ hold 2016-26 after costs. Kill otherwise. Four cells
+  (A, B-L1, B-L3, walk-forward secondary): deflate; a single marginal pass is a NO.
+- **Kills the class if empty:** any hand-mixed combination of these indicators and sequences is a point in the space the model searched;
+  if the model finds nothing out of sample, hand-mixing is the same search with worse statistics. Record as "indicator sequences:
+  CLOSED" in NEXT.md. If A or B finds something, report WHICH sequences carry it (permutation importance) and whether it is a regime
+  (2016-20 vs 2021-26) before anything is built.
+- Runner `research/sim/seq_night.py` (builds features once to `data/research/program/seq_feats_*.parquet`); outs
+  `data/research/program/seq_night_out.txt`, `seq_entry_out.txt`.
+
+## Amendment - Study NIGHT-BAND: the night rule below the -8% cutoff (pre-register 2026-10-19, before any outcome; N 1039 -> 1040)
+
+User question (after SEQ-NIGHT/SEQ-ENTRY): the fixed -8% cutoff was never chosen by a sweep (grep: every sim uses -0.08; CLAUDE.md lists
+the fixed thresholds as an assumption to challenge). Mechanism: the same close-of-day liquidity provision; the reversal premium scales with
+the size of the drop, so the question is whether the 4-8% band still pays after the ~1.7x daily-proxy optimism and costs, and how many
+extra deployment nights it adds (the -8% pool has picks on ~31% of sessions).
+- **Data.** Sharadar SEP common stocks 1999-2026 (delisted included), daily bars; the daily-close proxy of the live rule
+  (close/prev_close <= cutoff, daily IBS < 0.10, closeunadj $5-2000, vol20 >= 0.60, ADV20 >= $10M; buy close, sell next open). All
+  Sharadar years are TOUCHED for the -8% rule; this study is a within-night contrast of a NEW band against the known band, not an OOS
+  claim. Minute (15:40) replay is impossible for the band (lm1 panels hold only names whose low touched -8%).
+- **Arms.** Cutoff c in {-4, -5, -6, -7%}; band = picks with c <= day_ret < -8%... i.e. [c, -8%) excluding the live pool. Report per band:
+  n, nights with picks, mean/median r bp, hit, day-clustered t, at 0 and 7.5bp/side, by year, halves 1999-2012 / 2013-26, ex-top-5 nights.
+  Primary contrast: on nights where BOTH the -8% pool and the band have picks, band mean r minus pool mean r (paired, day-clustered t).
+  Leg replay: current leg proxy min(1, .15n) x mean r on the -8% pool vs the union pool, per night over all sessions; delta bp/night and
+  pp/yr at w .65; also the band ALONE on nights with no -8% pick (the added-nights value).
+- **Gate (per band, its own cell).** Band mean r at 7.5bp/side >= +8bp (half the -8% pool's proxy level, i.e. ~0 after the 1.7x proxy
+  haircut is the kill line), day-clustered t >= 2, both halves positive, ex-top-5 positive, median > 0; union-leg delta >= +1.0 bp/night
+  (~+1.6pp/yr at w .65) with t >= 2. Four cutoffs examined: deflate (max-of-4 null t ~2.2).
+- **If a band passes:** no live change; register a log-only 15:40 forward shadow (the executor's own signal path with the lower cutoff,
+  scored at the official crosses) with a 60-night gate before any size. If none passes: record "night cutoff below -8%: dead at the
+  daily proxy; not tested: exact 15:40 band replay (no minute data), band-specific IBS cutoffs".
+- Runner `research/sim/night_band.py`; out `data/research/program/night_band_out.txt`.
+
+## RESULT - NIGHT-BAND (N 1040, 2026-10-19, one look): FAILS the registered bar; UNPROVEN, forward shadow registered
+- Sharadar daily proxy 1999-2026 (primary universe, no dedupe): live pool (<= -8%) n 41,037 mean +54.7bp (med +55.7, net +39.7 at
+  7.5bp/side, t 10.3). Band (-8%, -4%]: n 74,827, nights 5,740, mean +17.9 (med +15.7), net +2.9 (bar was +8: FAIL), hit 53%,
+  t 11.7, halves 1999-2012 +27.2 / 2013-26 +7.6, ex-top-5 +26.0; narrower bands (-5/-6/-7) +17.9..+18.5, same halves. Paired band
+  minus pool on common nights -26..-29bp t -5. Union-leg replay vs the live pool: +3.5 bp/night t 3.3 (h1 +6.6 / h2 +0.8, ex-top-5
+  +3.0, +5.7pp/yr at w .65 GROSS proxy) but -1.3 bp/night net of 15bp on the added exposure. Band alone on the 1,594 no-pool nights
+  (26% of sessions): +28.7bp/name, +9.7 bp/night t 5.7.
+- Reading: the band carries ~1/3 of the pool's premium and most of it pre-2013; after the ~1.7x daily-proxy haircut the 2013-26 band
+  is ~+4bp gross, i.e. inside the live auction cost (measured ~0bp on fills). Not dead: right sign in every arm, mechanism shared with
+  the live leg, and the added-nights value is real at 0 cost. Decided by forward prints only.
+- **Forward shadow registered (user OK 2026-10-19): `swingtrader/daily/night_band_shadow.py`** (research-shadows, REGISTRY
+  "NIGHT-BAND-FWD"): exact 15:40 state from SIP minutes on the live universe, band and pool rows, official close -> open crosses,
+  gate 60 forward band nights, band EW-night mean >= +5bp gross, t >= 2, median > 0. Local 4-session backfill (10-12..10-15, look-
+  alike): 47 names, band -154bp, pool -164bp (the week the live leg lost too). PASS = propose the lower cutoff; no live change.
+- Not tested: exact 15:40 band replay (no minute history for names that never touched -8%); band-specific IBS cutoffs; the band
+  under the live dedupe/tilt. Runner `research/sim/night_band.py`; out `data/research/program/night_band_out.txt`. Program N = 1040.
