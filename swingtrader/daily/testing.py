@@ -524,7 +524,9 @@ REGISTRY: list[Test] = [
          "2026-10-13", 120, "nights", _ovn_mom, "state/ovn-mom.jsonl; round1_prose.md Watch OVN-MOM-FWD", ["ovn_mom_shadow"]),
     Test("RARE-WATCH: rare-trigger watchtower (log-only)", "research/sim/rare_watch.py scan (research-shadows): frozen "
          "triggers from the mechanism loop -- cef_pref_floor (SPY >= 25% off its 252d high AND the $25-par CEF-preferred "
-         "basket median <= $20), pref_arrears (a preferred pays >= 3x its prior-4 median, yield 4-30%), ofac_cmic (a new OFAC "
+         "basket median <= $20), crash_trend (CRASH-A R2: SPY < 0.99x 200d SMA), crash_reentry (CRASH-C R3: "
+         "SPY >= 40% off peak then > 210d SMA, stop 5% below), crash_cef_blowout (SPY >= 20% off + EW CEF discount 3 pts "
+         "under its 52w median), pref_arrears (a preferred pays >= 3x its prior-4 median, yield 4-30%), ofac_cmic (a new OFAC "
          "CMIC entity maps to a US ADR), rating_equity (manual reminder). Alert only: a fire is a research prompt, never an order.",
          "2026-10-19", 0, "fires", _rare_watch, "data/research/rare_watch/watch.jsonl; make rare-watch; "
          "research/drafts/mech_loop_2026-10-17.md branch T", ["rare_watch"]),

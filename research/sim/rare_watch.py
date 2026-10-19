@@ -12,6 +12,12 @@ Watches
                   basket <= 80% of $25 (= $20.00). Fired = both. (Branch rule then buys at the next close cross; not done here.)
                   Basket = Sharadar SFP "CEF Preferred" not delisted; $25-par proxy = 1y median close >= $22 (drops the $10-par
                   muni/MLP issues branch N flags). Sharadar is a static 2026-10-05 snapshot, so listings after that are missed.
+  crash_trend     CRASH-A R2 (research/drafts/crash_A_trend_2026-10-18.md): fired while SPY is in a risk-off spell (close < 0.99 x
+                  200d SMA, back to risk-on > 1.01 x SMA). A regime flag, often fires in ordinary corrections; never a short signal.
+  crash_reentry   CRASH-C R3 (crash_C_bottom_2026-10-18.md): fired when SPY has been >= 40% below its running peak (5y window) and
+                  closes above its 210d SMA; evidence carries the 5%-below-SMA stop that did the work in 1929-32.
+  crash_cef_blowout CRASH-C blowout: SPY >= 20% off its 252d high AND the EW-median CEF discount (state/cef-rv-panel.json) >= 3.0 pts
+                  below its 52w median; fire lists the bottom-decile funds. WEAK-PASS (2008/2020 yes, 2022 no). Log only.
   pref_arrears    research/drafts/branch_G_pref_arrears_2026-10-17.md (G2 / G2-FWD): ex-dividend >= 3x median of the prior 4 payments,
                   yield 4-30% of the prior close, raw price $10-60, 20d median $vol >= $50k, ex-date within the last 14 days. Universe =
                   live Sharadar preferreds (SEP preferred categories + SFP ETD + CEF Preferred). Dividends/prices from the Yahoo chart
@@ -67,11 +73,14 @@ CMIC_WATCH = ("ALIBABA", "BAIDU", "BYD", "NIO", "WUXI APPTEC")
 L_ISSUERS = ("ALLSTATE", "BRIGHTHOUSE", "AMERICAN INTERNATIONAL GROUP", "ALABAMA POWER", "ATHENE", "AIR LEASE", "ARCH CAPITAL",
              "ARGO GROUP", "AMERICAN NATIONAL", "ENSTAR", "SIRIUSPOINT")
 L_PX = 24.0
+R2_BAND, R3_DD = 0.01, 0.40           # CRASH-A R2 (200d SMA, 1% band); CRASH-C R3 (>= 40% DD, then > 210d SMA, stop 5% below)
+CEF_DD, CEF_WIDEN = 0.20, 3.0         # CRASH-C blowout: SPY <= -20% off 252d high AND EW-median discount 3.0 pts under its 52w median
+STATE = Path(__file__).resolve().parents[2] / "state"
 
 
-def yget(sym: str):
-    """Yahoo 1y daily chart -> dict(close=[...], vol=[...], dates=[...], div={date: amt}) or None. Raw prices."""
-    url = YCH.format(urllib.parse.quote(sym))
+def yget(sym: str, rng: str = "1y"):
+    """Yahoo daily chart (default 1y) -> dict(close=[...], vol=[...], dates=[...], div={date: amt}) or None. Raw prices."""
+    url = YCH.format(urllib.parse.quote(sym)).replace("range=1y", f"range={rng}")
     for i in range(3):
         try:
             j = json.load(urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=30))
@@ -144,6 +153,73 @@ def w_cef_pref_floor(t, px):
           "basket_median_close": None if med is None else round(med, 2), "basket_trigger": BASKET_PCT * PAR,
           "n_issues_at_or_below_trigger": len(under), "issues_below": under[:10],
           "basket_min": None if not last else round(min(last.values()), 2)}
+    return fired, "ok", ev
+
+
+def _sma(x, n):
+    return sum(x[-n:]) / n if len(x) >= n else None
+
+
+def w_crash(spy):
+    """CRASH-A R2 trend state + CRASH-C R3 trend-confirmed re-entry on SPY (5y raw closes). Frozen rules, log only."""
+    c, d = spy["close"], spy["dates"]
+    if len(c) < 400:
+        raise RuntimeError(f"SPY history too short ({len(c)})")
+    off, start = False, None                     # R2: out < 0.99 x 200d SMA, back in > 1.01 x SMA (walked for hysteresis)
+    for i in range(200, len(c)):
+        m = sum(c[i - 199:i + 1]) / 200
+        if not off and c[i] < (1 - R2_BAND) * m:
+            off, start = True, d[i]
+        elif off and c[i] > (1 + R2_BAND) * m:
+            off, start = False, None
+    pk, seen40, ep_start = c[0], False, None     # R3: >= 40% below the running peak, then a close above the 210d SMA
+    for i, x in enumerate(c):
+        if x >= pk:
+            pk, seen40, ep_start = x, False, None
+        elif x <= (1 - R3_DD) * pk and not seen40:
+            seen40, ep_start = True, d[i]
+    m200, m210 = _sma(c, 200), _sma(c, 210)
+    dd_pk = 1 - c[-1] / pk
+    trend = {"spy_close": round(c[-1], 2), "sma200": round(m200, 2), "ratio_to_sma200": round(c[-1] / m200, 4),
+             "band": R2_BAND, "risk_off_since": None if not off else str(start), "drawdown_from_peak": round(dd_pk, 4),
+             "drawdown_252d": round(1 - c[-1] / max(c[-252:]), 4)}
+    above = c[-1] > m210
+    reentry = {"drawdown_from_peak": round(dd_pk, 4), "dd_trigger": R3_DD, "seen_40pct_since": None if not seen40 else str(ep_start),
+               "sma210": round(m210, 2), "close_above_sma210": above, "stop_level_5pct_below_sma210": round(0.95 * m210, 2),
+               "peak_window": f"{d[0]}..{d[-1]} (5y Yahoo; a peak older than that is missed)"}
+    return (off, "ok", trend), (bool(seen40 and above), "ok", reentry)
+
+
+def w_cef_blowout(spy, state_dir: Path):
+    """CRASH-C blowout trigger on the CEF-RV panel: SPY <= -20% off its 252d high AND the EW-median CEF discount >= 3.0 pts
+    below its own 52-week median (crash_c.py). Fire lists the bottom decile of (fund discount - own 52w median)."""
+    try:
+        pan = json.loads((state_dir / "cef-rv-panel.json").read_text())
+    except (OSError, ValueError):
+        return False, "blocked", {"error": "state/cef-rv-panel.json absent (make cef-rv-panel)"}
+    by_date = {}
+    for sym, rows in pan.items():
+        for r in rows:
+            if r[1] is not None:
+                by_date.setdefault(r[0], {})[sym] = r[1] * 100
+    full = max(len(v) for v in by_date.values()) if by_date else 0
+    dates = sorted(x for x, v in by_date.items() if len(v) >= full // 2)     # drop a partially-refreshed latest week
+    if len(dates) < 40:
+        return False, "blocked", {"error": f"panel has {len(dates)} weeks"}
+    med = [st.median(by_date[x].values()) for x in dates]
+    widen = med[-1] - st.median(med[-52:])
+    dd = 1 - spy["close"][-1] / max(spy["close"][-252:])
+    fired = bool(dd >= CEF_DD and widen <= -CEF_WIDEN)
+    ev = {"panel_week": dates[-1], "funds": len(by_date[dates[-1]]), "ew_median_disc_pct": round(med[-1], 2),
+          "widen_vs_52w_pts": round(widen, 2), "widen_trigger": -CEF_WIDEN, "spy_drawdown_252d": round(dd, 4),
+          "spy_trigger": CEF_DD, "lockout": "52 weeks after a fire (read the log)"}
+    if fired:
+        z = {}
+        for sym in by_date[dates[-1]]:
+            h = [by_date[x][sym] for x in dates[-52:] if sym in by_date[x]]
+            if len(h) >= 40:
+                z[sym] = round(by_date[dates[-1]][sym] - st.median(h), 2)
+        ev["bottom_decile"] = sorted(z.items(), key=lambda kv: kv[1])[:max(1, len(z) // 10)]
     return fired, "ok", ev
 
 
@@ -274,6 +350,17 @@ def scan(_a):
             fired, status, ev = False, "error", {"error": f"{type(e).__name__}: {str(e)[:200]}"}
         rows.append({"ts": now, "date": today, "watch": name, "fired": fired, "status": status, "evidence": ev})
 
+    spy5 = yget("SPY", "5y")
+    try:
+        if not spy5:
+            raise RuntimeError("SPY 5y fetch failed")
+        crash = w_crash(spy5)
+    except Exception as e:
+        crash = None
+        err = e
+    run("crash_trend", lambda: crash[0] if crash else (_ for _ in ()).throw(err))
+    run("crash_reentry", lambda: crash[1] if crash else (_ for _ in ()).throw(err))
+    run("crash_cef_blowout", lambda: w_cef_blowout(spy5, STATE) if spy5 else (_ for _ in ()).throw(err))
     try:
         t = sharadar_live()
     except Exception as e:
@@ -327,6 +414,8 @@ def report(_a):
             for x in e["new"][:5]:
                 print("      NEW", x["name"], "->", x["adr"])
             print("    watch names listed:", {k: v[:2] for k, v in e["watch_names_currently_listed"].items()})
+        elif w.startswith("crash_") and r["status"] == "ok":
+            print("    ", {k: v for k, v in e.items() if k != "bottom_decile"}, "| bottom decile:", e.get("bottom_decile", "-"))
         elif w == "rating_equity":
             print("    MANUAL:", e["manual"])
             for s, v in sorted(e["issues"].items()):
