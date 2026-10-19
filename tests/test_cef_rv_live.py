@@ -115,6 +115,15 @@ def test_slots_and_sizing_deepest_discount_first():
     assert C.size(cands, {"DEEP": 2000.0}, pan, settled=5000, equity=10_000, n_held=0) == []   # 1 share > slot
 
 
+def test_depth_accepts_the_shadow_panel_rows_with_a_nav_field():
+    """cef_rv_shadow.panel rows are (week, discount, NAV); the live sizer crashed on the 3-field rows on 2026-10-19."""
+    pan = {"A": [["2026-09-25", -0.05, 9.5], ["2026-10-02", None, 9.4], [SIG, -0.20, 9.0]],
+           "B": [["2026-10-02", -0.10], [SIG, -0.10]]}
+    assert C.depth(pan, "A", SIG) == -0.20 - (-0.125)
+    assert C.depth(pan, "B", SIG) == 0.0
+    assert [o["sym"] for o in C.size([sig("B"), sig("A")], {"A": 10.0, "B": 10.0}, pan, settled=5000, equity=10_000, n_held=0)] == ["A", "B"]
+
+
 def test_pref_ex_reservation_reduces_the_budget_today_only(tmp_path):
     signals(tmp_path, sig("A"), sig("B"))
     panel(tmp_path, A=-0.2, B=-0.1)

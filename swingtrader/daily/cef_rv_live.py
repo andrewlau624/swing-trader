@@ -105,7 +105,8 @@ def exits(rows: list[dict], today: dt.date, held: dict) -> list[dict]:
 def depth(panel: dict, sym: str, signal: str) -> float:
     """Discount at the signal week minus the fund's trailing-52-week median: more negative = deeper. 0 if unknown."""
     rows = panel.get(sym) or []
-    hist = [(d, x) for d, x in rows if d <= signal and x is not None and math.isfinite(x)]
+    # panel rows are (week, discount[, NAV]) (cef_rv_shadow.panel); the NAV field crashed a 2-way unpack on 2026-10-19
+    hist = [(r[0], r[1]) for r in rows if r[0] <= signal and r[1] is not None and math.isfinite(r[1])]
     if not hist:
         return 0.0
     win = [x for _, x in hist[-52:]]
