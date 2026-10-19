@@ -147,17 +147,17 @@ def _ibs_exec(tmp_path, monkeypatch, low, account="roth", mode="roth_first"):
 
 
 def test_roth_ibs_trades_lookalikes_and_skips_same_index_names_the_taxable_book_traded(tmp_path, monkeypatch):
-    # taxable: sold SPY (same index, no safe look-alike) and traded SOXX (its noise stand-in for SMH)
+    # taxable: sold SPY (same index, no safe look-alike) and traded SOXQ (the SMH look-alike itself)
     _write(tmp_path, "live", closed=[{"sym": "SPY", "exit_date": "2026-10-10", "pnl": 4.0},
-                                     {"sym": "SOXX", "exit_date": "2026-10-15", "pnl": -1.0},
+                                     {"sym": "SOXQ", "exit_date": "2026-10-15", "pnl": -1.0},
                                      {"sym": "XLK", "exit_date": "2026-10-15", "pnl": -9.0}])
     ex = _ibs_exec(tmp_path, monkeypatch, low={"XLK", "SPY", "SMH", "IWM"})
     book = DailyBook(cash=3000.0, start_equity=3000.0)
     ex._ibs_open(book, TODAY, 3000.0)
     buys = {r.symbol for r in ex.broker.client.submitted if r.side.value == "buy"}
-    assert buys == {"VGT", "IWM"}, "XLK->VGT (different index); IWM free; SPY skipped; SOXX taken"
+    assert buys == {"VGT", "IWM"}, "XLK->VGT (different index); IWM free; SPY skipped; SOXQ taken"
     line = next(l for l in ex.lines if "[wash] roth_first: roth night blocks" in l)
-    assert "IBS look-alikes XLK->VGT" in line and "'SPY'" in line and "'SMH->SOXX'" in line
+    assert "IBS look-alikes XLK->VGT" in line and "'SPY'" in line and "'SMH->SOXQ'" in line
     # the look-alike is sized off its own bars (not XLK's)
     vgt = next(o for o in book.orders.values() if o["sym"] == "VGT")
     assert vgt["ref_px"] != pytest.approx(next(o for o in book.orders.values() if o["sym"] == "IWM")["ref_px"])

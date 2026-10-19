@@ -285,8 +285,8 @@ def lever_g1(pairs: list[tuple[str, float]]) -> dict:
 # _roth_ibs_targets); it keeps the taxable book's IBS/intraday legs symmetric.
 WASH_LOOKALIKE = {"SPY": "SPLG", "QQQ": "QQQM", "IWM": "VTWO", "MDY": "IJH", "XLK": "VGT",
                   "XLF": "VFH", "XLE": "VDE", "XLV": "VHT", "XLI": "VIS", "XLY": "VCR",
-                  "XLP": "VDC", "XLU": "VPU", "XLB": "VAW", "SMH": "SOXX", "EEM": "IEMG",
-                  "EFA": "IEFA"}                    # DIA, XBI: none
+                  "XLP": "VDC", "XLU": "VPU", "XLB": "VAW", "SMH": "SOXQ", "EEM": "IEMG",
+                  "EFA": "IEFA"}                    # DIA, XBI: none. SMH -> SOXQ (PHLX SOX, ~$88), not SOXX (~$500+: a $500 Roth leg rounded to 0 shares, 2026-10)
 WASH_SAME_INDEX = {"SPY", "QQQ", "IWM", "MDY", "EEM"}   # look-alike tracks the SAME index: not used
 WASH_SAFE_LOOKALIKE = {k: v for k, v in WASH_LOOKALIKE.items() if k not in WASH_SAME_INDEX}
 
