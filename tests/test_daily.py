@@ -849,7 +849,7 @@ def test_real_money_books_stay_out_of_each_others_wash_sale_window(tmp_path, mon
                          state_dir=tmp_path, log_dir=tmp_path)
     w = roth._wash_symbols("2026-09-23")
     assert {"ABC", "NEW"} <= w and "OLD" not in w and "SGOV" not in w
-    assert "NEW" in roth._foreign_symbols(DailyBook(cash=5000, start_equity=5000))
+    assert "NEW" in roth._foreign_symbols(DailyBook(cash=5000, start_equity=5000), today="2026-09-23")
     assert _executor(tmp_path, monkeypatch)._wash_symbols("2026-09-23") == set(), "paper is not real money"
 
 

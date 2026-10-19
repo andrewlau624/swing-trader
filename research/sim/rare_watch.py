@@ -416,7 +416,7 @@ def report(_a):
             print("    watch names listed:", {k: v[:2] for k, v in e["watch_names_currently_listed"].items()})
         elif w.startswith("crash_") and r["status"] == "ok":
             print("    ", {k: v for k, v in e.items() if k != "bottom_decile"}, "| bottom decile:", e.get("bottom_decile", "-"))
-        elif w == "rating_equity":
+        elif w == "rating_equity" and "manual" in e:
             print("    MANUAL:", e["manual"])
             for s, v in sorted(e["issues"].items()):
                 print(f"      {s:10s} {v['last']:>7.2f} {'<24' if v['under_trigger'] else ''}  {v['name']}")

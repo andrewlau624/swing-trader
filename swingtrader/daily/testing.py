@@ -310,8 +310,15 @@ def _cef_rv(state: Path, logs: Path) -> dict:
     rows = [r for r in _jsonl(state / w.LOG_NAME) if r.get("signal", "") >= w.FORWARD_FROM]
     closed = [r for r in rows if r.get("status") == "closed" and "x_oo" in r]
     wk = sum(1 for r in closed if r.get("logged", "") >= _week_ago())
-    return dict(n=len(closed), week=wk, line=w.line(_jsonl(state / w.LOG_NAME)) if rows or closed
-                else "no forward signals yet (make cef-rv)")
+    line = w.line(_jsonl(state / w.LOG_NAME)) if rows or closed else "no forward signals yet (make cef-rv)"
+    try:
+        pan = json.loads((state / w.PANEL_NAME).read_text())
+        wk_, have = w.panel_week(pan)
+        age = (dt.date.today() - dt.date.fromisoformat(wk_)).days if wk_ else 999
+        line += f"; panel week {wk_ or '-'} ({have}/{len(pan)} funds)" + (" STALE: run make cef-rv-panel" if age > 10 else "")
+    except (OSError, ValueError):
+        line += "; panel MISSING: run make cef-rv-panel"
+    return dict(n=len(closed), week=wk, line=line)
 
 
 def _hedge(state: Path, logs: Path) -> dict:

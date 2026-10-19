@@ -26,6 +26,7 @@ import json
 import math
 import statistics as st
 import time
+from collections import Counter
 from pathlib import Path
 
 from .exdate_open_shadow import CA_URL, _get, _headers
@@ -134,11 +135,20 @@ def navfall26w(rows) -> float | None:
     return nav_now / nav_then - 1
 
 
+def panel_week(pan: dict) -> tuple[str, int]:
+    """(latest week at least half the funds have, how many have it). A week only a few funds have reached is partial
+    (CEFConnect posts the Friday point fund by fund), so it does not count as fresh."""
+    n = Counter(r[-1][0] for r in pan.values() if r)
+    ok = [w for w in n if sum(c for x, c in n.items() if x >= w) >= len(pan) / 2]
+    w = max(ok, default="")
+    return w, sum(c for x, c in n.items() if x >= w)
+
+
 def panel(state_dir: Path, today: dt.date, log=print) -> dict[str, list]:
     """sym -> [(week date, discount[, NAV])] oldest first, from CEFConnect; refetched when a newer weekly point is due."""
     p = state_dir / PANEL_NAME
     old = json.loads(p.read_text()) if p.exists() else {}
-    last = max((r[-1][0] for r in old.values() if r), default="")
+    last = panel_week(old)[0]
     due = str(today - dt.timedelta(days=(today.weekday() - 4) % 7 or 7))     # the latest Friday before today
     if old and last >= due:
         return old
