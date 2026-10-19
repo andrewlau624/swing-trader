@@ -325,10 +325,12 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
         except Exception:  # noqa: BLE001
             px_now = {}
     out["held_usd"] = round(sum(h["qty"] * px_now.get(s, h["entry_px"]) for s, h in state["open"].items()), 2)
+    real = {s: h for s, h in state["open"].items() if not h.get("dry_run")}     # dry holdings are not broker cash spent
     state_dir.mkdir(exist_ok=True)
     statep.write_text(json.dumps(state, indent=1))
-    (state_dir / HELD_NAME).write_text(json.dumps({"date": today.isoformat(), "usd": out["held_usd"], "n": len(state["open"]),
-                                                   "mode": mode}))
+    (state_dir / HELD_NAME).write_text(json.dumps({"date": today.isoformat(), "n": len(real), "mode": mode,
+                                                   "usd": round(sum(h["qty"] * px_now.get(s, h["entry_px"])
+                                                                    for s, h in real.items()), 2)}))
     return out
 
 

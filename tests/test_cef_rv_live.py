@@ -143,7 +143,8 @@ def test_dry_run_logs_sizes_and_holdings_value_but_places_nothing(tmp_path):
     st = json.loads((tmp_path / C.STATE_NAME).read_text())
     assert set(st["open"]) == {"A", "B"} and st["open"]["A"]["signal_week"] == SIG
     held = json.loads((tmp_path / C.HELD_NAME).read_text())
-    assert held["usd"] == 1000.0 and held["n"] == 2 and out["held_usd"] == 1000.0
+    assert out["held_usd"] == 1000.0
+    assert held["usd"] == 0.0 and held["n"] == 0, "dry holdings must not reach the executor's Roth cash (cef-rv-held.json)"
     run("dry", tmp_path, ad)                                           # second run: no re-buy, one missed row only
     assert sum(1 for r in rows(tmp_path) if r["cmd"] == "missed") == 1 and len([r for r in rows(tmp_path) if r["cmd"] == "buy"]) == 2
 
@@ -171,6 +172,7 @@ def test_exit_sells_at_most_what_is_held_and_never_shorts(tmp_path):
     assert set(st["open"]) == {"KEEP"}
     assert any(r["cmd"] == "sell-skip" and r["sym"] == "GONE" for r in rows(tmp_path))
     assert out["held_usd"] == 220.0                                   # KEEP marked at the quote
+    assert json.loads((tmp_path / C.HELD_NAME).read_text())["usd"] == 220.0   # live holdings do reach the executor
 
 
 def test_no_orders_outside_the_pre_open_window_or_on_a_non_session(tmp_path):

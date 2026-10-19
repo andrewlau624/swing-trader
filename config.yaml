@@ -184,7 +184,7 @@ daily:
   # the forward gate CEF-RV-FWD (60 closed trades) decides. ~+4.8pp/yr excess on deployed capital: a Roth upgrade over holding
   # beta, below the +8pp stand-alone gate. Equal slots max($500, min($1k, equity/10)), settled cash only minus the day's PREF-EX
   # reservation, <= 50% of Roth equity, BIL/SGOV never sold. off | dry | live. Switch-on is a user decision (dry first).
-  cef_rv_mode: "off"             # quoted: bare off is YAML false
+  cef_rv_mode: "dry"             # dry since 2026-10-18 (user OK): logs orders, submits nothing; quoted: bare off is YAML false
   noise_lookback: 14
   noise_target_vol: 0.02
   noise_max_lev: 3.5
