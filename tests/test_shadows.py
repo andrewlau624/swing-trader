@@ -278,4 +278,4 @@ def test_m1_n2_scores_release_nights_against_other_nights():
     g = ev.n2_score(closed, eq)
     assert g["n"] == 1 and g["n_other"] == 1 and abs(g["event_bp"] - 30) < 1e-9 and abs(g["diff_bp"] - 40) < 1e-9
     assert dt.date(2026, 11, 6) in ev.release_mornings() and ev.release_stale_warning(dt.date(2026, 10, 4)) is None
-    assert "events.py" in ev.release_stale_warning(dt.date(2026, 11, 20))
+    assert "events.py" in ev.release_stale_warning(max(ev.release_mornings()) - dt.timedelta(days=1))
