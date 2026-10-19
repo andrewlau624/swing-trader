@@ -422,6 +422,9 @@ ssr-lift: ## SSR-LIFT-FWD shadow: Rule 201 lift-day short T+2 open->close, SPY-h
 night-band: ## NIGHT-BAND-FWD shadow: the night rule between -4% and -8% at the 15:40 state, official crosses (no orders; ARGS="--backfill 5")
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.night_band_shadow $(ARGS)
 
+gap-night: ## GAP-NIGHT-FWD shadow: |gap| >= 3% names, close cross -> next open cross vs the universe overnight (no orders; ARGS="--backfill 5")
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.gap_night_shadow $(ARGS)
+
 arete-dip: ## ARETE-DIP-FWD shadow: momentum names on a down day, d+3/d+5 vs EW universe (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.arete_dip_shadow
 

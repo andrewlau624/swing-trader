@@ -21,6 +21,7 @@ ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.ovn_mom_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.arete_dip_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.ssr_lift_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.night_band_shadow
+ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.gap_night_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.noise_rearm_watch
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.gamma_state_shadow
 ExecStart=-__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.top2_shadow

@@ -176,6 +176,13 @@ def _night_band(state: Path, logs: Path) -> dict:
     return dict(n=w.summary(rows)["nights"], week=len(wk), line=w.line(rows))
 
 
+def _gap_night(state: Path, logs: Path) -> dict:
+    from . import gap_night_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    wk = {r["T"] for r in rows if r.get("status") == "scored" and not r.get("backfill") and r["T"] >= _week_ago()}
+    return dict(n=w.summary(rows)["nights"], week=len(wk), line=w.line(rows))
+
+
 def _fill_costs(state: Path, logs: Path) -> dict:
     from . import fill_cost_scorer as w
     wk = _jsonl(state / w.LOG_NAME)
@@ -558,6 +565,14 @@ REGISTRY: list[Test] = [
          "paired-vs-pool reads are taken by hand (NIGHT-BAND N 1040: daily proxy +17.9bp gross, +7.6 in 2013-26, fails the "
          "registered bar; the answer sits inside the live auction cost). PASS = propose lowering the cutoff, user decision.",
          "2026-10-20", 60, "band nights", _night_band, "state/night-band.jsonl; round1_prose.md NIGHT-BAND", ["night_band_shadow"]),
+    Test("GAP-NIGHT-FWD: gap names close cross -> next open cross vs the universe overnight (log-only)", "gap_night_shadow.py "
+         "(research-shadows): night-universe common stocks with |open(T)/close(T-1) - 1| >= 3%, prev close >= $5, ADV20 >= $50M, "
+         "bought at the official close cross of T and sold at the official open cross of T+1, vs the EW overnight of every eligible "
+         "name the same night (and ex the night leg's own picks). Gate: 60 forward gap nights, EW-night excess vs univ >= +5bp, "
+         "t >= 2, median > 0; up/down arms, SPY beta and the ex-night-picks read are taken by hand (GAP-NIGHT N 1050: Sharadar "
+         "2016-21 +8.6bp/night x-univ t 3.0, up-gaps +13.0, 2022-26 +5.4 t 1.6, daily opens/closes not cross prints). PASS = "
+         "propose a live pilot, user decision.",
+         "2026-10-20", 60, "gap nights", _gap_night, "state/gap-night.jsonl; round1_prose.md GAP-NIGHT", ["gap_night_shadow"]),
     Test("Fill-cost ledger (official-print truth)", "fill_cost_scorer.py (research-shadows): scores every daily-fills "
          "row's cost vs the official SIP auction print of its own session (the executor's slippage_bps is "
          "decision-reference drift, not cost: audit_execution_1002). Intraday/noise fills logged as mid_unclosed. "
