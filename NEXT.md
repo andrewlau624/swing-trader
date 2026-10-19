@@ -1703,6 +1703,18 @@ open/close auction cost stays ~0bp (`make review` 2b). Revert = set it back to 0
   Not tested: nothing in the feasible MOC window remains; the only larger cell (the close itself) is the auction print.
 - **THEME-NIGHT not tested:** themes defined from text/news or ETF flows (only price-momentum industry themes were run).
 - **SEL-* not tested:** the dedupe-before-vol20 code-order fix (bounded <= +0.6pp/yr; user decision, no study needed).
+- **SEQ-NIGHT (N 1038) / SEQ-ENTRY (N 1039), 2026-10-19: KILL both.** 105 indicator-SEQUENCE features (squeeze/MACD/RSI/ADX/Hull/
+  ribbon/stack runs, ages, divergences; usethinkscript scans as named features), GBM fit 1999-2015 -> judge 2016-26. Night-pool
+  ranker +18bp t 1.1, placebo not beaten, tilt +1.1 bp/night t 1.0. Stand-alone entry (all $5+/$10M stocks, top decile daily): 1-night
+  +0.1bp net excess t 0.1, 3-day +0.7 t 0.1, beta 1.5-1.6, both lose to holding QQQ. The ranking IS monotone out of sample (deciles
+  -5..+9bp/night) but ~9bp gross on the long side vs a 10bp round trip, and the spread sits in the bottom (unshortable) decile; walk-
+  forward +7-20bp/night in 2006-13, ~0 since 2014. **Indicator sequences closed as a long-only entry and as a night ranker.** Not
+  tested: 15:30-15:40 minute-path sequences as a night ranker; bottom-decile AVOIDANCE as a filter on other legs; sequences on ETFs
+  (IBS leg). Runner `research/sim/seq_night.py`; outs `seq_night_out.txt`, `seq_entry_out.txt`; features `seq_feats/` (~3GB, rebuildable).
+- **BREADTH-GATE (N 1041, 2026-10-19): KILL.** Share of stocks above 200d/50d SMA as a night-leg gate: OFF sessions (bottom quintile) still
+  earn +15 / +1 bp/night; gating costs -2.8 bp/night (t -1.4) and only lowers maxDD (-50% -> -25%); quintile order flips between eras;
+  corr with SPY-vs-200d 0.89. Same class as REGIME-10M (drawdown dial): trend/regime/breadth gates on the MR book stay CLOSED. Not
+  tested: breadth as a continuous sizing dial (same class, < 1pp; do not run).
 - **NIGHT-BAND (N 1040, 2026-10-19): FAILS the bar, UNPROVEN -> forward shadow.** The night rule between -4% and -8% on the Sharadar
   daily proxy: band +17.9bp gross (+7.6 in 2013-26), net +2.9 at 7.5bp/side vs an +8 bar; union leg +3.5 bp/night t 3.3 gross but
   -1.3 net of 15bp; band alone on the 26% of no-pool nights +9.7 bp/night t 5.7. Inside the live auction cost: decided forward.
@@ -1714,3 +1726,12 @@ open/close auction cost stays ~0bp (`make review` 2b). Revert = set it back to 0
 |---|---|---|---|
 | NIGHT-BAND: night rule at -4..-8% | union leg +3.5 bp/night t 3.3 gross; added nights +9.7 bp/night t 5.7 | 2013-26 band ~+4bp exact, inside auction cost | `night_band_shadow.py` (live, 60 nights) |
 | SEQ-NIGHT sequence tilt (N 1038) | walk-forward tilt +1.4 bp/night t 1.5 (+2.3pp/yr at w .65); Ridge top-minus-bottom +31.6bp t 2.1 | GBM t 1.1, placebo 95th +32 not beaten; 2023-25 negative | log-only tilt shadow (Ridge scores) if the band shadow passes first |
+
+## 2026-10-19: three live-code fixes shipped (user: "fix whatever you can")
+- **Night leg: vol20 floor now runs BEFORE `dedupe_correlated`** (executor `_phase_close_night`): a quiet twin can no longer win the
+  dedupe and then be dropped by the floor (SEL-NIGHT: 36-39 lost twins/yr). Crowd count unchanged: `night_sizing(..., n_raw=)` gets
+  kept + quiet. Log line "[night] N after vol20 >= 60% (k quiet)" now precedes the dedupe line.
+- **PREF-EX live screen = the shadow's** (`pref_ex_live.screen_reason`: price $10-60, yield 0.2-4%, 20-session median cross >= $1,400);
+  buy-skip rows carry the reason. Live was buying any upcoming pref/etd ex-date the shadow would not have judged.
+- **PREF-EX shadow allocates largest yield first** (`execution`, `stack_alloc`), like live; smallest-cross-first was -10bp t -2.9
+  (SEL-PREF). Tests: 530 pass. The dedupe-before-vol20 "open item" above is closed.

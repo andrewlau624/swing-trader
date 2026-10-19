@@ -1049,6 +1049,16 @@ class DailyExecutor:
             self._log_alt_source(syms, elig, picks)
         if picks.empty:
             return
+        # vol20 floor BEFORE the duplicate-bet check: a quiet twin must not win the dedupe and then be dropped by the
+        # floor, losing both names (SEL-NIGHT 2026-10-18: 36-39 lost twins/yr). The crowd count still includes them.
+        n_quiet = 0
+        if "vol20" in picks:
+            quiet = ~(picks["vol20"] >= self.d.night_vol_min)
+            n_quiet = int(quiet.sum())
+            picks = picks[~quiet]
+        self.log(f"[night] {len(picks)} after vol20 >= {self.d.night_vol_min:.0%} ({n_quiet} quiet)")
+        if picks.empty:
+            return
         if "rets" in elig.columns:
             picks, dropped = sg.dedupe_correlated(picks, elig["rets"].to_dict(), self.d.night_max_corr)
             if dropped:
@@ -1056,13 +1066,12 @@ class DailyExecutor:
                          + ", ".join(f"{d} ~ {k}" for d, k in dropped[:12]))
         else:
             self.warn("eligibility cache has no return history - duplicate-bet check skipped today")
-        n_raw = len(picks)
+        n_raw = len(picks) + n_quiet
         picks, frac = sg.night_sizing(picks, vol_min=self.d.night_vol_min,
                                       crowd_n=self.d.night_crowd_n,
-                                      max_name_pct=self.d.night_max_name_pct)
-        self.log(f"[night] {len(picks)} after vol20 >= {self.d.night_vol_min:.0%}"
-                 + (f"; crowded day ({n_raw} signals): exposure x {self.d.night_crowd_n / n_raw:.2f}"
-                    if n_raw > self.d.night_crowd_n else ""))
+                                      max_name_pct=self.d.night_max_name_pct, n_raw=n_raw)
+        if n_raw > self.d.night_crowd_n:
+            self.log(f"[night] crowded day ({n_raw} signals): exposure x {self.d.night_crowd_n / n_raw:.2f}")
         if picks.empty:
             return
         self._night_judge_picks = picks[["day_ret", "price"]].copy()

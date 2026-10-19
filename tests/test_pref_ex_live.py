@@ -188,3 +188,17 @@ def test_executor_roth_night_cash_honours_todays_reservation(tmp_path):
     assert ex._pref_ex_reserved("2026-10-15") == 0.0                      # stale file: ignored
     ex.cash_account = False
     assert ex._pref_ex_reserved("2026-10-14") == 0.0                      # taxable book: never
+
+
+def test_live_screen_matches_the_shadow_price_yield_and_cross_floors():
+    from swingtrader.daily import pref_ex_shadow as W
+    ok = ev("OK.PRA", div=0.25)
+    assert P.screen_reason(ok, 25.0, 10_000.0) is None
+    assert "price" in P.screen_reason(ok, W.MAX_PX + 1, 10_000.0)
+    assert "yield" in P.screen_reason(ev("HI.PRA", div=2.0), 25.0, 10_000.0)          # 8% > 4%
+    assert "cross" in P.screen_reason(ok, 25.0, W.MIN_CROSS - 1)
+    assert P.screen_reason(ok, None, 10_000.0) == "no quote"
+    cands = [ok, ev("HI.PRA", div=2.0), ev("THIN.PRA", div=0.3)]
+    last = {"OK.PRA": 25.0, "HI.PRA": 25.0, "THIN.PRA": 25.0}
+    auction = {"OK.PRA": 10_000.0, "HI.PRA": 10_000.0, "THIN.PRA": 1_000.0}
+    assert [o["sym"] for o in P.size(cands, last, auction, settled=5000, equity=20000)] == ["OK.PRA"]

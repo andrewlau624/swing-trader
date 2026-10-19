@@ -260,7 +260,7 @@ def execution(rows: list[dict], acct: float = ACCT, part: float = PART) -> None:
             by_night.setdefault((_rc(r) == "cef", r["ex"]), []).append(r)     # the cef arm has its own night / ACCT
     for night in by_night.values():
         rem = acct
-        for k, r in enumerate(sorted(night, key=lambda r: r["med_cross_usd"])):
+        for k, r in enumerate(sorted(night, key=lambda r: -r.get("yld", 0.0))):     # largest yield first, like live
             want = min(part * r["med_cross_usd"], rem / (len(night) - k))
             sh = math.floor(want / r["close_px"])
             r["order_usd"] = sh * r["close_px"]
@@ -426,12 +426,13 @@ def roth_snapshot(book: dict, today: dt.date) -> dict:
 
 def stack_alloc(night: list[dict], snap: dict, part: float = PART) -> dict:
     """Strict/lenient x pref-first/night-first whole-share allocation of the Roth's idle cash over one ex-night's eligible
-    events (smallest cross first, per-event cap part x ex-ante median cross $). Night-first leaves cash - night_budget."""
+    events (largest yield first, as pref_ex_live.size does; SEL-PREF 2026-10-18 found smallest-cross-first -10bp t -2.9;
+    per-event cap part x ex-ante median cross $). Night-first leaves cash - night_budget."""
     out = {}
     for mode, base in (("strict", snap["cash"]), ("lenient", snap["cash"] + snap["tbill_usd"])):
         for prio, avail in (("pref", base), ("night", max(0.0, base - snap["night_budget"]))):
             rem, qty, usd = avail, {}, 0.0
-            for k, r in enumerate(sorted(night, key=lambda r: r["med_cross_usd"])):
+            for k, r in enumerate(sorted(night, key=lambda r: -r.get("yld", 0.0))):   # largest yield first, like live
                 want = min(part * r["med_cross_usd"], rem / (len(night) - k))
                 q = math.floor(want / r["close_px"])
                 qty[r["sym"]] = q

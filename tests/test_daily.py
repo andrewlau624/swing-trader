@@ -1504,3 +1504,12 @@ def test_roth_night_priority_off_and_taxable_unchanged(tmp_path):
     from swingtrader.daily import executor as E
     ex = E.DailyExecutor(Config.load(), account="paper", broker=FakeBroker(), state_dir=tmp_path, log_dir=tmp_path)
     assert ex._roth_night_priority(_roth_book(), "d", 157.0, 900.0) == 157.0
+
+
+def test_night_sizing_n_raw_override_keeps_crowd_count_of_quiet_names():
+    # executor applies the vol floor before the duplicate-bet check and passes the pre-floor count back in
+    picks = pd.DataFrame({"vol20": [0.9] * 20}, index=[f"H{i}" for i in range(20)])
+    kept, per = sg.night_sizing(picks, vol_min=0.6, crowd_n=30, max_name_pct=0.10, n_raw=60)
+    assert len(kept) == 20 and per == pytest.approx(1 / 20 * 0.5), "60 raw signals incl. 40 quiet -> exposure x 0.5"
+    kept, per = sg.night_sizing(picks, vol_min=0.6, crowd_n=30, max_name_pct=0.10)
+    assert per == pytest.approx(0.05), "without the override the crowd count is the kept set"

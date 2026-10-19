@@ -417,7 +417,7 @@ def gap_scale(today, next_open, scale: float) -> float:
 
 
 def night_sizing(picks: pd.DataFrame, *, vol_min: float, crowd_n: int,
-                 max_name_pct: float) -> tuple[pd.DataFrame, float]:
+                 max_name_pct: float, n_raw: int | None = None) -> tuple[pd.DataFrame, float]:
     """Filter and size the night leg (research: h1.py / h1port.py, rule R6).
 
     - drop names whose 20-day volatility is under `vol_min`: in quiet names a
@@ -425,8 +425,10 @@ def night_sizing(picks: pd.DataFrame, *, vol_min: float, crowd_n: int,
     - count the day's raw signals BEFORE that filter; on days with more than
       `crowd_n` of them the selloff is market-wide and the bounce is weak
       (-9bp vs +25bp on ordinary days), so exposure scales by crowd_n / n.
+    `n_raw` overrides that count when the caller applied the vol floor itself
+    (the executor does, before the duplicate-bet check).
     Returns (kept picks, fraction of the leg per name)."""
-    n_raw = len(picks)
+    n_raw = len(picks) if n_raw is None else int(n_raw)
     kept = picks[picks["vol20"] >= vol_min] if "vol20" in picks else picks
     if kept.empty:
         return kept, 0.0

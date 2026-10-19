@@ -8301,3 +8301,52 @@ extra deployment nights it adds (the -8% pool has picks on ~31% of sessions).
   alike): 47 names, band -154bp, pool -164bp (the week the live leg lost too). PASS = propose the lower cutoff; no live change.
 - Not tested: exact 15:40 band replay (no minute history for names that never touched -8%); band-specific IBS cutoffs; the band
   under the live dedupe/tilt. Runner `research/sim/night_band.py`; out `data/research/program/night_band_out.txt`. Program N = 1040.
+
+## RESULT - SEQ-NIGHT (N 1038) and SEQ-ENTRY (N 1039), 2026-10-19, one look each: both KILL as registered
+- Features built: 105 per-name sequence/indicator states + market state (124 in A incl. sectors; 111 in B), Sharadar common stocks
+  1999-2026, `research/sim/seq_night.py`, batches in `data/research/program/seq_feats/`.
+- **A (SEQ-NIGHT, 23,166 of 24,417 picks covered): KILL.** GBM judge 2016-26 top-half minus bottom-half +18.3bp, t 1.10, halves +1.2 /
+  +23.5, ex-top-5 -1.4; placebo 95th +32.4 (not beaten); tilt replay +1.1 bp/night t 1.0; filter (drop bottom quintile) +0.2 t 0.2.
+  In-sample +169bp t 14 (memorises). Ridge +31.6bp t 2.09 (halves +43/+28, ex-top-5 +14.4 < 15 bar). Walk-forward 2006-26 +22.5 t 1.72,
+  tilt +1.4 bp/night t 1.5 (+2.3pp/yr at w .65), by year positive through 2022 then 2023 -60 / 2024 -51 / 2025 -24. Top features:
+  range_pct, rsi_chg5, ribbon_width, bear_div_age, age_c_s200. No cell clears the gate; the Ridge/walk-forward tilt is UNPROVEN
+  (NEXT.md unproven table), not a pass.
+- **B (SEQ-ENTRY, 5.5M judge rows 2016-26, 204 names/day in the top decile): KILL both labels.** L1 (one night): net excess vs SPY
+  +0.1bp/trade t 0.09, median -1.2, 2022 -11.5, beta 1.62, alpha -1.9bp t -1.5, total 2016-26 +100% vs QQQ +640%. L3 (3 days):
+  +0.7bp t 0.11, median -7.3, beta 1.48, alpha -8.2 t -1.4, +373% vs +630%. Ridge same. Both beat the shuffled-label placebo
+  (placebo top deciles are -5.8 / -14.6bp: the universe's own negative excess), and the predicted deciles are MONOTONE
+  (L1 -4.8 .. +8.8bp; L3 -35 .. +7.4bp): the sequence model does rank stocks out of sample, but the long top decile is ~+9bp gross
+  per night, below a 10bp round trip, and most of the spread is the bottom decile (the unshortable side, as in BORROW-XS/SSR-LIFT).
+  Walk-forward L1 2006-26 +3.8bp net t 3.9 (2006-13 +7..+20bp/night, ~0 since 2014); 2016-26 only +1.4 t 0.9. Top features:
+  spy_ret20, dist_hi, spy_c_s200, ibs, breadth200 (market state and the IBS snapshot, not the sequences).
+- Answer to the user's question ("hundreds of indicators mixed together"): a learned mix of 105 indicator sequences carries a real,
+  monotone, decaying ranking signal of ~10-15bp/night top-to-bottom in 2016-26; it is smaller than the cost of trading its long side
+  and does not re-sort the night pool. Hand-mixed combinations are points in this space. **Indicator sequences: CLOSED as a long-only
+  entry and as a night-pool ranker.** Not tested: minute-path sequences (15:30-15:40) as a night ranker; the short/avoid side of the
+  B ranking as a filter on OTHER legs (bottom-decile avoidance; ceiling small); sequences on ETFs for the IBS leg. Program N = 1040.
+
+## Amendment - Study BREADTH-GATE: market breadth as a leg-level gate on the night leg (pre-register 2026-10-19, before any outcome; N 1040 -> 1041)
+Context: SEQ-ENTRY's permutation importance put market state first (breadth200, spy_ret20, spy_c_s200). Prior is LOW: REGIME-10M (N 919-922)
+closed "trend/regime gates on the MR book" (a drawdown dial), NDISC bucketed SPY vs MA20/50/200 and 5d/20d returns on the night leg (dead).
+Not previously run: breadth itself (share of the $5+/$10M universe above its own 200d / 50d SMA). Cheap (data already built): run as a
+class-level falsification; if breadth behaves like SPY-vs-200d the class stays closed.
+- **Data.** Night pool = `night_band_rows.parquet` (Sharadar daily proxy of the live rule, day_ret <= -8%, 1999-2026); per-night leg
+  proxy min(1, .15n) x mean r over all sessions with a <= -4% candidate. Breadth = `seq_market.parquet` breadth200 / breadth50 (prior
+  day's values: shift 1 session, no look-ahead), spy_c_s200 for comparison.
+- **Rule.** Quintile breakpoints of breadth200 fit on 1999-2015; judge 2016-26: leg proxy per quintile; the frozen gate = OFF when
+  breadth200 is in the bottom quintile (the only economically-motivated arm: broad selling = the bounce fails). Report ON/OFF means,
+  the difference, day-clustered t, halves 2016-20 / 2021-26, ex-top-5, maxDD of the leg ON-only vs always-on, and the same for
+  spy_c_s200 < 0 as the dead comparator.
+- **Gate.** OFF-session leg mean < 0 in 2016-26 AND ON-minus-always-on >= +1.0 bp/night with t >= 2 AND both halves same sign; else KILL
+  (an OFF arm that merely lowers maxDD while costing return is REGIME-10M again: a dial). One look.
+- Runner `research/sim/breadth_gate.py`; out `data/research/program/breadth_gate_out.txt`.
+
+## RESULT - BREADTH-GATE (N 1041, 2026-10-19, one look): KILL; regime-gate class stays closed
+- Night-leg proxy 2016-26 by prior-day breadth200 quintile (breakpoints 1999-2015): +15.1 / +11.6 / +17.5 / +16.2 / +41.9 bp/night
+  (fit era: +19 / +32 / +39 / +16 / +8: the ordering FLIPS between eras). OFF in Q1 (18% of sessions): OFF sessions still earn +15.1
+  bp/night; ON-only minus always-on -2.8 bp/night t -1.4 (-4.5pp/yr at w .65), maxDD -49.7% -> -25.0%. breadth50: OFF sessions +1.3,
+  delta -0.3 t -0.1. SPY<200d comparator -1.6 t -0.8; corr(breadth200, spy_c_s200) 0.89: breadth is the dead class in a new costume.
+- Reading: as in REGIME-10M, a breadth gate is a drawdown dial that costs return; the night leg's OFF sessions are not losers. The
+  SEQ-ENTRY importance of market state was the universe's beta timing, not a night-leg gate. Not tested: breadth as a SIZING dial
+  (continuous weight) -- same class, ceiling < 1pp, do not run. Runner `research/sim/breadth_gate.py`; out `breadth_gate_out.txt`.
+  Program N = 1041.

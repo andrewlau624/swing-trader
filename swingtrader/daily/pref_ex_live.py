@@ -82,10 +82,27 @@ def auction_usd(sym: str, today: dt.date, crosses_fn, H: dict | None) -> float:
     return float(statistics.median(usd)) if usd else 0.0
 
 
+def screen_reason(r: dict, px: float | None, auction_usd: float) -> str | None:
+    """The shadow's eligibility screen (pref_ex_shadow: price $10-60, yield 0.2-4%, 20-session median cross >= $1,400),
+    applied before sizing so live buys the same set the research judged. None = eligible."""
+    from .pref_ex_shadow import MAX_PX, MAX_YLD, MIN_CROSS, MIN_PX, MIN_YLD
+    if not px or px <= 0:
+        return "no quote"
+    if not MIN_PX <= px <= MAX_PX:
+        return f"price ${px:.2f} outside ${MIN_PX:.0f}-{MAX_PX:.0f}"
+    yld = float(r["div"]) / px
+    if not MIN_YLD <= yld <= MAX_YLD:
+        return f"yield {yld:.2%} outside {MIN_YLD:.1%}-{MAX_YLD:.0%}"
+    if auction_usd < MIN_CROSS:
+        return f"median cross ${auction_usd:,.0f} < ${MIN_CROSS:,.0f}"
+    return None
+
+
 def size(cands: list[dict], last: dict[str, float], auction: dict[str, float], settled: float, equity: float,
          part: float = PART) -> list[dict]:
     """Whole-share MOC buys: `part` of the name's median cross $, largest yield first, <= MAX_NAMES, total <= settled cash
-    and <= MAX_EQUITY_FRAC x equity. Zero-share names are skipped, never forced to 1 share."""
+    and <= MAX_EQUITY_FRAC x equity. Names failing `screen_reason` are skipped; zero-share names are skipped, never
+    forced to 1 share."""
     budget = max(0.0, min(settled, MAX_EQUITY_FRAC * equity))
     order = sorted(cands, key=lambda r: -(float(r["div"]) / last.get(r["sym"], float("inf")) if last.get(r["sym"]) else 0.0))
     out, spent = [], 0.0
@@ -93,7 +110,7 @@ def size(cands: list[dict], last: dict[str, float], auction: dict[str, float], s
         if len(out) >= MAX_NAMES:
             break
         px = last.get(r["sym"])
-        if not px or px <= 0:
+        if screen_reason(r, px, auction.get(r["sym"], 0.0)):
             continue
         qty = math.floor(part * auction.get(r["sym"], 0.0) / px)
         if qty < 1:
@@ -272,8 +289,10 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
             f"${total:,.0f} of settled ${settled:,.0f} (equity ${equity:,.0f})")
         for c in cands:
             if c["sym"] not in {o["sym"] for o in orders}:
+                why = screen_reason(c, last.get(c["sym"]), auction.get(c["sym"], 0.0))
                 log_row(dict(cmd="buy-skip", sym=c["sym"], ex=c["ex"], last=last.get(c["sym"]),
-                             auction_usd=round(auction.get(c["sym"], 0.0)), reason=f"0 shares at {p:.0%} of the cross or no budget"))
+                             auction_usd=round(auction.get(c["sym"], 0.0)),
+                             reason=why or f"0 shares at {p:.0%} of the cross or no budget"))
         if orders:
             resp.write_text(json.dumps({"date": today.isoformat(), "usd": total, "mode": mode}))
             out["reserved"] = total
