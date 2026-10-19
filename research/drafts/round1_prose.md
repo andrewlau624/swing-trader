@@ -7886,3 +7886,101 @@ Registered BEFORE any code. Forward measurement of a POST-HOC observation (CEFX5
 - **Execution caveat.** CO needs an open-cross sell Schwab cannot place as MOO (the JRI CEF AUTO pre-open test filled at the official open, 0.0bp, 2026-10-10),
   so CC (MOC both legs, the Schwab-safe form) is reported beside CO. CEFX5 CC was +15bp / t 0.46 (KILL); CO +52bp / t 2.85.
 - No live trading of this class: `pref_ex_live.CLASSES = ("pref", "etd")` must stay as is; any live use is a separate user decision after the gate.
+
+## Study CRASH-B (N 1025, pre-registered 2026-10-18, BEFORE any outcome is read)
+User goal: profit from a >=30% drawdown if one comes, acceptable bleed if not. Schwab-only; Roth allows long puts / debit spreads (options approval level UNVERIFIED).
+Not a premium-harvest idea: the question is the payoff ratio of a rolled, fixed-budget tail position at FAR-SIDE fills.
+- **Data.** OptionMetrics `optionm.opprcd{2005..2025}`, SPY secid 109820, cp_flag='P', strike = strike_price/1000, days-to-expiry 15..130; underlying + total return from `optionm.secprd`. Buy at best_offer, sell at best_bid (bid 0 = worth 0); short leg of a spread bought back at ask, sold at bid. No mid fills anywhere. Commission/exchange fees ignored (flagged).
+- **Common rules (frozen).** Buy on the first trading day of each month, expiry nearest 90 calendar days (60-120 allowed), budget b = 0.10% of account equity per month (1.2%/yr max), fractional contracts in the model; whole-contract feasibility reported separately. Ladders stack (up to ~3 live). Proceeds go to cash (not re-spent beyond b).
+- **Monetization (frozen, primary).** Sell the long put at bid when its delta <= -0.70 (delta from opprcd; if missing, Black-Scholes from impl_vol) or when DTE <= 21, whichever first. Reference arm M0 (no early sale, exit at DTE 21) reported, NOT used for the gate. Spread: same trigger on the long leg, both legs closed together.
+- **Candidates (3, no others).** (1) PUT10: put strike nearest 90% of spot. (2) SPR: long 90% put / short 75% put (debit spread), spend b on spreads. (3) COND: PUT10 bought only when (3a) the put's IV is <= its own trailing-252-session 33rd percentile (IV series: nearest-90d 90%-strike put each day; needs 252 sessions so starts 2006), or (3b) SPY close < its 200d SMA. Both gate arms reported; skipped months spend nothing.
+- **Gate (tightened, one look, primary monetization, calendar-year net P&L of the put book, bid-marked, after premium, % of account).** PASS needs ALL: net P&L 2008 >= 10x the annual budget (>= +12% of account) AND net P&L 2020 >= +12%, AND every non-crash year (all years except 2008, 2020, and 2022 reported separately) net P&L >= -(annual budget actually spent) [i.e. bleed <= budget], AND cumulative 2010-2019 bleed reported. 2022 reported honestly, not in the gate. COND arms: budget = what they actually spend; 10x test uses 12% for comparability and also 10x actual spend.
+- **Combined book.** 100% SPY (total return) with b funded monthly by selling SPY, 2005-2025: report terminal wealth, CAGR, maxDD vs SPY alone. PASS-ECON additionally requires terminal wealth within -0.5%/yr CAGR of SPY alone... recorded as description only; the verdict is the payoff gate.
+- **Kill.** Any gate leg fails for a candidate -> that candidate dies. All die -> class KILL (listed tail puts at fixed budget). Only 2 crash episodes exist (2008, 2020): a PASS is "not killed", not validated; 2005-2025 is entirely touched. No re-tuning of OTM, tenor, delta trigger, budget.
+- Runner `research/sim/crash_b.py` -> `data/research/program/crash_b_out.txt`; note `research/drafts/crash_B_puts_2026-10-18.md`.
+
+## Study CRASH-A — rule-based regime exit + inverse-ETF short on SPY (pre-register 2026-10-18, N 1023 -> 1024)
+Question (user 2026-10-18): the best Schwab-executable way to profit if a >=30% SPY/QQQ drawdown happens, at an acceptable bleed if not. We do NOT assume a crash is coming; crash timing is not forecastable here (VTS, PLUM, MFLW, SHAR-CRASH all dead as timing signals). This tests only whether a trend rule is crisis alpha or a cost of insurance.
+- **Rules (canonical, no tuning, at most 3).** All on SPY total-return (Sharadar SFP closeadj, 1998-2026). R1 Faber: month-end close < 10-month SMA of month-end closes. R2: daily close < 200d SMA x 0.99 (exit) / > SMA x 1.01 (re-enter), 1% band. R3 Moskowitz TSMOM: trailing 12-month total return (month-end) < trailing 12-month cash return. Risk-off state -> defensive book. Defensive primary D1 = 50% inverse (-1x SPY) + 50% cash; secondary D2 = 100% cash (reported, not gated).
+- **Instruments.** Long = SPY closeadj. Inverse = SH actual 2006-06-21+, synthetic (-1x SPY total daily - 0.9%/yr + cash) before, labelled SYNTHETIC; synthetic is checked vs SH over the overlap. Cash = FRED DTB3 daily (BIL proxy, less 0.1%/yr). 60/40 = 60% SPY / 40% IEF monthly rebalance, 2002-08+.
+- **Execution.** Signal on close t, trade at close t+1 (Schwab MOC; conservative, 1 day lag), so day d return uses the signal from close d-2. Cost 3bp per notional traded.
+- **Gate (all must hold; D1).** (a) In each crash episode (SPY peak-to-trough: 2000-03-24..2002-10-09, 2007-10-09..2009-03-09, 2020-02-19..2020-03-23, 2022-01-03..2022-10-12) the rule account return beats buy-and-hold SPY by >= +15pp; (b) in non-crash years (all calendar years 1998-2026 except 2000,2001,2002,2008,2020,2022) geometric CAGR cost vs SPY <= 3pp/yr; (c) whipsaw count reported. A rule that fails (a) in 2020 is "slow", reported plainly.
+- **Kill.** Any rule failing (a) in any episode or (b) = no crisis alpha; reported as insurance cost or nothing. No re-tuning of windows/bands. 1987-style one-day crash cannot be tested (data 1998+) and cannot be caught by any close-based rule: stated, not tested.
+- Runner `research/sim/crash_a.py` -> `data/research/program/crash_a_out.txt`; memo `research/drafts/crash_A_trend_2026-10-18.md`.
+
+## Study CRASH-C — buy forced CEF sellers in a >=20% SPY drawdown with a discount blowout (pre-register 2026-10-18, N 1025 -> 1026)
+Source: user 2026-10-18 ("profit from a >=30% drawdown"), branch C. Mechanism: levered-CEF deleveraging / fund redemptions push CEF price below NAV
+beyond what NAV falls; the price-vs-NAV wedge, not beta, is the forced-seller component. NOT INCOME-SHOCK ($25-par panic, killed) and NOT branch N.
+Evidence question (2) ($25-par IG paper < $18) is NOT run: INCOME-SHOCK (N 1021) already measured it on 2008-07/2009/2020 and killed it. Question (3) is
+answered from existing outputs (shar_crash_out.txt, nx_out.txt), no new N.
+- Data: CEFConnect weekly price/NAV panel (data/research/cefconnect/cef_panel.parquet, 355 LIVE-to-2026 funds: survivorship stated, bias favours the rule);
+  Sharadar SFP closeadj/closeunadj (TR); SPY from SFP. NAV TR = NAV_t x (adjfactor_t / adjfactor_0), adjfactor = closeadj/closeunadj.
+- Trigger (frozen): first panel week with SPY close <= 0.80 x its trailing-252-session high AND EW-median universe discount (pct points) <= its own
+  trailing-52-week median minus 3.0 points; 52-week lockout after a fire. Episodes expected 2008, 2020, 2022; a non-fire counts as non-positive.
+- Selection: funds with >= 52 weeks of history at the trigger; bottom decile of (disc - own trailing-52w median) = widest blowout. Subsets reported:
+  all deciles, and "levered proxy" = name category in {muni, taxable_fi, pref_conv} (cef_peer.CATS).
+- Trade: three equal tranches, entry at the first SFP close strictly after the signal week, +4 and +8 weeks (selection fixed at trigger); each tranche exits at
+  the first week disc >= the fund's pre-trigger 52w median, else 260 calendar days. Cost 50bp/side base (RT 1.0%), 2x = 2.0% RT.
+- Metrics per episode (EW across funds): price TR, own-NAV TR (wedge = price - NAV), same-category EW NAV TR of all panel funds over the same window (primary
+  comparator), SPY TR over the same window and EW-all-funds price TR (beta comparators). Primary excess = price TR - same-category EW NAV TR - cost.
+- Gate (PASS): per episode mean primary excess >= +10%, median > 0, ex-top-5 funds mean > 0, still >= +10% at 2x cost; in >= 2 of 3 episodes. Else KILL.
+  No change of trigger/decile/exit after reading. One run. Runner research/sim/crash_c.py; out data/research/program/crash_c_out.txt.
+
+### Result — CRASH-A (2026-10-18, one run, N 1024): KILL all three rules (gate (b) fails; R1 and R3 also fail (a))
+Out `data/research/program/crash_a_out.txt`. Episode excess vs SPY (D1, pp): R1 +66/+75/+39/+10; R2 +63/+62/+20/+16 (passes (a)); R3 +73/+68/0/+18. Non-crash-year CAGR cost: R1 8.4, R2 7.9, R3 5.9pp/yr (gate 3). Memo `research/drafts/crash_A_trend_2026-10-18.md`.
+### Result — CRASH-C (2026-10-18, one run, N 1026): gate PASSES 2 of 3 (2008-09, 2020; 2022 fails), WEAK-PASS pending survivorship; no deployment
+Out data/research/program/crash_c_out.txt. Fires: 2001-09-21, 2002-12-20 (extra, reported, both FAIL: +3.5%/+6.0% net), 2008-09-26, 2020-03-13, 2022-06-17.
+Selected decile excess vs same-category NAV, net 1x / 2x cost: 2008-09 +17.3 / +16.3% (median +13.1, ex-top5 +9.8, SPY over window -0.5); 2020 +14.0 / +13.0%
+(median +12.7, ex-top5 +8.7); 2022 -0.6 / -1.6%. Wedge is the source (2008 +26pp, 2020 +12pp); price TR is NOT beta-free in 2020 (+28.8% vs SPY +31%).
+Caveats: live-fund panel (non-panel CEFs earned 12pp less than panel funds in the 2020 window), 3 effective episodes, 2008 tranche 0 priceTR -3%.
+
+### CRASH-A extension (pre-register 2026-10-18, BEFORE any pre-1998 outcome is read; N stays 1024)
+User clarified: a Great-Crash-scale event (1929-32, about -86%, multi-year, with sharp bear rallies). Same frozen rules R1/R2/R3, D1/D2, lag and cost; nothing re-tuned.
+- **Data.** WRDS CRSP `crsp.dsi` vwretd (total) / vwretx daily from 1926 = "SPY" (VW index, NYSE-era, not investable; also NO dividend-cut/closure risk modelled). -1x synthetic = -vwretd - 0.9%/yr + cash. Cash = `crsp.mcti` t30ret (monthly, spread to daily /21). Long Treasuries b10ret/b20ret where present, reported only (not in the rules).
+- **Windows (judge, pre-1998: untouched by any rule in the program).** W1 1929-09..1932-07 (index peak-to-trough by data), W2 1937-03..1938-03, W3 1973-01..1974-12, plus full 1926-1950. Rule return vs buy-and-hold per window; gate for the extension: D1 beats buy-and-hold by >= +15pp in W1 and W3 and non-crash-year bleed 1926-1950 (excl. 1929-32, 1937-38) reported vs the same 3pp tolerance.
+- **Reports.** per-window P&L; whipsaw count in the 1930-31 bear rallies (spring 1930 about +45%); -1x leg path decay vs a static short from the 1929 peak; $ at $2.3k/$10k/$25k; systemic risks (listed in memo, not modelled). Optional evidence (not Schwab-tradable): Japan 1990-2003 via Datastream.
+- **Kill.** Any gated window failed = no giant-crash alpha. Daily-data caveat: 1926-52 `dsi` daily exists; the rules use a 1-day lag as before.
+
+### CRASH-C extension — Great-Crash-scale test on CRSP (pre-register 2026-10-18, before any output is read; N 1026 -> 1027)
+User clarification: "crash" means 1929-32 scale (about -86%, false bottoms). Question: does early bottom-buying ruin the account, and which staging/confirmation rule survives?
+- Data: WRDS crsp.dsi (daily vwretd, 1926+; total-return index, TR level = cumprod(1+vwretd)). Windows (peak = max TR level before the window trough): 1929-32, 1937-38,
+  1973-74, 2000-02, 2007-09. Peak date = TR-level max in [window start - 1y, window start +1y]: 1929-01..1930-12... fixed as: 1929 [1928-01,1930-01], 1937 [1936-01,1938-01],
+  1973 [1972-01,1974-01], 2000 [1999-01,2001-01], 2007 [2007-01,2008-01]; evaluation runs to peak+6 years or the first date the TR level regains the peak (the "break even" of the index).
+- Rules (frozen, long-only, cash earns 0, no leverage, no costs beyond 0.25% per entry tranche):
+  R1 staged: 1/3 of the account bought at close when the index is first -30%, -50%, -70% below its peak (a tranche that never triggers stays cash).
+  R2 all-in at -30%. R3 trend-confirmed: all-in the first close after a >= 40% drawdown when the index close is above its 210-session SMA (about 10 months); sell back to cash
+  if it closes below the SMA by 5% (one whipsaw exit allowed per window; re-entry by the same rule). R4 buy-and-hold from the peak (benchmark).
+  R5 cheapest decile: on each entry date (R2 date) buy the decile of stocks with the lowest price/52-week-high (CRSP dsf, NYSE/AMEX common, share price >= 1, equal weight, held to window end)
+  versus the index return over the same hold; report the excess.
+- Metrics per window and rule: worst interim drawdown of the account from entry (peak-to-trough of the equity curve after first purchase), sessions from first purchase to account break-even,
+  final value at window end, and dollars at $2.3k / $10k / $25k starting cash. Window end = the earlier of index recovery of its prior peak or peak+6y, capped by data.
+- Gate (answer to the user question, no PASS/KILL of a strategy): "early bottom buying ruins" if R1 or R2 in 1929-32 has worst interim drawdown <= -50% of deployed capital and
+  has not broken even by window end; a rule SURVIVES if in all 5 windows its worst drawdown >= -50% and it breaks even within the window. Report plainly; no rule edits after reading.
+Runner research/sim/crash_c_great.py; out data/research/program/crash_c_great_out.txt. One run.
+
+### Result — CRASH-A extension (2026-10-18, one run, N 1024): PASS on the extension gate, premium unchanged
+`research/sim/crash_a_ext.py` -> `data/research/program/crash_a_ext_out.txt`. CRSP VW 1926-98, D1 excess vs VW: W1 1929-32 +101/+98/+86pp (R1/R2/R3), W2 1937-38 +56/+64/+44, W3 1973-74 +43/+63/+70 (gate >= +15 in W1, W3: all pass). 1930-31: 0 whipsaws R1/R3, R2 3 spells (2 lost ~2%). Non-crash 1926-50 bleed D1 R1 10.2 / R2 6.3 / R3 5.8pp/yr (D2 6.6/3.8/3.5): the insurance premium stays 4-10pp/yr. The VW index is not investable; Japan optional case not run.
+### Result — CRASH-C extension (2026-10-18, one run, N 1027): early bottom-buying RUINS a 1929-scale account; only trend-confirmed re-entry survives all 5 windows
+Out data/research/program/crash_c_great_out.txt. 1929-32 (index -84.0%): R2 all-in at -30% worst account dd -80.2%, final -25.5%, never breaks even in 6y; R1 staged
+-30/-50/-70 worst -65.2%, final +12.8%, break-even 1,086 sessions; R3 trend-confirmed worst -36.8%, final +83.2%, break-even 901 sessions; buy&hold from the peak -84.0%.
+R3 survives all 5 windows (worst dd -8.6..-36.8%, breaks even in all). Caveat: in 1929 R3 bought the April-1930 false bottom, was stopped out 4 weeks later (-21%), and only the
+re-entry (Aug 1932) made +83%: the stop, not the entry, did the work. Cheapest decile (R5) from the -30% date: 1929 -0.5% with -80.8% dd; mixed elsewhere.
+
+### Result — CRASH-B (2026-10-18, one run, N 1025)
+Runner `research/sim/crash_b.py`, out `data/research/program/crash_b_out.txt`, note `research/drafts/crash_B_puts_2026-10-18.md`. Primary PUT10 net P&L 2008 +1.1% (0.9x budget), 2020 +2.4% (2.0x), 2010-19 cum -6.3% (spent 12.0%); SPR, COND-IV, COND-SMA all lower. Gate needed >= +12% both years: ALL FAIL. Combined with SPY: CAGR -0.5pp/yr, maxDD -55.2% -> -54.7%. Whole contracts need ~$170k+. MODEL 1929-32 (BS, not a backtest): ~+5.7% of account (4.7x budget) at k=1.68, 43.8x only at k=0.89 (generous). **VERDICT: KILL.** No re-tuning of OTM/tenor/trigger/budget.
+
+## Study CRASH-D — inverse-ETF sleeve funded from T-bills, trend-gated (pre-register 2026-10-18, BEFORE any outcome is read; N 1027 -> 1028)
+Question: CRASH-A priced the trend rules against buy-and-hold SPY. The live book is mostly cash/T-bills between trades, so the relevant cost of a crash sleeve is the sleeve's P&L (1x inverse index when the rule says risk-off, T-bills otherwise) minus T-bills, per unit of sleeve capital.
+- **Rules**: the same three frozen CRASH-A rules R1 Faber 10m SMA, R2 200d SMA +-1% band, R3 12m TSMOM, signal at close t, trade close t+1 (held = state.shift(2)), 3bp of sleeve notional per switch. No tuning, none dropped.
+- **Series**: CRSP VW total return 1926-01..1997-12 spliced to SPY (Sharadar total) 1998-01..2026-10; cash = CRSP t30ret (monthly) then FRED DTB3 - 0.1%. Inverse = actual SH from 2006-06, synthetic -1x daily (-r - 0.9%/yr + cash) before.
+- **Measure**: sleeve excess = compounded(sleeve) - compounded(cash) over a window, as % of sleeve capital. Episodes: 1929-09..1932-07, 1937-03..1938-03, 1973-01..1974-12, 2000-03-24..2002-10-09, 2007-10-09..2009-03-09, 2020-02-19..2020-03-23, 2022-01-03..2022-10-12. Non-crash years = all calendar years except 1929-32, 1937-38, 1973-74, 2000-02, 2008, 2020, 2022 (2009 and 1933 stay in, as in CRASH-A). Whipsaw = risk-off spell whose sleeve excess < 0.
+- **Gate (fixed now)**: average non-crash-year sleeve excess >= -2.0%/yr (1926-2026 is the gate window; 1998-2026 reported) AND sleeve gain >= +30% of sleeve capital in 1929-32, 1937-38 and 2007-09. Per rule. All three reported; picking the cheapest rule afterwards is a multiple-testing choice and is labelled so.
+- Dollars: a 50%-of-account sleeve at $2.3k/$10k/$25k, 1929 replay and an average non-crash year. Kill: any rule failing either arm fails; no re-tuning.
+
+### Result — CRASH-D (2026-10-18, one run, N 1028): KILL all three rules (arm (a) cost fails; arm (b) payoff passes)
+Out `data/research/program/crash_d_out.txt`; memo `crash_D_overlay_2026-10-18.md`. Non-crash-year cost of the T-bill-funded inverse sleeve: R1 4.81, R2 4.06, R3 4.18 %/yr of sleeve capital (gate 2.0). Gains in 1929-32/1937-38/2007-09: R1 +142/+53/+52%, R2 +130/+59/+41%, R3 +129/+43/+46% (gate 30). All-years mean -2.8/-1.9/-2.2 %/yr. Cheapest per payoff R2 (57 vs 52/51) is a post-hoc pick within noise. No re-tuning.
+
+### CRASH-D addendum — MODERN -80% test on QQQ (pre-register 2026-10-18, added BEFORE any QQQ output is read; user request; N 1028 same study)
+Same three frozen rules, signal AND sleeve both on QQQ (Sharadar SFP total return, from 1999-03). Inverse = actual PSQ from 2006-06, synthetic -1x QQQ (-0.95%/yr + cash) before. Cash = DTB3 - 0.1%. Episode: QQQ close peak 2000-03-10 to trough 2002-10-09 (fixed now); R3 needs 12m of history so it cannot signal before 2000-03; reported as is. Non-crash years on QQQ = 1999-2026 minus {2000,2001,2002,2008,2020,2022}. Gate as CRASH-D (cost <= 2%/yr; gain >= +30% in the 2000-02 episode); also 2008 and 2020/2022 reported. Reported as its own row beside 1929. Nikkei 1990-2003 (WRDS Datastream) as evidence only, skipped if no clean index series. QQQ results do not change the verdict on SPY; no re-tuning.
+### Result — CRASH-D addendum, QQQ (2026-10-18, one run): KILL on cost, payoff real
+Out `crash_d_qqq_out.txt`. 2000-03-10..2002-10-09 QQQ -82.6%: sleeve excess R1 +99 / R2 +104 / R3 +104% of sleeve capital (gate 30 passes). Non-crash cost R1 7.13 / R2 7.81 / R3 6.22 %/yr (gate 2.0 fails). Weak in 2008 (+27%) and 2020 (0-5%). Nikkei skipped (no clean Datastream series).

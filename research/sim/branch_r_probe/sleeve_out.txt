@@ -1,0 +1,38 @@
+BRANCH R sleeve: PREF+ETDX official crosses 2021-01-13..2026-10-02, 7264 events
+floor |dev| 16.9bp; top-quartile excess dispersion 13.3bp at median cross/day share 0.10
+gross $/yr (account fixed, no leverage, whole shares); base = flat bp/side on top of impact
+
+base   0bp | C  sqrt-law on day $vol (b=32.6)       CO $10,000 | p  5%: 1,556 p 10%: 2,205 p 20%: 2,848 p 30%: 3,248 p 50%: 3,763
+base   0bp | C  sqrt-law on day $vol (b=32.6)       CO $25,000 | p  5%: 2,048 p 10%: 3,447 p 20%: 4,976 p 30%: 5,860 p 50%: 6,966
+base   0bp | C  sqrt-law on day $vol (b=32.6)       CC $10,000 | p  5%: 1,185 p 10%: 1,732 p 20%: 2,182 p 30%: 2,507 p 50%: 2,929
+base   0bp | C  sqrt-law on day $vol (b=32.6)       CC $25,000 | p  5%: 1,450 p 10%: 2,553 p 20%: 3,924 p 30%: 4,542 p 50%: 5,297
+base   0bp | D  PREF-PART 0.8*sqrt(100p)            CO $10,000 | p  5%: 1,400 p 10%: 1,902 p 20%: 2,296 p 30%: 2,491 p 50%: 2,674
+base   0bp | D  PREF-PART 0.8*sqrt(100p)            CO $25,000 | p  5%: 1,838 p 10%: 2,965 p 20%: 4,032 p 30%: 4,501 p 50%: 4,885
+base   0bp | D  PREF-PART 0.8*sqrt(100p)            CC $10,000 | p  5%: 1,030 p 10%: 1,430 p 20%: 1,630 p 30%: 1,751 p 50%: 1,840
+base   0bp | D  PREF-PART 0.8*sqrt(100p)            CC $25,000 | p  5%: 1,240 p 10%: 2,072 p 20%: 2,979 p 30%: 3,183 p 50%: 3,216
+base   0bp | S1 stress: excess/cross, g=1           CO $10,000 | p  5%: 1,433 p 10%: 1,860 p 20%: 1,933 p 30%: 1,678 p 50%:   751
+base   0bp | S1 stress: excess/cross, g=1           CO $25,000 | p  5%: 1,882 p 10%: 2,898 p 20%: 3,409 p 30%: 3,040 p 50%: 1,210
+base   0bp | S1 stress: excess/cross, g=1           CC $10,000 | p  5%: 1,132 p 10%: 1,583 p 20%: 1,786 p 30%: 1,826 p 50%: 1,618
+base   0bp | S1 stress: excess/cross, g=1           CC $25,000 | p  5%: 1,378 p 10%: 2,316 p 20%: 3,245 p 30%: 3,319 p 50%: 2,792
+base   0bp | S2 severe: excess/cross, g=.25, cap hs CO $10,000 | p  5%: 1,041 p 10%:   761 p 20%:  -978 p 30%:-3,308 p 50%:-4,738
+base   0bp | S2 severe: excess/cross, g=.25, cap hs CO $25,000 | p  5%: 1,353 p 10%: 1,152 p 20%:-1,574 p 30%:-5,914 p 50%:-9,280
+base   0bp | S2 severe: excess/cross, g=.25, cap hs CC $10,000 | p  5%:   950 p 10%: 1,072 p 20%:   432 p 30%:  -493 p 50%:  -904
+base   0bp | S2 severe: excess/cross, g=.25, cap hs CC $25,000 | p  5%: 1,132 p 10%: 1,504 p 20%:   928 p 30%:  -846 p 50%:-2,028
+
+base   5bp | C  sqrt-law on day $vol (b=32.6)       CO $10,000 | p  5%: 1,100 p 10%: 1,565 p 20%: 2,000 p 30%: 2,280 p 50%: 2,651
+base   5bp | C  sqrt-law on day $vol (b=32.6)       CO $25,000 | p  5%: 1,431 p 10%: 2,429 p 20%: 3,525 p 30%: 4,122 p 50%: 4,842
+base   5bp | C  sqrt-law on day $vol (b=32.6)       CC $10,000 | p  5%:   729 p 10%: 1,092 p 20%: 1,335 p 30%: 1,539 p 50%: 1,817
+base   5bp | C  sqrt-law on day $vol (b=32.6)       CC $25,000 | p  5%:   834 p 10%: 1,536 p 20%: 2,473 p 30%: 2,804 p 50%: 3,173
+base   5bp | D  PREF-PART 0.8*sqrt(100p)            CO $10,000 | p  5%:   944 p 10%: 1,262 p 20%: 1,449 p 30%: 1,523 p 50%: 1,563
+base   5bp | D  PREF-PART 0.8*sqrt(100p)            CO $25,000 | p  5%: 1,221 p 10%: 1,948 p 20%: 2,580 p 30%: 2,763 p 50%: 2,761
+base   5bp | D  PREF-PART 0.8*sqrt(100p)            CC $10,000 | p  5%:   574 p 10%:   789 p 20%:   783 p 30%:   783 p 50%:   729
+base   5bp | D  PREF-PART 0.8*sqrt(100p)            CC $25,000 | p  5%:   623 p 10%: 1,055 p 20%: 1,528 p 30%: 1,445 p 50%: 1,092
+base   5bp | S1 stress: excess/cross, g=1           CO $10,000 | p  5%:   977 p 10%: 1,220 p 20%: 1,085 p 30%:   710 p 50%:  -360
+base   5bp | S1 stress: excess/cross, g=1           CO $25,000 | p  5%: 1,265 p 10%: 1,881 p 20%: 1,958 p 30%: 1,302 p 50%:  -914
+base   5bp | S1 stress: excess/cross, g=1           CC $10,000 | p  5%:   676 p 10%:   943 p 20%:   938 p 30%:   858 p 50%:   507
+base   5bp | S1 stress: excess/cross, g=1           CC $25,000 | p  5%:   762 p 10%: 1,299 p 20%: 1,794 p 30%: 1,580 p 50%:   668
+base   5bp | S2 severe: excess/cross, g=.25, cap hs CO $10,000 | p  5%:   586 p 10%:   120 p 20%:-1,825 p 30%:-4,276 p 50%:-5,850
+base   5bp | S2 severe: excess/cross, g=.25, cap hs CO $25,000 | p  5%:   736 p 10%:   134 p 20%:-3,025 p 30%:-7,653 p 50%:-11,404
+base   5bp | S2 severe: excess/cross, g=.25, cap hs CC $10,000 | p  5%:   494 p 10%:   431 p 20%:  -416 p 30%:-1,461 p 50%:-2,015
+base   5bp | S2 severe: excess/cross, g=.25, cap hs CC $25,000 | p  5%:   516 p 10%:   487 p 20%:  -523 p 30%:-2,585 p 50%:-4,152
+

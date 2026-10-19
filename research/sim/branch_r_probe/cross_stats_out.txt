@@ -1,0 +1,32 @@
+TAQ closing crosses (scond '6') on E-1, 988 events / 158 ex-nights, 2021-01-12..2025-11-25; px vs events.pc median abs diff 0.00bp
+cross $: median $6,736 p25 $2,768 p75 $17,214; shares median 300; cross/day$ median 0.011
+15:59:50 NBBO half-spread: median 18.0bp mean 27.4; top-of-book size median 1 lots
+cross print vs 15:59:50 mid: mean +2.79bp median +4.02; mean |dev| 21.3bp median |dev| 13.7; in half-spread units mean z +0.12 median +0.33 mean |z| 1.09
+print inside the 15:59:50 NBBO: 80%; at/above ask 34%; at/below bid 23%
+vs 15:50 mid: mean +3.32bp, mean |dev| 27.9bp
+saving of buying at the cross vs lifting the 15:59:50 ask: mean 24.6bp  (cross sits +2.8bp from mid)
+-- by cross $ (X) quartile
+   (14.059000000000001, 2768.237] n  247 X med $   2,253 | dev mean  +5.49 |dev|  23.2 |z| 0.88 hs  23.8bp  frac|dev|>hs 0.24
+   (2768.237, 6735.75]          n  247 X med $   4,393 | dev mean  +4.54 |dev|  17.2 |z| 0.88 hs  18.6bp  frac|dev|>hs 0.31
+   (6735.75, 17213.67]          n  247 X med $  10,336 | dev mean  +4.99 |dev|  18.3 |z| 1.08 hs  15.5bp  frac|dev|>hs 0.39
+   (17213.67, 5933600.75]       n  247 X med $  77,444 | dev mean  -3.85 |dev|  26.4 |z| 1.53 hs  14.2bp  frac|dev|>hs 0.54
+-- by cross / day $vol quartile
+   (-0.0009589, 0.00438]        n  247 X med $   2,730 | dev mean  +3.36 |dev|  16.9 |z| 1.03 hs  15.4bp  frac|dev|>hs 0.38
+   (0.00438, 0.0107]            n  247 X med $   4,736 | dev mean  +4.64 |dev|  17.6 |z| 0.94 hs  16.9bp  frac|dev|>hs 0.29
+   (0.0107, 0.035]              n  247 X med $   7,935 | dev mean  +5.67 |dev|  20.3 |z| 1.05 hs  19.5bp  frac|dev|>hs 0.31
+   (0.035, 0.661]               n  247 X med $  70,447 | dev mean  -2.51 |dev|  30.2 |z| 1.35 hs  21.2bp  frac|dev|>hs 0.49
+-- by cross / 20d $vol quartile
+   (-0.0009679, 0.00575]        n  247 X med $   2,632 | dev mean  +5.73 |dev|  17.8 |z| 1.10 hs  14.3bp  frac|dev|>hs 0.40
+   (0.00575, 0.0143]            n  247 X med $   4,350 | dev mean  +1.80 |dev|  17.6 |z| 0.92 hs  17.6bp  frac|dev|>hs 0.27
+   (0.0143, 0.0378]             n  247 X med $   7,582 | dev mean  +8.15 |dev|  21.0 |z| 0.90 hs  21.8bp  frac|dev|>hs 0.30
+   (0.0378, 7.58]               n  247 X med $  75,849 | dev mean  -4.52 |dev|  28.7 |z| 1.45 hs  18.7bp  frac|dev|>hs 0.51
+-- by year (signed dev bp, |dev|)
+   2021: n 187 dev -0.18 |dev| 13.9 X med $8,163
+   2022: n 183 dev +6.74 |dev| 28.2 X med $6,074
+   2023: n 278 dev +2.32 |dev| 23.5 X med $5,874
+   2024: n 220 dev +2.09 |dev| 19.0 X med $5,499
+   2025: n 120 dev +3.78 |dev| 21.0 X med $10,286
+-- by class
+   etdx: n 355 dev +3.49 |dev| 20.6 hs 20.9 X med $5,183 sh_day 0.010
+   pref: n 633 dev +2.40 |dev| 21.6 hs 16.2 X med $7,764 sh_day 0.011
+OLS |dev|bp = 15.85 + 32.6 * sqrt(cross/day$)   corr +0.23

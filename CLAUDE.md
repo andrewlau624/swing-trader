@@ -1112,3 +1112,36 @@ N renumbered to 866 (multiple parallel-session collisions: PAIR-CLASS/SSR-LIFT/P
   +1.5x SPY hedge; net = 5bp/side + 2bp borrow; Alpaca ETB flag at detection). Gate 60 forward event-days, net > 0, day-t >= 2.
   Local 20-session backfill +115bp net/event (raw short +214bp, median +233): a look-alike, NOT evidence. The research-shadows
   unit on him was re-rendered with absolute paths (was `~/llm-trader/`). Any live pilot = user decision.
+
+## Research memory — mechanism loop (2026-10-17/18), `research/drafts/mech_loop_2026-10-17.md`
+- KILLS: PCP-HTB (N 1019; conversion earns r - b, registration sign error disclosed; HTB chains far-side -78%/yr), BK-EMERGE-GV (N 1020;
+  median -6.5%/120d, lottery), INCOME-SHOCK (N 1021; $25-par panic rule with PIT quality screen loses in 2008-07), TME via futures (access:
+  commissions; Schwab IRA futures need $25k). Branches B-F (contracts, cross-asset, disclosures, obscure info, house margin): 0 cards.
+- **INTL-PREF (N 1022): PASS** — PREF-EX on TSX $25-par prefs (WRDS Datastream tr_ds_equities, 2005-25, 999/1,166 delisted): CO net +32bp,
+  issuer-clustered t 12, 21/21 yrs, 2023-25 +33.5; Yahoo matches Datastream 28/28. The ex-date under-adjustment is a property of retail $25-par
+  paper, not US tax. Additive to US PREF-EX. Unverified: IBKR MOO fills at the TSX open, Roth Canadian withholding (0% vs 15% = ~6-9 vs ~2-3%/yr
+  at $10k). Prototype `research/sim/intl_pref_shadow.py` (`make intl-pref`, log-only, local, not deployed).
+- Data: WRDS FISD fisd_ratings/fisd_rating_hist = PIT issue-level ratings (the "no free PIT ratings" line was wrong at issue level).
+  Datastream on WRDS has international raw prices + ds2div ex-dates: untouched markets for any mechanism.
+- Arrears catch-up ex-nights (G2): 9/9 positive, +4.8%/event, ~1/yr, thin: log-only candidate (PREF-EX y<=4% filter excludes them).
+- Round 3 (10-18), branches J-N + INTL-PREF diligence (ledger mech_loop_2026-10-17.md): J intl income paper = ex-date under-adjustment
+  corroborated in JSE (+169bp, drop 0.61) and Stockholm prefs (+62bp) but ceilings ~1.5pp each; ASX hybrids dead (0.91, franking).
+  KILLS: K delisted $25 paper (2 events/11y, move in the gap), L special-event pref calls (exercises were on above-par paper),
+  M Japan yutai (over-drop real, no recovery), N CEF-pref 200% coverage floor (never bound; 2020 = beta). INTL-PREF at IBKR:
+  ~+5.6pp/yr at $10k if Roth gets 0% WHT (Article XXI, IBKR handling unknown), ~+1.9pp at 15%; small tickets cost 10-20bp RT.
+  TSX no-open-trade prints = prior close (3.4% of ex events; bias ~1.4bp); shadow scores them at the close.
+  The $25-par/income-paper neighbourhood is now saturated: next branches must leave it.
+- **USER RULING 2026-10-18: Schwab only.** No new brokerage accounts; international markets are out (INTL-PREF, JSE/SE prefs, TSX,
+  IBKR unlocks all ACCESS-KILLED). Research only US-listed instruments tradable at Schwab (taxable margin + Roth). Do not re-propose IBKR.
+
+## Research memory — crash plan (2026-10-18, user: "make money off a 1929-size drawdown"), N 1024-1028
+- **CRASH-B puts (N 1025): KILL.** Rolled 10%-OTM SPY puts at 1.2%/yr, far-side OptionMetrics 2005-25: 2008 +1.1% / 2020 +2.4% of
+  account; 1929 BS model +5.7% at calm-regime IV. One SPY put ~$520 / $59k notional: needs a >= ~$170k account. Dead at $2-25k.
+- **CRASH-A / CRASH-D trend sleeve (N 1024, 1028): KILL on cost, PASS on payoff.** R1 Faber 10m / R2 200d 1% band / R3 12m TSMOM,
+  50% 1x inverse sleeve vs T-bills: +129..142% of sleeve in 1929-32, +41..59% 1937 / 2008, QQQ 2000-02 (-83%, the only modern
+  -80%) +99..104%; but 4-5%/yr of sleeve in non-crash years (QQQ 6-8%), 2020 ~0-31%, and **net -1.9..-2.8%/yr over 1926-2026
+  INCLUDING 1929**: negative-EV insurance, not a profit engine. Exits 18-34% after the top; cannot beat fast/V crashes.
+- **CRASH-C (N 1026-1027):** early bottom-buying ruins a 1929 account (all-in at -30%: -80% DD, no recovery in 6y); trend-confirmed
+  re-entry after >= 40% DD with a 5%-below-SMA stop survived all 5 windows (stop did the work). CEF discount-blowout staged buy:
+  WEAK-PASS (+17% 2008, +14% 2020 vs category NAV, 2022 ~0), live-fund survivorship unresolved.
+- The book itself is not a crash harvester (vol-proportional premium only). Do not re-run trend/inverse/put crash variants.

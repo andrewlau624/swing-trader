@@ -1510,6 +1510,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 
 | Option-implied borrow-rate cross-section, monthly (BORROW-XS/XS2, N 1006-1007, 2026-10-16) | **REAL signal, NOT deployable; long-only = size/vol beta** | 1996-2025 (`optionm.borrate`), decile LS D1-D10 gross +106bp/mo t 6.43, monotone D1 119 -> D10 13bp/mo; but the payoff is the SHORT leg (Roth cannot short) and long-only D1-EW net +22bp/mo is confined to the small + high-vol terciles (BORROW-XS2 KILL; nothing clears t>=2 in 2016-25). Do not re-tune tenor/deciles/lag. `borrow_xs.py`, `borrow_xs2.py` |
 | Index dealer-gamma / OI state (GAMMA-MKT, N 1008) + index option skew/term structure (SKEW-MKT, N 1009), 2026-10-16 | **dead** | SPY `optionm.opprcd`/`vsurfd` (coverage 2005+, not 1996). GAMMA: |next-day ret| ~ dealer-gamma z is significant but the WRONG sign (a vol-regime proxy, not hedging) and the directional arm is null; SKEW: RR30/TS fail both halves (wrong sign H2, t<2 H1). Index gamma/pinning + skew/term families closed. `gamma_mkt.py`, `skew_mkt.py` |
+| Rare index washout buy: SPY dd >= 15% and 5d <= -7%, buy close, hold 10 (PANIC-IDX, N 1018) | **dead** | 1998-2026 n 18 (0.65/yr): excess -1.35% t -0.8, hit 56%, ex-top-5 -4.2%, 3x worst -53% (2020); only 5d <= -10% grid cells positive (n 6-15, same crises), ceiling ~+0.8pp/yr. Rare+large index dips cannot clear the gate |
 
 ## Ideas not yet tested
 

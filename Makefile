@@ -397,6 +397,9 @@ pref-ex-live: ## PREF-EX live module (Roth MOC/MOC preferred ex-div capture); do
 cef-rv-live: ## CEF-RV live module (Roth open-cross CEF discount reversion); does nothing unless daily.cef_rv_mode is dry|live
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.cef_rv_live
 
+intl-pref: ## INTL-PREF paper prototype: TSX preferred ex-date log-only scan + score (research/sim/intl_pref_shadow.py; no orders)
+	@PYTHONPATH=. $(PY) -m research.sim.intl_pref_shadow scan && PYTHONPATH=. $(PY) -m research.sim.intl_pref_shadow score && PYTHONPATH=. $(PY) -m research.sim.intl_pref_shadow report
+
 rare-watch: ## Rare-trigger watchtower (CEF-pref crash floor, pref arrears, OFAC NS-CMIC, rating manual); log-only, research/sim/rare_watch.py
 	@PYTHONPATH=. $(PY) -m research.sim.rare_watch scan
 
