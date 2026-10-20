@@ -330,7 +330,7 @@ def _cef_rv(state: Path, logs: Path) -> dict:
         pan = json.loads((state / w.PANEL_NAME).read_text())
         wk_, have = w.panel_week(pan)
         age = (dt.date.today() - dt.date.fromisoformat(wk_)).days if wk_ else 999
-        line += f"; panel week {wk_ or '-'} ({have}/{len(pan)} funds)" + (" STALE: run make cef-rv-panel" if age > 10 else "")
+        line += f"; panel week {wk_ or '-'} ({have}/{len(pan)} funds)" + (" STALE: Nasdaq refresh failed; check [cef-nav] in the research-shadows log, else make cef-rv-panel" if age > 10 else "")
     except (OSError, ValueError):
         line += "; panel MISSING: run make cef-rv-panel"
     return dict(n=len(closed), week=wk, line=line)

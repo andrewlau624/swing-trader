@@ -153,9 +153,15 @@ def panel(state_dir: Path, today: dt.date, log=print) -> dict[str, list]:
     if old and last >= due:
         return old
     funds = _cefc("funds") or []
-    if not funds:     # CEFConnect blocks datacenter IPs (the server): the panel is pushed from a clean IP instead
-        log(f"[cef-rv] CEFConnect unreachable; using the stored panel (latest week {last or '-'}); "
-            f"refresh it from a clean IP: make cef-rv-panel")
+    if not funds:     # CEFConnect blocks datacenter IPs (the server): extend the stored panel from the Nasdaq NAV symbols
+        from . import cef_nav
+        new = cef_nav.refresh(old, state_dir, today, log, keep=KEEP_WEEKS) if old else {}
+        if new and panel_week(new)[0] > last:
+            p.write_text(json.dumps(new))
+            log(f"[cef-rv] panel extended from Nasdaq: {len(new)} funds, latest week {panel_week(new)[0]}")
+            return new
+        log(f"[cef-rv] CEFConnect unreachable and Nasdaq added no newer week; using the stored panel (latest week "
+            f"{last or '-'}); seed / add funds from a clean IP: make cef-rv-panel")
         return old
     new, bad = {}, 0
     for f in funds:
