@@ -17,6 +17,7 @@ from __future__ import annotations
 import datetime as dt
 import json
 import re
+import statistics
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
@@ -28,7 +29,8 @@ MAP_NAME = "cef-rv-navmap.json"   # state/: sym -> {"nav": navsym | None, "check
 THREADS = 6
 RECHECK_DAYS = 30                 # unmapped funds are looked up again after this long
 NAVSYM = re.compile(r"^X[A-Z]{1,5}X$")
-DRIFT = 0.005                     # overlap check: NAV on the stored last week must agree within this
+DRIFT = 0.005                     # overlap check: the NAV symbol's history must agree with the stored rows within this (median)
+OVERLAP_DAYS = 21                 # weeks before the stored last week fetched for that check
 
 
 def _get(path: str, params: dict | None = None) -> dict | None:
@@ -88,13 +90,17 @@ def nav_symbol(sym: str, get=None) -> str | None:
     name = re.sub(r"\(The\)|Common Stock|Common Shares|,|\.", " ", info.get("companyName") or "").split()
     if len(name) < 2:
         return None
-    hits = (get(f"autocomplete/slookup/10", dict(search=" ".join(name[:3]))) or [])
-    key = " ".join(name[:2]).lower()
+    hits = (get(f"autocomplete/slookup/10", dict(search=" ".join(name[:4]))) or [])
+    full = " ".join(name).lower()
+    found = []
     for h in hits if isinstance(hits, list) else []:
-        s = str(h.get("symbol") or "")
-        if h.get("asset") == "MUTUALFUNDS" and NAVSYM.match(s) and str(h.get("name") or "").lower().startswith(key):
-            return s
-    return None
+        s, hn = str(h.get("symbol") or ""), " ".join(str(h.get("name") or "").split()).lower()
+        # autocomplete truncates names (~30 chars): a hit matches when it is a prefix of the full name
+        if h.get("asset") == "MUTUALFUNDS" and NAVSYM.match(s) and hn and full.startswith(hn[:28]):
+            found.append(s)
+    # a term trust and its sibling share a truncated name (BMEZ / BME): ambiguous -> None; refresh() also rejects a NAV
+    # symbol whose history disagrees with the stored CEFConnect rows
+    return found[0] if len(set(found)) == 1 else None
 
 
 def navmap(state_dir: Path, syms: list[str], today: dt.date, log=print, get=None, threads: int = THREADS) -> dict:
@@ -126,9 +132,10 @@ def refresh(pan: dict[str, list], state_dir: Path, today: dt.date, log=print, ke
 
     def one(s: str) -> tuple[str, list[list]]:
         last = pan[s][-1][0] if pan[s] else far
-        return s, fridays(hist(m[s]["nav"], "mutualfunds", last, get), hist(s, "stocks", last, get))
+        since = (dt.date.fromisoformat(last) - dt.timedelta(days=OVERLAP_DAYS)).isoformat()   # overlap for the NAV check
+        return s, fridays(hist(m[s]["nav"], "mutualfunds", since, get), hist(s, "stocks", since, get))
 
-    new, added, drift, empty, weeks = dict(pan), 0, [], 0, set()
+    new, added, mismap, empty, weeks = dict(pan), 0, [], 0, set()
     with ThreadPoolExecutor(threads) as ex:
         for s, rows in ex.map(one, todo):
             old = pan[s]
@@ -136,16 +143,22 @@ def refresh(pan: dict[str, list], state_dir: Path, today: dt.date, log=print, ke
                 empty += 1
                 continue
             last = old[-1][0] if old else ""
-            ov = [r for r in rows if r[0] == last]
-            if ov and old and len(old[-1]) >= 3 and old[-1][2] and abs(ov[0][2] / old[-1][2] - 1) > DRIFT:
-                drift.append(s)
+            stored = {r[0]: r[2] for r in old if len(r) >= 3 and r[2]}
+            ov = [abs(r[2] / stored[r[0]] - 1) for r in rows if r[0] in stored]
+            if ov and statistics.median(ov) > DRIFT:
+                # the NAV symbol tracks a different fund (a term trust mapped to its sibling): unmap it, keep the stored rows
+                mismap.append(s)
+                m[s] = {"nav": None, "checked": today.isoformat(), "mismap": m[s]["nav"]}
+                continue
             add = [r for r in rows if r[0] > last]
             if add:
                 added += 1
                 weeks.update(r[0] for r in add)
                 new[s] = (list(old) + add)[-keep:]
+    if mismap:
+        (Path(state_dir) / MAP_NAME).write_text(json.dumps(m, indent=0, sort_keys=True))
     weeks = sorted(weeks)
     log(f"[cef-nav] Nasdaq refresh: {added}/{len(todo)} mapped funds extended ({empty} returned nothing, "
         f"{len(syms) - len(todo)} unmapped kept as stored); new weeks {weeks[0] if weeks else '-'}..{weeks[-1] if weeks else '-'}"
-        + (f"; NAV DRIFT vs the stored last week on {len(drift)}: {drift[:6]}" if drift else ""))
+        + (f"; {len(mismap)} NAV symbols REJECTED (history disagrees with the stored rows), now unmapped: {mismap[:8]}" if mismap else ""))
     return new

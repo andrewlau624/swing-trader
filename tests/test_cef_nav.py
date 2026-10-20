@@ -52,10 +52,15 @@ def test_hist_parses_nasdaq_rows_and_drops_na():
 
 def test_nav_symbol_tries_xsymx_then_a_name_lookup():
     get = _fake_get({"XGABX": {}}, {}, names={"ADX": "Adams Diversified Equity Fund Common Stock", "ASA": "ASA  Gold and Precious Metals Limited"},
-                    lookup={"Adams Diversified Equity": [{"symbol": "ADX", "asset": "STOCKS", "name": "Adams Diversified Equity Fund"},
+                    lookup={"Adams Diversified Equity Fund": [{"symbol": "ADX", "asset": "STOCKS", "name": "Adams Diversified Equity Fund"},
                                                          {"symbol": "XADEX", "asset": "MUTUALFUNDS", "name": "Adams Diversified Equity Fund"}]})
     assert N.nav_symbol("GAB", get) == "XGABX"
     assert N.nav_symbol("ADX", get) == "XADEX"
+    # a term trust and its sibling share the truncated autocomplete name: ambiguous -> None
+    get2 = _fake_get({}, {}, names={"BMEZ": "BlackRock Health Sciences Term Trust Common Shares"},
+                     lookup={"BlackRock Health Sciences Term": [{"symbol": "XBMEX", "asset": "MUTUALFUNDS", "name": "BlackRock Health Sciences T"},
+                                                                {"symbol": "XHSTX", "asset": "MUTUALFUNDS", "name": "BlackRock Health Sciences T"}]})
+    assert N.nav_symbol("BMEZ", get2) is None
     assert N.nav_symbol("ASA", get) is None
     assert N.nav_symbol("ZZZ", get) is None
 
@@ -85,13 +90,19 @@ def test_refresh_extends_each_fund_from_its_own_last_week_and_flags_drift(tmp_pa
     new = N.refresh(pan, tmp_path, TODAY, log=logs.append, keep=3, get=get, threads=1)
     assert [r[0] for r in new["GAB"]] == ["2026-10-02", "2026-10-09", "2026-10-16"]            # appended, keep=3 trims nothing yet
     assert abs(new["GAB"][-1][1] - (5.15 / 5.55 - 1)) < 1e-12 and new["GAB"][-1][2] == 5.55
-    assert [r[0] for r in new["OLD"]] == ["2026-07-31", "2026-08-07", "2026-10-16"]            # stale fund catches up
+    assert new["OLD"] == pan["OLD"]                                   # NAV 10.3 vs stored 10.0 on 07-31: XOLDX tracks another fund
     assert new["ASA"] == pan["ASA"]                                                           # unmapped: untouched
     assert pan["GAB"][-1][0] == "2026-10-09"                                                  # input not mutated
-    assert "2/2 mapped funds extended" in logs[-1] and "NAV DRIFT" in logs[-1] and "OLD" in logs[-1]   # 10.0 vs 10.3 on 07-31
-    # the fetch starts at each fund's stored last week (overlap row for the drift check), not a global date
+    assert "1/2 mapped funds extended" in logs[-1] and "REJECTED" in logs[-1] and "OLD" in logs[-1]
+    m = json.loads((tmp_path / N.MAP_NAME).read_text())
+    assert m["OLD"]["nav"] is None and m["OLD"]["mismap"] == "XOLDX" and m["GAB"]["nav"] == "XGABX"
+    # the fetch starts OVERLAP_DAYS before each fund's stored last week (rows to check the NAV symbol against), not a global date
     since = {p.split("/")[1]: q["fromdate"] for p, q in get.calls if "historical" in p}
-    assert since["GAB"] == "2026-10-09" and since["OLD"] == "2026-07-31"
+    assert since["GAB"] == "2026-09-18" and since["OLD"] == "2026-07-10"
+    # a rejected symbol is not retried the same month
+    n0 = len(get.calls)
+    N.refresh(new, tmp_path, TODAY, log=logs.append, keep=3, get=get, threads=1)
+    assert not any("XOLDX" in p for p, _ in get.calls[n0:])
 
 
 def test_panel_falls_back_to_nasdaq_when_cefconnect_is_blocked(tmp_path, monkeypatch):
