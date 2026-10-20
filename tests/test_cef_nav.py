@@ -50,19 +50,26 @@ def test_hist_parses_nasdaq_rows_and_drops_na():
     assert N.hist("XNOPE", "mutualfunds", "2026-10-01", get) == {}
 
 
-def test_nav_symbol_tries_xsymx_then_a_name_lookup():
-    get = _fake_get({"XGABX": {}}, {}, names={"ADX": "Adams Diversified Equity Fund Common Stock", "ASA": "ASA  Gold and Precious Metals Limited"},
+def test_nav_candidates_and_resolve_pick_the_symbol_whose_history_matches():
+    get = _fake_get({"XGABX": {"2026-10-09": 5.5, "2026-10-16": 5.55}}, {},
+                    names={"ADX": "Adams Diversified Equity Fund Common Stock", "ASA": "ASA  Gold and Precious Metals Limited"},
                     lookup={"Adams Diversified Equity Fund": [{"symbol": "ADX", "asset": "STOCKS", "name": "Adams Diversified Equity Fund"},
-                                                         {"symbol": "XADEX", "asset": "MUTUALFUNDS", "name": "Adams Diversified Equity Fund"}]})
-    assert N.nav_symbol("GAB", get) == "XGABX"
+                                                              {"symbol": "XADEX", "asset": "MUTUALFUNDS", "name": "Adams Diversified Equity Fund"}]})
+    assert N.nav_candidates("GAB", get) == ["XGABX"] and N.nav_symbol("GAB", get) == "XGABX"
     assert N.nav_symbol("ADX", get) == "XADEX"
-    # a term trust and its sibling share the truncated autocomplete name: ambiguous -> None
-    get2 = _fake_get({}, {}, names={"BMEZ": "BlackRock Health Sciences Term Trust Common Shares"},
+    assert N.nav_symbol("ASA", get) is None and N.nav_symbol("ZZZ", get) is None
+    # stored rows agree with XGABX -> accepted; a stored history that disagrees rejects even the only candidate
+    assert N.resolve("GAB", [["2026-10-09", -0.05, 5.5]], get)["nav"] == "XGABX"
+    assert N.resolve("GAB", [["2026-10-09", -0.05, 9.9]], get)["nav"] is None
+    assert N.resolve("GAB", [], get)["nav"] == "XGABX"                       # no overlap, unambiguous -> accepted
+    # a term trust and its sibling share the truncated autocomplete name: the stored history picks the right one
+    get2 = _fake_get({"XBMEX": {"2026-10-16": 45.7}, "XHSTX": {"2026-10-16": 18.2}}, {},
+                     names={"BMEZ": "BlackRock Health Sciences Term Trust Common Shares"},
                      lookup={"BlackRock Health Sciences Term": [{"symbol": "XBMEX", "asset": "MUTUALFUNDS", "name": "BlackRock Health Sciences T"},
                                                                 {"symbol": "XHSTX", "asset": "MUTUALFUNDS", "name": "BlackRock Health Sciences T"}]})
     assert N.nav_symbol("BMEZ", get2) is None
-    assert N.nav_symbol("ASA", get) is None
-    assert N.nav_symbol("ZZZ", get) is None
+    assert N.resolve("BMEZ", [["2026-10-16", -0.1, 18.22]], get2) == {"nav": "XHSTX", "tried": ["XBMEX", "XHSTX"]}
+    assert N.resolve("BMEZ", [], get2)["nav"] is None                       # ambiguous with nothing to check against
 
 
 def test_navmap_caches_and_rechecks_unmapped_monthly(tmp_path):
@@ -93,9 +100,16 @@ def test_refresh_extends_each_fund_from_its_own_last_week_and_flags_drift(tmp_pa
     assert new["OLD"] == pan["OLD"]                                   # NAV 10.3 vs stored 10.0 on 07-31: XOLDX tracks another fund
     assert new["ASA"] == pan["ASA"]                                                           # unmapped: untouched
     assert pan["GAB"][-1][0] == "2026-10-09"                                                  # input not mutated
-    assert "1/2 mapped funds extended" in logs[-1] and "REJECTED" in logs[-1] and "OLD" in logs[-1]
+    assert "1/1 mapped funds extended" in logs[-1] and "2 unmapped" in logs[-1]
     m = json.loads((tmp_path / N.MAP_NAME).read_text())
-    assert m["OLD"]["nav"] is None and m["OLD"]["mismap"] == "XOLDX" and m["GAB"]["nav"] == "XGABX"
+    assert m["OLD"] == {"nav": None, "tried": ["XOLDX"], "checked": "2026-10-19"} and m["GAB"]["nav"] == "XGABX"
+    # a cached (pre-verification) map entry that disagrees with the stored rows is rejected at refresh time
+    m["OLD"]["nav"] = "XOLDX"
+    (tmp_path / N.MAP_NAME).write_text(json.dumps(m))
+    new2 = N.refresh(pan, tmp_path, TODAY, log=logs.append, keep=3, get=get, threads=1)
+    assert new2["OLD"] == pan["OLD"] and "REJECTED" in logs[-1] and "OLD" in logs[-1]
+    m = json.loads((tmp_path / N.MAP_NAME).read_text())
+    assert m["OLD"]["nav"] is None and m["OLD"]["mismap"] == "XOLDX"
     # the fetch starts OVERLAP_DAYS before each fund's stored last week (rows to check the NAV symbol against), not a global date
     since = {p.split("/")[1]: q["fromdate"] for p, q in get.calls if "historical" in p}
     assert since["GAB"] == "2026-09-18" and since["OLD"] == "2026-07-10"

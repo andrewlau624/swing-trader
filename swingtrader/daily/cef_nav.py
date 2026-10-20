@@ -80,40 +80,71 @@ def fridays(nav: dict[str, float], px: dict[str, float]) -> list[list]:
     return rows
 
 
-def nav_symbol(sym: str, get=None) -> str | None:
-    """The fund's Nasdaq Fund Network NAV symbol: X{sym}X if it exists, else a name lookup (ADX -> XADEX)."""
+def nav_candidates(sym: str, get=None) -> list[str]:
+    """Possible Nasdaq Fund Network NAV symbols for the fund: X{sym}X if it exists, then every name-lookup hit (ADX -> XADEX).
+    A term trust and its sibling share a truncated autocomplete name (BMEZ / BME), so the caller must verify a candidate
+    against the fund's stored NAV history (navmap) before using it."""
     get = get or _get
+    out = []
     cand = f"X{sym}X"
     if get(f"quote/{cand}/info", dict(assetclass="mutualfunds")):
-        return cand
+        out.append(cand)
     info = get(f"quote/{sym}/info", dict(assetclass="stocks")) or {}
     name = re.sub(r"\(The\)|Common Stock|Common Shares|,|\.", " ", info.get("companyName") or "").split()
     if len(name) < 2:
-        return None
-    hits = (get(f"autocomplete/slookup/10", dict(search=" ".join(name[:4]))) or [])
+        return out
+    hits = (get("autocomplete/slookup/10", dict(search=" ".join(name[:4]))) or [])
     full = " ".join(name).lower()
-    found = []
     for h in hits if isinstance(hits, list) else []:
         s, hn = str(h.get("symbol") or ""), " ".join(str(h.get("name") or "").split()).lower()
         # autocomplete truncates names (~30 chars): a hit matches when it is a prefix of the full name
-        if h.get("asset") == "MUTUALFUNDS" and NAVSYM.match(s) and hn and full.startswith(hn[:28]):
-            found.append(s)
-    # a term trust and its sibling share a truncated name (BMEZ / BME): ambiguous -> None; refresh() also rejects a NAV
-    # symbol whose history disagrees with the stored CEFConnect rows
-    return found[0] if len(set(found)) == 1 else None
+        if h.get("asset") == "MUTUALFUNDS" and NAVSYM.match(s) and hn and full.startswith(hn[:28]) and s not in out:
+            out.append(s)
+    return out
 
 
-def navmap(state_dir: Path, syms: list[str], today: dt.date, log=print, get=None, threads: int = THREADS) -> dict:
-    """Load state/cef-rv-navmap.json, resolve new (or stale-unmapped) funds, save."""
+def nav_symbol(sym: str, get=None) -> str | None:
+    """First candidate when it is the only one (no history to verify against); None when ambiguous."""
+    c = nav_candidates(sym, get)
+    return c[0] if len(c) == 1 else None
+
+
+def agrees(navsym: str, stored: list, get=None) -> bool | None:
+    """Does the NAV symbol's history match the stored rows (median |diff| <= DRIFT over the weeks both have)? None = no overlap."""
+    nav_at = {r[0]: r[2] for r in stored if len(r) >= 3 and r[2]}
+    if not nav_at:
+        return None
+    last = max(nav_at)
+    since = (dt.date.fromisoformat(last) - dt.timedelta(days=OVERLAP_DAYS)).isoformat()
+    h = hist(navsym, "mutualfunds", since, get)
+    ov = [abs(h[d] / nav_at[d] - 1) for d in h if d in nav_at]
+    return statistics.median(ov) <= DRIFT if ov else None
+
+
+def resolve(sym: str, stored: list, get=None) -> dict:
+    """{"nav": navsym | None, "tried": [...]}: the first candidate whose history agrees with the stored rows; without any
+    overlap only an unambiguous candidate is accepted."""
+    cands = nav_candidates(sym, get)
+    for c in cands:
+        ok = agrees(c, stored, get)
+        if ok or (ok is None and len(cands) == 1):
+            return {"nav": c, "tried": cands}
+    return {"nav": None, "tried": cands}
+
+
+def navmap(state_dir: Path, syms: list[str], today: dt.date, log=print, get=None, threads: int = THREADS,
+           pan: dict | None = None) -> dict:
+    """Load state/cef-rv-navmap.json, resolve new (or stale-unmapped) funds against their stored rows, save."""
     get = get or _get
+    pan = pan or {}
     p = Path(state_dir) / MAP_NAME
     m = json.loads(p.read_text()) if p.exists() else {}
     cutoff = (today - dt.timedelta(days=RECHECK_DAYS)).isoformat()
     need = [s for s in syms if s not in m or (not m[s].get("nav") and (m[s].get("checked") or "") < cutoff)]
     if need:
         with ThreadPoolExecutor(threads) as ex:
-            for s, ns in zip(need, ex.map(lambda s: nav_symbol(s, get), need)):
-                m[s] = {"nav": ns, "checked": today.isoformat()}
+            for s, r in zip(need, ex.map(lambda s: resolve(s, pan.get(s) or [], get), need)):
+                m[s] = {**r, "checked": today.isoformat()}
         Path(state_dir).mkdir(parents=True, exist_ok=True)
         p.write_text(json.dumps(m, indent=0, sort_keys=True))
     mapped = sum(1 for s in syms if (m.get(s) or {}).get("nav"))
@@ -126,7 +157,7 @@ def refresh(pan: dict[str, list], state_dir: Path, today: dt.date, log=print, ke
     """Append the weekly rows after each fund's stored last week; rows are never rewritten, only extended."""
     get = get or _get
     syms = sorted(pan)
-    m = navmap(state_dir, syms, today, log, get, threads)
+    m = navmap(state_dir, syms, today, log, get, threads, pan)
     todo = [s for s in syms if (m.get(s) or {}).get("nav")]
     far = (today - dt.timedelta(days=7 * keep + 7)).isoformat()
 
