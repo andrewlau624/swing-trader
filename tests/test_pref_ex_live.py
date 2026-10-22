@@ -67,6 +67,21 @@ def test_off_mode_is_a_no_op(tmp_path):
     assert out["skipped"] == "off" and not (tmp_path / P.LOG_NAME).exists()
 
 
+def test_position_symbol_is_schwabs_hyphen_form():
+    assert P.position_symbol("PSEC/PRA") == "PSEC-A" and P.position_symbol("BAC/PRP") == "BAC-P"
+    assert P.position_symbol("SOJD") == "SOJD"
+    held = {"PSEC-A": SimpleNamespace(qty=10.0), "SOJD": SimpleNamespace(qty=3.0)}
+    assert P.held_qty(held, "PSEC/PRA") == 10.0 and P.held_qty(held, "SOJD") == 3.0 and P.held_qty(held, "GONE/PRA") == 0.0
+
+
+def test_sell_leg_finds_the_holding_under_schwabs_position_symbol(tmp_path):
+    (tmp_path / P.STATE_NAME).write_text(json.dumps({"open": {
+        "PSEC.PRA": dict(schwab="PSEC/PRA", qty=10, ex="2026-10-14", bought="2026-10-13", px=14.88)}}))
+    ad = FakeAd({}, positions={"PSEC-A": 10.0})       # the 2026-10-21 shape: positions say PSEC-A, the order said PSEC/PRA
+    out = P.run("live", tmp_path, tmp_path, log=lambda *_: None, today=TODAY, now=NOW, ad=ad, crosses_fn=crosses, H={})
+    assert ad.submitted == [("PSEC/PRA", "sell", "cls", 10)] and out["sold"] == ["PSEC.PRA"]
+
+
 def test_schwab_symbol_mapping():
     assert P.schwab_symbol("BAC.PRP") == "BAC/PRP" and P.schwab_symbol("GLADZ") == "GLADZ"
 

@@ -49,6 +49,23 @@ def schwab_symbol(sym: str) -> str:
     return f"{m.group(1)}/PR{m.group(2)}" if m else sym
 
 
+def position_symbol(schwab: str) -> str:
+    """Schwab's positions endpoint lists a preferred as BAC-P / PSEC-A, not the BAC/PRP order symbol
+    (seen 2026-10-21: the first live sell was skipped as "account holds 0" while 10 PSEC-A sat in the
+    account). Baby bonds and commons keep their symbol."""
+    m = re.fullmatch(r"([A-Z]+)/PR([A-Z]?)", schwab)
+    return f"{m.group(1)}-{m.group(2)}" if m else schwab
+
+
+def held_qty(held: dict, schwab: str) -> float:
+    """Shares the account holds under the order symbol or Schwab's position form of it."""
+    for k in (schwab, position_symbol(schwab)):
+        q = float(getattr(held.get(k), "qty", 0.0) or 0.0)
+        if q:
+            return q
+    return 0.0
+
+
 def next_session(d: dt.date) -> dt.date:
     from .cpc_ledger import next_session as ns
     return ns(d + dt.timedelta(days=1))
@@ -257,7 +274,7 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
     for sym, h in list(state["open"].items()):
         if h.get("ex", "9999") > today.isoformat():
             continue
-        have = float(getattr(held.get(h["schwab"]), "qty", 0.0) or 0.0)
+        have = held_qty(held, h["schwab"])
         qty = int(min(have, float(h["qty"])))
         if qty < 1:
             log_row(dict(cmd="sell-skip", sym=sym, schwab=h["schwab"], reason=f"account holds {have:g}"))
