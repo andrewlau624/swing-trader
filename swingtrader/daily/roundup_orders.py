@@ -1,8 +1,13 @@
 """Reverse-split round-up: the automatic 1-share buys and sells (Round 32 B1; user-approved 2026-10-02).
 
 Runs inside `roundup_watch.run` every weekday morning, only when ROUNDUP_AUTO=1 in .env. For every alerted split
-whose buy-by session is today or later, it places ONE 1-share DAY limit buy in each account in ROUNDUP_ACCOUNTS
-(default "live,roth"), so the share is held at the last pre-split close. After the ex-date it watches the position:
+whose buy-by session is today or later, it places ONE 1-share limit buy in each account in ROUNDUP_ACCOUNTS
+(default "live,roth"), so the share is held at the last pre-split close. Order mode (config.yaml
+daily.roundup_order_mode): "day" (default, unchanged) = DAY limit 1-2% above Schwab's ask the morning the alert
+exists; "gtc" = GTC limit at or below the last close (min of the last close and that ask limit) as soon as the
+candidate is confirmed with buy-by >= today, cancelled on the ex-date if still unfilled. Unconfirmed (EDGAR-only)
+candidates are never bought. Every account x deal decision is reported back as an outcome row (order-placed /
+no-order + the exact reason) that the watch writes to state/roundup-watch.jsonl. After the ex-date it watches the position:
 1+ share from 2 days after the ex-date (never earlier: an unprocessed split still shows the old share) -> "rounded" (the round-up was paid) and a 1-share DAY market sell is placed; still 0 shares 21
 days after the ex-date -> "cash" (Schwab paid cash in lieu). Kill switch per account: once 2 deals are "cash" and none
 "rounded", that account stops buying and an email says so. Each resolved account gets a payout (sell fill - buy fill;
@@ -62,12 +67,38 @@ def _save(state_dir: Path, st: dict) -> None:
     (Path(state_dir) / ORDERS_NAME).write_text(json.dumps(st, indent=1))
 
 
-def place(ad, sym: str, side: str, limit: float | None = None) -> str:
+def gtc_limit(last_close: float, px: float) -> float:
+    """GTC mode: at or below the last close, never above the DAY-mode ask limit (which fills now when the ask is
+    already under the close)."""
+    lc = round(float(last_close), 4 if last_close < 1 else 2)
+    return min(lc, buy_limit(float(px)))
+
+
+def cancel(ad, oid: str) -> bool:
+    try:
+        r = ad.c.cancel_order(int(oid), ad.hash)
+        return r.status_code in (200, 201, 204)
+    except Exception:
+        return False
+
+
+def _order_dead(ad, oid: str) -> bool:
+    """True only when the broker says the buy order is canceled / expired / rejected with nothing filled; an unknown
+    status (no order_status on the adapter, API error) is False so the deal keeps the old follow-up."""
+    try:
+        status, fq, _, _ = ad.order_status(None, {"broker_id": str(oid)})
+    except Exception:
+        return False
+    return status in ("canceled", "expired", "rejected") and fq < 1
+
+
+def place(ad, sym: str, side: str, limit: float | None = None, gtc: bool = False) -> str:
     from schwab.orders.common import Duration, Session
     from schwab.orders.equities import equity_buy_limit, equity_sell_market
     px = (f"{limit:.4f}" if limit < 1 else f"{limit:.2f}") if limit is not None else None
     o = (equity_buy_limit(sym, 1, px) if side == "buy" else equity_sell_market(sym, 1))
-    resp = ad.c.place_order(ad.hash, o.set_duration(Duration.DAY).set_session(Session.NORMAL).build())
+    dur = Duration.GOOD_TILL_CANCEL if gtc else Duration.DAY
+    resp = ad.c.place_order(ad.hash, o.set_duration(dur).set_session(Session.NORMAL).build())
     if resp.status_code not in (200, 201):
         raise RuntimeError(f"Schwab rejected {side} 1 {sym}: {resp.status_code} {resp.text[:160]}")
     oid = resp.headers.get("Location", "").rstrip("/").split("/")[-1]
@@ -83,10 +114,15 @@ def place(ad, sym: str, side: str, limit: float | None = None) -> str:
 
 
 def manage(state_dir: Path, alerts: list[dict], today: dt.date, adapters: dict | None = None, prices: dict | None = None,
-           placer=place, notify=None, log=print, events: list | None = None) -> dict:
+           placer=place, notify=None, log=print, events: list | None = None, outcomes: list | None = None,
+           mode: str = "day") -> dict:
     """Buy what is due, then follow each held deal to rounded/cash; returns the order state. `events` collects
-    (kind, account, symbol, detail) for this run's email: bought / sold / cash."""
+    (kind, account, symbol, detail) for this run's email: bought / sold / cash. `outcomes` collects one dict per
+    account x deal buy decision: outcome "order-placed" (order_id, limit, gtc) or "no-order" (reason) - also for an
+    account whose adapter could not be built (ticker "*"). `mode`: "day" (DAY limit above the ask) or "gtc" (GTC at
+    or below the last close, cancelled on the ex-date if unfilled)."""
     ev = events if events is not None else []
+    oc = outcomes if outcomes is not None else []
     st = _load(state_dir)
     if adapters is None:
         from .brokers import make_adapter
@@ -96,29 +132,48 @@ def manage(state_dir: Path, alerts: list[dict], today: dt.date, adapters: dict |
                 adapters[a] = make_adapter(a)
             except Exception as exc:
                 log(f"[roundup] {a} unavailable: {str(exc)[:80]}")
+                oc.append(dict(ticker="*", trade_date=None, account=a, outcome="no-order",
+                               reason=f"account unavailable: {str(exc)[:120]}"))
     held = {a: ad.positions() for a, ad in adapters.items()}
-    # 1. buys: alerted, buy-by today or later, not after the ex-date
+    # 1. buys: alerted (confirmed), buy-by today or later, not after the ex-date
     bought_today = {a: 0 for a in adapters}
     for r in alerts:
         key = f"{r['ticker']}-{r['trade_date']}"
-        if r["buy_by"] < str(today) or r["trade_date"] <= str(today):
+        if r.get("unconfirmed") or not r.get("buy_by") or r["buy_by"] < str(today) or r["trade_date"] <= str(today):
             continue
         for a, ad in adapters.items():
             d = st.setdefault(key, {})
-            if a in d or killed(st, a) or bought_today[a] >= MAX_PER_DAY or r["ticker"] in held[a]:
-                continue
+            if a in d:
+                continue                                      # decided earlier (ordered / unfilled / ...)
+            why = ("account stopped: 2 cash-in-lieu outcomes and none rounded" if killed(st, a) else
+                   f"daily cap: {MAX_PER_DAY} buys already placed today" if bought_today[a] >= MAX_PER_DAY else
+                   "already held in the account" if r["ticker"] in held[a] else None)
+            if why:
+                oc.append(dict(ticker=r["ticker"], trade_date=r["trade_date"], account=a, outcome="no-order", reason=why))
+                log(f"[roundup] {a}: no order for {r['ticker']}: {why}"); continue
             px = (prices or {}).get(r["ticker"]) if prices is not None else ask(ad, r["ticker"])
             if not px or px > MAX_PRICE:
-                log(f"[roundup] {a}: no usable quote for {r['ticker']} ({px}) - retry next run"); continue
-            lim = buy_limit(float(px))
+                why = f"no usable quote ({px})" if not px else f"ask {px} above the ${MAX_PRICE:g} cap"
+                oc.append(dict(ticker=r["ticker"], trade_date=r["trade_date"], account=a, outcome="no-order",
+                               reason=why + " - retry next run"))
+                log(f"[roundup] {a}: {why} for {r['ticker']} - retry next run"); continue
+            gtc = mode == "gtc" and bool(r.get("last_close"))
+            lim = gtc_limit(r["last_close"], px) if gtc else buy_limit(float(px))
             try:
-                oid = placer(ad, r["ticker"], "buy", lim)
+                oid = placer(ad, r["ticker"], "buy", lim, gtc=True) if gtc else placer(ad, r["ticker"], "buy", lim)
             except Exception as exc:
+                oc.append(dict(ticker=r["ticker"], trade_date=r["trade_date"], account=a, outcome="no-order",
+                               reason=f"buy failed: {str(exc)[:200]}"))
                 log(f"[roundup] {a} BUY 1 {r['ticker']} failed: {str(exc)[:120]}"); continue
             d[a] = dict(status="ordered", order_id=oid, limit=lim, placed=str(today), ex=r["trade_date"], ratio=r["ratio"])
+            if gtc:
+                d[a]["gtc"] = True
             bought_today[a] += 1
-            ev.append(("bought", a, r["ticker"], f"1 share, limit ${lim:g}, split {r['trade_date'][5:]}"))
-            log(f"[roundup] {a}: BUY 1 {r['ticker']} limit ${lim:.2f} (ex {r['trade_date']}, 1-for-{r['ratio']:g}) order {oid}")
+            oc.append(dict(ticker=r["ticker"], trade_date=r["trade_date"], account=a, outcome="order-placed",
+                           order_id=str(oid), limit=lim, gtc=gtc))
+            ev.append(("bought", a, r["ticker"], f"1 share, limit ${lim:g}{' GTC' if gtc else ''}, split {r['trade_date'][5:]}"))
+            log(f"[roundup] {a}: BUY 1 {r['ticker']} limit ${lim:.2f}{' GTC' if gtc else ''} (ex {r['trade_date']}, "
+                f"1-for-{r['ratio']:g}) order {oid}")
     # 2. follow-up
     for key, d in st.items():
         sym = key.rsplit("-", 3)[0]
@@ -127,8 +182,21 @@ def manage(state_dir: Path, alerts: list[dict], today: dt.date, adapters: dict |
                 continue
             q = float(getattr(held[a].get(sym), "qty", 0.0) or 0.0)
             ex = dt.date.fromisoformat(s["ex"])
+            dead = s["status"] == "ordered" and q < 1 and today >= ex and _order_dead(adapters[a], s.get("order_id"))
             if s["status"] == "ordered" and today < ex:
-                s["status"] = "held" if q >= 1 else ("ordered" if s["placed"] == str(today) else "unfilled")
+                if q >= 1:
+                    s["status"] = "held"
+                elif s.get("gtc"):
+                    s["status"] = "ordered"       # a GTC order stays open until the ex-date
+                else:
+                    s["status"] = "ordered" if s["placed"] == str(today) else "unfilled"
+            elif s["status"] == "ordered" and q < 1 and (dead or s.get("gtc")):
+                # ex-date reached with no share: an open GTC order is cancelled; a DAY order the broker reports as
+                # expired / canceled never bought anything, so the deal is "unfilled", not a cash-in-lieu outcome
+                if s.get("gtc") and not dead:
+                    s["cancelled"] = cancel(adapters[a], s.get("order_id"))
+                s.update(status="unfilled", resolved=str(today))
+                log(f"[roundup] {a}: {sym} buy never filled by the ex-date -> unfilled (no deal)")
             elif s["status"] in ("ordered", "held", "waiting") and today < ex + dt.timedelta(days=SETTLE_DAYS):
                 s["status"] = "waiting"          # the broker may not have processed the split yet: decide nothing
             elif s["status"] in ("ordered", "held", "waiting"):

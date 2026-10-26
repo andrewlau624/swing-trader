@@ -279,6 +279,11 @@ class DailyCfg:
     # CEF-RV live module (cef_rv_live.py, own timer 09:05 ET, Roth only): off | dry | live.
     # dry = size and log, place nothing; live = pre-open market buys/sells at the 09:30 opening cross.
     cef_rv_mode: str = "off"
+    # Reverse-split round-up auto-buys (roundup_orders.py, needs ROUNDUP_AUTO=1 in .env): day | gtc.
+    # day = the 1-share DAY limit 1-2% above Schwab's ask the morning the alert exists (unchanged behaviour);
+    # gtc = a GTC limit at or below the last close as soon as Alpaca confirms the split with buy-by >= today,
+    # cancelled on the ex-date if unfilled. Same caps either way (price <= $25, 3 buys/account/day).
+    roundup_order_mode: str = "day"
     # Study ACC: log the 1.25x non-callable 3x-ETF IBS overlay vs the live 1x leg
     # (delta, running maxDD, realized exposure); no order path.
     ibs_lev_shadow: str = "shadow"

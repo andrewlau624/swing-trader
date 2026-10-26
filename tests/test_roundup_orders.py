@@ -95,3 +95,74 @@ def test_resolved_deal_books_payout_per_account_then_the_ledger(tmp_path, monkey
     e = L.fold(L.read(led))[eid]
     assert e["status"] == "COMPLETED" and e["realized_pnl"] == round(d["live"]["pnl"] + d["roth"]["pnl"], 2)
     assert d["live"]["booked"] == eid and d["roth"]["booked"] == eid
+
+
+# ---- 2026-10-26: every account x deal decision is an outcome row; GTC mode (config daily.roundup_order_mode)
+def test_outcomes_name_the_reason_for_every_no_order(tmp_path):
+    oc = []
+    def placer(ad, sym, side, lim=None, **kw):
+        raise RuntimeError("Schwab rejected buy 1 VIVK: 400 price too far from market")
+    ro.manage(tmp_path, [ALERT], dt.date(2026, 10, 2), adapters={"live": Fake(), "roth": Fake({"VIVK": 1})},
+              prices={"VIVK": 0.2983}, placer=placer, log=lambda *a: None, outcomes=oc)
+    by = {o["account"]: o for o in oc}
+    assert by["live"]["outcome"] == "no-order" and "Schwab rejected" in by["live"]["reason"]
+    assert by["roth"]["reason"] == "already held in the account"
+    oc = []
+    ro.manage(tmp_path, [ALERT], dt.date(2026, 10, 2), adapters={"live": Fake()}, prices={"VIVK": None},
+              placer=lambda *a, **k: "id", log=lambda *a: None, outcomes=oc)
+    assert oc[0]["reason"].startswith("no usable quote")
+    oc = []
+    ro.manage(tmp_path, [ALERT], dt.date(2026, 10, 2), adapters={"live": Fake()}, prices={"VIVK": 30.0},
+              placer=lambda *a, **k: "id", log=lambda *a: None, outcomes=oc)
+    assert "above the $25 cap" in oc[0]["reason"]
+    oc = []
+    ro.manage(tmp_path, [ALERT], dt.date(2026, 10, 2), adapters={"live": Fake()}, prices={"VIVK": 0.2983},
+              placer=lambda *a, **k: "id7", log=lambda *a: None, outcomes=oc)
+    assert oc[0]["outcome"] == "order-placed" and oc[0]["order_id"] == "id7" and oc[0]["gtc"] is False
+    assert all(o["ticker"] == "VIVK" and o["trade_date"] == "2026-10-05" for o in oc)
+
+
+def test_daily_cap_and_unconfirmed_are_outcomes(tmp_path):
+    alerts = [dict(ALERT, ticker=t) for t in ("A1", "A2", "A3", "A4")] + [dict(ALERT, ticker="UNC", unconfirmed=True)]
+    oc, calls = [], []
+    ro.manage(tmp_path, alerts, dt.date(2026, 10, 2), adapters={"live": Fake()}, prices={t: 0.5 for t in "A1 A2 A3 A4".split()},
+              placer=lambda ad, sym, side, lim=None, **k: calls.append(sym) or "id", log=lambda *a: None, outcomes=oc)
+    assert calls == ["A1", "A2", "A3"]
+    assert [o["ticker"] for o in oc if o["outcome"] == "no-order"] == ["A4"] and "daily cap" in oc[-1]["reason"]
+    assert not any(o["ticker"] == "UNC" for o in oc)             # unconfirmed names are never bought
+
+
+def test_gtc_mode_places_at_or_below_the_last_close_and_cancels_on_the_ex_date(tmp_path):
+    calls, oc = [], []
+    def placer(ad, sym, side, lim=None, gtc=False):
+        calls.append((sym, side, lim, gtc)); return "11"
+    live = Fake()
+    st = ro.manage(tmp_path, [ALERT], dt.date(2026, 9, 29), adapters={"live": live}, prices={"VIVK": 0.35},
+                   placer=placer, log=lambda *a: None, outcomes=oc, mode="gtc")
+    assert calls == [("VIVK", "buy", 0.3181, True)]              # ask 0.35 > last close: limit = the last close
+    assert st["VIVK-2026-10-05"]["live"]["gtc"] and oc[0]["gtc"] is True
+    st = ro.manage(tmp_path, [ALERT], dt.date(2026, 10, 1), adapters={"live": live}, prices={"VIVK": 0.35},
+                   placer=placer, log=lambda *a: None, mode="gtc")
+    assert st["VIVK-2026-10-05"]["live"]["status"] == "ordered"  # still open: not "unfilled" like a DAY order
+    assert len(calls) == 1                                       # and not re-placed
+    cancelled = []
+    live.c = SimpleNamespace(cancel_order=lambda oid, h: cancelled.append(oid) or SimpleNamespace(status_code=200))
+    live.hash = "h"
+    st = ro.manage(tmp_path, [ALERT], dt.date(2026, 10, 5), adapters={"live": live}, prices={"VIVK": 0.35},
+                   placer=placer, log=lambda *a: None, mode="gtc")
+    s = st["VIVK-2026-10-05"]["live"]
+    assert s["status"] == "unfilled" and s["cancelled"] and cancelled == [11]
+    # ask already under the last close: the DAY-style ask limit is used (fills now, below the close)
+    assert ro.gtc_limit(0.3181, 0.20) == ro.buy_limit(0.20) and ro.gtc_limit(12.0, 11.0) == 11.11
+
+
+def test_expired_day_order_is_unfilled_not_cash(tmp_path):
+    class Expired(Fake):
+        def order_status(self, coid, info):
+            return ("expired", 0.0, 0.0, "")
+    live = Expired()
+    run(tmp_path, "2026-10-02", {"live": live})
+    st, _ = run(tmp_path, "2026-10-05", {"live": live})
+    assert st["VIVK-2026-10-05"]["live"]["status"] == "unfilled"
+    st, _ = run(tmp_path, "2026-12-01", {"live": live})
+    assert st["VIVK-2026-10-05"]["live"]["status"] == "unfilled" and not ro.killed(st, "live")

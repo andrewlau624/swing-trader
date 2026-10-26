@@ -183,6 +183,14 @@ def _gap_night(state: Path, logs: Path) -> dict:
     return dict(n=w.summary(rows)["nights"], week=len(wk), line=w.line(rows))
 
 
+def _night_letf_tilt(state: Path, logs: Path) -> dict:
+    from . import night_letf_tilt_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    s = w.summary(rows)
+    wk = {r["T"] for r in rows if r.get("status") == "scored" and r.get("tilt") and not r.get("backfill") and r["T"] >= _week_ago()}
+    return dict(n=s["tilt_nights"], week=len(wk), line=w.line(rows))
+
+
 def _fill_costs(state: Path, logs: Path) -> dict:
     from . import fill_cost_scorer as w
     wk = _jsonl(state / w.LOG_NAME)
@@ -471,7 +479,8 @@ REGISTRY: list[Test] = [
          "2026-10-02", 30, "scored events", _cef_activist, "make cef-activist-watch; study_goal_g45.md", ["cef_activist_watch"]),
     Test("Split-off exchange offers", "odd lots accepted in full in split-off exchange offers (manual)",
          "2026-10-02", 0, "alerts", _alerts("splitoff-watch.jsonl", "offers"), "make splitoff-watch", ["splitoff_watch"]),
-    Test("Reverse-split round-up", "1 share before a reverse split that rounds fractions up (manual)",
+    Test("Reverse-split round-up", "1 share before a reverse split that rounds fractions up (Alpaca + EDGAR full-text "
+         "discovery from 2026-10-26; auto 1-share buys with ROUNDUP_AUTO=1, every candidate's outcome on file)",
          "2026-10-02", 0, "alerts", _alerts("roundup-watch.jsonl", "splits"), "make roundup-watch", ["roundup_watch"]),
     Test("Forced-flow discovery (EDGAR forms)", "does the SC 14D-9 / DEFM14C / 425 / 8-K 2.01+5.01 / 25-NSE / "
          "S-4 / SC 13E3 scanner surface per-holder-capped, guaranteed-floor events? (discovery only)",
@@ -573,6 +582,15 @@ REGISTRY: list[Test] = [
          "2016-21 +8.6bp/night x-univ t 3.0, up-gaps +13.0, 2022-26 +5.4 t 1.6, daily opens/closes not cross prints). PASS = "
          "propose a live pilot, user decision.",
          "2026-10-20", 60, "gap nights", _gap_night, "state/gap-night.jsonl; round1_prose.md GAP-NIGHT", ["gap_night_shadow"]),
+    Test("NIGHT-LETF-TILT: live night picks a single-stock LETF had to sell at the close vs the rest (log-only)",
+         "night_letf_tilt_shadow.py (research-shadows): every 15:40 night-rule signal (state/night-candidates.jsonl) tagged with "
+         "the day's single-stock-LETF close pressure I = sum_f L(L-1)/2 x fund 20d median $vol / the name's 20d median $vol "
+         "(ss_letf.panel, map data/letf_map.csv from the Mac); tilt = I >= 0.05 vs the rest, scored on the same official "
+         "close-cross -> next-open-cross print repeat_shadow writes, net 10bp RT. Gate: 40 forward nights with a scored tilt pick; "
+         "PASS = night-paired tilt-minus-rest >= +30bp, t >= 2, median > 0 (LETF-REV N 1065: +99.6 vs +21.6bp/night, paired "
+         "+57.9 t 1.66, 88 nights 2024-26, edge unproven) -> propose a night-leg weight tilt, user decision; FAIL = paired <= 0.",
+         "2026-10-27", 40, "tilt nights", _night_letf_tilt, "state/night-letf-tilt.jsonl; round1_prose.md RESULT LETF-REV (N 1065)",
+         ["night_letf_tilt_shadow"]),
     Test("Fill-cost ledger (official-print truth)", "fill_cost_scorer.py (research-shadows): scores every daily-fills "
          "row's cost vs the official SIP auction print of its own session (the executor's slippage_bps is "
          "decision-reference drift, not cost: audit_execution_1002). Intraday/noise fills logged as mid_unclosed. "

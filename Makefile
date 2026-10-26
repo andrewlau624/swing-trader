@@ -425,6 +425,12 @@ night-band: ## NIGHT-BAND-FWD shadow: the night rule between -4% and -8% at the 
 gap-night: ## GAP-NIGHT-FWD shadow: |gap| >= 3% names, close cross -> next open cross vs the universe overnight (no orders; ARGS="--backfill 5")
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.gap_night_shadow $(ARGS)
 
+night-letf-tilt: ## NIGHT-LETF-TILT shadow: live night picks split by single-stock-LETF close pressure I >= 0.05 vs the rest (no orders; ARGS="--backfill 10")
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.night_letf_tilt_shadow $(ARGS)
+
+letf-map: ## regenerate data/letf_map.csv (single-stock LETF -> underlying, leverage) from Sharadar tickers.parquet; Mac only, monthly, commit the file
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.night_letf_tilt_shadow --build-map
+
 arete-dip: ## ARETE-DIP-FWD shadow: momentum names on a down day, d+3/d+5 vs EW universe (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.arete_dip_shadow
 
