@@ -8350,3 +8350,860 @@ class-level falsification; if breadth behaves like SPY-vs-200d the class stays c
   SEQ-ENTRY importance of market state was the universe's beta timing, not a night-leg gate. Not tested: breadth as a SIZING dial
   (continuous weight) -- same class, ceiling < 1pp, do not run. Runner `research/sim/breadth_gate.py`; out `breadth_gate_out.txt`.
   Program N = 1041.
+
+## Amendment - Studies MINPATH-NIGHT (N 1042) and CROWD-NIGHT (N 1043): pre-register 2026-10-19, before any outcome; N 1041 -> 1043
+
+**MINPATH-NIGHT.** The night pool's variance lives in the last half hour (NIGHT-TAU: the pick set is fixed by 15:35, the outcome moves with
+the auction print). Every ranker so far used daily history (PATTERN-NIGHT snapshots, SEQ-NIGHT sequences). Not tested: the 15:30-15:40
+minute path itself as a within-night ranker.
+- Data: `data/research/night/lm1` + `data/research/recent/lm1` minute bars (15:30-16:00) for the tau-15:40 picks of NIGHT-TAU
+  (`night_tau_picks.parquet`, sig rows at tau 1540; 2020-11..2026-10, ~14.5k picks). Features from bars with hm <= 15:40 only:
+  r_1530_1540, window low vs p40 (drawup from the window low), minutes since the window low, new-low-at-15:40 flag, window range /
+  p40, VWAP(15:30-15:40) distance, share of down minutes, last-minute return, last-5-minute return, window $vol / (ADV20 / 39) (the
+  per-10-minute baseline), $vol acceleration (last 5 vs first 5 minutes), plus day_ret, ibs, vol20, log_adv at 15:40.
+- Model/judge: GBM (SEQ settings) + Ridge; fit 2020-11..2023-06, judge 2023-07..2026-10 (the NIGHT-TAU halves); label r - night mean
+  (clip +-50%); within-night top-half minus bottom-half, day-clustered t, quintiles, 20 shuffled-label placebos, permutation importance,
+  tilt (k .25) and filter (drop bottom quintile, cap .15n) replays. Gate as SEQ-NIGHT: >= +15bp, t >= 2, placebo 95th beaten, ex-top-5
+  same sign, and tilt >= +0.5pp/yr or filter >= +1pp/yr at w .65. Kill otherwise; a pass carried by day_ret/vol20 alone = the live tilt.
+- Runner `research/sim/minpath_night.py`; out `data/research/program/minpath_night_out.txt`.
+
+**CROWD-NIGHT.** The live crowd rule (night_sizing: exposure x crowd_n / n when more than crowd_n = 30 names fire; h1port rule R6,
+fit 2021-23: "-9bp vs +25bp on ordinary days") was never re-judged on a long delisted-complete panel. Mechanism either way: market-wide
+selloffs = weaker idiosyncratic bounce (the rule) or = the high-vol regime where the premium is largest (NX: premium tracks vol).
+- Data: `night_band_rows.parquet` pool rows (day_ret <= -8%, Sharadar daily proxy, primary universe, vol20 >= .6 applied, no dedupe),
+  1999-2026; n = pool names per night. Judge 1999-2015 (the crowd rule never saw it; the leg LEVEL is touched by NX, the by-n contrast is
+  not); report 2016-26.
+- Report: per-name mean/median r, hit, day-clustered t by n bucket (1-5, 6-10, 11-20, 21-30, 31-60, 61+), both eras; leg per night under
+  (a) live = min(1, .15n) x min(1, 30/n) x mean r, (b) no crowd scaling = min(1, .15n) x mean r, (c) crowd_n 60; delta (b)-(a) and (c)-(a)
+  bp/night, t, halves, ex-top-5, maxDD of each leg; crowded-night (n > 30) count and share.
+- Gate: (b) or (c) minus (a) >= +1.0 bp/night (judge era), t >= 2, both halves same sign, ex-top-5 same sign, maxDD no worse than (a) by
+  more than 5pp. Else KILL (the rule stands). Either way record the by-n gradient as the mechanism read.
+- Runner `research/sim/crowd_night.py`; out `data/research/program/crowd_night_out.txt`.
+
+## RESULT - CROWD-NIGHT (N 1043, 2026-10-19, one look): KILL at the bar; the crowd rule is a wash, not a mechanism
+- Per-name r by names-per-night, judge 1999-2015: 1-5 +65 / 6-10 +76 / 11-20 +68 / 21-30 +113 / 31-60 +67 / 61+ +34bp: NOT monotone
+  in n; 2016-26: +54 / +37 / +31 / -18 / -7 / +133 (the 61+ bucket = 34 nights, 2020-03 and 2025-04 type crashes, med +140).
+  Leg per night, judge era: live (x 30/n above 30) +21.89; no crowd scaling +22.85 (delta +0.96 bp/night, t 2.01, halves +0.74 / +1.22,
+  ex-top-5 +0.49, maxDD -26.3% vs -26.2%); crowd_n 60 +0.74 t 2.71. 2016-26: no-crowd +0.54 t 0.76, ex-top-5 -0.44. Neither cell
+  clears +1.0 bp/night with ex-top-5 agreement; the rule stands. Reading: "crowded = weak bounce" (h1port R6, 2021-23) does not hold
+  across 27 years; crowded nights are neither reliably worse nor better, and the cap .15n already bounds the exposure. Changing
+  crowd_n is a ~+1 bp/night gross-proxy question (< +1.5pp/yr) with the crash tail on the other side: leave it.
+- Not tested: crowd scaling by market breadth of the selloff (share of the universe down > 3%) instead of pool size (same class,
+  REGIME-10M/BREADTH-GATE say dial). Runner `research/sim/crowd_night.py`; out `crowd_night_out.txt`. Program N = 1043.
+
+## RESULT - MINPATH-NIGHT (N 1042, 2026-10-19, one look): KILL
+- 13,923 pick-rows (15:40 picks with 15:30-15:40 minutes), fit 2020-11..2023-06 -> judge 2023-07..2026-10 (552 nights). GBM top-half minus
+  bottom-half +7.6bp t 0.37 (ex-top-5 -10.7), placebo 95th +21.4 not beaten; tilt +0.8 bp/night t 0.4; filter -4.4 t -2.1 (drops good
+  names); in-sample +273bp (memorises). Ridge -18.9 t -0.9. Single features: only log_adv +56bp t 2.6 (liquid names bounce more; already
+  known from NX/SHAR-SURV) and new_low -42bp t -2.1 (a fresh low AT 15:40 bounces less) reach |t| ~2 of 16 looks (max-of-16 null ~2.5).
+- Reading: the last ten minutes before the decision carry no usable ranking beyond liquidity; the variance is in the auction print and
+  after. With PATTERN (snapshots), SEQ (sequences) and MINPATH (path) all empty, **within-pool ranking of the night leg is closed in
+  every representation tried.** Not tested: an explicit ADV tilt (log_adv +56 t 2.6 here, liquid +138 vs illiquid +91 in NX; unproven,
+  ceiling < 1pp since the per-name cap already favours many names); the new-low flag as a skip (t -2.1 of 16, do not run alone).
+  Runner `research/sim/minpath_night.py`; out `minpath_night_out.txt`, rows `minpath_night_rows.parquet`. Program N = 1043.
+
+## Amendment - Study INTRA-ANY (N 1044-1045): pre-register 2026-10-19, before any outcome; N 1043 -> 1045
+
+**Question (user, 2026-10-19).** Every live rule checks at a fixed clock time. The scalp loop (15 studies) tested condition-triggered
+intraday entries, but all of them exited intraday (1-60 min) and were one family: hand-written setups or flow classifiers on the
+stock's own tape. Not tested: a learned model that may fire at ANY intraday check time on ANY eligible name, with the exit at the
+free closing auction (hours horizon, entry pays the spread once, exit 0bp). This is the streaming/"checker at any interval" form.
+- Data: point-in-time minute panels already on disk. `data/research/volday/m1_*.parquet` (2016-01..2026-09; each month the 10
+  highest-realized-vol names with ADV20 >= $500M, px >= $10, chosen from the prior month; full sessions) and
+  `data/research/inplay/m1_*.parquet` (2019-01..2026-09; per day the 25 largest |gap| >= 1% names with ADV20 >= $200M and 10
+  two-way deep-liquidity names, chosen pre-open). Alpaca SIP raw 1-min bars, regular hours only (minute-of-session 0..389).
+  SPY minutes from `data/research/night/m1/SPY_*.parquet`. Daily context from Sharadar (prev close unadjusted, 1/5/20d returns,
+  vol20, $ADV20, next-day open/close ratio). Universe = both panels pooled with a source flag.
+- Decision grid: every 5 minutes from 10:00 to 15:30 (k = 30..360). Hourly subset (10:00, 11:00, ..., 15:00) reported as well.
+  Features use bars with minute <= k only: return since open / since prev close / gap, r5/r15/r30/r60, distance to session high,
+  low and VWAP, session range, realized vol last 30 min and since open, cumulative $volume vs $ADV20, last-5-min volume share,
+  SPY return since open and last 30 min, stock-minus-SPY since open, time of day, day of week, prev-day / 5d / 20d returns, vol20,
+  log $ADV20, source flag. Entry price = the OPEN of bar k+1 (no bar-close lookahead).
+- Labels. A (N 1044): entry -> the session's last 1-min close (proxy for the 16:00 cross; the live form is an MOC sell).
+  B (N 1045): entry -> next session's open (A compounded with Sharadar open(d+1)/close(d)).
+- Model: HistGradientBoostingRegressor (same GBM as SEQ-NIGHT), fit 2016-01..2021-12 on all grid rows; a development read trains
+  on 2016-19 and reads 2020-21 (reported, not judged). JUDGE = 2022-01..2026-09, one look, untouched by any learned
+  intraday-to-close model (SCALP-CLF judged 2019; VOLDAY/INPLAY judged fixed rules with intraday exits on these bars).
+- Executable form: per name-day, the FIRST grid time whose prediction >= the fit-period 90th percentile of predictions; one
+  trade, hold to the exit. Cost: 5bp entry (marketable order in $200M+ names), 0bp exit; also shown at 10bp.
+- PASS (per label): first-trigger trades, net of 5bp: mean >= +10bp, day-clustered t >= 2, median > 0, both halves
+  (2022-23 / 2024-26) > 0, ex-top-5 > 0, excess over the time-matched unconditional mean >= +10bp, and every within-day
+  shuffled-label placebo (3 refits) below the real mean. Also reported: per-row prediction deciles, hourly-only subset, hit rate
+  of the top decile vs all rows, corr(pred, y) vs corr(pred, |y|) (direction vs volatility), permutation importance, by year.
+- KILL rule: fail any gate -> "learned any-time intraday trigger with auction exit, on the tape of volatile-liquid and in-play
+  US names 2016-26, is closed." Not tested after this: non-tape inputs (exchange imbalance feeds, L2 depth, news), names below
+  $200M ADV, limit (passive) entries, and the short side.
+- Runner `research/sim/intra_any.py` (build | run); rows `data/research/program/intra_any_rows.parquet`; out `intra_any_out.txt`.
+
+**INTRA-ANY v1 run DISCARDED (2026-10-19, disclosed).** The first run's daily-context features ret1/ret5/ret20/vol20 were computed
+as of the SAME day's close (no shift): corr(pred, y) 0.96, hit 0.99, placebo +282bp. That is the day's close leaking into the
+features, not an outcome. Fixed to the prior close (shift 1) and rerun once; the leaked output is kept as
+`intra_any_out_v1_LEAK.txt` and is not a look at the judged question.
+
+## RESULT - INTRA-ANY (N 1044-1045, 2026-10-19, one look after the disclosed leak fix): KILL both labels
+- A (any 5-min check -> closing auction): first-trigger n 16,397, gross +7.5bp, net 5bp +2.5 (t 0.28, median -5.0, hit 0.49),
+  halves -4.9 / +7.8, placebo refits +3.1/+3.0/+4.4 >= real, excess over time-matched +7.4; corr(pred, y) 0.018. 2/8 gates.
+- B (any check -> next open): n 14,371, net +20.7 (t 1.60, median +4.7, hit 0.51), halves +9.9 / +27.4, excess +16.9, but placebo
+  refits +22.1/+20.4/+20.6 = real: a shuffled-label model selects the same name-days. The number is the overnight premium of
+  volatile in-play names (all rows +9.3/night), not model information. 6/8 gates (t, placebo fail).
+- Dev read (2016-19 -> 2020-21): A +7.6 gross, B +53.6 gross (2020 vol), consistent.
+- Verdict per registration: learned any-time intraday trigger with auction exit on the tape of volatile-liquid and in-play names,
+  2016-26, is CLOSED. Not tested: non-tape inputs (imbalance feeds, L2, timestamped news), < $200M ADV, passive limit entries,
+  short side; and two siblings of the same root left open: pre-market tape -> open cross (both legs free), halt-reopening auctions.
+  Out `intra_any_out.txt`; rows `intra_any_rows.parquet` (6.1M, rebuildable). Program N = 1045.
+
+## Amendment - Studies HALT-REOPEN (N 1046) and PREMKT-CROSS (N 1047-1048): pre-register 2026-10-19, before any outcome; N 1045 -> 1048
+
+Two siblings of the "streaming / any-time" root left open by INTRA-ANY; the LLM/text sibling is closed by the user (no N).
+
+**HALT-REOPEN (N 1046). Mechanism:** a Limit-Up-Limit-Down pause halts a stock for 5 minutes after a >=5-10% move inside 5 minutes;
+it reopens through a reopening auction (halt cross). The imbalance that tripped the band must clear in that cross while most
+participants are frozen or absent; the cross is a free fill (an order entered during the halt participates). Hypothesis: the reopen
+print after a DOWN halt is below where the stock trades at the close (liquidity provision at the point of maximal dislocation).
+- Events: NYSE trade-halt history API (all US exchanges; `data/research/halts/nyse_halts_2016_2026.parquet`, coverage 2019-07+),
+  Reason "LULD pause", halt time 09:35-15:50 ET, resumed the same day, FIRST halt of the symbol-day (re-halts counted as risk, not
+  traded), Sharadar-matched with prev close >= $5 and 20-session median $ADV >= $10M (the night leg's universe). n = 1,240
+  (2019 17, 2020 647, 2021-26 ~90-110/yr), 688 symbols. Minute bars: Alpaca SIP raw 1-min for each symbol-day.
+- Prices: pre-halt = last 1-min close before the halt time; p-5 = close 5 minutes before that; reopen = OPEN of the first bar at or
+  after the resume time (proxy for the halt-cross print); then +5m, +30m, the session's last close, and next open (Sharadar
+  open(d+1)/close(d)). Direction: DOWN halt if pre-halt < p-5, else UP. SPY from `night/m1` over the same minutes.
+- Arms: D = buy the reopen after a DOWN halt, sell the closing cross (primary). D-N = same, sell next open. U = short the reopen
+  after an UP halt, cover at the close (informational; Roth cannot short). Cost: 0bp at both auctions in the base case; reported
+  at 10bp and 25bp (thin reopening crosses). Also reported: reopen -> +5m / +30m paths, re-halt rate within 30 min, reopen-bar
+  $volume (capacity), ADV buckets (>= $10M / $50M), by year, 2020 vs ex-2020.
+- PASS (arm D): net 10bp mean >= +30bp, day-clustered t >= 2, median > 0, hit >= 0.5, both halves (2019-20 / 2021-26) > 0,
+  ex-top-5 > 0, SPY-adjusted mean >= +20bp. A pass carried by 2020 alone (ex-2020 <= 0) is a NO.
+- KILL: fail -> "buying the LULD reopening cross after a down halt in $5+/$10M+ names, 2019-26, is closed". Not tested after
+  this: news-pending halts (T1; a different auction with news), re-halts, names < $10M ADV, limit orders inside the halt
+  (price improvement vs the print), pre-2019 (no halt history), the UP side as a live short.
+- Runner `research/sim/halt_reopen.py` (fetch | run); out `halt_reopen_out.txt`.
+
+**PREMKT-CROSS (N 1047-1048). Mechanism:** the two official auctions are the only free fills at this size; a trade that buys the
+09:30 cross and sells the 16:00 cross pays 0bp on both legs, so any 10bp of conditional open-to-close drift is kept whole. The
+pre-market tape (04:00-09:29) has never been modelled here (fixed gap-fade / gap-continuation rules died with intraday exits).
+- Data: the INTRA-ANY panels (volday 2016-26 with bars from 04:00 ET; inplay 2019-26 with bars from 08:25 ET). Features from bars
+  BEFORE 09:30 only: pre-market return vs prev close (last pre-market print), 08:30-09:29 return, pre-market range, pre-market
+  $volume / $ADV20, number of pre-market minutes with prints, last print vs pre-market VWAP, 09:00-09:29 realized vol, SPY
+  pre-market return (same window), stock-minus-SPY; plus the prior-close daily context (ret1/5/20, vol20, log ADV, dow, source).
+  Volday-only full-session pre-market features are NaN for inplay rows (the GBM handles NaN).
+- Entry = the first regular-hours bar's open (== the official open cross in 2016-20 per SPLIT-CROSS); exit A (N 1047) = the
+  session's last 1-min close (proxy for the 16:00 cross); exit B (N 1048) = next open. One decision per name-day.
+- Model: same GBM as INTRA-ANY; fit 2016-01..2021-12, judge 2022-01..2026-09 one look; trade when pred >= fit-period p90.
+- PASS (per label): selected trades net 5bp (safety margin on two 0bp auctions): mean >= +10bp, day-clustered t >= 2, median > 0,
+  both halves (2022-23 / 2024-26) > 0, ex-top-5 > 0, excess over the universe's unconditional open-to-exit mean >= +10bp, every
+  within-day shuffled-label placebo (3 refits) below the real mean. Also reported: deciles, hit rate, corr(pred, y) vs
+  corr(pred, |y|), importance, by year, the bottom decile (informational short).
+- KILL: fail -> "learned pre-market-tape selection into the open cross with an auction exit, on these universes 2016-26, is
+  closed". Not tested after this: pre-market NEWS content (LLM branch closed by the user), names < $200M ADV, pre-market
+  limit entries (fills before 09:30), the short side live.
+- Runner `research/sim/premkt_cross.py` (build | run); rows `premkt_rows.parquet`; out `premkt_cross_out.txt`.
+
+## RESULT - PREMKT-CROSS (N 1047-1048, 2026-10-19, one look): KILL both labels; the signal it found is day-level
+- A (open cross -> close cross): selected n 6,706 (13.8% of name-days), net 5bp +26.2 (t 1.36, median +13.6, hit 0.51), halves
+  -10.5 / +55.5, by year 2022 -25, 2023 +31, 2024 +31, 2025 +69, 2026 +55; placebo refits +18.9/+20.3/+11.7 (real +26.2); top
+  features ret1, spy_pm. 6/8 gates (t, h1 fail).
+- B (-> next open): net +54.8 (t 2.00, median +21.6), halves +2.1 / +94.2, placebo +57.1/+56.1/+39.9 = real: a shuffled-label
+  model picks the same days. 7/8 (placebo fails).
+- Diagnostic (no N): by SPY pre-market quintile, the universe's EW open->close is +29.6 / +4.7 / -4.9 / -24.3 / -2.5 bp (2016-21) and
+  +15.5 / +7.4 / -6.5 / -11.8 / +3.1 (2022-26) from the most negative SPY pre-market to the most positive; SPY itself ~flat. Volatile
+  names reverse the market's pre-market move intraday: a day-level ~+15-30bp on 20% of days, dial class, not stock selection.
+- Verdict: learned pre-market-tape selection into the open cross, on these universes 2016-26, is CLOSED. The stock-specific
+  pre-market tape adds ~+6-14bp over the day-level placebo (A), under the bar and with flipped halves. Not tested: pre-market news
+  content (LLM branch closed by the user), < $200M ADV, pre-market limit entries, the short side, the day-level reversal as its own
+  registered rule (dial class: do not run). Out `premkt_cross_out.txt`; rows `premkt_rows.parquet`. Program N = 1048.
+
+## Amendment - Study CHART-YOLO (N 1049): pre-register 2026-10-19, before any outcome; N 1048 -> 1049
+
+**Root (user material, 2026-10-19):** a list of public models. Branches: (1) financial-headline sentiment classifiers = the LLM/NLP
+branch the user closed today (and data-blocked: no point-in-time headline archive) -> not run; (2) LSTM price predictors = tape
+sequence models, already covered and stronger here (SEQ-ENTRY, INTRA-ANY with placebos) -> not run; (3) Mistral/Gemma "advisor"
+chat models -> no testable number -> not run; (4) `foduucom/stockmarket-pattern-detection-yolov8` = a NEW representation: the
+visual chart patterns a human reads (head-and-shoulders top/bottom, double top "M_Head", double bottom "W_Bottom", triangle),
+detected on rendered daily candlestick charts. Never tested here (SEQ-NIGHT used indicator sequences; GOLD-IFVG closed ICT shapes).
+- Universe: Sharadar domestic common stocks, prev close >= $5, 20-session median $ADV >= $10M (the night leg's universe), 2016-01..
+  2026-09. Sample: 30,000 (name, date) pairs drawn uniformly at random (seed 0) from eligible name-days (one look, no re-sampling).
+- Image: the 100 daily bars ending at the signal close, rendered in the model's training style (mplfinance-like candlesticks, green
+  up / red down, grey grid, right price axis), 640x480. Model as published (YOLOv8s, conf 0.25). A detection counts as a SIGNAL only
+  when its box's right edge is in the last 15% of the chart width (the pattern completed at the signal close); detections that end
+  earlier are the STALE control (same names, same chart style, pattern already over).
+- Direction (textbook, fixed): BULL = W_Bottom, Head and shoulders bottom; BEAR = M_Head, Head and shoulders top; Triangle and
+  StockLine reported, no direction.
+- Labels (Sharadar, split-adjusted ratios): L1 = close d -> open d+1 (overnight); L2 = open d+1 -> close d+1 (the two free crosses);
+  L5 = close d -> close d+5; each minus SPY over the same window. Costs: 0bp for the auction legs; L5 shown net 10bp.
+- PASS: BULL right-edge signals L5 excess >= +30bp, day-clustered t >= 2, median > 0, both halves (2016-20 / 2021-26) > 0,
+  ex-top-5 > 0; BULL minus BEAR L5 >= +40bp with t >= 2; the STALE control of the same class must be at least 20bp weaker than the
+  right-edge signal (else it is the chart's trend, not the pattern); the 1-day auction trade (L2) reported with a +10bp bar.
+- KILL: fail -> "visual chart patterns (the four textbook reversal shapes, as detected by a public YOLOv8 chart model) carry no
+  tradable 1-5 day information in liquid US stocks 2016-26". Not tested after this: intraday chart images, other pattern
+  vocabularies (flags, cup-and-handle), a model retrained on this book's own labels, options-implied confirmation.
+- Runner `research/sim/chart_yolo.py` (probe | run); detections `data/research/chart_yolo/detections.parquet`; out `chart_yolo_out.txt`.
+
+## RESULT - HALT-REOPEN (N 1046, 2026-10-19, one look on the full set after a disclosed partial read): KILL
+- The first bar fetch died on a connection error at 457/1,240 symbol-days; a partial read (439 events, kept as
+  `halt_reopen_out_PARTIAL439.txt`) was seen before the fetch was resumed. Full set: 1,194 scored, 656 symbols, 530 down / 664 up.
+- Mechanics confirmed: trigger move median -564bp (down) / +514 (up) in the 5 minutes before the halt; the reopen print is -78bp
+  below the pre-halt price after down halts and +188 above after up halts; 32% of down halts re-halt within 30 minutes; reopen-bar
+  median $1.7M (capacity is not the constraint).
+- D (buy the reopen after a DOWN halt, sell the close), net 10bp: n 530, mean +580, median +122, hit 0.55, day-clustered t 1.60,
+  ex-top-5 +161; 2019-20 +469 (median +387, hit 0.62, t 2.79) vs 2021-26 +696 mean / **-51 median, hit 0.47, ex-top-5 -155, t 0.96**;
+  by year 2021 -223, 2022 -467, 2023 +262, 2024 -14, 2025 +3,764 (lottery tail), 2026 -207. The first 5 minutes after the reopen are
+  NEGATIVE (-66 mean, -32 median, t -1.9); +30m +115. 7/9 gates (t, SPY-adj fail) -> KILL as registered.
+- U (short the reopen after an UP halt): -44 mean / +32 median to the close, next-open -254 (t -2.2): up-halt names keep going; no
+  short edge, and the Roth cannot short anyway.
+- Read: in the 2020 crash the reopening cross after a down halt was a real liquidity-provision trade (median +387bp, 62% hit). Since
+  2021 the median trade LOSES; the positive mean is a handful of re-halt squeezes (re-halt bucket mean +1,497, median +176). A
+  lottery with a negative median is not a leg. Verdict per registration: buying the LULD reopening cross after a down halt in
+  $5+/$10M+ names, 2019-26, is CLOSED. Not tested: news-pending (T1) halts; re-halts as their own event; names < $10M ADV; entry 5
+  minutes after the reopen (bounded: the +5m dip is -32bp median, which cannot lift the 2021-26 median of -51 to the +30 bar);
+  limit orders inside the halt; pre-2019. Runner `research/sim/halt_reopen.py`; out `halt_reopen_out.txt`; rows
+  `data/research/halts/halt_reopen_rows.parquet`; halt history `nyse_halts_2016_2026.parquet` (74,686 halts, reusable). Program N = 1049.
+
+## Amendment - Study GAP-NIGHT (N 1050): pre-register 2026-10-19 (branch loop), before any outcome; N 1049 -> 1050
+
+Branch of today's root ("searchers that find a person who must trade, executed at an auction"). INTRA-ANY/PREMKT label B found that
+the in-play / volatile universes earn +9-14bp per night close -> open unconditionally in 2022-26 (placebo = real: a universe
+property). Not in the ledgers as a standalone: Lab-BH/BI is the multi-day drift of gappers (negative over 20d); the EXDIV "+9bp" note
+is ex-dividend names. Mechanism (Lou-Polk-Skouras overnight/intraday clientele): retail attention names are bought at the open and
+sold into the close by day traders, so the close is depressed relative to the next open; the two legs are the free crosses.
+- Form A (Sharadar, 2016-01..2026-09): every name-day with |open / prev close - 1| >= 3% at the open, prev close >= $5, 20-session
+  median $ADV >= $50M, domestic common stock. Trade: buy the close cross of the gap day, sell the next open cross. Form B: the
+  point-in-time inplay pool G name-days (25 largest |gap| >= 1%, ADV >= $200M, 2019-01..2026-09, `data/research/inplay/pools.parquet`).
+- Label: open(d+1)/close(d) - 1 (split-adjusted ratios; daily open == official open cross per SPLIT-CROSS 2016-20). Per-night
+  equal-weight portfolio. Comparators: SPY overnight; the EW overnight of ALL eligible names (ADV >= $50M, px >= $5) the same night;
+  the same with the night leg's own picks (day_ret <= -8%, IBS < 0.1) EXCLUDED, so the result is not the night leg in disguise.
+- Arms: all gaps; up-gaps; down-gaps; |gap| 3-5 / 5-10 / 10%+. Costs: 0bp (two auctions); shown at 5bp total.
+- JUDGE = 2016-01..2021-12 (never read for this question: the +9-14bp observation is from 2022-26, which is reported as the touched
+  period). PASS: per-night EW excess over the EW universe overnight >= +8bp, day-clustered (per-night) t >= 2, median night > 0, both
+  halves (2016-18 / 2019-21) > 0, ex-top-5 nights > 0, excess over SPY-beta-matched overnight > 0, and the night-leg-excluded
+  universe comparator does not close the gap. KILL otherwise: "gap names held close -> open earn no premium beyond the universe
+  overnight premium". Not tested after this: intraday-volume-based attention (RVOL) instead of the gap; names < $50M ADV; the
+  intraday short side.
+- Runner `research/sim/gap_night.py`; out `gap_night_out.txt`.
+
+## RESULT - GAP-NIGHT (N 1050, 2026-10-19 branch loop, one look): PASS-SMALL on the registered gates (2016-21), decaying, up-gap carried
+- Form A, arm all: 91,441 gap name-days on 2,691 nights (median 15 names/night). JUDGE 2016-21: raw +14.0bp/night (median +12.9, hit
+  0.57, t 3.43); excess over the EW universe overnight +8.6 (median +1.3, t 3.03, ex-top-5 +5.7); over SPY +9.9 (t 3.27); SPY-beta
+  1.54 overnight, beta-adjusted +7.7 (t 2.65); halves x-univ +11.0 (t 3.1) / +6.1 (t 1.4, median -1.2); night-leg picks excluded +7.7
+  (t 2.7). 8/8 gates -> PASS as registered.
+- Decomposition: UP gaps +13.0 x-univ (t 3.45, both halves > 0) carry it; DOWN gaps +0.2 (t 0.04). Size: 3-5% +4.2 (t 1.3), 5-10%
+  +6.9 (t 1.4), 10%+ +20.8 mean / -6.5 median (lottery). Form B (PIT inplay pool G, 2019-21): raw +17.0 (t 2.5), x-univ +8.6 (t 2.3).
+- Touched 2022-26: raw +7.8 (t 1.65), x-univ +5.4 (t 1.59); 2022 -13 x-univ, 2023-25 +7..+15, 2026 +3. Universe overnight itself
+  fell from +5.6 (2016-21) to +2.3 (2022-26).
+- Read: the overnight attention premium (Lou-Polk-Skouras) exists in gap names at the two free crosses, strongest in UP gaps; the
+  median night is small and the effect is about half as strong since 2022. Not a new mechanism: it is the same overnight-clientele
+  family as OVN-MOM (decayed to ~+3bp net) and part of what the night leg's beta decomposition already carries. Economics at 0bp:
+  ~+8bp/night x ~250 nights = ~+20pp/yr gross over the universe at 100% of capital; realistic (50% capture, 50% capital, 2022-26
+  strength) ~+3-5pp/yr, overnight SPY-beta 1.5. Status: FORWARD-SHADOW CANDIDATE (user decision), not a deployment. Not tested:
+  RVOL-based attention instead of the gap; < $50M ADV; official cross prints (daily open/close used); the night-leg interaction
+  (capital competes on the same close->open window); up-gap-only as its own registered rule (do not re-tune on 2016-21).
+  Runner `research/sim/gap_night.py`; out `gap_night_out.txt`. Program N = 1050.
+
+## Amendment - GAP-NIGHT-FWD forward shadow (no N; registered 2026-10-19 after the user's "shadow", before any forward print)
+- Module `swingtrader/daily/gap_night_shadow.py` (research-shadows 08:20 ET, log-only, `state/gap-night.jsonl`, REGISTRY
+  "GAP-NIGHT-FWD"). Frozen rule = the registered form A on the live night universe: common stock, SIP daily bars, |open(T)/close(T-1)
+  - 1| >= 3%, close(T-1) >= $5, ADV20 (median $vol, 20 prior sessions) >= $50M. Trade: official CLOSE cross of T -> official OPEN cross
+  of T+1 (Alpaca SIP trades, largest print per auction), EW per night. Comparator per night: EW overnight open(T+1)/close(T) - 1 of all
+  eligible names (`univ`) and of those that are not night-leg picks (`univ_x`; day_ret <= -8%, IBS < 0.10 excluded), from the same
+  daily bars. SPY logged per row.
+- Gate: 60 forward gap nights (first forward session 2026-10-20), per-night excess over `univ` >= +5bp, night-clustered t >= 2,
+  median night excess > 0. Read by hand from the same log: up vs down arms (the study's +13.0 vs 0), excess vs `univ_x`, SPY beta,
+  net at 5bp round trip. PASS = propose a tiny live pilot (user decision); FAIL (excess <= 0 at 60 nights) closes the gap form of the
+  overnight-attention family at the crosses. Backfill rows (`--backfill N`) are labelled and excluded from the gate.
+- Not tested by this shadow: RVOL-based attention; < $50M ADV; up-gap-only as a rule; the night-leg capital interaction.
+
+## Amendment - Study NEWS-HALT (N 1051): pre-register 2026-10-19 (branch loop), before any outcome; N 1050 -> 1051
+
+Sibling of HALT-REOPEN left open: news-pending halts (T1/T2, "News pending/released/dissemination"), where trading stops for a
+material announcement and reopens intraday through the halt cross after the news is out. Mechanism: the reopening cross is the first
+print that clears all orders accumulated during a ~40-minute halt on fresh news; the question is whether that print over- or
+under-reacts relative to the close (the counterparty is everyone who had to re-mark at once). Direction comes from the news, i.e.
+from the reopen print vs the pre-halt price (there is no trigger move).
+- Events: NYSE halt history, reasons News pending / News Released / News dissemination, resumed the same day between 09:35 and 15:50
+  ET (560 of 1,448 such halts began pre-open), first halt of the symbol-day, Sharadar-matched prev close >= $5 and 20-session median
+  $ADV >= $10M: n = 245 (2019 14, 2020 31, 2021 41, 2022 38, 2023 31, 2024 30, 2025 37, 2026 23), 190 symbols, median halt 38 min.
+  Bars: Alpaca SIP raw 1-min (fetch 228 new symbol-days). `data/research/halts/news_events.parquet`.
+- Prices as HALT-REOPEN: pre-halt = last close before the halt time (for pre-open halts: the prior close); reopen = open of the
+  first bar at/after the resume time; +5m, +30m, close, next open; SPY same window. Direction: NEWS-DOWN if reopen < pre-halt, else
+  NEWS-UP (registered: the direction uses the reopen print itself, so "buy the reopen" means buying after a down news print).
+- Arms: D = buy the reopen after NEWS-DOWN, sell the close (primary; also next open); U = short the reopen after NEWS-UP (informational).
+  Costs 0bp base, 10bp and 25bp shown.
+- PASS (arm D): net 10bp mean >= +30bp, day-clustered t >= 2, median > 0, hit >= 0.5, both halves (2019-22 / 2023-26) > 0, ex-top-5
+  > 0, SPY-adjusted >= +20bp. KILL otherwise: "buying the news-halt reopening cross after a down news print, $5+/$10M+ names,
+  2019-26, is closed". Not tested after this: halts that reopen at the regular 09:30 cross, the up side as a live short, re-halts,
+  < $10M ADV, the content of the news (LLM branch closed).
+- Runner `research/sim/halt_reopen.py` with HALT_EVENTS=news_events.parquet HALT_OUT=news_halt_out.txt HALT_DIR=reopen (direction
+  from the reopen print); out `news_halt_out.txt`.
+
+## RESULT - NEWS-HALT (N 1051, 2026-10-19 branch loop, one look): KILL (arm D); up-news fade observed on the short side
+- 242 scored of 245; 75 NEWS-DOWN / 167 NEWS-UP reopens; reopen print vs pre-halt -117bp median (down) / +241 (up); re-halts ~3%;
+  reopen-bar median $3-5.5M.
+- D (buy the reopen after a down news print, sell the close), net 10bp: n 75, mean -40.5, median -3.6, hit 0.49, t -0.7, ex-top-5
+  -121; 2021-26 -60; ADV >= $50M -142 (t -2.0); next open -72 (t -1.0). 1/9 gates -> KILL. Bad news keeps going after the reopen.
+- U (short the reopen after an UP news print, cover at the close): n 167, net 10bp +111.9, median +48.1, hit 0.57, t 2.65, ex-top-5
+  +69; +5m +108 (t 3.7), +30m +158 (t 3.9); 2021-26 +131 (t 3.3), 2019-20 +42 (t 0.3); ADV >= $50M +82 (t 1.5); by year positive in
+  6/8. Informational (not gated): the good-news reopening cross OVERSHOOTS and fades into the close. Short-side only (taxable margin;
+  not the Roth), ~35 events/yr, ceiling ~35 x ~1% x a 10-20% position = ~+0.4-0.7pp/yr at $10k -> below the gate as a leg.
+  Recorded in NEXT.md's unproven table as a short-side observation; not a shadow (ceiling), not re-tuned.
+- Not tested: halts reopening at the regular 09:30 cross; the up-fade as a registered short rule on an untouched period (none
+  exists: 2019-26 is all the halt history); re-halts; < $10M ADV. Out `news_halt_out.txt`; rows `data/research/halts/news_halt_rows.parquet`.
+  Program N = 1051.
+
+## Amendment - Study SPECIAL-EX (N 1052): pre-register 2026-10-19 (branch loop), before any outcome; N 1051 -> 1052
+
+Pivot from halts to the ex-date family. PREF-EX/ETDX showed dividend-proportional under-adjustment survives in $25-par paper;
+common-stock REGULAR ex-dates are dead (EXDIV-OPEN, THN: ~0 since 2021). Not tested: SPECIAL dividends on commons (one-off payouts
+of 3%+ of price), where the ex-day price drop is a large, discrete, tax-clientele event and the holder base must re-mark at the open
+cross. Due-bill specials appear only in a ceiling-scan row (>= 25% payouts, where the ex-date follows the pay date).
+- Events: Sharadar `actions` dividends (date = ex-date) on domestic common stocks, 2000-01..2026-09, value / prev closeunadj between
+  3% and 50%, prev close >= $5, 20-session median $ADV >= $10M. Arms by size: 3-10%, 10-25% (standard ex-date mechanics) and 25-50%
+  (due-bill regime; reported, NOT gated: the vendor ex-date convention is unverified there).
+- Trade: buy the close cross on E-1, sell the open cross on E, receive the dividend: r = (open_E_raw + div) / close_{E-1}_raw - 1,
+  raw prices (open_E_raw = open_E x closeunadj_E / close_E), minus SPY overnight. Costs 0bp (two auctions), shown at 5bp.
+- Mechanism check: drop ratio = (close_{E-1} - open_E) / div; < 0.9 means under-adjustment (the PREF-EX signature).
+- PASS (pooled 3-25%): net mean >= +30bp, date-clustered t >= 2, median > 0, hit >= 0.55, both halves (2000-12 / 2013-26) > 0,
+  ex-top-5 > 0, drop ratio < 0.9, and 2021-26 alone > 0 (the regular-dividend version died there). KILL otherwise: "special-dividend
+  ex-nights on liquid commons carry no capturable under-adjustment". Not tested after this: the due-bill regime as a trade; selling
+  at the ex-date CLOSE instead of the open; the Roth vs taxable tax treatment (specials may be non-qualified).
+- Runner `research/sim/special_ex.py`; out `special_ex_out.txt`.
+
+## RESULT - SPECIAL-EX (N 1052, 2026-10-19 branch loop): KILL; the registered "PASS" was a vendor-date artifact (disclosed)
+- As registered (pooled 3-25%, 1,517 ex-nights): +229bp mean, median +92, hit 0.74, t 21, 9/9 gates -> PASS on paper.
+- Adversarial check (failure-mode order: data bug first): 40% of pre-2013 events (18% in 2020-23, 8% in 2024+) show NO price drop at
+  the recorded date and none over the next 5 sessions (median drop 0.18 x dividend): the Sharadar `actions` dividend record is
+  mis-dated or mis-valued there. Using the vendor's own total-return factor (closeadj/close jump on E implies a dividend within
+  0.8-1.25x the recorded value) as a point-in-time confirmation splits the sample: CONFIRMED n 954 (drop ratio 0.95): 2000-12 +91,
+  2013-20 +39, **2021-26 +13.3bp mean, median +4.5, hit 0.54, t 1.7** (2024 -2, 2026 -5; ADV >= $50M +30 t 1.8); NOT confirmed n 581:
+  +526bp, hit 0.98 (impossible: a fake dividend added to an unchanged price). COST's five specials are correctly dated and drop
+  0.73-1.07x.
+- Verdict: liquid commons adjust ~fully for special dividends (drop 0.95-0.97 in the modern era); the capturable residual is
+  ~+5-13bp/event at 0bp, t < 2, not a leg. KILL. Not tested: the due-bill (>= 25%) regime; selling at the E close (confirmed set
+  not re-run; the open result is already under the bar); the Roth-vs-taxable angle. DATA RULE (new): any study using Sharadar
+  `actions` dividends as ex-dates must confirm each row against the closeadj/close factor jump; unconfirmed rows must be dropped
+  BEFORE any outcome is read (PREF-EX/ETDX used SFP/official prints and are unaffected; EXDATE-OOS/EXDIV-OPEN used actions —
+  re-check their unconfirmed share before citing them). Runner `research/sim/special_ex.py`; out `special_ex_out.txt` (artifact
+  numbers) + this note. Program N = 1052.
+
+## Amendment - Study RE-HALT (N 1053): pre-register 2026-10-19 (branch loop), before any outcome; N 1052 -> 1053
+
+Sibling of HALT-REOPEN: the SECOND LULD halt of a symbol-day. HALT-REOPEN found the first down-halt reopen loses in the modern era,
+and that the re-halt bucket carried the positive mean (+1,497 mean / +176 median, n 170, outlier-driven). Question: is the second
+halt's reopen a different event (the pool of forced sellers has already cleared once)? Same universe, same symbol-days (bars on disk).
+- Events: LULD pauses with nth >= 1 on the symbol-days already in `luld_events.parquet` (first halt in the $5+/$10M+ universe),
+  resumed the same day 09:35-15:50, one row per halt (the 2nd, 3rd... halts each count); prices as HALT-REOPEN (pre-halt, p-5,
+  reopen, +5m/+30m/close/next open), direction from the 5-min move into THAT halt.
+- Arms and PASS/KILL exactly as HALT-REOPEN (arm D net 10bp >= +30, t >= 2, median > 0, hit >= 0.5, halves 2019-20 / 2021-26 > 0,
+  ex-top-5 > 0, SPY-adj >= +20, not 2020-only). Not tested after this: halts on symbol-days whose FIRST halt was outside the
+  universe; 4th+ halts separately. Runner `halt_reopen.py` with HALT_EVENTS=rehalt_events.parquet HALT_OUT=rehalt_out.txt.
+
+## RESULT - RE-HALT (N 1053, 2026-10-19 branch loop, one look): KILL
+- 1,224 scored (480 down / 744 up re-halts on 399 symbol-days; names already -23% on the day at the 2nd+ halt; 56% halt again within
+  30 min). D (buy the reopen after a down re-halt, sell the close), net 10bp: mean +1,662 (one +214,834bp row = a bad print; ex-top-5
+  +896), median +375, hit 0.59, t 1.99; halves +912 / +2,026; ADV >= $50M +322 / median +187 (t 1.9). Gates: t and SPY-adj fail -> KILL.
+- Why it is not "unproven": the yearly MEDIAN flips sign (2019 -973, 2020 +363, 2021 +46, 2022 -124, 2023 +1,004, 2024 +195,
+  2025 +991, 2026 -279); the 10-90% range of a single trade is -1,771 .. +4,208bp. That is crash-day lottery variance, not a
+  median effect; the +30m path is ~0 in 5/8 years. Not tested: 4th+ halts separately; symbol-days whose first halt was outside the
+  universe; the UP side (short, +? not read). The LULD family (first halt, re-halt, news halt) is now closed in every form on
+  2019-26 halt history. Out `rehalt_out.txt`; rows `data/research/halts/rehalt_rows.parquet`. Program N = 1053.
+
+## Amendment - Study F-SALE (N 1054): pre-register 2026-10-19 (branch loop), before any outcome; N 1053 -> 1054
+
+New family (none of today's): mutual-fund FIRE SALES (Coval-Stafford 2007). A fund facing heavy redemptions must sell what it holds,
+pro rata, regardless of price; stocks held by several such funds are pushed down over the outflow quarter and recover over the
+following 6-12 months. A named, constrained counterparty; long-only; Roth-friendly; capacity irrelevant at $2-25k. Never tested
+here (the ledgers have ETF creation/redemption and 13F crowding only). Data entitled at $0: WRDS `tfn.s12` (mutual-fund holdings by
+fund and quarter, through 2026-03) and Sharadar prices.
+- Build: s12 holdings 2009-12..2026-03 for funds with assets >= $100M (fdate, fundno, cusip, shares, assets). Fund flow proxy per
+  quarter: assets_t / assets_{t-1} - (1 + r_t), where r_t is the fund's holdings-weighted stock return over the quarter from its
+  PRIOR quarter's holdings (Sharadar closeadj; cusip -> Sharadar via tickers.cusips). Heavy outflow = flow <= -5%; heavy inflow
+  >= +5% (Coval-Stafford thresholds). PRESSURE(stock, q) = [sum over outflow funds of shares reduced - sum over inflow funds of
+  shares added] / stock's 20-session median volume at quarter end, restricted to funds whose change is in the flow's direction.
+- Signal: quarters end 3/6/9/12; holdings become public with a lag; the signal date = quarter end + 60 calendar days (conservative
+  vs the 45-day filing deadline). Portfolio: bottom decile of PRESSURE (most fire-sold) among names with prev close >= $5 and
+  $ADV20 >= $10M, EW, bought at the next open cross after the signal date, held to the next signal date (quarterly rebalance; ~90
+  sessions). Benchmark: EW of all eligible names with a PRESSURE value that quarter, and SPY.
+- Reported: the pressure-quarter return itself (the fire sale must be visible: bottom decile should UNDERPERFORM during the quarter
+  it is measured); the holding-period excess by decile; top-decile (inflow-bought) as the mirror; by year; halves 2010-17 / 2018-26;
+  ex-top-5 quarters; quarter-clustered t (quarters are the cluster, ~64).
+- PASS: bottom-decile holding-period excess over the eligible EW >= +150bp per quarter (~+6pp/yr), quarter-clustered t >= 2, median
+  quarter > 0, both halves > 0, ex-top-5 quarters > 0, monotone-ish deciles (bottom > middle), and the pressure-quarter return of
+  the bottom decile < the EW (the mechanism is visible). KILL otherwise: "fund fire-sale pressure from s12 holdings carries no
+  exploitable 1-quarter reversal at the 60-day lag". Not tested after this: shorter lags (needs N-PORT monthly), daily-flow
+  versions (needs MFLinks/CRSP daily), the inflow-side short, ETF fire sales.
+- Runner `research/sim/f_sale.py` (pull | run); data `data/research/fsale/`; out `f_sale_out.txt`.
+
+## RESULT - CHART-YOLO (N 1049, 2026-10-19, one look): KILL, and the textbook sign is WRONG
+- 30,000 charts; the public model fires on 81% of them (43,481 boxes); right-edge (completed) signals: BULL 1,298 (W_Bottom 734, H&S
+  bottom 564), BEAR 2,463 (H&S top 1,448, M_Head 1,015), Triangle 49.
+- BULL right-edge: L1 -2.2, L2 (open->close crosses) -7.0, L5 -33.2bp vs SPY (median -40.5, hit 0.46, t -1.7); 2021-26 -43.5 (t -2.1).
+  Higher model confidence is worse (conf terciles +26 / -60 / -66). BEAR right-edge: L5 +16.2 (median -8.8, t 1.3). BULL minus BEAR
+  L5 = -49bp (t -2.2). Stale (already-over) patterns ~ the universe (-4 / -13). Triangle (n 49) -167/5d. 0/8 gates -> KILL.
+- Read: a double bottom / inverse head-and-shoulders completing at the right edge of a daily chart is, if anything, a short-term
+  negative in liquid US stocks 2016-26 (the shape is "just stopped falling", and the next week continues down more often than not);
+  "textbook" pattern direction is a contrarian indicator at this horizon. Verdict per registration: visual chart patterns as detected
+  by a public chart model carry no tradable 1-5 day information. Not tested: intraday chart images; other pattern vocabularies
+  (flags, cup-and-handle); a model retrained on this book's own labels; the CONTRARIAN use (short completed bull patterns) as a
+  registered rule (do not re-tune on the same sample). Detections `data/research/chart_yolo/detections.parquet` (reusable). Out
+  `chart_yolo_out.txt`. Program N = 1054 (F-SALE registered).
+
+## RESULT - F-SALE (N 1054, 2026-10-19 branch loop, one look): KILL at this flow proxy; the hypothesis is NOT tested at a proper flow measure
+- Build: tfn.s12 2009Q4-2026Q1, 97.9M fund-quarter-stock rows (49.5k fund ids, 13.6k Sharadar tickers), 1.04M fund-quarters with a
+  flow proxy (34% outflow <= -5%, 27% inflow >= +5%: the proxy is far too dispersed for real quarterly fund flows, which are mostly
+  within +/-5%). 109.6k eligible stock-quarters, 65 quarters.
+- Bottom decile (most "fire-sold"): next-quarter excess vs EW -80bp (median -59, hit 0.38, quarter-t -2.1), vs SPY -107; halves -37 /
+  -122; top decile -11. Mechanism check FAILS: the bottom decile OUTPERFORMED during the pressure quarter (+128bp vs EW, t 3.3), i.e.
+  the measure flags funds trimming winners, not forced selling at a loss. 0/8 gates -> KILL.
+- Read: with fund flow inferred from s12 `assets` minus a holdings-weighted return, "pressure" is dominated by noise and by winner
+  trimming; the Coval-Stafford fire-sale signature (negative pressure-quarter return, positive reversal) is not reproduced, so this
+  run does not falsify the mechanism, it falsifies the proxy. Not tested: pressure from CRSP monthly flows (needs MFLinks, absent on
+  this account) or N-PORT monthly holdings; daily-flow ETFs; the open-cross entry at quarter end + 60d (moot). Data kept:
+  `data/research/fsale/s12_*.parquet` (3.2GB, reusable), `pressure.parquet`. Runner `research/sim/f_sale.py`; out `f_sale_out.txt`.
+  Program N = 1054.
+
+## Amendment - Study HL-BOUNCE (N 1055): pre-register 2026-10-19 (user: "bounce back in an uptrend"), before any outcome; N 1054 -> 1055
+- Branch list first (CLAUDE.md rule): trend-filter+dip (DEAD: W4/U1/F7/U5/AT3/TREND-NIGHT), indicator turn-ups (DEAD: U9/H5/F3/F4/F5),
+  intraday level bounces (DEAD: VOLDAY/INPLAY/LEVEL-BOUNCE/STOP-RUN), momentum pullback (ARETE-DIP killed, shadow), weekly (low ceiling,
+  not run), breakout retest (not run, breakout neighbours all lose). This study = the one untested shape: SWING STRUCTURE.
+- Hypothesis: in a daily uptrend defined by market structure (rising pivot highs, a new pivot low ABOVE the prior pivot low), the first
+  close back above the pivot-low bar's high (the "confirmed bounce") is followed by continuation over 1-10 sessions, in excess of the
+  equal-weight liquid universe. Mechanism claimed by practitioners: trend followers buy the pullback and stops sit under the pivot.
+  Prior from the ledgers: bounces are larger in DOWNtrends (AT3, TREND-NIGHT) and textbook bull shapes are contrarian (CHART-YOLO).
+- Pre-test ceiling (research-priority gate): liquid stocks, if ~1% of liquid name-days signal (~13/day) and the H5 net excess is at the
+  +25bp bar, ~5 overlapping slots x 50% of capital -> ~+6pp/yr at $10k at 100% capture, ~3pp at honest 50%: BELOW the +8pp gate. Run
+  anyway on the user's instruction (test before pushing back; the shape has never been measured); a PASS is a sleeve candidate, not a 2x.
+- Data: `winsig.load_panel("stock")` and `("etf")` (Sharadar SEP common / SFP non-leveraged ETFs, 2002-06..2026-10, delisted included),
+  `liq` = closeunadj >= $5 and 20d $ADV >= $20M; split-adjusted OHLC for structure; forward returns f1/f3/f5/f10 from the open at t+1 on
+  the total-return scale (closeadj), excess x{H} vs the EW liq universe (`add_bench`).
+- Pivots (k = 3): pivot low at t if low[t] < min(low[t-3..t-1]) and low[t] <= min(low[t+1..t+3]); pivot high symmetric with high. A pivot is
+  CONFIRMED at bar t+3 (no lookahead: all state used at s is from pivots confirmed at or before s).
+- State at bar s: PL_cur = latest confirmed pivot low (bar t), PL_prev = the one before it; PH1 > PH2 = the two latest confirmed pivot highs.
+  Bounce confirmation: s in [t+3, t+10], close[s] > high[t], and no close in (t, s) exceeded high[t] (first cross only; one signal per pivot).
+- Arms (all: buy open s+1, excess vs EW liq, 10bp round trip, shock 30bp, primary H5, H1/H3/H10 reported):
+  A1 HL-UP (PRIMARY): PL_cur > PL_prev AND PH1 > PH2 (higher low inside rising highs).
+  A2 LL (control): PL_cur < PL_prev (lower low, any highs). A3 ALL: every confirmed pivot-low bounce.
+  Diagnostics (not judged): A1 & close > SMA200; A1 by pullback depth terciles (PL_cur/PH1 - 1); A1 by ADV tercile; by year.
+- Universes: stocks (primary) and ETFs (second primary, same bar). Periods: 2016-01..2026-09 (discovery per the winsig loop) and
+  2003-01..2015-12 (confirm; untouched for any structure rule). ONE run; no re-tuning of k, the 10-bar window or the confirmation rule.
+- PASS (per universe): `winsig.passes` on H5 in BOTH periods (net excess >= +25bp, NW t >= 3, both halves > 0, median > 0, ex-top-5 > 0)
+  AND A1 minus A2 (date-paired on common dates) >= +10bp, else the structure condition adds nothing. KILL otherwise, stated as: "a
+  confirmed bounce from a higher low inside rising pivot highs has no 1-10 day continuation in excess of the universe, at daily tier".
+- Not tested after this (to be carried on the do-not-redo row): stop/target exits (exit at PH1 or below PL_cur), k other than 3,
+  weekly bars, intraday pivots, the SHORT mirror (lower high in falling lows), breakout-level retest (branch D), deep momentum
+  pullback 3-10d (branch E). Runner `research/sim/hl_bounce.py`; out `data/research/program/hl_bounce_out.txt`.
+
+## Amendment - Study BNC-IBS (N 1056): pre-register 2026-10-19 (same request), before any outcome; N 1055 -> 1056
+- Question (the user's premise, isolated): does WAITING FOR THE BOUNCE after a dip beat buying the dip? Tested on the live IBS universe
+  (18 ETFs in config.yaml ibs_symbols, all 18, no momentum rank) so the comparator is the live leg's own form.
+- Data: Sharadar SFP via `sharadar.prices` (split-adjusted OHLC; total-return scale by closeadj/close applied to open and close), 2003-01..
+  2026-09. IBS(d) = (C-L)/(H-L) on day d; signal day d: IBS(d) < 0.2. Costs 5bp/side (ETF tier), shock 15bp/side.
+- Arms (per signal day d, per name):
+  DIP (live form, baseline): buy open d+1 -> sell open d+2.
+  WAIT (unconditional one-day delay): buy open d+2 -> sell open d+3.
+  BNC-O: close(d+1) > close(d) (up day after the dip): buy open d+2 -> sell open d+3.   NOB: close(d+1) <= close(d), same legs.
+  BNC-C: close(d+1) > close(d): buy close d+1 -> sell open d+2 (the bounce night itself).
+  BNC-H: close(d+1) > high(d) (reclaim of the dip bar): both the close d+1 -> open d+2 and the open d+2 -> open d+3 legs.
+- Stats per arm and period (2003-15 PRIMARY, untouched for every bounce form; 2016-26 reported): mean, net, median, hit, day-clustered
+  t (daily means, NW lag 1), halves, ex-top-5 days, per-year table. Paired: BNC-O minus WAIT and BNC-O minus NOB on common dates.
+- PASS (bounce thesis): BNC-O or BNC-C net >= +15bp/trade, day-t >= 2.5, both halves > 0, median > 0, ex-top-5 > 0 in BOTH periods, AND
+  BNC-O minus NOB >= +10bp (t >= 2) (the confirmation carries information rather than the calendar). KILL otherwise, stated as: "on the
+  live IBS ETF universe, waiting for an up-close after an IBS<0.2 dip does not add to, and may forfeit, the dip's next-open edge".
+- Not tested after this: the top-3 momentum rank, a 15:40 intraday confirmation, holds beyond one session, single stocks, the night leg's
+  -8% picks (TREND-NIGHT/M2-M5 already cover multi-day there). Runner `research/sim/bnc_ibs.py`; out `data/research/program/bnc_ibs_out.txt`.
+  Program N = 1056.
+
+## RESULT - HL-BOUNCE (N 1055, 2026-10-19, one look): KILL in both universes and both periods; the uptrend structure adds nothing
+- Signals: ETFs 17,148 liq (A1 4,116 in 2016-26 / 1,838 in 2003-15); stocks 152,772 liq (A1 25,905 / 23,366). Excess vs the EW liq
+  universe, buy open s+1, 10bp RT.
+- A1 (higher low inside rising highs) H5: stocks 2016-26 -5.5bp gross, -15.5 net, t -2.2, median -10.3, hit 49%, halves -14.3/-13.0,
+  ex-top-5 -17.2; 2003-15 -7.4 / -17.4, t -1.2, halves -24.1/+8.6. ETFs 2016-26 -12.2 / -22.2 (t -1.8, halves -1.8/-23.4); 2003-15
+  -8.9 / -18.9. H1, H3, H10 all <= +1.6bp in every cell. 0 of 4 primary cells pass.
+- A1 - A2 (lower-low control) date-paired: -8.8 / -10.5 (ETF), -8.3 / -5.3 (stock) bp, |t| <= 1.1: a higher low is no better than a lower
+  low (bar was +10). A1 - not-A1: -7..+1. A2 is itself negative (stocks -7..-12, ETFs -2.5 / -21.4).
+- Diagnostics: deepest-pullback tercile is the worst (-16..-23bp) and the shallowest is ~0..+2.6; no ADV tercile positive; close>SMA200
+  does not rescue (stocks -2.4 / -7.7). By year (stocks): 20 of 25 years <= +7bp, best 2015 +20, 2024 +4, 2025 +6, 2026 -19.
+- Read: the "confirmed bounce" bar is a short-term up move in a liquid name, and liquid names mean-revert over 1-10 days, so buying it is
+  buying after the bounce; the structure labels (higher low, rising highs) do not change that. Consistent with CHART-YOLO (bull shapes
+  contrarian) and AT3/TREND-NIGHT (uptrend dips bounce less). Verdict as registered. Not tested: stop/target exits, k != 3, weekly bars,
+  intraday pivots, the short mirror, breakout-level retest, deep 3-10d momentum pullback. Program N = 1056.
+
+## RESULT - BNC-IBS (N 1056, 2026-10-19, one look): KILL; waiting for the up-close carries no information and forfeits the dip night
+- 21,839 IBS<0.2 name-days on the 18 ibs_symbols (no momentum rank). 2003-15 (primary): DIP +16.9bp gross / +6.9 net (t 4.0, median
+  +14.9); WAIT +9.7 / -0.3 (t 2.5); BNC-O +12.4 / +2.4 (t 1.3, halves +0.2/+10.5); NOB +6.3; BNC-C (bounce night) +2.5 / -7.5; NOB-C
+  +11.5 (t 4.0); BNC-H reclaim +0.4 / -9.6 and +10.0 / 0.0. Paired BNC-O - WAIT -0.5 (t -0.4); BNC-O - NOB -0.3 (t -0.1).
+- 2016-26: DIP +13.2 / +3.2 (t 3.0); BNC-O +6.2 / -3.8 (t 0.7, halves +11.1/-5.8); NOB +15.8 / +5.8 (t 3.0); BNC-O - NOB -7.7 (t -2.1),
+  i.e. the dipped names that did NOT bounce on d+1 are the better buys; BNC-H reclaim night -8.6 gross. 0 of 2 periods pass.
+- Caution on one printed line: "BNC-O - DIP (same signal days)" (-42bp) conditions DIP's window on the d+1 up-close that overlaps it and
+  is NOT a valid comparison; ignore it. The valid comparisons are BNC-O vs WAIT and vs NOB.
+- Read: on this universe the dip's edge is the next-open entry; one day later it has halved (WAIT), and the up-close filter selects the
+  half that already bounced. Verdict as registered. Not tested: top-3 momentum rank, 15:40 confirmation, holds > 1 session, stocks.
+  Program N = 1056.
+
+## Amendment - Studies DEEP-PULL (N 1057) and BRK-RETEST (N 1058): pre-register 2026-10-19 (bounce tree, level 2), before any outcome; N 1056 -> 1058
+- These are the two siblings left open by HL-BOUNCE/BNC-IBS (branches E and D). Same data and judge as HL-BOUNCE: `winsig` stock and ETF
+  panels (liq: >= $5, ADV20 >= $20M), buy open s+1, excess vs the EW liq universe, 10bp RT, shock 30bp, periods 2016-26 and 2003-15,
+  `winsig.passes` bar in BOTH periods. One run, no re-tuning. Weekly bars (branch F) are NOT run: ~6 events/yr per name, ceiling < 1pp.
+- DEEP-PULL (N 1057): a confirmed bounce (HL-BOUNCE pivot definition, k=3, first close above the pivot bar's high within 10 bars) in a name
+  that was AT a 52-week high recently: max close over the 60 bars before the pivot low >= 0.97 x the 252-bar max close, and the pivot low
+  sits 5-20% below that recent high (depth = pivot low / recent high - 1 in [-0.20, -0.05]). PRIMARY horizon H10 (the "hold for a week or
+  two" the practitioners describe), H5 reported. Control: the same bounce in names NOT near a 52w high (recent high < 0.90 x 252d max).
+  Ceiling: ARETE-DIP-like frequency (~hundreds/yr); even at +25bp/10d net x 50% capital ~ +3pp/yr: below the gate, run on the user's
+  instruction as the last open leaf of the pullback branch. KILL statement: "a confirmed bounce from a 5-20% pullback in a recent
+  52-week-high name has no 5-10 day continuation over the universe". Not tested after this: holds > 10d, trailing stops, 52w-high
+  defined on intraday highs, weekly bars.
+- BRK-RETEST (N 1058): breakout at bar b = close > max close of the prior 50 bars (level L = that prior max). First retest within [b+3,
+  b+30]: low[t] <= 1.01 x L and close[t] > L (touch-and-hold), buy open t+1. PRIMARY H5, H10 reported. Control: the failed retest
+  (close[t] < L on the touch day, same window) and the breakout day itself (buy open b+1). KILL statement: "the first pullback to a 50-day
+  breakout level that holds on the close has no 5-10 day continuation over the universe". Not tested after this: 20d / 252d levels,
+  touch tolerance != 1%, intraday retests, a volume condition on the breakout, the short side of failed retests.
+- Runner `research/sim/pull_retest.py` (imports `hl_bounce.pivots`); out `data/research/program/pull_retest_out.txt`. Program N = 1058.
+
+## RESULT - DEEP-PULL (N 1057) + BRK-RETEST (N 1058), 2026-10-19, one look: KILL, all four primary cells
+- DEEP-PULL E1 (H10 excess vs EW liq, 10bp RT): stocks 2016-26 n 25,081: -1.6bp gross / -11.6 net, median -14.6, hit 49%, halves
+  +3.7/-8.3, ex5 -11.5; 2003-15 n 24,491: +3.5 / -6.5, t 1.0, median -0.3, halves +9.1/+8.9, ex5 +3.3 (the only cell with both halves
+  positive, and it is below cost). ETFs: 2016-26 +2.3 / -7.7 (median +12.4 but halves +14.1/-47.8, ex5 -33.3); 2003-15 -22.5 / -32.5
+  (t -2.8). The far-from-high control (E2) is indistinguishable (-5.9 / +3.8 stocks); the shallow (<5%) arm is -5.9 / -8.6 and the >20%
+  arm -3.8 / -54.7. By year (stocks) the best years are 2019 +37 and 2021 +59; 2018 -54, 2020 -61, 2022 -52: it is a regime bet.
+- BRK-RETEST D1 (H5): stocks 2016-26 n 28,859: +8.3 / -1.7 (t -0.7, median -0.9, halves +7.8/-19.2, ex5 -10.8); 2003-15 n 27,310:
+  -1.0 / -11.0. ETFs +4.9 / -5.1 and -0.1 / -10.1. The failed-retest control (close back below the level) earns the same (+2.9 / +2.0
+  stocks): whether the level "holds" on the close carries no information about the next week. The breakout day itself is -5.5bp
+  (t -2.4) in stocks, consistent with the loop's "breakouts fade" finding.
+- Read: level 2 of the bounce tree is closed. Every leaf (structure, confirmation, momentum pullback, breakout retest) is <= 0 in excess of
+  the universe at the daily tier, in both the discovery and the untouched periods. Not tested (carried on the rows): holds > 10d,
+  trailing stops, other level lookbacks/tolerances, intraday retests, weekly bars, short sides. Program N = 1058.
+
+## Amendment - Study ETF-PD (N 1059): pre-register 2026-10-19 (open loop, pivot 1), before any outcome; N 1058 -> 1059
+- Why reopened: the ETF premium/discount family was CLOSED on SPY (ETC), broad SPDRs (EF) and bond SPDRs (BSPD) and marked
+  "do not re-open without new data; a smaller/international fund needs its own NAV history". The WRDS reconciliation (2026-10-16)
+  found `crsp_q_mutualfunds.daily_nav` + `fund_hdr_hist` (et_flag F): daily NAV for 6,637 US ETFs incl. dead funds, 2010-01..2026-06,
+  with dated tickers. That is the new data. Petajisto (2017) reports the mispricing lives in illiquid / international / bond ETFs
+  where AP arbitrage is costly, not in SPY.
+- Mechanism: APs arbitrage ETF price to NAV only when the creation/redemption cost (basket spread, FX, foreign-market closure) is below the
+  deviation; between those bounds retail order flow moves the price away from NAV and it reverts within a day. Named counterparty: retail/
+  flow traders on the wrong side of a thin ETF's close. Competing explanation to measure: STALE NAV (international funds: price leads NAV
+  after the foreign close), in which case NAV moves to price and there is nothing to trade.
+- Ceiling (gate): ~2,000 live ETFs/day, bottom decile ~200, executable (ADV20 >= $5M) ~50. If the deepest-discount names earn +15bp net
+  per session at 50% of capital: 250 x 15bp x 0.5 x 50% capture ~ +9pp/yr at $10k; thin names have no capacity issue at $2-25k. Clears
+  on paper; the test decides whether +15bp net exists in executable names.
+- Data: NAV panel pulled to `data/research/etf_pd/nav.parquet` (crsp_fundno, caldt, dnav, ticker valid that day); prices = Sharadar SFP
+  (winsig etf panel: non-leveraged ETFs, delisted included), RAW close = closeunadj, raw open = open x closeunadj/close. Premium
+  p_d = closeunadj_d / dnav_d - 1; drop |p| > 20% (bad prints/splits). Signal z_d = p_d - median(p_{d-60..d-1}) (own-history
+  centred, removes persistent stale-NAV offsets and fee effects). Universe each day: ETFs with a NAV, >= 60 prior premia, closeunadj >= $5,
+  ADV20 >= $1M. Ranked into deciles daily (D1 = deepest discount vs own history).
+- Legs (auction fills; the NAV is published after the close, so the first executable fill is the d+1 open cross): S1 = open d+1 -> close
+  d+1 (PRIMARY, one session); N1 = open d+1 -> open d+2; W5 = open d+1 -> close d+5. Excess vs the EW universe of the same ETFs that day.
+  Costs 10bp RT flat, shock 30bp. Executability bucket: ADV20 >= $5M at 30bp RT.
+- Reported: D1..D10 means (monotonicity), D1 and D10 full stats (mean, net, median, hit, NW t on daily means, halves 2010-17 / 2018-26,
+  ex-top-5 days, shock), D1 by category (international / bond / domestic equity / other by fund-name regex) and by ADV bucket, by year;
+  mechanism split: next-day NAV change and next-day price change regressed on z by category (stale NAV vs mispricing).
+- PASS: D1 S1 net >= +15bp, NW t >= 3, both halves > 0, median > 0, ex-top-5 > 0, D1 > D5 > D10 (monotone), AND the ADV >= $5M bucket
+  net >= +10bp at 30bp RT. KILL otherwise, stated as: "own-history ETF discounts carry no executable next-session reversion in US ETFs
+  2010-26 at auction fills". Not tested after this: the premium short side, intraday (non-auction) entries, international funds with an
+  FX/futures hedge, creation-flow (shares outstanding) conditioning, holding to NAV convergence beyond 5 sessions.
+- Runner `research/sim/etf_pd.py` (pull | run); out `data/research/program/etf_pd_out.txt`. Program N = 1059.
+
+## RESULT - ETF-PD (N 1059, 2026-10-19, one look): KILL; the ETF premium/discount family is closed delisted-complete
+- Panel: 2,737 ETFs with CRSP NAV and Sharadar prices, 2.89M name-days, 4,149 sessions 2009-12..2026-06. Premium median +2.2bp, p10 -19.5,
+  p90 +32.6; own-history z p10 -23.3 / p90 +20.8: US ETF deviations from NAV are a few tens of bp even at the tails.
+- D1 (deepest discount) S1 (open d+1 -> close d+1) excess vs the EW universe: +0.9bp gross, -9.1 net, median +1.0, hit 51%, NW t 2.7,
+  halves +0.6/+1.4, ex5 +0.7, shock -29.1. N1 +1.0, W5 +1.4. D10 -1.4 (t -3.7). Deciles monotone but the whole D1-D10 span is ~2bp.
+  Bond D1 +2.8, intl +1.0, domestic -0.3; ADV > $50M +2.0, $5-50M +0.4; ADV >= $5M at 30bp RT net -29.1 (bar +10). No year above +8bp.
+  1 of 7 registered gates (monotonicity) -> KILL.
+- Mechanism: per 100bp of z, next-day NAV moves +23 (bond) / +59 (domestic) / +61 (intl) bp toward the price, and the price moves only
+  -13 / -16 / -19bp. The deviation is mostly information the NAV has not yet absorbed (stale or lagged pricing), and the tradable residual
+  on a 20bp tail is ~3bp: inside any spread. Verdict as registered. With SPY (ETC), broad SPDRs (EF), bond SPDRs (BSPD) and now every
+  US ETF incl. dead funds, the ETF premium/discount family is CLOSED at the daily auction tier; do not reopen without intraday iNAV data
+  and a specific constrained-AP episode (e.g. a creation halt).
+- Ceiling-killed on paper this tick (no N): fallen-angel forced selling on ISSUER EQUITY (FISD PIT ratings): ~40 US fallen angels/yr x
+  <= 1-2% equity effect around the index exit x ~10% of account per name ~ +0.4pp/yr; the bond side is not retail-executable at Schwab.
+  Not tested: a pooled HY-ETF (HYG/JNK) rebalance-day arm (deep market; TME-class ceiling ~1-2pp).
+- Not tested after ETF-PD: premium short side, intraday (iNAV) entries, FX-hedged international funds, creation-flow (shares outstanding)
+  conditioning, holding to convergence beyond 5 sessions. Program N = 1059.
+
+## Amendment - Study F-SALE2 (N 1060): pre-register 2026-10-19 (open loop, pivot 2), before any outcome; N 1059 -> 1060
+- Completes F-SALE (N 1054), which was killed "at this flow proxy" with the hypothesis explicitly untested at a proper flow measure. New
+  data: `crsp_q_mutualfunds` has its OWN holdings (`holdings`, keyed by crsp_portno, with permno/cusip, 460M rows) plus `monthly_tna` and
+  `monthly_returns`, so Coval-Stafford / Edmans-Goldstein-Jiang flow-induced pressure can be built without MFLinks.
+- Mechanism (unchanged): open-end funds facing redemptions must sell pro rata; the sold stocks are pushed down in the event quarter and
+  revert over the following quarters. Named constrained counterparty: the redeeming fund.
+- Measure (Edmans et al. 2012 MFFlow, hypothetical pro-rata sale, exogenous to the fund's choice): for domestic equity portfolios
+  (fund_style crsp_obj_cd 'ED%', share classes summed per crsp_portno), quarterly flow pct = sum over months of
+  [TNA_m - TNA_{m-1}(1+r_m)] / TNA at the prior quarter end. For portfolios with flow <= -5%: sell_sh_iq = sum_j flowpct_jq x shares_ij
+  (shares held at the latest report date before the quarter start, within 6 months). Mirror buy_sh for flow >= +5%. PRESSURE_iq =
+  sell_sh_iq / quarterly share volume of stock i (days of volume, negative); permno -> Sharadar ticker via ncusip/cusip map.
+- Design, same as F-SALE's registration: eligible = prev close >= $5 and $ADV20 >= $10M, EW bottom decile of PRESSURE each quarter
+  (most fire-sold), held the next quarter (close q-end -> close q+1-end as the proxy, disclosed; the registered open-cross entry at q-end +
+  60d is stricter), benchmark EW eligible universe with a pressure value and SPY. Also report the Coval-Stafford variant (sell pressure
+  from funds with flow <= 5th percentile only) as a diagnostic.
+- PASS (F-SALE bar): bottom-decile next-quarter excess vs eligible EW >= +150bp, quarter-clustered t >= 2, median quarter > 0, both halves
+  (2010-17 / 2018-26) > 0, ex-top-5 quarters > 0, bottom > middle deciles, AND the pressure-quarter return of the bottom decile < EW (the
+  fire sale must be visible). KILL otherwise, stated as: "flow-induced mutual-fund selling pressure carries no exploitable next-quarter
+  reversal in $5+/$10M+ US stocks at a 60-day lag". Ceiling (disclosed): quarterly, ~100% of capital, literature reversal ~+6-8%/yr gross
+  -> ~+3-4pp at honest capture: BELOW the +8pp stand-alone gate; run because it completes an open registration and is the one named-
+  counterparty mechanism with newly available data. A PASS is a Roth sleeve over beta, not a 2x.
+- Not tested after this: monthly rebalance (needs monthly holdings / N-PORT), the inflow-bought short side, ETF fire sales, lags < 60d.
+- Runner `research/sim/f_sale2.py` (pull | run); data `data/research/fsale2/`; out `f_sale2_out.txt`. Program N = 1060.
+
+## CORRECTION - F-SALE (N 1054) decile labels were inverted (found 2026-10-19 while building F-SALE2)
+- `f_sale.py` defines pressure = (sell_p - buy_p)/advsh, so POSITIVE = net flow-forced selling, but the comment says "negative = net
+  fire-sold" and run() labels the LOWEST decile "most fire-sold". The printed D1 (mean pressure -4.32 days of volume) is therefore the most
+  INFLOW-BOUGHT decile and D10 (+2.54) the most fire-sold.
+- Re-read of the recorded numbers with correct labels: fire-sold D10 earned +464bp in the pressure quarter vs ~+600 for the middle deciles
+  (the fire sale IS visible, ~-150bp relative) and -11bp excess the next quarter (NO reversal, t -0.3). Inflow-bought D1 earned +745 in the
+  pressure quarter (+128 vs EW, t 3.3) and -80bp excess the next quarter (t -2.1): inflow pressure reverses, outflow pressure does not.
+- Verdict unchanged (KILL for the long side; the registered gates fail on either labelling), but the recorded mechanism statement ("flags funds
+  trimming winners, falsifies the proxy") was wrong: the s12 proxy did reproduce the event-quarter price pressure on the fire-sold side.
+  The row in NEXT.md is annotated. Lesson: print the mean signal value per decile next to the label on every sort (done here, which is how
+  the inversion was caught); never trust a sign comment.
+
+## RESULT - F-SALE2 (N 1060, 2026-10-19, one look): KILL; the fire sale is visible, the reversal is not
+- Panel: 222k (permno, quarter) pressure rows 2009Q1-2026Q2 from 18 server-side yearly queries (sell median 21 / buy median 24 funds per
+  stock-quarter); 7,901 Sharadar tickers; 83,659 eligible stock-quarters ($5+, $10M+ ADV), 64 judged quarters 2009Q1-2024Q4. Pressure
+  median -0.011 days of volume, p10 -0.52, p90 +0.54.
+- Mechanism (registered check) PASSES strongly: D1 (most flow-forced selling) pressure-quarter excess vs EW -273bp (median -206, hit 0.16,
+  t -6.3, ex-top-5 -319); raw pressure-quarter returns are monotone D1 +356 ... D10 +910. Flow-forced selling is in the price.
+- Reversal FAILS: D1 next-quarter excess vs EW +15bp (median +48, hit 0.61, t 0.49, ex-top-5 -19), vs SPY +23; halves +38 / -14; by year
+  -370 (2020) .. +253 (2023). D10 (inflow-bought) -25 (t -0.6). 3 of 8 gates (median, h1, monotone-vs-middle, mechanism) -> KILL.
+- Read: at the quarterly horizon flow pressure behaves like information (or like Lou-2012 persistence that has already run), not like a
+  liquidity dislocation that snaps back; the Coval-Stafford reversal, if it exists, is a 12-18 month phenomenon (diagnostic below), i.e. a
+  slow value-like sleeve, not a $2-25k edge. Verdict as registered. Not tested: 2-4 quarter holds as a registered rule, monthly lag (CRSP
+  monthly TNA permits it; holdings stay quarterly), ETF fire sales, the inflow short side. Program N = 1060.
+- DIAGNOSTIC (unregistered, not a verdict): D1 cumulative excess vs eligible EW over q+1..q+k, non-overlapping quarters only (every k-th quarter)
+    k=2: all quarters mean +11bp (n 64); non-overlapping mean +24 med +77 t 0.31 (n 32); D10 -75
+    k=4: all quarters mean -63bp (n 64); non-overlapping mean -17 med +75 t -0.09 (n 16); D10 -198
+    k=6: all quarters mean -175bp (n 64); non-overlapping mean -183 med -121 t -0.67 (n 11); D10 -369
+
+## Open-loop close-out 2026-10-19: candidates ceiling-killed on paper (no N, no backtest), so the next agent does not redo them
+Gate: ceiling %/yr = events/yr x net edge x share of account x honest capture (<= 50%), kill if < +8pp at $10k.
+- Single-stock OPEX pinning toward the max-OI strike (OptionMetrics opprcd OI by strike is available): 12 monthlies (+ ~40 weeklies in
+  the ~500 names with weeklies) x <= 30bp x 50% capital x 50% = +1.8..4pp. Index OI-pinning already killed (N 1065-era opex_pin). Not run.
+- Per-stock signed dealer gamma -> next-day continuation: GAMMA-MKT (index) killed, LUCK-B4 (per-stock option state, random rules) null;
+  conditional continuation effects in the literature are <= 10bp/day -> ceiling marginal, prior low. Not run.
+- SPX AM-settlement (SOQ) open-cross dislocation fade on the third Friday (TAQ ms available): ~12/yr x <= 20bp x 100% = ~2.4pp. Not run.
+- Mutual-fund liquidations (fund_hdr end dates) -> forced sale of holdings: liquidating funds are small, sold stakes are tiny vs ADV. Not run.
+- ADR premium vs home-market close: same stale-price structure ETF-PD just measured (deviation = information the lagging leg absorbs);
+  cross-venue inaccessible at Schwab. Not run.
+- SPAC trust-value yield (buy below trust, redeem): redemption is a manual election with weeks of capital lock = the odd-lot tender
+  objection (user retired tenders 2026-10-13). Not run.
+- Earnings-announcement night (IBES anndats/anntims on WRDS would give exact timing): DS1 (Round 29) already dead on 2021-26 at +0..+6bp
+  gross; pre-FOMC drift is addendum 33 (F3 adopted small). Not re-run.
+- Status after this loop (N 1055-1060, six kills + one correction): the data-unlocked frontier from the WRDS reconciliation is now measured
+  (borrow, index gamma, skew/term, ETF NAV, fund flows). Remaining DATA-LIMITED rows are unchanged (margin-rate history, custodial borrow
+  fees, intraday iNAV, N-PORT monthly holdings). Program N = 1060.
+
+## Amendment - Studies REC-RECALL (N 1061), NIGHT-SHORT (N 1062), STK-IBS-OPEN (N 1063): pre-register 2026-10-25, before any outcome; N 1060 -> 1063
+Source: `docs/research/hypothesis-space.md` (built 2026-10-25 from NEXT do-not-redo + docs/memory + this ledger). After N 1060 only three cells
+clear the +8pp-at-$10k paper gate and are runnable on data on disk; all three are registered here as one-look studies. No tuning of any cutoff.
+
+### REC-RECALL (N 1061): pre-ex-date covering window in hard-to-borrow dividend payers (the deferred RECORD-RECALL leaf, 2026-10-19)
+- Mechanism: lenders recall loaned shares before the holder-of-record date (dividend tax / substitute-payment reasons; Thornock 2013), so short
+  sellers in hard-to-borrow names must cover in the sessions before the ex-date. Named constrained counterparty: the recalled short.
+- Rule (fixed, standalone long, auction-executed): buy the closing cross at E-5, sell the closing cross at E-1 (E = ex-date; the ex drop is
+  excluded), for ordinary cash dividends (CRSP distcd 12xx) in names whose option-implied borrow fee (`optionm.borrate`, nearest-30d tenor,
+  -99.99 dropped, as of E-6) is in the top decile of that month's cross-section. Eligible: prev close >= $5, $ADV20 >= $5M.
+- Data: WRDS `crsp.dsedist` (exdt) x `optionm.borrate` x `crsp.dsf` 2001-2024 (CRSP ends 2024-12); permno->secid via
+  `wrdsapps_link_crsp_optionm.opcrsphist`. No record-date rule exists in the program, so the whole period is a first look.
+- Benchmark: the same name's unconditional 4-session close->close return (all non-event windows), and the same fee-decile EW universe over the
+  same calendar window. Report fee deciles D1..D10 (print the mean fee next to each decile label; assert the sign in code).
+- PASS: D10 excess >= +40bp/event net (tier 5bp/side), day-clustered t >= 2, median > 0, both halves (2001-12 / 2013-24) > 0, ex-top-5 > 0,
+  and monotone (D10 > D5 > D1). WEAK: +20..+40bp with t >= 2 (below the gate; forward shadow only). KILL otherwise, stated as "the pre-ex
+  covering window in top-decile borrow-fee dividend payers carries no exploitable long return at the closing crosses".
+- Ceiling (disclosed): ~60 full-capital 4-session holds/yr x net x 50% capture: +12pp at +40bp, +6pp at +20bp.
+- Not tested after this: proxy (DEF 14A) record dates (needs SEC_USER_AGENT), the short side after the record date, custodial (not
+  option-implied) fees, intraday entries, 2025-26 (CRSP not licensed there).
+- Runner `research/sim/rec_recall.py`; data `data/research/rec_recall/`; out `data/research/program/rec_recall_out.txt`.
+
+### NIGHT-SHORT (N 1062): the night leg's short mirror (close cross -> open cross), taxable margin only
+- Rule: daily-bar proxy of the live night rule mirrored: day_ret >= +8% and IBS >= 0.90 at the close, prev close >= $5, $ADV20 >= $10M,
+  domestic common stock; short the closing cross, cover the next opening cross; net 5bp/side + 2bp overnight borrow; excess vs the EW
+  eligible-universe overnight (so the overnight premium is netted out).
+- Why it is not a costume: every prior short was intraday (Study S, GAP-SHORT, Lab-BA, NEWS-HALT, SSR-LIFT) or a tilt; the overnight short of
+  a close-at-high crash-up is the "short side: not tested" sibling on INTRA-ANY, PREMKT-CROSS, BRK-RETEST, HL-BOUNCE, ETF-PD, F-SALE2.
+- Prior: negative (OVN-MOM N 939, GAP-NIGHT N 1050: attention names earn the overnight premium). The value is a class kill.
+- Data: Sharadar SEP 2003-26 (delisted-complete). Judge 2003-15 (never used for any short rule); report 2016-20 and 2021-26 separately.
+- PASS: 2003-15 short return (negative of the overnight excess) >= +15bp/night net, day-clustered t >= 2, median night > 0, ex-top-5 > 0, both
+  subperiods (2003-08 / 2009-15) > 0. KILL otherwise, stated as "shorting close-at-high +8% names overnight at the crosses loses or is ~0;
+  the short side of the night-leg family is closed at daily tier". Roth excluded by rule (no shorting).
+- Ceiling: ~250 nights/yr x +15bp x 50% size x 50% capture = +9pp. Squeeze tail applies (SSR-LIFT maxDD -41% at 0.5x).
+- Not tested after this: exact 15:40 minute form (SIP 2016-26) unless the proxy passes; ETB-filtered universe (borrow availability not on
+  disk); holding past the open cross; cutoffs other than the mirror (+8% / 0.90) by construction.
+- Runner `research/sim/night_short_mirror.py`; out `data/research/program/night_short_out.txt`.
+
+### STK-IBS-OPEN (N 1063): the ETF IBS leg's open-to-open form on liquid single stocks, disjoint from the night leg
+- Rule: on day d, name in the top 500 by 20d $ADV (prev close >= $5, domestic common), IBS < 0.2 and day_ret > -4% (disjoint from the night
+  leg and NIGHT-BAND); buy the d+1 opening cross, sell the d+2 opening cross; equal weight across signals; tier 5bp/side; excess vs the EW
+  top-500 universe open(d+1)->open(d+2).
+- Why it is not a costume: the IBS leg was only ever run on ETFs (18 names; "all liquid ETFs" dead); stock forms were close-cross entries
+  with a drop gate (night leg, NIGHT-BAND). The one-session open-to-open stock form has no row.
+- Prior: low (NIGHT-BAND -4..-8% ~ +4bp gross; ETF leg 2003-15 net +5bp t 1.0).
+- Data: Sharadar SEP 2003-26. Judge 2003-15 (touched for the ETF rule, never for a stock rule; say so). Report 2016-20 and 2021-26
+  (official open crosses on disk if cheap; else Sharadar open, which matched the cross 2016-20 per SPLIT-CROSS).
+- PASS: 2003-15 net >= +10bp/signal-day, day-clustered t >= 2, median day > 0, ex-top-5 > 0, both subperiods > 0, and 2016-26 same sign.
+  KILL if net < +8bp or t < 2. Stated as "IBS<0.2 without a large drop, bought at the next open cross and sold at the following open cross,
+  earns < +8bp net in liquid US stocks 2003-15".
+- Ceiling: 250 x +15bp x 100% x 50% = +19pp paper; ~0 at +4bp gross.
+- Not tested after this: IBS cutoffs other than 0.2 and universes other than top-500 ADV (no tuning); close-cross entry (that is the
+  night family); multi-day holds; ETF-momentum-style ranking within the stock set.
+- Runner `research/sim/stk_ibs_open.py`; out `data/research/program/stk_ibs_open_out.txt`. Program N = 1063.
+
+## RESULT - STK-IBS-OPEN (N 1063, 2026-10-25, one look): KILL
+- Judge 2003-15: net -4.1bp/signal-day (gross +5.9, below the 10bp round trip), t -1.78, median +0.6, ex-top-5 -5.5, subperiods 2003-08 -2.4 /
+  2009-15 -5.6, 2016-26 -1.6 (same sign). 3,246 judge signal days, ~93 names/day (550k name-days 2003-26). Only 2003 and 2020 clear +5bp net.
+- The registered sentence holds: "IBS<0.2 without a large drop, bought at the next open cross and sold at the following open cross, earns < +8bp
+  net in liquid US stocks 2003-15". Excess vs the EW top-500 open-to-open is +1.7bp (t 1.5), carried by 2003-08 and 2022; the universe's own
+  open-to-open drift (+2.4..+6.6bp) exceeds the signal's increment in every period. ETF anchors on the same days: SPY +8.4 (t 1.4), QQQ +7.5
+  (t 1.2) 2003-15, consistent with the ETF leg's known 2003-15 prior. Read: by the d+1 open the overnight bounce has already happened.
+- Diagnostic read (not a rule): signal days where SPY's own IBS<0.2 are net positive (+4.4 judge) but their excess vs the universe is ~0 or
+  negative (-2.1, t -1.3): market beta, not a stock signal. Days with SPY IBS>=0.2: +2.7 excess (t 1.9), below cost.
+- Prices: Sharadar open for all periods (no official open-cross series exists on disk for this set; the night cache holds only night picks).
+- Not tested: as registered (other IBS cutoffs / universes, close-cross entry, multi-day holds, ranking within the set) plus official 2021-26
+  open crosses. Runner `research/sim/stk_ibs_open.py`; out `data/research/program/stk_ibs_open_out.txt`.
+
+## RESULT - NIGHT-SHORT (N 1062, 2026-10-25, one look): KILL; the short side of the night-leg family is closed at daily tier
+- Judge 2003-15 (2,229 nights, 16,509 name-nights): excess short net -12.8bp/night (t -3.01), median -1.0, hit .49, ex-top-5 -15.4, subperiods
+  -16.8 / -9.1; raw short net -14.8 (t -3.2). All six gates fail. 2016-20 -24.9 (t -3.3), 2021-26 -7.8 (t -1.4). Gross the short excess is
+  ~-1bp in 2003-15: the mechanism is ~0 and the 12bp cost makes it a loser; in 2016-20 the picks earn +12.9bp over the universe overnight
+  (OVN-MOM/GAP-NIGHT's attention premium), so the short loses most there.
+- Registered sentence holds: "shorting close-at-high +8% names overnight at the crosses loses or is ~0; the short side of the night-leg family
+  is closed at daily tier". Wins only in bear years (2008 +29, 2022 +27, 2015 +5, 2026 YTD +8): short-beta plus short-momentum.
+- Volunteered, post-hoc, NOT judged (selection on 2003-15): the >20% day-return bin shorts at +53.1 mean / +47.9 median / hit .65 / t 3.25 /
+  ex-top-5 +32.6 (390 nights, 892 name-nights, ~30 nights/yr); 8-12% is -16.3 (t -4.4), 12-20% -3.7. Crowded nights (>10 names) +12.7 (t 2.3,
+  183 nights) = bear-rally regime. Size bins: none pass.
+- Not tested: exact 15:40 minute form, ETB-filtered universe, holding past the open cross, cutoffs other than the mirror (the >20% bin is
+  registered separately below as NIGHT-SHORT-20, judged on 2016-26 which was never inspected for that bin).
+- Runner `research/sim/night_short_mirror.py`; out `data/research/program/night_short_out.txt`.
+
+## Amendment - Study NIGHT-SHORT-20 (N 1064): pre-register 2026-10-25, before any outcome; N 1063 -> 1064
+- Origin: the >20% day-return bin volunteered by NIGHT-SHORT on 2003-15 (selection sample; the number above was read, so 2003-15 cannot judge).
+- Rule: day_ret >= +20% and IBS >= 0.90 at the close (daily bars), prev close >= $5, $ADV20 >= $10M, domestic common; short the closing cross,
+  cover the next opening cross; net 5bp/side + 2bp borrow; excess vs the EW eligible-universe overnight. No other cutoff is touched.
+- Judge: 2016-01-01..2026-09-30 (never inspected for this bin). Report 2016-20 and 2021-26 and the per-year table; report 2003-15 as the
+  selection sample only.
+- PASS: 2016-26 excess short net >= +25bp/night, day-clustered t >= 2, median > 0, ex-top-5 > 0, 2016-20 and 2021-26 both > 0, hit >= 0.55.
+  KILL otherwise, stated as "the >20% close-at-high overnight short does not survive out of its selection sample".
+- Ceiling (disclosed, BELOW the +8pp gate): ~30 nights/yr x +50bp x 0.5 size x 50% capture = ~+4pp, taxable margin only, borrow availability
+  unmodelled, squeeze tail. Run because it is a 10-minute read on a built runner; a PASS is a small taxable sleeve to forward-shadow, not a 2x.
+- Not tested after this: holding past the open, ETB filter, exact 15:40 form, the 12-20% band, long side of the mirror (that is the live leg).
+- Runner: `research/sim/night_short_mirror.py --min-dr 0.20` (or a sibling function); out `data/research/program/night_short20_out.txt`. Program N = 1064.
+
+## RESULT - NIGHT-SHORT-20 (N 1064, 2026-10-25, one look): KILL; the >20% close-at-high overnight short does not survive out of its selection sample
+- Judge 2016-26 (747 nights, 1,557 name-nights, ~70 nights/yr): excess short net -27.6bp/night (t -0.99), median +22.8, hit .56, ex-top-5
+  -44.5; 2016-20 -51.8, 2021-26 -16.0. 2 of 7 gates (median, hit). Selection sample 2003-15 was +53.1 (t 3.25), in-sample.
+- Shape: classic squeeze profile. The median night wins (the typical name mean-reverts) and a broad right tail of continuation destroys the
+  mean (2018 -213, 2021 -266bp/night; picks continue +200-270bp gross on those years). ex-top-5 -44.5 vs mean -27.6: the tail is broad.
+  Borrow modelled at 2bp; these are the names where borrow is actually hard, so real costs are higher.
+- Volunteered, not judged: 100-500M ADV bin +44 mean / +75 median (t 1.1, 196 nights); >500M -382 (t -2.0); 3-5-name nights -142 (t -2.1).
+  Nothing clears the bar. Not tested: holding past the open, ETB filter, 15:40 form, 12-20% band. Runner `research/sim/night_short_mirror.py
+  --min-dr 0.20`; out `data/research/program/night_short20_out.txt`. Program N = 1064.
+
+## RESULT - REC-RECALL (N 1061, 2026-10-25, one look): KILL (WEAK by bars, placebo-equal; the recall mechanism is unsupported)
+- 127,275 eligible ordinary-dividend events 2001-24 with an option-implied fee at E-6 (36% of 464k CRSP 12xx events; D10 = 5,033 events,
+  ~210/yr, 2,023 names, no single name carries it). Decile mean fees asserted monotone (D1 0.1% .. D10 29.5%/yr).
+- D10, buy close E-5 sell close E-1, net 10bp: raw +35.3bp (t 3.6); excess vs own-name baseline +29.4 (t 2.96, median +11, halves +25/+32,
+  ex-top-5 +25); excess vs same-decile universe +21.3 (t 2.76, median +1.5, 2013-24 +14.4 t 1.3 median -10.7 hit .48). Monotone D10>D5>D1.
+  By the bars: WEAK on both benchmarks (+20..+40, t >= 2), never +40.
+- Placebo (E-10..E-6) reproduces it: D10 +24.3 / +19.6 (t 2.5 / 2.6) with the same decile profile. Paired same-event main minus placebo:
+  -23 to -34bp (t -1.0 to -1.7). The excess is not specific to the covering window, so the stated mechanism (lender recall -> short covering
+  E-5..E-1) is unsupported; under the protocol a number with no mechanism is a NO. No forward shadow.
+- Volunteered: (1) the D10 fee at E-6 is a pre-dividend SPIKE (same-name fee E-6 minus E-36: +21.6pp mean, up in 92% of D10 events):
+  OptionMetrics' implied borrow comes from put-call parity, so a dividend the vendor under-projects prints as "borrow fee" before ex. The
+  top fee decile before an ex-date is partly a dividend-projection artifact. DATA RULE: `optionm.borrate` around ex-dates is contaminated;
+  any borrow-fee study near dividends must use a fee read >= 30 sessions before ex or a custodial fee. (2) Low-fee payers (D1-D6) underperform
+  their own baseline by 12-20bp (t -2..-3) in E-5..E-1: dividend payers are weak the week before ex (one look, not registered).
+  (3) The unconditional D10 4-session base is +7.2bp vs +15-17 for D6-D9: BORROW-XS confirmed.
+- Not tested: proxy (DEF 14A) record dates (needs SEC_USER_AGENT), the post-record short side, custodial fees, a fee read at E-36 instead of
+  E-6 (would separate the standing-HTB names from the spike artifact; ceiling at the observed +21-29bp is ~+6-9pp before the placebo, so a
+  clean re-run is below the gate unless the artifact-free subset is much stronger), 2025-26.
+- Runner `research/sim/rec_recall.py` (pull | run); cache `data/research/rec_recall/` (~700MB); out `data/research/program/rec_recall_out.txt`.
+- Session close: N 1061-1064 all KILL. The three cells that cleared the paper gate after N 1060 are now measured; the matrix has no Tier A
+  cell left on data on disk. Program N = 1064.
+
+## Amendment - Study LETF-REV (N 1065): pre-register 2026-10-26 (user picked branch 1 of the market scan), before any outcome; N 1064 -> 1065
+- Origin: SS-LETF (N 877) confirmed that single-stock LETF rebalancing pushes 15:45 -> close in the day's direction (+3-5bp gross, placebo
+  diff +5.9bp t 2.8) and killed the continuation trade. The reversal side was never read. Beckmeyer-Branger-Gayda find the LETF close
+  impact "quickly reverts at the next day's open". Named counterparty: the LETF that must sell (buy) at the close of a down (up) day.
+- Pressure I: exactly `ss_letf.panel()` (fund $ volume x leverage demand / underlying 20d $ volume), no redefinition. Period 2022-07..2026-09
+  (the SS-LETF panel; the overnight leg of it is untouched). Underlying universe: names with >= 1 single-stock LETF (fund_map).
+- Rule A (long, both accounts): day_ret <= -3% (LETF must sell at the close) and I >= 0.05; buy the closing cross, sell the next opening
+  cross (Sharadar closeunadj -> next open, as in GAP-NIGHT); net 5bp/side. Excess vs (i) the EW overnight of all LETF-underlying names that
+  night and (ii) the paired placebo of SS-LETF: same-day names with I = 0 and day_ret <= -3%.
+- Rule B (read only, no short): day_ret >= +3% and I >= 0.05; report the overnight return vs the same benchmarks (a negative number = the
+  up-side reversal; it would be a long-AVOID filter, since the short side is closed by NIGHT-SHORT).
+- Tilt read: the live night-leg subset (day_ret <= -8% & IBS < 0.10) split by I >= 0.05 vs I = 0 (does pressure add to the live leg?).
+- I buckets [0, 0.02, 0.05, 0.10, 0.20, 1): print the mean I next to each label; assert monotone labels in code.
+- PASS (standalone A): net >= +15bp/night, day-clustered t >= 2, median > 0, ex-top-5 > 0, halves (2022-07..2024-06 / 2024-07..2026-09) > 0,
+  treated minus placebo > 0, monotone in I. WEAK: +8..+15 with t >= 2 and placebo diff > 0 -> night-leg tilt candidate (forward shadow).
+  KILL otherwise, stated as "the LETF close impact does not revert at the next open by more than the round trip in the names with it".
+- Ceiling (disclosed, BELOW the gate): bounded by the measured impact (3-5bp average, +12-16 in the top names): ~+1-2pp as a night tilt,
+  ~1pp standalone on top-I names. Run because the user picked it and the runner exists (30-min read).
+- Not tested after this: holding past the open, entry before the close (that is SS-LETF), intraday 15:45 entry + open exit, index LETFs
+  (Ivanov-Lenkey: modest), the short side.
+- Runner `research/sim/letf_rev.py` (imports ss_letf.panel / fund_map); out `data/research/program/letf_rev_out.txt`. Program N = 1065.
+
+## RESULT - LETF-REV (N 1065, 2026-10-26, one look): KILL standalone; the tilt read is a bettor-scale night-leg candidate (edge unproven)
+- Rule A (day_ret <= -3%, I >= 0.05, close cross -> open cross): 366 nights, 38 names, 2024+ almost entirely (I >= 0.05 barely exists
+  before 2024, so the halves gate is vacuous: H1 = 13 nights). Net +12.4bp/night (t 0.83), median +32.8, hit .58, ex-top-5 +4.2; excess vs
+  the LETF-underlying EW overnight -1.5 (that universe earns +9.0bp/night itself); paired treated-minus-placebo +11.0 (t 0.93); I buckets
+  non-monotone. Decaying: 2024 +58, 2025 +14, 2026 -8. Gates: 4/7, t fails. KILL as registered: "the LETF close impact does not revert at
+  the next open by more than the round trip in the names with it"; at the median Rule A captures the high-vol-name overnight premium.
+- Rule B (up days, read only): excess vs LETF-underlying EW -10.5 (t -1.0); only the top bucket I >= 0.20 reverses (-49.3, t -2.5, 158 nights,
+  median -72). Non-monotone; ~70 name-days/yr; not a filter by the bars.
+- Volunteered: the Rule A signal sits entirely in the <= -8% tail (I >= 0.05: +74.5 net, t 2.6, 142 nights; -3..-5%: -10.9). The -3% cutoff
+  diluted it; not re-cut.
+- TILT READ (the live night subset, day_ret <= -8% & IBS < 0.10, 2022-07..2026-09): all 612 nights +28.3 net (t 2.45); I >= 0.05: 88 nights,
+  30 names, 176 name-days, **+99.6bp/night net, median +152.6, hit .69, t 3.33, ex-top-5 +67.3, ex-top-3-names +95.9 (t 3.2)**; 0 < I < 0.05:
+  +46.0 (t 2.0); I = 0: +21.6 (t 1.8). Paired nights I >= 0.05 minus I = 0: +57.9 (median +62, hit .64, t 1.66, 76 nights). By year 2024 +164
+  (6 nights), 2025 +73 (36), 2026 +112 (46). Still ~+90 at a 20bp round trip. Names: AAOI, CRWV, IONQ, COIN, CRCL, MU, OKLO, BMNR, SMR, POET.
+  Reading: in the live night leg's own picks, the ones a single-stock LETF must sell at the close bounce 3-4x harder at the open. This is a
+  named-counterparty mechanism inside the live leg, bettor-scale (~+60-80bp/night over controls), 88 nights on 30 names, 2024-26 only,
+  paired t 1.66: EDGE UNPROVEN, not no-edge. Shape = night-leg weight tilt (size-up), which CLAUDE.md makes a user decision; the protocol
+  step is a log-only forward shadow (NIGHT-LETF-TILT: live picks with I >= 0.05 vs the rest, gate ~40 shadow nights), REGISTRY entry in the
+  same commit. Not built in this session.
+- Not tested: holding past the open, 15:45 entry + open exit, index LETFs, the short side, cost shock on the tilt beyond 20bp, DSR across the
+  program, overlap of tilt nights with GAP-NIGHT / live fills, whether the live leg's per-name cap binds on these names.
+- Runner `research/sim/letf_rev.py`; out `data/research/program/letf_rev_out.txt`. Program N = 1065.
+
+## Amendment - Study NIGHT-BOATS (N 1066): pre-register 2026-10-26 (market scan branch 3, unblocked: Alpaca feed=boats has Blue Ocean overnight bars from 2024-09-16), before any outcome; N 1065 -> 1066
+- Question: do the night leg's picks (bought at the closing cross) trade at a better price in the 20:00-04:00 Blue Ocean overnight session than
+  at the 09:30 opening cross where the leg exits, and is there enough overnight volume at $2-25k to use it? This is an EXIT read on a live leg,
+  not a new entry. The exchange overnight sessions start 2026-12-06; Blue Ocean is the venue that exists today (Schwab does not route there;
+  Alpaca does), so a PASS is a venue/broker question before it is a trade.
+- Picks: the daily-bar proxy of the live rule (day_ret <= -8%, IBS < 0.10, prev close >= $5, $ADV20 >= $10M, domestic common; Sharadar), nights
+  2024-09-16..2026-09-30; plus the actual live picks from the server decisions log where they exist (reported separately, not judged).
+- Data: Alpaca StockBarsRequest(feed=DataFeed.BOATS, Minute) per pick-night, 20:00 ET (= 00:00 UTC) to 04:00 ET; next-day official open from
+  Sharadar open (as GAP-NIGHT). Overnight VWAP, last print, high, $ volume, number of prints, first/last print time.
+- Reads (all vs the opening cross, bp, no costs on the overnight side since a passive sale pays no spread; the cross exit is the live baseline):
+  A. overnight VWAP minus open cross; B. last overnight print minus open; C. share of nights with any BOATS print and with >= $5k overnight
+  $ volume (capacity at $2-25k); D. passive-offer form: resting offer at close x (1 + k), k = 1% primary (2%, 3% descriptive), filled if an
+  overnight minute HIGH > level + $0.01, fill at level, else exit at the open cross; compare to exit-at-open on the same nights.
+- PASS (D primary): per-night improvement over exit-at-open >= +15bp, day-clustered t >= 2, median > 0, halves (2024-09..2025-09 /
+  2025-10..2026-09) > 0, ex-top-5 > 0, and C >= 50% of nights with a print. WEAK: +8..+15 with t >= 2. KILL otherwise, stated as "the
+  night leg's picks do not print materially above the next open cross in the Blue Ocean session, or do so on too few nights to matter".
+- Ceiling (disclosed): ~250 nights/yr x improvement x night-leg share (~50%) x 50% capture: +15bp -> ~+1pp; +50bp -> ~+3pp. BELOW the gate;
+  run because it is a free exit improvement on a validated leg and the data just turned out to be on hand. Also a pre-read for Dec 6.
+- Not tested after this: the entry side (buying overnight instead of at the close cross), names outside the night rule, the exchange
+  overnight sessions (not launched), Schwab access to overnight venues (date-versioned: check), the IBS/GAP-NIGHT legs' exits.
+- Runner `research/sim/night_boats.py` (fetch | run; cache `data/research/night_boats/`); out `data/research/program/night_boats_out.txt`.
+  Program N = 1066.
+
+## Amendment - NIGHT-LETF-TILT forward shadow (no N; log-only, 2026-10-26, built from LETF-REV N 1065): gate pre-registered before any forward row
+- `swingtrader/daily/night_letf_tilt_shadow.py` (REGISTRY entry, start 2026-10-27). Population: every 15:40 night-rule candidate in
+  `state/night-candidates.jsonl` (both accounts), scored on the official close cross -> open cross by repeat_shadow; I = ss_letf.panel()
+  formula on Alpaca SIP daily bars with the static `data/letf_map.csv` (499 single-stock LETFs; rebuilt monthly on the Mac); tilt = I >= 0.05.
+- Gate at 40 tilt nights: PASS = paired per-night tilt-minus-rest >= +30bp net, night-clustered t >= 2, median > 0 -> propose a night-leg
+  weight tilt (user decision, night size-up class). FAIL = paired <= 0. Else HOLD. Backfill rows (candidates before 2026-10-27) are
+  labelled look-alikes and excluded from the gate.
+
+## RESULT - NIGHT-BOATS (N 1066, 2026-10-26, one look): KILL; Blue Ocean overnight prints are a tail stop, not an exit improvement
+- 5,173 proxy picks on 478 nights 2024-09-16..2026-09-30 (Alpaca feed=boats minute bars; AAPL/SPY as venue-liveness control). D primary
+  (resting offer at close x 1.01, else exit at the open cross): +22.6bp/night mean, t 1.08, median 0.0, hit .41, ex-top-5 -7.1; halves +29.5 /
+  +15.8 (t 0.8 each). 3/7 gates. The mean is two catastrophe nights (FLNA 2024-11-25 opened -85%, CORT 2025-12-31 -45%) and 48% of fills were
+  on names that opened above +1% anyway (capped upside). k = 2% / 3%: t 2.0 / 2.1 but medians 0 and outlier-carried (ex-top-5 +12..+17).
+- A/B: on printed picks the overnight VWAP and last print sit +33 / +27bp (median) above the open cross, per-night t 1.6; the printed subset is
+  selected on interest. Coverage: 61% of picks print (49% -> 69% H1 -> H2; 85% in 2026), 89% of nights have a printed pick; median overnight
+  $ volume per printed pick $76k, front-loaded at 20:00 ET (68% first print in that hour). Capacity is not the constraint at $2-25k; price is.
+- Live picks 2026-09-24..10-22 (228, not judged): 82% print, median $126k; the +1% offer lost money this month (-59bp/night, t -1.6) because
+  the picks gapped up +500-950bp at the open on 10-16.
+- Read: an overnight resting offer is a free pre-news stop on the night leg's tail, too rare to move the mean; the median pick gains nothing.
+  Not tested: a dynamic / VWAP-based overnight exit (not registered), the entry side, the exchange overnight sessions from 2026-12-06,
+  Schwab overnight access, IBS / GAP-NIGHT exits. Data caveat: BOATS minute coverage grows across the sample, so halves are not like-for-like.
+- Runner `research/sim/night_boats.py` (fetch | run); cache `data/research/night_boats/` (15MB); out `data/research/program/night_boats_out.txt`.
+  Program N = 1066.

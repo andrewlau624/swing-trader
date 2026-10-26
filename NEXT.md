@@ -10,6 +10,33 @@ Full evidence lives in `RESULTS.md`; this file is just what is *waiting*.
 
 ---
 
+## Market scan (2026-10-26): LETF-REV KILL + night-tilt shadow built; NIGHT-BOATS KILL; round-up scanner rebuilt; N = 1066
+- **NIGHT-BOATS (N 1066): KILL.** Alpaca serves Blue Ocean overnight bars (feed=boats) from 2024-09-16, so the overnight session needed no capture plan. A +1% resting offer on the night picks beats the open cross only on catastrophe nights (t 1.1, median 0). Data on hand for the Dec-6 regime check.
+- **Built, uncommitted, not deployed:** NIGHT-LETF-TILT log-only shadow (`night_letf_tilt_shadow.py`, REGISTRY, Makefile `night-letf-tilt`, research-shadows unit line, `data/letf_map.csv`; gate 40 tilt nights, paired >= +30bp t >= 2); round-up scanner rebuild (EDGAR full-text discovery with Alpaca as ex-date confirmation, outcome rows for every candidate incl. no-order reasons, cash-adjustment/warrant regex fixes, `daily.roundup_order_mode: day|gtc` defaulting to day). 559 tests pass. Deploy = commit, `git pull` on him, `make persist`.
+- **LETF-REV (N 1065): KILL standalone.** But inside the live night leg, picks that a single-stock LETF must sell at the close bounce
+  +99.6bp/night net (t 3.3, 88 nights, 30 names, 2024-26) vs +21.6 for the rest; paired t 1.66. Edge unproven, bettor-scale. Next step is a
+  log-only forward shadow NIGHT-LETF-TILT (live picks split by I >= 0.05, gate ~40 nights, REGISTRY entry): a night size-up, so user decision.
+- **Round-up pipeline (read-only check, no N):** Nasdaq's accelerated delisting did NOT raise reverse-split counts (Jan-Sep domestic common
+  279/273/262/270 for 2023-26); it compressed time-to-split (median 68 days under $1 in 2026 vs 144 in 2023-24) and raised pre-split prices
+  (27% in $0.50-1). Live scanner (3 weeks): 54 upcoming splits seen, 11 qualified, 8 scored (all would have paid), VIVK Roth round-up PAID
+  +$1.17 (first Schwab confirmation). Binding constraint = lead time: Alpaca announces 0-1 days before ex, 10/11 alerts on the buy-by day;
+  late announcements are dropped silently (`roundup_watch.py:210`); POAS/ZBAO/AXNX/PPCB alerted with no order and no log of why. Two
+  qualification false positives (AXNX "cash adjustment", GCTK warrant clause). Improvement (not built): EDGAR full-text discovery of
+  8-K/6-K "reverse stock split" + "rounded up" (filings arrive 1-80 days before ex) with Alpaca as ex-date confirmation, GTC limit buys,
+  and a log line for dropped/late and no-order cases.
+- Market-structure facts: round lots 100/40/10/1 since 2025-11-03 (odd-lot quotes off the SIP until 2028); half-penny ticks Nov 2026;
+  trade-through rescission proposed June 2026; overnight sessions 2026-12-06 (limit-only, 20% bands, no auction). None clears the gate now.
+
+## Hypothesis-map session (2026-10-25): three Tier-A cells measured, 4 kills, map built; N = 1064
+- `docs/research/hypothesis-space.md` (new): 18 families x 7 mechanisms, every cell cited; after N 1060 only three cells cleared the +8pp
+  paper gate on data on disk. All three are now KILL: REC-RECALL (N 1061, placebo-equal; `optionm.borrate` is a put-call-parity dividend
+  spike near ex-dates -> new data rule), NIGHT-SHORT (N 1062, short side of the night family closed at daily tier) + NIGHT-SHORT-20 (N 1064,
+  the volunteered >20% bin fails OOS: squeeze profile), STK-IBS-OPEN (N 1063, the ETF leg's form on stocks is below cost).
+- No Tier A cell remains on disk. Tier B (below gate): U4 Schwab fully-paid lending (account action, user decision), U5 Coval-Stafford 2-4q
+  holds (+3-4pp Roth sleeve), U6 IBS on IBIT/ETHA/FBTC in Roth (+4-7pp, zero-cost universe extension of the live leg: the one Tier B item
+  worth a replay), U7 ARK-class disclosed trades (needs a scrape), U8 shallow-band night (after NIGHT-BAND-FWD), U9/U10 < 2pp.
+- Nothing live changed; nothing committed.
+
 ## WRDS data-unlock session (2026-10-16): 4 "blocked/paid" rows already licensed; Tor NULL; N = 1009
 - **WRDS entitlement reconciliation** (`research/drafts/wrds_recon_2026-10-16.md`, `data/research/wrds_recon/`): the program's
   "BLOCKED / DATA-LIMITED / paid" labels were a source assumption, not an entitlement check. Now licensed at $0:
@@ -1396,6 +1423,18 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Gap ≥ 4% + premarket vol ≥ 250k, pullback to VWAP, reclaim, 2R target (Lab-AS, day-trading lab) | **dead** | gross −1.7bp/trade, −18.9 at 10bp/side (t −3.2), −36 at 2x both halves; placebo 59th pct; $2.3k -> $568 over 2022-26 |
 | 5-min ORB on Stocks in Play, re-test at 5/10bp per side, 2022-26 (Lab-AU, day-trading lab) | **dead (again)** | −23.5bp/trade, 19k trades, t −16.7; even the optimistic fill bound grosses only ~+10bp: −9bp at 10bp/side both halves. Already dead in RESULTS.md (check RESULTS.md's dead tables too) |
 | VWAP trend on QQQ / TQQQ, flip on every 1-min VWAP cross (Lab-AW, day-trading lab) | **dead** | signal real (placebo 97th pct, +6.7bp/day gross on QQQ) but 16 switches/day cost 16bp: −9.3bp/day QQQ, −27.7 TQQQ; the band that fixes it is the live noise leg |
+| Swing-structure "bounce back in an uptrend": pivot low (k=3) above the prior pivot low inside rising pivot highs, first close back above the pivot bar high within 10 bars, buy next open, 1-10d hold (HL-BOUNCE, N 1055, 2026-10-19) | **KILL both universes, both periods; the uptrend condition adds nothing** | Excess vs EW liq universe, H5: stocks 2016-26 -5.5bp gross / -15.5 net (t -2.2, median -10, halves -14/-13), 2003-15 -7.4 / -17.4; ETFs -12.2 / -22.2 (t -1.8) and -8.9 / -18.9. H1/H3/H10 all <= 0. A1 (higher low) minus A2 (lower low) date-paired -5..-10bp, t < 1.1 (bar +10). Deepest pullbacks worst (-16..-23), shallow ~0; no ADV tercile positive; SMA200 split does not rescue. `not tested:` stop/target exits (exit at PH1 / below PL), k != 3, weekly bars, intraday pivots, short mirror (lower high), breakout-level retest, 3-10d deep momentum pullback. `research/sim/hl_bounce.py`, out `hl_bounce_out.txt` |
+| "Wait for the bounce" on the live IBS universe: IBS<0.2 on d, enter only after an up-close (or reclaim of high(d)) on d+1, buy open d+2 or close d+1, 1 session (BNC-IBS, N 1056, 2026-10-19) | **KILL; confirmation carries no information and forfeits the dip night** | 18 ibs_symbols, 2003-15 primary: DIP (open d+1 -> open d+2) +16.9bp gross (t 4.0); WAIT (open d+2 -> d+3) +9.7; BNC-O (up-close then open d+2 -> d+3) +12.4 (t 1.3, net +2.4); NOB (down-close) +6.3; BNC-O - NOB paired -0.3bp (t -0.1). 2016-26: BNC-O +6.2 vs NOB +15.8, paired -7.7 (t -2.1): the names that did NOT bounce are the better buys. Bounce-night itself (close d+1 -> open d+2 after an up day) +2.5 / +1.5, reclaim-of-high arm -8.6 in 2016-26. `not tested:` top-3 momentum rank, 15:40 intraday confirmation, holds > 1 session, single stocks (night-leg multi-day already dead M2-M5). `research/sim/bnc_ibs.py`, out `bnc_ibs_out.txt` |
+| Deep pullback bounce in recent 52-week-high names: 60d max close >= 0.97 x 252d max, pivot low 5-20% below it, first close back above the pivot bar high, buy next open, 10d hold (DEEP-PULL, N 1057, 2026-10-19) | **KILL both universes, both periods** | H10 excess vs EW liq: stocks 2016-26 -1.6bp gross / -11.6 net (median -14.6, halves +3.7/-8.3), 2003-15 +3.5 / -6.5 (t 1.0, median -0.3); ETFs +2.3 / -7.7 (ex5 -33) and -22.5 / -32.5 (t -2.8). Far-from-high control no different; shallow (<5%) and deep (>20%) arms worse (-6..-67). `not tested:` holds > 10d, trailing stops, intraday-high 52w definition, weekly bars. `research/sim/pull_retest.py`, out `pull_retest_out.txt` |
+| Breakout-level retest: 50d close breakout, first touch of the level (low <= 1.01 L) within 3-30 bars that holds (close > L), buy next open, 5d hold (BRK-RETEST, N 1058, 2026-10-19) | **KILL both universes, both periods; hold vs fail indistinguishable** | H5 excess vs EW liq: stocks 2016-26 +8.3bp gross / -1.7 net (t -0.7, median -0.9, halves +7.8/-19.2, ex5 -10.8), 2003-15 -1.0 / -11.0; ETFs +4.9 / -5.1 and -0.1 / -10.1. Failed-retest control +2.9 / +2.0 (same as the hold). Breakout day itself -5.5 (stocks, t -2.4). `not tested:` 20d / 252d levels, tolerance != 1%, intraday retests, breakout volume condition, short side of failed retests. `research/sim/pull_retest.py`, out `pull_retest_out.txt` |
+| ETF own-history discount reversion, ALL US ETFs delisted-complete: z = raw close/NAV - 1 minus own 60d median, daily deciles, long D1 at open d+1 -> close d+1 / open d+2 / close d+5, excess vs EW universe (ETF-PD, N 1059, 2026-10-19; CRSP MF daily NAV 2010-26 + Sharadar SFP) | **KILL; ETF premium/discount family CLOSED delisted-complete at every liquidity and category** | 2,737 ETFs, 2.89M name-days. D1 s1 +0.9bp gross / -9.1 net (t 2.7, median +1.0, hit 51%); n1 +1.0, w5 +1.4; D10 -1.4; deciles monotone but spanning 2bp. Bond +2.8, intl +1.0, domestic -0.3; ADV>$50M +2.0; no year above +8bp. Mechanism: next-day NAV moves +23..+61bp per 100bp of z (stale NAV / information), price only -13..-19bp, and p10 of the premium is -23bp, so the reversion is ~3bp. `not tested:` premium short side, intraday entries, FX-hedged intl funds, creation-flow conditioning, holds > 5d. `research/sim/etf_pd.py`, out `etf_pd_out.txt`, NAV panel `data/research/etf_pd/nav.parquet` (reusable) |
+| Mutual-fund flow-induced selling pressure (Edmans MFFlow: flow x prior holdings over |flow| >= 5% domestic-equity portfolios, CRSP MF holdings + monthly TNA/returns, no MFLinks) -> bottom-decile next-quarter reversal (F-SALE2, N 1060, 2026-10-19) | **KILL; mechanism visible, no reversal; flow-pressure family closed at quarterly horizon** | 83.7k eligible stock-quarters 2009-2024, 64 quarters. D1 (most fire-sold) pressure-quarter excess -273bp (t -6.3, hit 0.16; deciles monotone +356 -> +910 raw) but next-quarter excess +15bp (median +48, t 0.49, ex-top-5 -19, halves +38/-14); D10 (inflow-bought) -25. 3/8 gates. `not tested:` 2-4 quarter holds (Coval-Stafford 12-18m reversal; see prose diagnostic), monthly lag, ETF fire sales, the inflow short side. `research/sim/f_sale2.py`, `f_sale2_pull.py`; pressure panel `data/research/fsale2/` (reusable); out `f_sale2_out.txt` |
+| Pre-ex-date covering window in top-decile option-implied borrow-fee dividend payers (REC-RECALL, N 1061, 2026-10-25): buy close E-5, sell close E-1, CRSP 12xx x optionm.borrate 2001-24 | **KILL (WEAK by bars, placebo-equal)** | D10 +29/+21bp net vs own-name / decile-universe (t 3.0/2.8) but the E-10..E-6 placebo earns the same (+24/+20, t 2.5/2.6); paired main-minus-placebo -23..-34bp. The D10 fee at E-6 is a pre-dividend put-call-parity spike (+22pp vs E-36 in 92% of events), not a standing HTB state. not tested: DEF 14A proxy record dates, post-record short side, custodial fees, fee read at E-36, 2025-26 |
+| Night-leg short mirror: day_ret >= +8% & IBS >= 0.90, short close cross -> cover open cross, net 12bp (NIGHT-SHORT, N 1062, 2026-10-25) | **KILL; short side of the night family closed at daily tier** | 2003-15 excess -12.8bp/night t -3.0, 2016-20 -24.9, 2021-26 -7.8; gross excess ~-1bp (mechanism ~0, costs make it a loser); wins only in bear years (2008, 2022). not tested: 15:40 minute form, ETB filter, holding past the open, 12-20% band |
+| >20% close-at-high overnight short, the bin NIGHT-SHORT volunteered on 2003-15 (NIGHT-SHORT-20, N 1064, 2026-10-25), judged 2016-26 | **KILL** | selection sample +53bp t 3.3; judge 2016-26 -27.6bp/night t -1.0, median +22.8 hit .56 but ex-top-5 -44.5, 2018 -213 / 2021 -266 per night: squeeze profile, median wins, broad continuation tail. not tested: holding past the open, ETB filter, 15:40 form |
+| ETF IBS leg's open-to-open form on liquid single stocks: top-500 ADV, IBS<0.2, day_ret > -4%, buy open d+1 sell open d+2 (STK-IBS-OPEN, N 1063, 2026-10-25) | **KILL** | 2003-15 net -4.1bp/day t -1.8 (gross +5.9 < 10bp RT), 2016-26 -1.6; excess vs top-500 +1.7 (t 1.5) carried by 2003-08 and 2022; the overnight bounce is gone by the d+1 open; SPY/QQQ anchors +8bp same days. not tested: other IBS cutoffs/universes, close-cross entry (= night family), multi-day holds, official 2021-26 open crosses |
+| Single-stock LETF close-impact reversal at the next open: day_ret <= -3% & I >= 0.05, close cross -> open cross (LETF-REV, N 1065, 2026-10-26; I = ss_letf.panel) | **KILL standalone; tilt read = edge unproven** | 366 nights 2024+: net +12.4bp t 0.8, excess vs LETF-underlying EW -1.5, non-monotone in I, decaying (2026 -8). Up-side reverses only at I >= 0.20 (-49bp t -2.5). TILT: live night picks (<= -8% & IBS < 0.10) with I >= 0.05 earn +99.6bp/night net (t 3.3, median +153, 88 nights / 30 names 2024-26) vs +21.6 for I = 0; paired +58 t 1.66 -> forward shadow is the next step (user decision: night size-up). not tested: holding past the open, 15:45 entry + open exit, index LETFs, short side, cost shock > 20bp on the tilt, live-fill overlap |
+| Night-leg exit in the Blue Ocean overnight session: resting offer at close x 1.01 vs the open cross, Alpaca feed=boats 2024-09..2026-09 (NIGHT-BOATS, N 1066, 2026-10-26) | **KILL** | +22.6bp/night t 1.1, median 0, hit .41, ex-top-5 -7: the mean is two catastrophe nights (FLNA -85%, CORT -45%); 48% of fills capped a bigger open gap-up. Overnight prints sit +30bp above the open on the median printed pick (t 1.6, selected subset); 61% of picks print, median $76k, front-loaded at 20:00 ET. not tested: dynamic/VWAP overnight exit, entry side, exchange overnight sessions (Dec 6), Schwab access, IBS/GAP-NIGHT exits |
 
 | +25% movers at 15:00 held to 15:55, long only (Lab-AX, day-trading lab) | **dead** | gross +6bp/trade, −33.7 at 20bp/side, H2 −53.6; the run-up is done by 15:00 |
 | Buy the reopening after a LULD halt, up or down (Lab-AY, day-trading lab) | **dead** | ~−130bp gross per 30 min either way (t −4..−5); post-halt drift is down; short side = Lab-BA |
@@ -1715,16 +1754,77 @@ open/close auction cost stays ~0bp (`make review` 2b). Revert = set it back to 0
   earn +15 / +1 bp/night; gating costs -2.8 bp/night (t -1.4) and only lowers maxDD (-50% -> -25%); quintile order flips between eras;
   corr with SPY-vs-200d 0.89. Same class as REGIME-10M (drawdown dial): trend/regime/breadth gates on the MR book stay CLOSED. Not
   tested: breadth as a continuous sizing dial (same class, < 1pp; do not run).
+- **MINPATH-NIGHT (N 1042, 2026-10-19): KILL.** 15:30-15:40 minute path (climax, drawup, VWAP distance, volume acceleration, new low at
+  15:40) as a within-night ranker: GBM +7.6bp t 0.4, placebo not beaten, filter negative; only log_adv (+56 t 2.6, known) and new_low
+  (-42 t -2.1) of 16 single looks reach |t| 2. **Night-pool ranking closed in every representation (snapshot, sequence, minute path).**
+  Not tested: explicit ADV tilt (unproven, < 1pp); new-low skip alone (do not run).
+- **CROWD-NIGHT (N 1043, 2026-10-19): KILL; rule stands.** Per-name night return is not monotone in names-per-night over 1999-2026
+  (21-30 names the BEST bucket pre-2016; 61+ names +133bp in 2016-26 crashes); dropping the x30/n scaling adds +0.96 bp/night t 2.0 in
+  1999-2015 (ex-top-5 +0.5), +0.5 t 0.8 in 2016-26; maxDD unchanged. A wash: do not re-tune crowd_n. Not tested: scaling by
+  selloff breadth instead of pool size (dial class, do not run).
 - **NIGHT-BAND (N 1040, 2026-10-19): FAILS the bar, UNPROVEN -> forward shadow.** The night rule between -4% and -8% on the Sharadar
   daily proxy: band +17.9bp gross (+7.6 in 2013-26), net +2.9 at 7.5bp/side vs an +8 bar; union leg +3.5 bp/night t 3.3 gross but
   -1.3 net of 15bp; band alone on the 26% of no-pool nights +9.7 bp/night t 5.7. Inside the live auction cost: decided forward.
   `night_band_shadow.py` LIVE in research-shadows from 2026-10-20 (REGISTRY NIGHT-BAND-FWD, 60 band nights). Not tested: exact
   15:40 band replay (no minutes), band IBS cutoffs, band under dedupe/tilt.
 
+- **LLM / text-on-an-event-stream branch: CLOSED by user (2026-10-19), no N.** "Kill all LLM stuff." Filings are priced within a
+  minute (G12), review/NCSR/news tone added nothing (NLP ledger); the existing LLM news shadow is not to be extended or pointed at
+  auctions. Do not re-propose LLM or NLP signal sources.
+- **HALT-REOPEN (N 1046, 2026-10-19): KILL.** Buy the LULD reopening cross after a down halt ($5+/$10M+ names, NYSE halt history
+  2019-26, 530 down halts): mean +580bp to the close but median +122 and t 1.6; 2019-20 real (median +387, hit 0.62, t 2.8), 2021-26
+  median -51, hit 0.47, ex-top-5 -155 (mean carried by re-halt squeezes). First 5 min after reopen -32 median. Up-halt short: no.
+  Not tested: news-pending halts, re-halts as events, < $10M ADV, limit orders inside the halt, pre-2019. Data kept:
+  `data/research/halts/` (74,686 halts 2019-26 + 1,240 symbol-day minute files). Runner `research/sim/halt_reopen.py`.
+- **PREMKT-CROSS (N 1047-1048, 2026-10-19): KILL both labels.** GBM on the 04:00-09:29 tape -> buy the open cross, sell the close
+  (A) / next open (B), volday+inplay 2016-26, judge 2022-26: A net +26bp t 1.4, halves -10/+56, placebo +12..20; B net +55 t 2.0 but
+  placebo = real. What it found is day-level: volatile names reverse SPY's pre-market move intraday (+15-30bp on the most-negative
+  quintile of days, SPY itself flat) = dial class. Stock-specific pre-market tape adds < +15bp, halves flip. Not tested: pre-market
+  news (LLM closed), < $200M ADV, pre-market limit entries, short side. Runner `research/sim/premkt_cross.py`.
+- **INTRA-ANY (N 1044-1045, 2026-10-19): KILL both labels.** Learned (GBM) any-time intraday trigger, every 5 min 10:00-15:30 on the
+  volatile-liquid (2016-26) + in-play (2019-26) PIT minute panels, 6.0M rows, first trigger per name-day at the fit-period p90, judged
+  2022-26 one look. A (exit at the close): net 5bp +2.5bp t 0.3, hit 0.49, placebo refits +3..+4 = real; deciles flat (D10 +10 gross,
+  median +0.8). B (exit next open): net +20.7 t 1.6 BUT placebo +20..22 = real: the whole number is the overnight premium of volatile
+  names held overnight (unconditional +8.8/night; `ret1` top feature), not model information. Verdict: **learned any-time trigger on the
+  tape with an auction exit is closed on these universes.** Not tested: non-tape inputs (exchange imbalance, L2, timestamped news),
+  names < $200M ADV, passive limit entries, the short side, the PRE-MARKET tape into the open cross (both legs free), halt-reopen
+  auctions. v1 had a same-day-close leak (disclosed in prose; `intra_any_out_v1_LEAK.txt`). Runner `research/sim/intra_any.py`.
+
+- **GAP-NIGHT (N 1050, 2026-10-19 loop): PASS-SMALL, decaying — FORWARD SHADOW LIVE (user "shadow" 2026-10-19; `gap_night_shadow.py`, research-shadows, REGISTRY GAP-NIGHT-FWD, gate 60 gap nights).** Gap names (|open gap| >= 3%,
+  $5+, ADV >= $50M) bought at the close, sold at the next open: 2016-21 judge +8.6bp/night over the EW universe overnight (t 3.0,
+  median +1.3, beta-adj +7.7), UP gaps +13.0 (t 3.5) carry it, down gaps 0; 2022-26 +5.4 (t 1.6). Overnight-attention clientele
+  (same family as OVN-MOM). ~+3-5pp/yr realistic at 2022-26 strength, SPY overnight beta 1.5. Not tested: RVOL attention, < $50M ADV,
+  official cross prints, up-gap-only rule (do not tune on 2016-21). Runner `research/sim/gap_night.py`.
+- **NEWS-HALT (N 1051, 2026-10-19 loop): KILL (long side).** Buy the news-halt reopening cross after a DOWN news print: n 75,
+  net -40bp to the close, next open -72; bad news continues. Observation (short side, informational): after an UP news print the
+  reopen overshoots and fades, short reopen -> close +112bp net (median +48, t 2.65, n 167, 2021-26 t 3.3); ~35 events/yr, taxable
+  short only, ceiling ~+0.5pp/yr at $10k -> not a leg. Not tested: 09:30-cross reopenings, re-halts, < $10M ADV.
+- **SPECIAL-EX (N 1052, 2026-10-19 loop): KILL.** Special dividends (3-25% of price) on liquid commons, close E-1 -> open E + div: the
+  registered PASS (+229bp, hit 0.74) was 40% mis-dated vendor rows (no price drop ever; "+500bp, hit 0.98"). Vendor-factor-confirmed
+  rows: drop 0.95, 2021-26 +13bp median +4.5 t 1.7. Commons adjust fully. **Data rule: Sharadar `actions` dividend rows must be
+  confirmed by the closeadj/close factor jump before use as ex-dates** (re-check EXDATE-OOS / EXDIV-OPEN's unconfirmed share).
+  Not tested: due-bill (>= 25%) regime, E-close exit on the confirmed set. Runner `research/sim/special_ex.py`.
+- **RE-HALT (N 1053, 2026-10-19 loop): KILL.** Second+ LULD halt of the day, buy the down-halt reopen -> close: mean +1,662bp (bad print
+  inside; ex-top-5 +896), median +375, t 1.99, but yearly medians flip sign (2021 +46, 2022 -124, 2026 -279) and a single trade spans
+  -1,771..+4,208bp: crash-day lottery. **LULD/news halt family closed in every form on 2019-26** (HALT-REOPEN, RE-HALT, NEWS-HALT).
+  Not tested: 4th+ halts alone; halts whose first halt was outside the $5/$10M universe.
+- **CHART-YOLO (N 1049, 2026-10-19): KILL, wrong sign.** Public YOLOv8 chart-pattern model on 30k rendered daily charts (liquid US
+  names 2016-26): completed BULL patterns (double bottom, inverse H&S) -33bp/5d vs SPY (t -1.7, 2021-26 t -2.1, worse at higher
+  confidence); BEAR +16; spread -49 (t -2.2); stale patterns ~0. Textbook direction is contrarian at 1-5d. User's model list: sentiment
+  classifiers = closed LLM branch; LSTM = tape models (dead); advisor LLMs = no number. Not tested: intraday images, flags/cups, a
+  retrained model, the contrarian rule as its own registration.
+- **F-SALE (N 1054, 2026-10-19 loop): KILL at the s12-assets flow proxy; mechanism untested.** Mutual-fund fire-sale pressure
+  (Coval-Stafford) from tfn.s12 holdings 2010-26: bottom decile -80bp next quarter (t -2.1) and it OUTPERFORMED in the pressure
+  quarter (+128, t 3.3): the proxy flags winner-trimming, not forced selling (34% of fund-quarters flagged as -5% outflows = noise).
+  Not tested: CRSP-flow pressure (needs MFLinks), N-PORT monthly, ETF daily flows. s12 pull kept (`data/research/fsale/`, 3.2GB).
+  **CORRECTION 2026-10-19:** the run's decile labels were inverted (pressure = (sell-buy)/adv is POSITIVE for net selling). With correct labels the
+  fire-sold decile fell ~150bp vs EW in the event quarter (mechanism visible) and did NOT revert (-11bp next q); the inflow-bought decile reverted -80bp/q
+  (t -2.1). KILL stands; the "winner trimming / proxy falsified" statement is withdrawn. F-SALE2 (N 1060) re-runs with CRSP flows + CRSP holdings.
 ### Unproven (right sign, mechanism, under the bar) -- forward-shadow candidates, NOT dead (user rule 2026-10-19)
 | idea | best cell | why under the bar | natural next try |
 |---|---|---|---|
 | NIGHT-BAND: night rule at -4..-8% | union leg +3.5 bp/night t 3.3 gross; added nights +9.7 bp/night t 5.7 | 2013-26 band ~+4bp exact, inside auction cost | `night_band_shadow.py` (live, 60 nights) |
+| ADV tilt on the night leg | MINPATH log_adv +56bp t 2.6; NX liquid +138 vs illiquid +91 | 1 of 16 looks; cap .15n already spreads names | pre-register a log-ADV tilt vs tilt v1 on Sharadar, judge 2016-26 (< 1pp ceiling) |
 | SEQ-NIGHT sequence tilt (N 1038) | walk-forward tilt +1.4 bp/night t 1.5 (+2.3pp/yr at w .65); Ridge top-minus-bottom +31.6bp t 2.1 | GBM t 1.1, placebo 95th +32 not beaten; 2023-25 negative | log-only tilt shadow (Ridge scores) if the band shadow passes first |
 
 ## 2026-10-19: three live-code fixes shipped (user: "fix whatever you can")
