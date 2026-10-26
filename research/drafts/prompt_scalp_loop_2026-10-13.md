@@ -13,7 +13,7 @@ Keep iterating until the user says stop. When a line of work ends (pass, kill, b
 If blocked on a user decision, log it under "Waiting on user" in the ledger and move on.
 
 ## 0. Read first (every new context window)
-- `CLAUDE.md` (research memory, the research-priority gate, the data-buy rule, the validation protocol, and the
+- `CLAUDE.md` plus `docs/memory/INDEX.md` (research memory is one file per topic under `docs/memory/`; read the index, then the files the task touches: the research-priority gate, the data-buy rule, the validation protocol, and the
   2026-06 PDT change), `NEXT.md` (do-not-redo tables, especially the day-trading lab rows), `round1_prose.md` (program N).
 - The day-trading lab: `daytrade/README.md` (honest starting point and the per-day earnings table), `daytrade/MISTAKES.md`
   (every fill-model trap already hit here; read all of it), `daytrade/PLAN_CHANGES.md`, `research/drafts/prompt_daytrade_lab.md`.
@@ -90,7 +90,7 @@ Any new idea must explain why its gross move is several times the cost, not just
 4. Failure-mode checklist in order: data bug, lookahead at the decision timestamp, survivorship, selection, multiple
    testing (DSR at N), fill model (optimistic vs pessimistic), cost at 2x, hit rate vs p*, median vs ex-top-5, time-of-day
    concentration, overlapping trades. A fresh subagent adversarially attacks any PASS before it is accepted.
-5. Verdict PASS / WEAK / KILL / DATA-LIMITED in the ledger, NEXT.md (do-not-redo if dead) and a short CLAUDE.md line.
+5. Verdict PASS / WEAK / KILL / DATA-LIMITED in the ledger, NEXT.md (do-not-redo if dead) and a short note as a new file under docs/memory/ with its INDEX.md line.
    Commit with a short casual message.
 6. A PASS goes to **forward paper in the day-trading lab only** (`daytrade/forward_log.py`, lab paper broker), with a
    REGISTRY entry in `swingtrader/daily/testing.py` in the same commit. Live money needs the user's explicit OK.

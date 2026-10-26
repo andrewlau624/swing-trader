@@ -1,0 +1,5 @@
+# Research memory — SPLIT-CROSS (2026-10-08, N 899 -> 900)
+
+- Forward-split ex-date night at OFFICIAL SIP crosses, 2016-20 (`research/sim/split_cross.py`, `split_cross_out.txt`): n 152, gross vs SPY +158bp (median +58, t 2.09, ex-top5 +44); net of 2x tier +129 (median +28, ex-top5 +15) but day-clustered t 1.73 -> FAILS the registered t >= 2. 2016-18 median +60 vs 2019-20 +18 (net2 median -2): decaying.
+- Daily open == official open cross in 2016-20 (median gap 0bp), open cross never missing. So the 1998-2012 Sharadar +43 median is NOT a first-print artifact; the 2021-26 shadow backfill (median +18 all, -17 at close-cross >$1M, 43% of splits with no cross) reflects decay plus a junk universe (OTC ADRs/foreign lines).
+- Buckets (gross median / net2 mean): <$5M ADV +69 / 0; $5-50M +39 / +268 (outlier-carried); >$50M +57 / +76 (t 2.4). Ratio 1.5:1 best (+70, t 2.35); >=3:1 ex-top5 negative. Shadow rule recommendation (gate unchanged): ADV20 >= $50M or at least $5M, ratio <= 2:1, exclude ADR/OTC symbols.

@@ -1,0 +1,4 @@
+# Research memory — PREF-INDEX (2026-10-08): CEILING-KILL, DATA-LIMITED, no N, no backtest
+
+- Pref-index inclusion/deletion forced flow (PFF/PGX/PGF/FPE): iShares `asOfDate` holdings CSV re-tested 2026-10-08 -> still HTML (no PIT holdings history); inclusion date unobservable, only a first-listing proxy. Prior probes stand: new-issue first close vs $25 +0.28% median (pref), 0.00% (ETD), 20d drift = accrued coupon (no concession); month-end rebalance flow <= 12 x ~50bp on part of capital.
+- Ceiling at $10k: ~100 listings/yr x <=30bp x ~5-10% of account per name ~ +0.2-0.4pp/yr (even 1/3 of listings x 50bp x 100% = ~5pp is unreachable given thin-paper caps and auction-only fills). Far below +8pp. Deletion side (calls/redemptions) is a price-to-par pull, already in PREF-EX/ETDX carry. Reopen only if PIT holdings (paid ICE/iShares archive) appear.

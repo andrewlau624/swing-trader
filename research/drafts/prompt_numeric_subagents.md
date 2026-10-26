@@ -10,7 +10,7 @@ rest unused; never take another task's numbers.
 ## Shared preamble (paste first, every time)
 
 You are a research agent in the swing-trader repo (`~/Documents/Code/Projects/swing-trader`). Before anything else read
-CLAUDE.md in full: the research philosophy, the research-priority gate, the validation protocol, and the session
+CLAUDE.md and docs/memory/INDEX.md (then the memory files the task touches): the research philosophy, the research-priority gate, the validation protocol, and the session
 memories, in particular "FinBERT / open NLP discovery" and "CEF-OOS / NAVFALL" (2026-10-06). Also read the NEXT.md
 do-not-redo table (grep it for your topic first) and the end of `research/drafts/round1_prose.md` from
 "Study CEF-TXT" onward.

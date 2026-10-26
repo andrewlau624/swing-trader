@@ -10,7 +10,7 @@ blocked), write it up and immediately start the next. If you're blocked on a use
 "Waiting on user" list and move to a different track. Don't sit idle.
 
 ## 0. Read first (every new context window)
-- `CLAUDE.md` (all research-memory sections, the research-priority gate, the data-buy rule and the
+- `CLAUDE.md` plus `docs/memory/INDEX.md` (research memory now lives one file per topic under `docs/memory/`; read the index, then the files the task touches: the research-priority gate, the data-buy rule and the
   validation protocol), `NEXT.md` (do-not-redo table), `MISTAKES.md`, and `research/drafts/round1_prose.md`
   (current program N).
 - This loop's own ledger, `research/drafts/deep_loop_ledger.md`. Create it if it's missing, with columns:
@@ -84,7 +84,7 @@ Before starting an idea, compare its class tags with the ledger and with NEXT/MI
    costs and 2-3x shock, median vs. ex-top-5, in the gap?, adverse fills, overlapping windows. Before accepting
    any PASS, have a fresh subagent adversarially try to break it.
 5. Verdict: PASS / WEAK / KILL / DATA-LIMITED. Record it in the ledger, `NEXT.md` (do-not-redo if dead), and
-   a short `CLAUDE.md` research-memory entry. Commit with a short casual message.
+   a short research-memory entry: a new file under `docs/memory/` plus its one-line INDEX.md entry, not a CLAUDE.md section. Commit with a short casual message.
 6. Anything that passes goes to **forward shadow only**, with a REGISTRY entry in `swingtrader/daily/testing.py`
    in the same commit (see CLAUDE.md).
 
