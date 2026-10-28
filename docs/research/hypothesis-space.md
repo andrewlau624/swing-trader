@@ -61,7 +61,8 @@ earlier rows called "not tested" resolves to ceiling-killed (listed at the end s
   (-27.6, squeeze profile). Cell "US single stocks x liquidity provision, short side, overnight" = killed 10-25.
 - U3 -> STK-IBS-OPEN (N 1063): KILL, 2003-15 net -4.1bp t -1.8, 2016-26 -1.6. Cell "US single stocks x liquidity provision at the
   opening cross (no drop gate)" = killed 10-25.
-Next study must come from Tier B (below gate: U6 crypto-ETF IBS replay is the one zero-cost extension) or from unblocking Tier C data.
+Next study must come from Tier B (below gate; U5/U6 measured and KILLED 2026-10-27, so the cheap extensions are now
+exhausted) or from unblocking Tier C data.
 
 ### (was) Tier A: untested, paper ceiling >= +8pp at $10k, runnable today on data on disk
 
@@ -141,12 +142,18 @@ actual rebate is the blocked "custodial borrow fee" row.
 of F-SALE2 N 1060). Pressure panel `data/research/fsale2/` is on disk (30 min). Literature long-leg reversal ~+6-8%/yr
 gross over 12-18 months, 100% of capital, quarterly: x 50% capture = **+3-4pp**: a Roth sleeve over beta, not a 2x.
 Kill: next-4-quarter excess vs EW <= 0 or carried by < 5 names.
+**MEASURED 2026-10-27 (N 1068): KILL.** 64 quarters 2009-24, ~131 names/q: event-quarter D1 -273bp, but forward excess
+h=4 -62bp (t -0.79, NW -0.52, ex-top-5 -144); 2009-17 +66 t 0.79 vs 2018-26 -225 t -1.63; median stock -296bp. D10
+worse (-195bp, t -2.07). No reversal at 1-4 quarters: `u5_firesale_hold_out.txt`.
 
 **U6. IBS on auction-traded crypto ETFs (IBIT / ETHA / FBTC, Roth)** (crypto x liquidity provision). Different wrapper
 from the spot Binance test (closing/opening cross, equity clientele; the mechanism is the equity-vol liquidity premium,
 and BTC vol is ~3x SPY). History 2024-01 on (Alpaca daily + official crosses), ~450 bars: a replay, then forward. Ceiling
 standalone: ~50 trades/yr x 30-60bp x 50% x 50% = **+4-7pp**; as a universe extension of the live IBS leg it costs
 nothing. Kill: 2024-26 excess vs the leg's same-day picks <= 0; else forward shadow (no live size without 60 trades).
+**MEASURED 2026-10-27 (N 1067): KILL.** 371 trades: +12bp gross (t 0.61), -3bp at 7.5bp/side; vs the live leg same-day
+-34bp (t -1.75), 2024 +54 but 2025-26 -81 (t -3.70). Universe extension -10bp/day (t -1.88), -24bp on crypto-picked days.
+`u6_crypto_ibs_out.txt`. The wrapper does not revive the crypto premium.
 
 **U7. Daily-disclosed active-ETF trades (ARK-class) -> next-day in thin holdings** (information asymmetry x ETFs).
 Named counterparty publishes its own trades after the close; copycat and continuation flow in names where the trade

@@ -1835,3 +1835,23 @@ open/close auction cost stays ~0bp (`make review` 2b). Revert = set it back to 0
   buy-skip rows carry the reason. Live was buying any upcoming pref/etd ex-date the shadow would not have judged.
 - **PREF-EX shadow allocates largest yield first** (`execution`, `stack_alloc`), like live; smallest-cross-first was -10bp t -2.9
   (SEL-PREF). Tests: 530 pass. The dedupe-before-vol20 "open item" above is closed.
+
+## 2026-10-27: PREF-EX sells were all rejected; U5/U6 Tier B cells measured and killed
+- **PREF-EX live had never sold a position (fixed + deployed).** Every MOC sell since 10-21 was `REJECTED` with "Short sales are
+  not permitted in this account type": `SchwabAdapter._instructions` looked up the holding by the order symbol (`GS/PRD`) while the
+  positions endpoint keys it `GS-D`, so it sent `SELL_SHORT`. Four positions ($1,490: GS-D 47, GS-A 18, ADC-A 10, PSEC-A 10) sat
+  past their ex-dates and the Roth book's free equity fell to $429 vs the $1,000 sleeve. Fix: `_position_qty` matches `symbol` or
+  `uniformSymbol` (`brokers.py`), pref-ex logs `sell-rejected` and keeps the state open for retry (`pref_ex_live.py`). Verified on
+  him: all four now resolve to `SELL`; next 15:25 run sells them. 564 tests pass.
+- **Overlay sizing cap:** PREF-EX/CEF-RV now size `equity` against the daily book's Roth sleeve (DAILY_ROTH_CAPITAL = $1,000), not
+  the whole $7.7k account (the index core is not the book's money). The night leg still gets what the overlay reservations leave;
+  a hard night-leg split is a user decision.
+- **U6 crypto-ETF IBS (N 1067): KILL.** 371 trades, +12bp gross (t 0.61), -3bp at 7.5bp/side; vs the live 18-ETF leg's same-day
+  picks -34bp (t -1.75), 2024 +54 / 2025-26 -81 (t -3.70); 18->21 universe extension -10bp/day (t -1.88). `u6_crypto_ibs_out.txt`.
+- **U5 fire-sale 2-4q holds (N 1068): KILL.** 64 quarters 2009-24: event-quarter D1 -273bp, forward h=4 -62bp (t -0.79, NW -0.52,
+  ex-top-5 -144); 2009-17 +66 vs 2018-26 -225; D10 -195 (t -2.07). The pressure panel flags continued underperformance, not reversal.
+  `u5_firesale_hold_out.txt`.
+- **Beta/alpha (already measured, `beta_alpha_iso_out.txt`):** 2021-26 book raw 38.6%/yr, alpha 24.5% t 4.26, 37% systematic
+  (MKT +10.2pp/yr); night alpha 17.0% t 3.47 (sys 16%), IBS daily alpha 5.2% t 1.85 but weekly alpha 0.0 (MKT beta 1.01 t 15,
+  sys 100%). The night leg is the alpha; the IBS sleeve is a beta sleeve. No sizing change without the user.
+- Note: U5/U6 prose was written after the outcomes were read (post-hoc); recorded as exploratory, not clean pre-registrations.

@@ -9207,3 +9207,29 @@ clear the +8pp-at-$10k paper gate and are runnable on data on disk; all three ar
   Schwab overnight access, IBS / GAP-NIGHT exits. Data caveat: BOATS minute coverage grows across the sample, so halves are not like-for-like.
 - Runner `research/sim/night_boats.py` (fetch | run); cache `data/research/night_boats/` (15MB); out `data/research/program/night_boats_out.txt`.
   Program N = 1066.
+
+## Amendment - Study U6 (N 1067): crypto-ETF IBS, registered and run 2026-10-27 (POST-HOC prose: outcomes were read before this line; treat as exploratory, not a clean pre-registration)
+- Question: does the live IBS timing (IBS < 0.2 on d, buy the opening cross d+1, sell the opening cross d+2) on the
+  auction-traded crypto ETFs (IBIT / ETHA / FBTC) beat the live 18-ETF IBS leg's same-day picks, 2024+? Tier B cell U6.
+- Data: Sharadar SFP daily bars (open == the official opening print, SPLIT-CROSS 2016-20), 2024-01-11..2026-09-30; the
+  cached 18-ETF panel and `book.ibs_days()` for the live comparison. Judge 2024-26; no costs in the primary read, 2bp/side
+  and 7.5bp/side sensitivity. Kill: excess vs the leg's same-day picks <= 0.
+- Runner `research/sim/u6_crypto_ibs.py`; out `data/research/program/u6_crypto_ibs_out.txt`. Program N = 1067.
+- RESULT: KILL. 371 trades / 169 signal days: pooled +12.0bp gross (median +8.7, t 0.61, ex-top-5 -5.4); +8.0 at 2bp/side,
+  -3.0 at 7.5bp. vs the live leg's same-day picks: -34.1bp (t -1.75), -38.1 at 2bp/side, ex-best-5 -52.0; 2024 +54.2 but
+  2025-26 -81.2 (t -3.70), 2026 -159. Universe extension (18 -> 21, same top-3 momentum + IBS<0.2): crypto picked on 28 of
+  201 sessions (14%), leg +26.1bp/day live vs +16.1 extended (diff -10.0, t -1.88); on crypto-picked days +39.2 live vs -24.2
+  extended (n 28). The wrapper does not revive the crypto premium; close the cell.
+
+## Amendment - Study U5 (N 1068): fire-sale decile 2-4 quarter holds, registered and run 2026-10-27 (POST-HOC prose: outcomes were read before this line; treat as exploratory, not a clean pre-registration)
+- Question: the untested holding-period field of F-SALE2 (N 1060): does the most flow-fire-sold decile of CRSP-MF stocks
+  revert over 2-4 quarters (Coval-Stafford / Edmans-Goldstein-Jiang), or does the next-quarter non-reversion persist? Tier B U5.
+- Data: `data/research/fsale2/pressure_*.parquet` (same panel/build as F-SALE2), quarter-end closeadj prices from Sharadar;
+  83,659 eligible stock-quarters, 64 quarters 2009Q1..2024Q4, ~131 names/quarter. Entry close q, hold h = 1..4 quarters,
+  equal-weight bottom decile vs the quarter's EW eligible universe. Overlapping cohorts; NW t with lag h. Kill: h=4 excess
+  <= 0, t < 2, median <= 0, a half <= 0, ex-top-5 <= 0, or the event-quarter excess >= 0 (mechanism absent).
+- Runner `research/sim/u5_firesale_hold.py`; out `data/research/program/u5_firesale_hold_out.txt`. Program N = 1068.
+- RESULT: KILL. Event-quarter D1 excess -273bp (mechanism visible). Forward excess does not turn positive: h=1 +15bp
+  (t 0.49), h=2 +12 (t 0.26), h=3 -35 (t -0.58), h=4 -62 (median -3, t -0.79, NW -0.52, ex-top-5 -144); 2009-17 +66
+  (t 0.79) vs 2018-26 -225 (t -1.63); median stock excess at h=4 -296bp. The inflow-bought D10 is worse (-195bp at h=4,
+  t -2.07). The panel flags continuing underperformance, not a reversal; no long sleeve.
