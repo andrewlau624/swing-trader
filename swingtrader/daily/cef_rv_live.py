@@ -71,6 +71,14 @@ def _pref_held(state_dir: Path) -> float:
         return 0.0
 
 
+def _status(ad, oid: str) -> str:
+    """Schwab order status right after submit ('rejected' is immediate); '' if unreadable."""
+    try:
+        return str(ad.order_status(oid, {"broker_id": oid})[0]) if oid else ""
+    except Exception:  # noqa: BLE001  (a status read must never lose the position)
+        return ""
+
+
 def _jsonl(p: Path) -> list[dict]:
     out = []
     for x in (p.read_text().splitlines() if p.exists() else []):
@@ -307,6 +315,10 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
         late = r["exit_session"] < today.isoformat()
         if mode == "live":
             oid = ad.submit(sym, "sell", "opg", f"cef-rv-live.sell.{sym}.{today}", qty=qty)
+            if _status(ad, oid) == "rejected":
+                log_row(dict(cmd="sell-rejected", sym=sym, qty=qty, signal=r["signal"], exit_signal=r["exit_signal"],
+                             late=late, order_id=oid))
+                continue                       # keep state['open']: retry the next run
             log_row(dict(cmd="sell", sym=sym, qty=qty, signal=r["signal"], exit_signal=r["exit_signal"], late=late, order_id=oid))
         else:
             log_row(dict(cmd="sell", sym=sym, qty=qty, signal=r["signal"], exit_signal=r["exit_signal"], late=late, dry_run=True))
@@ -348,6 +360,9 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
         for o in orders:
             if mode == "live":
                 oid = ad.submit(o["sym"], "buy", "opg", f"cef-rv-live.buy.{o['sym']}.{today}", qty=o["qty"])
+                if _status(ad, oid) == "rejected":
+                    log_row(dict(cmd="buy-rejected", **o, order_id=oid))
+                    continue                   # do not record a position the account does not hold
                 log_row(dict(cmd="buy", **o, order_id=oid))
             else:
                 log_row(dict(cmd="buy", **o, dry_run=True))

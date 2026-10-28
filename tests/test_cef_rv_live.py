@@ -70,6 +70,11 @@ def panel(tmp_path, **disc):
     (tmp_path / C.PANEL_NAME).write_text(json.dumps(p))
 
 
+class RejectAd(FakeAd):
+    def order_status(self, oid, info):
+        return ("rejected", 0.0, 0.0, "")
+
+
 def run(mode, tmp_path, ad, today=TODAY, now=NOW):
     return C.run(mode, tmp_path, tmp_path, log=lambda *_: None, today=today, now=now, ad=ad, crosses_fn=crosses, H={})
 
@@ -124,6 +129,23 @@ def test_the_shared_overlay_pool_blocks_cef_when_pref_ex_holds_it(tmp_path, monk
     ad = FakeAd({"A": 10.0}, settled=5000, equity=7722)
     out = run("live", tmp_path, ad)
     assert ad.submitted == [] and out["bought"] == []           # PREF-EX already holds the whole $500 pool
+
+
+def test_a_rejected_sell_stays_open_and_a_rejected_buy_is_not_recorded(tmp_path):
+    (tmp_path / C.STATE_NAME).write_text(json.dumps({"open": {
+        "X": dict(qty=10, entry_px=10.0, entry_date="2026-10-01", signal_week=OLD_SIG)}}))
+    (tmp_path / C.SIGNALS_NAME).write_text(json.dumps(dict(sym="X", signal=OLD_SIG, exit_signal=SIG, status="pending")) + "\n")
+    ad = RejectAd({"A": 10.0}, positions={"X": 10.0})
+    out = run("live", tmp_path, ad)
+    assert out["sold"] == [] and "X" in json.loads((tmp_path / C.STATE_NAME).read_text())["open"]
+    assert any(r["cmd"] == "sell-rejected" for r in rows(tmp_path))
+    # a rejected buy must not leave a phantom holding
+    signals(tmp_path, sig("A"))
+    (tmp_path / C.STATE_NAME).write_text(json.dumps({"open": {}}))
+    ad2 = RejectAd({"A": 10.0})
+    out2 = run("live", tmp_path, ad2)
+    assert out2["bought"] == [] and json.loads((tmp_path / C.STATE_NAME).read_text())["open"] == {}
+    assert any(r["cmd"] == "buy-rejected" for r in rows(tmp_path))
 
 
 def test_depth_accepts_the_shadow_panel_rows_with_a_nav_field():
