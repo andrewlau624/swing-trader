@@ -1844,8 +1844,8 @@ open/close auction cost stays ~0bp (`make review` 2b). Revert = set it back to 0
   `uniformSymbol` (`brokers.py`), pref-ex logs `sell-rejected` and keeps the state open for retry (`pref_ex_live.py`). Verified on
   him: all four now resolve to `SELL`; next 15:25 run sells them. 564 tests pass.
 - **Overlay sizing cap:** PREF-EX/CEF-RV now size `equity` against the daily book's Roth sleeve (DAILY_ROTH_CAPITAL = $1,000), not
-  the whole $7.7k account (the index core is not the book's money). The night leg still gets what the overlay reservations leave;
-  a hard night-leg split is a user decision.
+  the whole $7.7k account (the index core is not the book's money), and share a combined 50% pool (each subtracts the other's
+  live holdings/reservation); the night leg keeps the other 50%.
 - **U6 crypto-ETF IBS (N 1067): KILL.** 371 trades, +12bp gross (t 0.61), -3bp at 7.5bp/side; vs the live 18-ETF leg's same-day
   picks -34bp (t -1.75), 2024 +54 / 2025-26 -81 (t -3.70); 18->21 universe extension -10bp/day (t -1.88). `u6_crypto_ibs_out.txt`.
 - **U5 fire-sale 2-4q holds (N 1068): KILL.** 64 quarters 2009-24: event-quarter D1 -273bp, forward h=4 -62bp (t -0.79, NW -0.52,

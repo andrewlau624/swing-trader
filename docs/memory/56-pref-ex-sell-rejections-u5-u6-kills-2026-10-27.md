@@ -7,8 +7,8 @@
   Fix: `_position_qty` matches `symbol` or `uniformSymbol` (`swingtrader/daily/brokers.py`); `pref_ex_live` logs
   `sell-rejected` and keeps `state['open']` for retry. Verified on him: all four resolve to `SELL`; next 15:25 run sells.
 - **Overlay sizing cap.** PREF-EX and CEF-RV now pass `equity = min(account equity, DAILY_ROTH_CAPITAL)` ($1,000) instead of
-  the whole Roth account ($7.7k, mostly the index core). They no longer size 50% of money that is not the book's. The night
-  leg still gets what the reservation hooks leave; a hard 50/50 split is an open user decision.
+  the whole Roth account ($7.7k, mostly the index core). They share a combined 50% of the book sleeve (each subtracts the
+  other's live holdings/reservation); the night leg keeps the other 50%.
 - **U6 crypto-ETF IBS (N 1067): KILL.** 371 trades, 2024-01..2026-09: +12.0bp gross (median +8.7, t 0.61), -3.0 at 7.5bp/side;
   vs the live 18-ETF leg same-day -34.1bp (t -1.75), 2024 +54.2 / 2025-26 -81.2 (t -3.70), ex-best-5 -52. Universe extension
   18->21: -10.0bp/day (t -1.88), -24.2 vs live on crypto-picked days. `research/sim/u6_crypto_ibs.py`.

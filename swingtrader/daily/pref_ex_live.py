@@ -51,6 +51,23 @@ def book_capital() -> float:
     return float(Config.load().daily.live_capital or 0.0)
 
 
+def overlay_cap() -> float | None:
+    """Half the book sleeve for BOTH Roth overlays (PREF-EX + CEF-RV) combined;
+    the other half is the night leg's. None when no cap is configured."""
+    cap = book_capital()
+    return 0.5 * cap if cap else None
+
+
+def _cef_held(state_dir: Path, today: dt.date) -> float:
+    """CEF-RV's live market value, from its state file (fresh <= 7 days)."""
+    try:
+        j = json.loads((state_dir / "cef-rv-held.json").read_text())
+        age = (today - dt.date.fromisoformat(str(j.get("date")))).days
+        return float(j.get("usd") or 0.0) if 0 <= age <= 7 else 0.0
+    except Exception:  # noqa: BLE001  (no file / unreadable = nothing held)
+        return 0.0
+
+
 def _jsonl(p: Path) -> list[dict]:
     return [json.loads(x) for x in p.read_text().splitlines() if x.strip()] if p.exists() else []
 
@@ -128,11 +145,13 @@ def screen_reason(r: dict, px: float | None, auction_usd: float) -> str | None:
 
 
 def size(cands: list[dict], last: dict[str, float], auction: dict[str, float], settled: float, equity: float,
-         part: float = PART) -> list[dict]:
-    """Whole-share MOC buys: `part` of the name's median cross $, largest yield first, <= MAX_NAMES, total <= settled cash
-    and <= MAX_EQUITY_FRAC x equity. Names failing `screen_reason` are skipped; zero-share names are skipped, never
-    forced to 1 share."""
+         part: float = PART, cap_usd: float | None = None) -> list[dict]:
+    """Whole-share MOC buys: `part` of the name's median cross $, largest yield first, <= MAX_NAMES, total <= settled cash,
+    <= MAX_EQUITY_FRAC x equity, and <= cap_usd when the shared overlay pool binds. Names failing `screen_reason` are
+    skipped; zero-share names are skipped, never forced to 1 share."""
     budget = max(0.0, min(settled, MAX_EQUITY_FRAC * equity))
+    if cap_usd is not None:
+        budget = min(budget, max(0.0, cap_usd))
     order = sorted(cands, key=lambda r: -(float(r["div"]) / last.get(r["sym"], float("inf")) if last.get(r["sym"]) else 0.0))
     out, spent = [], 0.0
     for r in order:
@@ -315,6 +334,8 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
     cap = book_capital()
     if cap:
         equity = min(equity, cap)
+    oc = overlay_cap()
+    cap_usd = None if oc is None else max(0.0, oc - _cef_held(state_dir, today))
     if not cands:
         log(f"[pref-ex-live] no {'/'.join(CLASSES)} ex-dates on {next_session(today)}; settled ${settled:,.0f}")
     else:
@@ -323,7 +344,7 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
         last = {s: q[b] for s, b in bmap.items() if b in q}
         auction = {c["sym"]: auction_usd(c["sym"], today, crosses_fn, H) for c in cands}
         p = part(rows)
-        orders = size(cands, last, auction, settled, equity, p)
+        orders = size(cands, last, auction, settled, equity, p, cap_usd=cap_usd)
         total = round(sum(o["usd"] for o in orders), 2)
         log(f"[pref-ex-live] {len(cands)} candidates for ex {next_session(today)}, {len(orders)} sized at {p:.0%} of the cross, "
             f"${total:,.0f} of settled ${settled:,.0f} (equity ${equity:,.0f})")

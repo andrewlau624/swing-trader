@@ -157,6 +157,15 @@ def test_overlay_sizes_against_the_book_sleeve_not_the_whole_account(tmp_path, m
     assert ad.submitted == [("BAC/PRP", "buy", "cls", 20)]      # 50% of $1,000, not of the $7.7k account
 
 
+def test_the_shared_overlay_pool_blocks_pref_when_cef_holds_it(tmp_path, monkeypatch):
+    monkeypatch.setenv("DAILY_ROTH_CAPITAL", "1000")
+    events(tmp_path, ev("BAC.PRP"))
+    (tmp_path / "cef-rv-held.json").write_text(json.dumps({"date": TODAY.isoformat(), "usd": 500.0}))
+    ad = FakeAd({"BAC/PRP": 25.0}, settled=5000, equity=7722)
+    P.run("live", tmp_path, tmp_path, log=lambda *_: None, today=TODAY, now=NOW, ad=ad, crosses_fn=crosses, H={})
+    assert ad.submitted == []                                   # CEF-RV already holds the whole $500 pool
+
+
 def test_live_submits_moc_buys_with_schwab_symbols(tmp_path):
     events(tmp_path, ev("BAC.PRP"))
     ad = FakeAd({"BAC/PRP": 25.0}, settled=1000, equity=3000)

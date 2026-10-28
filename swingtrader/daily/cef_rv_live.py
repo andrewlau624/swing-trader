@@ -54,6 +54,23 @@ def book_capital() -> float:
     return float(Config.load().daily.live_capital or 0.0)
 
 
+def overlay_cap() -> float | None:
+    """Half the book sleeve for BOTH Roth overlays (PREF-EX + CEF-RV) combined;
+    the other half is the night leg's. None when no cap is configured."""
+    cap = book_capital()
+    return 0.5 * cap if cap else None
+
+
+def _pref_held(state_dir: Path) -> float:
+    """PREF-EX's live cost basis, from its state file (it sells at the next ex-date)."""
+    try:
+        j = json.loads((state_dir / "pref-ex-live.json").read_text())
+        return sum(float(h.get("qty") or 0) * float(h.get("px") or 0)
+                   for h in (j.get("open") or {}).values())
+    except Exception:  # noqa: BLE001  (no file / unreadable = nothing held)
+        return 0.0
+
+
 def _jsonl(p: Path) -> list[dict]:
     out = []
     for x in (p.read_text().splitlines() if p.exists() else []):
@@ -123,12 +140,16 @@ def depth(panel: dict, sym: str, signal: str) -> float:
     return float(hist[-1][1] - statistics.median(win))
 
 
-def size(cands: list[dict], last: dict[str, float], panel: dict, settled: float, equity: float, n_held: int) -> list[dict]:
-    """Whole-share slot buys, deepest discount first, <= max_positions - n_held names, total <= settled cash. A fund whose
-    slot does not fit the remaining budget gets a smaller lot; zero-share lots are skipped."""
+def size(cands: list[dict], last: dict[str, float], panel: dict, settled: float, equity: float, n_held: int,
+         held_usd: float = 0.0, cap_usd: float | None = None) -> list[dict]:
+    """Whole-share slot buys, deepest discount first, <= max_positions - n_held names, total <= settled cash and
+    <= MAX_EQUITY_FRAC x equity - held_usd. A fund whose slot does not fit the remaining budget gets a smaller lot;
+    zero-share lots are skipped."""
     slot = slot_usd(equity)
     room = max(0, max_positions(equity) - n_held)
-    budget = max(0.0, min(settled, MAX_EQUITY_FRAC * equity - n_held * slot))
+    budget = max(0.0, min(settled, MAX_EQUITY_FRAC * equity - held_usd))
+    if cap_usd is not None:
+        budget = min(budget, max(0.0, cap_usd))
     order = sorted(cands, key=lambda r: depth(panel, r["sym"], r["signal"]))
     out, spent = [], 0.0
     for r in order:
@@ -307,12 +328,15 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
         equity = min(equity, cap)
     reserved = _reserved(state_dir, today)
     avail = max(0.0, settled - reserved)
+    held_usd = sum(float(h.get("qty") or 0) * float(h.get("entry_px") or 0) for h in state["open"].values())
+    oc = overlay_cap()
+    cap_usd = None if oc is None else max(0.0, oc - _pref_held(state_dir) - reserved)
     if not buy:
         log(f"[cef-rv-live] no forward entries for {today}; {len(state['open'])} held, settled ${settled:,.0f}")
     else:
         panel = json.loads((state_dir / PANEL_NAME).read_text()) if (state_dir / PANEL_NAME).exists() else {}
         last = quotes_fn(ad, sorted({r["sym"] for r in buy}))
-        orders = size(buy, last, panel, avail, equity, len(state["open"]))
+        orders = size(buy, last, panel, avail, equity, len(state["open"]), held_usd=held_usd, cap_usd=cap_usd)
         total = round(sum(o["usd"] for o in orders), 2)
         log(f"[cef-rv-live] {len(buy)} entries for {today}, {len(orders)} sized, ${total:,.0f} of available "
             f"${avail:,.0f} (settled ${settled:,.0f} - PREF-EX ${reserved:,.0f}; equity ${equity:,.0f}, "

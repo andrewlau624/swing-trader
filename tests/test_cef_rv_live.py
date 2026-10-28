@@ -115,6 +115,17 @@ def test_slots_and_sizing_deepest_discount_first():
     assert C.size(cands, {"DEEP": 2000.0}, pan, settled=5000, equity=10_000, n_held=0) == []   # 1 share > slot
 
 
+def test_the_shared_overlay_pool_blocks_cef_when_pref_ex_holds_it(tmp_path, monkeypatch):
+    monkeypatch.setenv("DAILY_ROTH_CAPITAL", "1000")
+    panel(tmp_path, A=-0.20)
+    signals(tmp_path, sig("A"))
+    (tmp_path / C.STATE_NAME).write_text(json.dumps({"open": {}}))
+    (tmp_path / "pref-ex-live.json").write_text(json.dumps({"open": {"P": dict(qty=32, px=16.0)}}))   # $512 held
+    ad = FakeAd({"A": 10.0}, settled=5000, equity=7722)
+    out = run("live", tmp_path, ad)
+    assert ad.submitted == [] and out["bought"] == []           # PREF-EX already holds the whole $500 pool
+
+
 def test_depth_accepts_the_shadow_panel_rows_with_a_nav_field():
     """cef_rv_shadow.panel rows are (week, discount, NAV); the live sizer crashed on the 3-field rows on 2026-10-19."""
     pan = {"A": [["2026-09-25", -0.05, 9.5], ["2026-10-02", None, 9.4], [SIG, -0.20, 9.0]],
