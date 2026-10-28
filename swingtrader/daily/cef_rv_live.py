@@ -44,6 +44,16 @@ NEED = 30                                 # live round trips before the cost rea
 CASH_LIKE = ("BIL", "SGOV")
 
 
+def book_capital() -> float:
+    """The Roth sleeve the daily book sizes from (DAILY_ROTH_CAPITAL wins, then
+    daily.live_capital). Never size a CEF slot off the account's index core."""
+    from ..config import Config, get_env
+    env = (get_env("DAILY_ROTH_CAPITAL") or "").strip()
+    if env and env.lower() not in ("none", "null", "off"):
+        return float(env)
+    return float(Config.load().daily.live_capital or 0.0)
+
+
 def _jsonl(p: Path) -> list[dict]:
     out = []
     for x in (p.read_text().splitlines() if p.exists() else []):
@@ -292,6 +302,9 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
         out["missed"].append(r["sym"])
     acct = ad.account()
     settled, equity = _settled_cash(acct), float(acct.equity)
+    cap = book_capital()
+    if cap:
+        equity = min(equity, cap)
     reserved = _reserved(state_dir, today)
     avail = max(0.0, settled - reserved)
     if not buy:

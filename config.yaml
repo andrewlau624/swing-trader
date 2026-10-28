@@ -173,7 +173,8 @@ daily:
   # dividend. Pre-registered: PREF-EX N 861 (+38bp/event, official crosses 2021-26, 22/22 yrs on Sharadar 2005-26), ETDX N 869
   # (+44bp, 28/29 yrs), ROTH-STACK N 897 (idle Roth cash only, 5% of the cross, whole shares: +8.4pp/yr at $3k, +5.4 at $10k;
   # 3x cost leaves +1.6 / +0.9, so it stands only while the measured cross cost stays ~0bp). Settled cash only, BIL/SGOV never
-  # sold, <= 3 names, <= 50% of Roth equity; writes state/pref-ex-reserved.json so the 15:40 Roth night leg does not spend
+  # sold, <= 3 names, <= 50% of the book's Roth sleeve (DAILY_ROTH_CAPITAL, not the whole account: the index core is not the
+  # book's money); writes state/pref-ex-reserved.json so the 15:40 Roth night leg does not spend
   # the same dollars. off | dry (size + log, no orders) | live. Switch-on is a user decision (first run dry for a week).
   pref_ex_mode: "live"           # quoted: bare off is YAML false; user OK 2026-10-16 (dry->live same day, cluster starts 10-21; kill rule = >25bp cost / event mean net <=0 at 30 trips)
   # CEF-RV live (Roth, OO form; swingtrader/daily/cef_rv_live.py, own timer weekdays 09:05 ET). Buy a closed-end fund at the
@@ -183,7 +184,7 @@ daily:
   # N 933 (+114bp vs same-category peers, every category positive). CEF-SURV99: the 1999-2014 pass is survivorship-flattered, so
   # the forward gate CEF-RV-FWD (60 closed trades) decides. ~+4.8pp/yr excess on deployed capital: a Roth upgrade over holding
   # beta, below the +8pp stand-alone gate. Equal slots max($500, min($1k, equity/10)), settled cash only minus the day's PREF-EX
-  # reservation, <= 50% of Roth equity, BIL/SGOV never sold. off | dry | live. Switch-on is a user decision (dry first).
+  # reservation, <= 50% of the book's Roth sleeve (DAILY_ROTH_CAPITAL), BIL/SGOV never sold. off | dry | live. Switch-on is a user decision (dry first).
   cef_rv_mode: "live"            # user "go live" 2026-10-19 (dry 10-18..19; the 10-19 dry run crashed on the depth() bug fixed in dc21a2c, 3 entries missed); first live buys from the 10-23 signals on 10-26; quoted: bare off is YAML false
   roundup_order_mode: day        # round-up 1-share buys (ROUNDUP_AUTO=1): day = DAY limit above the ask on the alert morning (current); gtc = GTC at/below the last close once Alpaca confirms, cancelled on the ex-date if unfilled
   noise_lookback: 14

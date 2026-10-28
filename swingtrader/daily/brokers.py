@@ -331,11 +331,24 @@ class SchwabAdapter:
         return (leg.get("instrument", {}).get("symbol", ""), leg.get("instruction", ""),
                 float(leg.get("quantity") or o.get("quantity") or 0))
 
+    def _position_qty(self, sym: str) -> float:
+        """Shares held under the order symbol or Schwab's position form of it.
+        Preferreds order as BAC/PRP but the positions endpoint lists BAC-P; a
+        lookup by the order symbol alone sent the first PREF-EX sells as
+        SELL_SHORT and the Roth rejected them (GS/PRD vs GS-D, 2026-10-26)."""
+        for p in self._acct().get("positions", []) or []:
+            ins = p.get("instrument", {})
+            if sym in (ins.get("symbol"), ins.get("uniformSymbol")):
+                q = float(p.get("longQuantity") or 0) - float(p.get("shortQuantity") or 0)
+                if abs(q) >= 1e-9:
+                    return q
+        return 0.0
+
     def _instructions(self, sym: str, side: str, qty: float) -> list[tuple[str, int]]:
         """Split an order into Schwab instructions. A sell larger than the long
         position becomes SELL + SELL_SHORT; a buy against a short becomes
         BUY_TO_COVER (+ BUY for any excess)."""
-        have = float(getattr(self.positions().get(sym), "qty", 0.0) or 0.0)
+        have = self._position_qty(sym)
         q = int(qty)
         if side == "sell":
             long_part = int(min(max(have, 0), q))

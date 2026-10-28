@@ -74,6 +74,23 @@ def test_position_symbol_is_schwabs_hyphen_form():
     assert P.held_qty(held, "PSEC/PRA") == 10.0 and P.held_qty(held, "SOJD") == 3.0 and P.held_qty(held, "GONE/PRA") == 0.0
 
 
+class RejectAd(FakeAd):
+    def order_status(self, oid, info):
+        return ("rejected", 0.0, 0.0, "")
+
+
+def test_a_rejected_sell_stays_open_and_is_logged(tmp_path):
+    (tmp_path / P.STATE_NAME).write_text(json.dumps({"open": {
+        "PSEC.PRA": dict(schwab="PSEC/PRA", qty=10, ex="2026-10-14", bought="2026-10-13", px=14.88)}}))
+    ad = RejectAd({}, positions={"PSEC-A": 10.0})
+    out = P.run("live", tmp_path, tmp_path, log=lambda *_: None, today=TODAY, now=NOW, ad=ad, crosses_fn=crosses, H={})
+    assert out["sold"] == []
+    st = json.loads((tmp_path / P.STATE_NAME).read_text())
+    assert "PSEC.PRA" in st["open"]
+    rows = [json.loads(x) for x in (tmp_path / P.LOG_NAME).read_text().splitlines()]
+    assert any(r["cmd"] == "sell-rejected" and r["sym"] == "PSEC.PRA" for r in rows)
+
+
 def test_sell_leg_finds_the_holding_under_schwabs_position_symbol(tmp_path):
     (tmp_path / P.STATE_NAME).write_text(json.dumps({"open": {
         "PSEC.PRA": dict(schwab="PSEC/PRA", qty=10, ex="2026-10-14", bought="2026-10-13", px=14.88)}}))
@@ -125,6 +142,19 @@ def test_dry_run_sizes_logs_and_reserves_but_places_nothing(tmp_path):
     assert res["date"] == TODAY.isoformat() and abs(res["usd"] - sum(r["usd"] for r in buys)) < 1e-6
     st = json.loads((tmp_path / P.STATE_NAME).read_text())
     assert set(st["open"]) == {"BAC.PRP", "GLADZ"} and st["open"]["BAC.PRP"]["schwab"] == "BAC/PRP"
+
+
+def test_overlay_sizes_against_the_book_sleeve_not_the_whole_account(tmp_path, monkeypatch):
+    monkeypatch.setenv("DAILY_ROTH_CAPITAL", "1000")
+    events(tmp_path, ev("BAC.PRP"))
+
+    def big_crosses(syms, start, end, H):
+        days = [(dt.date(2026, 10, 1) + dt.timedelta(days=i)).isoformat() for i in range(14)]
+        return {s: {d: (25.0, 100, 25.0, 800) for d in days} for s in syms if s == "BAC.PRP"}
+
+    ad = FakeAd({"BAC/PRP": 25.0}, settled=5000, equity=7722)
+    P.run("live", tmp_path, tmp_path, log=lambda *_: None, today=TODAY, now=NOW, ad=ad, crosses_fn=big_crosses, H={})
+    assert ad.submitted == [("BAC/PRP", "buy", "cls", 20)]      # 50% of $1,000, not of the $7.7k account
 
 
 def test_live_submits_moc_buys_with_schwab_symbols(tmp_path):

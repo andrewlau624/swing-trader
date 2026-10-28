@@ -39,6 +39,18 @@ CLASSES = ("pref", "etd")
 NEED = 30                                # live round trips before the cost readout counts
 
 
+def book_capital() -> float:
+    """The Roth sleeve the daily book sizes from (DAILY_ROTH_CAPITAL wins, then
+    daily.live_capital). The overlay must not size against the account's other
+    holdings (the index core): that money is not the book's, and using it here
+    starves the night leg. 0 = no cap known."""
+    from ..config import Config, get_env
+    env = (get_env("DAILY_ROTH_CAPITAL") or "").strip()
+    if env and env.lower() not in ("none", "null", "off"):
+        return float(env)
+    return float(Config.load().daily.live_capital or 0.0)
+
+
 def _jsonl(p: Path) -> list[dict]:
     return [json.loads(x) for x in p.read_text().splitlines() if x.strip()] if p.exists() else []
 
@@ -282,6 +294,14 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
             continue
         if mode == "live":
             oid = ad.submit(h["schwab"], "sell", "cls", f"pref-ex-live.sell.{sym}.{today}", qty=qty)
+            status = ""
+            try:
+                status = str(ad.order_status(oid, {"broker_id": oid})[0]) if oid else ""
+            except Exception:  # noqa: BLE001  (a status read must never lose the sell)
+                pass
+            if status == "rejected":
+                log_row(dict(cmd="sell-rejected", sym=sym, schwab=h["schwab"], qty=qty, ex=h["ex"], order_id=oid))
+                continue                       # keep state['open']: retry the next run
             log_row(dict(cmd="sell", sym=sym, schwab=h["schwab"], qty=qty, ex=h["ex"], order_id=oid))
         else:
             log_row(dict(cmd="sell", sym=sym, schwab=h["schwab"], qty=qty, ex=h["ex"], dry_run=True))
@@ -292,6 +312,9 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
     cands = [c for c in candidates(_jsonl(state_dir / EVENTS_NAME), today) if c["sym"] not in state["open"]]
     acct = ad.account()
     settled, equity = _settled_cash(acct), float(acct.equity)
+    cap = book_capital()
+    if cap:
+        equity = min(equity, cap)
     if not cands:
         log(f"[pref-ex-live] no {'/'.join(CLASSES)} ex-dates on {next_session(today)}; settled ${settled:,.0f}")
     else:
