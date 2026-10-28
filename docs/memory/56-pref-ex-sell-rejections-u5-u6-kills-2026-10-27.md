@@ -21,3 +21,6 @@
 - **Process note:** U5/U6 were registered in `round1_prose.md` after the outcomes were read (post-hoc), disclosed as
   exploratory, not clean pre-registrations. With these two, the cheap Tier B extensions are exhausted; next is Tier C data
   (EDGAR full-text / daily ETF shares outstanding) or a user sizing decision, not another in-design-space variant.
+- **Sizing check (no new N).** `weight_grid.py` 2021-26, $3k whole shares: 0.5/0.5 30.0%/yr Sharpe 2.02 maxDD -9.7%;
+  0.6/0.4 33.4%/1.98/-9.8%; 0.65/0.35 34.0%/1.91/-10.8%. The current split is the Sharpe peak at $3k; a night tilt buys
+  ~+3.4pp/yr for the same maxDD. Live weights unchanged (user decision).

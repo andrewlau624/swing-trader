@@ -1855,3 +1855,10 @@ open/close auction cost stays ~0bp (`make review` 2b). Revert = set it back to 0
   (MKT +10.2pp/yr); night alpha 17.0% t 3.47 (sys 16%), IBS daily alpha 5.2% t 1.85 but weekly alpha 0.0 (MKT beta 1.01 t 15,
   sys 100%). The night leg is the alpha; the IBS sleeve is a beta sleeve. No sizing change without the user.
 - Note: U5/U6 prose was written after the outcomes were read (post-hoc); recorded as exploratory, not clean pre-registrations.
+
+## 2026-10-27 (cont.): IBS/night weight grid (sizing check, no new N)
+- `research/sim/weight_grid.py`, out `data/research/program/weight_grid_out.txt`, 2021-26 live rules/tilt, night 2.5bp/side,
+  IBS 1bp/side, noise off. At $3k whole shares: 0.5/0.5 = 30.0%/yr, Sharpe 2.02, maxDD -9.7%; 0.6/0.4 = 33.4%/yr, 1.98,
+  -9.8%; 0.65/0.35 = 34.0%, 1.91, -10.8%; 0.4/0.6 = 26.2%, 1.96, -8.7%. At $10k fractional: 0.5/0.5 = 33.2%/1.89/-10.4;
+  0.6/0.4 = 35.9%/1.82/-11.0. The current 0.5/0.5 is the Sharpe peak at $3k; 0.6/0.4 buys ~+3.4pp/yr for the same maxDD
+  and a slightly lower Sharpe. A live weight change is a user decision; not changed.
