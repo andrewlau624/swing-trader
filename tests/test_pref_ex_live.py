@@ -166,6 +166,16 @@ def test_the_shared_overlay_pool_blocks_pref_when_cef_holds_it(tmp_path, monkeyp
     assert ad.submitted == []                                   # CEF-RV already holds the whole $500 pool
 
 
+def test_the_pool_counts_pref_exs_own_holdings(tmp_path, monkeypatch):
+    monkeypatch.setenv("DAILY_ROTH_CAPITAL", "1000")
+    events(tmp_path, ev("BAC.PRP"))
+    (tmp_path / P.STATE_NAME).write_text(json.dumps({"open": {
+        "OLD.PRA": dict(schwab="OLD/PRA", qty=32, ex="2026-10-30", bought="2026-10-13", px=16.0)}}))
+    ad = FakeAd({"BAC/PRP": 25.0}, settled=5000, equity=7722)
+    P.run("live", tmp_path, tmp_path, log=lambda *_: None, today=TODAY, now=NOW, ad=ad, crosses_fn=crosses, H={})
+    assert ad.submitted == []                                   # $512 of existing holds use the whole $500 pool
+
+
 def test_live_submits_moc_buys_with_schwab_symbols(tmp_path):
     events(tmp_path, ev("BAC.PRP"))
     ad = FakeAd({"BAC/PRP": 25.0}, settled=1000, equity=3000)

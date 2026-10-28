@@ -335,7 +335,8 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
     if cap:
         equity = min(equity, cap)
     oc = overlay_cap()
-    cap_usd = None if oc is None else max(0.0, oc - _cef_held(state_dir, today))
+    own = sum(float(h.get("qty") or 0) * float(h.get("px") or 0) for h in state["open"].values())
+    cap_usd = None if oc is None else max(0.0, oc - _cef_held(state_dir, today) - own)
     if not cands:
         log(f"[pref-ex-live] no {'/'.join(CLASSES)} ex-dates on {next_session(today)}; settled ${settled:,.0f}")
     else:
