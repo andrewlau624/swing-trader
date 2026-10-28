@@ -495,6 +495,13 @@ class DailyExecutor:
                 sig = set(sg.loser_picks(rows, day_ret_max=self.d.night_day_ret_max,
                                          ibs_max=self.d.night_ibs_max, price_min=self.d.night_price_min,
                                          price_max=self.d.night_price_max).index)
+        try:                                   # forward rows for the Wash-guard G4s read (state/wash-shadow.jsonl)
+            with (self.state_dir / "wash-shadow.jsonl").open("a") as fh:
+                fh.write(json.dumps(dict(date=today, account=self.account, blocked=sorted(cur | night),
+                                         blocked_signals=sorted(sig), would_take=sorted(sig & (cur - night)),
+                                         would_skip=sorted(sig & night))) + "\n")
+        except Exception:  # noqa: BLE001  (a log write must never cost the night leg)
+            pass
         if self.account == "live":
             self.log(f"[wash-guard] SHADOW live 15:40: the Roth traded {len(cur)} names in 31d; "
                      f"tonight's night signals among them (skipped now and under G4s) {fmt(sig & night)}. "

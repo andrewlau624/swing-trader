@@ -504,7 +504,7 @@ REGISTRY: list[Test] = [
          "the +0.59bp/night NX increment show up live while auction cost stays ~0bp?",
          "2026-10-10", 0, "night exits", _nx_s2, "deploy_loop_2026-10-10.md item 3; make review 2b/4", ["nx_s2"]),
     Test("Wash guard G4s", "what the Roth-first wash-sale guard would change vs the live one",
-         "2026-09-22", 0, "log lines", _log_tag("wash-guard"), "make review", ["wash_guard_mode"]),
+         "2026-09-22", 0, "log lines", _log_tag("wash-guard"), "make review; state/wash-shadow.jsonl", ["wash_guard_mode"]),
     Test("Tug-of-war night tilt (AU3)", "tilt night picks by the tug-of-war score (logged, not sized)",
          "2026-09-22", 0, "log lines", _log_tag("night", "tow"), "make review section 9 (SINCE=2026-09-22)"),
     Test("TME-L: leveraged month-end Treasury sleeve", "does 2x (TLT on margin) / 3x (TMF) keep >= 80% / 73% of "
