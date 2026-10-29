@@ -210,7 +210,7 @@ class DailyExecutor:
         if trading_day:
             self._apply_kills(book, today)
         if not trading_day:
-            self.log("not a trading day - reconcile only")
+            self.log("market closed or holiday - reconcile only")
         elif phase == "open":
             self._session_canary(clock, now)
             self.phase_open(book, today)
