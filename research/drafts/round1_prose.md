@@ -9300,3 +9300,404 @@ positions, and return correlation) is DESCRIPTIVE, no N. This entry judges one c
 ### Result - CEF-STRESS (2026-11-06, one run, N 1071): KILL (t 1.91 < 2; 3x stress cost -74bp). Judge 2008-15 DIFF +126bp, halves +199/+10, ex-top5 +105,
 median +46; 2015 alone -6; 2016-26 report +114 t 2.81 (2021-26 +37 t 1.0). Q1: the CRASH-C decile is 100% inside CEF-RV positions at all 3 fires (same edge).
 Out data/research/program/cef_stress_out.txt; memory docs/memory/58-cef-stress-crash-c-overlap-2026-11-06.md.
+
+## Study VT-FLOW: modeled vol-target fund rebalancing flow -> next-day SPY, pre-register 2026-11-06 BEFORE any outcome is read (N 1071 -> 1075; 4 variants)
+- Counterparty: vol-control / risk-control index funds and risk-parity books (~$300-500bn) that set equity exposure E = target / realized vol and
+  rebalance mechanically, usually with a 1-day implementation lag. Prediction (falsifiable): the flow implied by a generic model of that book at
+  close t moves the index in the flow's direction over close t -> close t+1; the effect is ABSENT before vol-target AUM existed (pre-2000).
+- Dedupe: NOT SG-CTA (ceiling-killed: trend-follower crowding, price-trend input, monthly horizon); NOT Lab-CD Moreira-Muir (exposure LEVEL as
+  a sizing rule); NOT VTS (VIX term structure state); NOT add. 32 (vol-targeting the book's gross). This trades the predicted CHANGE in a third
+  party's exposure, 1-day horizon. Idea B (post-spike hold gated on releveraging) is CEILING-KILLED below, no N.
+- Ceiling (before testing): top-quintile |flow| days ~50/yr per side; plausible impact 10-30bp/day; $10k long+short (taxable) 100 days x 20bp x
+  100% x 50% capture = +10pp/yr, long-only (Roth) ~+5pp. Borderline, not killable on paper; the test is < 1h on free data -> run.
+  $2.3k/$10k/$25k identical in % (SPY whole shares at ~$680 = 3 shares at $2.3k: rounding ~10% cash drag there); $100k+ no capacity issue.
+- Model (frozen, not fitted): E_t = min(1.5, 0.10 / RV_t), RV_t = max(RV21, RV63) = sample sd of daily log returns x sqrt(252) through close t,
+  computed on the signal index (^GSPC for US, ^STOXX50E for Europe).
+  A1 total flow: F_t = E_t - E_{t-1} (funds execute it at close t+1).
+  A2 roll-off only (deterministic): F_t = E*(t+1) - E_t, E* = E on the windows ending t+1 with r_{t+1} = 0 (only the 21d/63d drop-outs act).
+  Signal day: |F_t| > trailing-252-session quantile q of |F| (strictly past data), q in {0.80, 0.90}. Position close t -> close t+1 = sign(F_t).
+- Variant choice (4 = N 1072-1075): highest NW t (lag 5) of the signed net return on SPY 2010-2019 only. The chosen variant is judged once.
+- Returns: SPY total return close-to-close (Yahoo adjclose), split close t -> open t+1 / open t+1 -> close t+1 reported. Cost 2bp/side, a signal
+  day = one round trip (4bp); 2x cost column. STOXX50E: price index, 3bp/side.
+- Judge: J1 SPY 2020-01..2026-11-05; J2 ^STOXX50E 2010-2026 (never seen); P1 placebo ^GSPC 1950-1999 close-to-close (pre-vol-target era).
+  Descriptive: SPY 1993-2009.
+- Gate: G1 J1 signed net mean >= +10bp/signal day, NW t >= 2.0. G2 J2 signed gross > 0, t >= 1.5. G3 P1 signed mean <= 50% of J1 gross
+  (else the effect is not this flow -> KILL as mechanism). G4 J1 median > 0, ex-top-5 > 0, 2x cost > 0, halves 2020-22 / 2023-26 both > 0.
+  G5 J1 OLS r_{t+1} on signed signal with r_t and 5d return controls: signal t >= 1.5. G6 ceiling at $10k >= +8pp/yr.
+  Any of G1-G5 fail = KILL; only G6 fail = PASS-SMALL. Placebo: 500 circular shifts of the J1 signal series (rank reported).
+- Today (descriptive only): report E, F (A1/A2) at the 2026-11-05 close and the 21d/63d drop-out calendar for the next 10 sessions.
+Runner research/sim/vt_flow.py; out data/research/program/vt_flow_out.txt. One run.
+
+### Ceiling-kill (no N, no backtest) — VT-SPIKE (idea B: post -4% day / VIX spike index hold, entry gated on predicted releveraging)
+SPY <= -4% closes 1993-2026 cluster into ~0.6 independent episodes/yr. PANIC-IDX (N 1018) measured index washout buying at excess -1.35%/event
+(only 5d <= -10% cells positive, ~+4%/event, same 4-5 crises). Gating on "vol now falling" is a confirmation entry (class closed, memory 53) and
+cuts n further. Ceiling 0.6/yr x 4% x 100% x 50% = +1.2pp/yr at $2.3k/$10k/$25k/$100k alike (3x LETF ~+3.6pp, with the CRASH-C ruin tail).
+< +8pp -> CEILING-KILL. Not tested: a daily-frequency version (that is VT-FLOW A2: crash-day roll-off flow), option structures (dead, memory 50).
+
+## Amendment - Overnight-session structure (BOATS-PREM N 1088, BOATS-LETF N 1089) + three ceiling-kills: pre-register 2026-11-06 (overnight agent, theme market structure), before any outcome; N 1087 -> 1089
+- Context: hypothesis-space.md lists the Blue Ocean (feed=boats, 2024-09-16+) session as "untested: dynamic overnight exit, entry side".
+  NIGHT-BOATS (N 1066) and OVX (N 870/872) were the night leg's thin picks (fixed +1% offer / pre-market tape). Neither looked at the
+  names the overnight session exists for (Asian retail into US mega-caps and LETFs) nor at LETF-vs-underlying pricing inside the session.
+  Data check before registration (no outcome read): BOATS NBBO quotes exist (2025-06-10 21:00 ET: TQQQ 3c wide on $75, QQQ 8c on $533).
+- Shared data: Alpaca official auction prints (close cross C_d, open cross O_{d+1}; fallback daily bar close/open, flagged); BOATS NBBO =
+  last quote in [T-60s, T] (bid>0, ask>bid, spread<2%, else missing). Session evening E = calendar day before trade date d+1 (Sunday for
+  Monday). Registered T = 23:00 ET on E (Korean midday). Report-only T: 20:30, 01:30, 03:45 ET (not judged). Window 2024-09-16..2026-10-30;
+  halves split at 2025-09-30. Nights with no QQQ BOATS quote at T are venue-dead and dropped (count reported). Extra cost 1bp/side.
+- Universes (a priori, from public Korean-retail top US holdings; not from BOATS volume): ASIA = TSLA NVDA PLTR AAPL MSFT GOOGL AMZN META
+  AMD MSTR IONQ TQQQ SOXL TSLL NVDL QQQ SPY SQQQ SOXS. CONTROL (mega-caps with little Asian-retail interest) = JPM XOM JNJ PG KO WMT V UNH HD PEP.
+### Study BOATS-PREM (N 1088): Asian-demand premium in the overnight session
+- Mechanism / counterparty: Asian retail buys US favourites in their daytime through BOATS while US market makers are thin and APs absent;
+  price-insensitive demand should lift the BOATS bid above what the US open cross later pays. Falsifiable prediction: D = (bid_T - O_{d+1})/C_d
+  > 0 for ASIA and > D for CONTROL (PX = D_ASIA - D_CONTROL > 0).
+- Trade (Roth-able, long only): buy ASIA EW at C_d, sell at bid_T. Hedged excess = net - beta x QQQ (mid_T/C - 1), beta = 60-session
+  close-to-close beta to QQQ ending d-1 (Alpaca daily bars).
+- Ceiling (paper): 250 nights x net edge x 100% x 50% capture; clears +8pp at $10k only if hedged net >= ~+6.4bp/night. BOATS depth at T
+  ($10-60M/night in the top names) is not binding at $2-25k; 100k one line.
+- Gate PASS (all): hedged excess EW-ASIA >= +8bp/night; NW t (lag 5) >= 2; median night > 0; both halves > 0; ex-top-5 nights > 0;
+  3x cost (two more half-spreads) >= 0; and PX > 0 with NW t >= 2 (the mechanism). Unhedged passing while hedged fails = beta, KILL.
+  Placebo: the CONTROL universe run through the same trade. DSR at program N reported.
+### Study BOATS-LETF (N 1089): LETF vs underlying dislocation inside the overnight session
+- Mechanism / counterparty: no creation/redemption and thin LETF market making overnight; retail LETF flow (TQQQ/SOXL/TSLL/NVDL are Asian
+  favourites) can push the LETF away from L x its underlying's BOATS move, and the US open (APs + MMs back) should close it.
+- Pairs (LETF, underlying, L): TQQQ/QQQ 3, SQQQ/QQQ -3, QLD/QQQ 2, UPRO/SPY 3, SPXL/SPY 3, SOXL/SOXX 3, SOXS/SOXX -3, TNA/IWM 3,
+  TSLL/TSLA 2, NVDL/NVDA 2. fair_T = C_LETF x (1 + L x (mid_U,T / C_U - 1)).
+- Rule (long only): at T, if ask_LETF,T / fair_T - 1 <= -15bp, buy at ask_T, sell at O_{d+1}. Judged excess = O_LETF/ask_T - 1 - L x (O_U/mid_U,T - 1)
+  minus 1bp/side; raw (unhedged) reported. Rich side (bid_T / fair - 1 >= +15bp: sell at bid vs open) reported, not judged.
+- Ceiling (paper): events/yr x excess x 100% x 50%; at >= 1 event/night and +15bp it is ~+19pp at $10k; < 100 events/yr ceiling-kills
+  it post hoc regardless of t.
+- Gate PASS (all): >= 50 events; mean excess >= +15bp; event-day-clustered NW t >= 2; median > 0; both halves > 0; ex-top-5 > 0;
+  2x cost (one more full LETF spread) > 0. Else KILL.
+- Not tested by either (registered): the exchange overnight sessions from 2026-12-06 (24X / Nasdaq / NYSE Arca overnight; only BOATS exists
+  in data), entry in BOATS for the night leg, intl ETFs vs their open home market (EWY BOATS volume ~$0.02M/night: no capacity),
+  T other than the registered one as a judged rule, Schwab's 24/5 symbol list and API access (UNVERIFIED; a PASS needs it confirmed).
+- Runner `research/sim/boats_asia.py`; out `data/research/program/boats_asia_out.txt`; cache `data/research/boats_asia/`.
+### Ceiling-kills (no outcome read, no N): candidates (b)-(d) of the overnight brief
+- ETF creation/redemption gaps in thin intl/country ETFs while home is closed: the end-of-day form is ETF-PD (N 1059, all US ETFs
+  delisted-complete, intl +1.0bp, family CLOSED); foreign-holiday stale NAV dead by the same mechanism; intraday iNAV blocked (Tier C);
+  the BOATS form (home market OPEN during the US night) has no liquidity (EWY ~$0.02M/night). CEILING-KILL / closed.
+- Equal-weight / smart-beta rebalance days (RSP, sector EW, MTUM/QUAL/USMV): RSP/SCHD front-run killed (count/bound, NEXT 1297);
+  RSP ~4 rebalances/yr x <= 30bp on drift names x 100% x 50% = 0.6pp; MTUM/factor semiannual 2 x ~2% x 100% x 50% = 2pp; sector-EW
+  AUM too small to move prices. All < +8pp at $10k: CEILING-KILL.
+- Single-stock LETF rebalance on extreme-move days: killed forms SS-LETF 15:45->close (N 877, +3-5bp gross), LETF-REV close->open
+  standalone (N 1065), index-LETF last half hour; night-leg tilt is the open NIGHT-LETF-TILT shadow. Remaining leaf = short the up-side
+  at I >= 0.20 (-49bp t -2.5 in LETF-REV): taxable only, ~tens of nights/yr x 49bp x ~20% x 50% < 0.5pp. CEILING-KILL.
+### Result - VT-FLOW (2026-11-06, one run, N 1075): KILL (gates 0/6)
+Out data/research/program/vt_flow_out.txt. Choice on SPY 2010-19: all 4 variants |t| < 0.35 (best A2 q0.90, net +0.7bp t 0.19) -> chosen A2 q0.90
+(roll-off flow; ~always >= 0 by construction, so long-only on big-day drop-outs). J1 SPY 2020-26 n 182 (26.6/yr): gross +0.7bp, net -3.3 t -0.44,
+halves -16.4 / +4.6; close->open +2.4, open->close -1.7. J2 STOXX50E 2010-26 own signal: +8.7 gross t 0.52 (2020-26 +2.4). P1 ^GSPC 1970-99
+(Yahoo starts 1970) +4.8 gross t 1.49 = larger than J1: the pre-vol-target era earns more. G5 controls: signal -5.8bp t -0.69. Placebo rank 27%.
+Descriptive (unjudged) J1: A1 q0.80 +0.3bp net t 0.05 (long +9.5 / short -0.9), A1 q0.90 +5.0 t 0.57. Ceiling -0.4pp/yr.
+Today (descriptive): 2026-11-05 ^GSPC -4.36%, RV21 19.7% / RV63 13.7%, modeled exposure 0.79 -> 0.51x (A1 dE -0.29: a large modeled
+deleveraging at the next close); no big returns leave the 21d window in the next 10 sessions (largest -1.1% on 10-14/10-16), so no
+roll-off releveraging signal; the rule (dead) would be flat.
+
+## Study HMM-REBAL: balanced-fund (60/40) rebalancing front-run, the PUBLISHED form, judged on periods the paper never used; pre-register 2026-11-06 BEFORE any outcome is read (assigned N 1080-1081; 2 judged arms)
+- Source: Harvey, Mazzoleni, Melone, "The Unintended Consequences of Rebalancing" (NBER w33554, rev. 2026-01). Sample 1997-09-10..2023-03-17,
+  ES vs TY futures. Published: 1 SD Calendar (Threshold) signal -> -17 (-16) bp next-day equity; strategy 10.2%/yr ex., vol 9.17%, Sharpe 1.11,
+  skew 5.23 (GFC + Mar-2020 carry much of it; ex those Sharpe 0.90); high-VIX half 16.5%/yr vs low 3.9%.
+- Counterparty: pensions / balanced / target-date funds (~$4tn+) on calendar (month-end) and threshold (~2pp band) rebalancing policies;
+  they must sell the outperforming asset. Prediction (falsifiable): the published weight earns > 0 on the SPY-minus-10y spread after the
+  paper's sample; the effect reverses within ~2 weeks (not information).
+- Dedupe: add. 34 Q4 (2016-26) tested MTD SPY-TLT only as IBS sizing (+0.15pp) and an ad hoc 3-day SPY sleeve (M3 t 1.94); never the
+  published weight, never post-2023-03 as a judge, never pre-1997. VT-FLOW (N 1071-1075) is vol-target flow, a different counterparty.
+  2016-26 is TOUCHED by add. 34 (report only, never judge on it).
+- Ceiling (before testing): published 10.2%/yr at its own scale (avg |w| ~0.5 of a 1:1 spread); 50% capture = 5.1pp; run at 1.6x the
+  published scale (<= ~1.0 spread notional per leg, inside Reg T 2x in TAXABLE only) = ~8pp at $10k. Roth: no short -> long-only equity leg
+  ~half -> ~2.5-4pp. $2.3k: SPY whole shares (~3-5 shares) -> rounding noise ~10-20% of the target weight; $10k/$25k same % as published;
+  $100k+ no capacity issue (futures-scale flow). Borderline, not killable on paper; < 1h on free data -> run.
+- Rule (frozen, exactly the paper's Sec. 4 + App. B): daily 60/40 drift w' = w(1+Rs)/(w(1+Rs)+(1-w)(1+Rb)).
+  Threshold_d: sig = w' - .60; reset to .60 when |sig| >= d; Th = mean over d in {0.0,0.1,...,2.5}% (26 values).
+  Calendar: sig = w' - .60; reset to .60 on the month's last session. Modified calendar Cm_t = sign(-Cal_t) if t is in the month's last 5
+  sessions; = sign(Cal at T-4 of the previous month) on the first session of a month; else 0.
+  A1 (N 1080) FULL: w_t = 0.5 x (-Th_t / 1.5%) + 0.5 x Cm_t.   A2 (N 1081) CAL-ONLY: w_t = Cm_t (the conditional calendar flow alone).
+  Return_{t+1} = w_t x (Rs_{t+1} - Rb_{t+1}), close-to-close (signal at close t, trade at the close cross; executable at ~15:50 estimate).
+  Cost 2bp/side per leg on |w_t - w_{t-1}| (x2 legs); 3x cost column. Lag-1 (w_{t-1} on R_{t+1}) reported as an execution sensitivity, not gated.
+- Data (free): J1 SPY / IEF Yahoo adjclose (total return). J2 ^SP500TR (Yahoo, 1988+) vs a constant-maturity 10y par bond built from FRED
+  DGS10: Rb = y_{t-1}/252 - Dmod x dy + 0.5 x Conv x dy^2. Signals built on the same pair as the returns. Report 2016-23 (touched) and
+  1997-2015 ETF/proxy (paper's own period) as description only.
+- Judge: J1 2023-03-20 .. last close (post-sample, ~3.6y; low power stated up front). J2 1988-01-05 .. 1997-09-09 (pre-sample, never used).
+- Gate per arm: G1 J1 net mean > 0 and J2 net mean > 0; G2 pooled J1+J2 net NW t (lag 5) >= 2.0; G3 J1 ex-top-5-days > 0 and 3x cost > 0;
+  G4 placebo: 500 random circular shifts of w within J1+J2, real net Sharpe rank >= 90th pct; G5 ceiling at $10k >= +8pp/yr at 1.6x scale
+  with 50% capture. G1-G4 fail = KILL; only G5 fail = PASS-SMALL. Also reported: halves, median day, hit rate, DSR at program N.
+- Descriptive (no gate): today's Th, Cal, Cm and weight at the 2026-11-05 close and what the rule says for the Nov / Dec (quarter-end) turns.
+Runner research/sim/hmm_rebal.py; out data/research/program/hmm_rebal_out.txt. One run.
+
+- Amendment (2026-11-06, before any outcome): FRED DGS10 timed out; the J2 bond leg uses Yahoo ^TNX (CBOE 10y yield, same construction).
+
+### Ceiling-kill (no N, no backtest) — TL-ETF (idea B: December tax-loss selling -> January rebound, conditioned on YTD drawdown, ETFs/stocks)
+Already measured: TL-JAN (N 853->854, delisted-complete stocks 1998-2025) +2.94%/event-year net at 25bp/side, t 1.91, 2016-25 +0.53% t 0.30,
+not monotone in YTD loss -> PERMANENTLY DEAD; CEF-TL2 (N 863->864) Jan gross +2.72% t 3.28, net +0.13%; DS5 night x1.5 Dec dead.
+The ETF form (sector/thematic/leveraged YTD losers, ~2-5bp round trips) fixes the cost problem but not the ceiling: one event/yr x the most
+generous gross (+2.7%, CEF panel) x 100% of account x 50% capture = +1.4pp/yr at $2.3k/$10k/$25k/$100k alike; the Dec short leg was
+wrong-signed in both panels. Leveraged-ETF losers scale the bounce by leverage (beta), not edge (memory: IBS x-asset). < +8pp -> CEILING-KILL.
+Not tested: ETF-panel numbers themselves (no backtest by rule); options on Jan rebound (class dead); intra-December timing of the selling
+climax (needs daily flow data); thin non-ETF names with delisted returns (covered by TL-JAN at the panel level).
+
+## Amendment - Forced-flow EDGAR families (overnight agent, theme structural/contractual): CEF-RIGHTS (N 1084) + ceiling notes; pre-register 2026-11-06 BEFORE any rights-offering outcome is read (N range 1084-1087)
+Dedupe (grep NEXT/hypothesis-space/memory 37): CEF rights offerings were never run - recorded only as "capital-proportional, no
+per-deal table, payoff ~0" (prose 3337, I4/I39). CEF NAV tenders pro-rata (study_cpc 1.3pp), Dutch/odd-lot (ABANDONED), B3/B4
+going-private, MERG-CASH, SPIN-CHILD (N 840), appraisal (untradable) are already in ledgers and are NOT re-run here.
+- **Ceiling (prior, before data).** US seasoned-CEF rights offerings ~8-15/yr (Gabelli family, Cornerstone CLM/CRF annual, Bancroft/
+  Ellsworth, others). Long-only post-expiry recovery, prior edge +1.5-3%/event over ~20 sessions, deployable ~100% at $2.3k-$25k
+  (CEFs $50M+ cap, $vol >= $0.3M/day), capture 50%: 12 x 2% x 1.0 x 0.5 = ~12pp at $10k (same at $2.3k/$25k; $100k: ~half, capacity
+  at 10% of 20-day $vol). Not ceiling-killable on priors -> test. Counterparty: rights arbitrageurs (long rights / short common) and
+  subscribers flipping newly issued shares at E+3..E+7 sessions; the issuance is contractual and dated by the prospectus.
+- **Events.** `research/sim/cef_rights_fetch.py`: every Sharadar SFP CEF (delisted included) -> CIK -> data.sec.gov submissions ->
+  final prospectus (497/424B*) filed >= 365d after first price, text says "rights offering"/"subscription rights" AND
+  "subscription price"; expiry E parsed from "expire ... <Month D, YYYY>". Dedupe (CIK, E); drop E outside [filed, filed+120d];
+  drop documents whose cover is a preferred-share offering. Map CIK->Sharadar ticker live on E. efts full-text is 403 from this host
+  (so a filing-type/text census, not efts).
+- **Trade (frozen, 1 judged arm).** Buy at close(E+5 sessions) (after issuance), sell at close(E+25). Return = closeadj ratio (Sharadar
+  SFP, dividends reinvested) minus the equal-weight Sharadar CEF universe (delisted-complete, as cef_alpha.universe) over the same
+  closes. Cost judged 20bp/side (CEF tier), stress 40 and 60bp/side; Corwin-Schultz high-low spread per event reported.
+- **Judge.** All events with E in 2001-01-01..2026-09-01 (never inspected for this event). Halves E < 2014 / >= 2014.
+- **Pass bar** (SE clustered by entry month): (1) mean net excess > 0, t >= 2.0; (2) both halves > 0; (3) median > 0; (4) ex-top-5 > 0;
+  (5) placebo: same funds, pseudo-E = E-126 sessions, identical window, |t| < 1.5 and < 1/3 of primary; (6) 2x cost (40bp/side) > 0;
+  (7) realized ceiling events/yr x net mean x 50% >= 8pp at $10k (with concurrency: at most 100% of capital, equal split across
+  overlapping events). PASS if all; KILL if mean <= 0 or t < 1; else WEAK (no shadow).
+- **Reported, not judged (mechanism check, falsifier):** subscription-window excess close(filed) -> close(E) (prediction: < 0) and
+  E -> E+5 (issuance window; prediction <= 0). If the subscription window is not negative, the forced-flow story is wrong even if the
+  judged arm passes. Also: transferable vs non-transferable, per-year, hit rate, $vol capacity, DSR at N 1084.
+- Runner `research/sim/cef_rights.py`, output `data/research/program/cef_rights_out.txt`. One look.
+- **Kill rule:** mean <= 0 or t < 1 -> CEF rights offerings carry no tradable post-issuance recovery for a long holder.
+
+
+## Study VRP-POST: post-spike short-vol (VIX futures roll/VRP harvested only after a spike), pre-register 2026-11-06 BEFORE any outcome is read (overnight agent, theme variance risk premium; N 1076-1079, 4 variants)
+grep first: Lab-BN (SVXY whenever VIX/VIX3M < 1, 2018-26: DEAD, t 1.5, placebo 76th) and VTS (N 864, VIX term as an SPY sensor) are the
+unconditional / sensor forms; the "VIX-inversion long mirror" (memory 42) is long SPY. No post-spike conditional short-vol study exists.
+Mechanism / who pays: after a spike, late hedgers and the vol-of-vol premium keep VIX futures priced above the realised path; once
+the front curve is back in contango the long-VIX ETP roll (VXX/UVXY/VIXY sell F1 buy F2 daily) and futures mean reversion pay the
+short side. Prediction (falsifiable): post-spike short-vol earns MORE per day than short-vol on ordinary contango days, net of 2x cost.
+- Data (free, `data/research/vrp/`): Cboe CFE VX settlements (archive CFE_*_VX.csv for expiries 2004-2013, per-contract VX_*.csv
+  2013+; pre-2007-03-26 VBI/10), Yahoo ^VIX, ^IRX (cash), SVXY/VIXY/SVIX for validation only. Synthetic SPVXSP-style 1-month
+  constant-maturity long-VX daily return r_long from F1/F2 settles (`research/sim/vrp_data.py`; checked BEFORE registration
+  against VIXY only: corr 0.95 2011-17 / 0.985 2018-26, Feb-5-2018 +97%). Instruments: S1 = -1x daily (XIV/SVIX-like, taxable;
+  SVIX is a long ETP, Roth eligibility at Schwab unverified) r = max(-1, -r_long) + rf - 1.35%/252 while held; S05 = -0.5x
+  (SVXY since 2018-02-28, Roth) r = -0.5 r_long + rf - 0.95%/252. Excess = r - rf.
+- Rule: Med63_t = median VIX close t-63..t-1. Spike day: VIX_t >= 1.5 x Med63_t. An episode is ARMED from the first spike day
+  until 63 trading days after its last spike day; P = max VIX close since the episode's first spike day. ENTRY signal at close t:
+  armed AND F2_t > F1_t AND VIX_t <= (1 - X) x P. Execution lag: signal at the 16:15 settle of t -> trade at the close of t+1
+  -> first earned day t+2. EXIT signal at close t (any): F1_t >= F2_t; H trading days since entry; trade's cumulative S1 return
+  <= -30% (S05: -15%; hard per-trade loss cap, executed with the same 1-day lag, so gaps go through); episode disarmed. Re-entry
+  inside the episode allowed after a curve or H exit, never after a loss-cap exit.
+- Variants (N 1076-1079): X in {0.20, 0.35} x H in {21, 63}. CHOOSE on 2012-01..2019-12 (includes Feb 2018) by Sharpe of S1
+  daily excess while in position at 1x cost; the chosen variant is judged once on 2004-03..2011-12 (synthetic; never used) and
+  2020-01..2026-11 (never used to choose).
+- Costs per side on the ETP: 1x 10bp, 2x 20bp, 3x 30bp, charged on every entry and exit.
+- Sizing: w = 0.10 / |worst in-position S1 day in 2012-19| (worst historical day <= 10% of account in the choice era); report
+  the judge-era worst day at that w (falsifier: > 25% of account = KILL regardless of mean) and maxDD of the account at w.
+- Gate (judged variant, S1, 2x cost): excess > 0 in BOTH judge eras; pooled judge NW t (lag 5, in-position days) >= 2;
+  episode median > 0 and >= 60% of episodes positive; ex-best-episode > 0 and ex-top-5-days > 0; placebo: 1,000 draws placing
+  the same number of trades with the same hold lengths at random contango (F2>F1) start days in the judge eras -> rule >= 95th
+  pct of total excess; mean in-position excess > mean S1 excess on all other judge contango days. Account-level judge %/yr at w
+  and 2x cost >= +8pp -> PASS; > 0 with all else passing -> PASS-SMALL. DSR at N 1079 reported. S05 (Roth) reported at the same
+  rule, not separately judged. Also reported: per-episode table incl. 2007-02, 2008, 2010-05, 2011-08, 2015-08, 2018-02,
+  2020-03, 2024-08, 2025-04; whether the gain is in the untradable gap (16:15 settle vs the ETP's 16:00 close: noted, not fixable
+  with daily settles).
+- Kill rule: any gate failure -> KILL for this form (X/H grid, 1.5x/63d spike, F2>F1 re-entry, -1x/-0.5x ETP, daily close trade).
+- Runner `research/sim/vrp_post.py`, output `data/research/program/vrp_post_out.txt`. One look.
+- Idea B (VIX-ETP rebalance flow, next-day reversal/continuation): CEILING-KILL, no N (numbers in the result section).
+
+### Result - VRP-POST (2026-11-06, one run, N 1076-1079): KILL (prediction wrong-signed)
+Choose 2012-19 (S1, 1x): X .20/H 21 Sharpe 1.30 t 2.26 (chosen); .20/63 1.18; .35/21 1.00; .35/63 0.98. Sizing w = 0.10/16.2% = 0.62.
+Judge (S1, 2x cost): 2004-11 +3.8%/yr instrument (+2.35pp/yr account), 2020-26 +1.9%/yr (+1.18pp); pooled +4.9bp/in-day NW t 0.41,
+median +31bp, hit .53, ex-top-5 days -7.6%. 14 judge episodes: median -0.7%, 43% positive, ex-best-episode -53%. **In-position
++8.7bp/day vs +18.6bp/day on other judge contango days (Welch t -0.60): post-spike short-vol earns LESS than ordinary contango
+short-vol** (placebo pct 29). Account at w: worst day -24.3% (2020-06-11, -39% instrument; breaks the 10% sizing), maxDD -53%
+2020-26 / -37% 2004-11. DSR 0.002. Roth S05 (w 1.0): +1.1 / -0.2pp/yr, maxDD -47%. 3x cost: S05 negative both pooled.
+The F2>F1 filter did keep it out of Oct-2008 and Mar-2020 (first entries Dec-2008, May-2020) and out of Feb-5-2018 - crash
+avoidance works, the premium does not concentrate after spikes. Out: `data/research/program/vrp_post_out.txt`.
+Not tested: spike thresholds other than 1.5x/63d med; VIX-level (not off-peak %) entry; VX1-VX2 roll-yield magnitude as the
+entry; longer-dated (VX4-7, mid-term ZIV/VIXM-style) short; option structures (closed class); intraday entry; exit on VIX
+normalisation instead of H; short UVXY/VXX (borrow) in taxable.
+
+### Ceiling-kill - VIX-ETP rebalance flow (idea B, no N)
+Forced flow: L(L-1) x AUM x r at the 16:15 settle (UVXY 1.5x and SVXY -0.5x factor .75, SVIX -1x factor 2). Post-2018 AUM
+(~$2-3B combined) => ~$0.25B vega-notional per 10% VX move vs ~$5B/day VX notional (~5% of volume). Events |r_long| > 10%:
+~8-10/yr. Ceiling at $10k: 10/yr x ~1% next-day move on the instrument x ~0.3 deployable (UVXY/SVIX worst days 30-60%,
+10% worst-day cap) x 50% capture = ~1.5pp/yr (<< +8pp). Unregistered descriptive (synthetic r_long, next day after
+|r|>10%): after up-days 2006-11 +0.18%, 2012-18 +1.92%, 2018-26 -0.86% (mean; medians -2.1..+0.8) - sign flips by era,
+no stable reversal or continuation. Not tested: intraday 15:45-16:15 VX futures pre-positioning (needs CFE intraday), AUM-scaled
+flow, ETP-level NAV premium on rebalance days.
+
+## Amendment - XASSET-FF (overnight agent, theme non-equity / cross-asset forced flows), 2026-11-06: no N used (N 1092-1095 unspent)
+Dedupe first (memory 15/16/17/27, hypothesis-space bonds/futures rows): **idea A (Treasury month-end duration extension) = TME,
+already VALIDATED small** on untouched 2002-15 (+32bp/mo net, t 2.76, ~4%/yr deployed), TME-L2 leverage measured (TMF ~9.5%/yr,
+-21.9% DD; TMF 3x ceiling-killed +5.8pp honest), XB funding TME from IBS cash -2.5pp; "stop Treasury variants". **Idea B (Treasury
+auction concession) = TAC, KILLED** (2016-26 +2.4bp t 0.9; IEF after auctions dead). Neither re-run. Gold/silver around COMEX
+delivery = the physical-settlement branch the user closed (FND, 2026-10-04): not re-run. GSCI/BCOM monthly roll ceiling-killed (memory 27).
+### Ceiling-kills (no outcome read, no backtest): perfect-foresight bounds
+Bound = windows/yr x E|log return over the window| x 100% deployed x 50% capture = what a rule earns if it knew the SIGN of every
+window. It is an upper bound on any honest capture; < +8pp at $10k kills. Runner `research/sim/xasset_ff_bound.py` (free Yahoo,
+cache `data/research/xasset_ff/`), out `data/research/program/xasset_ff_out.txt`. Same %/yr at $2.3k/$10k/$25k (FX/commodity ETFs,
+deep markets); $100k: unchanged (capacity is not the binding constraint, frequency x vol is).
+- C-FIX month-end WM/R 4pm-fix FX hedge rebalancing (Melvin-Prins; counterparty = equity managers re-hedging FX to the month's
+  relative equity return): FXE 1d 2.5pp, 3d 4.3pp. CEILING-KILL (also RB6040's "no more month-end variants").
+- C-QE quarter-end USD funding / G-SIB window dressing in spot USD: UUP 5d x 4 = 1.6pp. CEILING-KILL.
+- C-BCOM January commodity-index reweight (index funds trade days 6-10 of Jan; weights published in Oct): SLV 10d x 1 = 2.4pp,
+  GLD 1.3pp. CEILING-KILL.
+- C-MUNI summer/winter reinvestment season: MUB 21d x 2 = 1.1pp. CEILING-KILL.
+- C-CARRY unwind (VaR-constrained / retail-margin carry traders forced out after a JPY spike; buy the high-yielder after): episodes
+  = 5d drop < -5% with a 20-session gap; bound assumes the ENTIRE 20d-high -> 20d-low crash reverses. AUDJPY 1.18/yr x 11.1% x 50% =
+  6.6pp (13.1pp at 2x taxable margin, via long FXA / short FXY); Roth-eligible FXA long only: 0.54/yr x 10.8% -> 2.9pp. With an
+  honest reversal share (<= 30% of the crash) the 2x taxable form is ~4pp. CEILING-KILL.
+- Reference: the same bound on the validated TME window (TLT 3d x 12) is 6.7pp; TME's realized +32bp/mo is ~29% of it, which
+  calibrates "honest capture of a perfect-sign bound" at roughly a third.
+Class reading: at 1x, deep non-equity ETFs (daily sd FX 50-80bp, TLT ~90bp, gold ~100bp) cannot clear +8pp with <= 12 short
+windows/yr even with perfect sign foresight; only a daily-cadence mechanism could, and the x-asset IBS scan already put bonds and
+commodities at +1.7/+1.8bp/trade.
+Not tested: any conditional outcome (by rule); spot FX (not at Schwab in IRA), FX/commodity futures (taxable only, one micro at
+$2-25k), leveraged FX ETPs (ULE/EUO/YCS: thin); intraday 4pm-London-fix window (no free intraday FX history); silver/nat-gas
+(high-vol) forced flows other than the already-killed roll/FND/GSCI; Sprott physical-trust / halted-creation ETP premia (market-
+structure agent's domain); crypto trust conversions.
+
+### Result - HMM-REBAL (N 1080-1081, 2026-11-06, one look): KILL both arms; TL-ETF ceiling-killed (above)
+A1 FULL: J1 SPY-IEF 2023-03-20..2026-11-05 +0.09%/yr (vol 5.3%) NW t +0.03, ex-top-5 -2.7%, halves +2.0 / -1.8; J2 1988-97 -1.11% t -0.98;
+pooled t -0.71, DSR 0; 3x cost -3.1 / -3.9%; lag-1 -0.7 / -1.3%; placebo pct 93 / 76. A2 CAL-ONLY: J1 +0.86% t 0.21 (2023-24 +5.9, 2025+ -4.0),
+J2 -2.25% t -1.22, pooled -0.80. G1/G2/G3 fail -> KILL. Description (paper period / touched): ETF 2002-15 A1 +7.35%/yr t 3.38; proxy 1997-2023
++5.5% t 2.96; ETF 2016-23Q1 +5.8% t 1.39 (ex-top-5 +1.0%); ETF ex-GFC/Mar-2020 +3.1% t 2.15. The replication reproduces the published sign in
+sample at ~0.6-0.8 Sharpe; out of the paper's window it is zero (post) or negative (pre). Mechanism: alive in-sample, not tradable after
+publication on ETFs at the close. Today (descriptive): QTD SPY -3.9% vs IEF +3.0%, Cal -0.79pp at 11-05 -> the dead rule would be long SPY /
+short IEF over Nov 23-30 and the Dec quarter-end if the gap holds; w_full +0.33 at the 11-05 close. Out data/research/program/hmm_rebal_out.txt.
+
+## Study EDGAR-SESS: in-session EDGAR filings (acceptance timestamp) traded inside the regular session, pre-register 2026-11-06 BEFORE any outcome is read (overnight agent, theme timestamped event stream; N 1095 -> 1097; N 1098-1099 reserved, unspent unless stated)
+Question: the program's main killer is "the effect is in the untradable after-close gap" (S&P add/delete, 13D, PEAD, halts, X1-X6
+"session after ~0"). Filings ACCEPTED 09:35-15:30 ET have no gap between the event and a regular-hours fill. Is a material part of the
+move still available at acceptance + 1-5 min, after honest spread costs? Dedupe: NEWS-HALT (N 1051) traded the halt REOPEN (news
+releases that trigger a halt), R1a/b used 8-K bad-news items as a NIGHT filter, J3-J8/X1-X6/ID1-3/EV1-2 traded the SESSION AFTER (open
+cross). None used the intraday acceptance minute. LLM news judge/FinBERT are closed by the user; no text model here (keyword/LLM arm only
+if the plain item-code rule passes, as a new registration under N 1098).
+- Ceiling (before data): frequency is not binding (thousands of in-session 8-Ks/yr). ceiling %/yr = events/yr x net edge x share
+  deployable x 0.5. At $10k: 200 eligible events/yr x 20bp net x 50% deployed x 0.5 = +10pp; 500 x 10bp x 0.5 x 0.5 = +12.5pp. So the
+  gate is the per-event net edge after latency, not the count: anything below ~+10bp net/event at >= 200 events/yr is a fail by the
+  +8pp rule even if it is "significant". $2.3k/$25k: same %/yr (whole-share rounding irrelevant at $5+ names; capacity per event is
+  a few % of 1-minute volume, tens of $k in $5M-ADV names). $100k: capped by 1-minute volume in thin names.
+- Data: EDGAR submissions JSON (data.sec.gov, generic research UA), fields form / items / acceptanceDateTime, for every Sharadar
+  domestic common stock (incl. delisted) with a CIK and prices in 2019-2026. Minute bars: Alpaca SIP raw 1-min per symbol-day
+  (halt_reopen.py pattern). Daily close/next open/ADV: Sharadar SEP (official crosses). Universe on the event day: price >= $5,
+  20d ADV$ >= $5M (tier >= $20M reported), acceptance minute m with 09:35 <= m < 15:30 ET on a trading day, bars present at m-1 and m+L.
+- Event types (one row per filing; an 8-K can carry several items): T101 8-K Item 1.01; T201 8-K 2.01; T502 8-K 5.02; T103 8-K 1.03;
+  T301 8-K 3.01; TTO SC TO-I/SC TO-T (subject company); T424 424B4/424B5; T25 25-NSE/25. 
+- Prices: p0 = close of bar m-1 (last print before acceptance); entry pE = open of bar m+L (L = 2 primary; L = 1, 5 reported);
+  exits: close = Sharadar official close (EOD), open = next official open (NXO).
+- Direction rules: CONT = sign(pE/p0 - 1) when |pE/p0-1| >= 50bp, else no trade; REV = minus CONT; FIX (mechanism sign, only where one
+  is named before data): short T103, T301, T424, T25; long TTO.
+- Costs per side by 20d ADV$: >= $100M 5bp, $20-100M 10bp, $5-20M 20bp (post-news marketable fill); shock 2x. Shorts: +0 borrow (flag).
+- CHOOSE 2019-01..2022-12: cells = 8 types x {CONT, REV, FIX where defined} x {EOD, NXO} at L = 2. A cell is selected if mean net > 0,
+  day-clustered t >= 2 and >= 30 events. JUDGE 2023-01..2026-10-05 on selected cells only. Gate (all): judge mean net > 0 and t >= 2,
+  median > 0, ex-top-5 mean > 0, 2x-cost mean > 0, net >= +10bp/event with >= 100 events/yr pooled across selected cells (the ceiling
+  line), L = 5 still > 0. Kill rule: no cell selected, or any selected cell failing => KILL for that cell; if all fail => KILL for the
+  study's form (item-code x momentum/fixed sign, minute bars, EOD/NXO exits). Placebo: same symbols, same minute-of-day, random other
+  days without a filing (CONT rule), 200 draws.
+- Diagnostics (not gates): share of the m-1 -> EOD move done by m+1 and m+2 (is it done in the first minute); pre-acceptance drift
+  m-30 -> m-1 (does the wire press release precede the EDGAR acceptance); capacity = 1-min $volume at m+L.
+- DSR across program N (1097) and the choose-grid count.
+### Result - BOATS-PREM (N 1088) and BOATS-LETF (N 1089), 2026-11-06, one run each: both KILL (N 1088-1089 of this agent's range 1088-1091; 1090-1091 unused).
+- Data: 533 nights 2024-09-16..2026-10-30, 531 BOATS-live at 23:00 ET; official crosses 100% coverage. ASIA half-spreads at 23:00 1-7bp
+  (QQQ/SPY 0.7, TSLA 1.7, TQQQ 1.8), CONTROL 6-34bp: BOATS is liquid only in the Asian-retail names.
+- BOATS-PREM (registered T 23:00): hedged excess EW-ASIA -2.1bp/night (NW t -1.34, median -4.0, H1 +2.6 / H2 -6.5), 3x cost -11.0; unhedged
+  close->bid +2.1 (t 0.55). D_ASIA (bid_T - open) -6.8 (t -2.16): selling in BOATS LOSES to the open cross. PX +11.2 (t 2.36) at the bid is the
+  spread difference: at the mid (post-hoc) PX -5.4 (t -1.15). No Asian-demand premium; the mechanism prediction fails. 03:45 report-only: same
+  (hedged -2.9, t -1.93). Every gate item but PX-at-bid fails. DSR not needed (mean < 0).
+- BOATS-LETF (cheap side, registered): 263 events / 184 nights (125/yr; SOXL 102), excess -3.4bp (median -2.9, hit .41), night-clustered
+  -2.9 (t -1.43), 2x cost -13.9. KILL. LETF mid vs L x underlying BOATS move: median -1.5..-5.5bp, sd 6-27bp, i.e. LETFs track inside the spread.
+- Rich side (reported, not judged): +17.9 hedged (t 4.09) but 162/208 nights are SOXL/SOXS on a thin SOXX quote (SOXX half-spread 6.9bp;
+  SOXL reads cheap and SOXS rich at the same time = the underlying's quote is off, not the LETF). Ex-SOXL/SOXS (post-hoc): -2.8 (t -2.06).
+  Not a lead.
+- Tested: Alpaca BOATS NBBO 2024-09..2026-10, fixed a-priori universes, T 23:00 (judged) / 03:45 (reported), close cross -> BOATS bid, BOATS bid vs
+  open cross, LETF ask vs L x underlying BOATS mid -> open cross. Not tested: the exchange overnight sessions from 2026-12-06 (24X/Nasdaq/
+  Arca; different participants), BOATS entry for the night leg, intraday-in-session dynamics (VWAP, momentum within 20:00-04:00), event
+  nights (US earnings after the close, Asian macro) as a conditioning, SOXL/SOXS vs the ICE semiconductor index or futures-implied fair value,
+  Schwab 24/5 access. Out `data/research/program/boats_asia_out.txt`; runners `research/sim/boats_asia.py`, `boats_asia_posthoc.py`.
+
+### Result - CEF-RIGHTS (2026-11-06, one run, N 1084): KILL (long side; the sign is the opposite of the registered prediction)
+Events: 1,074 Sharadar CEFs (delisted incl.) -> 325 rights prospectuses -> 176 offerings -> 163 judged (2001-02..2026-08, 6.4/yr,
+90 funds, 53% transferable). Judged arm close(E+5)->close(E+25) excess vs EW CEF universe, net 20bp/side: **-229bp, month-clustered
+t -4.96, median -242, hit 24%, halves -294/-172, ex-top5 -276**; 2x/3x cost -269/-309; Corwin-Schultz RT -230 (median CS 36bp);
+raw (not excess) -204. Placebo E-126: +88bp t +2.24 (funds offer after strong runs). Gates 0/7, DSR 0.000. Ceiling -5.1pp/yr at 50%.
+Mechanism windows (reported): close(filed)->close(E) -178bp t -4.9; **close(E-10)->close(E) -352bp t -9.45, hit 20%** (the formula
+pricing window: subscription price = ~92-95% of the average market price over the last days before expiry, so arbs/subscribers short
+into it); E->E+5 (issuance) -68bp t -2.45; E+5->E+25 -189bp gross. Non-transferable worse (-310) than transferable (-158).
+22 of 26 years negative. Read: the forced-flow pressure is real and LARGE, but it does not reverse inside 25 sessions - there is no
+long-side recovery to harvest; a long holder should EXIT before the pricing window, not buy after it.
+- Post-hoc (NOT judged, outcomes read): a short from close(E-10) to close(E+25) would have earned ~+6.1% gross excess/event, 6.4/yr.
+  Taxable-only (Roth cannot short), borrow on a CEF mid-offering is likely HTB (the arbs are already short) and no borrow history is
+  free; ceiling = 6.4 x (6.1% - 0.4% cost - borrow) x 0.5 -> ~+18pp at zero borrow, < +8pp once borrow > ~3.2% per 35 sessions
+  (~23%/yr). Edge unproven, borrow-DATA-LIMITED; all 2001-26 data is now touched, so it can only be judged forward.
+- CEF-RV hygiene (no N, no outcome read): 53 of 5,502 CEF-RV entries 2008-26 (~3/yr) fall in [E-45d, E+40d] of a rights offering.
+  A rights-window exclusion is cheap risk hygiene but its ceiling is < 0.5pp/yr on the book; not tested.
+Not tested: entries later than E+25 (60-120 session recovery), the short arm on any untouched period (none exists in EDGAR's
+electronic era), borrow cost/availability, BDC/REIT/operating-company rights offerings (SEP names, not in the CEF universe),
+announcement-day (pre-filing press release) returns, NAV-relative (discount) returns as the statistic, the 41 rights prospectuses
+whose expiry date did not parse. Out `data/research/program/cef_rights_out.txt`; runners `research/sim/cef_rights_fetch.py`,
+`research/sim/cef_rights.py`; events/trades `data/research/cef_rights/`.
+
+### Ceiling notes (no N, no backtest) - the other candidate families for this theme
+- CEF/BDC NAV tenders, pro-rata (98-99% NAV): already scored in study_cpc (55 offers, 1.3pp/yr capital-proportional, after-tax
+  -0.2pp). Not re-run.
+- Dutch-auction issuer tenders, non-odd-lot (buy below the floor, tender, prorated remainder sold after expiry): ~10-15/yr x
+  (p x ~2% premium - (1-p) x ~1% post-expiry drop ~= +0.5%) x 100% x 0.5 = ~3-4pp at $10k, cash locked 3-5 weeks (the reason odd-lot
+  tenders were abandoned). CEILING-KILL.
+- Going-private / squeeze-out appraisal floors: appraisal needs dissent + litigation, institutional size; cash-outs B4 dead. UNTRADABLE.
+- Mandatory exchangeable / mandatory-convertible conversion dates: ~10-15/yr; hedged convert arbs deliver common against their own
+  short (no net flow); only unhedged income holders sell; no free deal table. 15 x <=1% x 0.5 = < 7.5pp, weak mechanism. CEILING-KILL,
+  DATA-LIMITED.
+- Spin-off orphan (index-forced selling of the child): SPIN-CHILD (N 840) already tested close(D)->+60 (-1.04%, median -2.61%); a
+  delayed entry needs >= +4%/event at ~20 spins/yr to clear 8pp against that prior. CEILING-KILL (not re-run; delayed entry after the
+  S&P deletion effective date is the untested form).
+
+## Pre-registration - CEF-RIGHTS-FWD (N 1085) + CEF-RV rights-window hygiene watch (N 1086), 2026-11-06, FORWARD ONLY, log-only; registered BEFORE any forward event exists
+Origin: CEF-RIGHTS (N 1084) found the pricing-window drop (close(E-10)->close(E) -352bp, t -9.45) with no reversal by E+25; the short
+T-10 -> T+25 (~+6.1% gross excess/event, 6.4/yr) is POST-HOC on 2001-26 (all EDGAR-era data touched), so it can only be judged on
+offerings that have not happened yet. Borrow on a fund mid-offering is the binding unknown; this shadow measures it.
+- CEF-RIGHTS-FWD (N 1085). Universe: the CEF-RV fund list (state/cef-rv-panel.json, CEFConnect/Nasdaq), CIK from SEC
+  company_tickers.json. Scanner (swingtrader/daily/cef_rights_shadow.py, research-shadows, daily): data.sec.gov submissions per CIK,
+  final prospectuses 497/424B1-5 filed in the last 120 days by a seasoned registrant (oldest listed filing >= 365 days before), classified
+  and dated by the SAME code as N 1084 (cef_rights_fetch.classify/expiry); preferred-share offerings dropped; one event per (CIK, expiry
+  within 45 days), earliest filing kept. E = first regular session >= expiry date (regular-hours calendar, signals.regular_clock;
+  dates are trade dates). Would-be trade: SHORT at the official CLOSE cross of session E-10, COVER at the official close cross of E+25
+  (35 sessions), taxable margin account only (never the Roth). Return = -(fund close->close total return incl. distributions - the EW
+  CEF-universe return over the same sessions, cef_rv_shadow.ew); net = that - 2 x 20bp - logged borrow (annual rate x 35/252).
+  Borrow logged on every run up to the entry session (read-only): Alpaca asset shortable / easy_to_borrow, Schwab quote reference
+  isShortable / isHardToBorrow / htbRate when the client is available; nothing else in swingtrader/daily/brokers.py exposes borrow, so a
+  missing field is logged as unknown. Gate events: scored, single ticker, first seen by the scanner on or before the entry session
+  (events found later are `late`, reported, never gated). Borrow-available = shortable at the last snapshot on/before entry (unknown =
+  not available).
+  GATE (read once n >= 15 gate events): mean net of logged borrow > +200bp AND median net > 0 AND borrow available on >= 70% of events
+  -> PASS (= propose a small taxable short; user decision). KILL if mean net <= 0 at n >= 15. Otherwise HOLD to 30 events, then the
+  same gate, final. Reported beside: unknown-borrow count, pricing-window excess E-10->E (the mechanism, should stay negative), ex-top-3,
+  hit rate, transferable vs not. Falsifier: the forward pricing-window excess >= 0 or the E-10->E+25 short <= 0 at n >= 15.
+- CEF-RV rights hygiene watch (N 1086), descriptive only: every CEF-RV signal (state/cef-rv.jsonl) or live position (cef-rv-live.json)
+  whose fund enters or is held inside a rights pricing window [E-10, E+5] is logged with its later OO/CC excess vs EW CEF. Gate
+  (descriptive): at >= 10 flagged closed trades, report flagged vs unflagged mean excess; a flagged mean below unflagged by >= 150bp
+  is a prompt to propose a rights-window entry block (user decision), nothing automatic.
+- Not tested by this registration: entries after E+25, discount/NAV-relative statistics, BDC/REIT/operating-company rights offerings,
+  announcement-day (press-release) entry, any borrow cost not visible to Alpaca/Schwab read-only APIs.
+- AMENDMENT to CEF-RIGHTS-FWD (2026-11-06, same session, before any forward event; no forward outcome read). While building the
+  scanner: in N 1084's own events the first final prospectus (497/424B*) was filed a MEDIAN 2 business days before expiry and 78% of
+  the 163 judged offerings were filed < 10 sessions before E, so the E-10 short was NOT knowable from that filing for most events
+  (the post-hoc +6.1% short carries this lookahead; E-10->E excess on the 31 knowable events -164bp vs -396bp on the 132 not). The
+  scanner therefore also reads 497AD (Rule 482 fund press releases, usually 2-3 weeks earlier) with the same classifier;
+  `announced` = earliest matching filing, the expiry is the final prospectus's once filed (a 497AD expiry is provisional). Gate
+  events additionally need announced <= entry session (else `late`, reported, never gated). Gate numbers unchanged.
+
+### Result - EDGAR-SESS (N 1096-1097, 2026-11-06, one look): KILL (no cell selected on 2019-22; judge half not read for any cell)
+Data: 6,959 CIKs (Sharadar domestic commons incl. delisted, priced 2019+), EDGAR submissions JSON; in-session (09:35-15:30 ET) filings of
+the 8 registered types on $5+/ADV $5M+ names, Alpaca SIP raw 1-min bars: 4,550 events with bars (choose 2,895, judge 1,655), ~580/yr
+(T502 ~250, T101 ~130, T424 ~90, T25 ~70, T201 ~20, T301/TTO/T103 rare). Data bug caught before reading: SEP open/close are
+split-adjusted, minute bars raw -> rerun in raw prices (closeunadj); 5 ticker/split mismatches dropped.
+**The acceptance minute is not a price event.** Median |m-1 -> m+5 open| 8-14bp by type (noise for $5M-ADV names); only 5% of events move
+>= 50bp by m+2 and 3% >= 100bp by m+5; of days with |m-1 -> close| >= 100bp, the share done by m+2 is 0-4% (median and bp-weighted).
+The information arrived earlier: the event-day overnight gap is 53-59bp median (no matched non-event control measured) and the m-30 -> m-1 drift is 40-60bp vs
+26bp for all events -- the wire release / pre-market PR precedes the EDGAR paperwork. CHOOSE grid (36 cells, L=2): best cells T25 CONT EOD
++152bp net on n 14 (t 1.3) and T101 REV EOD +124 on n 46 (t 0.99, ex-top-5 -61); FIX shorts on T424/T25/T301 ~0 (-2.4, -1.0, -5.2bp net,
+n 373/390/13); TTO long +5 (n 20). No cell met n >= 30, t >= 2 -> nothing to judge. Pooled descriptive CONT judge -24.7bp net (n 88), REV
+-24.8. Ceiling: even at the pre-registered +10bp gate the CONT/REV forms trigger ~25-40 events/yr (the 50bp filter) -> < 1pp/yr.
+DSR: n/a (no selection). Capacity: median 1-min $volume after acceptance ~$78k (not binding at $2-25k).
+Tested: item code / form type x {continuation, reversal of the m-1 -> m+L move, fixed mechanism sign} x {close cross, next open cross},
+entry at acceptance + 1/2/5 min, $5+/ADV $5M+, 2019-22 choose. Not tested: names < $5M ADV or < $5 (where a filing might BE the first
+release: micro-caps without wire service); 8-K items outside the 8 types (7.01/8.01 PR-attached, 2.02 in-session earnings, 4.02
+non-reliance); the full-text / press-release-timestamp stream (newswire, not EDGAR); intraday exits other than the close/next open;
+an LLM/keyword classifier (registered as conditional on a plain-rule pass; not run, N 1098-1099 unspent).
+Out: data/research/program/edgar_sess_out.txt; runner research/sim/edgar_sess.py; data data/research/edgar_sess/ (submissions JSON
+reusable for any EDGAR-timestamp study: form/items/acceptanceDateTime 2019-26 for 6,959 CIKs).
