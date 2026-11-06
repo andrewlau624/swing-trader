@@ -6,6 +6,7 @@ usage: PYTHONPATH=. python3 -m research.sim.edgar_sess edgar | events | bars | r
 from __future__ import annotations
 
 import json
+import re
 import sys
 import time
 import warnings
@@ -155,19 +156,21 @@ def events() -> None:
     print(ev.groupby([ev.date.dt.year, "type"]).size().unstack(fill_value=0), flush=True)
 
 
-def bars() -> None:
+def bars(ev_path: Path | None = None) -> None:
     """Alpaca SIP raw 1-min bars, one request (paged) per day for all of that day's event symbols."""
     from .auction_fetch import _env
     BD.mkdir(parents=True, exist_ok=True)
     H = _env()
-    ev = pd.read_parquet(D / "events.parquet")
+    ev = pd.read_parquet(ev_path or D / "events.parquet")
     need = {(s, d.date()) for s, d in zip(ev.ticker, ev.date)}
     todo = sorted(x for x in need if not (BD / f"{x[0]}_{x[1]}.parquet").exists())
     days = pd.Series([s for s, _ in todo]).groupby([d for _, d in todo]).apply(list)
     print(len(todo), "symbol-days on", len(days), "days", flush=True)
     for i, (day, syms) in enumerate(days.items()):
         got = {s: [] for s in syms}
-        p = dict(symbols=",".join(syms), timeframe="1Min", start=f"{day}T13:00:00Z", end=f"{day}T21:30:00Z",
+        # Sharadar suffixes reused/delisted tickers with digits (SUNS1); Alpaca knows the trading symbol of the day (SUNS)
+        req = {re.sub(r"\d+$", "", s): s for s in syms}
+        p = dict(symbols=",".join(req), timeframe="1Min", start=f"{day}T13:00:00Z", end=f"{day}T21:30:00Z",
                  feed="sip", adjustment="raw", limit=10000)
         ok = True
         while True:
@@ -182,6 +185,11 @@ def bars() -> None:
                 if r.status_code == 429:
                     time.sleep(3 * (k + 1))
                     continue
+                bad = re.match(r".*invalid symbol: (\S+)", r.text) if r.status_code == 400 else None
+                if bad and bad.group(1).strip('"}') in req and len(req) > 1:
+                    req.pop(bad.group(1).strip('"}'))
+                    p["symbols"] = ",".join(req)
+                    continue
                 break
             if r is None or r.status_code != 200:
                 print("  fail", day, getattr(r, "status_code", None), flush=True)
@@ -189,7 +197,7 @@ def bars() -> None:
                 break
             j = r.json()
             for s, b in (j.get("bars") or {}).items():
-                got.setdefault(s, []).extend(b or [])
+                got.setdefault(req.get(s, s), []).extend(b or [])
             tok = j.get("next_page_token")
             if not tok:
                 break

@@ -9701,3 +9701,48 @@ non-reliance); the full-text / press-release-timestamp stream (newswire, not EDG
 an LLM/keyword classifier (registered as conditional on a plain-rule pass; not run, N 1098-1099 unspent).
 Out: data/research/program/edgar_sess_out.txt; runner research/sim/edgar_sess.py; data data/research/edgar_sess/ (submissions JSON
 reusable for any EDGAR-timestamp study: form/items/acceptanceDateTime 2019-26 for 6,959 CIKs).
+
+## Study EDGAR-MICRO: in-session EDGAR filings by micro-caps (the untested EDGAR-SESS leaf), pre-register 2026-11-06 BEFORE any outcome is read (overnight agent; N 1099 -> 1102)
+Question: EDGAR-SESS killed in-session filings for $5+/ADV $5M+ names because the wire release precedes EDGAR. Its listed untested
+leaf: micro-caps (prior close < $5 OR 20d ADV < $5M), where the filing may BE the first public release. Counterparty: retail/market
+makers quoting a name whose news is not yet on any terminal; small size has no capacity problem. Caveat stated up front: Nasdaq
+Rule 5250(b)(1) requires listed issuers to release material news via a Reg FD-compliant press release (and pre-notify MarketWatch
+in-session), so listed micro-caps also tend to wire first; this study measures whether that holds.
+- Ceiling (counts only, no outcome read): listed (NASDAQ/NYSE/NYSEMKT) domestic common incl. delisted, pclose >= $0.50, ADV >= $100k,
+  accepted 09:35-15:30 ET, 8-K items 1.01/1.03/2.01/2.02/3.01/4.02/5.02/7.01/8.01, 424B4/5, SC TO-I/T: ~1,970 events/yr (2.02 378,
+  7.01 515, 8.01 494, 5.02 274, 1.01 190, 424B 57, 3.01 25, 2.01 26, 4.02 6, 1.03 1, SC TO 3). Median ADV $0.5-1.9M; Abdi-Ranaldo
+  half-spread median 10-42bp by type (likely understated for micro-caps). ~8 events/day, so frequency and per-event capacity (median
+  rest-of-day $vol ~$0.4M x 5% = $20k) do not bind at $10k; ceiling = 252 x net/event x 100% x 0.5 needs >= ~+6bp net per event-day
+  at full deployment for +8pp. The count cannot kill it; the gate is net edge after a micro-cap spread. Not ceiling-killed.
+- Data: edgar_sess submissions cache (6,951 of 6,951 listed CIKs present), Sharadar SEP raw-price join (closeunadj; OHLC x
+  closeunadj/close), Alpaca SIP raw 1-min bars (edgar_sess bar cache; delisted Sharadar tickers with digit suffixes mapped to the
+  trading symbol). Runner research/sim/edgar_micro.py; out data/research/program/edgar_micro_out.txt.
+- Cost: one-way = max(25bp, AR half-spread of the prior 20 days) + 5bp; shock = 2x. AR validated against Alpaca NBBO quotes at the
+  entry minute on a <= 300-event sample (diagnostic).
+- Rules (L = 2 primary; L = 1, 5 shown): entry = open of minute acc+L; CONT/REV = sign of the m-1 -> entry move when |move| >= 100bp;
+  FIX: 424B -1, 3.01 -1, 4.02 -1, 1.03 -1, SC TO +1. Exits: close cross (EOD) and next open cross (NXO). Types with < 30 choose
+  events are pooled into "OTHER". Choose 2019-01..2022-12: cell selected if n >= 30, net > 0, day-clustered t >= 2.
+- Judge 2023-01..2026-10-05 once, selected cells only. Gate: net > 0 & t >= 2, median > 0, ex-top-5 > 0, 2x-cost > 0, both judge
+  halves (2023-24 / 2025-26) > 0, L=5 > 0, placebo (same symbol, same day, random minute >= 60 min away from acceptance, 200 draws)
+  below the real mean in >= 95% of draws, DSR at program N, and the ceiling line: judge events/yr x net x 0.5 >= +8pp at $10k.
+  Kill: no cell selected or every selected cell fails => KILL of this form (item code x momentum/reversal/fixed sign, 1-min bars,
+  EOD/NXO exits, listed micro-caps). Leak diagnostics reported: m-30 -> m-1 drift, share of the day's move done by m+1/m+2.
+
+### Result - EDGAR-MICRO (N 1100-1102, 2026-11-06, one look): KILL (0 of 54 cells selected on 2019-22; judge half not read)
+- Events 15,276 (2019-26, ~1,970/yr). With minute bars and a print at acceptance+2: 7,071 (choose 4,525, judge 2,546); the rest had
+  no Alpaca bars (1,083), < 20 one-minute bars that day (1,953) or no trade within 2 min of m+2 (untradable at the registered latency).
+- Spread check (199 events, Alpaca SIP NBBO at acc+1..+3): median half-spread 37bp (p75 74; ADV < $500k: 70bp). Registered one-way cost
+  median 37bp, too low for 38% of events; the 2x shock covers it.
+- No impulse at acceptance even in micro-caps: |m-1 -> m+2| median 26bp vs 22bp at random minutes in the same symbol-day; share >= 100bp
+  0.158 vs 0.080 placebo (some tail impulse); for days with |m-1 -> close| >= 200bp the median share done by m+2 is 0-4% (EDGAR-SESS
+  pattern). Pre-acceptance drift m-30 -> m-1 60bp vs 54bp placebo: no measurable leak, the filing is just not the price event.
+- CHOOSE 2019-22: pooled CONT/REV gross -6.5..+6.5bp, net -235..-248bp/event (cost on >= 100bp movers, which are the widest names).
+  Fixed shorts on 424B: gross -3/-42bp, n 141. Best: T301 FIX (delisting-notice short) NXO gross +319 net +147 t 0.88 n 30, ex5 -106,
+  median -11: not selected. Gate never reached; the ceiling line is moot (gross ~0 before a ~75bp round trip).
+- Kill form: listed micro-caps (pclose < $5 or ADV < $5M; >= $0.50, >= $100k ADV), 8-K items 1.01/1.03/2.01/2.02/3.01/4.02/5.02/7.01/8.01,
+  424B4/5, SC TO; CONT/REV of the m-1 -> m+2 move (>= 100bp) or a fixed mechanism sign; market entry at m+2 open; exits close/next open.
+  Not tested: OTC / sub-$0.50 / ADV < $100k names (no SIP bars; filing-first is most plausible there); passive/limit entries; intraday
+  exits (m+30/m+60); other 8-K items (3.02 unregistered sales, 5.07, 2.03/2.04 debt); 2.02 earnings by surprise sign; text/LLM
+  classifier; newswire timestamps. Fix: edgar_sess.bars() now maps Sharadar digit-suffixed tickers (SUNS1 -> SUNS) and drops invalid
+  symbols instead of failing the whole day (EDGAR-SESS had 167 of 5,271 events without bars; verdict unaffected).
+Out: data/research/program/edgar_micro_out.txt; runner research/sim/edgar_micro.py; data data/research/edgar_micro/.
