@@ -9233,3 +9233,70 @@ clear the +8pp-at-$10k paper gate and are runnable on data on disk; all three ar
   (t 0.49), h=2 +12 (t 0.26), h=3 -35 (t -0.58), h=4 -62 (median -3, t -0.79, NW -0.52, ex-top-5 -144); 2009-17 +66
   (t 0.79) vs 2018-26 -225 (t -1.63); median stock excess at h=4 -296bp. The inflow-bought D10 is worse (-195bp at h=4,
   t -2.07). The panel flags continuing underperformance, not a reversal; no long sleeve.
+
+## Study IBS-VS: vol-scaled GROSS of the IBS leg (time series), pre-register 2026-11-06 BEFORE any outcome is read (N 1068 -> 1070; 2 judged arms)
+- Question (caller, after the 2026-11-06 sell-off): does sizing the IBS leg's gross by the realized vol of its signal ETFs beat flat
+  sizing at MATCHED maxDD, judged on 2016-20? A sizing rule on a known mechanism (premium ~ vol, ibs_xasset_scan), not a gate.
+- Dedupe (grep NEXT/RESULTS/round1): NOT the same as VT-IBS (N 838, cross-name split of a fixed budget), add. 32 A5 (inverse vol-target
+  of the whole overnight book on the BOOK's trailing sigma, 2021-26 only), Round 18 AT1/AT2 (10d/60d vol-ratio GATE), AS (cross-leg
+  inverse-vol budget), PROVOL (night leg, ceiling-kill). This study varies only the IBS sleeve's total exposure through time, by each
+  firing name's vol relative to its own history, judged on the 2016-20 ETF holdout. Neighbours are dead; prior is weak.
+- Rule: live selection `book.ibs_days` (top-3 EQ18 momentum, IBS<0.2 on d, open d+1 -> open d+2). Per firing name i on day d:
+  z = sigma20_i,d / median(sigma20_i over the 252 sessions through d) (close-d data only). Weight of name i = L x clip(z^g, 0.25, 3) / n_d
+  of equity; total gross capped at 2.0x (taxable, Reg T overnight) or 1.0x (Roth, no margin), scaled down pro rata when over.
+  Arms: P g=+1 (premium-proportional: "more capital when vol is high"); C g=-1 (constant-risk / inverse vol). Flat: z^0.
+  The caller's "more capital when vol is high" and "constant-risk" are OPPOSITE rules; both are registered.
+- Theory prediction (falsifiable): mu ~ k sigma and var ~ sigma^2 give the Kelly weight k/sigma, so C >= flat > P at matched maxDD.
+- Matching: L per arm fit on 2021-26 ONLY (fractional shares, 1bp/side) so the arm's 2021-26 maxDD equals flat's at 1.25x (taxable;
+  the CLE cap) and 1.0x (Roth). Frozen, then judged on 2016-20.
+- Primary (2016-20, taxable version): excess CAGR = arm CAGR minus the flat frontier's CAGR (flat G 0.10..2.0) interpolated at the
+  arm's own 2016-20 maxDD. Also: paired daily Sharpe test d_t = r_arm - k r_flat (k = sd ratio), NW t lag 5; ex-top-5 days;
+  median and hit of signal-day d_t; placebo = 200 permutations of the multipliers across signal days (Sharpe rank); DSR at N 1070.
+- PASS per arm: excess CAGR > 0 in 2016-20 AND 2021-26, NW t >= 2 on 2016-20, ex-top-5 > 0, median > 0, placebo >= 95th pct,
+  still > 0 at 3bp/side, and >= +1pp/yr at $10k whole shares. Else KILL.
+- Reported: halves, 2017-19 ex-2020, 1/2/3bp/side, %/yr at $2.3k/$10k/$25k (whole shares at 2026 price levels, margin interest
+  12.5%/yr on overnight debit, idle cash in BIL), Roth version capped 1x, $100k one line. Oversold V6 relation (descriptive, no N):
+  overlap of SPY/QQQ RSI(2)<10 / 3-down triggers with index IBS<0.2 and with IBS-leg signal days, and return correlation.
+- Ceiling (gate, written before running): IBS sleeve flat 1x ~ 73 signal days/yr x ~19bp ~ 13-14%/yr gross; a sizing rule at matched
+  maxDD moves that by ~10-30% -> +1.5-4pp, x 50% capture ~ +1-2pp/yr at every size (rate, not dollars). BELOW the +8pp gate, which is
+  for new candidates independent of the book; this is a sizing change to the existing OOS-verified IBS leg, the same class as the
+  IBS/night weight grid (commit 997e55f, a sizing check). A pass is PASS-SMALL (a sizing change, user decision), not an edge.
+- Not tested: VIX / market-level vol as the scaler, GARCH or intraday RV forecasts, other clip/caps, the night leg (size-up banned
+  until NX), stocks, scaling the oversold shadow.
+- Runner `research/sim/ibs_vs.py`; out `data/research/program/ibs_vs_out.txt`. Program N = 1070.
+
+## Study CEF-STRESS: do CEF-RV entries in broad-market stress earn more excess per trade? pre-register 2026-11-06 BEFORE any outcome is read (N 1070 -> 1071; 1 judged arm)
+Source: user 2026-11-06 (market sold off; "is the CRASH-C blowout buy the same edge as CEF-RV?"). Question 1 (overlap of the CRASH-C decile with CEF-RV
+positions, and return correlation) is DESCRIPTIVE, no N. This entry judges one conditional: a CEF-RV size-up in stress, not a new leg.
+- Prior reads (disclosed): CEF-ALPHA's SPY-dip control already showed excess vs EW CEF larger on SPY bottom-tercile-26w dates (+254 vs +157bp 1999-2014,
+  +179 vs +71 2016-26; no t, no gate) and NAVFALL (N 891) a NAV-fall spread that is ~half SPY rebound and +71bp ex-2008/09. So the direction is not
+  unseen; this test is the first gated, pre-specified stress definition.
+- Data: CEFConnect history is no longer on disk; rebuilt from the Nasdaq Fund Network daily NAV (cef_nav.hist, the server's live source) 2007-04..2026-11
+  for the ~314 server-mapped funds (LIVE-to-2026 only: survivorship material pre-2016, see CEF-SURV99), Friday rows, price = Sharadar SFP closeunadj
+  (Nasdaq close after the SFP end 2026-10-05); disc outside [-60%, +100%] = data error. Data check vs the server panel 2023-26 reported, not tuned.
+- Trades: the frozen CEF-RV rule (cef_rv.build_trades, unchanged). Outcome per trade: net (50bp RT) minus the EW CEF universe incl. delisted (cef_alpha.universe)
+  over the same hold.
+- STRESS (frozen) at the signal week: SPY closeadj <= 0.90 x trailing-252-session high OR EW-median panel discount <= its own trailing-52-week median - 2.0pt.
+  Components reported, not judged.
+- Judge: entries 2008-01-01..2015-12-31 (before CEF-RV's 2016-26 selection window; 2008-14 was read in aggregate by CEF-OOS; 2015 untouched, reported alone).
+  Gate PASS needs all: mean(stress excess) - mean(normal excess) >= +100bp; month-clustered t >= 2.0; median diff > 0; diff > 0 in both halves 2008-11 /
+  2012-15; ex-top-5 stress trades diff > 0; diff > 0 with 3x cost (1.5% RT) on stress entries only. Else KILL: no stress size-up of CEF-RV.
+- Reported, not judged: 2016-26 (selection period), by-year, ex-2008-09, stress share and entries/yr, ceiling for a 2x stress slot size at $2.3k/$10k/$25k.
+- A PASS is a sizing conditional on CEF-RV (user decision; forward CEF-RV-FWD gate still governs CEF-RV itself), not an independent edge.
+- Not tested: stress defined by VIX / credit spreads / CEF fund-flow or leverage data; dead-fund NAV (does not exist); intraday entry during the panic;
+  category-level (muni vs equity) stress; holding past the CEF-RV exit.
+- Runner `research/sim/cef_stress.py` (data `research/sim/cef_nasdaq_hist.py`); out `data/research/program/cef_stress_out.txt`. Program N = 1071.
+- RESULT (2026-11-06): KILL both arms. Data: Sharadar SFP bars (local etf_daily.parquet absent), through 2026-10-05; 400 judge signal days.
+  Taxable (cap 2x, matched to flat 1.25x maxDD -20.7% on 2021-26; L P 0.954, C 1.503), 1bp/side, excess CAGR vs flat frontier at same maxDD:
+  P +1.19pp 2016-20 / -0.89pp 2021-26 (Sharpe 1.02 vs flat 1.09; 1.15 vs 1.21); C -5.22 / +0.23 (Sharpe 0.97, 1.13). Paired 2016-20:
+  P -0.62bp/day NW t -0.54, ex-top-5 -1.59, signal-day median -5.8bp, hit 45%, placebo 48th pct; C -0.78bp NW t -0.64, ex5 -1.84,
+  median +1.2, placebo 32nd. DSR 0.17 / 0.14. 3bp/side: P +3.08 / -0.12pp, C -4.90 / -0.83. Roth (cap 1x): P saturates (L hits the
+  4.0 bound = flat 1x except low-vol days), +0.17 / +0.54pp, placebo 66th; C -1.91 / -1.86pp. Whole shares, $2.3k/$10k/$25k, 2016-20:
+  taxable flat 15.6/17.5/17.7%, P 17.3/19.4/19.8% (DD ~1-1.4pp deeper), C 11.6/14.3/14.5%; 2021-26 flat 22.4/23.2/23.3%, P 20.6/22.1/22.3%.
+  Theory prediction (C >= flat > P) also fails: C is the worst arm on the judge window. Fails NW t, median, placebo, both-halves.
+  Oversold V6 (descriptive): SPY/QQQ triggers coincide with index IBS<0.2 on 39-51% of trigger days and with an IBS-leg signal on 56-65%;
+  trigger close->open +15..23bp in both 2016-20 and 2021-26, but the following open->open (the IBS window) is -11.9 (SPY) / +2.1 (QQQ) in
+  2016-20 vs +24 in 2021-26. Same oversold-close state, adjacent non-overlapping window; not the same trade. Program N = 1070.
+### Result - CEF-STRESS (2026-11-06, one run, N 1071): KILL (t 1.91 < 2; 3x stress cost -74bp). Judge 2008-15 DIFF +126bp, halves +199/+10, ex-top5 +105,
+median +46; 2015 alone -6; 2016-26 report +114 t 2.81 (2021-26 +37 t 1.0). Q1: the CRASH-C decile is 100% inside CEF-RV positions at all 3 fires (same edge).
+Out data/research/program/cef_stress_out.txt; memory docs/memory/58-cef-stress-crash-c-overlap-2026-11-06.md.
