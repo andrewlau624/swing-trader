@@ -344,6 +344,21 @@ def _cef_rv(state: Path, logs: Path) -> dict:
     return dict(n=len(closed), week=wk, line=line)
 
 
+def _cef_rights(state: Path, logs: Path) -> dict:
+    from . import cef_rights_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    s = w.summary(rows)
+    wk = sum(1 for r in rows if r.get("first_seen", "") >= _week_ago())
+    return dict(n=s["n"], week=wk, line=w.line(rows))
+
+
+def _cef_rights_rv(state: Path, logs: Path) -> dict:
+    from . import cef_rights_shadow as w
+    rows = _jsonl(state / w.HYGIENE_NAME)
+    closed = [r for r in rows if r.get("src") == "shadow" and r.get("x_oo") is not None]
+    return dict(n=len(closed), week=0, line=w.hygiene_line(rows, _jsonl(state / "cef-rv.jsonl")))
+
+
 def _hedge(state: Path, logs: Path) -> dict:
     from . import hedge_shadow as w
     rows = _jsonl(state / w.LOG_NAME)
@@ -536,6 +551,17 @@ REGISTRY: list[Test] = [
          "signal; research -255bp vs the rest, not validated), read beside the gate.", "2026-10-09", 60, "closed forward trades", _cef_rv,
          "make cef-rv; research/sim/cef_alpha_out.txt; round1_prose.md Study CEF-ALPHA / CEF-RV-FWD",
          ["cef_rv_shadow"]),
+    Test("CEF-RIGHTS-FWD: short a CEF through its rights pricing window (log-only)", "cef_rights_shadow.py (research-shadows): "
+         "a seasoned CEF-RV fund files a rights-offering prospectus (EDGAR, N 1084 classifier); would-be SHORT at the official close "
+         "cross of E-10, cover the close cross of E+25, excess vs EW CEF, net of 2 x 20bp and the logged borrow; Alpaca shortable/ETB "
+         "and Schwab HTB/htbRate snapshotted read-only up to entry. Research: E-10->E -352bp t -9.45 (N 1084), the short is post-hoc "
+         "(+6.1% gross), borrow unknown. Gate at 15 events first seen on/before entry: mean net > +200bp, median > 0, borrow "
+         "available >= 70%; kill mean <= 0. Taxable only.", "2026-11-07", 15, "scored offerings", _cef_rights,
+         "state/cef-rights.jsonl; make cef-rights; round1_prose.md CEF-RIGHTS-FWD (N 1085)", ["cef_rights_shadow", "cef_rights_fwd"]),
+    Test("CEF-RV rights hygiene (descriptive)", "CEF-RV signals / live positions that enter or are held inside a rights pricing "
+         "window [E-10, E+5]: their later OO excess vs unflagged trades. Descriptive (N 1086): at 10 flagged closed trades, flagged "
+         ">= 150bp worse = propose a rights-window entry block (user decision).", "2026-11-07", 10, "flagged closed trades",
+         _cef_rights_rv, "state/cef-rights-rv.jsonl; round1_prose.md (N 1086)", ["cef_rights_shadow"]),
     Test("Hedge: online learner over night filter configs", "exponential weights (eta 0.5) over 12 fixed night configs "
          "(cutoff -8/-10/-12/-15% x top-k all/2/4), trained only on forward nights; does the config it picks each night beat "
          "the fixed live rule? Gate: chosen - live >= +10bp/night, t >= 2, halves > 0; kill <= 0.", "2026-10-10", 120,

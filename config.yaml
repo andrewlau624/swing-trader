@@ -161,6 +161,7 @@ daily:
   roth_night_priority: "on"      # Roth night leg first: count noise 3x longs (flat 15:57) as cash, sell SGOV for any shortfall
   lever_g1_log: shadow           # `[lever-g1]` day-clustered 95% UB gate beside `[lever]`; lever_ok unchanged (add. 38)
   ibs_lev_shadow: shadow         # Study ACC: log the 1.25x non-callable 3x-ETF IBS overlay vs the live 1x leg (delta, maxDD, exposure); never trades
+  cef_rights_fwd: shadow         # CEF-RIGHTS-FWD (N 1085): log would-be rights-window shorts E-10 -> E+25 + borrow flags, CEF-RV hygiene (N 1086); never trades
   wash_guard_mode: shadow        # `[wash-guard]` what the Roth-first G4s guard would change vs the live one (add. 31)
   # LIVE wash guard between the two real-money books: symmetric | roth_first.
   # Only matters once DAILY_ROTH=on; addendum 31/39; symmetric = old behavior.

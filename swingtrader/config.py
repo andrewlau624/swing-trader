@@ -287,6 +287,9 @@ class DailyCfg:
     # Study ACC: log the 1.25x non-callable 3x-ETF IBS overlay vs the live 1x leg
     # (delta, running maxDD, realized exposure); no order path.
     ibs_lev_shadow: str = "shadow"
+    # CEF-RIGHTS-FWD (N 1085) + CEF-RV rights hygiene (N 1086): off | shadow. Logs would-be rights-window shorts and
+    # borrow flags (cef_rights_shadow.py, research-shadows); no order path.
+    cef_rights_fwd: str = "shadow"
     # The LIVE wash guard between the two real-money books (add. 31/39).
     # symmetric: each book avoids every name the other held/ordered/closed in
     #   31 days, on every leg; the brokerage book runs first each phase.

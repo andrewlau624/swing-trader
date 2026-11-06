@@ -406,6 +406,9 @@ rare-watch: ## Rare-trigger watchtower (CEF-pref crash floor, pref arrears, OFAC
 cef-rv: ## CEF-RV shadow: CEF discount reversion vs the EW CEF universe from official crosses (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.cef_rv_shadow
 
+cef-rights: ## CEF-RIGHTS-FWD shadow (N 1085): upcoming CEF rights offerings, would-be E-10 -> E+25 short + borrow flags, CEF-RV hygiene (no orders)
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.cef_rights_shadow $(ARGS)
+
 cef-rv-panel: ## Seed / add funds to the CEF-RV NAV panel from CEFConnect here (it blocks the server's IP) and push it; weekly rows now come from Nasdaq on the server (cef_nav.py)
 	@mkdir -p /tmp/cef-rv-panel && PYTHONPATH=. $(PY) -m swingtrader.daily.cef_rv_shadow panel /tmp/cef-rv-panel
 	@scp -q /tmp/cef-rv-panel/cef-rv-panel.json him:llm-trader/state/cef-rv-panel.json && echo "pushed to him:llm-trader/state/"
