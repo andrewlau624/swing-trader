@@ -219,7 +219,7 @@ class DailyCfg:
     # changes an order. "off" disables it; it also no-ops without ANTHROPIC_API_KEY in .env.
     news_judge: str = "shadow"
     news_judge_provider: str = "opencode-go"   # opencode-go (OPENCODE_API_KEY) | anthropic (ANTHROPIC_API_KEY)
-    news_judge_model: str = "deepseek-v4-flash"
+    news_judge_model: str = "deepseek-v4.1-flash"
     news_judge_effort: str = "low"             # Claude only
     news_judge_max_calls: int = 20             # new verdicts per night, shared by every book
     # Round 31 Study ID3 (swingtrader/daily/insider_shadow.py): the session after an officer/director open-market

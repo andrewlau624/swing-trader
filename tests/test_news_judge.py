@@ -113,7 +113,7 @@ def test_opencode_invalid_verdict_is_logged_as_an_error(tmp_path):
 def test_default_provider_is_opencode_deepseek_flash():
     from swingtrader.config import Config
     d = Config.load().daily
-    assert (d.news_judge_provider, d.news_judge_model) == ("opencode-go", "deepseek-v4-flash")
+    assert (d.news_judge_provider, d.news_judge_model) == ("opencode-go", "deepseek-v4.1-flash")  # v4-flash left OpenCode Go 2026-10-30
 
 
 def test_sec_contact_comes_from_the_resend_address(monkeypatch):

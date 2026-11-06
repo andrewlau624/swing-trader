@@ -22,8 +22,8 @@ ET = ZoneInfo("America/New_York")
 def test_new_shadow_keys_default_to_shadow_and_load_without_warnings(recwarn):
     cfg = Config.load()
     d = cfg.daily
-    assert (d.fomc_filler_mode, d.roth_night_cash_log, d.lever_g1_log, d.wash_guard_mode) == \
-        ("shadow",) * 4
+    assert (d.fomc_filler_mode, d.roth_night_cash_log, d.lever_g1_log) == ("shadow",) * 3
+    assert d.wash_guard_mode == "off"      # ended 2026-11-07: G4s went live as daily.wash_guard roth_first
     assert not [w for w in recwarn if "unknown key" in str(w.message)]
 
 
