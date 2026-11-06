@@ -76,7 +76,9 @@ def all_assets(use_cache: bool = True, max_age_days: float = 7) -> UniverseInfo:
     """
     path = CACHE / "assets.json"
     cached = _read_assets_cache(path) if (use_cache and path.exists()) else None
-    if cached is not None and _cache_fresh(cached, max_age_days):
+    # A cache with no active names is a failed fetch (2026-10-23: alpaca-py rejected the new
+    # TXSE exchange code and the night leg scanned ~40 names for two weeks); never trust it.
+    if cached is not None and cached.get("n_active", 0) > 0 and _cache_fresh(cached, max_age_days):
         return UniverseInfo(cached["symbols"], cached["n_active"], cached["n_inactive"])
     try:
         info = _fetch_assets()
@@ -98,7 +100,8 @@ def _fetch_assets() -> UniverseInfo:
     from alpaca.trading.requests import GetAssetsRequest
 
     k, s = require_alpaca_keys()
-    client = TradingClient(k, s, paper=True)
+    # raw_data: plain dicts, so a new exchange code (TXSE) cannot fail validation of the whole list
+    client = TradingClient(k, s, paper=True, raw_data=True)
 
     def pull(status):
         try:
@@ -110,14 +113,15 @@ def _fetch_assets() -> UniverseInfo:
             return []
 
     active = pull(AssetStatus.ACTIVE)
+    if not active:
+        raise RuntimeError("active asset query returned nothing")
     inactive = pull(AssetStatus.INACTIVE)
 
     def keep(a):
-        ex = str(getattr(a, "exchange", "")).split(".")[-1]
-        return ex in MAJOR and valid_symbol(a.symbol)
+        return str(a.get("exchange", "")) in MAJOR and valid_symbol(a["symbol"])
 
-    act = sorted({a.symbol for a in active if keep(a)})
-    ina = sorted({a.symbol for a in inactive if keep(a)} - set(act))
+    act = sorted({a["symbol"] for a in active if keep(a)})
+    ina = sorted({a["symbol"] for a in inactive if keep(a)} - set(act))
     return UniverseInfo(sorted(set(act) | set(ina)), len(act), len(ina))
 
 
