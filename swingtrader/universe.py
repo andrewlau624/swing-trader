@@ -24,6 +24,9 @@ from .metrics import annual_vol, dollar_volume
 
 CACHE = ROOT / "data" / "cache"
 MAJOR = {"NASDAQ", "NYSE", "AMEX", "ARCA", "BATS"}
+# ~12.7k active names on 2026-11-06. Far fewer means a broken fetch (an exchange code renamed or
+# rejected), not a real market; refuse it rather than let the night leg scan a sliver.
+MIN_ACTIVE = 5000
 
 # Plain common stock only: 1-5 letters, optional single-letter share class.
 # Excludes warrants (FOO.WS), rights, units, and CVR junk like "750CVR029" --
@@ -78,7 +81,7 @@ def all_assets(use_cache: bool = True, max_age_days: float = 7) -> UniverseInfo:
     cached = _read_assets_cache(path) if (use_cache and path.exists()) else None
     # A cache with no active names is a failed fetch (2026-10-23: alpaca-py rejected the new
     # TXSE exchange code and the night leg scanned ~40 names for two weeks); never trust it.
-    if cached is not None and cached.get("n_active", 0) > 0 and _cache_fresh(cached, max_age_days):
+    if cached is not None and cached.get("n_active", 0) >= MIN_ACTIVE and _cache_fresh(cached, max_age_days):
         return UniverseInfo(cached["symbols"], cached["n_active"], cached["n_inactive"])
     try:
         info = _fetch_assets()
@@ -121,6 +124,8 @@ def _fetch_assets() -> UniverseInfo:
         return str(a.get("exchange", "")) in MAJOR and valid_symbol(a["symbol"])
 
     act = sorted({a["symbol"] for a in active if keep(a)})
+    if len(act) < MIN_ACTIVE:
+        raise RuntimeError(f"only {len(act)} active names on major exchanges (expected >= {MIN_ACTIVE})")
     ina = sorted({a["symbol"] for a in inactive if keep(a)} - set(act))
     return UniverseInfo(sorted(set(act) | set(ina)), len(act), len(ina))
 

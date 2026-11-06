@@ -37,7 +37,7 @@ from ..live.broker import PaperBroker
 from .brokers import AlpacaAdapter, SchwabAdapter, make_adapter
 from ..live.lock import AccountLock, account_fingerprint
 from ..live.notify import Notifier
-from ..universe import all_assets, valid_symbol
+from ..universe import MIN_ACTIVE, all_assets, valid_symbol
 from . import marketdata as md
 from . import events as ev
 from . import signals as sg
@@ -709,7 +709,12 @@ class DailyExecutor:
                 self.log(f"[wash-guard] skipped ({type(exc).__name__}: {str(exc)[:80]})")
 
         # night-leg universe for this afternoon (pays the ~30s SIP pull now)
-        u = [s for s in all_assets().symbols if valid_symbol(s)]
+        info = all_assets()
+        n_active = getattr(info, "n_active", None)     # test stubs carry symbols only
+        if self.live and n_active is not None and n_active < MIN_ACTIVE:   # 10-23..11-06 the leg scanned ~40 names unnoticed
+            self.warn(f"[night] universe has only {n_active} active names (expected >= {MIN_ACTIVE}): "
+                      "asset fetch is broken, the night leg is scanning a sliver")
+        u = [s for s in info.symbols if valid_symbol(s)]
         elig = md.eligibility(u, dt.date.fromisoformat(today), price_min=self.d.night_price_min,
                               adv_min=self.d.night_adv_min, cache_dir=self.state_dir)
         self.log(f"[night] {len(elig)} names eligible today "
