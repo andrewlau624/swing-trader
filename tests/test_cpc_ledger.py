@@ -239,6 +239,17 @@ def test_digest_read_and_registry(tmp_path):
     assert any("cpc_ledger" in t.covers for t in testing.REGISTRY)
 
 
+def test_digest_upcoming_excludes_past_deadlines(tmp_path, monkeypatch):
+    """ACTION_REQUIRED events past their deadline are not 'upcoming'; they are counted as open past deadline."""
+    p = tmp_path / L.LOG_NAME
+    L.add_event(p, ev(issuer="OLD", security="OLD", status="ACTION_REQUIRED"), now=at(2026, 10, 1))
+    L.add_event(p, ev(issuer="NEW", security="NEW", status="ACTION_REQUIRED",
+                      deadline=L.close_et(dt.date(2026, 11, 12))), now=at(2026, 11, 5))
+    monkeypatch.setattr(L, "_now", lambda now=None: at(2026, 11, 7))
+    line = L.digest_read(tmp_path, tmp_path)["line"]
+    assert "upcoming deadlines NEW 11-12 (1 open past deadline" in line and "OLD" not in line
+
+
 def test_umh_hold_only_no_events_and_excluded_from_report(tmp_path):
     """User decision 2026-10-04: UMH is hold-only, generates nothing, and never counts toward validation."""
     import datetime as _dt

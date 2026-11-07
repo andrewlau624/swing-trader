@@ -581,9 +581,11 @@ def digest_read(state: Path, logs: Path) -> dict:
     st = fold(rows)
     r = report(rows, n)
     new_wk = [e for e in st.values() if e["first_known"][:10] >= wk]
-    upcoming = sorted((e for e in st.values() if e["status"] in ("KNOWN_AVAILABLE", "ACTION_REQUIRED") and e.get("deadline")),
-                      key=lambda e: e["deadline"])[:3]
+    upcoming = sorted((e for e in st.values() if e["status"] in ("KNOWN_AVAILABLE", "ACTION_REQUIRED") and e.get("deadline")
+                       and n < dt.datetime.fromisoformat(e["deadline"])), key=lambda e: e["deadline"])[:3]
     up = ", ".join(f"{e['security']} {e['deadline'][5:10]}" for e in upcoming) or "none"
+    late = len(r["open_past_deadline"])          # ACTION_REQUIRED stays open past its deadline until cpc-done/-failed
+    up += f" ({late} open past deadline, close with cpc-done / cpc-failed)" if late else ""
     ann = "too early" if r["annualized_at_10k"] is None else f"{r['annualized_at_10k']:+.1%}/yr at $10k"
     line = (f"{len(new_wk)} new this week; upcoming deadlines {up}; completed {r['completed']}, missed {r['missed']}; "
             f"realized ${r['total_pnl_after_tax']:+,.0f} after tax vs est ${r['estimated_vs_realized'][0]:,.0f}; "
