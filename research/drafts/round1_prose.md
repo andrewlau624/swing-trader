@@ -9888,3 +9888,152 @@ Out: data/research/program/edgar_micro_out.txt; runner research/sim/edgar_micro.
 - QQQ 2025-10-29..2026-03-30: base +29.6% (DD -9.4) cap +23.3 (-8.3). 2022: base 53.7 (-12.2) cap 49.1 (-9.2).
 - Live replay 17 sessions (descriptive): base +0.3% maxDD -19.5, cap +8.0% / -5.9, dcash +3.4% / -2.9.
 - Money $2.3k/$10k/$25k (floor shares): base 37/45/46%, cap 25/30/31%; MAR lower at every size. Out: night_beta_cap_out.txt.
+
+## Study GEO-HEADLINE: geopolitical-acts spikes -> next-auction drift in SPY/USO/XLE/ITA/GLD, pre-register 2026-11-07 BEFORE any return is read (overnight agent; N 1114 -> 1116: N 1115 primary, N 1116 secondary family)
+- Origin: user forwarded a US/Israel-Iran war essay. NEWS-DRIFT (N 885) closed single-stock Benzinga headlines intraday (~5 min);
+  the macro/geopolitical sibling at the 1-5 session horizon from a regular-hours auction was never tested.
+- Data (free): Caldara-Iacoviello daily GPR (matteoiacoviello.com, data_gpr_daily_recent.xls, 1985-01-01..2026-11-02, newspaper
+  article counts, calendar days), column GPRD_ACT (acts: war begins, military escalation, terror acts). Yahoo daily open/close/adjclose
+  (vt_flow.yahoo_ohlc; regular-hours official-session bar: open ~ opening cross, close = closing cross).
+- Trigger (fixed, no tuning): newspaper date D with GPRD_ACT(D) >= 99th pct of the trailing 365 calendar entries (excl. D, min 300);
+  declustered: a trigger within 14 calendar days of the previous kept trigger is dropped (first spike of an episode).
+  Signal trade day T = first NYSE session with date >= D (articles dated D describe events through D-1; GPR is not real-time, so
+  a live version needs a replica; entry on T's close is the honest first moment).
+- Primary (N 1115): long SPY from the 16:00 closing cross on T to the closing cross on T+5 sessions. Mechanism: fear overshoot /
+  risk-averse forced de-risking (vol-targeters, VaR) sells into the shock, liquidity providers are paid ("buy the invasion");
+  prediction: SPY close(T)->close(T+5) mean and median > unconditional, falsified if <= placebo median or negative.
+- Secondary (N 1116, family, reported not judged on): (a) entry at open(T+1) and the optimistic open(T) (live-replica only),
+  h = 1, 3, 5; (b) USO long (continuation: supply-risk premium builds), GLD long (continuation: haven), XLE long, ITA long
+  (continuation), same close(T)->close(T+5); (c) 95th-pct trigger (more events) for SPY.
+- Judge: 2008-01-01..2026-11-02 (GLD/USO/ITA only exist 2004-06; nothing was tuned on any period; 1993-2007 SPY reported as a
+  pre-period check, not judged). Halves 2008-2016 / 2017-2026.
+- Report: n, mean/median/hit, t, ex-top-5, placebo (2000 draws of same-size random sessions in the judge period, percentile of mean),
+  cost 1bp/side base and 3x, gap-vs-trade split (close(T-1)->open(T) gap, open(T)->close(T) day, close(T)->close(T+5) trade),
+  DSR threshold at program N ~1116 (t* ~ sqrt(2 ln N) ~ 3.7), money at $2.3k/$10k/$25k.
+- Ceiling FIRST (from trigger counts only, no returns): 99th pct declustered = 2.72 events/yr (2008+), 95th = 7.63/yr; 5-session
+  hold, 100% of account deployable (one ETF). Gate +8pp/yr at $10k needs net edge per event >= 8/(2.72*0.5) = 5.9% (99th) or
+  >= 2.1% (95th) at 50% capture. A 5-day SPY sd is ~2.3%; a +5.9% mean drift is implausible a priori -> expected CEILING-KILL.
+  The one look runs anyway because data is on disk in < 1 hour (test-before-pushing-back rule) and answers the essay's question.
+- Kill: primary judge mean net <= 0 or median <= placebo median, either half negative, ex-top-5 <= 0, or ceiling at $10k < +8pp/yr.
+  Runner research/sim/geo_headline.py, out data/research/program/geo_headline_out.txt. One look.
+
+## Study WAR-ENERGY: hold energy for 6 months after a geopolitical oil supply shock begins, pre-register 2026-11-07 BEFORE any return is read (overnight agent; N 1112 -> 1114: N 1113 primary, N 1114 secondary family)
+- Origin: user-forwarded essay (Middle East war / oil disruption may last longer than markets price). General form: after an
+  oil supply shock begins, does energy (or crude) beat the market over the next 3-6 months, and does a small energy sleeve cut
+  the account's drawdown in those windows better than simply de-risking into bills?
+- Ceiling (alpha form, before any data): events/yr x net excess x deployable x capture. Hamilton/Kilian geopolitical onsets ~7 in
+  1950-2008 (0.12/yr); generous 0.25/yr x 15% 6m excess x 100% x 50% = +1.9pp/yr at $2.3k/$10k/$25k/$100k alike (one ETF, XLE ~$90
+  whole shares fine). Even 1 event/yr gives 7.5pp. -> **CEILING-KILL as alpha, recorded now.** Evaluated ONLY as a hedge below.
+- Event list (fixed before returns from Hamilton 2011 NBER w16790 "Historical Oil Shocks", section text + Table 1, and Kilian 2008;
+  onset = month of the disruptive event; entry at the END of the onset month so it is ex-ante; hold months t+1..t+6):
+  CORE (n=7, published chronology): 1952-04 (US refinery strike + Iran boycott), 1956-10 (Suez), 1973-10 (Arab-Israeli war/OAPEC
+  embargo), 1978-11 (Iranian revolution strikes), 1980-09 (Iran-Iraq war), 1990-08 (Kuwait invasion), 2002-12 (Venezuela strike +
+  Iraq war, merged: 3 months apart). ADDITIONS (n=3, chosen by me with hindsight knowledge of outcomes -> reported separately, never
+  judged): 2011-02 Libya, 2019-09 Abqaiq, 2022-02 Russia-Ukraine. 2026 episode: describe only.
+- Data: Ken French 49-industry VW monthly "Oil" (1926+), 12-industry "Enrgy", F-F factors (Mkt = Mkt-RF + RF, RF); FRED WTISPLC
+  monthly (1946+), DCOILWTICO daily (1986+); Yahoo XLE/SPY (1998+), USO (2006+), EWC/EWJ (1996+); backtest book series 1999+
+  (upro_gate/book.parquet) for the account proxy in daily windows.
+- Primary (N 1113): CORE events, 6m cumulative Oil minus Mkt (simple-return difference of compounded legs).
+  G1: median > 0, >= 5/7 positive, ex-top-1 median > 0. G2 placebo: core median > 90th pct of medians of 7 random onset months
+  (10,000 draws, 1927-2026). G3 hedge: account = 90% Mkt + 10% sleeve over the 6m window; ENERGY sleeve vs BILLS sleeve (same 10%
+  de-risk): median within-window maxDD (monthly) better AND median window return >= bills. All three = PASS-HEDGE (n=7 -> at most
+  "hedge unproven but consistent", no sizing claim). Any fail = KILL as hedge.
+- Secondary (N 1114, descriptive, never rescues the primary): 3m horizon; price trigger T (WTISPLC 3m change >= +25%, first month,
+  12m refractory; 1974+ only meaningful, controls before); daily trigger (DCOILWTICO +25% in 30 sessions, entry next close) for
+  XLE-SPY / USO-SPY / EWC-EWJ 63/126-session excess; ADDITIONS list; unconditional always-on 10% Oil sleeve vs 10% bills 1927-2026
+  (CAGR, maxDD); corr(Oil, Mkt) in shock windows vs all months; book proxy 1999+ daily windows; ex-top-1, halves (pre/post 1975).
+- Kill: any of G1-G3 fails. Runner research/sim/war_energy.py, out data/research/program/war_energy_out.txt. One look.
+
+### USO-ROLL (N 1117 used; 1118 unused, 2026-11-07): CEILING-KILL, no signed outcome read
+- Idea: front-run the oil-ETF / GSCI monthly WTI roll (USO 4-day roll ~2 weeks pre-expiry Feb 2009 - Apr 2020; first 10 trading
+  days, multi-month, discretionary from May 2020 per USO 8-K 2020-04-30; GSCI 5th-9th bday). Overlaps the CL/NG monthly index roll
+  row already ceiling-killed (~1-4%/yr) and FUT-ROLL (Databento CL 2011-25 sign-unstable); re-checked with free data in ETF form.
+- Ceiling = 12 x E|d log(F2/F1) over window| x notional/equity x 50% with the SIGN OF EVERY WINDOW KNOWN (EIA RCLC1/RCLC2 1985-2024-04;
+  USO/USL Yahoo 2009-26). Forced flow moves the spread, so outright USO timing (the only Roth form) is bounded by it.
+- Bounds at 1x: GSCI window 4.3pp (1985-2008) -> 2.9 (2009-15) -> 1.8 (2016-20) -> 1.7 (2020-24); USO window 4.3 -> 2.1 -> 1.2 -> 1.6.
+  ETF form long USL / short USO (taxable, Reg T max = 1x spread): 3.6-6.4pp (inflated by 12-month ladder slope noise). Roll-window
+  |spread move| ~= random same-length windows (e.g. 2016-20 USO window 19bp vs 27bp random): no excess roll-window variance in CL,
+  unlike ES/NQ (3-4.6x). Only size-up = MCL micro calendar spreads at 2-3x (taxable + futures approval; not Roth): post-2016 3x
+  bound 3.5-5.5pp, honest (~1/3 of bound, TME ratio) ~1-2pp. All < +8pp at $10k -> CEILING-KILL. $2.3k: one MCL spread ~3x notional
+  (rounding); $25k: same %; $100k: capacity not the constraint. Runner research/sim/uso_roll.py, out data/research/program/uso_roll_out.txt.
+- Not tested: signed outcome (deliberately), BNO/UCO/SCO and Brent roll, RBOB/NG/ag GSCI legs, intraday TAS / settlement-window
+  pressure, USO creation/redemption (AP) flows, 2020-04 position-limit episode, deferred-month ETF (USO 12-month = USL) premium/
+  discount to NAV around rolls, roll-yield size conditioning, options on USO.
+
+## Study OIL-SHOCK: scale the IBS leg down while crude is spiking? pre-register 2026-11-07 BEFORE any leg return is read (overnight agent; N 1110 -> 1112: N 1111 primary, N 1112 secondary)
+- Question (user priority: drawdowns): are the MR legs hurt more in energy-driven selloffs (1990, 2008 H1, 2022, 2026) and is a
+  pre-registered OIL condition a reason to scale a leg down? Distinct from REGIME-10M / BREADTH-GATE (trend/vol gates on the MR book,
+  class CLOSED): the conditioner is crude oil only. Mechanism to falsify: an energy supply shock is a fundamental (stagflation)
+  repricing, so oversold closes keep falling instead of mean-reverting; prediction: IBS-leg mean on ON sessions < 0 and below OFF.
+- Seen before registering (no leg returns): ON-day counts per year only. P is ON 3.7% of 1986-2026 sessions, S 4.2%. P catches
+  1990/2022/2026 but only 1 day of 2008 H1 and many post-crash REBOUNDS (1986, 1999, 2009, 2016, 2020) where the mechanism does not
+  apply; S catches 2008 H1/2021 but also slow uptrends. Stated now, not fixed afterwards.
+- Signal (FRED DCOILWTICO, last obs <= signal day d; NYMEX settles 14:30 ET, before the 16:00 close; obs <= 0 -> NaN):
+  P (N 1111, PRIMARY): WTI / WTI 20 obs earlier - 1 >= +20%. S (N 1112, secondary, never rescues P): WTI >= max of the prior 252 obs (1y high).
+- Leg (judged): live IBS rule (top-3 EQ18 by 12-1 momentum, IBS<0.2 at close d, open d+1 -> open d+2, EW, 5bp/side), dated by d,
+  0 on no-signal sessions. Judge series (never used to choose the rule): 1999-2015 Sharadar funds via shar_crash.ibs_daily (as REGIME-10M);
+  2016-20 ibs_oos series (research/data.etf cache); PROXY 1986-1998 single-index IBS<0.2: ^GSPC 1986-01..1993-01 close d -> close d+1
+  (Yahoo ^GSPC opens equal the prior close 50-90% of days, so open->open is fake; H/L are real), SPY 1993-02..1998-12 open d+1 -> open d+2.
+  Halves: 1986-2002 / 2003-2020. 2021-26 = touched, REPORT only (incl. 2022, 2026).
+- Night leg: DESCRIPTIVE only (shar_crash.night_daily 1999-2026 Sharadar; NX judging reserved). Book = 0.5 IBS + 0.5 night, descriptive.
+- Arm: IBS leg x0 (cash) on ON sessions (x0.5 reported, not gated). Gates (judge 1986-2020, P): G1 IBS mean on ON sessions < 0 AND
+  circular-shift placebo of the ON mask (1,000 random offsets, keeps episode lengths) one-sided p <= 0.05; G2 ON mean < 0 in BOTH halves;
+  G3 arm maxDD better by >= 2pp AND CAGR >= base - 0.2pp; G4 not a VIX relabel: ON mean < 0 on ON sessions with VIXCLS(d) <= 25
+  (1990+); G5 ON mean < 0 after dropping the worst episode (episode = ON runs merged across gaps <= 20 sessions). Any fail = KILL.
+  Report: ON/OFF means, t, overlap with VIX>25, n episodes (small: say so), maxDD contribution, CAGR/maxDD/MAR, 2x cost, ex-top-5.
+- Ceiling (before any return): ON ~10 sessions/yr; IBS fires on ~1/3 of sessions; even -50bp/trade avoided at 0.5 book weight is
+  ~10 x 1/3 x 50bp x 0.5 ~ 0.8pp/yr. It cannot be an alpha source (< +8pp gate); it is judged ONLY as a drawdown dial that must not cost
+  return (G3), the standard REGIME-10M failed. Runner research/sim/oil_shock.py; out data/research/program/oil_shock_out.txt. One look.
+
+### Result - GEO-HEADLINE (N 1115-1116, 2026-11-07, one look): KILL + CEILING-KILL (half1 and pre-period fail; continuation is in the gap)
+- Triggers: 99th-pct GPR acts, declustered, 104 total, 49 in 2008-26 (2.6/yr); 95th: 145 in 2008-26.
+- Primary SPY close(T)->close(T+5) net 1bp/side: judge +63.7bp med +78.7 hit 69% t 2.14 ex-top-5 +20.5, 3x cost +59.7, but the
+  unconditional 5-day SPY is +24.5 (med +42): excess ~+39bp, placebo pct 88 (p ~0.12). Half1 2008-16 +10.8 (uncond +18.0, placebo
+  pct 44, ex5 -54); half2 2017-26 +110.6 t 2.55 (placebo 97). Pre-1993-2007 (report) +18.7 vs uncond +21.3 (pct 49). 95th trigger:
+  +11.0 vs +24.5 (pct 26), half1 -31.7. => the "buy the invasion" drift exists only in 2017-26 (the dip-buying regime). Kill gates hit:
+  half1 median below placebo median; pre-period null; t 2.14 << DSR t* 3.75.
+- Gap-vs-trade (SPY judge, mean bp): pre-day +15, gap +14, day T +30, trade +66. USO gap +58 / day -1 / trade +12 (h5 close entry
+  +9.8, t 0.12); XLE gap +46 / day +23 / trade -5 (close entry h1-h3 negative, -48/-61bp). Crude/energy continuation is ENTIRELY in
+  the untradable gap; after the auction it fades. GLD: no haven drift (h5 +10.7 vs uncond +18.5).
+- Best family cells (not judged; ~45 cells): ITA open(T) h1 +40.5bp t 2.38 placebo 99.6 (needs a real-time GPR replica at 09:30;
+  GPR is published with a lag), SPY open(T+1) h5 +81.3 t 2.85 placebo 97.6 (same 2017-26 tilt). None clears t* 3.75.
+- Ceiling: 2.6 ev/yr x +64bp x 100% x 0.5 = +0.8pp/yr at $2.3k/$10k/$25k alike (excess-only ~+0.5pp); $100k same (SPY, no
+  capacity limit). Gate needed >= 5.9%/event. CEILING-KILL regardless of the statistics.
+- Out: data/research/program/geo_headline_out.txt; runner research/sim/geo_headline.py; data data/research/geo_headline/.
+
+### Result - WAR-ENERGY (N 1113-1114, 2026-11-07, one look): CEILING-KILL as alpha; KILL as hedge (G1, G2, G3 all fail)
+- PRIMARY CORE 7 onsets (Hamilton/Kilian), French Oil vs Mkt months t+1..t+6: median -4.4%, mean -2.2%, hit 3/7, ex-top-1 median
+  -4.8%; placebo percentile 16% (random-onset p90 +6.3%). By episode: 1952 -4.4, 1956 +8.1, 1973 +0.5, 1978 +8.8, 1980 -6.7,
+  1990 -16.5 (WTI already -24.5% by t+6), 2002 -5.2. Halves: pre-1975 median +0.5, post-1975 -5.2. 12-ind Enrgy identical.
+- Hedge G3: 10% energy sleeve vs 10% bills (both funded from Mkt): window maxDD WORSE in 7/7 (median -5.18% vs -4.52%);
+  median window return +10.56% vs +9.23% only because the market rose in 6/7 windows. corr(Oil, Mkt) in windows 0.41-0.94
+  (1973 0.47), all months 0.72: energy equities fall WITH the market in shock windows; they are not a drawdown hedge.
+- Secondary (descriptive): 3m CORE median +4.0%, 5/7, placebo pct 89% (just below p90; the early pop, ~0 after 6m; DD still worse
+  0/7). Additions (hindsight) 2011 -4.1 / 2019 -36.1 / 2022 +28.9. Price trigger T (WTI 3m >= +25%, 17 events 1974-2026):
+  median +0.5%, hit 9/17, ex-top-1 -1.1%, placebo pct 56%, sleeve DD better 1/17. Always-on 10% Oil 1927-2026: CAGR +10.46%
+  maxDD -82.8 vs Mkt +10.31/-83.7 vs 10% bills +9.76/-79.8 (bills cut DD 3x more than oil). Daily trigger (DCOILWTICO +25%/30d,
+  next close): XLE-SPY median -2.3% (63d) / -3.1% (126d); USO-SPY +0.4% / -12.4%; EWC-EWJ +5.9% / +3.3% (n~12, noisy); backtest
+  book +10% XLE vs +10% cash 126d window DD identical (median -5.3%).
+- 2026 (describe only): WTI 57.3 (2025-12-31) -> max 114.6 (2026-04-07) -> 99.6 (2026-11-03); YTD XLE +40.6%, USO +114.6%,
+  SPY +8.7%; French Oil-Mkt by month mixed (Jan-Mar +12.6/+9.7/+18.0, Apr-Jun -14.4/-11.4/-4.9); the T trigger fired 2026-03 and the
+  6m window after it was Oil -14.9% vs Mkt. The essay's trade (pre-shock energy) paid in 2026; entering AFTER the trigger did not.
+- Mechanism read: the shock is priced in the onset month (energy equities move with the first spike), then mean-reverts as supply is
+  replaced (Saudi spare capacity 1980/1990, SPR); "longer than expected" is not systematically under-priced in 7 of 7 + 17 triggers.
+- Out data/research/program/war_energy_out.txt; runner research/sim/war_energy.py; data data/research/war_energy/.
+
+### Result — OIL-SHOCK (2026-11-07, one run; N 1110 -> 1112): P and S both FAIL every gate -> KILL; oil is not a reason to scale IBS down
+Out: data/research/program/oil_shock_out.txt; runner research/sim/oil_shock.py. Judge IBS 1986-2020 (8,823 sessions; Sharadar EQ18 vs ibs_oos
+overlap corr 0.98 on 2017-20). P ON 332 sessions (3.8%), 41 episodes (most are post-crash REBOUNDS, as stated; true stagflation shocks
+in the judge: 1990, 2000, 2004-05 -> n ~3-5, tiny). IBS per session ON +0.04bp vs OFF +0.59bp (per trade ON +0.1 median +8.0 vs OFF +2.0
+median +4.8), circular-shift placebo p 0.44, halves -0.85 / +1.21bp, ON & VIX<=25 +1.62bp, ex-worst-episode (1990-07..10, -5.0% on 40 ON
+sessions) +1.65bp; x0 arm CAGR 0.47 vs 0.45%, maxDD -57.2 vs -57.5% (G3 fail). S ON 369 (4.2%), 43 episodes: IBS ON +4.61bp vs OFF +0.39
+(the WRONG sign: oil at a 1y high is a GOOD IBS state, halves -5.9 / +10.8), p 0.87; x0 arm costs CAGR. 2x cost: same picture (P ON -3.0
+vs OFF -2.4bp). VIX overlap: 37% of P-ON sessions have VIX>25 (vs 15% OFF) but P-ON is only 9% of VIX>25 days; S is independent of VIX
+(15% vs 16%). The only damage P shows sits in its VIX>25 subset (-3.9bp vs OFF&VIX>25 +9.8) and in 1990 -> a vol-gate relabel at most.
+Episodes: 1990 Gulf War -5.0% (proxy, the single bad one); 2008 H1 (S, 35 sessions) +1.5%; 2022-01 P -4.6% / 2022-03 -0.0%; 2026-03..04
+P +10.0% (24 sessions). REPORT 2021-26 (touched): IBS ON +19.8 vs OFF +3.4bp; x0 cuts maxDD -21.0 -> -18.6 (2022-01 episode = 56% of the
+2022 DD log-loss) but costs 2.1pp/yr CAGR (MAR 0.46 -> 0.41). Night (descriptive): 1999-2015 ON +30.1bp vs OFF +10.5 (P), +17.2 vs +11.0
+(S): the night leg EARNS MORE in oil spikes; 2016-26 P ON -9.6 vs +2.9 (t -0.7, n small). Book 0.5/0.5 1999-2015: x0 on ON costs 1.7pp/yr
+CAGR, maxDD unchanged (the 2002 maxDD had 0 ON sessions). Single-index SPY-IBS 1993-2026: ON -0.05 vs OFF +1.21bp, maxDD worse with x0.
+Reading: the mechanism (energy shock -> dip-buying fails) is not visible beyond the 1990 episode; oil spikes are mostly rebounds and
+the MR legs are flat-to-better in them. Same verdict as REGIME-10M: a size-down is at best a drawdown dial that costs return. DSR moot.
