@@ -9746,3 +9746,145 @@ in-session), so listed micro-caps also tend to wire first; this study measures w
   classifier; newswire timestamps. Fix: edgar_sess.bars() now maps Sharadar digit-suffixed tickers (SUNS1 -> SUNS) and drops invalid
   symbols instead of failing the whole day (EDGAR-SESS had 167 of 5,271 events without bars; verdict unaffected).
 Out: data/research/program/edgar_micro_out.txt; runner research/sim/edgar_micro.py; data data/research/edgar_micro/.
+
+## Study UPRO-GATE: trend gate on the Roth's passive UPRO sleeve only, pre-register 2026-11-06 BEFORE any outcome is read (overnight agent, user priority = drawdowns; N 1106-1107: N 1106 primary, N 1107 secondary; N after = 1107)
+- Why this is not REGIME-10M (N 919-922, class closed): that gated the mean-reversion book, whose OFF sessions earn the
+  premium. Here only the passive 1/3 UPRO core of the Roth (NEXT.md "Index-beat hunt", Roth = 1/3 UPRO + 2/3 Roth book;
+  the book sizes from DAILY_ROTH_CAPITAL, executor.py ~1731, so the UPRO core is a manual holding) is gated. It has no MR
+  premium to lose; the question is a drawdown dial on 3x beta, not alpha. The +8pp ceiling gate does not apply in alpha form;
+  the judge is risk-adjusted (MAR) with a CAGR floor and the honest benchmark "hold less UPRO".
+- Prior knowledge disclosed: the Faber 10-month SMA literature (1901-2012 1x results) is known to the author; no 3x result
+  on this data has been read. Parameters are the published defaults, not tuned.
+- Data (free): ^GSPC daily close (Yahoo, cached data/research/vtflow/y_GSPC.parquet) + Shiller monthly dividends
+  (ie_data.xls, D/12 spread evenly over the month's trading days) = S&P 500 TR through 1993-01; SPY adjclose (Yahoo) from
+  1993-02. FRED DTB3 (1954+). Real UPRO (Yahoo adjclose) 2009-06+. Files in data/research/upro_gate/.
+- Synthetic 3x (fixed): r3 = 3 r_TR - 2 rf - 0.91%/252, rf = DTB3/100/252 per trading day (2x notional financed at the
+  T-bill rate). Validation only (not a verdict input): annualized tracking error and CAGR drift vs real UPRO 2009-26;
+  sensitivity arm financing 2 x (rf + 0.5%) reported.
+- OFF asset: T-bills, rf - 0.09%/252 (SGOV fee).
+- Primary (N 1106) 10M: at each month-end close, S&P TR index > its 10-month SMA of month-end TR closes -> UPRO next month,
+  else bills. Execution: the official CLOSING CROSS of the NEXT trading day (first session of the new month): strict no
+  lookahead (the state uses the month-end close, which is only known after 16:00), regular-hours by construction (the
+  16:00 cross, signals.regular_clock), and close-to-close is the only price available pre-1962 (^GSPC opens = closes then).
+  The month's first session is held under the old state. Descriptive only: same-day month-end close (Faber canonical).
+- Secondary (N 1107) 200D: daily S&P price close vs its 200-day SMA, 1% band (ON when close > 1.01 SMA, OFF when
+  close < 0.99 SMA, else keep state), executed at the next session's close cross.
+- Costs: 2bp per side per switch (UPRO/SGOV spreads at $2-25k), shock 3x (6bp/side). Roth: no tax on switches, no margin.
+- Judge: 1955-01..2008-12 (incl. 1962, 1973-74, 1987, 2000-02, 2008), halves 1955-1981 / 1982-2008. 2009-26 descriptive
+  (real UPRO and synthetic), incl. 2020-03 and 2022 episodes.
+- Gate (each rule separately; PASS = all three in BOTH halves): G1 MAR (CAGR / |maxDD|) gated >= 1.5x buy-and-hold synthetic
+  UPRO; G2 gated CAGR >= 80% of B&H CAGR; G3 worst rolling 12-month return (month-end) gated > B&H.
+- Honest benchmark (reported with the verdict): static w UPRO + (1-w) bills, monthly rebalanced, w solved so its judge-period
+  maxDD equals the gated sleeve's; plus fixed w = 1/2 (= 1/6 of the account). If the matched static mix has >= the gated
+  CAGR in both halves, the gate is NOT better than holding less UPRO and the verdict says so.
+- Also reported: switches/yr, cost per switch, whipsaw count (switch reversed within 2 months), whole-Roth effect
+  (1/3 sleeve + 2/3 book, monthly rebalanced; book = 0.5 IBS + 0.5 night daily-bar book at 5bp/side from the REGIME-10M
+  harness 1999-2026, an assumption: Roth IBS skip of QQQ/SMH not modeled) at $2.3k/$10k/$25k start + $7.5k/yr deposits.
+- Kill rule: any gate fails in either half -> KILL for that rule. A PASS changes nothing live; it yields a proposal only.
+  Runner research/sim/upro_gate.py, out data/research/program/upro_gate_out.txt. One look.
+
+## Study BETA-HEDGE: per-leg index hedge of the book (CLAUDE.md priority #4, drawdown form), pre-register 2026-11-06 BEFORE any hedged outcome is read (overnight agent; N 1102 -> 1105: N 1103 IBS-QQQ primary, N 1104 night-QQQ primary, N 1105 SPY secondary arm)
+- Question: if each leg is short its own measured beta in QQQ over the exact holding window, does the edge survive with a much
+  smaller maxDD, so the hedged leg levered to the unhedged maxDD earns MORE than the unhedged leg?
+- Already known (read before registering, unhedged decomposition only): `beta_alpha_iso` 2021-26 IBS sleeve alpha ~0 (MKT beta
+  ~1.0, sys ~100%), night alpha 15%/yr (sys 16-25%); NX 2003-15 night beta to IWM 0.26, +3.07 -> +2.1bp after it. PRIOR: IBS hedged
+  FAILS G1 (its premium is a conditional market-level bounce that the same-window QQQ short removes); night hedge changes little
+  (low beta) and G2/G3 hinge on whether the leg's worst nights are market nights. Hedged numbers have not been computed anywhere.
+- Rule (primary, fixed): per position, beta = OLS slope of the name's close-to-close returns on QQQ's over the 60 sessions ending
+  at the decision day d (no lookahead; < 40 valid obs -> beta 1.0, share reported), clipped to [-4, 4]. Hedge = short
+  sum_i(w_i x beta_i) x leg notional of QQQ over the same window: IBS open(d+1) -> open(d+2); night close(d) cross -> open(d+1) cross.
+  Hedge cost QQQ 1bp/side; borrow 0; no short rebate. Leg rules/weights/costs exactly as live (book.py ibs_days / night_days, live
+  tilt, weekend 0.5, IBS 1bp/side, night 2.5bp/side); idle capital earns 0 in both arms (excess-of-cash comparison).
+- Secondary (N 1105, judged only as a second arm, not rescuing a failed primary): same rule with SPY as hedge/beta index.
+- Roth form (reported, not separately judged): long PSQ (inverse QQQ) of beta x notional over the same window, real PSQ prices
+  (expense ratio and daily reset embedded), 3bp/side; no leverage in the Roth.
+- Judge: IBS on 2016-01..2020-12 ETF series (ibs_oos data; the IBS rule was not chosen there; the hedge is new). Night: live taxable
+  fills (server logs/daily-fills-live.jsonl, 2026-09-23 ..), per-night sleeve return on deployed capital, hedged with real QQQ
+  close/next-open (Yahoo) and 60d betas from Yahoo daily closes. 2021-26 night backtest (night_trades.v2) and IBS 2021-26: descriptive
+  only. Combined book (0.5/0.5): descriptive 2021-26.
+- Gates (per leg, all on the judge period): G1 hedged mean daily return NW(5) t >= 2; G2 hedged MAR (CAGR/|maxDD|) >= 1.3 x unhedged
+  MAR; G3 hedged leg levered by L = unhedged maxDD / hedged maxDD (capped so L x (1 + |avg beta|) <= 2 gross, Reg-T; margin 10%/yr on
+  long borrow above 1x) has CAGR >= unhedged CAGR. PASS = G1 & G2 & G3. Night live sample < 60 sessions: G1 is reported, and a
+  night verdict on live alone is "underpowered" unless all three pass; the 2021-26 backtest cannot rescue it.
+- Also reported: Sharpe, worst 21 sessions, 2020-02-19..2020-04-30 and 2022 stress windows, regression alpha/beta (NW t) of each leg
+  on same-window QQQ, halves, 2x/3x cost shock (legs + hedge), ex-top-5 days, levered return, $2.3k/$10k/$25k with whole-share hedge
+  rounding error for QQQ / PSQ / SH, and the beta vs alpha split of each leg (share of raw return explained by beta x QQQ).
+- Kill: any gate fails -> KILL of this form (60d close-close OLS beta, single-index QQQ/SPY short, same-window, per-leg). Not
+  covered by this registration: multi-factor hedges, regime-conditional hedging, futures (MNQ) hedges, option hedges.
+- Runner research/sim/beta_hedge.py, out data/research/program/beta_hedge_out.txt. One look.
+
+### Result - BETA-HEDGE (N 1103-1105, 2026-11-06, one look): KILL (all three arms fail G1-G3; night live underpowered)
+- IBS (N 1103, judge 2017-20, 788 signal days 2017-26): unhedged 15.7%/yr, maxDD -13.5%, MAR 1.16, +6.16bp/day NW t 2.39; same-window
+  QQQ regression beta 0.99 (t 28), alpha 0.0%/yr (t 0.00). QQQ-hedged: -3.3%/yr, maxDD -16.8%, -1.24bp t -0.97, ex-top-5 -2.34 t -2.0,
+  invested-day median -2.7bp; levered L 0.81 -> -2.6%/yr. The QQQ beta position explains 120% of the raw leg. Halves 2017-18 -1.67 /
+  2019-20 -0.82. 2020-02-19..04-30: unhedged +13.8% (DD -10.7) vs hedged -1.2% (DD -2.4). 2021-26 (descriptive): hedged +0.53bp t 0.32.
+- SPY arm (N 1105): IBS +2.68bp t 1.82, 6.7%/yr, maxDD -11.2%, MAR 0.60 (< 1.16): fails G1-G3; its residual is the TECH tilt of the picks
+  (QQQ outran SPY), not IBS alpha. 3x cost -0.10bp.
+- Roth PSQ form (a/(1+b) long, PSQ b/(1+b)): IBS -1.47bp t -2.04 2017-20. Not viable.
+- Night (N 1104): live judge = 17 sessions with trades (109 round trips, 2026-09-23..11-05): unhedged +1.6bp/session t 0.02, hedged +12.8bp
+  t 0.21 -> G1 fail, UNDERPOWERED by registration. Live position beta mean 1.72 / median 2.45 (clip 4 binds: single-stock 2x LETFs
+  AAOX/ORCX/MRVU/DLLL/IONX...), regression beta 4.46 (t 6.6), corr 0.82 to QQQ close->open: the live night leg is currently a levered
+  overnight-tech bet; hedging cut its sleeve maxDD -19.5% -> -9.7% on this tiny sample. Backtest 2021-26 (descriptive, beta 0.49): unhedged
+  45.9%/yr maxDD -20.6 MAR 2.23, alpha 35.8%/yr t 3.47; QQQ-hedged 27.6%/yr maxDD -28.8 MAR 0.96 (worst hedged stretch 2026-03..06 = a
+  rally); 2022 hedged DD -7.3 vs -12.2 but return 38.7 vs 53.7%; 3x cost hedged t 0.83. Beta share of raw night return 34%.
+- Book 0.5/0.5 2021-26 (descriptive): unhedged 31.8%/yr, maxDD -10.5%, MAR 3.04; QQQ both legs 14.0%/-15.5%; IBS->cash + night hedged
+  13.9%/-15.3%; IBS unhedged + night hedged 23.1%/-12.5%. Every hedged form has a lower MAR; the two legs already diversify each other.
+- Money: QQQ $656/share: at $2.3k the night hedge rounds to 0 shares on 32% of nights (median error 29%); PSQ $27.95 / SH $33.74 are
+  fine at every size. Moot, since the hedge fails.
+- Kill form: 60d close-close OLS beta (clip ±4), single-index QQQ/SPY short (or PSQ long), same window, per leg, every session.
+  Not tested: MNQ/option hedges, multi-factor hedge, regime-conditional hedge, beta cap / LETF exclusion in the live night leg,
+  forward hedged live night (needs >= 60 sessions). Out data/research/program/beta_hedge_out.txt; runner research/sim/beta_hedge.py.
+
+### Result - UPRO-GATE (N 1106-1107, 2026-11-06, one look): PASS both rules on the 1955-2008 judge; proposal only, nothing live changed
+- Synthetic 3x vs real UPRO 2009-07..2026: corr 0.998, TE 3.0%/yr, CAGR 31.8% vs 30.1% (synthetic ~1.7pp/yr optimistic; the
+  2(rf+50bp) arm 30.5%). Judge B&H synthetic 3x 1955-2008: CAGR 6.4%, maxDD -97.3%, worst 12m -89.1%.
+- 10M (N 1106): CAGR 13.7%, maxDD -78.1% (1987, gate was ON), MAR 0.18 vs 0.07, worst 12m -70.2%; halves A 11.2%/-48.7%,
+  B 16.2%/-78.1%: G1/G2/G3 YYY both halves. 1.37 switches/yr, 26 whipsaws in 54y, 3x cost -0.1pp/yr.
+- 200D band (N 1107): CAGR 13.2%, maxDD -80.5%, MAR 0.16, halves A 13.1%/-46.1%, B 13.4%/-80.5%: YYY both. 2.46 switches/yr.
+- Honest benchmark (static UPRO+bills at the gated maxDD, w 0.56/0.59): gate +4.9 / +4.4pp CAGR on judge, +2.8..+7.0 per half.
+- Not crash insurance: 1987 (-78%), 2018Q4 (10M worse than B&H), 2022 (10M -57% vs -63%). Helps slow bears: 1973-74, 2000-02,
+  2007-09 (10M -42% vs -96% maxDD), 2020 (10M -34% vs -77%, 200D -48%).
+- Descriptive 2009-26 real UPRO: B&H 30.1%/-76.8%; 10M 17.7%/-64.2% (loses to static w 0.56: 20.7%/-49%); 200D 24.9%/-47.8%.
+  Post-Faber 2007-07..2026 (window added after first look, descriptive): 10M 15.2%/-64%, 200D 19.7%/-53%, B&H 13.1%/-96%.
+- Whole Roth (1/3 sleeve + 2/3 book): 1999-2008 B&H 8.9%/-48.1%, 10M 18.5%/-19.2%, 200D 15.9%/-18.3%, 1/6+1/6 13.2%/-29.4%;
+  2009-26 B&H 16.6%/-33.4%, 10M 12.0%/-30.3%, 200D 14.0%/-22.0%, 1/6+1/6 10.8%/-20.4%. Book pre-2016 includes the unproven night leg.
+- Selection caveat: the 10M/200D rules were published on data that includes this judge window (not OOS for the rule family);
+  DSR not computed (risk dial, not a return claim). Out: data/research/program/upro_gate_out.txt.
+
+## Study NIGHT-BETA-CAP: cap the night leg's position beta to QQQ, pre-register 2026-11-06 BEFORE any capped outcome is read (overnight agent, user priority = drawdowns; N 1107 -> 1110: N 1108 primary, N 1109 / 1110 secondary)
+- Context read before registering (Step 1 diagnostic, composition only, no capped return computed): BETA-HEDGE's "backtest beta 0.49"
+  was ACCOUNT-level (sum of account weights x beta; the sleeve deploys ~0.4-0.7 of equity) while the live 2.45 is per deployed
+  notional. Like-for-like backtest position beta (notional-weighted, 60d, clip 4) mean 0.91/0.78/0.68/0.79/0.84/0.97 for
+  2021..2026 (median 1.04 -> 1.33 in 2026); LETF notional share 7% (2021) -> 33% (2026), 2025-26 LETF median beta 3.2-3.5 (single-stock
+  2x longs) vs 0.3-0.4 in 2021/2024 (inverse/commodity). Live: LETF 57% of notional, stock picks beta ~2.0. Night rule and every live
+  parameter were chosen on 2021-26; no untouched period with this universe exists.
+- Rule (N 1108, primary, CAP): at 15:40 on d, beta_i = OLS slope of close-close returns of pick i on QQQ over the 60 sessions through
+  d-1 (>= 40 obs, else 1.0; clip +-4) -- data available at the decision. B = sum(v_i beta_i) / sum(v_i) over the leg's final
+  sized picks (v = live sizing incl. tilt and weekend scale). If B > 1.0, multiply every v_i by 1/B (freed capital = cash, 0 return).
+  Cap 1.0 fixed a priori (index beta), never tuned.
+- Secondary N 1109 (DROP-RESPREAD): drop picks with beta_i > 2.0, re-spread the dropped weight pro rata over the remaining picks,
+  each capped at 0.10 of account (max_name_pct); if none remain, cash. Secondary N 1110 (DROP-CASH): drop beta_i > 2.0, freed = cash.
+  Secondaries are judged as separate arms, never rescue the primary.
+- Data: data/research/night/night_trades.v2.parquet (live night rule via research/sim/book.Sim, 2020-11..2026-09-18), Sharadar
+  closes for betas; costs 2.5bp/side on notional (as BETA-HEDGE); excess of cash.
+- Judge: NONE CLEAN. 2021-26 is the period the night rule was chosen on and the single-stock LETFs only exist 2024-26. The backtest is
+  run as an in-sample feasibility check with gates; the only clean judge is a forward log-only shadow. Verdict ceiling from the
+  backtest is "PASS-INSAMPLE -> shadow", never deploy.
+- Gates (each arm vs the uncapped leg, in EACH half 2021-23 and 2024-26): G1 MAR (CAGR/maxDD) >= 1.3x; G2 CAGR >= 0.75x uncapped;
+  G3 worst 21-session return better. All three in both halves = PASS-INSAMPLE. Any fail = KILL for that arm (in-sample is the
+  favourable case for a rule chosen with this knowledge).
+- Also reported: levered back to the uncapped full-period maxDD (financing 10%/yr on gross > 1), 2x/3x cost, ex-top-5 days, median
+  invested night, hit rate, NW t of the daily difference, 2022, the 2026 drawdown window defined by QQQ alone (peak 2025-10-29 ->
+  trough 2026-03-30, -12.2%), live 17-session replay (descriptive), whole-share money at $2.3k/$10k/$25k (+$100k line) with the
+  sleeve at 0.5 of account. DSR not computed: a risk dial, not a return claim.
+- Kill: any gate fails in either half. Runner research/sim/night_beta_cap.py, out data/research/program/night_beta_cap_out.txt. One look.
+
+### Result - NIGHT-BETA-CAP (N 1108-1110, 2026-11-06, one look): KILL all three arms (in-sample gates fail; no clean judge exists)
+- Step 1: backtest "0.49" was account-level; like-for-like notional beta 0.68-0.97 mean (2026 median 1.33). LETF notional 7% -> 33%
+  (2026) backtest, 57% live; LETF beta 0.3 -> 3.4 as single-stock 2x longs arrived 2025-26; live stock-pick beta 2.05 vs 1.37.
+- CAP (N 1108, binds 52% of nights): 32.3%/yr maxDD -16.3 MAR 1.98 vs 45.9/-20.6/2.23; halves MAR 1.00x / 0.80x (G1 fail both),
+  CAGR 0.81x / 0.64x; worst21 better both. Levered to equal DD 40.8%. Daily diff -4.4bp t -3.3. Ex-top-5 MAR 0.98 vs 1.31.
+- DROP>2 respread (N 1109): 25.8%/-23.6 MAR 1.09; DROP>2 cash (N 1110): 22.8%/-20.7 MAR 1.10: all gates fail both halves.
+- QQQ 2025-10-29..2026-03-30: base +29.6% (DD -9.4) cap +23.3 (-8.3). 2022: base 53.7 (-12.2) cap 49.1 (-9.2).
+- Live replay 17 sessions (descriptive): base +0.3% maxDD -19.5, cap +8.0% / -5.9, dcash +3.4% / -2.9.
+- Money $2.3k/$10k/$25k (floor shares): base 37/45/46%, cap 25/30/31%; MAR lower at every size. Out: night_beta_cap_out.txt.
