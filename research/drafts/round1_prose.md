@@ -10037,3 +10037,29 @@ P +10.0% (24 sessions). REPORT 2021-26 (touched): IBS ON +19.8 vs OFF +3.4bp; x0
 CAGR, maxDD unchanged (the 2002 maxDD had 0 ON sessions). Single-index SPY-IBS 1993-2026: ON -0.05 vs OFF +1.21bp, maxDD worse with x0.
 Reading: the mechanism (energy shock -> dip-buying fails) is not visible beyond the 1990 episode; oil spikes are mostly rebounds and
 the MR legs are flat-to-better in them. Same verdict as REGIME-10M: a size-down is at best a drawdown dial that costs return. DSR moot.
+
+### RH-FADE (brief name RETAIL-HERD; renamed because Study RETAIL-HERD = N 981 scalp) — fade Robinhood herding buys (Barber-Huang-Odean-Schwarz 2022 JF), 2026-11-07: CEILING-KILL (shortable cell); sub-$5 ETB leaf DATA-LIMITED. No N consumed (1119 reserved, unused; no return was read)
+- Mechanism: attention-driven retail buyers overshoot; counterparty = herding Robinhood buyers. Short-only -> taxable margin only (Roth cannot).
+- Paper inputs (SSRN draft 2020-11-23, Table 2 / Table 11; 2018-05..2020-08 = the paper's own sample, NOT out of sample): 4,884 events
+  (top 0.5%/day of user-change ratio, >= 100 users), ~9/day; entry = close of the event day; 5-day FF5+mom AR all -2.94%, **price > $5 only
+  -0.85%**, mcap < $1B -4.25%, mcap > $1B +0.14% (zero), pre-Covid -2.2% vs post-2020-03-13 -4.6%. Median event price $8.95, p25 $3.34,
+  median mcap $375M. The effect lives in sub-$5 / sub-$1B names.
+- Borrow evidence (free, on disk via WRDS): proxy attention events (top 0.5%/day of vol / prior-20d mean, US common, CRSP 2018-24, 33,962
+  events, 19/day) x `optionm.borrate` (option-implied, nearest-30d, read in [t-7, t]). $5+ & < $1B: fee coverage 14%, mean 26.6%/yr,
+  median 8.9, p75 25.3, p90 62.9, 48% > 10%/yr (2018-19 median ~5%, 2020-24 ~11-17%, rising). Sub-$5: coverage 23%, mean 59.1, median 23.3,
+  p90 150. Whole optionable cross-section: median 1.2-2.7%/yr. Uncovered (non-optionable) names are likely harder to borrow -> fees are a floor.
+- Ceiling (0.5x gross short, 5-session hold, ~50 rotations/yr, never event-limited; % identical at $2.3k/$10k/$25k, the $2k margin minimum
+  binds at $2.3k = one name at a time): shortable cell ($5+ & <$1B, generous edge 1.5%/5d vs the paper's -0.85% for all $5+), 50% capture,
+  0.30% round trip: gross 18.8 - cost 7.5 - borrow (mean fee) 13.3 = **-2.0pp**; median fee **+6.8pp** (also < 8). Clears only at 100% capture.
+  Sub-$5 cell (edge 4.25%, 1.0% rt, short margin max($2.50/sh, 100%)): mean fee **-1.4pp**; median fee +16.5pp; fee <= 25% subset
+  (52% of covered, mean 9.0%, ~1 event/day) ~+23pp ON PAPER only if the edge does not shrink in low-fee names (Miller predicts it does:
+  overpricing concentrates where shorting is costly; the paper never splits by fee).
+- Why stop: (1) gate fails in the shortable cell at every fee read; (2) the only paper-passing leaf is sub-$5 ETB, which needs an untested
+  fee interaction, 100% short margin, retail locates (unverified) and a squeeze tail (2021 meme); (3) **no live signal exists**: Robinhood
+  removed the popularity API in 2020-08 (Robintrack ends there), so even a PASS on 2018-20 could not be traded; a live version needs a
+  different input (WSB mention counts: YoloStocks daily history 2021+ is free, ApeWisdom is snapshot-only) = a new hypothesis.
+- Side finding (DATA-UNIT CONFLICT, flag for the coordinator): `optionm.borrate.borrowrate` is a DECIMAL fraction/yr, not percent:
+  GME 2021-01-22 = 0.94, cross-section p10 0.002-0.006 (GC ~0.2-0.6%), p99 0.4-1.5. `wrds_borrate_profile.py` says PERCENT; `borrow_xs.py`
+  charges borrowrate/100/12 (=> borrow charged 100x too low if decimal), `pcp_htb.py` filters borrowrate >= 10 (= 1000%/yr if decimal),
+  REC-RECALL quotes fee gaps in pp. Not re-run here; the BORROW-XS net numbers and PCP-HTB universe need a unit check.
+- Out `data/research/program/rh_fade_out.txt`; runner `research/sim/rh_fade.py`; cache `data/research/rh_fade/`.
