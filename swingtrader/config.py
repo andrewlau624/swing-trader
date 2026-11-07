@@ -290,6 +290,9 @@ class DailyCfg:
     # CEF-RIGHTS-FWD (N 1085) + CEF-RV rights hygiene (N 1086): off | shadow. Logs would-be rights-window shorts and
     # borrow flags (cef_rights_shadow.py, research-shadows); no order path.
     cef_rights_fwd: str = "shadow"
+    # UPRO-GATE-FWD (N 1107): off | shadow. Daily SPY 200d-SMA 1% band state for the manually held Roth UPRO core
+    # (upro_gate_shadow.py, research-shadows); logs a SWITCH line, no order path.
+    upro_gate_fwd: str = "shadow"
     # The LIVE wash guard between the two real-money books (add. 31/39).
     # symmetric: each book avoids every name the other held/ordered/closed in
     #   31 days, on every leg; the brokerage book runs first each phase.

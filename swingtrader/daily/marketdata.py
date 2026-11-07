@@ -42,8 +42,8 @@ def trade_date(ts) -> pd.Series | pd.Timestamp:
     return d + pd.Timedelta(days=1) if t.hour >= 17 else d
 
 
-def sip_daily(symbols: list[str], start, end=None) -> dict[str, pd.DataFrame]:
-    """Completed SIP daily bars, indexed by ET session date."""
+def sip_daily(symbols: list[str], start, end=None, adjustment: str = "all") -> dict[str, pd.DataFrame]:
+    """Completed SIP daily bars, indexed by ET session date. adjustment: Alpaca's "all" (split+dividend) or "raw"."""
     from alpaca.data.requests import StockBarsRequest
     from alpaca.data.timeframe import TimeFrame
     data, _ = _clients()
@@ -55,10 +55,10 @@ def sip_daily(symbols: list[str], start, end=None) -> dict[str, pd.DataFrame]:
             df = data.get_stock_bars(StockBarsRequest(
                 symbol_or_symbols=chunk, timeframe=TimeFrame.Day,
                 start=pd.Timestamp(start, tz="UTC"), end=end,
-                feed="sip", adjustment="all")).df
+                feed="sip", adjustment=adjustment)).df
         except Exception:
             # one bad symbol can reject a whole batch; fall back per symbol
-            df = _per_symbol(data, chunk, start, end)
+            df = _per_symbol(data, chunk, start, end, adjustment)
         if df is None or df.empty:
             continue
         df = df.reset_index()
@@ -68,7 +68,7 @@ def sip_daily(symbols: list[str], start, end=None) -> dict[str, pd.DataFrame]:
     return out
 
 
-def _per_symbol(data, chunk, start, end):
+def _per_symbol(data, chunk, start, end, adjustment="all"):
     from alpaca.data.requests import StockBarsRequest
     from alpaca.data.timeframe import TimeFrame
     parts = []

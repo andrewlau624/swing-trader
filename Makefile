@@ -409,6 +409,9 @@ cef-rv: ## CEF-RV shadow: CEF discount reversion vs the EW CEF universe from off
 cef-rights: ## CEF-RIGHTS-FWD shadow (N 1085): upcoming CEF rights offerings, would-be E-10 -> E+25 short + borrow flags, CEF-RV hygiene (no orders)
 	@PYTHONPATH=. $(PY) -m swingtrader.daily.cef_rights_shadow $(ARGS)
 
+upro-gate: ## UPRO-GATE-FWD shadow (N 1107): SPY close vs 200d SMA 1% band -> Roth UPRO core ON/OFF, SWITCH line (no orders)
+	@PYTHONPATH=. $(PY) -m swingtrader.daily.upro_gate_shadow $(ARGS)
+
 cef-rv-panel: ## Seed / add funds to the CEF-RV NAV panel from CEFConnect here (it blocks the server's IP) and push it; weekly rows now come from Nasdaq on the server (cef_nav.py)
 	@mkdir -p /tmp/cef-rv-panel && PYTHONPATH=. $(PY) -m swingtrader.daily.cef_rv_shadow panel /tmp/cef-rv-panel
 	@scp -q /tmp/cef-rv-panel/cef-rv-panel.json him:llm-trader/state/cef-rv-panel.json && echo "pushed to him:llm-trader/state/"

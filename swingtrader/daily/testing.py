@@ -359,6 +359,12 @@ def _cef_rights_rv(state: Path, logs: Path) -> dict:
     return dict(n=len(closed), week=0, line=w.hygiene_line(rows, _jsonl(state / "cef-rv.jsonl")))
 
 
+def _upro_gate(state: Path, logs: Path) -> dict:
+    from . import upro_gate_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    return dict(n=len(rows), week=sum(1 for r in rows if r.get("date", "") >= _week_ago()), line=w.line(rows))
+
+
 def _hedge(state: Path, logs: Path) -> dict:
     from . import hedge_shadow as w
     rows = _jsonl(state / w.LOG_NAME)
@@ -556,6 +562,14 @@ REGISTRY: list[Test] = [
          "(+6.1% gross), borrow unknown. Gate at 15 events first seen on/before entry: mean net > +200bp, median > 0, borrow "
          "available >= 70%; kill mean <= 0. Taxable only.", "2026-11-07", 15, "scored offerings", _cef_rights,
          "state/cef-rights.jsonl; make cef-rights; round1_prose.md CEF-RIGHTS-FWD (N 1085)", ["cef_rights_shadow", "cef_rights_fwd"]),
+    Test("UPRO-GATE-FWD: 200d-SMA band on the Roth UPRO core (log-only signal)", "upro_gate_shadow.py (research-shadows): "
+         "after each regular session, SPY's official (regular-hours, unadjusted) close vs its 200-session SMA, 1% band (ON = hold "
+         "UPRO when close > 1.01 SMA, OFF = SGOV when < 0.99 SMA, else keep state), the exact upro_gate.py dec_200 rule; a SWITCH "
+         "line says to switch at the next session's 16:00 closing cross. No orders: the UPRO core is a manual holding. Read at "
+         "63 sessions: no missed/duplicate sessions, state matches a replay of the rule on the same bars, and whether the user "
+         "acted on each SWITCH (UPRO-GATE N 1107: 200D 13.2%/-80.5% vs B&H 6.4%/-97% synthetic 3x 1955-2008, 2.46 switches/yr).",
+         "2026-11-09", 63, "sessions logged", _upro_gate, "state/upro-gate.jsonl; make upro-gate; round1_prose.md UPRO-GATE (N 1107)",
+         ["upro_gate_shadow", "upro_gate_fwd"]),
     Test("CEF-RV rights hygiene (descriptive)", "CEF-RV signals / live positions that enter or are held inside a rights pricing "
          "window [E-10, E+5]: their later OO excess vs unflagged trades. Descriptive (N 1086): at 10 flagged closed trades, flagged "
          ">= 150bp worse = propose a rights-window entry block (user decision).", "2026-11-07", 10, "flagged closed trades",
