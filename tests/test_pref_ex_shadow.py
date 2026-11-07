@@ -177,3 +177,30 @@ def test_cef_rows_are_never_live_candidates():
     rows = [dict(sym="CEFA", ex=ex, cls="cef", div=0.6, status="upcoming"),
             dict(sym="P.PRA", ex=ex, cls="pref", div=0.4, status="upcoming")]
     assert [r["sym"] for r in L.candidates(rows, today)] == ["P.PRA"]
+
+
+def test_cc_is_costed_with_measured_cross_cost_when_quoted_else_the_model():
+    base = dict(status="scored", eligible=True, med_cross_usd=5000.0, close_px=25.0, close_usd=5000.0,
+                open_usd=10000.0, exit_close_usd=5000.0, co=0.004, cc=0.006)
+    rows = [dict(base, sym="A.PRA", ex="2026-10-20", cost_buy_d0=0.0003, cost_sell_E=0.0001),
+            dict(base, sym="B.PRA", ex="2026-10-21")]                       # no quotes: old rows still load
+    W.execution(rows, acct=10_000, part=0.05)
+    a, b = rows
+    assert a["cc_cost_src"] == "measured" and abs(a["net_cc"] - (0.006 - 0.0004)) < 1e-12
+    assert b["cc_cost_src"] == "model" and abs(b["net_cc"] - (0.006 - b["slip_cc"])) < 1e-12
+    assert abs(a["net_cc_model"] - (0.006 - a["slip_cc"])) < 1e-12 and a["slip_cc"] > 0.0018   # ~18.6bp model kept
+    assert abs(a["net_co"] - (0.004 - a["slip_co"])) < 1e-12                                 # CO gate unchanged
+
+
+def test_line_reports_event_weighted_mean_and_median_beside_the_night_mean():
+    # night 1: one event +100bp; night 2: three events at 0 -> night-mean 50bp, event-mean 25bp, median 0
+    rows = [dict(sym="A.PRA", ex="2026-10-20", status="scored", eligible=True, co=0.01, cc=0.01, net_co=0.01,
+                 net_cc=0.01, order_usd=200.0, part_close=0.04)]
+    rows += [dict(sym=f"Z{i}.PRA", ex="2026-10-21", status="scored", eligible=True, co=0.0, cc=0.0, net_co=0.0,
+                  net_cc=0.0, order_usd=200.0, part_close=0.04) for i in range(3)]
+    f = W.summary(rows)["forward"]
+    assert round(f["net_co"]["night_mean_bp"]) == 50 and round(f["net_co"]["event_mean_bp"]) == 25
+    assert round(f["net_cc"]["event_mean_bp"]) == 25 and f["net_cc"]["median_bp"] == 0
+    ln = W.line(rows)
+    assert "net CO night-mean +50bp" in ln and "CO mean gross +25/net +25bp, net median +0" in ln
+    assert "CC mean gross +25/net +25bp, net median +0" in ln and "measured cross cost 0/4 events" in ln

@@ -223,6 +223,13 @@ def test_score_compares_yesterdays_fills_to_the_closing_cross(tmp_path):
     assert sum(1 for x in (tmp_path / P.LOG_NAME).read_text().splitlines() if json.loads(x)["cmd"] == "score") == 1
     assert "1/30" not in P.line(rows) and "buy +20.0bp" in P.line(rows)
     assert sc[0]["share"] == 0.05                                         # 20 of the 400-share cross
+    assert sc[0]["exec_times"] == ["2026-10-13T20:00:01Z"]                  # execution-leg time, as Schwab returns it
+
+
+def test_old_score_rows_without_exec_times_still_summarise():
+    rows = [dict(cmd="score", side="buy", diff_bp=5.0), dict(cmd="score", side="sell", diff_bp=-3.0, exec_times=[])]
+    s = P.summary(rows)
+    assert s["buy_cost_bp"] == 5.0 and s["sell_cost_bp"] == 3.0 and "buy +5.0bp" in P.line(rows)
 
 
 def _trips(n, buy_bp, sell_bp):

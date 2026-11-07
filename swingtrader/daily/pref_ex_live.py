@@ -193,7 +193,9 @@ def _settled_cash(acct) -> float:
     return float(getattr(acct, "settled_cash", None) if getattr(acct, "settled_cash", None) is not None else acct.cash)
 
 
-def _fills(ad, order_id: str) -> tuple[float | None, int]:
+def _fills(ad, order_id: str) -> tuple[float | None, int, list[str]]:
+    """VWAP fill, filled shares and each execution leg's `time` (the only per-fill fields the Schwab order response is
+    read for anywhere in the repo -- price, quantity, time, as brokers.order_status; no venue/exchange field is read)."""
     legs = []
     for oid in str(order_id).split(","):
         if not oid:
@@ -201,9 +203,10 @@ def _fills(ad, order_id: str) -> tuple[float | None, int]:
         o = ad.c.get_order(int(oid), ad.hash).json()
         legs += [e for a in o.get("orderActivityCollection", []) or [] for e in a.get("executionLegs", []) or []]
     q = sum(float(e.get("quantity") or 0) for e in legs)
+    times = sorted(str(e["time"]) for e in legs if e.get("time"))
     if not q:
-        return None, 0
-    return sum(float(e["price"]) * float(e.get("quantity") or 0) for e in legs) / q, int(q)
+        return None, 0, times
+    return sum(float(e["price"]) * float(e.get("quantity") or 0) for e in legs) / q, int(q), times
 
 
 def score(rows: list[dict], ad, today: dt.date, crosses_fn, H: dict | None, log_row) -> int:
@@ -217,7 +220,7 @@ def score(rows: list[dict], ad, today: dt.date, crosses_fn, H: dict | None, log_
         if day >= today.isoformat():
             continue
         try:
-            fill, q = _fills(ad, r["order_id"])
+            fill, q, times = _fills(ad, r["order_id"])
             X = crosses_fn([r["sym"]], day, day, H).get(r["sym"], {}).get(day)
         except Exception as exc:  # noqa: BLE001
             log_row(dict(cmd="score-skip", sym=r["sym"], order_id=r["order_id"], err=str(exc)[:80]))
@@ -226,7 +229,10 @@ def score(rows: list[dict], ad, today: dt.date, crosses_fn, H: dict | None, log_
         log_row(dict(cmd="score", sym=r["sym"], side=r["cmd"], order_id=r["order_id"], day=day, qty=q, fill=fill,
                      close_cross=cross, close_cross_size=X[3] if X else None,
                      share=round(q / X[3], 4) if q and X and X[3] else None,     # our shares / the cross's shares
-                     diff_bp=round((fill / cross - 1) * 1e4, 1) if fill and cross else None))
+                     diff_bp=round((fill / cross - 1) * 1e4, 1) if fill and cross else None,
+                     # execution-leg times (broker clock, as returned): a fill away from 16:00 ET missed the cross.
+                     # Rows before 2026-11-07 have no exec_times; no venue is recorded (not read from Schwab)
+                     exec_times=times))
         n += 1
     return n
 

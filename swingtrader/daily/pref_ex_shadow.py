@@ -271,7 +271,14 @@ def execution(rows: list[dict], acct: float = ACCT, part: float = PART) -> None:
             r["slip_co"] = COST + imp * (HALF_SPR["close"] + HALF_SPR["open"])
             r["slip_cc"] = COST + imp * 2 * HALF_SPR["close"]
             r["net_co"] = r["co"] - r["slip_co"]
-            r["net_cc"] = r["cc"] - r["slip_cc"]
+            # CC is costed with the MEASURED closing-cross-vs-mid cost of its two legs (costs(): cost_buy_d0 +
+            # cost_sell_E, 2026-11-07) where the event has quotes; the slip_cc model (~18.6bp at PART 5%) only otherwise.
+            # The measured cost excludes our own impact on the cross price. net_cc_model keeps the old number.
+            meas = "cost_buy_d0" in r and "cost_sell_E" in r
+            r["cc_cost"] = r["cost_buy_d0"] + r["cost_sell_E"] if meas else r["slip_cc"]
+            r["cc_cost_src"] = "measured" if meas else "model"
+            r["net_cc"] = r["cc"] - r["cc_cost"]
+            r["net_cc_model"] = r["cc"] - r["slip_cc"]
             r["broker"] = "unverified"
 
 
@@ -283,7 +290,7 @@ def _stats(rows: list[dict], key: str) -> dict:
     ev = [r[key] for r in rows]
     t = st.mean(nm) / st.stdev(nm) * math.sqrt(len(nm)) if len(nm) > 2 and st.stdev(nm) > 0 else None
     return dict(nights=len(nm), n=len(ev), night_mean_bp=st.mean(nm) * 1e4 if nm else None,
-                median_bp=st.median(ev) * 1e4 if ev else None, hit=sum(v > 0 for v in ev) / len(ev) if ev else None,
+                event_mean_bp=st.mean(ev) * 1e4 if ev else None, median_bp=st.median(ev) * 1e4 if ev else None, hit=sum(v > 0 for v in ev) / len(ev) if ev else None,
                 t=t)
 
 
@@ -295,6 +302,9 @@ def summary(rows: list[dict], cls: str = "pref") -> dict:
         x = [r for r in rows if r.get("status") == "scored" and r.get("eligible") and "net_co" in r
              and (r["ex"] >= f0) == fwd]
         out[tag] = {k: _stats(x, k) for k in ("co", "net_co", "cc", "net_cc")}
+        out[tag]["net_cc_model"] = _stats([dict(r, net_cc_model=r.get("net_cc_model", r["net_cc"])) for r in x],
+                                          "net_cc_model")
+        out[tag]["cc_measured"] = sum(r.get("cc_cost_src") == "measured" for r in x)
         out[tag]["order_usd_per_night"] = (sum(r["order_usd"] for r in x) / len({r["ex"] for r in x})) if x else None
         parts = [r["part_close"] for r in x if r.get("part_close") is not None]
         out[tag]["median_part_close"] = st.median(parts) if parts else None
@@ -377,7 +387,12 @@ def line(rows: list[dict], cls: str = "pref") -> str:
                      f"{v['net_co']['night_mean_bp']:+.0f}bp (gross {v['co']['night_mean_bp']:+.0f}, median "
                      f"{v['co']['median_bp']:+.0f}, hit {v['co']['hit']*100:.0f}%), net CC {v['net_cc']['night_mean_bp']:+.0f}bp, "
                      f"${v['order_usd_per_night']:,.0f}/night at ${ACCT:,.0f}, median close participation "
-                     f"{(v['median_part_close'] or 0)*100:.1f}%")
+                     f"{(v['median_part_close'] or 0)*100:.1f}%; event-weighted CO mean gross {v['co']['event_mean_bp']:+.0f}/net "
+                     f"{v['net_co']['event_mean_bp']:+.0f}bp, net median {v['net_co']['median_bp']:+.0f}; CC mean gross "
+                     f"{v['cc']['event_mean_bp']:+.0f}/net {v['net_cc']['event_mean_bp']:+.0f}bp, net median "
+                     f"{v['net_cc']['median_bp']:+.0f} (CC at measured "
+                     f"cross cost {v['cc_measured']}/{v['co']['n']} events, else model; all-model CC night-mean "
+                     f"{v['net_cc_model']['night_mean_bp']:+.0f}bp)")
     nxt = ", ".join(f"{s_} {e}" for e, s_ in s["upcoming"][:5])
     verdict = ""
     f = s["forward"]["net_co"]
