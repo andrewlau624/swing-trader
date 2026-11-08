@@ -41,7 +41,8 @@ def fetch_px(t: str, start: str = "2002-07-01") -> pd.DataFrame:
     adj = res["indicators"]["adjclose"][0]["adjclose"] if "adjclose" in res["indicators"] else q["close"]
     df = pd.DataFrame({"close": q["close"], "adjclose": adj},
                       index=pd.to_datetime(res["timestamp"], unit="s", utc=True)
-                      .tz_convert("America/New_York").tz_localize(None).normalize())
+                      .tz_convert(res.get("meta", {}).get("exchangeTimezoneName") or "America/New_York")   # exchange-local date
+                      .tz_localize(None).normalize())
     df.index.name = "date"
     return df.dropna(subset=["close"])
 

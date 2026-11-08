@@ -41,7 +41,10 @@ def yahoo_ohlc(sym: str) -> pd.DataFrame:
     with urllib.request.urlopen(req, timeout=60) as r:
         j = json.load(r)
     res = j["chart"]["result"][0]
-    idx = pd.to_datetime(res["timestamp"], unit="s", utc=True).tz_convert("America/New_York").normalize().tz_localize(None)
+    # exchange-local dates: Yahoo stamps Asian/FX bars at the local open (the previous evening in New York), so a
+    # New York date puts them one day early (lookahead; caught in intl_gap, 2026-11-07). US tickers are unchanged.
+    tz = res.get("meta", {}).get("exchangeTimezoneName") or "America/New_York"
+    idx = pd.to_datetime(res["timestamp"], unit="s", utc=True).tz_convert(tz).normalize().tz_localize(None)
     q = res["indicators"]["quote"][0]
     df = pd.DataFrame({"open": q["open"], "close": q["close"], "adjclose": res["indicators"]["adjclose"][0]["adjclose"]},
                       index=idx.astype("datetime64[ns]")).dropna()

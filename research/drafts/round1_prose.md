@@ -10199,3 +10199,92 @@ parity predicts (conversion earns r - b), but weak: EOD HTB chain mids carry lit
 sign error (fee accrues to the synthetic long) stays the binding reason. Not tested: synthetic long + lending, actual Schwab fully-paid
 lending income, intraday NBBO, a reversed (unregistered) spec. Output data/research/program/pcp_htb_out.txt (overwritten, corrected).
 Program N = 1123.
+
+### Study REGIME-X (N 1160-1164, 2026-11-07): drawdown-control rules for the daily-bar book, pre-registered before any outcome
+User priority: drawdowns. Purpose: keep the live book (0.5 IBS ETF leg + 0.5 night leg, daily-bar form, 5bp/side, REGIME-10M /
+SHAR-CRASH harness on delisted-complete Sharadar SEP/SFP) alive in stress regimes. Program N 1123 (+ concurrent) -> uses 1160-1164.
+Already dead, NOT re-run: SMA trend gate on the MR book (REGIME-10M N 919-922, class closed for SMA-trend form), realized-vol scaling
+of IBS (IBS-VS N 1068-70) and of night gross (add. 32), VIX term structure (VTS N 864), TSMOM ETF sleeve (add. 26b), Moreira-Muir (Lab-CD),
+oil-shock / geo gates (N 1111-1116), per-leg index hedge (BETA-HEDGE N 1103-05).
+Branches registered (all parameters fixed from literature/practice, no fitting, one run):
+- N 1160 CREDIT: OFF (book exposure 0, cash) on session d when FRED BAA10Y as of d-1 > its own 252-session SMA (credit-spread trend;
+  Gilchrist-Zakrajsek 2012 mechanism: widening spreads = funding stress = liquidity providers withdraw).
+- N 1161 VIX30: OFF when VIXCLS close(d) > 30 (practitioner stress threshold). Prior evidence (add. 26a: every leg earns more on
+  high-vol days) predicts FAIL; run because it is the most common retail form.
+- N 1162 GZ-DD: Grossman-Zhou drawdown-constrained exposure on the book's own equity: e_d = clip((W/M - (1-D))/D, 0.25, 1), D = 0.25,
+  W/M = equity over running peak as of d-1.
+- N 1163 EQ-SMA: equity-curve trend: exposure 1 when book equity(d-1) > its 200-session SMA, else 0 (practitioner equity-curve filter).
+- N 1164 SLEEVE: capital 75% book / 25% sleeve, monthly rebalance, 2bp/side. Primary sleeve TLT (judge 2003-15, TLT from 2002-07);
+  report GLD, 50/50 TLT+GLD, WTMF (2011+), DBMF (2019+). Benchmark that must also be beaten on Calmar: 75% book + 25% T-bills (DTB3).
+Judge: 1999-2015 (gate rules never chosen on this book; sleeve 2003-15). Report 2016-26 (book touched, rules not).
+Stress windows reported: 2000-02, 2008-09, 2011, 2015-08..2016-02, 2018Q4, 2020-02..04, 2022.
+PASS candidate (all): (a) book maxDD cut >= 1/3 vs ungated in the judge window AND in 2016-26; (b) CAGR given up <= 20% of the
+ungated CAGR in both windows; (c) Calmar > the static de-levered book at the same average exposure (gates) / > 75% book + 25% bills
+(sleeve); (d) placebo: real maxDD cut beats >= 90% of 200 circular-shift placebos of the same gate series (gates N 1160-1163).
+Kill: any of (a)-(d) fails. Dollar view $2.3k/$10k/$25k: gates change exposure only (whole-share effect identical across arms,
+stated); sleeve simulated with whole shares. Runner research/sim/regime_x.py; out data/research/program/regime_x_out.txt.
+
+### PRE-REGISTRATION — XASSET-TZ branch (N 1150-1151, 2026-11-07, written before any outcome is read)
+Task: CLAUDE.md "where to search" item 3 (non-US-equity / non-equity, long history). Already in the program and NOT redone:
+ibs_xasset_scan, TAC, TME/HMM-REBAL, USO-ROLL/FUT-ROLL/FND, XASSET-FF bounds (FX month-end fix, QE USD, Jan BCOM, muni, carry),
+crypto funding/basis/weekend gap, ETF-PD (intl premium), intl close->open overnight.
+Branch list + ceilings (`events/yr x net edge x deployable x capture<=50%`, $10k; account size does not change these %
+until whole-share rounding, which is immaterial for $10-60 ETFs above $2.3k):
+- B1 INTL-GAP (N 1150): time-zone stale pricing at the US open cross of Asian single-country ETFs whose underlying market is
+  closed all US session. Input: foreign index close (known ~01:00-04:00 ET) vs the ETF's 09:30 opening cross. Fill: official
+  open cross -> official close cross, same day. Counterparty: the ETF market maker / MOO imbalance at an open cross with a closed
+  underlying, hedging with correlated US futures. Ceiling: 250/yr x 5 ETFs x net e x 100% x 50%: clears +8pp only if e >= ~6.4bp
+  net/day on the book -> RUN (only daily-cadence branch).
+- B2 Treasury auction concession pre-2016 in TLT/TMF: 24/yr x ~30bp (TLT, generous) x 100% x 50% = 3.6pp; TMF 3x 10.8pp nominal
+  but TAC measured +2.4bp 2016-26 (~10% of the assumed) -> honest ~1pp. CEILING-KILL (also TAC KILL).
+- B3 month/quarter-end stock-bond rebalancing: = TME (validated small) / HMM-REBAL (KILL). Not redone.
+- B4 commodity index roll ex-USO (GSCI/BCOM 5th-9th BD roll in DBC/UNG/agri ETFs): the forced flow is a calendar-SPREAD
+  effect; an ETF holder only gets outright direction, which the roll does not predict. Spread bound for WTI 1.2-2.9pp (USO-ROLL),
+  Mou (2011) GSCI front-run ~3.6%/yr pre-2010 fully collateralised -> 1.8pp at 50%; NG reverses (FUT-ROLL); futures spreads =
+  one micro contract at $10k. CEILING-KILL.
+- B5 daily 4pm London FX fix (11:00 ET) in FXE/UUP: published daily fix pattern is a few bp; 250 x ~2bp x 100% x 50% = 2.5pp;
+  leveraged FX ETPs (ULE/EUO) ADV < $1M. CEILING-KILL.
+- B6 crypto: weekend move lands in the Monday open-cross gap (untradable); funding/basis access-killed; spot-ETF IBS U6 3-7pp.
+  CEILING-KILL. (N 1151 reserved, unused unless B1 needs a control registration.)
+**N 1150 INTL-GAP rule (frozen).** Pairs: EWJ/^N225, EWH/^HSI, EWY/^KS11, EWT/^TWII, EWA/^AXJO (Yahoo daily, free). For US day t
+require an Asian close dated t and the Asian prior close dated == the US prior session date. f = ln(I_t/I_prev) (local index,
+close-to-close); g = ln(O_t/C_{t-1}) ETF (raw, dividend days dropped); residual r = g - f. Trade open->close: x = -sign(r)
+(fade the open-cross residual), equal weight across the day's eligible pairs; hedged return = ETF o->c - SPY o->c (report raw too).
+Long-only arm (Roth): only r < 0 legs, raw o->c. Cost: 3bp/side base (pre-2010 intl ETF spreads wider), shock 2x/3x.
+Judge period 2000-01-01..2015-12-31 (never used for this rule); report 2016-26 and stress 2008, 2018Q4, 2020, 2022 descriptively.
+Data-bug check first: share of days with O == C_{t-1} or |g| > 15% (drop those).
+GATE (all): judge book mean net/day (3bp/side) > 0 with NW t >= 2.0; both judge halves (2000-07, 2008-15) > 0; 2x cost > 0;
+ex-top-5 days > 0; median day > 0; random-sign placebo p < 0.05; implied $10k ceiling at 50% capture >= 8pp. Any failure -> KILL.
+
+### RESULT — XASSET-TZ / INTL-GAP (N 1150, 2026-11-07, one look after a data-bug fix): KILL; B2-B6 CEILING-KILL; N 1151 unused
+- First run "PASS" (+17.5bp/day t 9.9) was a LOOKAHEAD ARTIFACT: vt_flow.yahoo_ohlc / tme_treasury.fetch_px date bars by
+  converting Yahoo timestamps to New York; Asian indices are stamped at the local open (19:00-20:00 ET the day before), so every
+  home-index bar landed one date early and "home close dated t" was the close AFTER US session t (Tohoku -6.4% printed on Sunday
+  2011-03-13). Tell: the hedged arm was -8bp t -8 (signal predicted SPY's intraday move). Fixed with exchange-local dates
+  (`home_index()` in intl_gap.py); rule unchanged. Only other foreign-ticker user (xasset_ff_bound AUDJPY=X) is an unconditional
+  |window| bound, unaffected by a one-day shift.
+- Corrected judge 2000-15 (3bp/side): +2.5bp/day NW t 1.83, median +2.1, hit 52%; 2x cost -3.5; halves +11.7 (2000-07) / -6.7
+  (2008-15); 2016-26 -7.6 (t -7.5; gross ~-1.6 = residual continuation inside cost); SPY-hedged +0.3 t 0.3 (the raw is co-movement
+  with SPY); long-only (Roth) +6.5bp = mostly unconditional o->c drift of the r<0 days; per ETF only EWT positive (+9.2, t 3.8).
+  Stress: 2008 -20, 2018Q4 -1, 2020 -11, 2022 -3. Ceiling at 50% capture +3.1pp. GATE 3/7 -> KILL.
+- Tested: fade of (ETF open gap - home index close-to-close) for EWJ/EWH/EWY/EWT/EWA, open cross -> close cross, EW daily book,
+  raw/hedged/long-only. Not tested: USD-converted home return (FX leg), a fair-value model with US futures overnight (S&P futures
+  at 09:29 not free pre-2016), European ETFs (home market overlaps the US morning: a different, not-stale mechanism), the
+  first-minute fill instead of the cross, a continuation (opposite-sign) rule (post-hoc; gross inside cost anyway).
+Output data/research/program/intl_gap_out.txt. Program N = 1151 (1151 reserved, unused).
+
+### Result - REGIME-X (N 1160-1164, 2026-11-07, one run + one disclosed lookahead fix): all five FAIL -> KILL
+`research/sim/regime_x.py` (legs `research/sim/regime_x_legs.py` -> `data/research/regime_x/legs.parquet`) -> `data/research/program/regime_x_out.txt`.
+Base book judge 1999-2015 16.0% CAGR / -25.7% maxDD / Calmar 0.62 (DD = 2000-02); report 2016-26 7.5% / -13.5% / 0.56.
+- N 1160 CREDIT: judge 8.2% / -7.8% (DD cut 70%, give-up 49%), report 2.6% / -13.5% (cut 0, give-up 66%); OFF days earn MORE (+7.0 vs +5.3bp). FAIL.
+- N 1161 VIX30: judge cut 28% give-up 29%; report cut 0, give-up 47%; OFF days +15.4 vs +5.0bp (judge), +24.5 vs +1.7 (report). FAIL.
+- N 1162 GZ-DD: judge 14.0% / -17.1% (cut 33.3%, give-up 13%, Calmar 0.82 vs static 0.62); report cut 18.5%, give-up 12%, Calmar 0.60 = static. FAIL.
+- N 1163 EQ-SMA: judge 13.1% / -14.1% (cut 45%, give-up 19%, Calmar 0.93 vs 0.63, placebo 85.5th); report cut 18.1%, give-up 8%, Calmar
+  0.63 < static 0.67, placebo 84.5th. FAIL. Disclosure: the registered "as of d-1" equity includes book row d-1 = IBS open(d)->open(d+1),
+  unknown at close d; the first run used it and showed report cut 32.8% / give-up 2%. Corrected to lag 2 (true information set) before verdict.
+- N 1164 SLEEVE (25%, whole shares; $2.3k/$10k/$25k within 0.3pp of fractional): judge 2003-15 TLT cut 12% give-up 12%, GLD ~0, TLT+GLD 9%;
+  report TLT maxDD -16.4% (worse; 2022), GLD +1.7pp CAGR but cut 4%, WTMF 2011-26 cut 9% give-up 30%, DBMF 2019-26 cut 5% give-up 17%;
+  none beats 75% book + 25% bills Calmar. FAIL.
+Mechanism read: state gates switch off the days the liquidity-provision legs earn most; drawdown/equity rules are static de-levering in
+disguise out of the judge window. DSR moot (no survivor). Not tested: 0.5x partial de-risk, per-leg gates, HY OAS (FRED 3y only), breadth,
+pre-2011 managed-futures proxies, intraday stops, the noise leg, other thresholds. Program N = 1164 (1165-1169 unused).
