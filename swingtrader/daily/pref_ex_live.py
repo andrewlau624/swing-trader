@@ -68,6 +68,15 @@ def _cef_held(state_dir: Path, today: dt.date) -> float:
         return 0.0
 
 
+def _cef_reserved(state_dir: Path, today: dt.date) -> float:
+    """Cash cef_rv_live held back today for the next open's CEF entries (cef-rv-reserved.json, today's date only)."""
+    try:
+        j = json.loads((state_dir / "cef-rv-reserved.json").read_text())
+        return max(0.0, float(j.get("usd") or 0.0)) if j.get("date") == today.isoformat() else 0.0
+    except Exception:  # noqa: BLE001
+        return 0.0
+
+
 def _jsonl(p: Path) -> list[dict]:
     return [json.loads(x) for x in p.read_text().splitlines() if x.strip()] if p.exists() else []
 
@@ -342,7 +351,7 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
         equity = min(equity, cap)
     oc = overlay_cap()
     own = sum(float(h.get("qty") or 0) * float(h.get("px") or 0) for h in state["open"].values())
-    cap_usd = None if oc is None else max(0.0, oc - _cef_held(state_dir, today) - own)
+    cap_usd = None if oc is None else max(0.0, oc - _cef_held(state_dir, today) - _cef_reserved(state_dir, today) - own)
     if not cands:
         log(f"[pref-ex-live] no {'/'.join(CLASSES)} ex-dates on {next_session(today)}; settled ${settled:,.0f}")
     else:

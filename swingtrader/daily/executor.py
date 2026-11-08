@@ -323,6 +323,17 @@ class DailyExecutor:
         except Exception:  # noqa: BLE001  (no file / unreadable = nothing reserved)
             return 0.0
 
+    def _cef_rv_reserved(self, today: str) -> float:
+        """Dollars cef_rv_live (09:05 ET) held back for the next open's CEF entries: state/cef-rv-reserved.json
+        {"date", "usd"}, honoured only for today's date and only on the Roth."""
+        if not self.cash_account:
+            return 0.0
+        try:
+            j = json.loads((self.state_dir / "cef-rv-reserved.json").read_text())
+            return max(0.0, float(j.get("usd") or 0.0)) if j.get("date") == today else 0.0
+        except Exception:  # noqa: BLE001  (no file / unreadable = nothing reserved)
+            return 0.0
+
     def _cef_rv_held(self, today: str) -> float:
         """Market value of the CEF-RV live module's multi-week Roth holdings (cef_rv_live.py writes
         state/cef-rv-held.json {"date", "usd", "n"} each run). The night leg sizes from the bot's virtual cash, which
@@ -1102,6 +1113,11 @@ class DailyExecutor:
             self.log(f"[pref-ex] ${res:,.0f} reserved by pref_ex_live for tonight's preferred MOC buys: "
                      f"night cash ${cash0:,.0f} -> ${cash0 - res:,.0f}")
             cash0 -= res
+        cres = self._cef_rv_reserved(today)
+        if cres:
+            self.log(f"[cef-rv] ${cres:,.0f} reserved by cef_rv_live for the next open's CEF entries: "
+                     f"night cash ${cash0:,.0f} -> ${cash0 - cres:,.0f}")
+            cash0 -= cres
         held = self._cef_rv_held(today)
         if held:
             self.log(f"[cef-rv] ${held:,.0f} held by cef_rv_live (multi-week CEF positions): "

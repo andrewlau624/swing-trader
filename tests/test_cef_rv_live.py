@@ -253,3 +253,38 @@ def test_executor_roth_night_cash_subtracts_fresh_cef_holdings(tmp_path):
     assert ex._cef_rv_held("2026-10-12") == 0.0                          # dated in the future: ignored
     ex.cash_account = False
     assert ex._cef_rv_held("2026-10-14") == 0.0                          # taxable book: never
+
+
+def test_reserve_usd_only_on_the_session_before_the_weekly_entry_open():
+    fri, thu, mon = dt.date(2026, 10, 23), dt.date(2026, 10, 22), dt.date(2026, 10, 26)
+    assert C.reserve_usd(fri, 3000, 0, 0.0, None) == 1500.0            # slot 500 x 3 free positions
+    assert C.reserve_usd(fri, 3000, 2, 1000.0, None) == 500.0          # one position left
+    assert C.reserve_usd(fri, 3000, 0, 0.0, 400.0) == 400.0            # overlay cap binds
+    assert C.reserve_usd(thu, 3000, 0, 0.0, None) == 0.0
+    assert C.reserve_usd(mon, 3000, 0, 0.0, None) == 0.0
+    # Thanksgiving week: Fri 11-27 is a session; Wed 11-25 is not the last one before Mon 11-30
+    assert C.reserve_usd(dt.date(2026, 11, 25), 3000, 0, 0.0, None) == 0.0
+
+
+def test_friday_run_writes_the_reservation_live_and_logs_it_dry(tmp_path):
+    fri, now = dt.date(2026, 10, 23), dt.datetime(2026, 10, 23, 9, 5, tzinfo=ET)
+    signals(tmp_path, sig("A"))
+    out = run("live", tmp_path, FakeAd({"A": 10.0}, settled=2000, equity=3000), today=fri, now=now)
+    j = json.loads((tmp_path / C.RESERVE_NAME).read_text())
+    assert out["reserved"] == 1500.0 and j == {"date": "2026-10-23", "mode": "live", "usd": 1500.0, "would_usd": 1500.0}
+    run("dry", tmp_path, FakeAd({"A": 10.0}, settled=2000, equity=3000), today=fri, now=now)
+    assert json.loads((tmp_path / C.RESERVE_NAME).read_text())["usd"] == 0.0
+
+
+def test_executor_and_pref_ex_honour_the_cef_reservation_today_only(tmp_path):
+    from swingtrader.config import Config
+    from swingtrader.daily import executor as E
+    from swingtrader.daily import pref_ex_live as P
+    from test_daily import FakeBroker
+    (tmp_path / C.RESERVE_NAME).write_text(json.dumps({"date": "2026-10-23", "usd": 500.0}))
+    ex = E.DailyExecutor(Config.load(), account="roth", broker=FakeBroker(), state_dir=tmp_path, log_dir=tmp_path)
+    assert ex._cef_rv_reserved("2026-10-23") == 500.0 and ex._cef_rv_reserved("2026-10-26") == 0.0
+    ex.cash_account = False
+    assert ex._cef_rv_reserved("2026-10-23") == 0.0
+    assert P._cef_reserved(tmp_path, dt.date(2026, 10, 23)) == 500.0
+    assert P._cef_reserved(tmp_path, dt.date(2026, 10, 26)) == 0.0

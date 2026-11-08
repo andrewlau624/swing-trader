@@ -31,6 +31,7 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parents[2]
 LOG_NAME = "cef-rv-live.jsonl"            # logs/: every action + scores (the REGISTRY reader)
 STATE_NAME = "cef-rv-live.json"           # state/: {"open": {sym: {qty, entry_px, entry_date, signal_week, ...}}}
+RESERVE_NAME = "cef-rv-reserved.json"      # state/: {"date", "usd"} cash held back from tonight's night leg for the next open's entries
 HELD_NAME = "cef-rv-held.json"            # state/: {"date", "usd"} market value of the live holdings
 SIGNALS_NAME = "cef-rv.jsonl"             # state/: the CEF-RV shadow's trade rows
 PANEL_NAME = "cef-rv-panel.json"          # state/: sym -> [[week, discount], ...] (for the priority order)
@@ -146,6 +147,22 @@ def depth(panel: dict, sym: str, signal: str) -> float:
         return 0.0
     win = [x for _, x in hist[-52:]]
     return float(hist[-1][1] - statistics.median(win))
+
+
+def reserve_usd(today: dt.date, equity: float, n_open: int, held_usd: float, cap_usd: float | None) -> float:
+    """Dollars to hold back from tonight's Roth night leg when the next session is this week's entry session (the
+    Friday signal is only known at the shadow's Monday 08:20 run, but the night leg spends settled cash at Friday's close
+    and holds it over the weekend: 2026-10-26 had 21 entries and $4 settled). One slot per free position, within the
+    equity and overlay caps; 0 on every other session."""
+    from .cpc_ledger import next_session
+    fri = today + dt.timedelta(days=(4 - today.weekday()) % 7)
+    if next_session(today + dt.timedelta(days=1)) != exec_session(fri.isoformat()):
+        return 0.0
+    room = max(0, max_positions(equity) - n_open)
+    usd = min(room * slot_usd(equity), max(0.0, MAX_EQUITY_FRAC * equity - held_usd))
+    if cap_usd is not None:
+        usd = min(usd, max(0.0, cap_usd))
+    return round(usd, 2)
 
 
 def size(cands: list[dict], last: dict[str, float], panel: dict, settled: float, equity: float, n_held: int,
@@ -370,7 +387,19 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
                                            signal_week=o["signal"], dry_run=mode != "live")
             out["bought"].append(o["sym"])
 
-    # --- holdings value, for a future executor reservation hook (not wired)
+    # --- reserve the next open's entry cash from tonight's night leg (executor reads it for today only; live only)
+    held_now = sum(float(h.get("qty") or 0) * float(h.get("entry_px") or 0) for h in state["open"].values())
+    cap_now = None if cap_usd is None else cap_usd - (held_now - held_usd)
+    want = reserve_usd(today, equity, len(state["open"]), held_now, cap_now)
+    if want:
+        state_dir.mkdir(exist_ok=True)
+        (state_dir / RESERVE_NAME).write_text(json.dumps({"date": today.isoformat(), "mode": mode,
+                                                          "usd": want if mode == "live" else 0.0, "would_usd": want}))
+        log(f"[cef-rv-live] next session is this week's entry open: reserving ${want:,.0f} from tonight's night leg"
+            + ("" if mode == "live" else " (dry: logged only)"))
+    out["reserved"] = want
+
+    # --- holdings value (cef-rv-held.json, read by the executor's Roth night leg)
     px_now = {}
     if state["open"]:
         try:
