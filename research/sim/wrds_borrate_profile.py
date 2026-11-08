@@ -110,7 +110,7 @@ def main():
 
     # -------------------------------------------------------------- 2 sentinel
     r.title("2. Missing sentinel and the valid borrowrate distribution")
-    r.w(f"Sentinel = borrowrate <= {SENT} (observed exact value: -99.99). Values are PERCENT per annum.")
+    r.w(f"Sentinel = borrowrate <= {SENT} (observed exact value: -99.99). Values are a DECIMAL fraction per annum (0.05 = 5%/yr; verified 2026-11-07, memory 83).")
     for y in (2020, 2024):
         d = q(
             f"""select min(borrowrate) mn,
@@ -123,11 +123,11 @@ def main():
                 from optionm.borrate{y} where borrowrate > {SENT}"""
         ).iloc[0]
         d = d.to_dict()
-        r.sub(f"borrate{y} valid-only borrowrate (percent/yr)")
+        r.sub(f"borrate{y} valid-only borrowrate (decimal/yr)")
         r.df(pd.DataFrame([d]))
     r.w()
     r.w("Reading (2020): ~55% of rows are the -99.99 sentinel; valid rates are tiny for most")
-    r.w("names (median ~0.02%/yr = easy-to-borrow) with a fat right tail (p99 ~1%, max ~20%).")
+    r.w("names (median ~0.02 = 2%/yr) with a fat right tail (p99 ~1 = 100%/yr, max ~20 = 2000%/yr).")
 
     # -------------------------------------------------------------- 3 frequency
     r.title("3. Reporting frequency / key grain")

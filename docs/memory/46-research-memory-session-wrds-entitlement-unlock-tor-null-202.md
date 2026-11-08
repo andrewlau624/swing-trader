@@ -17,7 +17,7 @@
   Do not re-run Tor as a data source.
 - **BORROW-XS / BORROW-XS2 (N 1006-1007): real signal, no deployable edge.** The option-implied borrow-rate cross-section,
   1996-2025, is monotone (D1 119 -> D10 13 bp/mo) and the LS D1-D10 is +106bp/mo gross (t 6.43); net of 20bp + actual borrow
-  +84bp. But the payoff is the SHORT leg (the account cannot short a cash Roth; the same "profitable side is unharvestable"
+  +84bp [WITHDRAWN 2026-11-07: borrow charged 100x too low; corrected net -160bp/mo, see memory 83]. But the payoff is the SHORT leg (the account cannot short a cash Roth; the same "profitable side is unharvestable"
   pattern as SSR-LIFT / threshold-flow), and the deployable long-only D1 tilt is a size/vol beta (survives only in the small
   + high-vol terciles; nothing clears t>=2 in 2016-25). Closed: no re-tuning of tenor/deciles/lag.
 - **GAMMA-MKT (N 1008) + SKEW-MKT (N 1009): KILL.** Index dealer-gamma state: |next-day ret| ~ dealer-gamma z is significant

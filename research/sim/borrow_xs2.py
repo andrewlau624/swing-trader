@@ -84,7 +84,7 @@ def tercile_arm(p, tcol, labels, tag, out_lines, cells):
             continue
         g = s.dropna(subset=["dec"]).groupby(["ym", "dec"])["ret_fwd"].mean().unstack()
         uni = s.groupby("ym")["ret_fwd"].mean()
-        bc = (s[s["dec"] == 10].groupby("ym")["borrowrate"].mean() / 100.0 / 12.0)
+        bc = (s[s["dec"] == 10].groupby("ym")["borrowrate"].mean() / 12.0)  # DECIMAL/yr (N 1122 unit fix; was /100)
         out_lines.append(f"-- {labels[t]} tercile (n_months={uni.shape[0]}, names={s['permno'].nunique()})")
         lo_g = (g[1] - uni).dropna() if 1 in g.columns else pd.Series(dtype=float)
         lo_n = lo_g - 0.0010

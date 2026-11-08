@@ -119,7 +119,7 @@ def run(years, out_lines):
         uni = sub.groupby("ym")["ret_fwd"].mean()
         if 1 in g.columns and 10 in g.columns:
             ls = (g[1] - g[10]).dropna()
-            brcost = sub[sub["dec"] == 10].groupby("ym")["borrowrate"].mean() / 100.0 / 12.0
+            brcost = sub[sub["dec"] == 10].groupby("ym")["borrowrate"].mean() / 12.0  # borrowrate is DECIMAL/yr (N 1122 unit fix; was /100)
             brcost = brcost.reindex(ls.index).fillna(0)
             net = ls - (0.0020 + brcost)
             lines.append(f"\n== Arm {arm} ({col}) ==")

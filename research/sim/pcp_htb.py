@@ -36,10 +36,11 @@ def signal_dates(cal):
 
 def pull_borrate(db, y, sd):
     f = D / f"htb_{y}.parquet"
+    # borrowrate is a DECIMAL/yr: 0.10 = 10%/yr (N 1123 unit fix; the N 1019 run used >= 10, i.e. 1000%/yr)
     if f.exists(): return pd.read_parquet(f)
     ds = ",".join(f"'{d:%Y-%m-%d}'" for d in sd["t"] if d.year == y)
     sql = f"""select distinct on (securityid, date) securityid as secid, date, days, borrowrate
-              from optionm.borrate{y} where date in ({ds}) and borrowrate >= 10
+              from optionm.borrate{y} where date in ({ds}) and borrowrate >= 0.10
               order by securityid, date, abs(days-30)"""
     df = db.raw_sql(sql); df["date"] = pd.to_datetime(df["date"]); df.to_parquet(f, index=False); return df
 
@@ -178,7 +179,7 @@ def build_candidates():
             # sanity pair: mid implied vs borrowrate at ATM
             katm = min(ks, key=lambda k: abs(k - S))
             mid = S + (p.loc[katm, "best_bid"] + p.loc[katm, "best_offer"]) / 2 - (c.loc[katm, "best_bid"] + c.loc[katm, "best_offer"]) / 2
-            comp.append(dict(secid=r.secid, t=t, bor=r.borrowrate / 100, best_e=best[0], worst_e=worst, impl=(katm - mid) / mid * 365 / dte - rft))
+            comp.append(dict(secid=r.secid, t=t, bor=r.borrowrate, best_e=best[0], worst_e=worst, impl=(katm - mid) / mid * 365 / dte - rft))
             if best[0] < 0.10: continue
             stats["signal"] += 1
             k = best[1]
@@ -204,7 +205,7 @@ def build_candidates():
             if len(d): stats["delist"] += 1
             rows.append(dict(secid=r.secid, permno=permno, t=t, t1=t1, exd=exd, K=k, S1=px.loc[(permno, t1), "prc"], A1=A1,
                              P1=p1.best_offer, C1=c1.best_bid, cost=cost1, dte=dte1, e_t=best[0], e_t1=e1, rf=rf1,
-                             oi=int(min(c1.open_interest, p1.open_interest)), shock=shock, borrow=r.borrowrate / 100,
+                             oi=int(min(c1.open_interest, p1.open_interest)), shock=shock, borrow=r.borrowrate,
                              delisted=len(d) > 0))
         print(y, len(rows), flush=True)
     return pd.DataFrame(rows), stats, pd.DataFrame(comp), rf

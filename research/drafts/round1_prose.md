@@ -10063,3 +10063,139 @@ the MR legs are flat-to-better in them. Same verdict as REGIME-10M: a size-down 
   charges borrowrate/100/12 (=> borrow charged 100x too low if decimal), `pcp_htb.py` filters borrowrate >= 10 (= 1000%/yr if decimal),
   REC-RECALL quotes fee gaps in pp. Not re-run here; the BORROW-XS net numbers and PCP-HTB universe need a unit check.
 - Out `data/research/program/rh_fade_out.txt`; runner `research/sim/rh_fade.py`; cache `data/research/rh_fade/`.
+
+## Amendment - OIE (option-income ETF ex-date flow), pre-register 2026-11-07 before any outcome; N 1140-1142 (assigned 1140-1149)
+- Branch list (Roth: long-only, no margin; grep of NEXT/memory/drafts first):
+  (a) option-income ETF ex-date (YieldMax single-stock, JEPI/JEPQ, QYLD/XYLD/RYLD, weekly-pay ETFs): input = issuer distribution
+      calendar + daily OHLC; fill = close cross T-1 / open or close cross T..T+3; mechanism = yield-chasing retail buys before ex and
+      dumps after (distributions are mostly ROC, so no tax seller as in PREF-EX); NOT in a ledger (EXDIV-OPEN N 843 = liquid commons
+      by Sharadar actions; deep_loop 14 = CC-ETF *roll* flow only). -> RUN.
+  (b) pref/baby-bond called-for-redemption pull to par+accrued: idea_scan_events_2026-10-08 row 11 COVERED (below-par mirror = yield);
+      PREF-INDEX memory 33: deletion side = price-to-par pull already in PREF-EX/ETDX carry. -> skip.
+  (c) ETF/ETN closures / ETN acceleration: DL6 DEAD (median -0.24%), ETN accel CEILING-KILL (<0.3pp, idea_scan row 5). -> skip.
+  (d) pref-ETF (PFF/PGX) / small thematic index recon: PREF-INDEX CEILING-KILL + DATA-LIMITED (memory 33); small-index recons dead
+      (alpha_frontier). -> skip.
+  (e) 2x single-stock LETF month-end/daily rebalance flow: LETF-REV N 1065 KILL standalone; NIGHT-LETF-TILT shadow exists. -> skip.
+- Ceiling (a): YieldMax-family ex-dates are weekly since 2025 across ~50 funds, so an ex-date night exists most sessions (night-leg
+  shape, capital ~100% deployable, cross size >> $25k ticket in the liquid ones). 250 nights x 15bp x 100% x 50% = +19pp at
+  $2.3k/$10k/$25k (identical %; whole shares ok at $10-20 prices); at weekly-only deployment 52 x 30bp x 50% = 7.8pp. Clears only if
+  per-event net >= ~7bp at daily frequency. $100k: fine ($1M+ crosses in MSTY/CONY/TSLY/JEPI), breaks ~$1-5M in thin funds.
+- Universe (fixed before fetch): YieldMax TSLY OARK APLY NVDY AMZY FBY GOOY CONY NFLY DISO MSFO XOMO JPMO AMDY PYPY SQY MRNY AIYY
+  YMAX YMAG ULTY MSTY SNOY BABO TSMY PLTY MARO CVNY HOOY SMCY LFGY GPTY; Defiance QQQY IWMY JEPY; Roundhill XDTE QDTE RDTE;
+  NEOS SPYI QQQI; Global X QYLD XYLD RYLD; JPM JEPI JEPQ. Yahoo chart API daily raw OHLC + dividend events, 2013-2026.
+- Data caveat stated up front: Yahoo open ~ official open cross (EXDIV-OPEN found vendor open = cross for liquid names; not verified
+  here for these ETFs). Yahoo ex-date = the dividend event date.
+- **N 1140 OIE-CAP (primary):** buy close T-1, sell open T (ex-date); pnl = (open_T + div)/close_{T-1} - 1. Excess = pnl minus the
+  same fund's mean close->open return on non-ex nights T-35..T-5 (placebo). Events with div/close >= 0.3%.
+- **N 1141 OIE-POST (secondary):** buy close T (ex-day close), sell close T+3; excess vs the fund's mean 3-session return on
+  non-overlapping windows starting T-35..T-8 (no ex-date inside). Mechanism: post-ex dumping reverses.
+- **N 1142 OIE-PRE (secondary):** buy close T-4, sell close T-1 (chasers bid into ex); same placebo construction.
+- Judge: primary universe = all events 2023-01..2026-10 (none inspected for this rule); second judge set = QYLD/XYLD/RYLD/JEPI
+  2014-2022 (pre-YieldMax era, different flow mix). Gate (each rule): mean excess > 0 with t >= 2 clustered by ex-date; both halves
+  of the primary period > 0; median > 0; ex-top-5 > 0; mean > 10bp (2x a 5bp round-trip auction cost); sign holds on the 2014-22 set.
+  FAIL if mean <= 0 or t < 1; else WEAK. DSR across program N reported. Kill: FAIL -> record, stop; no re-cut by yield bucket/issuer.
+
+## Study BORROW-UNIT — data-unit audit of `optionm.borrate.borrowrate` + corrected re-runs of BORROW-XS and PCP-HTB (pre-register 2026-11-07, overnight agent, BEFORE any corrected outcome is read; N 1122 -> 1123)
+- **Unit evidence (read before registering; no return read):** WRDS direct query. Cross-section June 30d-tenor medians 0.016 (2005),
+  0.022 (2015), 0.024 (2021), 0.026 (2024); p99 0.23-1.52; rows >= 10 in those months = 0. GME 2021-01-22 = 0.94 (28d), AMC 2022-08-17
+  = 1.37, BYND 2022-08 = 0.92, MSFT 0.0005-0.005, SPY 0.0002-0.003. => **decimal fraction per year** (0.05 = 5%/yr). Both runners were
+  wrong: `borrow_xs.py`/`borrow_xs2.py` charge D10 borrow as `mean/100/12` (100x too small); `pcp_htb.py` prefilter `borrowrate >= 10`
+  = >= 1000%/yr (that is why it saw "359 name-dates, ~empty pre-2016").
+- **N 1122 BORROW-XS-U:** exact BORROW-XS rule, only change = borrow on the short leg = D10 mean borrowrate / 12 (decimal). Same panel,
+  deciles, 20bp RT, 2x shock, sub-periods and gate as N 1006. Gross and long-only lines are unit-invariant (already touched; ranks do not
+  depend on scale) and are NOT re-judged. Judge = the LS net line, FULL and 3 sub-periods. Ceiling stated before run: if the D10 mean fee
+  is >= ~13%/yr (106bp gross - 20bp - fee/12 <= 0) the LS is net-negative and the "net +84bp t 5.08" claim is withdrawn. Arm A verdict
+  can only stay NOT DEPLOYABLE or get worse; nothing is revived unless LS net > 0 with t >= 2 in >= 2 of 3 sub-periods.
+- **N 1123 PCP-HTB-U:** exact PCP-HTB spec, only change = prefilter `borrowrate >= 0.10` (10%/yr as registered). Same Wednesdays,
+  DTE/strike band, far-side cost, reserve, t+1 confirmation, gate (1)-(6). Prediction (parity, stated before run): conversion earns
+  r - b, so best-strike excess should centre near -b minus spreads: 0 signals. Falsifier: >= 100 confirmed entries/yr. Secondary check
+  (unit cross-validation by market prices): the runner's `impl` = ATM mid conversion yield minus T-bill (= -b by parity), so it should now correlate NEGATIVELY with
+  borrowrate (slope ~ -1 in decimal units); ~0 correlation would mean EOD HTB quotes are not informative.
+- Kill: any gate fail -> verdict unchanged (KILL), recorded as a verified unit bug with corrected numbers. No re-tuning.
+Program N = 1123.
+
+## CEF-SIBLINGS branch list + Study BDC-RV (pre-register 2026-11-07 BEFORE any BDC outcome is read; overnight agent; N 1130 -> 1131: N 1130 primary, N 1131 control)
+Branch list (siblings of CEF-RV: forced/constrained flow in closed-end/listed-fund wrappers, Roth long-only):
+- B1 CEF discount-management trigger tenders / tender anticipation: DEAD by user ruling 2026-10-17 (all tender classes); anticipation
+  without tendering = deep-discount CEF-RV subset; ceiling ~10/yr x 1.5% x 20% x 0.5 = ~1.5pp. CEILING-KILL, no N.
+- B2 CEF rights offerings: CEF-RIGHTS N 1084 KILL (in ledger). Not re-run.
+- B3 CEF merger / open-ending / liquidation announcement drift: cef_ends Arm E (ledger); post-announcement residual = a merger-arb
+  spread (MERG-CASH: spread = market drift); ~5-10 open-end/liquidations/yr x ~2% x 25% x 0.5 = ~2pp. CEILING-KILL, no N.
+- B4 Activist 13D on CEFs: G45 N 783 (in ledger; ~+3.9pp hedged, forward G45-F). BDC activist G55 killed at count. Not re-run.
+- B5 CEF year-end tax-loss: CEF-TL N 824 / CEF-TL2 N 864 / TL-ETF (in ledger, dead). Distribution cuts: window-signals R16
+  (continuation, long KILLED) / R17 avoid-screen live in cef_rv_shadow.cut42. Not re-run.
+- B6 CEF index-ETF reconstitution flow (YYY / PCEF / CEFS): not in a ledger. ~4 recons/yr x ~1.5% x 100% for a week x 0.5 = ~3pp
+  (6pp even at a 3% edge). CEILING-KILL, no N.
+- B7 BDC discount-to-NAV reversion (BDC-RV): not in a ledger (alpha_frontier excluded it as "a CEF discount variant", never run).
+  New wrapper the CEF-RV rule never saw -> a genuine out-of-asset test of the CEF-RV mechanism. RUN below.
+
+### Study BDC-RV (N 1130 primary, N 1131 control)
+- Mechanism: listed BDCs are closed-end (no redemption at NAV), retail/yield-held; price falls below NAV on yield-holder selling and
+  reverts (same named counterparty as CEF-RV). Falsifiable prediction: the FROZEN CEF-RV band rule earns positive excess vs the
+  equal-weight BDC universe; a price-only control (no NAV anchor) earns less.
+- Ceiling (prior, before data): ~45 listed BDCs -> ~50 trades/yr, ~14w hold, ~13 concurrent, 100% deployable at $2.3k/$10k/$25k
+  (BDC prices $8-25, whole shares fine); excess prior +2.5%/trade x 3.7 turns x 0.5 = ~4.6pp/yr (excess) / ~11pp raw. Below +8pp on
+  excess; justified only as a cheap (<1 h, data on disk + free XBRL) out-of-asset falsification of the live CEF-RV mechanism, and as a
+  possible CEF-RV complement in the Roth. Not independent of CEF-RV capital: it can only displace CEF-RV marginal trades.
+- Data: universe = CIKs reporting us-gaap NetAssetValuePerShare in SEC XBRL frames (any quarter 2009-2026) intersected with Sharadar
+  SEP common stock by CIK (delisted included). NAV = Sharadar SF1 ARQ bvps, PIT by its filing `date` (<= the signal Friday). Prices =
+  lh_panel total-return closes (delisted names truncate at the last bar = exit there). Weekly Friday disc = close / NAV - 1; NAV older
+  than 200 days -> no signal.
+- Rule (frozen CEF-RV, no tuning): enter when disc <= own trailing-52w (52 Fridays, >= 26 obs) 10th pct of disc; exit when disc >= own
+  trailing-52w median, or 26 weeks. One open trade per fund. Enter/exit at the close of the first session after the signal Friday.
+  Cost 50bp round trip; shock 150bp.
+- Benchmark: EW total return of all universe BDCs with a bar on both dates (incl. later-delisted). Excess = trade - EW.
+- Judge: all 2009-2026 entries (BDCs never inspected by this rule). Halves 2009-17 / 2018-26.
+- PASS (N 1130): net excess mean >= +100bp/trade, entry-week-clustered t >= 2, median > 0, both halves > 0, ex-top-5-funds > 0,
+  excess at 150bp RT > 0. Report raw net, hit rate, ex-top-5 dates, dollars at $2.3k/$10k/$25k (+$100k line), 2020 share.
+- Control (N 1131, report only, never rescues): same rule on PRICE (52w 10th pct of total-return price level, exit at its median).
+  NAV anchor confirmed if N 1130 excess - control excess > 0.
+- Kill: any gate fails -> KILL (record; no re-tuning bands, NAV source or hold). PASS -> log-only shadow + REGISTRY entry.
+
+### RESULT - OIE (N 1140-1142, 2026-11-07): all three FAIL -> KILL (one look; no re-cut)
+- Yahoo daily, 41/45 funds fetched (DISO, JPMO, SQY, FIVY-class missing/renamed), 3,388 events y >= 0.3%; primary 2023-01..2026-10
+  n 3,122, 327 ex-dates, median yield 1.00%, median prior-day $vol $5.2M.
+- N 1140 OIE-CAP: excess -0.6bp t -0.09, median +2.6, hit 52%, ex-top5 -3.3, halves +22.9 / -5.9 -> FAIL. Date-EW +4.1bp gross,
+  -0.9bp net of 5bp RT, -10.9bp at 15bp; ~85 dates/yr -> ceiling < 1pp/yr. 2014-22 QYLD/XYLD/RYLD/JEPI set +11.4bp t 2.01 (n 254, monthly).
+- N 1141 OIE-POST: -7.8bp t -0.44, median -3.6 -> FAIL. N 1142 OIE-PRE: +2.3bp t 0.13, 2014-22 -25.9bp t -1.68 -> FAIL.
+- Reported only: yield 2-5% cap_x +14.5bp (n 392), 5-25% +25.7bp (n 183): a post-hoc cut, not judged, not to be re-run as a rule
+  on this data (forward-only if ever). Ex-day session raw -26bp mean (the drop completes intraday, as in EXDIV-OPEN). DSR moot (t ~0).
+- Mechanism verdict: these distributions are mostly ROC; no taxable seller exists, and the ETF's NAV drops mechanically by the
+  distribution with AP arbitrage holding price ~ NAV, so the ex-date is priced. Branches (b)-(e) skipped as already in ledgers.
+- Out `data/research/program/oie_out.txt`; runner `research/sim/oie.py`; cache `data/research/oie/`.
+### Result — BORROW-XS-U (N 1122, 2026-11-07, one look): unit bug CONFIRMED; corrected LS net is strongly NEGATIVE; verdict unchanged (NOT DEPLOYABLE), the "net +84bp" claim is WITHDRAWN
+Re-run reproduces every unit-invariant line exactly (panel 717,758 rows / 8,046 names; LS gross +106.5bp t 6.43; D1-EW net +22.3bp
+t 3.58; XS2 tercile long-only lines identical). Corrected D10 borrow charge = 246.5bp/mo FULL (190.7 / 197.1 / 365.9 by sub-period),
+so Arm A LS net FULL **-160.0bp/mo t -9.42** (1996-2007 -67.8, 2008-15 -120.5, 2016-25 -319.6; median -148); Arm B net -175.6 t -14.5.
+XS2: LS net negative in every size and vol tercile (LARGE -80bp t -6.7). Robustness to the fee statistic (registered = EW mean): D10
+mean fee 29.8%/yr, median 21.6%/yr (180bp/mo), monthly FLOOR of D10 13.6%/yr (113bp/mo) -- even the floor exceeds the 106bp gross
+spread before the 20bp cost. So the high-fee short leg pays more in fee than it earns in underperformance: the short-sale-constraint
+anomaly is roughly fee-priced (consistent with the literature that the fee absorbs most of the D10 underperformance). Long-only verdict
+(size/vol beta, XS2 KILL) unaffected. Nothing revived. Not tested: actual broker locate rates (OptionMetrics rate is put-call-parity
+implied, dividend/early-exercise contaminated), a fee-capped short leg (e.g. D10 names with fee < 10%), lending income on a long book.
+Outputs data/research/program/borrow_xs_out.txt, borrow_xs2_out.txt (overwritten with corrected units).
+
+### Result - BDC-RV (N 1130-1131, 2026-11-07, one run): KILL (excess t 1.92, 3x cost negative, ex-top-5 funds ~0)
+`research/sim/bdc_rv.py` -> `data/research/program/bdc_rv_out.txt`, trades `data/research/bdc_rv/trades.csv`. 64 BDCs (48 from XBRL
+frames NAVPS x InvestmentOwnedAtCost mapped to Sharadar SEP by CIK, 16 hand-added delisted/renamed), PIT NAV = SF1 ARQ bvps by filing date.
+- N 1130 (NAV bands): 880 trades / 63 funds 2004-26, ~44/yr, hold ~109d, concurrency ~13. Raw net +223bp (median +484); EW BDC +139.
+  **Excess +84bp, wk-clustered t 1.92, median +209, hit 61%; 150bp RT -16bp.** 2009-17 +83 (t 1.0), 2018-26 +66 (t 1.3), 2013+ +51
+  (t 1.3), 2004-08 +160 (t 1.1). 2009+ ex-top-5 funds **+0.6bp**, ex-top-5 weeks +22. Gates failed: mean < 100, t < 2, 3x cost, ex-top-5.
+- N 1131 control (price bands): excess +35bp t 0.68, 2013+ +1bp. NAV anchor +70bp (direction right, mechanism weakly visible).
+- Read: the CEF-RV mechanism exists in BDCs but is ~1/2-1/3 the CEF size and noisier (quarterly, manager-marked NAV carries credit
+  information; median > 0 but a fat left tail). Ceiling ~3.4 turns x 0.84% x 0.5 = ~1.4pp/yr excess at any size. Not a CEF-RV
+  complement in the Roth. DSR moot.
+- Not tested: daily NAV (BDCs have none), NAV-estimate nowcasts (loan-index marked NAV), BDC peer-relative (sub-category) excess, BDC
+  activist/buyback-announcement conditioning, BDC preferred/baby bonds (covered by ETDX), pre-2012 BDCs the frames miss beyond the
+  16 hand-added (survivorship patch partial), entries at the open, other bands/holds (frozen; not to be tuned).
+### Result — PCP-HTB-U (N 1123, 2026-11-07, one run): unit bug CONFIRMED; corrected prefilter -> still KILL (gate 1/6); parity sign holds
+Prefilter `borrowrate >= 0.10` (true 10%/yr) gives **589,474** Wednesday HTB name-dates 2005-24 (vs 359 at the buggy 1000%/yr cut; the
+old "OptionMetrics borrow is ~empty pre-2016" was an artifact of the unit bug — 2005 alone has 5,791). Funnel: no option 83k, no strike
+160k, dividend-excluded 77k -> 15 signals, 13 confirmed, **ONE name (secid 103277), 2010-12 only**, entry excess +213-353%/yr = a bad
+quote (e.g. call bid 5.20 on K 32 with S 29.5, i.e. an OTM call bid above any value; adjusted/stale root), not carry. Judge 2016-24: 0
+entries, $10k excess 0.00pp. GATE (1) F (2) F (3) F 0/yr (4) F (5) F (6) T (only via that one artifact name) -> **KILL**. Unit cross-check
+by market prices: ATM mid conversion excess vs borrowrate n 260,159, spearman **-0.153** (pearson -0.03, outlier-driven) — negative as
+parity predicts (conversion earns r - b), but weak: EOD HTB chain mids carry little of the fee. Verdict unchanged; the registration's
+sign error (fee accrues to the synthetic long) stays the binding reason. Not tested: synthetic long + lending, actual Schwab fully-paid
+lending income, intraday NBBO, a reversed (unregistered) spec. Output data/research/program/pcp_htb_out.txt (overwritten, corrected).
+Program N = 1123.
