@@ -202,7 +202,7 @@ def round31_whatif(state: Path, acct: Account, manual_only: bool = False) -> lis
     """Round 31-32 shadows. Brokerage: ID3 insider-day sleeve (0.45 x that day's equity, equal split, official
     open -> close, 2.5bp/side) and the reverse-split round-up (both accounts, booked once here). Every account:
     the manual odd-lot tenders and split-off offers, at the whole shares THIS account could buy that day
-    (`odd_lot_shares`), x the guaranteed price (tender) or the implied gain (split-off) at the alert.
+    (`odd_lot_shares`), x the guaranteed price (tender) at the alert; split-offs and round-ups report real payouts.
     `manual_only` = just those two (the Roth)."""
     out = []
     eq_on = {e["date"]: e["equity"] for e in acct.equity_log}
@@ -220,11 +220,12 @@ def round31_whatif(state: Path, acct: Account, manual_only: bool = False) -> lis
         sh = [odd_lot_shares(eq(r.get("date", "")), float(r["last_close"])) for r in tw]
         usd = sum(n * (float(r["floor"]) - float(r["last_close"])) for n, r in zip(sh, tw))
         out.append(dict(idea=f"odd-lot tenders (manual, {_sh(sh)})", n=len(tw), usd=usd))
-    so = [r for r in _jsonl(state / "splitoff-watch.jsonl") if r.get("alert")]
-    if so:                                 # Round 32 B2: parent shares x implied gain at the entry-day alert
-        sh = [odd_lot_shares(eq(r.get("entry", "")), float(r["parent_px"])) for r in so]
-        usd = sum(n * float(r["parent_px"]) * float(r["gain"]) for n, r in zip(sh, so))
-        out.append(dict(idea=f"split-off exchange offers (manual, {_sh(sh)})", n=len(so), usd=usd))
+    # split-offs: the measured payout of offers this account actually tendered (splitoff_buy), not the alert-day
+    # implied gain (MDT->MMED 2026-10: implied ~+4.3%, realized -$46.18 in the Roth)
+    so = [v for v in _json(state / "splitoff-orders.json").values()
+          if v.get("account") == acct.name and v.get("status") in ("sold", "delivered") and "pnl" in v]
+    if so:
+        out.append(dict(idea="split-off exchange offers (real payouts)", n=len(so), usd=sum(float(v["pnl"]) for v in so)))
     # round-ups trade for real (roundup_orders): report the measured payouts, both accounts, not the "if rounded" gain
     # (Schwab paid cash in lieu on every resolved deal but one through 2026-11-09, so the old row overstated it)
     ru = [] if manual_only else [s for d in _json(state / "roundup-orders.json").values() for s in d.values()

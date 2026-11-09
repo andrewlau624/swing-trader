@@ -125,20 +125,20 @@ def test_ev2_flags_and_sub_gates():
     assert s.gate(rows[:30])["ev2"]["verdict"].startswith("shadowing")
 
 
-def test_splitoff_whatif_is_sized_by_what_each_account_can_buy(tmp_path):
-    """MDT -> MMED 2026-10-02: a flat 99 shares showed +$371 on a $2.3k brokerage."""
+def test_splitoff_whatif_reports_the_real_payout_per_account(tmp_path):
+    """MDT -> MMED 2026-10: the alert-day implied gain showed +$97; the Roth's real tender returned -$46.18."""
     import json
     import pytest
     from swingtrader.daily import digest
     (tmp_path / "splitoff-watch.jsonl").write_text(json.dumps(dict(
         entry="2026-10-02", parent="MDT", parent_px=86.89, gain=0.0431, alert=True)) + "\n")
+    (tmp_path / "splitoff-orders.json").write_text(json.dumps({
+        "MDT-2026-10-09": dict(account="roth", status="sold", pnl=-46.18, ticker="MDT", cost=859.3)}))
     acct = lambda name, eq: digest.Account(name, eq, None, 0.0, [], [], [], [], [dict(date="2026-10-02", equity=eq)])
     live = digest.round31_whatif(tmp_path, acct("live", 2263.09))
     roth = digest.round31_whatif(tmp_path, acct("roth", 1000.0), manual_only=True)
-    big = digest.round31_whatif(tmp_path, acct("live", 25000.0))
-    assert live[0]["usd"] == pytest.approx(26 * 86.89 * 0.0431) and "26 sh" in live[0]["idea"]
-    assert roth[0]["usd"] == pytest.approx(11 * 86.89 * 0.0431) and len(roth) == 1
-    assert big[0]["usd"] == pytest.approx(99 * 86.89 * 0.0431), "odd-lot priority caps at 99"
+    assert not any(r["idea"].startswith("split-off") for r in live), "no tender in this account = no row"
+    assert len(roth) == 1 and roth[0]["n"] == 1 and roth[0]["usd"] == pytest.approx(-46.18)
     assert digest.odd_lot_shares(50.0, 86.89) == 0
 
 
