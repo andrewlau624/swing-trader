@@ -436,9 +436,9 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
     with path.open("a") as f:
         for r in new + misses + scored + out:
             f.write(json.dumps(r) + "\n")
-    if ro.enabled():                       # automatic 1-share buys/sells (user-approved 2026-10-02); ROUNDUP_AUTO=1
-        try:
-            ro.manage(state_dir, list(alerted.values()) + new, today, events=events,   # prices: each account's Schwab ask
+    if ro.enabled() or ro.pending(state_dir):   # 1-share buys only with ROUNDUP_AUTO=1 (user-approved 2026-10-02); deals
+        try:                                     # already bought are followed to rounded/cash after it is turned off
+            ro.manage(state_dir, list(alerted.values()) + new if ro.enabled() else [], today, events=events,   # prices: each account's Schwab ask
                       notify=(lambda s, h: note.mail(s, h)) if note else None, log=log, outcomes=outcomes,
                       mode=order_mode)
         finally:                           # the order outcomes are on file even when manage() raises

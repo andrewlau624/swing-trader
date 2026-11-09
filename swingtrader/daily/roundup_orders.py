@@ -32,6 +32,14 @@ def enabled() -> bool:
     return os.environ.get("ROUNDUP_AUTO", "0").strip() == "1"
 
 
+def pending(state_dir: Path) -> bool:
+    """Deals bought earlier that are not resolved yet: they are still followed (rounded -> sell, else cash) and booked
+    to the CPC ledger after ROUNDUP_AUTO is turned off."""
+    return any(s.get("status") in ("ordered", "held", "waiting", "rounded") or
+               (s.get("status") in ("sold", "cash") and not s.get("booked"))
+               for d in _load(state_dir).values() for s in d.values())
+
+
 def accounts() -> list[str]:
     return [a.strip() for a in os.environ.get("ROUNDUP_ACCOUNTS", "live,roth").split(",") if a.strip()]
 

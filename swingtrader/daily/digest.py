@@ -225,12 +225,22 @@ def round31_whatif(state: Path, acct: Account, manual_only: bool = False) -> lis
         sh = [odd_lot_shares(eq(r.get("entry", "")), float(r["parent_px"])) for r in so]
         usd = sum(n * float(r["parent_px"]) * float(r["gain"]) for n, r in zip(sh, so))
         out.append(dict(idea=f"split-off exchange offers (manual, {_sh(sh)})", n=len(so), usd=usd))
-    ru = [] if manual_only else [r for r in _jsonl(state / "roundup-watch.jsonl")
-                                 if r.get("scored") and r.get("split_in_prices")]
-    if ru:                                 # Round 32 B1: 1 share in each of 2 accounts, IF Schwab rounds up
-        out.append(dict(idea="reverse-split round-up (1 sh x 2 accts, if rounded)", n=len(ru),
-                        usd=sum(2 * float(r["gain_if_rounded"]) for r in ru)))
+    # round-ups trade for real (roundup_orders): report the measured payouts, both accounts, not the "if rounded" gain
+    # (Schwab paid cash in lieu on every resolved deal but one through 2026-11-09, so the old row overstated it)
+    ru = [] if manual_only else [s for d in _json(state / "roundup-orders.json").values() for s in d.values()
+                                 if s.get("status") in ("sold", "cash") and "pnl" in s]
+    if ru:
+        n_round = sum(1 for s in ru if s["status"] == "sold")
+        out.append(dict(idea=f"reverse-split round-up (real: {n_round}/{len(ru)} rounded)", n=len(ru),
+                        usd=sum(float(s["pnl"]) for s in ru)))
     return out
+
+
+def _json(p: Path) -> dict:
+    try:
+        return json.loads(p.read_text()) if p.exists() else {}
+    except Exception:  # noqa: BLE001  (unreadable = nothing to report)
+        return {}
 
 
 def _sh(shares: list[int]) -> str:

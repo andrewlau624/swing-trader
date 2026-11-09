@@ -166,3 +166,29 @@ def test_expired_day_order_is_unfilled_not_cash(tmp_path):
     assert st["VIVK-2026-10-05"]["live"]["status"] == "unfilled"
     st, _ = run(tmp_path, "2026-12-01", {"live": live})
     assert st["VIVK-2026-10-05"]["live"]["status"] == "unfilled" and not ro.killed(st, "live")
+
+
+def test_pending_keeps_following_bought_deals_after_auto_is_off(tmp_path):
+    import json
+    assert not ro.pending(tmp_path)
+    (tmp_path / ro.ORDERS_NAME).write_text(json.dumps({
+        "A-2026-10-20": {"live": {"status": "waiting"}},
+        "B-2026-10-05": {"live": {"status": "cash", "pnl": -0.1, "booked": "X"}}}))
+    assert ro.pending(tmp_path)
+    (tmp_path / ro.ORDERS_NAME).write_text(json.dumps({
+        "B-2026-10-05": {"live": {"status": "cash", "pnl": -0.1, "booked": "X"}, "roth": {"status": "unfilled"}}}))
+    assert not ro.pending(tmp_path)
+
+
+def test_digest_round_up_row_uses_real_payouts_not_if_rounded(tmp_path):
+    import json
+    from swingtrader.daily import digest
+    (tmp_path / "roundup-watch.jsonl").write_text(json.dumps(dict(scored=True, split_in_prices=True,
+                                                                  gain_if_rounded=5.0)) + "\n")
+    (tmp_path / ro.ORDERS_NAME).write_text(json.dumps({
+        "A-2026-10-05": {"live": {"status": "cash", "pnl": -0.12}, "roth": {"status": "sold", "pnl": 3.0}},
+        "B-2026-10-20": {"live": {"status": "waiting"}}}))
+    acct = digest.Account("live", 2000.0, None, 0.0, [], [], [], [], [dict(date="2026-10-05", equity=2000.0)])
+    r = next(x for x in digest.round31_whatif(tmp_path, acct) if x["idea"].startswith("reverse-split"))
+    assert r["n"] == 2 and abs(r["usd"] - 2.88) < 1e-9 and "1/2 rounded" in r["idea"]
+    assert not any(x["idea"].startswith("reverse-split") for x in digest.round31_whatif(tmp_path, acct, manual_only=True))
