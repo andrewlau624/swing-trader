@@ -21,8 +21,6 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.compute as pc
 import pyarrow.parquet as pq
-from sklearn.ensemble import HistGradientBoostingRegressor
-from sklearn.linear_model import Ridge
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 PROG = ROOT / "data" / "research" / "program"
@@ -368,7 +366,8 @@ def market() -> pd.DataFrame:
     return m
 
 
-def fit_gbm(X: np.ndarray, y: np.ndarray, seed: int = 0, **kw) -> HistGradientBoostingRegressor:
+def fit_gbm(X: np.ndarray, y: np.ndarray, seed: int = 0, **kw):
+    from sklearn.ensemble import HistGradientBoostingRegressor   # lazy: features() is imported by the live seq_tilt_shadow (no sklearn)
     p = dict(GBM); p.update(kw)
     return HistGradientBoostingRegressor(random_state=seed, **p).fit(X, y)
 
@@ -456,6 +455,7 @@ def night_replays(df: pd.DataFrame, pred: np.ndarray) -> list[str]:
 
 
 def phase_a() -> None:
+    from sklearn.linear_model import Ridge
     t0 = time.time()
     d, feats = night_frame()
     L = [f"SEQ-NIGHT (N 1038): indicator-sequence ranker on the night pool; rows {len(d):,} (coverage of SEL-NIGHT picks), features {len(feats)}", ""]
@@ -565,6 +565,7 @@ def judge_entry(s: pd.DataFrame, m: pd.DataFrame, lab: str, label: str) -> tuple
 
 
 def phase_b() -> None:
+    from sklearn.linear_model import Ridge
     t0 = time.time()
     tr, te, feats = load_universe()
     m = market()

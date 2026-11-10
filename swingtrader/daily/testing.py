@@ -365,6 +365,13 @@ def _upro_gate(state: Path, logs: Path) -> dict:
     return dict(n=len(rows), week=sum(1 for r in rows if r.get("date", "") >= _week_ago()), line=w.line(rows))
 
 
+def _seq_tilt(state: Path, logs: Path) -> dict:
+    from . import seq_tilt_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    wk = {r.get("T") for r in rows if r.get("status") == "scored" and not r.get("backfill") and (r.get("T") or "") >= _week_ago()}
+    return dict(n=w.summary(rows)["nights"], week=len(wk), line=w.line(rows))
+
+
 def _exec_arms(state: Path, logs: Path) -> dict:
     from . import exec_bandit_shadow as w
     rows = _jsonl(state / w.LOG_NAME)
@@ -585,6 +592,10 @@ REGISTRY: list[Test] = [
          "decision); 120 with none -> kill, cross stays. CEF-RV opening-cross buys logged descriptively (open vs prior mid).",
          "2026-11-09", 60, "scored PREF-EX buys", _exec_arms, "state/exec-arms.jsonl; make exec-arms; round1_prose.md EXEC-ARMS (N 1197)",
          ["exec_bandit_shadow", "exec_arms_fwd"]),
+    Test("SEQ-TILT-FWD: SEQ-NIGHT Ridge tilt on night picks (log-only)", "seq_tilt_shadow.py (research-shadows): frozen "
+         "1999-2015 Ridge scores each night pick; tilt vs EW and top-minus-bottom on official crosses. Gate at 60 nights: "
+         "delta > 0, t >= 2, tmb > 0 = PASS; delta <= 0 = KILL; else hold to 120.", "2026-11-10", 60, "nights", _seq_tilt,
+         "state/seq-tilt.jsonl; make seq-tilt; round1_prose.md SEQ-TILT-FWD (N 1196)", ["seq_tilt_shadow", "seq_tilt_fwd"]),
     Test("CEF-RV rights hygiene (descriptive)", "CEF-RV signals / live positions that enter or are held inside a rights pricing "
          "window [E-10, E+5]: their later OO excess vs unflagged trades. Descriptive (N 1086): at 10 flagged closed trades, flagged "
          ">= 150bp worse = propose a rights-window entry block (user decision).", "2026-11-07", 10, "flagged closed trades",

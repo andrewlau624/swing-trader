@@ -163,6 +163,7 @@ daily:
   ibs_lev_shadow: shadow         # Study ACC: log the 1.25x non-callable 3x-ETF IBS overlay vs the live 1x leg (delta, maxDD, exposure); never trades
   upro_gate_fwd: shadow          # UPRO-GATE-FWD (N 1107): SPY close vs 200d SMA 1% band -> Roth UPRO core ON/OFF (SGOV), SWITCH line at the next close cross; never trades
   exec_arms_fwd: shadow          # EXEC-ARMS (N 1197): PREF-EX buy placement arms (take / bid-then-cross / mid-then-cross) scored vs the close cross from the logged 15:25 quote; never trades
+  seq_tilt_fwd: shadow           # SEQ-TILT-FWD (N 1196): frozen Ridge (1999-2015 fit) tilt over night picks vs equal weight, official crosses; never trades
   cef_rights_fwd: shadow         # CEF-RIGHTS-FWD (N 1085): log would-be rights-window shorts E-10 -> E+25 + borrow flags, CEF-RV hygiene (N 1086); never trades
   wash_guard_mode: "off"         # ended 2026-11-07: G4s is the live guard (wash_guard: roth_first); shadow only logged that. Was `[wash-guard]` (add. 31)
   # LIVE wash guard between the two real-money books: symmetric | roth_first.

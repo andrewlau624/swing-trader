@@ -10448,7 +10448,8 @@ open cross T+1, r = o1/c0 - 1. Per night (>= 2 scored picks): delta_ew = mean(m 
 bottom-half r by score (>= 4 picks); delta_v1 (same on the live tilt-v1 weights) is reported, not gated.
 Gate: at 60 nights (first forward signal 2026-11-10; earlier candidate nights are backfill, excluded): PASS = mean delta_ew > 0
 with night t >= 2 AND mean tmb > 0; KILL = mean delta_ew <= 0. Otherwise HOLD to 120 nights, then PASS by the same rule or
-KILL. PASS = propose the tilt (user decision); never changes orders. Known power limit: at the research effect (+1.4 bp/night,
-t 1.5 over ~20 years) 60 nights carry t ~0.2 in expectation, so PASS at 60 needs a much larger forward effect; a KILL at 60 is
+KILL. PASS = propose the tilt (user decision); never changes orders. Known power limit: the reproduced Ridge (artifact run,
+2016-26, 850 nights: tmb +31.6bp t 2.09, exact repro) has a tilt replay of only +0.45 bp/night t 0.39 (the +1.4 t 1.5 was the GBM
+walk-forward); 60 nights carry tilt t ~0.1 and tmb t ~0.55 in expectation, so PASS at 60 needs a much larger forward effect; a KILL at 60 is
 mostly noise-driven and closes only this frozen Ridge on live picks. Not tested here: the GBM ranker, a refit on 2016-26,
 bottom-quintile avoidance as a filter, 15:30-15:40 minute-path sequences. Program N = 1196.

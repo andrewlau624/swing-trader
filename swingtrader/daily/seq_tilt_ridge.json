@@ -1,0 +1,1012 @@
+{
+ "study": "SEQ-TILT-FWD (N 1196) frozen from SEQ-NIGHT (N 1038) Ridge line",
+ "model": "sklearn Ridge(alpha=10) on nan_to_num((x - mu) / sd); score = intercept + sum(coef * z)",
+ "train_window": [
+  "1999-01-04",
+  "2015-12-31"
+ ],
+ "train_rows": 12969,
+ "train_nights": 2336,
+ "label": "pick close->next-open return minus the night mean, clipped +-0.5",
+ "data": "Sharadar SEP split-adjusted OHLCV (closeunadj for log_px), SEL-NIGHT primary universe current-rule kept picks",
+ "alpha": 10.0,
+ "intercept": -1.7467162251705304e-05,
+ "features": [
+  {
+   "name": "vol20",
+   "mu": 1.1693999767303467,
+   "sd": 0.5898977518081665,
+   "coef": 0.002288542687892914,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "day_ret",
+   "mu": -0.12482249736785889,
+   "sd": 0.05482883006334305,
+   "coef": -0.02932703122496605,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "ret5",
+   "mu": -0.1152268648147583,
+   "sd": 0.21004962921142578,
+   "coef": -0.001723464927636087,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "ret20",
+   "mu": -0.07230933010578156,
+   "sd": 0.5106340646743774,
+   "coef": 0.0005141189321875572,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "ret63",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "ret252",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "vol60",
+   "mu": 1.1296629905700684,
+   "sd": 0.4369623363018036,
+   "coef": -7.416574953822419e-05,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "gap",
+   "mu": -0.01298958994448185,
+   "sd": 0.04364591836929321,
+   "coef": 0.0009266011766158044,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "low_ret",
+   "mu": -0.13083280622959137,
+   "sd": 0.056756842881441116,
+   "coef": 0.019873453304171562,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "high_ret",
+   "mu": 0.0037203102838248014,
+   "sd": 0.04327990114688873,
+   "coef": 0.006159043405205011,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "prev_low_ret",
+   "mu": -0.04976748302578926,
+   "sd": 0.06841002404689789,
+   "coef": 0.0009413874358870089,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "ibs",
+   "mu": 0.04403580352663994,
+   "sd": 0.03067534789443016,
+   "coef": 5.157563919055974e-06,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "range_pct",
+   "mu": 0.1579570323228836,
+   "sd": 0.08555985242128372,
+   "coef": -0.005464170128107071,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "atr_pct",
+   "mu": 0.12593543529510498,
+   "sd": 0.0601014718413353,
+   "coef": -0.006300733890384436,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "dist_hi",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "dist_lo",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "days_since_hi",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "days_since_lo",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "volratio",
+   "mu": 2.7771403789520264,
+   "sd": 19.600862503051758,
+   "coef": 0.00022925394296180457,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "vol5_20",
+   "mu": 1.1432743072509766,
+   "sd": 0.525836706161499,
+   "coef": -0.0005769359995611012,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "climax_age",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "dryup_run",
+   "mu": 0.059372350573539734,
+   "sd": 0.3833897113800049,
+   "coef": 0.0002866355061996728,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "down_run",
+   "mu": 2.143573045730591,
+   "sd": 1.5234731435775757,
+   "coef": 0.0001254388043889776,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "up_run",
+   "mu": 0.0,
+   "sd": 9.999999717180685e-10,
+   "coef": 0.0,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "nbig_dn20",
+   "mu": 7.013570785522461,
+   "sd": 2.4353086948394775,
+   "coef": -0.0004026726819574833,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "nbig_up20",
+   "mu": 5.326624870300293,
+   "sd": 2.226069927215576,
+   "coef": 0.0005572603549808264,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "ngap20",
+   "mu": 7.0996222496032715,
+   "sd": 3.8699986934661865,
+   "coef": -0.0006996826268732548,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "c_s20",
+   "mu": -0.126215398311615,
+   "sd": 0.20483499765396118,
+   "coef": -0.0022226881701499224,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "c_s50",
+   "mu": -0.10652023553848267,
+   "sd": 0.3496409058570862,
+   "coef": -0.0015349019085988402,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "c_s200",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "stack",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "stack_bull_run",
+   "mu": 14.89212703704834,
+   "sd": 35.3440055847168,
+   "coef": -0.0009141937480308115,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "stack_bear_run",
+   "mu": 11.513300895690918,
+   "sd": 24.84187126159668,
+   "coef": -0.000582812586799264,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "age_c_s50",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "age_c_s200",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "age_s20_s50",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "age_s50_s200",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "ribbon_align",
+   "mu": 1.6052124500274658,
+   "sd": 1.6442557573318481,
+   "coef": -0.001658997731283307,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "ribbon_bull_run",
+   "mu": 5.6259541511535645,
+   "sd": 14.58222484588623,
+   "coef": -0.0002683415077626705,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "ribbon_bear_run",
+   "mu": 7.749248027801514,
+   "sd": 14.139132499694824,
+   "coef": -7.980438385857269e-05,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "ribbon_width",
+   "mu": -0.13510479032993317,
+   "sd": 0.370456725358963,
+   "coef": -0.0010688609909266233,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "macd_pct",
+   "mu": -0.05077878758311272,
+   "sd": 0.14019183814525604,
+   "coef": -0.009187575429677963,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "hist_pct",
+   "mu": -0.013820507563650608,
+   "sd": 0.03884456306695938,
+   "coef": -0.004464388359338045,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "hist_run",
+   "mu": -2.127920389175415,
+   "sd": 14.092806816101074,
+   "coef": -0.00010160050442209467,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "hist_slope",
+   "mu": -0.008781385608017445,
+   "sd": 0.00925892312079668,
+   "coef": -0.004588973242789507,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "hist_rise_run",
+   "mu": 0.46572595834732056,
+   "sd": 1.782987356185913,
+   "coef": 0.0002615867415443063,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "hist_fall_run",
+   "mu": 2.8272032737731934,
+   "sd": 2.9014151096343994,
+   "coef": -0.0005762352957390249,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "macd_cross_age",
+   "mu": 9.843781471252441,
+   "sd": 9.249197006225586,
+   "coef": -0.0005406993441283703,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "macd_zero_run",
+   "mu": -2.07525634765625,
+   "sd": 47.968536376953125,
+   "coef": 0.00014895353524480015,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "rsi",
+   "mu": 40.440818786621094,
+   "sd": 11.620124816894531,
+   "coef": 0.004106784705072641,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "rsi_lt30_run",
+   "mu": 0.628190279006958,
+   "sd": 2.1715168952941895,
+   "coef": -0.0004722614830825478,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "rsi_gt70_run",
+   "mu": 0.05073637142777443,
+   "sd": 0.7848424911499023,
+   "coef": -0.00014250181266106665,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "rsi_lt30_age",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "rsi_gt70_age",
+   "mu": 83.2191390991211,
+   "sd": 99.51265716552734,
+   "coef": -0.00016217441589105874,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "rsi_min20",
+   "mu": 35.14064407348633,
+   "sd": 10.521671295166016,
+   "coef": 0.0006135620060376823,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "rsi_max20",
+   "mu": 62.76502990722656,
+   "sd": 13.782034873962402,
+   "coef": -1.1360205462551676e-05,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "rsi_chg5",
+   "mu": -8.259255409240723,
+   "sd": 10.205820083618164,
+   "coef": 0.0012797022936865687,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "bull_div",
+   "mu": 0.04310278221964836,
+   "sd": 0.20308849215507507,
+   "coef": 8.594746032031253e-05,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "bear_div",
+   "mu": 0.0,
+   "sd": 9.999999717180685e-10,
+   "coef": 0.0,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "bull_div_age",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "bear_div_age",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "lag_rsi",
+   "mu": 0.4123314619064331,
+   "sd": 0.386633962392807,
+   "coef": 0.0017871925374493003,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "lag_lt2_run",
+   "mu": 8.494332313537598,
+   "sd": 16.173641204833984,
+   "coef": 0.00021403084974735975,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "lag_gt8_run",
+   "mu": 6.468347549438477,
+   "sd": 16.81342124938965,
+   "coef": -0.00038738848525099456,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "adx",
+   "mu": 29.27791976928711,
+   "sd": 11.250411033630371,
+   "coef": -0.0013516376493498683,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "di_diff",
+   "mu": -7.633073806762695,
+   "sd": 17.443912506103516,
+   "coef": 0.002673425944522023,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "di_cross_age",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "adx_rise_run",
+   "mu": 3.081193685531616,
+   "sd": 5.03302001953125,
+   "coef": 0.0012357959058135748,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "adx_gt25_run",
+   "mu": 17.142494201660156,
+   "sd": 26.10171127319336,
+   "coef": -0.0005466050351969898,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "pctb",
+   "mu": 0.22097955644130707,
+   "sd": 0.29900768399238586,
+   "coef": 0.00965727400034666,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "bw",
+   "mu": 56.43362045288086,
+   "sd": 36.5210075378418,
+   "coef": -0.0022787926718592644,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "bw_ratio",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "explosive",
+   "mu": 0.000616855570115149,
+   "sd": 0.024828914552927017,
+   "coef": -0.0002048377355094999,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "bw_pct120",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "sq_on",
+   "mu": 0.028760891407728195,
+   "sd": 0.16713377833366394,
+   "coef": 6.1789047322236e-05,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "sq_on_run",
+   "mu": 0.12961678206920624,
+   "sd": 1.0762836933135986,
+   "coef": 0.00014973219367675483,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "sq_rel_age",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "sq_fired5",
+   "mu": 0.06785411387681961,
+   "sd": 0.2514953911304474,
+   "coef": -0.0002024975256063044,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "sq_level",
+   "mu": 0.20541290938854218,
+   "sd": 0.47048598527908325,
+   "coef": 0.0001333993423031643,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "sq_tight_run",
+   "mu": 0.0003084277850575745,
+   "sd": 0.027766427025198936,
+   "coef": 0.00045330612920224667,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "ttm_mom",
+   "mu": -0.21541140973567963,
+   "sd": 0.28378230333328247,
+   "coef": 0.005288349464535713,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "ttm_mom_run",
+   "mu": -5.529955863952637,
+   "sd": 16.20957374572754,
+   "coef": -0.0009666394325904548,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "ttm_mom_rise_run",
+   "mu": 0.01210579089820385,
+   "sd": 0.252537339925766,
+   "coef": 0.000115820141218137,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "ttm_mom_slope",
+   "mu": -0.00894911214709282,
+   "sd": 0.019467880949378014,
+   "coef": -0.0008721313788555562,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "c_hma",
+   "mu": -0.1078585758805275,
+   "sd": 0.9746302366256714,
+   "coef": 0.0002899749088101089,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "hma_slope",
+   "mu": -0.02341458573937416,
+   "sd": 0.05247935652732849,
+   "coef": 0.002116404939442873,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "hma_concave",
+   "mu": -0.7844089865684509,
+   "sd": 0.6202439665794373,
+   "coef": 0.00022709793120156974,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "hma_turn_age",
+   "mu": 6.59495735168457,
+   "sd": 6.618558883666992,
+   "coef": -2.1885940441279672e-05,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "hma_up_run",
+   "mu": -2.8055362701416016,
+   "sd": 9.675622940063477,
+   "coef": 0.000511596561409533,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "tight15",
+   "mu": 0.5946371555328369,
+   "sd": 0.6936681866645813,
+   "coef": 0.0015374183421954513,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "tight_run",
+   "mu": 0.0,
+   "sd": 9.999999717180685e-10,
+   "coef": 0.0,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "btd",
+   "mu": 0.00724805286154151,
+   "sd": 0.08482639491558075,
+   "coef": -0.0005652171093970537,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "stoch_k",
+   "mu": 19.655664443969727,
+   "sd": 22.31313133239746,
+   "coef": -0.00038303842302411795,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "stoch_d",
+   "mu": 35.769073486328125,
+   "sd": 26.07522201538086,
+   "coef": -0.0005796565674245358,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "stoch_cross_age",
+   "mu": 1.2498265504837036,
+   "sd": 1.6655458211898804,
+   "coef": 0.00038845642120577395,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "stoch_lt20_run",
+   "mu": 1.8918960094451904,
+   "sd": 3.124260425567627,
+   "coef": 0.00036816985812038183,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "stoch_gt80_run",
+   "mu": 0.005320379510521889,
+   "sd": 0.17488037049770355,
+   "coef": -0.00030283877276815474,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "cci",
+   "mu": -56.912628173828125,
+   "sd": 85.80976104736328,
+   "coef": -0.01023124624043703,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "brk_up_age",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "brk_dn_age",
+   "mu": null,
+   "sd": null,
+   "coef": 0.0,
+   "active": false,
+   "night_const": false
+  },
+  {
+   "name": "obv_slope",
+   "mu": -0.07473468780517578,
+   "sd": 0.2984483540058136,
+   "coef": -0.00040550014819018543,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "log_adv",
+   "mu": 17.591991424560547,
+   "sd": 1.1713916063308716,
+   "coef": -0.00034948685788549483,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "log_px",
+   "mu": 3.1108696460723877,
+   "sd": 0.8155567646026611,
+   "coef": -0.0010673601645976305,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "spy_ret1",
+   "mu": -0.011929892003536224,
+   "sd": 0.01874171942472458,
+   "coef": -0.00032462889794260263,
+   "active": true,
+   "night_const": true
+  },
+  {
+   "name": "spy_ret5",
+   "mu": -0.014888109639286995,
+   "sd": 0.0377962626516819,
+   "coef": 0.0002941757265944034,
+   "active": true,
+   "night_const": true
+  },
+  {
+   "name": "spy_ret20",
+   "mu": -0.01946892775595188,
+   "sd": 0.06587641686201096,
+   "coef": -6.828962068539113e-05,
+   "active": true,
+   "night_const": true
+  },
+  {
+   "name": "spy_vol20",
+   "mu": 0.24559929966926575,
+   "sd": 0.14263759553432465,
+   "coef": 0.000942020327784121,
+   "active": true,
+   "night_const": true
+  },
+  {
+   "name": "spy_c_s200",
+   "mu": -0.029103344306349754,
+   "sd": 0.11257018893957138,
+   "coef": 0.0014854616019874811,
+   "active": true,
+   "night_const": true
+  },
+  {
+   "name": "breadth50",
+   "mu": 0.46194005012512207,
+   "sd": 0.1970246583223343,
+   "coef": 0.0006726609426550567,
+   "active": true,
+   "night_const": true
+  },
+  {
+   "name": "breadth200",
+   "mu": 0.5081232786178589,
+   "sd": 0.19870445132255554,
+   "coef": -0.0001803847699193284,
+   "active": true,
+   "night_const": true
+  },
+  {
+   "name": "dow",
+   "mu": 1.811627745628357,
+   "sd": 1.3709927797317505,
+   "coef": -7.261902283062227e-06,
+   "active": true,
+   "night_const": true
+  },
+  {
+   "name": "sec_Techno",
+   "mu": 0.47459325194358826,
+   "sd": 0.4993540942668915,
+   "coef": 0.0017550574848428369,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "sec_Health",
+   "mu": 0.12761199474334717,
+   "sd": 0.33365726470947266,
+   "coef": 0.0010745282052084804,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "sec_Indust",
+   "mu": 0.059912096709012985,
+   "sd": 0.23732390999794006,
+   "coef": 0.0003301322285551578,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "sec_Financ",
+   "mu": 0.06523247808218002,
+   "sd": 0.2469356507062912,
+   "coef": 0.000458317284937948,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "sec_Consum",
+   "mu": 0.016500886529684067,
+   "sd": 0.12739154696464539,
+   "coef": -0.00015744425763841718,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "sec_Commun",
+   "mu": 0.09584393352270126,
+   "sd": 0.29437708854675293,
+   "coef": 0.0007185408030636609,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "sec_Real E",
+   "mu": 0.018043026328086853,
+   "sd": 0.1331070065498352,
+   "coef": 0.00010943172674160451,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "sec_Basic ",
+   "mu": 0.03708844259381294,
+   "sd": 0.18897853791713715,
+   "coef": 0.00046194699825719,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "sec_Energy",
+   "mu": 0.03277045115828514,
+   "sd": 0.17803524434566498,
+   "coef": 0.00017500492685940117,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "sec_Utilit",
+   "mu": 0.00516616553068161,
+   "sd": 0.0716901421546936,
+   "coef": -0.0005543679581023753,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "ssr",
+   "mu": 0.7079960107803345,
+   "sd": 0.45468416810035706,
+   "coef": 0.0002536200627218932,
+   "active": true,
+   "night_const": false
+  },
+  {
+   "name": "n_picks",
+   "mu": 25.06692886352539,
+   "sd": 30.1663818359375,
+   "coef": -0.00019080494530498981,
+   "active": true,
+   "night_const": true
+  },
+  {
+   "name": "repeat",
+   "mu": 0.17395327985286713,
+   "sd": 0.3790692687034607,
+   "coef": 0.0004833159619010985,
+   "active": true,
+   "night_const": false
+  }
+ ],
+ "repro": {
+  "judge_2016_26_tmb_bp": 31.58,
+  "line": "Ridge judge 2016-26 (repro of seq_night_out: +31.6bp t 2.1): nights 850; top-half minus bottom-half +31.6bp t 2.09 med +12.2 hit 0.524 h1(2016-20) +43.3 h2(2021-26) +28.0 ex-top-5 +14.4; Spearman +0.031; pred quintile means bp [26.0, 39.0, 13.0, 43.0, 57.0]"
+ }
+}
