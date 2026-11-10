@@ -18,3 +18,5 @@ ceiling-killed, only the regulator-lens IPO quiet period survived (re-ceilinged:
   40-day deals (misclassified as K=25), combination with the night/IBS book (correlation not measured), forward data.
 Files: research/sim/qp_init.py (--runup), qp_runup_crsp.py (WRDS pull cached data/research/qp_crsp/), qp_runup_book.py;
 outs data/research/program/qp_{init,runup,runup_crsp,runup_book}_out.txt. wrds pkg was missing in stvenv; installed via uv.
+- Forward: QP-RUNUP-FWD (N 1203, prose pre-reg 2026-11-10) log-only shadow swingtrader/daily/qp_runup_shadow.py (Nasdaq IPO calendar,
+  research-shadows, state/qp-runup.jsonl, make qp-runup); gate at 40 scored incl. net of the measured 15:45-15:50 half-spreads.

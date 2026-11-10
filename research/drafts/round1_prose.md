@@ -10620,3 +10620,32 @@ VERDICT: PASS-SMALL. The pre-initiation run-up is a real, rule-timed effect (OOS
 50% share before honest-capture haircut, -46% maxDD, dead at 3x cost: below the +8pp gate. Not deployed. Forward log-only shadow
 is the only next step (needs a live IPO calendar source + a testing.py REGISTRY entry in the commit that builds it; user decision).
 Program N stays 1207 (block 1200-1204: used 1200-1202; 1203-1204 unused).
+
+## PRE-REGISTRATION - QP-RUNUP-FWD (N 1203), 2026-11-10, BEFORE any forward outcome is read: log-only forward shadow of QP-RUNUP
+Why: QP-RUNUP-CRSP (N 1202) confirmed the run-up out of sample, but the trade is below the +8pp gate and dies at 3x cost; the open
+questions are whether it still exists on 2026+ deals and what the real cost is. No orders, ever (swingtrader/daily/qp_runup_shadow.py,
+research-shadows 08:20 ET; state/qp-runup.jsonl; testing.py REGISTRY "QP-RUNUP-FWD"). Program N stays 1207 (1203 was unused in the block).
+Rule (frozen, = N 1201 at K = 25, the post-JOBS era): F = first SIP daily bar (Alpaca) of a new listing; x = first regular session
+(exchange calendar) with date >= F + 25 calendar days; buy the official closing cross of session x-3, sell the closing cross of
+session x-1. Events: deals with x-3 on or after 2026-11-11.
+Universe (study: Sharadar `listed`, Domestic/ADR common, non-SPAC, non-spin-off). Forward source = Nasdaq IPO calendar JSON
+(api.nasdaq.com/api/ipo/calendar, "priced" rows, incl. no-price direct listings, as Sharadar's `listed` did). Forward filters:
+F within 0..3 days after the priced date and no SIP bar in the 30 days before it (stands in for "first price within 3 days of the
+listing": uplists with prior history are out); not a SPAC: name contains ACQUISITION or SPAC, or a $10.00 deal whose ticker is a
+5-letter ...U unit (stands in for SIC 6770 + spac actions); name containing FUND out (closed-end funds; not "Common"); day-1 raw
+close >= $5 and day-1 close x volume >= $5M; the pinned-at-$10 CV check (first 20 closes, std/mean < 1% -> out).
+AMENDMENTS (forward only, disclosed before any outcome): (a) the CV check uses the closes available at the decision (through x-4,
+~14 sessions) for the event itself; seasoned cohort members use their first 20 as in the study. (b) Entry filters are decided on the
+x-3 MORNING from data through x-4: close(x-4) >= $3 and median close x volume over sessions 2..x-4 >= $2M (the study used x-3's own
+close and volume, not knowable before the cross). The study's version is recomputed at scoring and reported, not gated. (c) Cost tier
+uses the same x-4 values: 5bp/side if close >= $10 and median $vol >= $10M, else 10bp. (d) Spin-offs are not in the IPO calendar, so
+the +-30-day spin-off check is moot. (e) Prices are official closing crosses (Alpaca auctions; daily-bar close if a cross is missing,
+flagged), scaled by Alpaca's split/dividend adjustment between x-3 and x-1.
+Control: excess vs the EW cross-to-cross return over the same two sessions of the other universe IPOs (calendar seeded 14 months
+back) aged 60-250 sessions at x-3 (>= 5 members, else no control); also vs SPY and IWM. Cost measured: last valid SIP NBBO in
+15:45-15:50 ET (the MOC cutoff) at x-3 and x-1; measured cost = half-spread at entry + half-spread at exit.
+Gate (judged on scored events only): at 40 scored: mean net excess vs cohort > 0 AND entry-day-clustered t >= 2 AND median > 0 AND
+mean excess net of the measured half-spreads > 0 -> PASS = propose a small live test (user decision, no auto-size). At 80 scored
+with mean net excess <= 0 -> KILL. Not passed by 120 scored -> KILL. Reported, not gated: 2x/3x cost, ex-top-5, hit rate, vs SPY/IWM,
+the study-filter (x-3) variant, the $10-40 / $ADV<$100M slices (seen in N 1201, so never gated). ~90 events/yr in 2002-26: 40 by
+~mid-2027. Not tested by this design: initiation counts/ratings, the K=40 regime, secondary quiet periods, combination with the book.

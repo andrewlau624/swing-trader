@@ -380,6 +380,13 @@ def _seq_tilt(state: Path, logs: Path) -> dict:
     return dict(n=w.summary(rows)["nights"], week=len(wk), line=w.line(rows))
 
 
+def _qp_runup(state: Path, logs: Path) -> dict:
+    from . import qp_runup_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    sc = [r for r in w.fold(rows).values() if r.get("status") == "scored"]
+    return dict(n=w.stats(rows)["n"], week=sum(1 for r in sc if (r.get("s") or "") >= _week_ago()), line=w.line(rows))
+
+
 def _exec_arms(state: Path, logs: Path) -> dict:
     from . import exec_bandit_shadow as w
     rows = _jsonl(state / w.LOG_NAME)
@@ -604,6 +611,14 @@ REGISTRY: list[Test] = [
          "1999-2015 Ridge scores each night pick; tilt vs EW and top-minus-bottom on official crosses. Gate at 60 nights: "
          "delta > 0, t >= 2, tmb > 0 = PASS; delta <= 0 = KILL; else hold to 120.", "2026-11-10", 60, "nights", _seq_tilt,
          "state/seq-tilt.jsonl; make seq-tilt; round1_prose.md SEQ-TILT-FWD (N 1196)", ["seq_tilt_shadow", "seq_tilt_fwd"]),
+    Test("QP-RUNUP-FWD: IPO quiet-period run-up (log-only)", "qp_runup_shadow.py (research-shadows): every new US listing on "
+         "Nasdaq's IPO calendar (non-SPAC/unit/fund, day-1 >= $5 and $5M, F = first SIP bar); x = first session >= F+25 days; "
+         "SIGNAL on x-3's morning (filters on data through x-4: close >= $3, median $vol >= $2M), would-buy the x-3 close cross, "
+         "sell the x-1 close cross; excess vs the EW seasoned-IPO cohort (60-250 sessions) and SPY/IWM, 5/10bp/side and the "
+         "15:45-15:50 NBBO half-spreads. Research: 2002-26 +52.7bp t 4.47, CRSP 1989-95 OOS +69bp t 3.69, dead at 3x cost. "
+         "Gate at 40 scored: mean > 0, day-clustered t >= 2, median > 0, net of measured spread > 0 -> propose a small live test "
+         "(user decision); 80 with mean <= 0 or no pass by 120 -> kill.", "2026-11-11", 40, "scored IPOs", _qp_runup,
+         "state/qp-runup.jsonl; make qp-runup; round1_prose.md QP-RUNUP-FWD (N 1203)", ["qp_runup_shadow", "qp_runup_fwd"]),
     Test("CEF-RV rights hygiene (descriptive)", "CEF-RV signals / live positions that enter or are held inside a rights pricing "
          "window [E-10, E+5]: their later OO excess vs unflagged trades. Descriptive (N 1086): at 10 flagged closed trades, flagged "
          ">= 150bp worse = propose a rights-window entry block (user decision).", "2026-11-07", 10, "flagged closed trades",

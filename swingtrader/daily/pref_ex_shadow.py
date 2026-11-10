@@ -154,10 +154,10 @@ def dividends(syms: list[str], start: str, end: str, H: dict) -> dict[str, list[
     return out
 
 
-def close_quotes(syms: list[str], day: str, H: dict) -> dict[str, tuple[float, float]]:
-    """sym -> (bid, ask) of the last valid SIP quote in 15:55-16:00 ET on `day`: the book the closing cross met."""
+def close_quotes(syms: list[str], day: str, H: dict, hm: str = "15:55") -> dict[str, tuple[float, float]]:
+    """sym -> (bid, ask) of the last valid SIP quote in hm..hm+5min ET on `day` (default 15:55-16:00: the book the closing cross met)."""
     from zoneinfo import ZoneInfo
-    a = dt.datetime.fromisoformat(f"{day}T15:55:00").replace(tzinfo=ZoneInfo("America/New_York")).astimezone(dt.timezone.utc)
+    a = dt.datetime.fromisoformat(f"{day}T{hm}:00").replace(tzinfo=ZoneInfo("America/New_York")).astimezone(dt.timezone.utc)
     b = a + dt.timedelta(minutes=5)
     out: dict[str, tuple[float, float]] = {}
     for i in range(0, len(syms), 50):

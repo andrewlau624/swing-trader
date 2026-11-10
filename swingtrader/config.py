@@ -299,6 +299,9 @@ class DailyCfg:
     # SEQ-TILT-FWD (N 1196): off | shadow. Frozen 1999-2015 Ridge tilt over the night picks, scored on official crosses
     # (seq_tilt_shadow.py, research-shadows); no order path.
     seq_tilt_fwd: str = "shadow"
+    # QP-RUNUP-FWD (N 1203): off | shadow. IPO quiet-period run-up (close x-3 -> close x-1, x = first session >= F+25)
+    # vs the seasoned-IPO cohort on official crosses (qp_runup_shadow.py, research-shadows); SIGNAL line only, no order path.
+    qp_runup_fwd: str = "shadow"
     # The LIVE wash guard between the two real-money books (add. 31/39).
     # symmetric: each book avoids every name the other held/ordered/closed in
     #   31 days, on every leg; the brokerage book runs first each phase.
