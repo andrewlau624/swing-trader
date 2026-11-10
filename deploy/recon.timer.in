@@ -1,0 +1,11 @@
+# Saturdays 07:20 ET: after the week's last fills, done before the 09:13 weekly digest reads it.
+[Unit]
+Description=swing-trader weekly reconciliation schedule
+
+[Timer]
+OnCalendar=Sat *-*-* 07:20:00 America/New_York
+Persistent=true
+Unit=recon.service
+
+[Install]
+WantedBy=timers.target

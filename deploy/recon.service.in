@@ -1,0 +1,14 @@
+# Installed by `make persist`. Live-vs-backtest reconciliation per leg (swingtrader/daily/recon.py): pick match,
+# fill gap vs the official cross, return-gap decomposition. Writes state/recon.jsonl; read by the weekly digest's
+# "Being tested" line. Places no orders. Takes ~17 min (re-pulls bars for every live day).
+[Unit]
+Description=swing-trader live-vs-backtest reconciliation
+
+[Service]
+Type=oneshot
+WorkingDirectory=__APP_DIR__
+EnvironmentFile=-__APP_DIR__/.env
+Environment=PYTHONPATH=__APP_DIR__
+ExecStart=__APP_DIR__/.venv/bin/python -u -m swingtrader.daily.recon
+TimeoutStartSec=3600
+Nice=10

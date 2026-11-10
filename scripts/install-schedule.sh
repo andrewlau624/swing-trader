@@ -53,6 +53,9 @@ install_systemd() {
   sed -e "s|__APP_DIR__|$APP|g" \
       "$APP/deploy/ovn-235-recorder.service.in" > "$HOME/.config/systemd/user/ovn-235-recorder.service"
   cp "$APP/deploy/ovn-235-recorder.timer.in" "$HOME/.config/systemd/user/ovn-235-recorder.timer"
+  sed -e "s|__APP_DIR__|$APP|g" \
+      "$APP/deploy/recon.service.in" > "$HOME/.config/systemd/user/recon.service"
+  cp "$APP/deploy/recon.timer.in" "$HOME/.config/systemd/user/recon.timer"
   "$APP/scripts/sysd.sh" daemon-reload
   if swing_on; then
     "$APP/scripts/sysd.sh" enable --now swing-trader.timer
@@ -68,6 +71,7 @@ install_systemd() {
   "$APP/scripts/sysd.sh" enable --now cef-rv-live.timer
   "$APP/scripts/sysd.sh" enable --now cb-funding.timer
   "$APP/scripts/sysd.sh" enable --now ovn-235-recorder.timer
+  "$APP/scripts/sysd.sh" enable --now recon.timer
   if ! loginctl show-user "$USER_" -p Linger 2>/dev/null | grep -q "Linger=yes"; then
     echo ""
     echo "  ############################################################"
