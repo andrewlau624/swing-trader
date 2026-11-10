@@ -10459,3 +10459,57 @@ SLOT_MIN 500 -> 250: a $2.5k Roth sleeve holds up to 5 positions instead of 2 in
 at risk, ~2.5x forward round trips per week). Signal, entry/exit sessions and ranking (deepest discount first) unchanged.
 Reason: recon 2026-11-10 showed 26 of 28 forward entries skipped on cash/position room. Slots at >= $10k unchanged ($1,000).
 Per-trade returns are size-independent at these sizes (whole shares of $5-20 funds), so the forward readout is unaffected.
+
+## PRE-REGISTRATION - CEF-ML: does a learned model rank CEF-RV candidates better than depth? (2026-11-10, BEFORE any outcome is read; N 1205-1207; 1208-1209 reserved, unused unless stated)
+Prior coverage (grep of the CEF ledgers): only single-feature conditioning was ever tested on CEF-RV -- depth rank (SEL-CEF N 1032,
+validated), category peers (CEF-PEER N 933), stress regime (CEF-STRESS N 1071, KILL), N-CSR tone (CEF-TXT N 888-9, KILL), NAV-fall
+(N 891), distribution cut42 (shadow flag, plausible), December tax-loss (CEF-TL/TL2). No multi-feature model, linear or tree, has been fit.
+- **Trades.** The frozen CEF-RV rule (`cef_rv.build_trades`) on the Nasdaq Fund Network NAV panel 2007-04..2026-10 (Friday rows, price =
+  SFP closeunadj; LIVE funds only), as written by CEF-STRESS to `data/research/cefconnect/cef_stress_trades.csv` (5,502 trades, 312 funds).
+  Label `exc` = net (50bp RT) - EW CEF universe incl. delisted over the same hold (the CEF-RV-FWD gate's quantity). Winsorized 1/99% of
+  the training set for fitting only; evaluation on raw exc.
+- **Features (frozen list, all knowable at the signal Friday's NAV):** depth (d - own 52w median), dz ((d - 52w mean)/52w sd), gap10
+  (d - q10), d level, trailing-365d distribution yield (Sharadar dividends / price), cut42 flag, days since last ex-date, NAV vol (52w sd of
+  weekly NAV log change), NAV 13w change, price 13w total return, log 20d median $ADV, category one-hots (CEF-PEER frozen regex; else
+  "equity_other"), VIX level, BAA10Y 13w change, DTB3 13w change, SPY 252d drawdown, EW median discount widening vs 52w, Nov/Dec dummy,
+  number of CEF-RV signals that week. Not available, so NOT tested: leverage, AUM, NAV total return, option-income flag (absorbed into
+  equity_other), distribution-announcement dates (only ex-dates).
+- **Ladder.** Rung 1 = live depth ranking (most negative first). Rung 2 (N 1205) = Ridge on fit-set-standardized features, alpha by
+  purged time-ordered 4-fold CV inside the training set from {1,10,100,1000}. Rung 4 (N 1206) = sklearn GradientBoostingRegressor, huber
+  loss, max_depth 2, 150 trees, lr 0.03, subsample 0.7, min_samples_leaf 50 (fixed, no tuning). Rung 3 not run (no sizing curve proposed).
+  N 1207 = Ridge as a FILTER (skip a signal when predicted exc < 0) vs take-all, secondary.
+- **Split.** Walk-forward, expanding, annual refit: model for year Y trained on trades with entry >= 2008 and EXIT < Y-01-01 (purged:
+  no training label overlaps the judged year), predicts entries in year Y, Y = 2016..2026. The first model sees 2008-15 only.
+  Contamination, stated: 2016-26 is the period CEF-RV was selected on (frozen a priori, not tuned) and where depth/category/cut42/NAV-fall
+  were read; 2008-15 was CEF-OOS's window (CEFConnect version) and CEF-STRESS's judge. No period is clean for the base rule; the MODEL's
+  weights never see a label from the year they rank. The conditional-edge map is descriptive on 2008-15 entries only.
+- **Primary statistic.** Weeks with >= 3 signals: each rung picks its top ceil(n/3); weekly delta = mean exc(rung n picks) - mean exc(rung
+  n-1 picks). Gate per rung vs the rung below: mean delta > 0 with Newey-West t (8 lags) >= 2 (= beats its walk-forward noise), both
+  halves (2016-20 / 2021-26) > 0, ex-top-5 weeks > 0, picked-set mean exc > 0 at 3x cost (150bp RT), DSR of the weekly delta series at
+  n_trials = 1207 >= 0.95. Secondary: within-week Spearman IC; slot replay (live formula, slot = max($250, min($1000, eq/10)), room =
+  floor(0.5 eq/slot)) at $2.3k/$10k/$25k, %/yr net of 50bp.
+- **Survivorship (material; reported, not a gate).** Death-hazard bound: logistic hazard of delisting within 52w fit on all Sharadar SFP
+  CEFs incl. delisted (price-only features: log ADV, 52w price vol, yield, 13w return, category), 2008-15; mean hazard of each rung's picks;
+  bound delta_adj = delta - (hazard_model - hazard_depth) x 186bp (CEF-SURV99 live-minus-dead alpha gap) per trade.
+- **Kill.** Ridge fails its gate -> conditional ranking adds nothing over depth in this feature set; GBM is judged vs Ridge AND vs depth.
+  Runner `research/sim/cef_ml.py`; out `data/research/program/cef_ml_out.txt`. One look.
+
+## RESULT - CEF-ML (N 1205-1207), 2026-11-10, one look: KILL (all three as registered)
+`research/sim/cef_ml.py` -> `data/research/program/cef_ml_out.txt`. 5,502 frozen-rule trades (312 live funds, 2008-05..2026-09);
+judge = walk-forward 2016-26, 3,378 trades, 279 weeks with >= 3 signals.
+- Picked top-third exc (pooled): depth +219bp, Ridge +244, GBM +232; within-week IC depth +0.110 (t 3.67), Ridge +0.117 (t 3.98),
+  GBM +0.105 (t 3.58). Ridge's largest weight every year is depth itself (2016: -190bp/sd; 2026: -122); CV picked the weakest
+  penalty (lambda 1) every year.
+- **N 1205 Ridge vs depth: FAIL.** delta +60.8bp/trade, NW-t 2.07, halves -10 / +118 (2016-20 negative; 2021-26 carried by 2025 and
+  2021), ex-top-5 +28, picks at 3x cost +144, DSR 0.24.
+- **N 1206 GBM vs Ridge: FAIL.** -33.5bp t -1.67, both halves negative. GBM vs depth (report) +27bp t 1.23, DSR 0.02.
+- **N 1207 Ridge filter (skip pred < 0): FAIL on DSR.** kept-minus-dropped +101bp t_month 3.75, halves +147/+73, ex-top-5 +92, kept
+  at 3x +42; monthly NW-t 2.19, DSR 0.135; lift vs take-all +24bp/trade. Live slots bind (5 vs ~45 signals/yr) so a filter is moot.
+- Slot replay 2016-26 (%/yr of equity, net 50bp): depth $2.3k +12.0 / $10k +14.1 / $25k +10.7; Ridge -0.1 / +0.0 / -0.5pp vs depth;
+  GBM -0.6 / -1.9 / +1.2pp. Excess vs EW CEF at account level only +1.5..+3.3%/yr for every rung (the raw level is CEF beta, as
+  CEF-ALPHA said).
+- Survivorship: death-hazard logit (772 SFP CEFs incl. delisted, 2008-15; only log ADV discriminates) gives picks' hazard depth 3.55%
+  / Ridge 3.80% / GBM 3.52%: adjustment < 1bp on every delta, but the hazard model is weak and 280 CEFs delisted 2016+ are missing
+  from the panel, so the LEVEL bias of CEF-SURV99 is untouched by this bound.
+- Read: on these 23 snapshot features, depth already carries the ranking information; models re-learn depth and add noise.
+  Program N = 1207 (1208-1209 unused).
