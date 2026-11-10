@@ -220,6 +220,8 @@ class DailyExecutor:
             self.phase_close(book, today, now, clock)
         elif phase == "flatten":
             self._flatten_noise(book, today, tif="day", kind="flat")
+        if trading_day and phase in ("reconcile", "intraday", "close") and clock.is_open:
+            self._sell_stranded_night(book, today)
 
         if not self.dry_run:
             if trading_day:
@@ -844,6 +846,19 @@ class DailyExecutor:
             if status in ("canceled", "expired", "rejected") and fq <= 0:
                 o["status"] = status
                 self._reroute_open_sell(book, today, coid, o, status)
+
+    def _sell_stranded_night(self, book: DailyBook, today: str) -> None:
+        """A night position from an earlier day with no working order means the open phase never sold it
+        (2026-10-13: the paper book hung, systemd killed the run at 900s, live and Roth never ran the open and
+        11 night positions were held a second night). Sell it at market during the session."""
+        working = {o["sym"] for o in book.open_orders().values()}
+        for sym, p in book.leg_positions("night").items():
+            if str(p.get("entry_date", today)) >= today or sym in working or float(p["qty"]) <= 0:
+                continue
+            self.warn(f"{sym}: night position from {p['entry_date']} still held with no exit order "
+                      "(the open run was missed) - selling at market")
+            self._order(book, today, sym, "sell", "night", qty=float(p["qty"]), tif="day",
+                        ref_px=float(p["avg_px"]), kind="exit-stranded")
 
     def _reroute_open_sell(self, book: DailyBook, today: str, coid: str, o: dict, status: str) -> None:
         """An open sell that ended (expired / canceled / rejected) with shares

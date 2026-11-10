@@ -226,6 +226,21 @@ def test_open_phase_sells_night_leg_at_the_auction(tmp_path, monkeypatch):
     assert t.notional == pytest.approx(0.5 * (3000 - 16 * 9 + 16 * 9.5), abs=0.01)
 
 
+def test_stranded_night_position_is_sold_at_market_once(tmp_path, monkeypatch):
+    held = {"CUE": SimpleNamespace(current_price="20", qty="10"), "NEW": SimpleNamespace(current_price="5", qty="4")}
+    ex = _executor(tmp_path, monkeypatch, held=held)
+    book = DailyBook(cash=1000, start_equity=3000)
+    book.positions["CUE"] = {"qty": 10, "avg_px": 24.0, "leg": "night", "entry_date": "2026-10-12"}
+    book.positions["NEW"] = {"qty": 4, "avg_px": 5.0, "leg": "night", "entry_date": "2026-10-13"}   # bought today
+    book.positions["XBI"] = {"qty": 3, "avg_px": 150.0, "leg": "ibs", "entry_date": "2026-10-09"}   # not night
+    ex._sell_stranded_night(book, "2026-10-13")
+    reqs = ex.broker.client.submitted
+    assert [(r.symbol, r.side.value, r.qty, r.time_in_force.value) for r in reqs] == [("CUE", "sell", 10, "day")]
+    assert any("open run was missed" in w for w in ex.warnings)
+    ex._sell_stranded_night(book, "2026-10-13")                     # the working order blocks a second sell
+    assert len(ex.broker.client.submitted) == 1
+
+
 def test_dry_run_submits_nothing(tmp_path, monkeypatch):
     from swingtrader.daily import executor as E
     ex = _executor(tmp_path, monkeypatch); ex.dry_run = True

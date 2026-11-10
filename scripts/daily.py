@@ -158,6 +158,9 @@ def main(argv=None):
         return 0
     from swingtrader.daily.executor import DailyExecutor
     rc = 0
+    # real-money books first: a hung paper run (2026-10-13) used up the 900s unit timeout before live/Roth ran.
+    # Stable sort keeps the live/Roth order the wash guard depends on.
+    accounts = sorted(accounts, key=lambda x: x not in ("live", "roth"))
     for acc in accounts:
         # one account failing must not stop the other: they are independent books
         try:
