@@ -10513,3 +10513,49 @@ judge = walk-forward 2016-26, 3,378 trades, 279 weeks with >= 3 signals.
   from the panel, so the LEVEL bias of CEF-SURV99 is untouched by this bound.
 - Read: on these 23 snapshot features, depth already carries the ranking information; models re-learn depth and add noise.
   Program N = 1207 (1208-1209 unused).
+
+## LENS SWEEP 2026-11-10 (research agent, block N 1200-1204): 15 candidates, dedupe + ceiling, BEFORE any outcome is read
+One candidate per alpha-foundry lens (+3). Ceiling = events/yr x net edge x deployable share x capture (<= 50%), at $10k.
+| # | lens | mechanism (counterparty, when, fill) | conditional? | dedupe evidence | verdict / ceiling @$10k |
+|---|---|---|---|---|---|
+| 1 | insurer | P&C/reinsurer sell-off after a billion-dollar cat event (holders dump unknown-loss risk), buy basket next close cross | yes (cat events) | 0 hits "reinsur"/"P&C"/"hurricane" | untested; CEILING-KILL ~2-3/yr x 4% x 100% x 50% = 4-6pp |
+| 2 | bookmaker | hot-IPO first-day crowd overpays; fade/ride day-2 | yes (hot deals) | region_ledger_2026-10-06.md:30 IPO first nights REJECTED (median +5, 2013+ -4) | dedupe-kill |
+| 3 | market maker | IPO allocation flippers sell days 1-5 | partly | region_ledger:30; round1_prose:6012 YOUNG-NIGHT (listing age as night filter FAIL) | dedupe-kill (costume of young-name liquidity provision) |
+| 4 | regulator | **IPO research quiet-period expiry**: underwriter analysts barred by NASD 2711 (40d, 2002-12) / 25d convention (post-JOBS) initiate ~all-Buy on a known date; hold close(F+K-2d) -> close(first session >= F+K) | yes (only at the rule's date; the date MOVES with the rule) | deep_loop_ledger.md:20 ceiling-killed at "~200 x 1.5% x 10% share x 50% = 1.5pp" | **re-ceilinged**: the 10% share was a multi-day-hold assumption; a 2-session hold at ~0.6 events/session deploys ~75%: 150/yr x 2% (BJR-scale) x 75% x 50% = **~11pp** (7.5pp at 50% share). RUN (N 1200) |
+| 5 | tax adviser | IPO +1y long-term-gain anniversary selling | yes (gainers) | region_ledger:10 REJECTED (short side; winners -64bp post) | dedupe-kill |
+| 6 | index provider | dividend ETFs delete dividend cutters at recon | yes | outside_box_ideas.md:42 KILL (Michaely drift negative) | dedupe-kill |
+| 7 | treasurer | warrant-redemption forced exercise -> common pressure | yes | discovery_ideas_c5.md:20 C2 folded into DL2 DEAD; mechanism_queue_2026-10-17.md:81 ceiling < 0.3pp | dedupe-kill |
+| 8 | logistics | proxy record-date lending recalls in HTB names (U1 arm B) | yes | memory 55:10 arm A REC-RECALL KILL (placebo-equal); arm B untested | dominated: weaker recall incentive than the dividend arm that died to its placebo; ceiling-kill by prior, not run |
+| 9 | auction designer | greenshoe/stabilization end (day 30) in IPOs pinned at the offer: support bid disappears | yes (stabilization binds) | 0 hits "greenshoe"/"over-allot"; G31 (round1_prose:2586) is follow-ons | untested; short-only (HTB new issues) ~36/yr x 3% x 50% x 50% = 2.7pp CEILING-KILL; needs 424B4 offer prices |
+| 10 | behavioural | $5 cliff (mandate/margin floors) | yes | study_outside_box_round30.md:28 dead long (5d -109bp, $4 placebo -31) | dedupe-kill |
+| 11 | accountant | Oct-31 fund fiscal-year tax-loss selling -> Nov rebound | yes | index_beat_ideas_r2.md:19 killed (2/yr); mechanism_queue:53 FUND-OCT; TL-JAN NEXT:1547 | dedupe-kill (1-1.5pp) |
+| 12 | lawyer | baby-bond 101% change-of-control put on acquired issuers | yes | NEXT:1296 G32-35 pref change-of-control killed (count/bound) | dedupe-kill |
+| 13 | insurer (2) | small-deal cash merger arb when arb capital is constrained | yes | NEXT:1280 MERG-CASH "no merger-arb variants"; NEXT:1540 B3 | dedupe-kill |
+| 14 | forced: retirees | December RMD selling of IRA holdings | no | 0 hits RMD; deep-market calendar (TME-class, memory 69) | untested; CEILING-KILL 1/yr x <1% x 100% x 50% < 0.5pp |
+| 15 | index provider (2) | Russell/CRSP quarterly IPO fast-entry adds | yes | 0 hits "fast entry"; Russell membership blocked (map Tier C) | blocked + ceiling 4 dates x 2% x 100% x 50% = 4pp CEILING-KILL |
+Survivor to test: #4 only. No second survivor clears the gate on data on disk; N 1201-1204 unused.
+
+## Study QP-INIT: IPO research quiet-period expiry (pre-register 2026-11-10 BEFORE any return is read; N 1200, one judged arm)
+Mechanism (regulator lens): after an IPO the syndicate's analysts may not publish until the quiet period ends; then they initiate,
+nearly always Buy/Outperform, before the open on a date fixed by rule (Bradley-Jordan-Ritter 2003, 1996-2000: ~+4% abnormal over
+days -2..+2 for initiated deals). Named constrained party = the underwriter research departments (NASD 2711 / FINRA 2241); payer =
+holders who sell into the initiation. Falsifiable twist: the expiry day MOVED with the rule (40 days 2002-08..2012-04; 25-day
+convention after the 2012-04-05 JOBS Act, e.g. Twitter, Alibaba, Snap, Uber all initiated on F+25). If the effect is the mechanism, it
+follows the rule's day and is ~0 at the other era's day.
+Data: Sharadar SEP/actions/tickers. Events = `listed` actions, Domestic/ADR common, first SEP price within 3 days of the listing,
+not SPAC (spacmerger/spacunitseparation, SIC 6770, "ACQUISITION" in name, first 20 closes CV < 1%), not a spin-off (+-30 days),
+day-1 close >= $5 and day-1 $volume >= $5M. Counts read before registering (no returns): 4,573 events 1998-2026, ~150/yr in the judge.
+Rule (fixed): F = first trade date; K = 40 if F in 2002-08-01..2012-04-04 else 25. Buy the close of the last session <= F+K-2
+calendar days, sell the close of the first session >= F+K (captures the initiation-morning gap whether it lands on F+K-1 or F+K;
+the date is known in advance, so the gap is held, not chased). Entry filters: close >= $3, median $vol over sessions 2..entry >= $2M.
+Cost per side 5bp (price >= $10 and $ADV >= $10M) else 10bp; shocks 2x/3x. Excess vs EW same-window return of other listings in the
+universe aged 60-250 sessions (the IPO cohort); also vs SPY.
+Judge: 2002-08-01..2026-10-05 (never used to choose any IPO-clock rule; BJR's 1996-2000 sample and 1998-2002-07 reported only).
+Halves = the two rule regimes (K=40, K=25). Gate (ALL): mean net excess >= +40bp/event; day-clustered t >= 3.17 (expected max z at
+N ~1200); both regimes > 0; median > 0 and hit > 50%; ex-top-5 > 0; 3x cost > 0; PLACEBO A (regime swap, K=25 in the 40-era and
+K=40 in the 25-era) below the primary and not itself passing; PLACEBO B (fixed K' in 15..60 excluding +-3 of 25/40) primary above
+the 95th pct; alpha vs SPY and QQQ > 0 with t >= 2; DSR (per-event, N 1207 = program N at registration) >= 0.95; ceiling at 50% share
+and 50% capture >= +8pp. Kill: any gate fails -> KILL; no re-definition of K, window, filters or control.
+Not tested by this design (to be listed in the verdict): initiation counts/ratings (IBES recs not pulled), the day-30 stabilization
+end, secondary-offering quiet periods, lockup-crossing, K misclassification for 2012-15 non-EGC deals that kept 40 days.
+Runner research/sim/qp_init.py; out data/research/program/qp_init_out.txt.
