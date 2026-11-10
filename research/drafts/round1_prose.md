@@ -10559,3 +10559,24 @@ and 50% capture >= +8pp. Kill: any gate fails -> KILL; no re-definition of K, wi
 Not tested by this design (to be listed in the verdict): initiation counts/ratings (IBES recs not pulled), the day-30 stabilization
 end, secondary-offering quiet periods, lockup-crossing, K misclassification for 2012-15 non-EGC deals that kept 40 days.
 Runner research/sim/qp_init.py; out data/research/program/qp_init_out.txt.
+
+### Result - QP-INIT (N 1200), 2026-11-10, one look (after a column-name crash fix, no design change): KILL
+Out: data/research/program/qp_init_out.txt. 2,133 judged events 2002-08..2026-10 (88/yr after entry filters). Net excess vs IPO
+cohort -3.5bp/event (median -21.4, hit 47.2%, day-t -0.27, ex-top-5 -11.2); vs SPY -17.5 (t -1.34); 2x -19.6, 3x -35.6 (t -2.76).
+Regimes: K=40 era -26.9 (t -1.50), K=25 era +7.3 (t 0.43). Regime-swap placebo -4.4 (= primary). Fixed-K' placebo: primary at the
+78th pct (5/50/95 = -37/-15/+15). Alpha vs SPY -16.9bp t -1.34, vs QQQ -15.7 t -1.24; DSR 0.000. Ceiling -1.6pp. Every gate fails.
+Reported only: 1998-2002-07 (BJR era) +72.3bp mean but median -45.7 (t 1.84): the published effect was a 1999-2000 mean, now gone.
+Descriptive (seen, NOT a rule): the 1-session profile around x = first session >= F+K shows the move BEFORE the date
+(x-2 +34/+11bp, x-1 +44/+29 mean/median raw), nothing on x (-2/-7).
+
+## Study QP-RUNUP (N 1201): the pre-expiry run-up seen in QP-INIT's descriptive profile (pre-register 2026-11-10, before any
+## run-up-window statistic other than that 1-session raw profile has been read)
+Post-hoc by origin, so the judge must be data the profile never touched. Rule (fixed): x = first session >= F+K (K as in QP-INIT);
+buy close of session x-3, sell close of session x-1 (2 sessions). Same universe, entry filters (applied at x-3), cost, cohort control.
+Judge (unseen for this window): (1) 1998-01-15..2002-07-31 (K=25; overlaps BJR's published 1996-2000 sample, disclosed); (2) the
+REGIME-SWAP placebo on 2002-26 (run-up window placed at the other era's K), never computed. 2002-26 at the true K is SEEN (the
+profile) and is reported with the full battery as confirmation only.
+Gate (ALL): (1) 1998-2002-07 mean net excess > 0, median > 0, day-t >= 2; (2) 2002-26: mean >= +40bp, day-t >= 3.17, both regimes
+> 0, median > 0, ex-top-5 > 0, 3x cost > 0, alpha vs SPY and QQQ t >= 2, DSR (N 1207) >= 0.95; (3) swap placebo mean < 1/3 of the
+2002-26 mean and day-t < 2. PASS -> forward log-only shadow only (no live size; the run-up has no initiation-count data behind it);
+any fail -> KILL. No re-windowing. Runner: research/sim/qp_init.py --runup; out data/research/program/qp_runup_out.txt.

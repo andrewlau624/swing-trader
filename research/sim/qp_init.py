@@ -209,7 +209,7 @@ def main():
     R = event_returns(ev, g)
     R = bench(cohort_control(R, g, ev), fu)
     R["c1"] = cost(R)
-    R["xs"] = R.ret - R.ctl - R.c1
+    R["xc"] = R.ret - R.ctl - R.c1
     R["raw_net"] = R.ret - R.c1
     R["xs_spy"] = R.ret - R.SPY - R.c1
     J = R[(R.de >= JUDGE_START) & (R.de <= JUDGE_END)].copy()
@@ -218,29 +218,29 @@ def main():
       f"({len(J)/((JUDGE_END-JUDGE_START).days/365.25):.0f}/yr); median sessions held "
       f"{(J.dx - J.de).dt.days.median():.0f} cal days")
     P("\nPRIMARY (judge 2002-08..2026-10): net excess vs IPO cohort (age 60-250 sessions), base cost")
-    summ("net excess vs cohort", J.xs, J.de)
+    summ("net excess vs cohort", J.xc, J.de)
     summ("net raw", J.raw_net, J.de)
     summ("net excess vs SPY", J.xs_spy, J.de)
     for m in (2, 3):
         summ(f"net excess, {m}x cost", J.ret - J.ctl - cost(J, m), J.de)
     P("regimes (halves):")
-    summ("K=40 regime 2002-08..2012-04", J[J.K == 40].xs, J.de)
-    summ("K=25 regime 2012-04..2026", J[J.K == 25].xs, J.de)
-    summ("K=25 2012-2018", J[(J.K == 25) & (J.de < "2019-01-01")].xs, J.de)
-    summ("K=25 2019-2026", J[(J.K == 25) & (J.de >= "2019-01-01")].xs, J.de)
+    summ("K=40 regime 2002-08..2012-04", J[J.K == 40].xc, J.de)
+    summ("K=25 regime 2012-04..2026", J[J.K == 25].xc, J.de)
+    summ("K=25 2012-2018", J[(J.K == 25) & (J.de < "2019-01-01")].xc, J.de)
+    summ("K=25 2019-2026", J[(J.K == 25) & (J.de >= "2019-01-01")].xc, J.de)
     P("reported, not judged: 1998-2002-07 (BJR-era convention K=25):")
-    summ("pre-2002-08 K=25", pre.xs, pre.de)
+    summ("pre-2002-08 K=25", pre.xc, pre.de)
     # placebo 1: regime swap
     ev2 = ev.copy()
     ev2["K"] = np.where(ev2.K == 40, 25, 40)
     Q = event_returns(ev2, g)
     Q = cohort_control(Q, g, ev2)
-    Q["xs"] = Q.ret - Q.ctl - cost(Q)
+    Q["xc"] = Q.ret - Q.ctl - cost(Q)
     Qj = Q[(Q.de >= JUDGE_START) & (Q.de <= JUDGE_END)]
     P("\nPLACEBO A (regime swap: K=25 in the 40-day era, K=40 in the 25-day era):")
-    summ("swap K", Qj.xs, Qj.de)
-    summ("swap K, 40-era (K=25)", Qj[Qj.K == 25].xs, Qj.de)
-    summ("swap K, 25-era (K=40)", Qj[Qj.K == 40].xs, Qj.de)
+    summ("swap K", Qj.xc, Qj.de)
+    summ("swap K, 40-era (K=25)", Qj[Qj.K == 25].xc, Qj.de)
+    summ("swap K, 25-era (K=40)", Qj[Qj.K == 40].xc, Qj.de)
     # placebo 2: random fixed offsets
     rng_means = []
     for K2 in range(15, 61):
@@ -255,7 +255,7 @@ def main():
     pm = np.array([m for _, m in rng_means])
     P(f"PLACEBO B (fixed K' in 15..60 excluding 22-28, 37-43; {len(pm)} offsets): mean excess "
       f"5th/50th/95th pct {np.nanpercentile(pm,5)*1e4:+.1f}/{np.nanpercentile(pm,50)*1e4:+.1f}/{np.nanpercentile(pm,95)*1e4:+.1f}bp; "
-      f"primary rank {(pm < J.xs.mean()).mean()*100:.0f}th pct")
+      f"primary rank {(pm < J.xc.mean()).mean()*100:.0f}th pct")
     P("  " + " ".join(f"{k}:{m*1e4:+.0f}" for k, m in rng_means))
     # beta / alpha
     P("\nBETA: event raw return on same-window SPY / QQQ (OLS, per event)")
@@ -264,7 +264,7 @@ def main():
         res = SS.linregress(X[b], X.ret - J.loc[X.index, "c1"])
         tt = res.intercept / (res.intercept_stderr or np.nan)
         P(f"  vs {b}: beta {res.slope:+.2f} alpha {res.intercept*1e4:+.1f}bp/event t {tt:+.2f}")
-    d = dsr(J.xs.values, N_PROGRAM)
+    d = dsr(J.xc.values, N_PROGRAM)
     P(f"\nDSR (per-event net excess, N {N_PROGRAM}): {d:.3f}")
     # event-time profile (descriptive)
     P("\nDESCRIPTIVE event-time profile (judge sample, 1-session close->close excess vs cohort, sessions rel. to first >= F+K):")
@@ -285,8 +285,9 @@ def main():
     yrs = (JUDGE_END - JUDGE_START).days / 365.25
     n_yr = len(J) / yrs
     for share in (1.0, 0.5):
-        P(f"ceiling at share {share:.0%}: {n_yr:.0f}/yr x {J.xs.mean()*1e4:+.1f}bp x {share} x 50% = "
-          f"{n_yr * J.xs.mean() * share * 0.5 * 100:+.1f}pp/yr")
+        P(f"ceiling at share {share:.0%}: {n_yr:.0f}/yr x {J.xc.mean()*1e4:+.1f}bp x {share} x 50% = "
+          f"{n_yr * J.xc.mean() * share * 0.5 * 100:+.1f}pp/yr")
+    P("note: column renamed xs->xc after a first crash (DataFrame.xs name clash made every cohort-excess line n 1); no design change")
     J.to_parquet(OUT.with_suffix(".parquet"))
     OUT.write_text("\n".join(LINES) + "\n")
 
