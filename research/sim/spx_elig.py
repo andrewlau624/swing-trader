@@ -71,7 +71,7 @@ def events(f: pd.DataFrame, placebo: bool) -> pd.DataFrame:
     """Earnings-test transitions (primary) or long-eligible filings (placebo)."""
     out = []
     for t, g in f.groupby("ticker"):
-        g = g.sort_values("calendardate").drop_duplicates("calendardate", keep="first")
+        g = g.sort_values(["calendardate", "date"], kind="mergesort").drop_duplicates("calendardate", keep="first")  # first filing per quarter (SF1 file is unsorted)
         cd = g.calendardate.to_numpy()
         ni = g.netinccmn.to_numpy(dtype=float)
         n = len(g)

@@ -32,9 +32,9 @@ def firm_month(sc):
 
 
 def firm_quarter(fm):
-    f = table("fundamentals", columns=["ticker", "dimension", "calendardate", "reportperiod", "revenue"],
+    f = table("fundamentals", columns=["ticker", "dimension", "calendardate", "reportperiod", "date", "revenue"],
               filters=[("ticker", "in", sorted(fm.tk.unique())), ("dimension", "=", "ARQ")])
-    f = f.rename(columns={"ticker": "tk"}).sort_values(["tk", "reportperiod"]).drop_duplicates(["tk", "reportperiod"])
+    f = f.rename(columns={"ticker": "tk"}).sort_values(["tk", "reportperiod", "date"], kind="mergesort").drop_duplicates(["tk", "reportperiod"])  # earliest filing wins (file order is shuffled)
     f["reportperiod"], f["calendardate"] = pd.to_datetime(f.reportperiod), pd.to_datetime(f.calendardate)
     f["prev_rp"] = f.groupby("tk").reportperiod.shift(1)
     out = []
