@@ -6,8 +6,8 @@ Gap = backtest - live (+ = live worse); total = pick + fill + residual(sizing + 
   dedupe added late Sept, Schwab vs SIP quotes 0.3-1.5pp apart near the -8% / IBS .10 cutoffs.
 - IBS: pick match 86/81%, fill gap 0.0bp on 26 fills. Roth +60bp t 2.1 = roth_first wash guard skipping XBI (by design).
 - PREF-EX: fill +7.9bp buy / +6.3 sell (two early buys, OPP sells); timing +78bp = the known 10-21..10-28 rejected-sell episode.
-- CEF-RV: 2 of 28 rule entries bought; 24 "missed": Friday-NAV signals reach the shadow after Monday's 09:05 run (muni funds).
-  Possible research lookahead; study running (see the CEF-RV NAV timing memory when written).
+- CEF-RV: 2 of 28 rule entries bought; the other 26 were budget/slot skips on the entry session (CORRECTED 2026-11-10, memory 93:
+  the "24 missed" was recon reading the next day's re-logged "missed" row over the session's buy-skip; no late NAV, no lookahead).
 ## Bugs found
 - 2026-10-13: the PAPER book ran first, hung ~15 min on a network call, systemd killed the run at TimeoutStartSec=900 -> live
   and Roth never ran the open phase; 11 night positions held a second night (CUE 24.40 open -> sold 20.01). Fixed bb1c8ae:

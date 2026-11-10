@@ -851,10 +851,12 @@ def cef_section(state_dir: Path, logs_dir: Path, sessions: list[str]) -> dict:
     for r in live:
         if r.get("cmd") == "buy" and r.get("order_id"):
             buys.setdefault(r["ts"][:10], set()).add(r["sym"])
-    why = {}
+    why = {}     # (sym, session) -> reason; a buy-skip / buy-rejected logged on the session beats a later "missed" row
     for r in live:
         if r.get("cmd") in ("missed", "buy-skip", "buy-rejected"):
-            why[r["sym"]] = f"{r['cmd']}: {r.get('reason', '')}".strip(": ")
+            k = (r["sym"], r.get("session") if r["cmd"] == "missed" else r["ts"][:10])
+            if r["cmd"] != "missed" or k not in why:
+                why[k] = f"{r['cmd']}: {r.get('reason', '')}".strip(": ")
     start = min((r["ts"][:10] for r in live), default=None)
     rule_n = live_n = both = 0
     miss = {}
@@ -864,7 +866,7 @@ def cef_section(state_dir: Path, logs_dir: Path, sessions: list[str]) -> dict:
         rs, ls = set(cef_rule(rows, s)), buys.get(s, set())
         rule_n, live_n, both = rule_n + len(rs), live_n + len(ls), both + len(rs & ls)
         for x in rs - ls:
-            k = why.get(x, "no live row")
+            k = why.get((x, s), "no live row")
             miss[k.split(":")[0]] = miss.get(k.split(":")[0], 0) + 1
     sc = [r for r in live if r.get("cmd") == "score" and r.get("diff_bp") is not None]
     gaps = [fill_gap_bp(r["side"], r["fill"], r["open_cross"]) for r in sc if r.get("open_cross")]

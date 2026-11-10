@@ -292,3 +292,16 @@ def test_executor_and_pref_ex_honour_the_cef_reservation_today_only(tmp_path):
     assert ex._cef_rv_reserved("2026-10-23") == 0.0
     assert P._cef_reserved(tmp_path, dt.date(2026, 10, 23)) == 500.0
     assert P._cef_reserved(tmp_path, dt.date(2026, 10, 26)) == 0.0
+
+
+def test_a_budget_skip_is_not_relogged_as_missed_the_next_day(tmp_path):
+    """2026-10-27: the 20 rule entries skipped for budget on Mon 10-26 were logged again as "missed" on Tue, which read as a
+    late-NAV / late-signal problem. The skip is the outcome; the next day's run must not add a missed row for it."""
+    signals(tmp_path, sig("A"), sig("B"), sig("OLD", signal=OLD_SIG))
+    panel(tmp_path, A=-0.2, B=-0.1, OLD=-0.3)
+    run("dry", tmp_path, FakeAd({"A": 10.0, "B": 10.0}, settled=500, equity=3000))     # one slot of cash: B is skipped
+    assert [r["sym"] for r in rows(tmp_path) if r["cmd"] == "buy-skip"] == ["B"]
+    out = run("dry", tmp_path, FakeAd({"A": 10.0, "B": 10.0}, settled=500, equity=3000),
+              today=dt.date(2026, 10, 20), now=dt.datetime(2026, 10, 20, 9, 5, tzinfo=ET))
+    assert out["missed"] == ["OLD"]
+    assert [r["sym"] for r in rows(tmp_path) if r["cmd"] == "missed"] == ["OLD"]

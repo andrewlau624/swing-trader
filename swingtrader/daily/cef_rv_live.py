@@ -344,6 +344,9 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
 
     # --- buy leg: forward entries whose execution session is today
     buy, missed = entries(sig_rows, today, state["open"])
+    # a row seen on its session (bought, skipped for budget, rejected) already has its outcome logged: it was not missed
+    seen = {(x.get("sym"), x.get("signal")) for x in rows if x.get("cmd") in ("buy", "buy-skip", "buy-rejected")}
+    missed = [r for r in missed if (r["sym"], r["signal"]) not in seen]
     for r in missed:
         key = (r["sym"], r["signal"])
         if not any(x.get("cmd") == "missed" and (x.get("sym"), x.get("signal")) == key for x in rows):
