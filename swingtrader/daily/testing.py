@@ -227,6 +227,14 @@ def _noise_rearm(state: Path, logs: Path) -> dict:
     return dict(n=sum(1 for r in rows if r.get("positive")), week=len(wk), line=w.line(rows))
 
 
+def _recon(state: Path, logs: Path) -> dict:
+    from . import recon as w
+    rows = _jsonl(state / w.LOG_NAME)
+    last = max((r.get("run", "") for r in rows), default="")
+    days = [r for r in rows if r.get("kind") == "day" and r.get("run") == last]
+    return dict(n=len(days), week=sum(1 for r in days if r.get("day", "") >= _week_ago()), line=w.line(rows))
+
+
 def _pref_ex_live(state: Path, logs: Path) -> dict:
     from . import pref_ex_live as w
     rows = _jsonl(logs / w.LOG_NAME)
@@ -692,6 +700,11 @@ REGISTRY: list[Test] = [
          "then re-arming daytrade_mode is a user decision; the leg is off (user 2026-10-11, NOISE-GATE N 934, NOISE-DIAG).",
          "2026-10-11", 0, "positive weeks", _noise_rearm, "state/noise-rearm.jsonl; research/sim/noise_recent.py; CLAUDE.md",
          ["noise_rearm_watch"]),
+    Test("Live-vs-backtest recon (per leg)", "recon.py: every live night / IBS / PREF-EX trade day vs the repo's own rule "
+         "replayed on SIP data at official auction prints; total gap (backtest - live, + = live worse) split exactly into "
+         "pick + fill + residual (sizing, timing), day-clustered t, ex-top-5; CEF-RV pick match + fill only. Diagnostic: "
+         "no gate, read weekly; fails loudly on duplicate fills / unit drift.", "2026-11-09", 0, "leg-days reconciled",
+         _recon, "state/recon.jsonl; make recon", ["recon"]),
     Test("PREF-EX live (Roth, CC form)", "pref_ex_live.py: MOC buy the $25-par preferred / baby bond the session before "
          "its ex-date, MOC sell on it, settled Roth cash only, 5% of the median closing cross, <= 3 names (PREF-EX N 861 "
          "+38bp, ETDX N 869 +44bp, ROTH-STACK N 897). Gate: 30 live round trips with mean buy+sell cost vs the official "

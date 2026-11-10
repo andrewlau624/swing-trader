@@ -77,7 +77,7 @@ def _per_symbol(data, chunk, start, end, adjustment="all"):
             parts.append(data.get_stock_bars(StockBarsRequest(
                 symbol_or_symbols=[s], timeframe=TimeFrame.Day,
                 start=pd.Timestamp(start, tz="UTC"), end=end,
-                feed="sip", adjustment="all")).df)
+                feed="sip", adjustment=adjustment)).df)
         except Exception:
             pass
     parts = [p for p in parts if p is not None and len(p)]
@@ -110,6 +110,19 @@ def eligibility(symbols: list[str], today: dt.date, *, price_min: float,
             return pd.DataFrame(d).set_index("symbol")
     bars = sip_daily(symbols, pd.Timestamp(today) - pd.Timedelta(days=45),
                      pd.Timestamp(today))
+    rows = eligibility_rows(bars, today, price_min=price_min, adv_min=adv_min)
+    cache_dir.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(rows))
+    for old in cache_dir.glob("daily-universe-*.json"):
+        if old != path:
+            old.unlink(missing_ok=True)
+    return pd.DataFrame(rows).set_index("symbol") if rows else pd.DataFrame(
+        columns=["prev_close", "adv20", "vol20", "prev_date"])
+
+
+def eligibility_rows(bars: dict[str, pd.DataFrame], today, *, price_min: float, adv_min: float) -> list[dict]:
+    """The eligibility rows for `today` from daily bars, using only bars dated BEFORE today (also the
+    live-vs-backtest recon's universe, swingtrader/daily/recon.py)."""
     rows = []
     for sym, b in bars.items():
         b = b[b.index < pd.Timestamp(today)]
@@ -127,13 +140,7 @@ def eligibility(symbols: list[str], today: dt.date, *, price_min: float,
                          "vol20": vol20 if np.isfinite(vol20) else 0.0,
                          "rets": [round(float(v), 5) if np.isfinite(v) else 0.0 for v in lr.values],
                          "prev_date": str(b.index[-1].date())})
-    cache_dir.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(rows))
-    for old in cache_dir.glob("daily-universe-*.json"):
-        if old != path:
-            old.unlink(missing_ok=True)
-    return pd.DataFrame(rows).set_index("symbol") if rows else pd.DataFrame(
-        columns=["prev_close", "adv20", "vol20", "prev_date"])
+    return rows
 
 
 QUOTE_BATCH = 200
