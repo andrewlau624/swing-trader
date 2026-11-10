@@ -46,3 +46,9 @@ def test_fetch_reports_refusals():
     px, det = qg.fetch(ad, ["A", "B", "C"], in_session=True, now_s=NOW)
     assert px == {"A": 25.0}
     assert set(qg.refused(det)) == {"B", "C"}
+
+
+def test_nasdaq_closed_status_is_fine_pre_open_but_not_in_session():
+    assert qg.check(q(securityStatus="Closed", quoteTime=(NOW - 50000) * 1000), NOW, in_session=False)[0] == 25.0
+    assert qg.check(q(securityStatus="Closed"), NOW, in_session=True)[0] is None
+    assert qg.check(q(securityStatus="Halted", quoteTime=(NOW - 50000) * 1000), NOW, in_session=False)[0] is None

@@ -56,9 +56,9 @@ def ask(ad, sym: str) -> float | None:
     """Schwab's own ask (falls back to the last trade); None when there is no quote."""
     try:
         q = ad.c.get_quote(sym).json()[sym]["quote"]
-        from .quote_guard import OK_STATUS, PRE_OPEN_AGE_S
+        from .quote_guard import OFF_HOURS_OK, PRE_OPEN_AGE_S
         import time
-        if q.get("securityStatus") not in OK_STATUS:
+        if q.get("securityStatus") not in OFF_HOURS_OK:
             return None                                  # halted / closed: never size off a frozen quote
         if q.get("quoteTime") and time.time() - float(q["quoteTime"]) / 1000 > PRE_OPEN_AGE_S:
             return None

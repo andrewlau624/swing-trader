@@ -7,7 +7,7 @@ pre-open) used `lastPrice` with no check. Rules:
 - in session (PREF-EX): quote no older than IN_SESSION_AGE_S, status Normal, two-sided, not crossed, spread <= MAX_SPREAD;
   price = last if it sits inside the quote (+-BAND), else the mid.
 - pre-open (CEF-RV): the prior session's quote is expected; quote no older than PRE_OPEN_AGE_S (covers a long weekend),
-  status Normal, price = last (else mark, else close) within +-PRE_OPEN_BAND of the prior close.
+  status Normal or Closed (Nasdaq names off-hours), price = last (else mark, else close) within +-PRE_OPEN_BAND of the prior close.
 
 `fetch()` returns the usable prices plus a per-symbol detail dict (bid/ask/mid/age/reason) that callers log.
 """
@@ -21,6 +21,7 @@ MAX_SPREAD = 0.10
 BAND = 0.03
 PRE_OPEN_BAND = 0.15
 OK_STATUS = (None, "", "Normal")
+OFF_HOURS_OK = OK_STATUS + ("Closed",)    # Schwab marks Nasdaq listings "Closed" outside 09:30-16:00 (NYSE stay "Normal")
 
 
 def check(q: dict, now_s: float, *, in_session: bool) -> tuple[float | None, dict]:
@@ -38,7 +39,7 @@ def check(q: dict, now_s: float, *, in_session: bool) -> tuple[float | None, dic
         d["reason"] = why
         return None, d
 
-    if q.get("securityStatus") not in OK_STATUS:
+    if q.get("securityStatus") not in (OK_STATUS if in_session else OFF_HOURS_OK):
         return no(f"status {q.get('securityStatus')}")
     if age is None:
         return no("no quote time")
