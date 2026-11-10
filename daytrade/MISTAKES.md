@@ -3,6 +3,20 @@
 What went wrong, and what changed so it cannot repeat. Newest first. One entry per mistake:
 date, what happened, the cost (in $ or bp, or "none, caught in replay"), the fix (code, test or rule).
 
+## 2026-11-10 — Sharadar parquets are not sorted, and we assumed they were
+- **What happened.** The loader wrote the bulk CSVs in zip order. funds, stocks, daily and fundamentals are shuffled
+  within ticker; actions, events and sp500 are newest first. An earlier note said stocks.parquet was sorted; that
+  came from a filtered read and was wrong.
+- **Cost.** Small. 171 readers were audited and almost all already sort or pivot first. One fundamentals dedup
+  (`spx_elig.py`) kept a random filing per quarter. Re-run: t 0.50 -> 0.62, still FAIL. No verdict moved
+  (docs/memory/96).
+- **Fix.**
+  - The loader sorts the price and fundamentals tables on write.
+  - funds.parquet was re-sorted (backup kept).
+  - `tests/test_sharadar_sorted.py` is a canary.
+  - Rule: sort after every Sharadar read. On fundamentals, sort with `date` and `kind="mergesort"` before any
+    `keep=`.
+
 ## 2026-10-01 — the drift report would have been empty in paper/live
 - **What happened.** In paper/live the real broker usually reports a fill BEFORE the shadow replay broker fills the
   same order (the shadow waits out its 1s latency model). The journal row was written at the close with
