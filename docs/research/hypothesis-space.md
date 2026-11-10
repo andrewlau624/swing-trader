@@ -130,6 +130,14 @@ exhausted) or from unblocking Tier C data.
   (memory 67); remaining overnight leaves: exchange sessions after 2026-12-06, in-session dynamics, event nights.
 - Blocked until data exists: half-penny-tick spread capture (from 2026-11).
 
+### Lens sweep 2026-11-10 (N 1200-1202; round1_prose "LENS SWEEP 2026-11-10", memory 95)
+- New cell "US single stocks (IPOs) x regulatory threshold / information timing (research quiet-period clock)": initiation-day hold
+  = killed (QP-INIT N 1200); pre-expiry 2-session run-up = **passed-small** (QP-RUNUP N 1201 DSR-fail, QP-RUNUP-CRSP N 1202 OOS
+  PASS 1989-95; book +7.5%/yr at 50% share, maxDD -46%, cost-fragile). Forward shadow only (user decision).
+- New ceiling-kills (untested, below gate): post-catastrophe P&C/reinsurer rebound (~4-6pp), December RMD selling (< 0.5pp),
+  IPO day-30 stabilization end (short-only, 2.7pp; needs 424B4 offer prices), Russell/CRSP IPO fast-entry adds (blocked, ~4pp).
+  Proxy record-date recalls (U1 arm B): dominated by the killed arm A, not run.
+
 ### Tier B: untested, below the gate on paper (extensions, class kills, or forward shadows only)
 
 **U4. Schwab fully-paid securities lending income on HTB holdings** (single stocks x cost/carry). Named counterparty =

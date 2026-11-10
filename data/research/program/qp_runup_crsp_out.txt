@@ -1,0 +1,21 @@
+QP-RUNUP-CRSP (N 1202): IPO run-up x-3 -> x-1, K=25, CRSP; run 2026-11-10 06:05
+events (F 1985-1995) after filters: 2794; dropped {'no_names': 0, 'shr_exch': 830, 'spin': 257, 'day1': 4595}
+  by year: 1985:102 1986:236 1987:189 1988:80 1989:94 1990:91 1991:269 1992:347 1993:530 1994:392 1995:464
+
+JUDGE (F 1989-01..1995-12, K=25): 731 events (104/yr), cohort ctl median n 250
+  net excess vs cohort               n  731 mean   +69.1bp med   +19.2 hit 52.1% t_day +3.69 ex-top5   +53.9
+  net raw                            n  731 mean   +88.0bp med   +36.2 hit 52.1% t_day +3.98 ex-top5   +72.3
+  net excess vs vwretd               n  731 mean   +86.3bp med   +29.3 hit 53.9% t_day +4.31 ex-top5   +71.1
+  net excess, 2x cost                n  731 mean   +50.0bp med    -0.1 hit 49.9% t_day +2.66 ex-top5   +34.8
+  net excess, 3x cost                n  731 mean   +30.8bp med   -16.6 hit 48.2% t_day +1.64 ex-top5   +15.6
+  half F 1989-1992                   n  246 mean   +59.3bp med   +19.4 hit 52.0% t_day +2.07 ex-top5   +31.4
+  half F 1993-1995                   n  485 mean   +74.1bp med   +19.2 hit 52.2% t_day +3.07 ex-top5   +51.1
+  vs vwretd: beta +1.87 alpha +84.8bp/event t +4.66
+  DSR (N 1207, reported): 0.717
+
+REPORTED: K=40 placebo window on the same IPOs; and F 1985-88 (pre-1988-amendment era, K=25 window)
+  placebo K=40                       n  525 mean    +1.3bp med   -25.4 hit 45.7% t_day +0.07 ex-top5   -18.2
+  F 1985-1988 at K=25                n  100 mean   -56.5bp med   -37.8 hit 45.0% t_day -1.61 ex-top5  -105.5
+
+GATES: mean>0 & t>=2 PASS; median>0 PASS; ex-top5>0 PASS; 2x cost>0 PASS; halves>0 PASS; alpha t>=2 PASS
+VERDICT: PASS (run-up OOS-confirmed)

@@ -10606,3 +10606,17 @@ Gate (ALL): mean net excess > 0 with day-clustered t >= 2; median > 0; ex-top-5 
 > 0; alpha vs vwretd t >= 2. Reported, not gated: 3x cost, K=40 placebo window, hit rate, DSR at N 1207. PASS -> run-up OOS-confirmed;
 status = forward shadow (needs a build + REGISTRY entry; user decision before any live size). FAIL -> QP-RUNUP stays KILLED.
 Runner research/sim/qp_runup_crsp.py; out data/research/program/qp_runup_crsp_out.txt.
+
+### Result - QP-RUNUP-CRSP (N 1202), 2026-11-10, one look: PASS (all six gates) -> MECHANISM CONFIRMED OUT OF SAMPLE; TRADE BELOW GATE
+Out: data/research/program/qp_runup_crsp_out.txt. 731 IPOs (F 1989-95, 104/yr; counts match Ritter's). Net excess vs cohort +69.1bp
+(median +19.2, hit 52.1%, day-t 3.69, ex-top-5 +53.9); vs vwretd +86.3; 2x +50.0 (median -0.1); 3x +30.8 (median -16.6); halves
++59.3 (t 2.07) / +74.1 (t 3.07); alpha vs vwretd +84.8bp t 4.66 (beta 1.87); DSR 0.717 (reported, < 0.95). Placebo K=40 window on
+the same IPOs +1.3bp (t 0.07); F 1985-88 at K=25 -56.5 (n 100, t -1.61). Across 1989-95 / 1998-2002 / 2002-12 (K=40) / 2012-26
+(K=25) the 2-session run-up sits before the rule's date and is ~0 at the wrong era's date.
+Book replay (research/sim/qp_runup_book.py, qp_runup_book_out.txt; 2002-26, capital split across concurrent events, idle cash 0,
+whole-share effects negligible at $2.3k-$25k for $10-40 names): 50% share +7.5%/yr CAGR, maxDD -46%, Sharpe 0.55, active 33% of
+days; 100% share +12.8%/yr, maxDD -75%; 2x cost +4.0% (50%); 3x cost +0.6%. Year spread +157% (2013) to -60% (2022).
+VERDICT: PASS-SMALL. The pre-initiation run-up is a real, rule-timed effect (OOS + regime placebo), but the trade is ~+7.5%/yr at
+50% share before honest-capture haircut, -46% maxDD, dead at 3x cost: below the +8pp gate. Not deployed. Forward log-only shadow
+is the only next step (needs a live IPO calendar source + a testing.py REGISTRY entry in the commit that builds it; user decision).
+Program N stays 1207 (block 1200-1204: used 1200-1202; 1203-1204 unused).
