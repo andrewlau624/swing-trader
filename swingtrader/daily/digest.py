@@ -250,15 +250,14 @@ def _sh(shares: list[int]) -> str:
 
 
 def _night_exit_cost_vs_open(sells: list[dict]) -> float:
-    """Mean night open-sell cost in bps/side against the official SIP open (sg.night_exit_cost); nan if unscorable."""
+    """Mean night open-sell cost in bps/side against the official opening cross (sg.night_exit_cost); nan if unscorable."""
     if not sells:
         return float("nan")
     try:
         from . import marketdata as md
         import pandas as pd
         days = sorted({str(f.get("filled_at", ""))[:10] for f in sells})
-        bars = md.sip_daily(sorted({f["sym"] for f in sells}), pd.Timestamp(days[0]) - pd.Timedelta(days=3), None)
-        opens = {(sym, str(d.date())): float(b.loc[d, "open"]) for sym, b in bars.items() for d in b.index}
+        opens = {k: float(v[0]) for k, v in md.official_crosses([f["sym"] for f in sells], days[0], days[-1]).items() if v[0]}
         n, bps = sg.night_exit_cost(sells, opens, window=len(sells))
         return bps if n else float("nan")
     except Exception:  # noqa: BLE001  (no data access in tests / offline: show nothing rather than drift)

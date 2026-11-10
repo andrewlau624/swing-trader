@@ -18,3 +18,9 @@ Gap = backtest - live (+ = live worse); total = pick + fill + residual(sizing + 
 - marketdata._per_symbol fallback ignored `adjustment` (always "all"); fixed in fb4e88d (batch path already honoured it).
 - sel_night.py:244 logs adv from the wrong pick (research SEL-NIGHT adv numbers noisy). review.py replay skips dedupe/prev-close.
 Not reconciled: intraday leg (off), T-bills, CEF-RV returns (no closed trip), non-trading days, rule changes since a trade day.
+## Follow-ups done 2026-11-10 (user "yes yes")
+- Exit-cost gate, kill check, digest and review.py now score against md.official_crosses (SIP auction prints); fills with no
+  published cross are left out, never scored against a bar. Last 50 open sells: taxable 0.00bp (bars -0.12), Roth -3.93bp
+  UCB +2.55 (bars +7.92 UCB +16.6). No action changes today: taxable already passed the 10bp lever gate, and the Roth is a cash
+  account (no leverage); the Roth kill check (25bp) is now far from firing for the right reason.
+- CEF-RV SLOT_MIN 500 -> 250 (5 slots in a $2.5k sleeve, same dollars); amendment in round1_prose.md.

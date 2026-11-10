@@ -10453,3 +10453,9 @@ KILL. PASS = propose the tilt (user decision); never changes orders. Known power
 walk-forward); 60 nights carry tilt t ~0.1 and tmb t ~0.55 in expectation, so PASS at 60 needs a much larger forward effect; a KILL at 60 is
 mostly noise-driven and closes only this frozen Ridge on live picks. Not tested here: the GBM ranker, a refit on 2016-26,
 bottom-quintile avoidance as a filter, 15:30-15:40 minute-path sequences. Program N = 1196.
+
+## AMENDMENT - CEF-RV live slot size (2026-11-10, user decision; sizing only, no rule change)
+SLOT_MIN 500 -> 250: a $2.5k Roth sleeve holds up to 5 positions instead of 2 in the same $1,250 overlay budget (same dollars
+at risk, ~2.5x forward round trips per week). Signal, entry/exit sessions and ranking (deepest discount first) unchanged.
+Reason: recon 2026-11-10 showed 26 of 28 forward entries skipped on cash/position room. Slots at >= $10k unchanged ($1,000).
+Per-trade returns are size-independent at these sizes (whole shares of $5-20 funds), so the forward readout is unaffected.

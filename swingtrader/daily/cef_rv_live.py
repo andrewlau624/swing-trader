@@ -38,7 +38,7 @@ PANEL_NAME = "cef-rv-panel.json"          # state/: sym -> [[week, discount], ..
 RESERVED_NAME = "pref-ex-reserved.json"   # state/: PREF-EX live's {"date", "usd"} (same-day dollars already spoken for)
 ET = ZoneInfo("America/New_York")
 WINDOW = (dt.time(8, 0), dt.time(9, 28))  # pre-open orders only: after that the open cross is not reachable
-SLOT_MIN, SLOT_MAX, SLOT_DIV = 500.0, 1000.0, 10.0
+SLOT_MIN, SLOT_MAX, SLOT_DIV = 250.0, 1000.0, 10.0   # min 500 -> 250 (user, 2026-11-10): 5 slots, not 2, in a $2.5k sleeve; same dollars
 MAX_EQUITY_FRAC = 0.50
 FORWARD_FROM = "2026-10-08"               # = cef_rv_shadow.FORWARD_FROM: earlier signal weeks are backfill, never traded
 NEED = 30                                 # live round trips before the cost readout counts

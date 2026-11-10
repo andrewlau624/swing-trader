@@ -15,7 +15,8 @@ ET = ZoneInfo("America/New_York")
 def test_costs_and_round_trip(monkeypatch):
     bars = {"LOSER": pd.DataFrame({"open": [0.0, 10.20], "high": 0, "low": 0, "close": [10.00, 0.0], "volume": 1},
                                   index=[pd.Timestamp("2026-09-24"), pd.Timestamp("2026-09-25")])}
-    monkeypatch.setattr(review.md, "sip_daily", lambda syms, *a, **k: bars)
+    monkeypatch.setattr(review.md, "official_crosses", lambda syms, *a, **k: {
+        ("LOSER", "2026-09-24"): (None, 10.00), ("LOSER", "2026-09-25"): (10.20, None)})
     fills = pd.DataFrame([
         dict(book="live", sym="LOSER", leg="night", side="buy", qty=16, px=10.02,
              when=pd.Timestamp("2026-09-24 16:00:01", tz=ET), tif="cls"),

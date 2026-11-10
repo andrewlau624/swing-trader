@@ -960,7 +960,7 @@ class DailyExecutor:
 
     def _check_exit_cost(self, book: DailyBook | None = None, today: str = "") -> None:
         """This morning's open sells are booked by now; score the recent ones
-        against the official open (SIP, >15 min old by 15:40)."""
+        against the official opening cross (SIP auctions, >15 min old by 15:40)."""
         path = self.log_dir / f"daily-fills{self.tag}.jsonl"
         if not path.exists():
             return
@@ -970,10 +970,11 @@ class DailyExecutor:
             if not sells:
                 return
             days = sorted({str(f.get("filled_at", ""))[:10] for f in sells})
-            bars = md.sip_daily(sorted({f["sym"] for f in sells}),
-                                pd.Timestamp(days[0]) - pd.Timedelta(days=3), None)
-            opens = {(sym, str(d.date())): float(b.loc[d, "open"])
-                     for sym, b in bars.items() for d in b.index}
+            X = md.official_crosses([f["sym"] for f in sells], days[0], days[-1])
+            opens = {k: float(v[0]) for k, v in X.items() if v[0]}          # the official opening cross
+            unscored = sum(1 for f in sells if (f["sym"], str(f.get("filled_at", ""))[:10]) not in opens)
+            if unscored:
+                self.log(f"[night] exit cost: {unscored} of {len(sells)} sells have no published opening cross (left out)")
             n, bps = sg.night_exit_cost(sells, opens)
             routes = sg.exit_cost_by_route(sells, opens)
             self._exit_stats = sg.night_exit_cost(sells, opens, window=sg.LEVER_MIN_EXITS)

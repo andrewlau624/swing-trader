@@ -109,18 +109,17 @@ def live_fills(since: dt.date, cfg, book: str = "live") -> pd.DataFrame:
 
 # ------------------------------------------------------------ benchmarks
 def auction_prices(fills: pd.DataFrame) -> pd.DataFrame:
-    """Official session open/close (SIP daily bars) for every fill's day."""
+    """Official opening/closing cross (SIP auctions, md.official_crosses) for every fill's day."""
     if fills.empty:
         return fills
     f = fills.copy()
     f["day"] = f.when.dt.tz_localize(None).dt.normalize()
-    bars = md.sip_daily(sorted(f.sym.unique()), f.day.min() - pd.Timedelta(days=3),
-                        f.day.max() + pd.Timedelta(days=1))
-    def px(sym, day, col):
-        b = bars.get(sym)
-        return float(b.loc[day, col]) if b is not None and day in b.index else np.nan
-    f["open_auction"] = [px(s, d, "open") for s, d in zip(f.sym, f.day)]
-    f["close_auction"] = [px(s, d, "close") for s, d in zip(f.sym, f.day)]
+    X = md.official_crosses(list(f.sym.unique()), f.day.min(), f.day.max())
+    def px(sym, day, i):
+        v = X.get((sym, str(pd.Timestamp(day).date())))
+        return float(v[i]) if v and v[i] else np.nan
+    f["open_auction"] = [px(s, d, 0) for s, d in zip(f.sym, f.day)]
+    f["close_auction"] = [px(s, d, 1) for s, d in zip(f.sym, f.day)]
     # benchmark: close auction for MOC fills, open auction for pre-open fills
     pre_open = f.when.dt.hour * 60 + f.when.dt.minute <= 9 * 60 + 35
     bench = np.where(f.tif == "cls", f.close_auction, np.where(pre_open, f.open_auction, np.nan))

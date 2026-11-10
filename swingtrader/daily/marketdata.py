@@ -143,6 +143,25 @@ def eligibility_rows(bars: dict[str, pd.DataFrame], today, *, price_min: float, 
     return rows
 
 
+def official_crosses(symbols: list[str], start, end) -> dict[tuple[str, str], tuple]:
+    """(sym, 'YYYY-MM-DD') -> (open cross px, close cross px) from Alpaca SIP auctions (largest print per auction).
+    The prices the night/IBS fills actually trade at; daily bars (esp. dividend-adjusted) are not the cross
+    (recon 2026-11-10: Roth open sells +7.9bp/side vs bar opens, -3.9 vs the cross; ~110bp off on ex-div days)."""
+    from .exdate_open_shadow import _headers
+    from .pref_ex_shadow import crosses
+    syms = sorted(set(symbols))
+    if not syms:
+        return {}
+    a, b = str(pd.Timestamp(start).date()), str(pd.Timestamp(end).date())
+    out: dict[tuple[str, str], tuple] = {}
+    H = _headers()
+    for i in range(0, len(syms), 100):
+        for sym, days in crosses(syms[i:i + 100], a, b, H).items():
+            for d, x in days.items():
+                out[(sym, d)] = (x[0], x[2])
+    return out
+
+
 QUOTE_BATCH = 200
 
 

@@ -1446,6 +1446,22 @@ def test_tbill_dividend_is_credited_once_to_holders_at_the_ex_date():
     assert b.closed[-1]["note"], "kill rules skip rows with `note`"
 
 
+def test_live_exit_cost_is_scored_against_the_official_cross_not_bar_opens(tmp_path, monkeypatch):
+    """Daily bars (dividend-adjusted) are not the auction: a sell AT the opening cross costs 0bp even when the bar
+    open differs (recon 2026-11-10), and a sell with no published cross is left out, not scored against a bar."""
+    import json
+    from swingtrader.daily import executor as E
+    ex = _executor(tmp_path, monkeypatch)
+    rows = [{"sym": "X", "leg": "night", "side": "sell", "fill_px": 10.0, "filled_at": "2026-10-01 13:30:01+00:00"},
+            {"sym": "Y", "leg": "night", "side": "sell", "fill_px": 9.0, "filled_at": "2026-10-01 13:30:01+00:00"}]
+    (tmp_path / f"daily-fills{ex.tag}.jsonl").write_text("\n".join(json.dumps(r) for r in rows))
+    monkeypatch.setattr(E.md, "sip_daily", lambda *a, **k: {"X": pd.DataFrame({"open": [10.5]}, index=[pd.Timestamp("2026-10-01")])})
+    monkeypatch.setattr(E.md, "official_crosses", lambda *a, **k: {("X", "2026-10-01"): (10.0, 10.1)})
+    ex._check_exit_cost(None, "2026-10-01")
+    assert ex._exit_stats == (1, 0.0)
+    assert any("1 of 2 sells have no published opening cross" in l for l in ex.lines)
+
+
 def test_paper_exit_cost_never_kills_or_warns(tmp_path, monkeypatch):
     """Alpaca paper does not run the opening auction (21 of 27 OPG sells
     expired 2026-09-23..10-01); its +152bp must not kill the paper night leg."""
@@ -1459,8 +1475,7 @@ def test_paper_exit_cost_never_kills_or_warns(tmp_path, monkeypatch):
     rows = [{"sym": "X", "leg": "night", "side": "sell", "fill_px": 9.8,
              "filled_at": f"{d.date()} 13:50:00+00:00"} for d in days]
     (tmp_path / "daily-fills.jsonl").write_text("\n".join(json.dumps(r) for r in rows))
-    bars = pd.DataFrame({"open": 10.0}, index=days)
-    monkeypatch.setattr(E.md, "sip_daily", lambda *a, **k: {"X": bars})
+    monkeypatch.setattr(E.md, "official_crosses", lambda *a, **k: {("X", str(d.date())): (10.0, 10.0) for d in days})
     book = DailyBook(cash=3000, start_equity=3000)
     ex._check_exit_cost(book, "2026-10-02")
     assert not book.killed and not ex.warnings

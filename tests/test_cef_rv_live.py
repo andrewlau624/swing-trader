@@ -110,8 +110,9 @@ def test_exits_need_a_matching_held_signal_week():
 
 
 def test_slots_and_sizing_deepest_discount_first():
-    assert C.slot_usd(2300) == 500 and C.slot_usd(10_000) == 1000 and C.slot_usd(25_000) == 1000 and C.slot_usd(7000) == 700
-    assert C.max_positions(2300) == 2 and C.max_positions(10_000) == 5 and C.max_positions(25_000) == 12
+    assert C.slot_usd(2300) == 250 and C.slot_usd(10_000) == 1000 and C.slot_usd(25_000) == 1000 and C.slot_usd(7000) == 700
+    assert C.max_positions(2300) == 4 and C.max_positions(2500) == 5 and C.max_positions(10_000) == 5
+    assert C.max_positions(25_000) == 12
     pan = {s: [["2026-10-09", 0.0], [SIG, d]] for s, d in {"SHALLOW": -0.05, "DEEP": -0.20, "MID": -0.10}.items()}
     cands = [sig("SHALLOW"), sig("DEEP"), sig("MID")]
     last = {"SHALLOW": 10.0, "DEEP": 10.0, "MID": 10.0}
@@ -184,12 +185,12 @@ def test_dry_run_logs_sizes_and_holdings_value_but_places_nothing(tmp_path):
     assert ad.submitted == [] and out["bought"] == ["A", "B"] and out["missed"] == ["OLD"]
     rs = rows(tmp_path)
     buys = [r for r in rs if r["cmd"] == "buy"]
-    assert all(r["dry_run"] for r in buys) and [r["qty"] for r in buys] == [50, 50]
+    assert all(r["dry_run"] for r in buys) and [r["qty"] for r in buys] == [30, 30]      # $300 slots at $3k equity
     assert any(r["cmd"] == "missed" and r["sym"] == "OLD" and r["session"] == "2026-10-12" for r in rs)
     st = json.loads((tmp_path / C.STATE_NAME).read_text())
     assert set(st["open"]) == {"A", "B"} and st["open"]["A"]["signal_week"] == SIG
     held = json.loads((tmp_path / C.HELD_NAME).read_text())
-    assert out["held_usd"] == 1000.0
+    assert out["held_usd"] == 600.0                                  # 2 x 30 sh x $10
     assert held["usd"] == 0.0 and held["n"] == 0, "dry holdings must not reach the executor's Roth cash (cef-rv-held.json)"
     run("dry", tmp_path, ad)                                           # second run: no re-buy, one missed row only
     assert sum(1 for r in rows(tmp_path) if r["cmd"] == "missed") == 1 and len([r for r in rows(tmp_path) if r["cmd"] == "buy"]) == 2
@@ -200,7 +201,7 @@ def test_live_submits_pre_open_market_buys(tmp_path):
     panel(tmp_path, A=-0.2)
     ad = FakeAd({"A": 10.0}, settled=2000, equity=3000)
     out = run("live", tmp_path, ad)
-    assert ad.submitted == [("A", "buy", "opg", 50)] and out["bought"] == ["A"]
+    assert ad.submitted == [("A", "buy", "opg", 30)] and out["bought"] == ["A"]
     assert [r for r in rows(tmp_path) if r["cmd"] == "buy"][0]["order_id"] == "3001"
 
 
@@ -299,9 +300,9 @@ def test_a_budget_skip_is_not_relogged_as_missed_the_next_day(tmp_path):
     late-NAV / late-signal problem. The skip is the outcome; the next day's run must not add a missed row for it."""
     signals(tmp_path, sig("A"), sig("B"), sig("OLD", signal=OLD_SIG))
     panel(tmp_path, A=-0.2, B=-0.1, OLD=-0.3)
-    run("dry", tmp_path, FakeAd({"A": 10.0, "B": 10.0}, settled=500, equity=3000))     # one slot of cash: B is skipped
+    run("dry", tmp_path, FakeAd({"A": 10.0, "B": 10.0}, settled=300, equity=3000))     # one $300 slot of cash: B is skipped
     assert [r["sym"] for r in rows(tmp_path) if r["cmd"] == "buy-skip"] == ["B"]
-    out = run("dry", tmp_path, FakeAd({"A": 10.0, "B": 10.0}, settled=500, equity=3000),
+    out = run("dry", tmp_path, FakeAd({"A": 10.0, "B": 10.0}, settled=300, equity=3000),
               today=dt.date(2026, 10, 20), now=dt.datetime(2026, 10, 20, 9, 5, tzinfo=ET))
     assert out["missed"] == ["OLD"]
     assert [r["sym"] for r in rows(tmp_path) if r["cmd"] == "missed"] == ["OLD"]
