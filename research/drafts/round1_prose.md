@@ -10649,3 +10649,53 @@ mean excess net of the measured half-spreads > 0 -> PASS = propose a small live 
 with mean net excess <= 0 -> KILL. Not passed by 120 scored -> KILL. Reported, not gated: 2x/3x cost, ex-top-5, hit rate, vs SPY/IWM,
 the study-filter (x-3) variant, the $10-40 / $ADV<$100M slices (seen in N 1201, so never gated). ~90 events/yr in 2002-26: 40 by
 ~mid-2027. Not tested by this design: initiation counts/ratings, the K=40 regime, secondary quiet periods, combination with the book.
+
+## BRANCH LIST + PRE-REGISTRATION - IDX-LETF-REV (N 1207 -> 1209), 2026-11-10, BEFORE any outcome is read
+Task: strongest conditional (named-state) edge not in the ledgers. Branch list (ceiling = events/yr x net edge x share x capture
+<= 50%, at $10k; $2.3k/$25k identical unless noted, all liquid auction-traded instruments):
+| # | branch (input / fill / mechanism + counterparty) | ledger check | ceiling @$10k | verdict |
+|---|---|---|---|---|
+| 1 | INDEX-LETF close rebalance -> next open reversal on the UNDERLYING index/sector ETF (input: LETF AUM x L(L-1) x day return / underlying $ADV; fill: close cross -> open cross; counterparty: 2x/3x/inverse index LETFs that must trade the day's move at the close) | LETF-REV (N 1065) `not tested: ... index LETFs`; SS-LETF (single stock, 15:45->close); add. 34 (last half hour / night size-up, not the ETF's own overnight) | ~100 event-days x 15-20bp net x 100% x 50% = 7.5-10pp; ~5pp at 10bp | SURVIVES on paper only if >= 16bp net; RUN |
+| 2 | OPEX pinning conditioned on OI (SPY / single stock) | opex_pin dead; single-stock ceiling 1.8-4pp (map) | 1.8-4pp | dedupe + ceiling-kill |
+| 3 | Month-end pension 60/40 rebalancing conditioned on the equity/bond month | HMM-REBAL (N 1080-81) dead after 2015; TME validated small | 12 x <= 60bp x 100% x 50% = 3.6pp | dedupe-kill |
+| 4 | Dividend flows: ex-night capture (AZ, EXDIV-OPEN, OIE dead), pre-ex record recall (REC-RECALL dead), dividend-month premium (Hartzmark-Solomon 2013; not run) and aggregate pay-day reinvestment (H-S 2022; not run) | ledgered except the last two | dividend month 12 x ~40bp x 100% x 50% = 2.4pp; pay-day SPY ~25 days x ~10bp x 50% = 1.3pp | ceiling-kill (both new leaves) |
+| 5 | Regulatory date: IPO 180-day lockup expiry SHORT, close(E-2) -> close(E+1), taxable | deep_loop #14 ceiling-killed at 2pp (1% x 30%); Round 30 #7 night picks dead | re-ceilinged 3-session hold: 150 x 1% net of HTB borrow x 50% x 50% = 3.75pp | ceiling-kill (stays) |
+| 6 | Cross-asset: stock-AND-bond down day (risk-parity / vol-target deleveraging) -> equity ETF overnight | VT-FLOW (N 1072-75) dead; REGIME-X gates dead | ~20 days x 30bp x 100% x 50% = 3pp | dedupe + ceiling-kill |
+Survivor: #1 only (the user-favoured LETF branch, via LETF-REV's explicit `not tested: index LETFs` leaf). Prior: LOW (LETF-REV
+single-stock +12.4bp t 0.8 and no excess; SS-LETF +3-5bp gross; index LETF flow is small vs index futures/basket liquidity except
+in a few sector ETFs: GDX/GDXJ 2013-16, XBI 2016-22).
+
+Study IDX-LETF-REV. Data: WRDS CRSP dsf (prc = primary-listing close = closing cross; openprc = open; shrout; vol) 1999-2024.
+Underlying ETF <- LETFs (leverage fixed a priori from the fund name; NUGT/JNUG 3x->2x in 2020 and other leverage changes NOT
+modelled, disclosed): QQQ<-QLD QID TQQQ SQQQ PSQ; SPY<-SSO SDS UPRO SPXU SPXL SPXS SH; DIA<-DDM DXD UDOW SDOW DOG;
+IWM<-UWM TWM TNA TZA URTY SRTY RWM; XLF<-UYG SKF FAS FAZ; XLE<-DIG DUG ERX ERY; XLK<-ROM REW TECL TECS; SOXX<-USD SSG SOXL SOXS;
+XBI<-LABU LABD; IBB<-BIB BIS; GDX<-NUGT DUST; GDXJ<-JNUG JDST; IYR<-URE SRS DRN DRV; EEM<-EET EEV EDC EDZ; FXI<-XPP FXP YINN YANG.
+Demand D_t = sum over the underlying's LETFs of AUM_{t-1} x L(L-1) x r_t (r_t = underlying close-to-close return; AUM = prc x
+shrout of the LETF at t-1). I_t = D_t / (20-session mean $volume of the underlying through t-1). Event: |I_t| >= the 90th pct of
+|I| over that underlying's prior 252 sessions (>= 120 obs), I_t != 0. Arm A (N 1208, primary, long, Roth-eligible): I_t < 0 ->
+buy close(t), sell open(t+1). Arm B (N 1209, short, taxable): I_t > 0 -> short close(t), cover open(t+1). Event-day portfolio =
+equal weight across that day's qualifying underlyings. Return measured raw and as excess vs the same ETF's mean close->open over its
+prior 252 sessions (PIT); judged on the excess. Cost 3bp/side (6bp RT) base; shocks 2x/3x.
+Judge 2009-01-01..2019-12-31 (no rule has been chosen on these ETFs' close->open with this input; the IBS leg's ETFs and 2003-15 were
+read for a different (open->open, IBS) rule: disclosed). Halves 2009-14 / 2015-19. Reported, not gated: 2006-08, 2020-24.
+Mechanism tests (pre-registered): (i) DOSE - within the judge period, top-decile |r| days (same PIT rule on |r|) split by the
+LETF AUM / underlying ADV ratio above vs below its cross-sectional-time median: high-minus-low reversal must be > 0, t >= 1.5;
+(ii) PLACEBO - the |r| top-decile rule on the same ETFs in 1999-2005 (pre-LETF; the ProShares launches were 2006-07): the arm's
+judged excess must exceed the pre-LETF placebo by >= 50% of the arm's effect.
+Kill rule per arm: KILL unless ALL of: judge net (3bp/side) excess mean >= +10bp per event-day, day-clustered t >= 2.0, median > 0,
+both halves > 0, ex-top-5 > 0, dose test passes, placebo test passes, DSR >= 0.95 at N 1209. PASS also needs the book ceiling
+(event-days/yr x net mean, 100% deployed) >= 16pp/yr (= 8pp at 50% capture); statistical pass + ceiling fail = PASS-SMALL.
+Battery reported for both arms: halves, 2x/3x cost, ex-top-5, median, hit, day t, placebo, dose, DSR; rung-1 baseline = the same
+close->open trade on EVERY day (unconditional overnight) and on top-decile |r| days without the LETF input.
+N 1207 -> 1209 (1208 arm A, 1209 arm B).
+
+## RESULT - IDX-LETF-REV (N 1208-1209), 2026-11-10, one look: KILL both arms (as registered)
+research/sim/idx_letf_rev.py, out data/research/program/idx_letf_rev_out.txt (CRSP dsf pulled via WRDS, cached data/research/idx_letf/).
+Judge 2009-19, net 3bp/side, excess vs own prior-252 close->open mean, event-day EW portfolio:
+- Arm A long (I<0), 688 days (63/yr): net -9.3bp t -2.30, gross -3.3 (median +3.6, hit 51%), 2x -15.3, 3x -21.3, ex-top-5 -12.1;
+  halves -14.4 / -4.5; 2006-08 -8.2, 2020-24 -13.5 (reported). Dose (top-decile |r|, R high minus low) -3.0bp t -0.50. Baselines:
+  top-decile |r| without LETF input -1.9; unconditional -5.1 (= cost). Placebo 1999-2005 |r| rule -10.1. DSR 0.000. Fails every gate.
+- Arm B short (I>0), 744 days: net -1.9 t -0.52, gross +4.1 t 1.14; halves +2.3 / -5.8; dose -4.4 t -0.94; DSR 0.000. KILL.
+Per underlying, no dose pattern: SOXX (highest LETF/ADV ratio, median 46) long +2.5bp; XBI -16.4; GDXJ +3.1; EEM +17.4 is the
+lowest-ratio fund. Mechanism read: index LETF close flow is absorbed (futures/basket liquidity); no overnight reversal in the wrapper.
+Program N 1207 -> 1209.
