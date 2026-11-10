@@ -1,0 +1,38 @@
+QP-INIT (N 1200) IPO quiet-period expiry; Sharadar SEP; run 2026-11-10 05:57
+events after universe filters: 4573; by first-trade year:
+  1998:267 1999:481 2000:375 2001:94 2002:78 2003:78 2004:200 2005:174 2006:168 2007:192 2008:33 2009:58 2010:135 2011:106 2012:115 2013:197 2014:230 2015:143 2016:95 2017:135 2018:154 2019:128 2020:190 2021:344 2022:39 2023:59 2024:77 2025:115 2026:113
+
+window: close(last session <= F+K-2d) -> close(first session >= F+K); judged events 2133 (88/yr); median sessions held 3 cal days
+
+PRIMARY (judge 2002-08..2026-10): net excess vs IPO cohort (age 60-250 sessions), base cost
+  net excess vs cohort               n 2133 mean    -3.5bp med   -21.4 hit 47.2% t_day -0.27 ex-top5   -11.2
+  net raw                            n 2133 mean    -7.8bp med   -14.6 hit 48.1% t_day -0.57 ex-top5   -15.4
+  net excess vs SPY                  n 2133 mean   -17.5bp med   -23.1 hit 47.4% t_day -1.34 ex-top5   -25.2
+  net excess, 2x cost                n 2133 mean   -19.6bp med   -37.8 hit 45.5% t_day -1.52 ex-top5   -27.2
+  net excess, 3x cost                n 2133 mean   -35.6bp med   -53.2 hit 43.7% t_day -2.76 ex-top5   -43.2
+regimes (halves):
+  K=40 regime 2002-08..2012-04       n  676 mean   -26.9bp med   -39.4 hit 43.2% t_day -1.50 ex-top5   -40.2
+  K=25 regime 2012-04..2026          n 1457 mean    +7.3bp med   -12.3 hit 49.0% t_day +0.43 ex-top5    -3.9
+  K=25 2012-2018                     n  665 mean    +2.1bp med   -21.4 hit 46.9% t_day +0.11 ex-top5   -13.0
+  K=25 2019-2026                     n  792 mean   +11.7bp med    +6.9 hit 50.8% t_day +0.44 ex-top5    -9.0
+reported, not judged: 1998-2002-07 (BJR-era convention K=25):
+  pre-2002-08 K=25                   n  885 mean   +72.3bp med   -45.7 hit 46.9% t_day +1.84 ex-top5   +34.2
+
+PLACEBO A (regime swap: K=25 in the 40-day era, K=40 in the 25-day era):
+  swap K                             n 2165 mean    -4.4bp med   -22.7 hit 46.9% t_day -0.40 ex-top5   -11.8
+  swap K, 40-era (K=25)              n  752 mean    +9.8bp med   -16.9 hit 46.7% t_day +0.79 ex-top5    -0.1
+  swap K, 25-era (K=40)              n 1413 mean   -11.9bp med   -27.3 hit 47.1% t_day -0.77 ex-top5   -23.3
+PLACEBO B (fixed K' in 15..60 excluding 22-28, 37-43; 32 offsets): mean excess 5th/50th/95th pct -37.0/-14.5/+15.2bp; primary rank 78th pct
+  15:+22 16:+12 17:-4 18:-16 19:-23 20:-33 21:-18 29:-34 30:-29 31:-32 32:-52 33:-40 34:-15 35:-0 36:+20 44:-25 45:-21 46:-23 47:-15 48:-10 49:-3 50:-12 51:-10 52:+1 53:+1 54:-6 55:-27 56:-9 57:-6 58:-14 59:-8 60:-17
+
+BETA: event raw return on same-window SPY / QQQ (OLS, per event)
+  vs SPY: beta +0.94 alpha -16.9bp/event t -1.34
+  vs QQQ: beta +0.74 alpha -15.7bp/event t -1.24
+
+DSR (per-event net excess, N 1207): 0.000
+
+DESCRIPTIVE event-time profile (judge sample, 1-session close->close excess vs cohort, sessions rel. to first >= F+K):
+  -6: +20/+5 | -5: -3/-11 | -4: +4/-7 | -3: +12/+0 | -2: +34/+11 | -1: +44/+29 | +0: -2/-7 | +1: +7/+0 | +2: +7/+0 | +3: +2/+0 | +4: -9/-9  (mean/median bp, raw)
+ceiling at share 100%: 88/yr x -3.5bp x 1.0 x 50% = -1.6pp/yr
+ceiling at share 50%: 88/yr x -3.5bp x 0.5 x 50% = -0.8pp/yr
+note: column renamed xs->xc after a first crash (DataFrame.xs name clash made every cohort-excess line n 1); no design change

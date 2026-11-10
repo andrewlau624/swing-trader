@@ -10580,3 +10580,29 @@ Gate (ALL): (1) 1998-2002-07 mean net excess > 0, median > 0, day-t >= 2; (2) 20
 > 0, median > 0, ex-top-5 > 0, 3x cost > 0, alpha vs SPY and QQQ t >= 2, DSR (N 1207) >= 0.95; (3) swap placebo mean < 1/3 of the
 2002-26 mean and day-t < 2. PASS -> forward log-only shadow only (no live size; the run-up has no initiation-count data behind it);
 any fail -> KILL. No re-windowing. Runner: research/sim/qp_init.py --runup; out data/research/program/qp_runup_out.txt.
+
+### Result - QP-RUNUP (N 1201), 2026-11-10, one look: KILL AS REGISTERED (DSR 0.887 < 0.95); every other gate passes
+Out: data/research/program/qp_runup_out.txt. JUDGE 1 1998-2002-07 (unseen window, BJR-overlapping): +380.9bp net excess/event, median
++190, hit 60%, day-t 7.74, ex-top-5 +344 (1998-99 +497, 2000-02 +242). CONFIRMATION 2002-08..2026-10 (seen via the profile): +52.7bp,
+median +33.9, hit 53.2%, day-t 4.47, ex-top-5 +46.5; vs SPY +44.2; 2x +36.7, 3x +20.8 (median -1.4); K=40 era +61.1 (t 3.36), K=25 era
++48.9 (t 3.25); 2012-18 +53.8, 2019-26 +44.7 (t 1.93); alpha vs SPY +44.0 t 3.71 (beta 1.02), vs QQQ +48.7 t 4.13. DSR 0.887 (FAIL).
+JUDGE 2 regime-swap placebo +16.6 (t 1.32; 40-era at K=25 +7.2 t 0.49; 25-era at K=40 +21.7 t 1.23): the run-up follows the rule's day.
+Descriptive (not gates): 17/25 judge years positive mean (2022 -75, 2025 -101); sub-periods 2002-08 +48, 2009-15 +68, 2016-20 +48,
+2021-26 +45; ex-2020-21 +48; price $10-40 carries it (+80/+53), < $10 and > $40 negative; $ADV > $100M -79 (n 130), < $10M +58.
+Ceiling at 50% share / 50% capture: 90/yr x 52.7bp -> +11.8pp/yr; at 3x cost ~+4.7pp. Verdict: no re-definition; the one failing gate
+is DSR on a period that was partly seen. Next step = a genuinely unseen period, registered below.
+
+## Study QP-RUNUP-CRSP (N 1202): the same run-up rule on CRSP 1989-1995 IPOs, a period no rule here has read (pre-register 2026-11-10,
+## BEFORE any CRSP IPO return is pulled)
+Why this period: pre-dates BJR's 1996-2000 sample and every Sharadar read; CRSP 1992-97 was touched only for the night leg/OVN-MOM
+(not IPO windows). Quiet period = 25 days for exchange/Nasdaq IPOs after the 1988 Rule 174 amendments (disclosed assumption).
+Data: WRDS crsp.dsf (prc, vol, ret), dsenames (shrcd, exchcd), dsedist (acperm, spin-offs), dsi (vwretd). Events: permno's first
+dsf date F in 1989-01-01..1995-12-31, shrcd in (10,11,12,18,31), exchcd in (1,2,3); not an acperm of any dsedist row within +-30
+days of F; day-1 |prc| >= $5 and |prc| x vol >= $5M (nominal; stricter than in 2002-26 dollars, Nasdaq double-counted volume looser:
+disclosed, not adjusted). Rule identical to N 1201: K = 25, x = first session >= F+25, buy close x-3, sell close x-1 (return =
+compounded CRSP ret over x-2, x-1), entry |prc| >= $3 and median $vol (sessions 2..entry) >= $2M; cost 5bp/side ($10+ and $ADV
+>= $10M) else 10bp; excess vs EW same-window cohort of other events aged 60-250 sessions; market = CRSP vwretd.
+Gate (ALL): mean net excess > 0 with day-clustered t >= 2; median > 0; ex-top-5 > 0; 2x cost > 0; both halves (F 1989-92, 1993-95)
+> 0; alpha vs vwretd t >= 2. Reported, not gated: 3x cost, K=40 placebo window, hit rate, DSR at N 1207. PASS -> run-up OOS-confirmed;
+status = forward shadow (needs a build + REGISTRY entry; user decision before any live size). FAIL -> QP-RUNUP stays KILLED.
+Runner research/sim/qp_runup_crsp.py; out data/research/program/qp_runup_crsp_out.txt.

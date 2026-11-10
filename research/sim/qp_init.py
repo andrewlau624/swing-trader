@@ -203,6 +203,9 @@ def main():
     P("QP-INIT (N 1200) IPO quiet-period expiry; Sharadar SEP; run " + pd.Timestamp.now().strftime("%Y-%m-%d %H:%M"))
     P(f"events after universe filters: {len(ev)}; by first-trade year:")
     P("  " + " ".join(f"{y}:{n}" for y, n in ev.groupby(ev.F.dt.year).size().items()))
+    if "--runup" in sys.argv:
+        runup(ev, g, fu)
+        return
     if "--events" in sys.argv:
         print("\n".join(LINES))
         return
@@ -290,6 +293,72 @@ def main():
     P("note: column renamed xs->xc after a first crash (DataFrame.xs name clash made every cohort-excess line n 1); no design change")
     J.to_parquet(OUT.with_suffix(".parquet"))
     OUT.write_text("\n".join(LINES) + "\n")
+
+
+def runup_returns(ev, g):
+    """QP-RUNUP (N 1201): x = first session >= F+K; buy close x-3, sell close x-1."""
+    out = []
+    for r in ev.itertuples():
+        d = g[r.ticker]
+        ix = d.index[d.date >= r.F + pd.Timedelta(days=int(r.K))]
+        if not len(ix):
+            continue
+        x = ix[0]
+        e, xx = x - 3, x - 1
+        if e < 1:
+            continue
+        de = d.loc[e]
+        dv = (d.closeunadj * d.volume).iloc[1:e + 1].median()
+        if de.closeunadj < 3 or not (dv >= 2e6):
+            continue
+        out.append((r.ticker, r.F, r.K, de.date, d.loc[xx, "date"], d.loc[xx, "closeadj"] / de.closeadj - 1,
+                    de.closeunadj, dv, e))
+    return pd.DataFrame(out, columns=["ticker", "F", "K", "de", "dx", "ret", "px", "adv", "age"])
+
+
+def runup(ev, g, fu):
+    OUT2 = OUT.with_name("qp_runup_out.txt")
+    LINES.clear()
+    P("QP-RUNUP (N 1201): buy close x-3, sell close x-1, x = first session >= F+K; run " + pd.Timestamp.now().strftime("%Y-%m-%d %H:%M"))
+    R = bench(cohort_control(runup_returns(ev, g), g, ev), fu)
+    R["c1"] = cost(R)
+    R["xc"] = R.ret - R.ctl - R.c1
+    pre = R[R.de < JUDGE_START]
+    J = R[(R.de >= JUDGE_START) & (R.de <= JUDGE_END)].copy()
+    P("\nJUDGE 1 (unseen): 1998-01..2002-07, K=25 (overlaps BJR 1996-2000, disclosed)")
+    summ("net excess vs cohort", pre.xc, pre.de)
+    summ("net raw", pre.ret - pre.c1, pre.de)
+    summ("1998-1999", pre[pre.de < "2000-01-01"].xc, pre.de)
+    summ("2000-2002-07", pre[pre.de >= "2000-01-01"].xc, pre.de)
+    P("\nCONFIRMATION (SEEN via the QP-INIT profile): 2002-08..2026-10")
+    summ("net excess vs cohort", J.xc, J.de)
+    summ("net raw", J.ret - J.c1, J.de)
+    summ("net excess vs SPY", J.ret - J.SPY - J.c1, J.de)
+    for m in (2, 3):
+        summ(f"net excess, {m}x cost", J.ret - J.ctl - cost(J, m), J.de)
+    summ("K=40 era", J[J.K == 40].xc, J.de)
+    summ("K=25 era", J[J.K == 25].xc, J.de)
+    summ("K=25 2012-2018", J[(J.K == 25) & (J.de < "2019-01-01")].xc, J.de)
+    summ("K=25 2019-2026", J[(J.K == 25) & (J.de >= "2019-01-01")].xc, J.de)
+    for b in ("SPY", "QQQ"):
+        X = J[["ret", b]].dropna()
+        res = SS.linregress(X[b], X.ret - J.loc[X.index, "c1"])
+        P(f"  vs {b}: beta {res.slope:+.2f} alpha {res.intercept*1e4:+.1f}bp/event t {res.intercept/res.intercept_stderr:+.2f}")
+    P(f"  DSR (N {N_PROGRAM}): {dsr(J.xc.values, N_PROGRAM):.3f}")
+    ev2 = ev.copy()
+    ev2["K"] = np.where(ev2.K == 40, 25, 40)
+    Q = cohort_control(runup_returns(ev2, g), g, ev2)
+    Q["xc"] = Q.ret - Q.ctl - cost(Q)
+    Q = Q[(Q.de >= JUDGE_START) & (Q.de <= JUDGE_END)]
+    P("\nJUDGE 2 (unseen): regime-swap placebo on 2002-26 (run-up placed at the other era's K)")
+    summ("swap placebo", Q.xc, Q.de)
+    summ("swap, 40-era at K=25", Q[Q.K == 25].xc, Q.de)
+    summ("swap, 25-era at K=40", Q[Q.K == 40].xc, Q.de)
+    yrs = (JUDGE_END - JUDGE_START).days / 365.25
+    P(f"ceiling (2002-26 mean, 50% share, 50% capture): {len(J)/yrs:.0f}/yr x {J.xc.mean()*1e4:+.1f}bp -> "
+      f"{len(J)/yrs*J.xc.mean()*0.25*100:+.1f}pp/yr")
+    J.to_parquet(OUT2.with_suffix(".parquet")); pre.to_parquet(OUT2.with_name("qp_runup_pre.parquet"))
+    OUT2.write_text("\n".join(LINES) + "\n")
 
 
 if __name__ == "__main__":
