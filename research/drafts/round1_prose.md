@@ -10288,3 +10288,132 @@ Base book judge 1999-2015 16.0% CAGR / -25.7% maxDD / Calmar 0.62 (DD = 2000-02)
 Mechanism read: state gates switch off the days the liquidity-provision legs earn most; drawdown/equity rules are static de-levering in
 disguise out of the judge window. DSR moot (no survivor). Not tested: 0.5x partial de-risk, per-leg gates, HY OAS (FRED 3y only), breadth,
 pre-2011 managed-futures proxies, intraday stops, the noise leg, other thresholds. Program N = 1164 (1165-1169 unused).
+
+## Study RGTI-BASKET: swing rules on a basket of RGTI-like stocks across regimes (pre-register 2026-11-09 BEFORE any outcome is read; overnight agent; assigned N 1190-1199, used N 1190-1195)
+Origin: user idea "RGTI swings beautifully (local low ~$10 then +10% next day); trade stocks that behave like it with buy/hold/sell
+signals". Study CC (N 820) died as ONE stock in ONE regime (ex-best-5 -14bp). This study fixes the sample: many names, 1999-2026.
+Already dead and NOT redone: HL-BOUNCE (N 1055, pivot bounce in uptrend, all stocks), SEQ-ENTRY (N 1039, indicator sequences as entry),
+theme-explosion (add. 28, breakouts/momentum lose to vol-matched random), RSI(2)/ATR limit entry (fill artifact), BNC-IBS (N 1056), the
+live night leg (-8% & IBS<0.10 close->open) and IBS (ETFs). Here: multi-day swings (2-15 sessions) inside a behaviour-defined basket.
+Ceiling (before code): slots K=5 x 20% of account, avg hold ~7 sessions -> ~36 turns/slot/yr; +8pp/yr at 50% capture needs >= ~0.45%
+net EXCESS per trade over the vol-matched control (published short-horizon reversal in high-vol small caps: 1-2%/week pre-2005, decayed).
+Plausible, not ceiling-killable -> run.
+Data: Sharadar SEP (delisted-complete), tickers table=='SEP', category common (nx.is_common: Domestic/ADR/Canadian common, no warrants/
+pref/units). Split-adjusted OHLC; price filters use closeunadj; ADV = mean(closeunadj x volume). A trade whose name delists while held
+exits at the last available close (no delisting-return adjustment: stated bias, likely favourable to longs).
+Membership (point-in-time, trailing data only):
+- **M1 "high-vol swingy" (monthly).** At the last session of month m-1, over the trailing 120 sessions (>= 100 valid): eligible =
+  closeunadj in [$2, $50] and ADV120 >= $5M; vol = std of daily log returns; member = top decile of vol among eligible AND variance ratio
+  VR5 = var(overlapping 5d log ret) / (5 x var(1d)) <= 1.0 (mean-reverting at 5 days). Members trade in month m.
+  Vol-matched NON-member pool = eligible top-decile-vol names with VR5 > 1.0.
+- **M2 "range-bound relative to own history" (user input 2026-11-09, registered before any outcome; daily at the signal close d).**
+  H20/L20 = max high / min low over the last 20 sessions incl. d, H120/L120 over 120; member iff (H20-L20) <= 0.6 x (H120-L120); >= 2
+  low touches and >= 2 high touches in the last 20 sessions, where a low touch is a run of consecutive days with low <= 1.10 x L20 and a
+  high touch a run with high >= H20 / 1.10 (literal "within 10% of the band edge", price-relative); closeunadj in [$2,$50]; ADV20 >= $5M;
+  no vol requirement. Vol-matched non-member pool = eligible names failing the M2 test.
+Rules (signal at close d on members, buy OPEN d+1; one open position per name per rule; split-adjusted prices):
+- **R1 local-low reversal (N 1190 M1 / N 1193 M2):** close(d-1) = min close of the 20 sessions ending d-1 AND close(d)/close(d-1)-1 >= +8%.
+  Exit: target +15% (high >= 1.15 x entry -> fill max(open, target)), stop -10% (low <= 0.90 x entry -> fill min(open, stop); stop
+  checked first when both hit the same day), else close of the 10th session held.
+- **R2 range band (N 1191 M1 / N 1194 M2):** close(d) <= L20 + 0.10 x (H20 - L20) (highs/lows of the 20 sessions incl. d). Exit at the
+  first close >= the signal-day mid band (H20+L20)/2, else close of the 15th session. No stop.
+- **R3 pullback in uptrend (N 1192 M1 / N 1195 M2):** close(d) > SMA50(d) AND close(d) / max(close d-5..d-1) - 1 <= -12%. Exit close of
+  the 10th session.
+- R4 (state machine) NOT registered (not tested).
+Periods: FIT 1999-2012 = mechanics sanity only, no parameter changes. JUDGE 2013-01-01..last bar. Report 2013-19 / 2020-26 halves and
+2020, 2022, 2024-25 (Study CC's quantum regime) separately.
+Controls (per signal trade, same entry date, same exit mechanics from open d+1): C1 = random member on the same date with the nearest
+trailing-20d vol (20 draws -> placebo distribution of the mean); C2 = same, from the vol-matched non-member pool; C3 shuffled-signal =
+the same name at a random date within +-250 sessions (20 draws). Also beta vs QQQ over each holding window and per-trade alpha.
+Costs: ADV20 >= $10M 5bp/side, $5-10M 10bp/side; shocks 2x and 3x.
+Statistics: mean/median net, hit rate, ex-top-5, t clustered by entry month, excess vs C1 (paired by trade, month-clustered t), gap
+(close d -> open d+1, untradable given the close signal) vs trade, max concurrent signals, account sim K=5 equal slots, whole shares,
+at $2.3k/$10k/$25k (first-come by signal, random tie-break), DSR at program N 1195.
+**PASS gate (per rule x membership, judge period):** (a) net mean at 2x costs > 0; (b) excess vs C1 > the C1-placebo 95th pct AND paired
+excess t >= 2.0 (month-clustered); (c) excess vs C2 > 0; (d) ex-top-5 excess > 0 and both judge halves excess > 0; (e) alpha vs QQQ > 0;
+(f) ceiling: excess vs C1 x turns taken in the K=5 sim x 20% x 50% capture >= +8pp/yr at $10k. Any failure -> KILL for that cell.
+Six cells -> DSR at N 1195. A pass in 2024-25 only is a NO.
+
+## Study ANALOG (N 1180-1188, 2026-11-09): raw normalized PRICE-PATH analogs (nearest-neighbour shape matching), V1 + V2
+User idea: "RGTI's chart is great for swing trading; find stocks whose chart hits the same shape and trade it." Dead forms (not
+redone): Study CC (RGTI $14-16 bounce, N 820), PATTERN-NIGHT (snapshot GBM, N 1036), SEQ-NIGHT/SEQ-ENTRY (indicator sequences, N
+1038-39), theme-explosion sleeve. NEW form here: the raw z-normalized log-close PATH itself, kNN analog forecast. No outcome read yet.
+Ceiling: daily top-decile long book, ~100% deployed, rotation every H sessions: `(252/H) x net edge/trade x 100% x 50%`; clears
++8pp at $10k only if net edge >= 6.4bp x H per trade (H1 6.4bp, H5 32bp, H10 64bp) -> testable (SEQ-ENTRY's monotone ~9bp gross
+H1 shows the scale is not absurd); account size only matters via whole shares (implementable top-10 names; $2.3k ~ $230/name).
+Data: Sharadar SEP (Domestic/ADR/Canadian common, primary class, incl. delisted) + SFP ETFs, split-adjusted OHLC (closeadj for
+forward returns incl. dividends/delisting through last bar). Universe row (stock-date d): closeunadj >= $3, 20d mean close*volume
+>= $5M, >= L+1 valid bars. Shape: last L sessions of log close, z-normalized (subtract mean, divide std; flat paths dropped).
+Distance: Euclidean on the PCA-8 projection of the z-path (PCA fit on a 1999-2012 library sample; approximation, stated);
+correlation ranking is identical on z-paths (||a-b||^2 = 2L(1-corr)), reported, not a separate arm. kNN by faiss.
+Label (library): fwd open(d+1)->open(d+1+H) total return minus the same-date universe mean (cross-sectional excess), winsorized
+1/99%. Library for query year Y = paths with d+1+H < Jan 1 of Y, sampled every 5th session per ticker (approximation), from 1999.
+K = 50 nearest after dropping the same ticker within 60 sessions (fetch 120, filter). Forecast = mean neighbour label.
+**N 1180-1185 V1 GENERAL ANALOG** = L {20,40} x H {1,5,10} (6 trials). Each day: top decile of forecast among the universe ->
+long-only (Roth) EW; long-short taxable arm = top minus bottom decile (descriptive). Entry open(d+1), exit open(d+1+H).
+Judge 2013-01-01..2026-10 (library grows walk-forward, rule frozen); 2005-2012 reported in-sample only (nothing is chosen on it:
+all parameters above are fixed now).
+**N 1186-1188 V2 TEMPLATE ANALOGS** (L=40, H {1,5,10}). Swingers chosen 2008-2012 ONLY: among stocks in the universe >= 80% of
+2008-12 sessions, swing profit = sum of log returns of a channel strategy (buy next open when close <= 20d low + 0.2 x (20d
+high - 20d low); sell next open when close >= 20d low + 0.8 x range); top 50 = swingers. Templates = 40-session z-paths ending d
+(2008-2012) for a swinger with open(d+1)->open(d+11) >= +20%, one per ticker per 20 sessions. Threshold = 1st percentile of the
+nearest-template distance over all non-swinger stock-dates 2008-2012. Signal (2013-26): nearest-template distance <= threshold;
+entry open(d+1), hold H. RGTI's latest 40-day path is a FORWARD-ONLY shadow template, never a historical judge; its nearest
+historical analogs are logged as an illustrative table (non-judging).
+Controls (both variants): (a) VOL-MATCHED random = same-date mean of universe names in the same 20d-vol decile and price band
+($3-10, 10-30, 30+); excess = pick - cell mean; (b) SHAPE-SHUFFLED placebo = each query path's daily log returns time-permuted
+(same total-L return and vol, shape destroyed), run through the identical pipeline (V2: templates shuffled, threshold
+recalibrated 2008-12); (c) beta and alpha vs QQQ (daily staggered long book vs QQQ open->open).
+Costs per side: ADV >= $10M 5bp, $5-10M 10bp; shock 2x/3x. Stats: mean/median net bp per trade, hit, date-clustered t (per-date
+cohort means, NW lags H), halves 2013-19 / 2020-26, ex-top-5 dates, 2020 and 2022, capacity (median ADV of picks), gap check
+(close(d)->open(d+1) untradable leg of the picks vs the traded leg).
+GATE per cell (all): judge long-only net excess vs vol-matched > 0 with clustered t >= 2.0; both halves > 0; 2x cost net excess > 0;
+ex-top-5 > 0; median date-cohort excess > 0; beats shape-shuffled placebo (difference t >= 2.0); DSR >= 0.95 at program N 1189;
+ceiling at $10k (50% capture, absolute net not excess) >= +8pp. Any failure -> cell KILL. N 1189 reserved (unused unless needed).
+Not in scope (stated now): DTW distance, high/low channels in the path, intraday paths, short-only arm, horizons > 10.
+
+## RESULT - Study RGTI-BASKET (N 1190-1195), 2026-11-09, one look: all six cells KILL as registered
+M2 was pre-registered (user input 2026-11-09) before any outcome of M1 or M2 was read. Runner `research/sim/rgti_basket.py`
+(build -> `data/research/rgti_basket/panel.parquet`, judge -> `data/research/program/rgti_basket_out.txt`). Sharadar SEP common
+1998-06..2026-10-05, 10.5M eligible rows; avg members/day M1 66, M2 235. Judge 2013-26 (net = tier costs; ex1 = gross excess over C1,
+same-date vol-matched random member under the same exit rule; t month-clustered):
+- M1R1 local-low reversal (N 1190): n 1562, net +66bp (3x +41), median -480, hit .45; ex1 +16bp t 0.92, ex-top-5 -0; halves +86/-21;
+  2024-25 (Study CC's quantum regime) net -149bp, ex1 -117 t -2.4; FIT 1999-2012 net -97. KILL.
+- M1R2 range band (N 1191): net -8bp, ex1 -10, alpha vs QQQ -135bp. KILL. M1R3 pullback (N 1192): net +6, ex1 -67. KILL.
+- M2R1 (N 1193): net +97bp (3x +71), median -23, ex1 +41 t 1.30, halves +127/+10, 2024-25 ex1 -95. KILL (t, placebo, ceiling).
+- **M2R2 range band in range-bound names (N 1194): KILL on gates (e) and (f), but the relative effect is REAL.** n 32,882, net +86bp
+  (3x +61), median +188, hit .55; ex1 +40bp t 3.45 > placebo 95th +5; ex-top-5 +35; halves +46/+37; FIT 1999-2012 ex1 +40 t 4.28
+  (same size before the judge window); ex2 (vs vol-matched non-members) +42; DSR 0.97 at N 1195. But beta 1.07 vs QQQ and alpha
+  -34bp/trade: the absolute return is market beta; the +40bp is relative to same-day random range-bound names, i.e. a long/short
+  that a long-only account cannot hold. Ceiling 40bp x 100 trades/yr x 20% x 50% = +4.0pp < +8. K=5 whole-share sim 2013-26:
+  +11.5%/yr at $2.3k/$10k/$25k vs QQQ total return 20.2%/yr. 2022 ex1 -36.
+- M2R3 (N 1195): net +99bp but ex1 -31, C1 +143 (the random member does better). KILL.
+Gap (close d -> open d+1, untradable) is small in every cell (-26..+24bp); the results are in the tradable holding window.
+Reading: "RGTI-like" swing rules have no absolute edge over buying random names of the same kind; the visible bounces are the
+basket's beta/vol. Study CC's regime (2024-25) is the worst sub-period for M1R1. RGTI itself is an M2 member (not M1) on 2026-10-05,
+matching the user's "stable band" description. Not tested: R4 state machine; other parameters (X/Y, band %, windows; deliberately
+fixed); QQQ-hedged or long/short version of M2R2 (short leg unavailable in Roth; hedging gives alpha -34bp, so not promising);
+intraday entries/limit fills; retail-attention membership; options. Program N = 1195 (1196-1199 unused).
+
+### RESULT — Study ANALOG (N 1180-1188, 2026-11-09): KILL all nine (V1 six, V2 three); N 1189 unused
+`research/sim/analog.py` -> `data/research/program/analog_out.txt` (cache `data/research/analog/`, ~5GB, rebuildable). 17.65M
+universe stock/ETF-days 1999-2026 (Sharadar delisted-complete); PCA-8 keeps 0.895 (L20) / 0.877 (L40) of z-path variance; walk-
+forward HNSW library 0.47M (2005) -> 3.37M (2026) paths. Judge 2013-01..2026-10, top decile ~297 names/day, median pick ADV $30M.
+Net excess = pick net of its own cost minus the cost-free vol-matched cell mean (so ~-12bp of it is cost).
+- V1 (L20/L40 x H1/5/10): gross excess vs vol-matched +0.1..+2.2bp/trade; net excess -9.8..-11.9bp (t -7 to -38), both halves
+  negative, median negative; real - shape-shuffled placebo +0.2..+2.0bp (t <= 1.66: the shape adds nothing beyond the
+  total-L return and vol that the placebo keeps); beta vs QQQ 0.75-0.80, alpha -2 (H1) to -23bp (H10)/trade; DSR 0.000;
+  long-short -8.5..-11.5bp; implementable top-10/day net abs -6..+27bp, ceiling <= +3.4pp/yr; absolute-net ceiling +2..+4pp
+  (H5/H10) / -9.5pp (H1). Decile monotonicity exists but tiny (H10 top-bottom ~+4-7bp gross over 10 days). In-sample
+  2005-12 was no better (-2..-11bp net excess).
+- V2 (360 templates: 40d paths of 50 2008-12 channel "swingers" before a >= +20% 10-session move; 1% threshold 0.83; ~21
+  signals/day): H1 net excess -11.8; H5 gross excess +8.6, net -3.4 t -0.77, real - placebo +12.2 t 2.29 but 2013-19 -8.5,
+  ex-top-5 -5.7, median -11.8, 2020 -40, beta 0.82 alpha -5bp; H10 net -8.4 t -1.22, placebo diff t 1.64, alpha -26bp. All KILL.
+- Gap check: picks' untradable close->open gap = cell (+5.3 vs +4.9bp; V2 +4.9 vs +5.1): no hidden gap effect either.
+- RGTI illustrative (non-judging, path to 2026-10-02): nearest 50 historical analogs next 10d mean -0.49% / median -0.12% vs
+  library +0.34% / +0.32%; one-per-ticker top 20 next10d ranges -29.6% (CINF 2020-04) to +9.4%: no usable direction.
+Disclosure: first judge run had the QQQ window misaligned (session index vs calendar position) -> beta ~0; fixed and re-run before
+recording; no gate input changed (beta is reported, not gated). Not tested: DTW distance, high/low or volume channels in the
+path, intraday/minute paths, full 40-dim (non-PCA) distance, every-session library (5th-session sample used), within-year
+library updates, short-only arm, horizons > 10, other K/L, templates from other swinger definitions or other periods.
+Program N = 1188 (1189 unused).
