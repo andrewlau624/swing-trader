@@ -217,6 +217,11 @@ Ceiling-killed as a leg; only a > 5%/event median would reopen it.
 | due-bill (>= 25%) specials | ~10-20/yr, count/bound | Goal hunt G-rows; N 1052 |
 | Congress PTR copying | 45-day lag -> effect in the gap; post-2012 lit ~0 | R8 (data now free) |
 | MSCI / S&P deletion rebounds on US-listed names | ~4 days/yr x 1.5% x 50% x 50% ~ 1.5pp | index row |
+| SPAC extension-vote / liquidation discount-to-trust (redeem or hold to liquidation) | ~17 rotations x 0.3% excess x 100% x 50% ~ 1.5pp | FF-P2, memory 98 |
+| SPAC public-warrant redemption calls (buy warrant, short common, exercise) | 20/yr x 2% x 100% x 50% ~ 2pp; HTB borrow, no warrant data | FF-P2, memory 98 |
+| small-deal cash merger arb + deal-break model | perfect-foresight 8.7%/yr total (MERG-CASH completed-only) - BIL 4% = 4.7pp x 50% ~ 2.3pp | FF-P2, memory 98 |
+| S&P 400/600 drops + Russell June + dividend-index cut deletions (effective-date close -> T+1..5) | 4 x 1.5% x 100% x 50% + ~1.5pp ~ 4.5pp | FF-P2, memory 98 |
+| non-CEF (BDC/REIT/opco) transferable rights, rights-vs-stock arb or oversubscription | 20/yr x 2% x 30% x 50% ~ 0.6pp | FF-P2, memory 98 |
 | industry lead-lag at daily/weekly | long-only half of a decayed 1%/mo LS ~ 1.5pp | SECT-LAG sibling |
 | $25-par overnight dip at the cross | thin crosses cap deployment ~20%: ~1pp | PREF-DIP / INCOME-SHOCK neighbours |
 | THEME-NIGHT themes from text/news or ETF flows | text closed by user; flows = ETF-PD class | N 1034 |

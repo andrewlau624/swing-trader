@@ -10699,3 +10699,9 @@ Judge 2009-19, net 3bp/side, excess vs own prior-252 close->open mean, event-day
 Per underlying, no dose pattern: SOXX (highest LETF/ADV ratio, median 46) long +2.5bp; XBI -16.4; GDXJ +3.1; EEM +17.4 is the
 lowest-ratio fund. Mechanism read: index LETF close flow is absorbed (futures/basket liquidity); no overnight reversal in the wrapper.
 Program N 1207 -> 1209.
+
+## BRANCH LIST - FF-P2 forced-flow priority 2 (2026-11-10, gate decisions, no N; program N stays 1209)
+Five branches, ceiling at $10k under 50% capture: SPAC discount-to-trust ~1.5pp; SPAC warrant redemption calls ~2pp;
+small-deal cash merger arb + break model ~2.3pp (MERG-CASH completed-only 8.7%/yr total is the perfect-foresight cap, BIL ~4%);
+small-name index deletions ~4.5pp; non-CEF transferable rights ~0.6pp. All below +8pp: nothing registered, nothing run.
+Detail and not-tested list: docs/memory/98-ff-p2-forced-flow-branch-list-ceiling-kills-2026-11-10.md.
