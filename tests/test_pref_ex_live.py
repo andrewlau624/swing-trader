@@ -23,7 +23,11 @@ class FakeClient:
         self.quotes, self.orders = quotes, orders or {}
 
     def get_quotes(self, syms):
-        return Resp({s: {"quote": {"lastPrice": self.quotes[s]}} for s in syms if s in self.quotes})
+        import time
+        now = time.time() * 1000      # full Schwab quote shape: the quote guard needs time, bid/ask and status
+        return Resp({s: {"quote": {"lastPrice": p, "bidPrice": round(p * 0.999, 4), "askPrice": round(p * 1.001, 4),
+                                   "closePrice": p, "quoteTime": now, "securityStatus": "Normal"}}
+                     for s, p in self.quotes.items() if s in syms})
 
     def get_order(self, oid, h):
         return Resp(self.orders[int(oid)])

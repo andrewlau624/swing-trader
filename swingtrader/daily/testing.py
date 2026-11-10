@@ -365,6 +365,13 @@ def _upro_gate(state: Path, logs: Path) -> dict:
     return dict(n=len(rows), week=sum(1 for r in rows if r.get("date", "") >= _week_ago()), line=w.line(rows))
 
 
+def _exec_arms(state: Path, logs: Path) -> dict:
+    from . import exec_bandit_shadow as w
+    rows = _jsonl(state / w.LOG_NAME)
+    return dict(n=sum(1 for r in rows if r["strategy"] == "pref-ex"),
+                week=sum(1 for r in rows if r["day"] >= _week_ago()), line=w.line(rows) if rows else "no scored orders yet")
+
+
 def _hedge(state: Path, logs: Path) -> dict:
     from . import hedge_shadow as w
     rows = _jsonl(state / w.LOG_NAME)
@@ -571,6 +578,13 @@ REGISTRY: list[Test] = [
          "acted on each SWITCH (UPRO-GATE N 1107: 200D 13.2%/-80.5% vs B&H 6.4%/-97% synthetic 3x 1955-2008, 2.46 switches/yr).",
          "2026-11-09", 63, "sessions logged", _upro_gate, "state/upro-gate.jsonl; make upro-gate; round1_prose.md UPRO-GATE (N 1107)",
          ["upro_gate_shadow", "upro_gate_fwd"]),
+    Test("EXEC-ARMS: PREF-EX buy placement (log-only)", "exec_bandit_shadow.py (research-shadows): every PREF-EX buy logs "
+         "the 15:25 Schwab quote; after the close, take (15:25 ask), bid-then-cross and mid-then-cross (limit at the bid / mid, "
+         "filled only if a 1-min low trades strictly below it by 15:49, else market-on-close) are scored in bp vs the official "
+         "closing cross. Gate at 60 scored buys: an arm >= +3bp with day-clustered t >= 2 -> propose a small live test (user "
+         "decision); 120 with none -> kill, cross stays. CEF-RV opening-cross buys logged descriptively (open vs prior mid).",
+         "2026-11-09", 60, "scored PREF-EX buys", _exec_arms, "state/exec-arms.jsonl; make exec-arms; round1_prose.md EXEC-ARMS (N 1197)",
+         ["exec_bandit_shadow", "exec_arms_fwd"]),
     Test("CEF-RV rights hygiene (descriptive)", "CEF-RV signals / live positions that enter or are held inside a rights pricing "
          "window [E-10, E+5]: their later OO excess vs unflagged trades. Descriptive (N 1086): at 10 flagged closed trades, flagged "
          ">= 150bp worse = propose a rights-window entry block (user decision).", "2026-11-07", 10, "flagged closed trades",

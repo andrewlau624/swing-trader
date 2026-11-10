@@ -10417,3 +10417,38 @@ recording; no gate input changed (beta is reported, not gated). Not tested: DTW 
 path, intraday/minute paths, full 40-dim (non-PCA) distance, every-session library (5th-session sample used), within-year
 library updates, short-only arm, horizons > 10, other K/L, templates from other swinger definitions or other periods.
 Program N = 1188 (1189 unused).
+
+## PRE-REGISTRATION - EXEC-ARMS (N 1197), 2026-11-09, before any outcome is read: order placement on PREF-EX buys
+Question: does the PREF-EX buy (decided 15:25, sent market-on-close) get a better price from another placement?
+Data: each live/dry PREF-EX buy row logs Schwab's 15:25 quote (bid/ask/mid/age, after the quote guard); outcomes are the
+official closing cross (Alpaca SIP auctions, largest close print) and SIP 1-min lows 15:26-15:49 ET (regular hours by
+construction). Arms, reward_bp = (C / fill - 1) x 1e4: cross (0 by definition); take (fill at the 15:25 ask);
+bid_then_cross (fill at the bid if a 1-min low trades strictly below it before 15:50, else C); mid_then_cross (same at
+the mid). Full information: every arm is scored on every order, so no exploration; would-choose = best mean - 2 se > 0.
+Gate: at 60 scored buys, an arm with mean >= +3bp and day-clustered t >= 2 -> propose switching the leg (user decision).
+Kill: 120 scored with no arm passing -> cross stays, test ends. Both live and dry rows count (placement, not size).
+Known bias: a strictly-below touch still overstates passive fills for queue position on thin preferreds; a PROPOSE needs a
+small live test order before any switch. CEF-RV buys (09:05 -> opening cross) have no in-session alternative and are
+logged descriptively only (open cross vs prior mid / ask). Not tested: pref-ex sells (pre-open, opening cross), limit-on-
+close caps, VWAP / time slicing, limits at other offsets, the night leg's orders. Program N = 1197 (1196 = SEQ-TILT).
+
+## Study SEQ-TILT-FWD: log-only forward shadow of the SEQ-NIGHT Ridge tilt (pre-register 2026-11-09 BEFORE any forward outcome is read; N 1196)
+Origin: NEXT.md "Unproven" row SEQ-NIGHT sequence tilt (N 1038): Ridge judge 2016-26 top-minus-bottom +31.6bp t 2.1; GBM
+walk-forward tilt +1.4 bp/night t 1.5; placebo 95th not beaten; 2023-25 negative. User approved the shadow 2026-11-09.
+Model (FROZEN, no tuning): phase_a's Ridge line refit verbatim (`research/sim/seq_tilt_artifact.py`): seq_night.night_frame
+features, fit on 1999-2015 night-pool rows (the research's only Ridge fit; it never refit later), label = r minus night mean
+clipped +-0.5, train mean/std standardisation (not NaN-aware: features with any NaN in training are inert, kept inert),
+Ridge(alpha 10). Artifact `swingtrader/daily/seq_tilt_ridge.json` (coefficients, mu, sd, window, feature list) and sector map
+`seq_tilt_sectors.json`. Night-constant inputs (SPY state, breadth, weekday, n_picks) cannot change a within-night rank and
+are not computed live.
+Picks: every 15:40 night-rule signal (state/night-candidates.jsonl) -> funds out -> vol20 >= 0.60 -> live dedupe (corr 0.7,
+most-beaten first). Features from SIP daily bars (split-adjusted) dated < T + T's 09:30-15:40 SIP minutes (regular hours).
+Tilt: z = within-night standardised score, m = clip(1 + 0.25 z, 0.25, 2) / mean. Outcome: official close cross T -> official
+open cross T+1, r = o1/c0 - 1. Per night (>= 2 scored picks): delta_ew = mean(m r) - mean(r); tmb = top-half minus
+bottom-half r by score (>= 4 picks); delta_v1 (same on the live tilt-v1 weights) is reported, not gated.
+Gate: at 60 nights (first forward signal 2026-11-10; earlier candidate nights are backfill, excluded): PASS = mean delta_ew > 0
+with night t >= 2 AND mean tmb > 0; KILL = mean delta_ew <= 0. Otherwise HOLD to 120 nights, then PASS by the same rule or
+KILL. PASS = propose the tilt (user decision); never changes orders. Known power limit: at the research effect (+1.4 bp/night,
+t 1.5 over ~20 years) 60 nights carry t ~0.2 in expectation, so PASS at 60 needs a much larger forward effect; a KILL at 60 is
+mostly noise-driven and closes only this frozen Ridge on live picks. Not tested here: the GBM ranker, a refit on 2016-26,
+bottom-quintile avoidance as a filter, 15:30-15:40 minute-path sequences. Program N = 1196.

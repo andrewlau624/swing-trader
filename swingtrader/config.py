@@ -293,6 +293,9 @@ class DailyCfg:
     # UPRO-GATE-FWD (N 1107): off | shadow. Daily SPY 200d-SMA 1% band state for the manually held Roth UPRO core
     # (upro_gate_shadow.py, research-shadows); logs a SWITCH line, no order path.
     upro_gate_fwd: str = "shadow"
+    # EXEC-ARMS (N 1197): off | shadow. Scores take / bid-then-cross / mid-then-cross vs the close cross on every PREF-EX
+    # buy from its logged decision quote (exec_bandit_shadow.py, research-shadows); no order path.
+    exec_arms_fwd: str = "shadow"
     # The LIVE wash guard between the two real-money books (add. 31/39).
     # symmetric: each book avoids every name the other held/ordered/closed in
     #   31 days, on every leg; the brokerage book runs first each phase.

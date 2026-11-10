@@ -184,18 +184,18 @@ def size(cands: list[dict], last: dict[str, float], auction: dict[str, float], s
     return out
 
 
+QUOTE_DETAIL: dict[str, dict] = {}     # last fetch's bid/ask/mid/age per symbol (logged; read by the exec-bandit shadow)
+
+
 def _quotes(ad, bsyms: list[str]) -> dict[str, float]:
-    """Schwab last price per Schwab symbol."""
-    if not bsyms:
-        return {}
-    j = ad.c.get_quotes(bsyms).json() or {}
-    out = {}
-    for b in bsyms:
-        q = (j.get(b) or {}).get("quote") or {}
-        px = q.get("lastPrice") or q.get("mark") or q.get("closePrice")
-        if px:
-            out[b] = float(px)
-    return out
+    """Schwab price per symbol after the stale/broken-quote guard (quote_guard); refused symbols are left out."""
+    from . import quote_guard
+    px, det = quote_guard.fetch(ad, bsyms, in_session=True)
+    QUOTE_DETAIL.clear()
+    QUOTE_DETAIL.update(det)
+    for s, why in quote_guard.refused(det).items():
+        print(f"[pref-ex-live] quote refused for {s}: {why}")
+    return px
 
 
 def _settled_cash(acct) -> float:
@@ -356,6 +356,7 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
         log(f"[pref-ex-live] no {'/'.join(CLASSES)} ex-dates on {next_session(today)}; settled ${settled:,.0f}")
     else:
         bmap = {c["sym"]: schwab_symbol(c["sym"]) for c in cands}
+        QUOTE_DETAIL.clear()
         q = quotes_fn(ad, sorted(set(bmap.values())))
         last = {s: q[b] for s, b in bmap.items() if b in q}
         auction = {c["sym"]: auction_usd(c["sym"], today, crosses_fn, H) for c in cands}
@@ -376,9 +377,9 @@ def run(mode: str, state_dir: Path, logs_dir: Path, log=print, today: dt.date | 
         for o in orders:
             if mode == "live":
                 oid = ad.submit(o["schwab"], "buy", "cls", f"pref-ex-live.buy.{o['sym']}.{today}", qty=o["qty"])
-                log_row(dict(cmd="buy", **o, order_id=oid))
+                log_row(dict(cmd="buy", **o, order_id=oid, quote=QUOTE_DETAIL.get(o["schwab"])))
             else:
-                log_row(dict(cmd="buy", **o, dry_run=True))
+                log_row(dict(cmd="buy", **o, dry_run=True, quote=QUOTE_DETAIL.get(o["schwab"])))
             state["open"][o["sym"]] = dict(schwab=o["schwab"], qty=o["qty"], ex=o["ex"], bought=today.isoformat(),
                                            px=o["px"], dry_run=mode != "live")
             out["bought"].append(o["sym"])
