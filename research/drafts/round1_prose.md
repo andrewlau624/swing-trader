@@ -10705,3 +10705,25 @@ Five branches, ceiling at $10k under 50% capture: SPAC discount-to-trust ~1.5pp;
 small-deal cash merger arb + break model ~2.3pp (MERG-CASH completed-only 8.7%/yr total is the perfect-foresight cap, BIL ~4%);
 small-name index deletions ~4.5pp; non-CEF transferable rights ~0.6pp. All below +8pp: nothing registered, nothing run.
 Detail and not-tested list: docs/memory/98-ff-p2-forced-flow-branch-list-ceiling-kills-2026-11-10.md.
+
+## PRE-REGISTRATION - PREF-NOAUC: are PREF-EX backtest prices reachable on names with no real closing auction? (2026-11-17, BEFORE the backfill outcome is read; N 1209 -> 1211)
+Motivation (read before registering, stated): live PREF-EX (Roth, CC form, 40 scored MOC fills 10-20..11-16) costs 0bp on every fill whose
+session had a condition-'6' closing-auction print, and is nonzero on fills whose session had only 'M' (market-center official close) prints
+(19 of 40; e.g. CDR.PRB sell vs 17.8342, a sub-penny "close"). `crosses()` (exdiv_open.py, pref_ex_shadow.py) takes the largest-size print
+of the close list, so on no-auction sessions every backtest/shadow price is an 'M' print our MOC order does not trade at.
+Data: Alpaca SIP auctions, each PREF-EX event (pref_fetch.events(), 2021-01..2026-11, frozen filters) fetched d0-10 calendar days .. T, raw
+print lists kept. This is the period PREF-EX was chosen on (touched): the study is a VALIDITY / execution check, not a new edge; the
+forward shadow and live ledger stay the judges.
+Definitions: AUC(day) = the close list has a c=='6' print. Event is AUC if AUC(T-1) and AUC(T). Return forms as pref_cross.py
+(CO = (open T + div)/close T-1 - 1, CC = (close T + div)/close T-1 - 1), close price = largest-size '6' print when present, else largest 'M'
+(= today's picker). M-band(day) = (max - min)/mid over the day's distinct M-print prices, bp (a measurement-uncertainty bound).
+- **N 1210 (primary, descriptive):** share of events AUC; CC and CO mean / median / hit / day-clustered t for AUC vs NOAUC; NOAUC median M-band.
+  Falsifies "PREF-EX CC edge is the same on both" if NOAUC CC mean - AUC CC mean > +10bp with NOAUC median M-band >= 10bp (edge sits where
+  the price is least knowable).
+- **N 1211 (ex-ante filter):** keep events whose pref had AUC on >= 4 of the 5 sessions before T-1 (known at the T-1 15:25 decision).
+  PASS (adopt as a live PREF-EX filter, user decision): kept events >= 40% of all; kept CC mean net 10bp RT > 0 in both halves 2021-23 /
+  2024-26; and kept CC net per-night $ at $10k (5% of ex-ante closing-cross $, whole shares) >= 90% of unfiltered when the dropped events
+  are charged a 2x shock of their median M-band as extra RT cost. KILL: kept < 40% of events, or kept $/night < 90% of unfiltered under
+  that charge. Report ex-top-5, median, and the live 40 fills split by the same filter (descriptive, in-sample).
+Not tested here: open-auction ('O'/'Q') analogs; venue routing (where Schwab sends MOC on NYSE-listed prefs); LOC vs MOC. One run, no tuning.
+Runner research/sim/pref_noauc.py -> research/sim/pref_noauc_out.txt. Program N = 1211.
