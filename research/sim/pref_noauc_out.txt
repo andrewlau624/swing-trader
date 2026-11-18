@@ -1,0 +1,18 @@
+PREF-NOAUC: 4972 events / 733 ex-dates / 409 prefs (2021-01-08..2026-10-02)
+AUC (a '6' close print on T-1 and T): 41.1% of events
+
+N 1210 primary (gross, no cost):
+  AUC   cc: n  2043 mean  +25.7 med  +22.7 hit 0.62 t(day) +6.03 ex-top5  +24.1
+  AUC   co: n  2043 mean  +33.5 med  +30.9 hit 0.78 t(day) +13.25 ex-top5  +32.6
+  NOAUC cc: n  2929 mean  +29.5 med  +27.9 hit 0.65 t(day) +5.98 ex-top5  +28.0
+  NOAUC co: n  2929 mean  +40.3 med  +37.9 hit 0.78 t(day) +18.12 ex-top5  +39.5
+  NOAUC median M-band 24.9bp (p75 51.4); AUC median 23.7bp
+  NOAUC - AUC cc mean +3.8bp -> not falsified
+
+N 1211 ex-ante filter (AUC on >= 4 of 5 sessions before T-1):
+  kept 1211 (24.4%); dropped 3761; dropped median M-band 25.3bp
+  kept    cc: n  1211 mean  +20.7 med  +18.1 hit 0.61 t(day) +5.13 ex-top5  +18.4
+  dropped cc: n  3761 mean  +30.3 med  +27.3 hit 0.65 t(day) +7.35 ex-top5  +29.0
+  kept cc net halves 2021-23 +20.3 / 2024-26 +1.6bp
+  $/night at $10k: unfiltered (dropped charged 2x median M-band = 50.6bp) $-3.08; kept-only $1.29; ratio -0.42; unfiltered no charge $2.59
+  N 1211 verdict: KILL

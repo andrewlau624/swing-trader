@@ -10727,3 +10727,13 @@ Definitions: AUC(day) = the close list has a c=='6' print. Event is AUC if AUC(T
   that charge. Report ex-top-5, median, and the live 40 fills split by the same filter (descriptive, in-sample).
 Not tested here: open-auction ('O'/'Q') analogs; venue routing (where Schwab sends MOC on NYSE-listed prefs); LOC vs MOC. One run, no tuning.
 Runner research/sim/pref_noauc.py -> research/sim/pref_noauc_out.txt. Program N = 1211.
+
+#### Result - PREF-NOAUC (judged 2026-11-17, one run; N 1210-1211): 1210 NOT FALSIFIED, 1211 KILL
+research/sim/pref_noauc.py -> research/sim/pref_noauc_out.txt. 4,972 events / 733 ex-dates / 409 prefs 2021-01..2026-10. Only 41% of events
+have a real '6' closing auction on both T-1 and T. NOAUC cc +29.5bp (t 5.98, median +27.9) vs AUC +25.7 (t 6.03): +3.8bp, under the +10bp bar, so
+the edge does NOT sit in the unknowable-price events. M-band is ~24-25bp in BOTH groups (venue official closes disagree everywhere; only the '6'
+print is a real trade). Filter (AUC on >= 4/5 prior sessions) keeps 24% (< 40%), its cc is LOWER (+20.7 vs dropped +30.3) and 2024-26 net is
++1.6bp: KILL. Liquid names with real auctions earn less (the dv>=$1M row of pref_cross agrees). Live cross-check (in-sample, 40 fills): '6'
+sessions 0bp cost (21/21); no-'6' sessions +33bp/side mean, +11 ex the one CDR.PRB sell (-440bp vs a sub-penny 'M' close), so real NOAUC cost
+is ~+20bp RT on ~59% of events: PREF-EX cc stays positive net (~+28 - 10 - 12). Not tested: open-auction analogs; venue routing; LOC vs MOC;
+an M-print choice rule (primary-exchange 'N' fixed INN.PRE 11-16 but not CDR.PRB 11-10; not adopted on 2 cases).
