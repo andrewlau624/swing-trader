@@ -150,9 +150,12 @@ only raises Sharpe by 0.05 inside 2021-26, it is not this. Say so and stop.
      justified or the book runs on the OOS-verified IBS leg (+ index exposure).
    - The 2006-15 insider study (H-POOL, N 796) stays registered; it runs on the same purchase
      but is secondary.
-   - **2026-10-04: NX NOT FUNDED (user declined the $69 purchase).** NX is registered and unrun; the
-     night leg stays UNPROVEN (not failed): no size-ups, no tuning. `research/sim/nx.py` is staged for
-     qualifying data if it ever appears (settle the two wording issues in LOOP_LOG first).
+   - **SUPERSEDED 2026-10-06: NX RAN AND PASSED** (Sharadar bought direct; NEXT.md "Study NX RESULT",
+     `data/research/program/nx_out.txt`): +3.07bp/night t 3.13 on untouched 2003-15, positive in all 3
+     subperiods; 2x tier_hi cost is negative. The night leg is VALIDATED-SMALL and lives inside the cost
+     (auction fills ~0bp keep it). S1/S2 size-ups passed; S2 is live as taxable profile `nx_s2`
+     (night 0.65), allowed only while live auction cost stays near 0 (`make review` 2b). The
+     "no size-ups / unproven" lines above are history.
 2. Build the **forced-flow / odd-lot EDGAR scanner** (structural, capacity-limited, where
    small accounts win).
 3. Test the IBS/reversal mechanism on **non-US-equity assets** with long history.

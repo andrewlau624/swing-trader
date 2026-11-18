@@ -98,15 +98,25 @@ def status(account: str):
     f = ROOT / "logs" / (f"daily-fills-{account}.jsonl" if account in ("live", "roth") else "daily-fills.jsonl")
     if f.exists():
         rows = [json.loads(l) for l in f.read_text().splitlines() if l.strip()]
-        # buys and sells are measured against different refs (night buy: the
-        # 15:40 scan price; night sell: the broker's 09:15 mark), so one mean
-        # would mix the close-auction move with the pre-market-to-open gap
+        # true cost = fill vs the official auction print (fill_cost_scorer); slippage_bps is
+        # drift vs the decision ref (night buy: 15:40 scan price; night sell: the broker's
+        # 09:15 mark), i.e. mostly the market move, not cost
+        from swingtrader.daily import fill_cost_scorer as fcs
+        mine = {r["coid"] for r in rows}
+        costs = [c for c in fcs._read(ROOT / "state" / fcs.LOG_NAME)
+                 if c.get("coid") in mine and c.get("cost_bp") is not None]
+        for leg in ("ibs", "night"):
+            for side in ("buy", "sell"):
+                v = [c["cost_bp"] for c in costs if c.get("leg") == leg and c.get("side") == side]
+                if v:
+                    print(f"cost     {leg:6} {side:4} n={len(v):3} mean {np.mean(v):+7.1f}  "
+                          f"median {np.median(v):+7.1f} bps (fill vs official auction print; + = worse)")
         for leg in ("ibs", "night"):
             for side in ("buy", "sell"):
                 v = [r["slippage_bps"] for r in rows if r["leg"] == leg and r["side"] == side]
                 if v:
-                    print(f"slippage {leg:6} {side:4} n={len(v):3} mean {np.mean(v):+7.1f}  "
-                          f"median {np.median(v):+7.1f} bps (vs ref price at decision; + = worse)")
+                    print(f"  drift  {leg:6} {side:4} n={len(v):3} mean {np.mean(v):+7.1f}  "
+                          f"median {np.median(v):+7.1f} bps (vs decision ref = market move, not cost)")
         if account == "paper":
             late = sum(1 for r in rows if r["leg"] == "night" and r["side"] == "sell"
                        and str(r.get("coid", "")).endswith("-rest"))
