@@ -48,10 +48,8 @@ def test_digest_numbers_from_books_and_logs(tmp_path):
     assert w["conviction trade"]["usd"] == pytest.approx(0.5 * 2260 * 0.01)
     assert w["tug-of-war tilt"]["usd"] > 0, "high-TOW winner up-weighted, low-TOW loser down-weighted"
     assert w["quote imbalance tilt"]["usd"] > 0
-    assert w["LLM news judge (x0.25 on 'fundamental')"]["usd"] == pytest.approx(-0.75 * -6.0)
     g = {x["gate"]: x for x in data["gates"]}
     assert g["Conviction trade on"]["n"] == 3 and not g["Conviction trade on"]["ready"]
-    assert g["LLM news judge verdict"]["n"] == 1
     p = [x for x in data["proj"] if x["account"] == "roth" and x["years"] == 3][0]
     assert p["with_levers"] > p["without"] > 3 * D.ROTH_DEPOSIT_YR
     subj, html, text, images = D.render(data, charts=False)

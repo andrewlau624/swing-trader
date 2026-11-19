@@ -10737,3 +10737,19 @@ print is a real trade). Filter (AUC on >= 4/5 prior sessions) keeps 24% (< 40%),
 sessions 0bp cost (21/21); no-'6' sessions +33bp/side mean, +11 ex the one CDR.PRB sell (-440bp vs a sub-penny 'M' close), so real NOAUC cost
 is ~+20bp RT on ~59% of events: PREF-EX cc stays positive net (~+28 - 10 - 12). Not tested: open-auction analogs; venue routing; LOC vs MOC;
 an M-print choice rule (primary-exchange 'N' fixed INN.PRE 11-16 but not CDR.PRB 11-10; not adopted on 2 cases).
+
+#### Result - Study BA / BA1 LLM news judge (forward, read once 2026-11-19 at 305 scored picks; N 689): DEAD
+
+`make news-eval` on him, 2026-11-19 05:22 UTC, 312 judged picks 2026-10-01..2026-11-18, 305 scored on the official crosses
+(close cross d -> next open cross), 2 x 2.5bp:
+- BA1 (fundamental conf >= 0.7 at x0.25): flags 4% of picks; increment +1.39bp/night (halves +1.57 / +1.22), NW t +1.33,
+  sign-flip 83%, within-night shuffle 28% -> DEAD (bars: NW t >= 2 and both placebos >= 95th).
+- By verdict: fundamental n 13 net +13.5bp (t 0.24), liquidity n 284 +61.5bp (t 1.76), unclear n 8 -188.5bp (t -2.72).
+  "Fundamental" picks did NOT keep falling; the judge calls 93% of picks liquidity, so it cannot separate them.
+- Protocol note: OpenCode Go retired `deepseek-v4-flash` (2026-10-30); commit 90a14fd (2026-11-06) moved to `deepseek-v4.1-flash`
+  without an amendment. 217 verdicts are v4-flash, 95 v4.1-flash (from 2026-11-09). By Round 23b the switch should have restarted
+  the count; the pooled read is reported anyway. Neither model alone could pass (13 fundamental picks in total).
+- The `unclear` bucket (n 8, -188bp) is a post-hoc pocket from 8 picks; not a finding, not registered.
+Not tested: an LLM judge with a different question (e.g. "will this keep falling tomorrow"), a skip rule instead of x0.25,
+the same judge on IBS or PREF-EX picks, a larger/frontier model (Claude), news windows other than previous close -> 15:40,
+and any use of the `unclear` label. Ended: `daily.news_judge: off`, REGISTRY entry and digest rows removed.

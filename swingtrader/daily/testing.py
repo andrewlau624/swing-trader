@@ -112,13 +112,6 @@ def _alerts(log_name: str, label: str):
     return read
 
 
-def _news(state: Path, logs: Path) -> dict:
-    v = [r for r in _jsonl(state / "news-judge.jsonl") if r.get("verdict")]
-    f = sum(1 for r in v if r["verdict"] == "fundamental")
-    return dict(n=len(v), week=sum(1 for r in v if str(r.get("date", "")) >= _week_ago()),
-                line=f"{f} of {len(v)} picks called 'fundamental'; verdict read once at 300 (make forward-status)")
-
-
 def _quote_imbalance(state: Path, logs: Path) -> dict:
     snaps = [(d.get("date"), d.get("sym")) for f in logs.glob("daily-decisions*.jsonl")
              for d in _jsonl(f) if d.get("bid_size") is not None]
@@ -536,8 +529,6 @@ REGISTRY: list[Test] = [
          "S-4 / SC 13E3 scanner surface per-holder-capped, guaranteed-floor events? (discovery only)",
          "2026-10-05", 0, "candidates", _alerts("forced-flow-discovery.jsonl", "filings"),
          "make forced-flow-discovery", ["forced_flow_discovery"]),
-    Test("LLM news judge", "does Claude's 'fundamental' label pick the night picks that keep falling?",
-         "2026-09-24", 300, "picks judged", _news, "make forward-status", ["news_judge"]),
     Test("15:40 quote imbalance", "does the bid/ask size at 15:40 predict the night pick's bounce?",
          "2026-09-24", 300, "picks logged", _quote_imbalance, "make forward-status"),
     Test("Conviction trade (shadow)", "TQQQ conviction weight on breakout days, logged not traded",

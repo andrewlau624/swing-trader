@@ -1398,6 +1398,7 @@ def test_news_judge_crash_never_touches_the_night_orders(tmp_path, monkeypatch):
     _tow_rows(monkeypatch, {"LOWT": 1, "HIGHT": 12})
     ex = _executor(tmp_path, monkeypatch)
     ex.dry_run = False
+    ex.d.news_judge = "shadow"          # retired in config (BA1 dead) but the hook stays; keep it crash-safe
     def boom(*a, **k):
         raise RuntimeError("llm down")
     monkeypatch.setattr(nj, "run_shadow", boom)

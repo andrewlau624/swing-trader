@@ -140,7 +140,7 @@ def _night_trades(acct: Account) -> list[dict]:
     return [c for c in acct.closed if c.get("leg") == "night"]
 
 
-def whatif_realized(acct: Account, decisions: list[dict], verdicts: dict, conviction_w: float) -> list[dict]:
+def whatif_realized(acct: Account, decisions: list[dict], conviction_w: float) -> list[dict]:
     """$ the account would have made or lost from each shadow idea, on its real trades so far."""
     out = []
     eq_on = {e["date"]: e["equity"] for e in acct.equity_log}
@@ -180,11 +180,6 @@ def whatif_realized(acct: Account, decisions: list[dict], verdicts: dict, convic
         out.append(dict(idea="tug-of-war tilt", n=tow_n, usd=tow_usd))
     if qi_n:
         out.append(dict(idea="quote imbalance tilt", n=qi_n, usd=qi_usd))
-    # LLM judge BA1: picks judged fundamental with confidence >= 0.7 at weight 0.25
-    hit = [(c, verdicts[(c.get("entry_date"), c["sym"])]) for c in night if (c.get("entry_date"), c["sym"]) in verdicts]
-    if hit:
-        usd = sum(-0.75 * c["pnl"] for c, v in hit if v.get("verdict") == "fundamental" and (v.get("confidence") or 0) >= 0.7)
-        out.append(dict(idea="LLM news judge (x0.25 on 'fundamental')", n=len(hit), usd=usd))
     return out
 
 
@@ -272,7 +267,6 @@ def gates(accts: dict, logs: Path, state: Path) -> list[dict]:
     night_sells = [r for r in fl if r.get("leg") == "night" and r.get("side") == "sell"]
     roth_night = [r for r in fr if r.get("leg") == "night"]
     rt = len(_night_trades(live)) if live else 0
-    verdicts = [v for v in _jsonl(state / "news-judge.jsonl") if v.get("verdict")]
     snaps = {(d.get("date"), d.get("sym")) for f in logs.glob("daily-decisions*.jsonl")
              for d in _jsonl(f) if d.get("bid_size") is not None}
 
@@ -294,7 +288,6 @@ def gates(accts: dict, logs: Path, state: Path) -> list[dict]:
             "make review §2 (roth)", unit="Roth night fills"),
         row("Tug-of-war tilt", rt, sg.TOW_GATE_N, "night_tilt_tow: true in config.yaml (if §9 says on)",
             "make review §9", unit="night trades"),
-        row("LLM news judge verdict", len(verdicts), 300, "verdict read once", "make forward-status", unit="picks judged"),
         row("Quote imbalance verdict", len(snaps), 300, "verdict read once", "make forward-status", unit="picks logged"),
         row("Insider-day (ID3) verdict", sum(1 for r in _jsonl(state / "insider-day.jsonl")
                                              if r.get("status") == "scored" and not r.get("id2")),
@@ -310,12 +303,11 @@ def money(x: float) -> str:
 def build(state: Path, logs: Path, start_equity: float, conviction_w: float, taxable_monthly: float = 0.0):
     accts = {n: a for n in ("live", "roth", "paper") if (a := load_account(n, state, start_equity))}
     decisions = [d for f in logs.glob("daily-decisions*.jsonl") for d in _jsonl(f)]
-    verdicts = {(v["date"], v["sym"]): v for v in _jsonl(state / "news-judge.jsonl") if v.get("verdict")}
     real = {n: a for n, a in accts.items() if n in ("live", "roth")}
     bal = {n: a.equity for n, a in real.items()}
     from .testing import status as testing_status
     return dict(accounts=accts, gates=gates(accts, logs, state), testing=testing_status(state, logs),
-                whatif={n: whatif_realized(a, decisions, verdicts, conviction_w)
+                whatif={n: whatif_realized(a, decisions, conviction_w)
                         + (round31_whatif(state, a, manual_only=n != "live") if n in ("live", "roth") else [])
                         for n, a in accts.items()},
                 proj=projections(bal, taxable_monthly))

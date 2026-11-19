@@ -217,7 +217,7 @@ class DailyCfg:
     # Round 23 Study BA (swingtrader/daily/news_judge.py): after the 15:40 orders, Claude reads each
     # night pick's news + SEC filings and logs fundamental / liquidity / unclear. SHADOW ONLY: never
     # changes an order. "off" disables it; it also no-ops without ANTHROPIC_API_KEY in .env.
-    news_judge: str = "shadow"
+    news_judge: str = "off"                   # BA1 DEAD 2026-11-19
     news_judge_provider: str = "opencode-go"   # opencode-go (OPENCODE_API_KEY) | anthropic (ANTHROPIC_API_KEY)
     news_judge_model: str = "deepseek-v4.1-flash"
     news_judge_effort: str = "low"             # Claude only

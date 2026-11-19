@@ -124,7 +124,7 @@ daily:
   night_tilt_k: 0.25             # weight deeper drops more (addendum 16; fitted 2021-23, held out 2024-26). 0 = equal
   night_tilt_model: v1           # v2 adds yesterday's return: replay +$23k, but borderline (addendum 23)
   night_tilt_tow: false          # Round 19 AU3 tug-of-war tilt, SHADOW: logged only. Gate/kill rule: study_au_tow.md
-  news_judge: shadow             # Round 23 BA: Claude labels each night pick's drop fundamental/liquidity after
+  news_judge: off                # BA1 DEAD 2026-11-19 (NW t 1.33, shuffle 28%). Round 23 BA: Claude labels each night pick's drop fundamental/liquidity after
                                  # the orders are placed; logged to state/news-judge.jsonl, never trades. off = disable.
                                  # Needs OPENCODE_API_KEY in .env (no key = silently off). <= 20 calls/night,
                                  # pennies a month on OpenCode Go. Claude: provider anthropic + ANTHROPIC_API_KEY

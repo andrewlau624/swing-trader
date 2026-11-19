@@ -43,6 +43,7 @@ def _sec_json(url: str) -> dict:
         raise RuntimeError(f"SEC HTTP {r.status_code} for {url.rsplit('/', 1)[-1]}")
     return r.json()
 LOG_NAME = "news-judge.jsonl"
+RETIRED = "2026-11-19: BA1 DEAD (round1_prose.md); daily.news_judge off, module kept for sec_headers/_cik_map"
 
 SYSTEM = """You classify why a US-listed stock fell sharply today, for a strategy that buys big \
 one-day losers at the close and sells them at the next open. Decide from the news and filings \
