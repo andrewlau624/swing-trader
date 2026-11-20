@@ -523,10 +523,10 @@ testing: ## everything being tested forward (the weekly digest's "Being tested" 
 	@PYTHONPATH=. $(PY) -c "from swingtrader.daily import testing as t; [print(f\"{r['name'][:34]:34s} {r['n']:>5} / {r['need'] or '-':<4} +{r['week']:<3} {r['line']}\") for r in t.status('state', 'logs')]"
 
 forward-status: ## every forward-only shadow gate in one place (AU3 is in `make review` section 9)
-	@echo "== Round 23 BA: LLM news judge (verdict once at 300) =="
+	@echo "== Round 23 BA: LLM news judge (DEAD 2026-11-19, record only) =="
 	@PYTHONPATH=. $(PY) -m research.sim.news_judge_eval 2>/dev/null || echo "  no state/news-judge.jsonl yet"
 	@echo ""
-	@echo "== Round 24 BB: 15:40 quote imbalance (verdict once at 300) =="
+	@echo "== Round 24 BB: 15:40 quote imbalance (DEAD 2026-11-20, record only) =="
 	@PYTHONPATH=. $(PY) -m research.sim.quote_imbalance_eval
 	@echo ""
 	@echo "== Round 31 ID3: insider-purchase session (gate at 300 scored trades; ev2 / ev2_big = Round 33 EV2 weights, gate at 60) =="

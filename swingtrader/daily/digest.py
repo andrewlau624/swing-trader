@@ -163,23 +163,14 @@ def whatif_realized(acct: Account, decisions: list[dict], conviction_w: float) -
         d = dec.get((c.get("entry_date"), c["sym"]))
         if d is not None:
             by_night.setdefault(c["entry_date"], []).append((c, d))
-    tow_usd, tow_n, qi_usd, qi_n = 0.0, 0, 0.0, 0
+    tow_usd, tow_n = 0.0, 0
     for day, rows in by_night.items():
         tows = np.array([np.nan if r[1].get("tow") is None else float(r[1]["tow"]) for r in rows])
         if np.isfinite(tows).any():
             w = sg.night_tilt_tow(np.ones(len(rows)), tows)
             tow_usd += float(sum((wi - 1) * r[0]["pnl"] for wi, r in zip(w, rows))); tow_n += len(rows)
-        bs = np.array([r[1].get("bid_size") or np.nan for r in rows], float)
-        as_ = np.array([r[1].get("ask_size") or np.nan for r in rows], float)
-        ok = np.isfinite(bs) & np.isfinite(as_) & ((bs + as_) > 0)
-        if ok.any():
-            qi = np.where(ok, (bs - as_) / np.where(ok, bs + as_, 1), 0.0)
-            w = np.clip(1 + 0.5 * qi, 0.5, 1.5); w = w / w.mean()
-            qi_usd += float(sum((wi - 1) * r[0]["pnl"] for wi, r in zip(w, rows))); qi_n += int(ok.sum())
     if tow_n:
         out.append(dict(idea="tug-of-war tilt", n=tow_n, usd=tow_usd))
-    if qi_n:
-        out.append(dict(idea="quote imbalance tilt", n=qi_n, usd=qi_usd))
     return out
 
 
@@ -267,8 +258,6 @@ def gates(accts: dict, logs: Path, state: Path) -> list[dict]:
     night_sells = [r for r in fl if r.get("leg") == "night" and r.get("side") == "sell"]
     roth_night = [r for r in fr if r.get("leg") == "night"]
     rt = len(_night_trades(live)) if live else 0
-    snaps = {(d.get("date"), d.get("sym")) for f in logs.glob("daily-decisions*.jsonl")
-             for d in _jsonl(f) if d.get("bid_size") is not None}
 
     def row(name, n, need, action, where, note="", unit=""):
         return dict(gate=name, n=n, need=need, ready=n >= need, action=action, where=where, note=note, unit=unit)
@@ -288,7 +277,6 @@ def gates(accts: dict, logs: Path, state: Path) -> list[dict]:
             "make review §2 (roth)", unit="Roth night fills"),
         row("Tug-of-war tilt", rt, sg.TOW_GATE_N, "night_tilt_tow: true in config.yaml (if §9 says on)",
             "make review §9", unit="night trades"),
-        row("Quote imbalance verdict", len(snaps), 300, "verdict read once", "make forward-status", unit="picks logged"),
         row("Insider-day (ID3) verdict", sum(1 for r in _jsonl(state / "insider-day.jsonl")
                                              if r.get("status") == "scored" and not r.get("id2")),
             300, "verdict read once", "make forward-status", unit="shadow trades"),

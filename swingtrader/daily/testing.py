@@ -112,13 +112,6 @@ def _alerts(log_name: str, label: str):
     return read
 
 
-def _quote_imbalance(state: Path, logs: Path) -> dict:
-    snaps = [(d.get("date"), d.get("sym")) for f in logs.glob("daily-decisions*.jsonl")
-             for d in _jsonl(f) if d.get("bid_size") is not None]
-    return dict(n=len(set(snaps)), week=len({s for s in snaps if str(s[0]) >= _week_ago()}),
-                line="15:40 bid/ask sizes logged per night pick; verdict once at 300 (make forward-status)")
-
-
 def _nx_s2(state: Path, logs: Path) -> dict:
     """Taxable night exits since the profile went live (logs/daily-fills-live.jsonl); the increment itself is read in
     `make review` (night-leg P&L vs the 0.5 counterfactual on the same fills)."""
@@ -529,8 +522,6 @@ REGISTRY: list[Test] = [
          "S-4 / SC 13E3 scanner surface per-holder-capped, guaranteed-floor events? (discovery only)",
          "2026-10-05", 0, "candidates", _alerts("forced-flow-discovery.jsonl", "filings"),
          "make forced-flow-discovery", ["forced_flow_discovery"]),
-    Test("15:40 quote imbalance", "does the bid/ask size at 15:40 predict the night pick's bounce?",
-         "2026-09-24", 300, "picks logged", _quote_imbalance, "make forward-status"),
     Test("Conviction trade (shadow)", "TQQQ conviction weight on breakout days, logged not traded",
          "2026-09-22", 0, "log lines", _log_tag("conv"), "make review section 7", ["conviction_mode"]),
     Test("Oversold index buy (V6) + Roth A2", "SPY/QQQ close -> open after 3 down closes / RSI(2) < 10",

@@ -10753,3 +10753,18 @@ an M-print choice rule (primary-exchange 'N' fixed INN.PRE 11-16 but not CDR.PRB
 Not tested: an LLM judge with a different question (e.g. "will this keep falling tomorrow"), a skip rule instead of x0.25,
 the same judge on IBS or PREF-EX picks, a larger/frontier model (Claude), news windows other than previous close -> 15:40,
 and any use of the `unclear` label. Ended: `daily.news_judge: off`, REGISTRY entry and digest rows removed.
+
+#### Result - Study BB / BB1 15:40 quote imbalance tilt (forward, read once 2026-11-20 at 317 picks; N 690): DEAD
+
+`make qi-eval` on him, 2026-11-20 05:23 UTC, 317 night picks with a 15:40 Schwab book snapshot (2026-09-24..2026-11-18), official
+crosses, 2 x 2.5bp:
+- BB1 (weight clip(1 + 0.5 QI, 0.5, 1.5), renormalised per night): increment +14.66bp/night (halves +17.45 / +12.07), NW t +1.85,
+  sign-flip 95th, within-night shuffle 99th -> DEAD on the NW t >= 2 bar (both halves and both placebos pass).
+- QI terciles (sell-heavy -> buy-heavy): T1 +21.4bp n100, T2 +25.3 n100, T3 +121.9 n101. Same side as QI-HIST 2016-20 (T1 worst,
+  +24 vs +66 / +55): two independent reads agree that sell-heavy picks bounce least, neither clears its bar.
+- Ceiling even if real: a mean-preserving tilt on the night leg, ~+15bp/night x ~250 nights x ~0.5 of the account ~ +1.8pp/yr gross,
+  under the +8pp gate. No re-read with more data (that is optional stopping); a fresh-sample BB1 would need its own registration
+  and is not worth it at this ceiling.
+Not tested: ex-top-5 / median of the T3 bucket (T3's +122bp mean may be a few names); QI as a skip rule on T1 instead of a tilt;
+QI at times other than 15:40 (15:50, the closing imbalance feed itself, still parked); depth beyond the touch; IBS / PREF-EX picks.
+Ended: REGISTRY entry and digest whatif/gate rows removed; the 15:40 bid/ask logging stays (cheap, feeds nothing live).

@@ -606,7 +606,7 @@ and state, and does not touch the live book.
   300 judged picks (~2-4 months), scored on the official crosses. Forward only: a historical LLM backtest is
   contaminated by the model's knowledge.
 
-- **Round 24 BB (forward): 15:40 quote imbalance.** The night leg now logs Schwab bid/ask sizes + day volume per
+- **Round 24 BB (forward): 15:40 quote imbalance. DEAD 2026-11-20 (NW t 1.85; do-not-redo table).** The night leg now logs Schwab bid/ask sizes + day volume per
   pick in `daily-decisions*.jsonl` (free stand-in for the parked imbalance feed). `make qi-eval`; verdict at 300.
 
 ---
@@ -1571,6 +1571,7 @@ Alerts arrive (confirmed by hand 2026-09-29). `make notify-test` re-checks it.
 | Resting 1% dip bids in thin preferreds, exit close (PREF-DIP, N 880; PFF-hedged variant) | **dead** | -7.5bp/fill, halves negative; PFF hedge corr 0.28 removes nothing; "+28bp mkt-adj" was a close-to-close artifact |
 | PREF-EX on no-auction closes: events with no '6' closing print on T-1/T vs real auctions; ex-ante filter = '6' on >= 4/5 prior sessions (PREF-NOAUC, N 1210-1211, 2026-11-17) | **not falsified / filter KILL** | 59% of 4,972 events are no-auction; NOAUC cc +29.5 vs AUC +25.7bp; filter keeps 24%, cc +20.7 vs dropped +30.3, 2024-26 net +1.6. Live no-auction cost ~+20bp RT, auction days 0. not tested: open-auction analogs, MOC venue routing, LOC vs MOC, M-print choice rule |
 | LLM news judge (OpenCode Go deepseek-v4/v4.1-flash) labels each night pick fundamental/liquidity at 15:40; x0.25 on fundamental conf >= 0.7 (Study BA / BA1, N 689, forward 2026-10-01..11-18) | **dead** | 305 scored picks: increment +1.39bp/night, NW t 1.33, sign-flip 83%, shuffle 28%; only 4% flagged; fundamental n 13 +13.5bp vs liquidity +61.5bp, so the label does not find the picks that keep falling. Model switched mid-count (v4 retired). not tested: a different question, skip instead of x0.25, other legs' picks, a frontier model, other news windows, the `unclear` label (n 8 -188bp, post-hoc) |
+| 15:40 Schwab quote imbalance QI = (bid-ask size)/(sum) as a night-pick tilt clip(1+0.5QI, .5, 1.5) (Study BB / BB1, N 690, forward 2026-09-24..11-18) | **dead** | 317 picks: +14.7bp/night, NW t 1.85 (< 2), sign-flip 95%, shuffle 99%, both halves +; terciles T1 +21 / T2 +25 / T3 +122bp, same side as QI-HIST 2016-20; ceiling ~+1.8pp/yr even if real. not tested: T3 ex-top-5/median, a T1 skip rule, QI at other times / the real closing imbalance feed, depth past the touch, other legs |
 | Fade BTC/ETH perp liquidation cascades (LIQ-CASC, N 883) | **dead** | -14/-20bp at 60m, worse than plain drops; cascades continue |
 | Bids below hedged fair value in thin benchmark ETFs (ETF-THIN, N 884) | **dead** | -22bp/fill hedged, every year negative; thin ETFs quoted tight to FV, fills informed |
 | Intraday headline continuation, Benzinga single-symbol (NEWS-DRIFT, N 885) | **dead** | -12.6bp net at +60m (gross ~+7), halves negative; news absorbed within ~5 min |

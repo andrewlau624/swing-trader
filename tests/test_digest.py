@@ -47,7 +47,6 @@ def test_digest_numbers_from_books_and_logs(tmp_path):
     w = {r["idea"]: r for r in data["whatif"]["live"]}
     assert w["conviction trade"]["usd"] == pytest.approx(0.5 * 2260 * 0.01)
     assert w["tug-of-war tilt"]["usd"] > 0, "high-TOW winner up-weighted, low-TOW loser down-weighted"
-    assert w["quote imbalance tilt"]["usd"] > 0
     g = {x["gate"]: x for x in data["gates"]}
     assert g["Conviction trade on"]["n"] == 3 and not g["Conviction trade on"]["ready"]
     p = [x for x in data["proj"] if x["account"] == "roth" and x["years"] == 3][0]
