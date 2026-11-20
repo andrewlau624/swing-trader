@@ -10768,3 +10768,58 @@ crosses, 2 x 2.5bp:
 Not tested: ex-top-5 / median of the T3 bucket (T3's +122bp mean may be a few names); QI as a skip rule on T1 instead of a tilt;
 QI at times other than 15:40 (15:50, the closing imbalance feed itself, still parked); depth beyond the touch; IBS / PREF-EX picks.
 Ended: REGISTRY entry and digest whatif/gate rows removed; the 15:40 bid/ask logging stays (cheap, feeds nothing live).
+
+## Amendment - EXP round (user 2026-11-20: "be more experimental"): random-feature ridge, fly-brain reservoir, RL agent, daily lead-lag, foundation-model shadow (pre-register before any outcome; N 1211 -> 1218)
+
+Branch list given to the user 2026-11-20 (A-E); the user picked all. Not in any ledger (grep NEXT.md: Ridge only on hand-made
+features SEQ-NIGHT/CEF-ML; SECT-LAG was a 1-15 min scalp; foundation models "not run: power"; no RL, no connectome).
+**Common frame (A, B, D):** data Sharadar SFP adjusted daily OHLC (`data/research/nx/cache_SFP.parquet`). Base panel = 8 ETFs
+SPY QQQ IWM TLT XLK XLF XLE XLU (all listed by 2002-07-30). **FIT 2002-08..2010-12 only** (all hyperparameters frozen there; walk-
+forward refits may use data up to t-1 but never change hyperparameters). **JUDGE 2011-01..2020-12** (never used for these model
+classes). REPORT 2021-01..2026-10 on Alpaca `data/research/night/etf_daily.parquet` (descriptive, not judged). Decision at the
+close on day t using data through t's close; trade at t's close cross, hold to t+1 close (close-to-close). Cost 1bp/side per unit
+turnover (live ETF close cross ~0bp, n 657), shock 3bp/side. Long-only, gross exposure 0..1.5 (taxable margin; the Roth would cap at
+1.0). Gate for each timing variant, all required: (1) judge-period daily alpha vs SPY (OLS of strategy net on SPY) > 0 with NW t >= 2;
+(2) alpha > 0 in both 2011-15 and 2016-20; (3) net Sharpe minus SPY buy-and-hold Sharpe >= +0.20; (4) survives 3bp/side;
+(5) placebo: the same pipeline on labels circularly shifted by a random 250-2000 sessions within the fit period, 200 draws, judge alpha
+>= 95th percentile; (6) ex-top-5 days alpha > 0. Report median day, hit rate, maxDD, exposure, DSR at program N 1218.
+- **A1 RFF-TIME (N 1212).** Base features z_k: for P_base = 400 random draws of (asset in the 8, window L ~ U{2..120}, offset o ~ U{0..20},
+  stat in {log return, realised vol, max drawdown from window high, mean IBS}) computed over [t-o-L, t-o]; z-scored on the fit period.
+  Random Fourier features: P = 6,000 = 3,000 x {sin, cos}(gamma * w'z), w ~ N(0, I), gamma = 2 (Kelly-Malamud-Zhou 2022 "virtue of
+  complexity"). Ridge on next-day SPY log return; lambda chosen ONCE on the fit period by a 2002-08..2008 / 2009-10 split from
+  {1e-1..1e5 log grid}; expanding-window refit every 21 sessions. Position = clip(1 + f / sd(f_fit), 0, 1.5) (scaled around 1x).
+  Seed 0 for the draws; seeds 1-4 reported (pass needs seed 0 AND >= 3 of 5 seeds on gates 1-3).
+- **A2 RFF-ROT (N 1213).** Same features; 8 ridge models (one per ETF's next-day return); each day hold the top 2 ETFs by forecast,
+  equal weight, 1.0x. Judged vs the equal-weight 8-ETF basket (alpha vs EW basket instead of SPY; gate 3 vs EW basket Sharpe).
+- **B1 FLY-RES (N 1214).** Echo-state reservoir whose recurrent matrix W is a real connectome subgraph: the FlyWire adult Drosophila
+  connectome (public release; synapse counts signed by predicted neurotransmitter: GABA/glutamate negative). If FlyWire is not
+  obtainable without a login, the Winding et al. 2023 larval connectome (3,016 neurons, public supplement) is used instead, and the
+  report says which. Subgraph: the mushroom body (Kenyon cells + projection-neuron inputs + MBONs + DANs), capped at 3,000 neurons by
+  highest degree. W scaled to spectral radius 0.9, leak 0.3, tanh units. Inputs: the 8 ETFs' day-t log return and 20d vol z-scores
+  through a random input matrix onto projection neurons only (input sparsity 10%). Readout: ridge from the reservoir state to next-day SPY
+  return, lambda chosen as in A1; trading rule as A1. **Control (the falsification):** 20 degree-preserving rewired graphs (same in/out
+  degree sequence and sign counts) and 20 Erdos-Renyi graphs at the same density and sign mix, same pipeline. B1 PASSES only if it
+  clears gates 1-6 AND its judge alpha beats the 95th percentile of BOTH control families. Prior (stated before running): the
+  wiring will tie its controls; B1 then reads "the fly's wiring adds nothing over a random reservoir".
+- **B2 FLY-DA (N 1215).** Same reservoir; readout learned online with a dopamine-gated three-factor rule instead of ridge: action
+  a_t = clip(1 + w'x_t, 0, 1.5); reward r_t = net P&L of a_t; dw = eta * (r_t - rbar) * x_t * (a_t - abar), eta chosen on the fit period
+  from {1e-4, 1e-3, 1e-2}; learning continues through the judge period (online, no look-ahead). Same gates and controls as B1.
+- **D1 RL-ALLOC (N 1216).** PPO (stable small MLP 2x64, torch) allocating long-only weights over {SPY, QQQ, TLT, XLU, cash} at the close,
+  observation = last 20 days of returns of the 8 ETFs + current weights, reward = net log return after 1bp/side turnover. Train on the
+  fit period only (1M steps, 5 seeds, hyperparameters = PPO defaults, no tuning on the judge); frozen policies run 2011-20. Gates 1-6
+  with "SPY" replaced by the 60/40 SPY/TLT daily-rebalanced benchmark; PASS needs >= 4 of 5 seeds on gates 1-3 and the seed-median
+  policy on 4-6. Placebo for gate 5: policies trained on circularly shifted fit-period returns (5 draws x 5 seeds).
+- **E1 LEADLAG-D (N 1217).** Sharadar SEP, common stocks + ETFs, price >= $5, 20d ADV >= $10M, top 500 by ADV each month (point in
+  time; delisted names included). Each month-end, on the trailing 250 sessions, for each pair (A, B) the lag-1 OLS beta and t of
+  r_B(t+1) on r_A(t), controlling for r_B(t) and SPY r(t). For each B keep the leaders with t >= 3 (cap 10). Daily signal_B =
+  sum beta_AB * r_A(t) (day-t close-to-close). Trade: buy the top 20 signals at t's close, sell at t+1 open (night shape) and,
+  separately, at t+1 close; equal weight, 1.0x. FIT 1998-2010 picks nothing (the rule is fixed); JUDGE 2011-2020. Gate: net excess vs
+  the EW top-500 universe over the same window >= +15bp/day at 2.5bp/side (the +8pp ceiling shape), NW t >= 2, both halves > 0,
+  ex-top-5 days > 0, survives 5bp/side; placebo: leaders replaced by random names of the same count (200 draws) -> judge excess >= 95th.
+  Overlap with the live night leg (day_ret <= -8% names) reported. Not tested here: intraday lead-lag (SECT-LAG dead), supply-chain links.
+- **C1 TSFM-SHADOW (N 1218, forward).** Kronos-small (open weights, pretrained on market candles) zero-shot next-session forecast for every
+  live night pick and IBS ETF at 15:40, log-only; tilt = clip(1 + 0.5 * z(forecast within night), 0.5, 1.5). Read once at 300 scored
+  night picks, bars as Study BA (both halves, NW t >= 2, sign-flip and within-night shuffle >= 95th). Backtests are excluded by
+  construction (training-data contamination). Built after A/B/D/E; needs the user's OK to deploy.
+Runners `research/sim/exp_rff.py` (A), `exp_flyres.py` (B), `exp_rl.py` (D), `exp_leadlag.py` (E) -> `*_out.txt`. One run each; no tuning
+after a judge-period number is printed. Program N = 1218.
