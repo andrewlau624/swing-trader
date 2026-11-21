@@ -1,0 +1,26 @@
+PCA-DAY (N 1257): AL s-score through close T (N 1242 base, adv_adj), buy the 20 most negative s < -1.25 at open T+1, sell close T+1; nx tier_hi costs (2x shock); excess vs EW top-1000 open->close; DSR at N 1257
+
+=== JUDGE 2003-2015: load 2001-09-01..2016-01-15, decision closes 2003-01-02..2015-12-31 (halves split 2009-12-31, by traded day)
+  NX live night rule (primary, nx.collect_trades): +1.95bp/night at tier_hi over 3273 nights
+  panel: 3614 sessions x 8108 common names (ever $10M/day, split-adjusted $ volume); duplicate rows 0; open missing where close present 0
+  signal: first 2002-09-10; universe mean 994; MP factors kept mean 8.45; valid s/day 983
+  universe names with no T+1 bar (cash slot): 607 of 3,227,474 name-days; picks without a T+1 bar 14
+  book: 3273 days, 3273 with picks; names/day 20.0 (days < 20: 0.0%); round-trip tier_hi cost 20.2bp/name; turnover 2.0/day (buy open + sell close)
+  absolute: gross +2.35bp/day, net tier_hi -17.89 (t -7.90, -45.1%/yr simple), 2x -38.13; EW universe open->close +0.44bp
+  EXCESS vs EW: gross +1.91bp/day | net tier_hi -18.33bp (NW t -19.14, -46.2%/yr) | halves -17.49 / -19.31 | 2x tier_hi -38.57 | ex-top5 -18.86 | median day -19.11 hit 0.33 | DSR(N 1257) 0.000
+  corr with the NX live night series (tier_hi, same calendar date: the night ending at that open) — book net -0.008, excess +0.003 (3272 days)
+  by year (net excess bp/day): 03:-20.6 04:-19.1 05:-17.1 06:-15.0 07:-15.3 08:-13.2 09:-22.2 10:-22.9 11:-19.7 12:-26.4 13:-21.2 14:-15.0 15:-10.7 16:-31.7
+  placebo (within-date shuffle of s, 50 draws, net excess): mean -20.06bp 95th -19.12 -> real -18.33 at pct 100
+  GATES: net>=5bp FAIL | t>=2.5 FAIL | halves>0 FAIL | 2x tier_hi>0 FAIL | ex-top5>0 FAIL | placebo95 PASS -> KILL
+  VERDICT N 1257 PCA-DAY: KILL
+
+=== REPORT 2016-2026-10 (never judged): load 2014-09-01..2026-10-05, decision closes 2016-01-01..2026-10-05 (halves split 2020-12-31, by traded day)
+  NX live night rule (primary, nx.collect_trades): +3.28bp/night at tier_hi over 2704 nights
+  panel: 3041 sessions x 9691 common names (ever $10M/day, split-adjusted $ volume); duplicate rows 0; open missing where close present 0
+  signal: first 2015-09-01; universe mean 1000; MP factors kept mean 10.78; valid s/day 989
+  universe names with no T+1 bar (cash slot): 559 of 2,673,972 name-days; picks without a T+1 bar 26
+  book: 2703 days, 2703 with picks; names/day 20.0 (days < 20: 0.0%); round-trip tier_hi cost 17.7bp/name; turnover 2.0/day (buy open + sell close)
+  absolute: gross +0.73bp/day, net tier_hi -16.92 (t -8.29, -42.6%/yr simple), 2x -34.57; EW universe open->close -0.09bp
+  EXCESS vs EW: gross +0.82bp/day | net tier_hi -16.83bp (NW t -15.48, -42.4%/yr) | halves -17.30 / -16.42 | 2x tier_hi -34.48 | ex-top5 -17.35 | median day -16.27 hit 0.36 | DSR(N 1257) 0.000
+  corr with the NX live night series (tier_hi, same calendar date: the night ending at that open) — book net +0.037, excess +0.015 (2703 days)
+  by year (net excess bp/day): 16:-15.3 17:-21.8 18:-13.3 19:-17.9 20:-18.1 21:-11.7 22:-23.2 23:-15.9 24:-19.0 25:-20.3 26:-5.9

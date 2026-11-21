@@ -11538,3 +11538,10 @@ Common to all four:
   - relative strength inside drawdowns and recoveries; the vol ratio.
   - The pre-2010 effects (reversal, residual reversion) were real gross and decayed.
 - Not tested (open forms): thin names below $10M ADV (N 1256 running); daytime open->close holds (N 1257 running); non-US equity cross-sections; intraday-bar paths; event-conditioned versions.
+
+### RESULT - N 1257 PCA-DAY (run 2026-11-21): KILL
+- Judge 2003-15: gross excess vs EW open->close +1.91bp/day; net at tier_hi -18.3bp/day (t -19). Every year is negative; halves -17.5 / -19.3. The placebo is at the 100th percentile (the information is real, ~2bp).
+- Report 2016-26: gross +0.82, net -16.8.
+- Corr with the night leg is about 0: independent, but a loser.
+- **Family closed (N 1242/1248/1249/1253/1257):** the AL s-score carries ~1-4bp/day of real gross information in every window (close-close, night, day). No fresh-basket daily form clears even ~0bp auction costs plus the gate. The binding constraint is size, not timing.
+- Not tested: s as a tilt inside the IBS leg's own names (no added turnover); top-50/100; an ETF-only universe.
