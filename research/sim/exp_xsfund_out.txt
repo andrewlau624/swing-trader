@@ -1,0 +1,88 @@
+EXP round 5 N 1237 XS-FUND (program N 1239; code sha256 5a5a17948d672672; imports exp_xsrff.py sha256 a8b02543987682dd; DRY False; threads 3; float32)
+universe/portfolio/costs/placebo as N 1235: SEP common, px>=$5, ADV20>=$10M, >=253 bars; month-end decisions; label t->t+21; top min(50, N/10) EW; 2.5bp/side (shock 10); placebo 200 per-name circular label shifts seed 12345; GBM {'max_depth': 3, 'learning_rate': 0.05, 'max_iter': 300, 'min_samples_leaf': 200, 'early_stopping': False, 'random_state': 0}; RFF P 4000 gamma 1.0 on 35 features
+SF1: ARQ rows 681867 -> 681867 after dropping old-period amendments filed after a newer period; ART 688601; ARQ with a year-ago row 89.0%; field used as filing date: `date` (no `datekey` column)
+cache rows 352393 months 220 names 5410; 65s
+full-store rows 145761 months 69; 91s
+audit SF1 coverage of universe rows by year (any value): 2002:93% 2003:93% 2004:94% 2005:93% 2006:92% 2007:91% 2008:91% 2009:91% 2010:91% 2011:92% 2012:93% 2013:93% 2014:94% 2015:94% 2016:95% 2017:95% 2018:95% 2019:95% 2020:96% 2021:97% 2022:97% 2023:97% 2024:97% 2025:97% 2026:96%
+audit days from filing date to decision t: min 1 median 52 max 450 (must be >= 1); log(mcap_t / SF1 mcap at filing) quantiles 5/50/95 [-0.212, 0.01, 0.239]; delisted names in rows 1988, of which with SF1 1874
+audit raw missing share: ep 6% bp 6% sp 6% fcfp 7% ebitdaev 8% roa 2% roe 6% gpa 2% accr 3% revg 9% epsg 9% assetg 6% iss 6% de 9% lmcap 6% recency 6%
+months 289 (2002-08-30..2026-08-31), label segment S 220, names/month median 1739 min 927 max 2497; delisted-truncated labels 2078; 94s
+
+## judge-free diagnostics (fit/validation period only, before the first refit)
+  GBM permutation importance (judge-free): fit on 63 months with labels realised <= 2007-12-31, scored on validation 2008-01-31..2010-11-30 (35 months, labels realised before 2010-12-31); within-month shuffles x3, seed 7; validation mean monthly rank IC +0.0322, MSE 0.33425
+  per feature (drop in mean IC x1e4 | rise in MSE x1e5): lmcap +49|+77.3 r1 +49|+27.1 de +45|+22.4 r5 +39|+17.7 ladv +34|+59.7 ebitdaev +34|-1.9 ibs +29|+12.1 max5 +28|+12.0 dsh +27|+7.2 vol20 +22|+5.6 fcfp +22|+6.5 ivol +19|+2.1 r63 +19|+5.6 dturn +18|+11.6 accr +18|+11.1 dlo +14|+10.6 beta +14|+6.2 gpa +12|+6.1 r21 +9|+8.8 mom +8|+3.8 r252 +7|+3.2 r126 +6|+5.9 sp +6|-4.3 assetg +6|+3.8 recency +2|+0.6 roa -0|-2.3 ep -0|+2.3 bp -0|+1.9 iss -1|-1.8 vol63 -2|-6.2 epsg -3|-8.1 roe -9|-5.6 vr5 -13|-6.6 revg -37|-26.7 dhi -48|-29.5
+  blocks: all 19 price ranks permuted: IC drop +229e-4 (MSE +190.6e-5); all 16 SF1 features permuted: IC drop +114e-4 (MSE +99.3e-5)
+
+# FROZEN: everything below is the first and only judge read of this code (sha above)
+
+## N1237 XS-FUND GBM (primary)
+    refit 2010-12-31 train rows 145312 fits 201 -> months 2010-12-31..2011-11-30 (175s)
+    refit 2011-12-30 train rows 162656 fits 201 -> months 2011-12-30..2012-11-30 (366s)
+    refit 2012-12-31 train rows 180464 fits 201 -> months 2012-12-31..2013-11-29 (570s)
+    refit 2013-12-31 train rows 199091 fits 201 -> months 2013-12-31..2014-11-28 (795s)
+    refit 2014-12-31 train rows 221475 fits 201 -> months 2014-12-31..2015-11-30 (1043s)
+    refit 2015-12-31 train rows 242786 fits 201 -> months 2015-12-31..2016-11-30 (1306s)
+    refit 2016-12-30 train rows 261683 fits 201 -> months 2016-12-30..2017-11-30 (1593s)
+    refit 2017-12-29 train rows 283193 fits 201 -> months 2017-12-29..2018-11-30 (1950s)
+    refit 2018-12-31 train rows 306049 fits 201 -> months 2018-12-31..2019-11-29 (2337s)
+    refit 2019-12-31 train rows 327924 fits 201 -> months 2019-12-31..2020-11-30 (2770s)
+    refit 2020-12-31 train rows 352393 fits 1 -> months 2020-12-31..2021-11-30 (2772s)
+    refit 2021-12-31 train rows 377644 fits 1 -> months 2021-12-31..2022-11-30 (2774s)
+    refit 2022-12-30 train rows 400317 fits 1 -> months 2022-12-30..2023-11-30 (2777s)
+    refit 2023-12-29 train rows 424024 fits 1 -> months 2023-12-29..2024-11-29 (2779s)
+    refit 2024-12-31 train rows 448311 fits 1 -> months 2024-12-31..2025-11-28 (2781s)
+    refit 2025-12-31 train rows 476881 fits 1 -> months 2025-12-31..2026-08-31 (2784s)
+JUDGE decisions 2010-12-31..2020-11-30 (120 months), picks/month 50
+  N1237 XS-FUND GBM (primary) vs SPY (GATED): alpha    +9.7bp/mo NW t +0.43 beta 1.26 | halves 11-15   +15.6 16-20    +6.2 | Sharpe 1.04 vs 1.10 (d -0.06) | 10bp/side alpha    -1.2 t -0.05 | ex-top5   -12.6 | excess mean  +42.9bp t +1.81 med  +32.8 hit 55.8% | DSR(N 1239) 0.002
+  N1237 XS-FUND GBM (primary) vs EW  (report): alpha   +54.8bp/mo NW t +3.50 beta 1.01 | halves 11-15   +66.6 16-20   +41.9 | Sharpe 1.04 vs 0.75 (d +0.29) | 10bp/side alpha   +44.0 t +2.81 | ex-top5   +36.6 | excess mean  +55.7bp t +3.24 med  +50.2 hit 59.2% | DSR(N 1239) 0.394
+  N1237 XS-FUND GBM (primary) net: mean +170.2bp/mo, CAGR +20.2%, Sharpe 1.04, maxDD -34.5% (EW -29.6%, SPY -18.0%), median +185.0bp, hit 65.0%, months 120, turnover 1.44/mo (17.3x/yr), cost drag 43bp/yr
+  N1237 XS-FUND GBM (primary) placebo: real alpha vs SPY +9.7bp/mo at pct 62.0 of 200 (placebo p50 +3.1, p95 +54.2); [report] vs EW +54.8 at pct 59.0 (p50 +50.8, p95 +95.5)
+  N1237 XS-FUND GBM (primary) gates (vs SPY): G1 alpha>0 & t>=2 FAIL; G2 both halves>0 PASS; G3 dSharpe>=+0.20 FAIL; G4 10bp/side>0 FAIL; G5 placebo>=95th FAIL; G6 ex-top-5>0 FAIL => DEAD
+  N1237 XS-FUND GBM (primary) deciles (mean 21d return bp | mean forecast): D1[f -0.0798] +94 D2[f -0.0390] +102 D3[f -0.0225] +101 D4[f -0.0104] +102 D5[f -0.0003] +117 D6[f +0.0089] +118 D7[f +0.0179] +113 D8[f +0.0276] +124 D9[f +0.0395] +125 D10[f +0.0671] +148
+  N1237 XS-FUND GBM (primary) D10-D1 +54.4bp/mo NW t +1.87; D10-mean +33.9bp
+  N1237 XS-FUND GBM (primary) judge $/yr: $2.3k net +470 (alpha-EW +154, vs SPY +118; whole-share deployed 38%) $10k net +2,043 (alpha-EW +669, vs SPY +515; whole-share deployed 78%) $25k net +5,107 (alpha-EW +1,672, vs SPY +1,287; whole-share deployed 90%); arithmetic mean x 12, before tax
+REPORT (descriptive, full store) decisions 2020-12-31..2026-08-31 (69 months)
+  N1237 XS-FUND GBM (primary) REPORT vs SPY (GATED): alpha   +41.3bp/mo NW t +1.46 beta 1.01 | halves 11-15    +nan 16-20   +41.3 | Sharpe 1.13 vs 1.01 (d +0.12) | 10bp/side alpha   +30.2 t +1.07 | ex-top5   -11.8 | excess mean  +42.3bp t +1.49 med   +6.5 hit 53.6% | DSR(N 1239) 0.017
+  N1237 XS-FUND GBM (primary) REPORT vs EW  (report): alpha   +92.0bp/mo NW t +3.20 beta 0.89 | halves 11-15    +nan 16-20   +92.0 | Sharpe 1.13 vs 0.58 (d +0.55) | 10bp/side alpha   +80.9 t +2.82 | ex-top5   +61.1 | excess mean  +82.6bp t +2.86 med +111.7 hit 66.7% | DSR(N 1239) 0.514
+  N1237 XS-FUND GBM (primary) REPORT net: mean +171.0bp/mo, CAGR +20.6%, Sharpe 1.13, maxDD -17.7% (EW -20.3%, SPY -19.8%), median +157.2bp, hit 68.1%, months 69, turnover 1.48/mo (17.7x/yr), cost drag 44bp/yr
+  N1237 XS-FUND GBM (primary) REPORT deciles (mean 21d return bp | mean forecast): D1[f -0.0853] +13 D2[f -0.0346] +77 D3[f -0.0188] +79 D4[f -0.0084] +74 D5[f +0.0002] +93 D6[f +0.0080] +99 D7[f +0.0156] +100 D8[f +0.0236] +105 D9[f +0.0332] +106 D10[f +0.0527] +138
+  N1237 XS-FUND GBM (primary) REPORT D10-D1 +125.5bp/mo NW t +1.73; D10-mean +49.8bp
+  N1237 XS-FUND GBM (primary) REPORT $/yr: $2.3k net +472 (alpha-EW +228, vs SPY +117; whole-share deployed 24%) $10k net +2,052 (alpha-EW +991, vs SPY +507; whole-share deployed 59%) $25k net +5,130 (alpha-EW +2,477, vs SPY +1,268; whole-share deployed 77%); arithmetic mean x 12, before tax
+
+## N1237 XS-FUND RFF (second)
+  N1237 XS-FUND RFF (second): P 4000; lambda split train rows 88816 (labels <= 2007-12-31), validation rows 53024; true-label z = 10 (lambda 8.88e+05); placebo z median 31.6; val MSE by z (true) 1e-03:0.35051 3e-03:0.35034 1e-02:0.34982 3e-02:0.34833 1e-01:0.34481 3e-01:0.33934 1e+00:0.33516 3e+00:0.33381 1e+01:0.33368 3e+01:0.33373 1e+02:0.33376 3e+02:0.33377 1e+03:0.33377 3e+03:0.33377 1e+04:0.33377
+    refit 2010-12-31 train rows 145312 cols 201 -> months 2010-12-31..2011-11-30 (31s)
+    refit 2011-12-30 train rows 162656 cols 201 -> months 2011-12-30..2012-11-30 (41s)
+    refit 2012-12-31 train rows 180464 cols 201 -> months 2012-12-31..2013-11-29 (48s)
+    refit 2013-12-31 train rows 199091 cols 201 -> months 2013-12-31..2014-11-28 (56s)
+    refit 2014-12-31 train rows 221475 cols 201 -> months 2014-12-31..2015-11-30 (64s)
+    refit 2015-12-31 train rows 242786 cols 201 -> months 2015-12-31..2016-11-30 (71s)
+    refit 2016-12-30 train rows 261683 cols 201 -> months 2016-12-30..2017-11-30 (78s)
+    refit 2017-12-29 train rows 283193 cols 201 -> months 2017-12-29..2018-11-30 (86s)
+    refit 2018-12-31 train rows 306049 cols 201 -> months 2018-12-31..2019-11-29 (94s)
+    refit 2019-12-31 train rows 327924 cols 201 -> months 2019-12-31..2020-11-30 (101s)
+    refit 2020-12-31 train rows 352393 cols 1 -> months 2020-12-31..2021-11-30 (104s)
+    refit 2021-12-31 train rows 377644 cols 1 -> months 2021-12-31..2022-11-30 (106s)
+    refit 2022-12-30 train rows 400317 cols 1 -> months 2022-12-30..2023-11-30 (108s)
+    refit 2023-12-29 train rows 424024 cols 1 -> months 2023-12-29..2024-11-29 (110s)
+    refit 2024-12-31 train rows 448311 cols 1 -> months 2024-12-31..2025-11-28 (113s)
+    refit 2025-12-31 train rows 476881 cols 1 -> months 2025-12-31..2026-08-31 (115s)
+JUDGE decisions 2010-12-31..2020-11-30 (120 months), picks/month 50
+  N1237 XS-FUND RFF (second) vs SPY (GATED): alpha   -34.0bp/mo NW t -1.85 beta 1.18 | halves 11-15   -38.3 16-20   -30.0 | Sharpe 0.80 vs 1.10 (d -0.30) | 10bp/side alpha   -47.0 t -2.56 | ex-top5   -49.5 | excess mean  -11.2bp t -0.65 med  -16.9 hit 45.8% | DSR(N 1239) 0.000
+  N1237 XS-FUND RFF (second) vs EW  (report): alpha   +10.8bp/mo NW t +0.93 beta 0.92 | halves 11-15   +12.5 16-20    +6.1 | Sharpe 0.80 vs 0.75 (d +0.05) | 10bp/side alpha    -2.3 t -0.20 | ex-top5    -5.8 | excess mean   +1.6bp t +0.14 med   -5.6 hit 49.2% | DSR(N 1239) 0.008
+  N1237 XS-FUND RFF (second) net: mean +116.1bp/mo, CAGR +13.1%, Sharpe 0.80, maxDD -26.7% (EW -29.6%, SPY -18.0%), median +143.7bp, hit 68.3%, months 120, turnover 1.74/mo (20.8x/yr), cost drag 52bp/yr
+  N1237 XS-FUND RFF (second) placebo: real alpha vs SPY -34.0bp/mo at pct 34.5 of 200 (placebo p50 -28.3, p95 -0.5); [report] vs EW +10.8 at pct 36.5 (p50 +16.7, p95 +40.0)
+  N1237 XS-FUND RFF (second) gates (vs SPY): G1 alpha>0 & t>=2 FAIL; G2 both halves>0 FAIL; G3 dSharpe>=+0.20 FAIL; G4 10bp/side>0 FAIL; G5 placebo>=95th FAIL; G6 ex-top-5>0 FAIL => DEAD
+  N1237 XS-FUND RFF (second) deciles (mean 21d return bp | mean forecast): D1[f -0.0202] +89 D2[f -0.0120] +119 D3[f -0.0079] +110 D4[f -0.0046] +119 D5[f -0.0016] +114 D6[f +0.0013] +123 D7[f +0.0043] +122 D8[f +0.0078] +112 D9[f +0.0122] +119 D10[f +0.0218] +119
+  N1237 XS-FUND RFF (second) D10-D1 +29.4bp/mo NW t +2.22; D10-mean +4.1bp
+  N1237 XS-FUND RFF (second) judge $/yr: $2.3k net +320 (alpha-EW +4, vs SPY -31; whole-share deployed 31%) $10k net +1,393 (alpha-EW +19, vs SPY -135; whole-share deployed 82%) $25k net +3,483 (alpha-EW +48, vs SPY -337; whole-share deployed 92%); arithmetic mean x 12, before tax
+REPORT (descriptive, full store) decisions 2020-12-31..2026-08-31 (69 months)
+  N1237 XS-FUND RFF (second) REPORT vs SPY (GATED): alpha   -29.9bp/mo NW t -1.01 beta 0.91 | halves 11-15    +nan 16-20   -29.9 | Sharpe 0.60 vs 1.01 (d -0.41) | 10bp/side alpha   -42.8 t -1.45 | ex-top5   -82.2 | excess mean  -41.0bp t -1.47 med  -68.3 hit 44.9% | DSR(N 1239) 0.000
+  N1237 XS-FUND RFF (second) REPORT vs EW  (report): alpha   +11.3bp/mo NW t +0.54 beta 0.86 | halves 11-15    +nan 16-20   +11.3 | Sharpe 0.60 vs 0.58 (d +0.02) | 10bp/side alpha    -1.7 t -0.08 | ex-top5   -22.5 | excess mean   -0.7bp t -0.03 med   -9.5 hit 47.8% | DSR(N 1239) 0.002
+  N1237 XS-FUND RFF (second) REPORT net: mean +87.8bp/mo, CAGR +9.4%, Sharpe 0.60, maxDD -18.1% (EW -20.3%, SPY -19.8%), median +93.5bp, hit 58.0%, months 69, turnover 1.73/mo (20.8x/yr), cost drag 52bp/yr
+  N1237 XS-FUND RFF (second) REPORT deciles (mean 21d return bp | mean forecast): D1[f -0.0251] +62 D2[f -0.0152] +76 D3[f -0.0100] +112 D4[f -0.0058] +66 D5[f -0.0020] +86 D6[f +0.0017] +99 D7[f +0.0055] +84 D8[f +0.0100] +93 D9[f +0.0157] +106 D10[f +0.0279] +100
+  N1237 XS-FUND RFF (second) REPORT D10-D1 +38.1bp/mo NW t +1.65; D10-mean +11.4bp
+  N1237 XS-FUND RFF (second) REPORT $/yr: $2.3k net +242 (alpha-EW -2, vs SPY -113; whole-share deployed 20%) $10k net +1,053 (alpha-EW -8, vs SPY -492; whole-share deployed 68%) $25k net +2,633 (alpha-EW -21, vs SPY -1,229; whole-share deployed 87%); arithmetic mean x 12, before tax
+
+VERDICT: N1237 XS-FUND DEAD (needs the GBM); GBM DEAD, RFF DEAD
+total 3011s

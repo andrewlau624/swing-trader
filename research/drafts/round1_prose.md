@@ -11102,3 +11102,26 @@ These are siblings from the A1/A2 row's `not tested:` field: the published month
 - Same message as REGIME-X from the other side: the book's best days are its stress days, and a state forecast only trades return for drawdown.
 - DFF fetch failed; DTB3 used instead (no effect, since s never exceeds 1).
 - Not tested: the true live book including the intraday leg; GBM/RFF/RL with a drawdown reward; a de-risk-only map; vol-target sizing; VIX term structure / variance risk premium; weekly rebalancing; per-leg overlays beyond R1.
+
+### RESULT - XS-FUND (N 1237, run 2026-11-21): DEAD
+- **GBM** (primary), judge 2011-20:
+  - Alpha vs SPY +9.7bp/mo, t 0.43, beta 1.26.
+  - Gates: 1/6 pass (halves only).
+  - Placebo percentile 62.
+  - Ex-top-5 -12.6; alpha at 10bp/side -1.2.
+  - Size: about +1.2%/yr alpha vs SPY, i.e. +$515/yr at $10k.
+  - Vs EW: +55bp t 3.5, but placebo percentile 59; shifted-label models earn +51 at the median.
+- **RFF on 35 features:** worse than price-only (N 1235). Alpha vs SPY -34bp.
+- What the GBM uses: size, leverage, EBITDA/EV, short-term returns. That is a size/value/beta tilt, not skill.
+- Report 2021-26: vs SPY +41bp t 1.46, ex-top-5 negative.
+- Filing field is `date` (no `datekey`). Values are used only when filing date < t, as asserted.
+- Not tested:
+  - fundamental trajectories or surprises, and analyst estimates;
+  - event-time entry right after filing;
+  - LS, SPY-hedged or sector-neutral construction;
+  - tuned or deeper GBMs, or labels as excess-over-SPY;
+  - a placebo that breaks name fixed effects;
+  - other holds;
+  - micro-caps under $10M ADV;
+  - other SF1 fields.
+- Every cross-sectional stock selection on month-end snapshots (single sorts N 977, linear/RFF N 1235-1236, GBM N 1237) is now dead vs SPY.
