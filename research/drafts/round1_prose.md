@@ -10888,3 +10888,20 @@ RL as tested (PPO defaults, per-slot scorer, 5 daily lags + vol/IBS) learns at m
 Observation (post-hoc, NOT a finding): the D2a benchmark row says the 10 top 5-day winners lose ~8bp/day close->close in 2011-20 ->
 WEEKWIN-SHORT below, judged on a period where it was not seen.
 Not tested: shorts, intraday/close->open horizons for D2a-c, longer training/entropy, reservoir observations.
+
+## Amendment - WEEKWIN-SHORT: short the top-10 5-day winners close->close (pre-register 2026-11-20, before any 1998-2010 number for this rule; N 1222 -> 1224)
+Origin: post-hoc observation in the D2a benchmark row (2011-20 top-10 ret5 basket ~-8bp/day). 2011-20 is therefore TOUCHED for this rule
+and only reported. Mechanism: short-term reversal of attention/lottery winners (Lehmann 1990; Bali-Cakici-Whitelaw MAX); retail buys
+the week's biggest winners and the price reverts. The night-leg short mirror (NIGHT-SHORT N 1062: day ret >= +8%, close->open) is dead
+at gross ~-1bp; this is a different trigger (5-day) and window (close->close), so not a re-costume, but it is the same family's short side.
+Data: Sharadar SEP common stocks (exp_rl_universe.load_stocks: split-adj close + cash dividends, delisted kept), price >= $5, 20d ADV >= $10M.
+Each session t: the 10 names with the highest trailing 5-session total return (ret5) -> short equal weight at t's close, cover at t+1 close
+(names re-ranked daily; turnover charged on weight changes). No next-day bar -> 0 earned (counted; optimistic for delisted buyout targets).
+JUDGE = 1998-02..2010-12 (never printed for this rule). Report 2011-20 (touched).
+- **N 1223 WW-S1 (raw short):** short return = -basket. **N 1224 WW-S2 (SPY-hedged):** -basket + beta_fit x SPY, beta from 1998-2004 only.
+Costs: 2.5bp/side x turnover + borrow 10bp/day (~25%/yr, hot names); shock: 5bp/side + 20bp/day borrow.
+Gate (each variant): judge net mean > 0 with NW t >= 2; both 1998-2004 and 2005-10 net > 0; median day > 0; ex-top-5 days > 0; survives
+the shock; placebo: 10 random eligible names per day (200 draws) -> real gross short return >= 95th pct; and the ceiling: net >= +15bp/day
+(at a 0.5x short sleeve ~ +19%/yr; below that it cannot reach +8pp/yr). Report worst day, maxDD at 0.5x, 2008 and 2000-02 separately.
+Not tested here: 1-day or 20-day winners, close->open, longer holds, borrow data (none pre-2010 on disk). Runner research/sim/weekwin_short.py.
+Program N = 1224.
