@@ -300,9 +300,10 @@ def build_panel(bars: pd.DataFrame) -> dict:
                 ovn=o_next / c - 1.0)
 
 
-def eligible_mask(pn: dict) -> np.ndarray:
+def eligible_mask(pn: dict, adv_band: tuple = (ADV_MIN, np.inf)) -> np.ndarray:
+    """adv_band = [lo, hi) on the prior-20 split-adjusted $ volume; the registered rule is [ADV_MIN, inf)."""
     with np.errstate(invalid="ignore"):
-        return (pn["pos"] >= 20) & (pn["cu_prev"] >= PRICE_MIN) & (pn["adv"] >= ADV_MIN)
+        return (pn["pos"] >= 20) & (pn["cu_prev"] >= PRICE_MIN) & (pn["adv"] >= adv_band[0]) & (pn["adv"] < adv_band[1])
 
 
 def universe_mask(pn: dict, master: pd.DataFrame, which: str) -> np.ndarray:
@@ -574,11 +575,13 @@ def night_outcome(tk, c, cu, o_next, has_next, dd, nxt, mt, dprice, divs, lastba
     return -1.0, "nobar_halt"
 
 
-def collect_trades(pn: dict, master: pd.DataFrame, act: pd.DataFrame | None, which: str, lo, hi) -> dict:
-    """Apply the registered rule to every session in [lo, hi]. Returns trades + nights + aux series."""
+def collect_trades(pn: dict, master: pd.DataFrame, act: pd.DataFrame | None, which: str, lo, hi,
+                   adv_band: tuple = (ADV_MIN, np.inf)) -> dict:
+    """Apply the registered rule to every session in [lo, hi]. Returns trades + nights + aux series.
+    adv_band: the ADV20 eligibility band (default = the registered $10M floor; N 1256 uses [2e6, 1e7))."""
     mt = master_by_ticker(master)
     prim = universe_mask(pn, master, which)
-    el = eligible_mask(pn) & prim
+    el = eligible_mask(pn, adv_band) & prim
     sec = _sector_arrays(pn, master)
     date = pn["date"]
     inwin = (date >= np.datetime64(lo)) & (date <= np.datetime64(hi))
@@ -663,9 +666,16 @@ def iwm_overnight(P: Paths, lo, hi) -> pd.Series | None:
     return None
 
 
+THIN_ADD_BPS = 10.0   # N 1256: tier_hi + 10bp/side for ADV < $10M (the tier model has no thin tier)
+
+
 def cost_model(model: str, cu, adv):
     if model == "2x_tier_hi":
         return 2 * book.cost_bps("tier_hi", cu, adv)
+    if model == "tier_hi_thin":
+        return book.cost_bps("tier_hi", cu, adv) + THIN_ADD_BPS * (np.asarray(adv, float) < ADV_MIN)
+    if model == "2x_tier_hi_thin":
+        return 2 * cost_model("tier_hi_thin", cu, adv)
     return book.cost_bps(model, cu, adv)
 
 

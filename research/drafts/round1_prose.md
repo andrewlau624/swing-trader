@@ -11545,3 +11545,17 @@ Common to all four:
 - Corr with the night leg is about 0: independent, but a loser.
 - **Family closed (N 1242/1248/1249/1253/1257):** the AL s-score carries ~1-4bp/day of real gross information in every window (close-close, night, day). No fresh-basket daily form clears even ~0bp auction costs plus the gate. The binding constraint is size, not timing.
 - Not tested: s as a tilt inside the IBS leg's own names (no added turnover); top-50/100; an ETF-only universe.
+
+### RESULT - N 1256 THIN-NIGHT (run 2026-11-21): KILL at the registered cost, every gate fails
+- Judge 2003-15: 4,653 trades, net -2.35bp/night (t -3.5). Subperiods -2.2 / -0.7 / -3.1; 2x -8.5.
+- Harness check: the live band reproduces +3.07bp at tier.
+- **The bounce is bigger in thin names** (gross +40.7bp/trade, median +23.8, vs the live band's smaller per-trade gross). But the registered round trip is 59.5bp (54% of picks are < $10 at 25 + 10bp/side).
+  - Context (not gated): plain tier_hi -0.28; **tier +1.24bp/night** (2016-26: +2.88).
+- No trade breaches 1% of ADV at $10k/$25k. Capacity is not the issue; cost is. Corr with the live leg +0.45.
+- Combined book at $10k: worse than the live leg alone.
+- Report 2016-26: net -4.50.
+- Not tested:
+  - thin-name costs at measured live levels (the +10bp add is an assumption; the tier result is positive);
+  - price >= $10 only; limit-on-close entry;
+  - a thin-only crowding/dedupe.
+- **The decisive unknown is the real auction cost in $2-10M names.** It can be measured from the live fill-cost log if the live book ever trades names near the $10M floor; see the NEXT note.

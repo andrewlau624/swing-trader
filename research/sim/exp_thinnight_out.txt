@@ -1,0 +1,29 @@
+THIN-NIGHT (N 1256): exact NX live rule (nx.collect_trades, primary) with ADV20 in [$2M, $10M); cost tier_hi + 10bp/side, shock 2x; NX delisting rules; DSR at N 1256
+
+=== JUDGE 2003-2015: nights 2003-01-02..2015-12-31
+  thin band [$2M, $10M): 4653 trades on 1572 of 3273 nights; outcome kinds {'open': 4653}; open print on the exit session 100.0% of picks; mean leg weight/name 0.073
+  live band (check): 4599 trades; tier_hi +1.91bp/night, tier +3.07 (NEXT.md NX RESULT 2003-15 primary tier: +3.07)
+  leg: gross +3.79bp/night | net tier_hi+10 -2.35bp (NW t -3.50; iid t -3.40) | subperiods 2003-07 -2.17 2008-09 -0.68 2010-15 -3.06 | 2x cost -8.49 | ex-top5 -2.86 | median night +0.00 | per-trade median net -33.5bp hit 42.2% | DSR(N 1256) 0.000
+  mean round-trip cost 59.5bp; per-trade gross mean +40.7bp median +23.8bp
+  context (not gated): net at plain tier_hi -0.28bp/night, at tier +1.24; share of picks priced < $10 53.5%
+  per-trade net by ADV: $2-4M n 2003 mean -16.7bp median -38.5 | $4-7M n 1629 mean -33.5bp median -37.8 | $7-10M n 1021 mean +0.5bp median -17.8
+  participation at $10k (whole account in the leg, $ = per x equity): share of trades > 1% of ADV20 0.0%; median $ 894 vs median ADV $4.5M
+  participation at $25k (whole account in the leg, $ = per x equity): share of trades > 1% of ADV20 0.0%; median $ 2236 vs median ADV $4.5M
+  independence: daily corr with the live-band night leg (tier_hi) +0.453; nights both trade 968
+  combined at $10k (50/50 of the night capital, live tier_hi + thin): -0.22bp/night (t -0.33) vs live alone +1.91 (t +2.07)
+  by year (net bp/night): 03:-6.4 04:-3.1 05:-0.3 06:-3.6 07:+2.5 08:-3.0 09:+1.6 10:-2.4 11:-0.8 12:-2.8 13:+0.3 14:-6.6 15:-6.2
+  GATES: net>=3bp FAIL | NW t>=2.5 FAIL | 3 subperiods>0 FAIL | ex-top5>0 FAIL | 2x cost>0 FAIL -> KILL
+  VERDICT N 1256 THIN-NIGHT: KILL
+
+=== REPORT 2016-2026-10 (never judged): nights 2016-01-01..2026-10-05
+  thin band [$2M, $10M): 7493 trades on 2041 of 2704 nights; outcome kinds {'open': 7492, 'delist_nopx': 1}; open print on the exit session 100.0% of picks; mean leg weight/name 0.077
+  live band (check): 10740 trades; tier_hi +3.21bp/night, tier +6.22 (NEXT.md NX RESULT 2003-15 primary tier: +3.07)
+  leg: gross +8.13bp/night | net tier_hi+10 -4.50bp (NW t -2.55; iid t -2.49) | subperiods 2016-20 -5.26 2021-26 -3.83 | 2x cost -17.13 | ex-top5 -6.25 | median night +0.00 | per-trade median net -36.5bp hit 40.8% | DSR(N 1256) 0.000
+  mean round-trip cost 59.0bp; per-trade gross mean +41.1bp median +20.0bp
+  context (not gated): net at plain tier_hi -0.22bp/night, at tier +2.88; share of picks priced < $10 52.5%
+  per-trade net by ADV: $2-4M n 3060 mean -18.9bp median -40.0 | $4-7M n 2719 mean -4.9bp median -35.8 | $7-10M n 1714 mean -36.3bp median -32.4
+  participation at $10k (whole account in the leg, $ = per x equity): share of trades > 1% of ADV20 0.0%; median $ 895 vs median ADV $4.7M
+  participation at $25k (whole account in the leg, $ = per x equity): share of trades > 1% of ADV20 0.0%; median $ 2237 vs median ADV $4.7M
+  independence: daily corr with the live-band night leg (tier_hi) +0.322; nights both trade 1729
+  combined at $10k (50/50 of the night capital, live tier_hi + thin): -0.65bp/night (t -0.41) vs live alone +3.21 (t +1.43)
+  by year (net bp/night): 16:-10.4 17:-0.6 18:-5.5 19:-3.4 20:-6.5 21:+6.1 22:-6.0 23:-6.9 24:-0.3 25:-8.7 26:-8.5
