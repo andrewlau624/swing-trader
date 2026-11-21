@@ -11483,3 +11483,32 @@ Common to all four:
 - Not tested:
   - N 1254: raw (non-beta-matched) rebound leaders = Daniel-Moskowitz directly; other confirmation levels; longer holds; ETF universes.
   - N 1255: the ratio as a conditioning variable inside reversal; other windows; implied-vs-realised; an IBS filter.
+
+### RESULT - N 1253 PCA-NIGHT (run 2026-11-21): KILL, zero even before costs
+- Judge 2003-15, 3,273 nights. Harness check: the NX live rule reproduces at +3.11bp (recorded +3.07).
+- The 20 most negative s earn +4.31bp/night gross vs EW +4.39: excess -0.08bp gross, -20.3bp net at tier_hi (turnover 2.0/night). Placebo 96th percentile on a ~1.4bp gross difference.
+- 2016-26: -1.55bp gross excess.
+- **Class (N 1242/1248/1249/1253):** the AL s-score's reversion lives in the close-to-close day, not the night.
+- Not tested: open T+1 -> close T+1 (daytime) holds; s as a tilt on the live night picks; an overnight short of the top s.
+- **DATA BUG found by this run (program-wide):** Sharadar SEP `volume` is split-adjusted (AAPL 2014-06-06: 349.9M shares, about 28x raw). So `closeunadj * volume` overstates past ADV by every later split.
+  - That is lookahead: it favours future splitters, i.e. winners, in ADV filters and ranks.
+  - The correct form is `close * volume` (NX does this). About 33 research files use the wrong form, including `exp_rl_universe` (all EXP-round studies), weekwin_short, gap_night, special_ex, stk_ibs_open, pref_* and fetch_moc1550.
+  - The bias makes results look better, so recorded KILLs stand. Recorded PASS/SHADOW/live results built on these files are being audited (2026-11-21) and will be amended here.
+
+## Amendment - DEEP round 3c: thin names in the night leg, where small size is the advantage (pre-registered before any outcome; N 1253 -> 1256)
+- Why: the night leg's ADV floor is $10M (nx.ADV_MIN). Addendum 16 found "cheap thin names are the best bounces" inside the live universe. Below $10M, funds cannot play, but $10k (20 x $500) can.
+- **N 1256 THIN-NIGHT:**
+  - The exact NX live rule (`nx.collect_trades`, primary universe, all registered filters and caps), with the ADV band changed to $2M <= ADV20 < $10M. ADV = split-adjusted close x volume, as NX does.
+  - Costs: tier_hi + 10bp/side for every name with ADV < $10M (the tier model has no thin tier). Shock 2x that.
+  - Participation check: each name's $ at $10k and $25k <= 1% of ADV20. Report the share of trades that breach it.
+  - JUDGE 2003-2015 (NX subperiods 2003-07 / 2008-09 / 2010-15); REPORT 2016-2026-10.
+  - Gates:
+    - net >= +3bp/night per book (the NX primary scale); NW t >= 2.5;
+    - all 3 subperiods > 0; ex-top-5 nights > 0; median-night > 0 not required (matches NX);
+    - 2x cost > 0 (stricter than NX, because thin-name costs are unmeasured).
+  - Report:
+    - daily corr with the live-band night series (independence);
+    - the per-trade net by ADV bucket ($2-4M, $4-7M, $7-10M);
+    - open-auction availability (share of picks with an open print); DSR at N 1256.
+  - Ceiling: night shape. If it passes it is additive capital-wise only if the live book is capital-limited; report the combined book at $10k.
+  - Kill: any gate fails.

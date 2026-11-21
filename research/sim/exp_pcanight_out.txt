@@ -1,0 +1,28 @@
+PCA-NIGHT (N 1253): AL s-score through T-1 (N 1242 base), buy the 20 most negative s < -1.25 at close T, sell open T+1; nx tier_hi costs (2x shock), NX delisting rules; excess vs EW top-1000 overnight; DSR at N 1253
+
+=== JUDGE 2003-2015: load 2001-09-01..2016-01-15, nights 2003-01-02..2015-12-31 (halves split 2009-12-31)
+  NX live rule (primary, nx.collect_trades): +3.11bp/night at tier, +1.95 at tier_hi over 3273 nights (NEXT.md NX RESULT 2003-15 primary tier: +3.07bp)
+  panel: 3614 sessions x 8108 common names (ever $10M/day, split-adjusted $ volume); duplicate rows 0; delisted inside the panel 3541; |ret|>50% cells 10346; open missing where close present 0
+  signal: first 2002-09-10; universe mean 994; MP factors kept mean 8.45 (min 5, max 11); valid s/day 983
+  outcomes (all tradable names, all nights): {'open': 3226152, 'delist_nopx': 568}
+  book: 3273 nights, 3273 with picks; names/night 20.0 (nights < 20: 0.0%); turnover 2.0/night (fresh basket, buy close + sell open)
+  absolute: gross +4.31bp/night, net tier_hi -15.94 (t -11.01), 2x -36.19; EW universe overnight +4.39bp
+  EXCESS vs EW: gross -0.08bp/night | net tier_hi -20.33bp (NW t -24.15, -51.2%/yr) | halves -21.52 / -18.94 | 2x tier_hi -40.58 | ex-top5 -20.75 | median night -18.08 hit 0.19 | DSR(N 1253) 0.000
+  diagnostic (UNTRADABLE, s through close T): gross excess +0.98bp/night, net tier_hi excess -19.29
+  independence: daily corr with the NX live night leg (tier_hi) — book net +0.328, excess +0.035 (3273 nights)
+  by year (net excess bp/night): 03:-23.5 04:-19.3 05:-21.5 06:-24.1 07:-18.7 08:-23.3 09:-20.2 10:-21.9 11:-17.6 12:-16.5 13:-22.6 14:-18.1 15:-17.0
+  placebo (within-date shuffle of s, 50 draws, net excess): mean -21.72bp 95th -20.58 -> real -20.33 at pct 96
+  GATES: net>=5bp FAIL | t>=2.5 FAIL | halves>0 FAIL | 2x tier_hi>0 FAIL | ex-top5>0 FAIL | placebo95 PASS -> KILL
+  VERDICT N 1253 PCA-NIGHT: KILL
+
+=== REPORT 2016-2026-10 (never judged): load 2014-09-01..2026-10-05, nights 2016-01-01..2026-10-05 (halves split 2020-12-31)
+  NX live rule (primary, nx.collect_trades): +6.29bp/night at tier, +3.28 at tier_hi over 2704 nights (NEXT.md NX RESULT 2003-15 primary tier: +3.07bp)
+  panel: 3041 sessions x 9691 common names (ever $10M/day, split-adjusted $ volume); duplicate rows 0; delisted inside the panel 4217; |ret|>50% cells 13256; open missing where close present 0
+  signal: first 2015-09-01; universe mean 1000; MP factors kept mean 10.78 (min 8, max 15); valid s/day 989
+  outcomes (all tradable names, all nights): {'delist_nopx': 492, 'open': 2672909}
+  book: 2704 nights, 2703 with picks; names/night 20.0 (nights < 20: 0.0%); turnover 2.0/night (fresh basket, buy close + sell open)
+  absolute: gross +3.46bp/night, net tier_hi -14.19 (t -7.46), 2x -31.84; EW universe overnight +5.01bp
+  EXCESS vs EW: gross -1.55bp/night | net tier_hi -19.20bp (NW t -19.42, -48.4%/yr) | halves -19.13 / -19.26 | 2x tier_hi -36.85 | ex-top5 -19.76 | median night -17.30 hit 0.23 | DSR(N 1253) 0.000
+  diagnostic (UNTRADABLE, s through close T): gross excess -3.34bp/night, net tier_hi excess -21.01
+  independence: daily corr with the NX live night leg (tier_hi) — book net +0.362, excess +0.062 (2704 nights)
+  by year (net excess bp/night): 16:-26.1 17:-18.7 18:-17.0 19:-17.4 20:-16.6 21:-21.0 22:-20.6 23:-18.9 24:-19.5 25:-17.2 26:-18.1

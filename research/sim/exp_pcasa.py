@@ -64,20 +64,25 @@ def _dfilt(path, d):
     return pd.Timestamp(d).date() if pa.types.is_date(typ) else pd.Timestamp(d)
 
 
-def load_panel(d0: str, d1: str, src: dict | None = None, want_vol: bool = False, prefilter: bool = False):
+def load_panel(d0: str, d1: str, src: dict | None = None, want_vol: bool = False, prefilter: bool = False,
+               want_open: bool = False, adv_adj: bool = False):
     """Dense session x name panels of total return (div-adjusted, split-adjusted close) and ADV20 ($, unadjusted).
     src: file paths (default the NX caches). want_vol: also return dense share volume and its 20d mean.
     prefilter: drop names whose daily $ volume never reaches ADV_MIN in the window (result-neutral: they can never
-    enter the top-ADV20 universe, and only universe names enter factors, regressions or books)."""
+    enter the top-ADV20 universe, and only universe names enter factors, regressions or books).
+    want_open: also return dense open, close (split-adjusted) and ex-date dividends (cash, unadjusted).
+    adv_adj: dollar volume = split-adjusted close x volume. SEP volume is split-adjusted (AAPL 2014-06-06: 349.9M
+    shares = 12.5M raw x 28), so the default closeunadj x volume (exp_rl_universe convention, kept for N 1242-1249
+    reproducibility) overstates $ volume by every LATER split factor: a lookahead tilt toward future splitters."""
     src = src or NX_SRC
     t = pd.read_parquet(src["tickers"], columns=["table", "ticker", "category"])
     t = t[t.table == "SEP"]
     common = sorted(set(t.ticker[is_common(t.category.fillna("").astype(str))]))
-    tb = pq.read_table(src["sep"], columns=["ticker", "date", "close", "volume", "closeunadj"],
+    tb = pq.read_table(src["sep"], columns=["ticker", "date", "close", "volume", "closeunadj"] + (["open"] if want_open else []),
                        filters=[("date", ">=", _dfilt(src["sep"], d0)), ("date", "<=", _dfilt(src["sep"], d1)),
                                 ("ticker", "in", common)])
     if prefilter:
-        dvol = pc.multiply(tb["closeunadj"], tb["volume"])
+        dvol = pc.multiply(tb["close" if adv_adj else "closeunadj"], tb["volume"])
         mx = pa_table_groupmax(tb["ticker"], dvol)
         tb = tb.filter(pc.is_in(tb["ticker"], value_set=mx))
     tick = pc.dictionary_encode(tb["ticker"]).combine_chunks()
@@ -91,7 +96,9 @@ def load_panel(d0: str, d1: str, src: dict | None = None, want_vol: bool = False
     dup = len(key) - len(np.unique(key))
     close = np.full((D, N), np.nan); cu = np.full((D, N), np.nan); dv = np.full((D, N), np.nan, np.float32)
     c_ = tb["close"].to_numpy(); u_ = tb["closeunadj"].to_numpy(); v_ = tb["volume"].to_numpy()
-    close[si, code] = c_; cu[si, code] = u_; dv[si, code] = (u_ * v_).astype(np.float32)
+    close[si, code] = c_; cu[si, code] = u_; dv[si, code] = ((c_ if adv_adj else u_) * v_).astype(np.float32)
+    if want_open:
+        op = np.full((D, N), np.nan, np.float32); op[si, code] = tb["open"].to_numpy().astype(np.float32)
     if want_vol:
         vol = np.full((D, N), np.nan, np.float32); vol[si, code] = v_.astype(np.float32)
     del tb, c_, u_, v_, dt, si, code, tick, key
@@ -110,6 +117,7 @@ def load_panel(d0: str, d1: str, src: dict | None = None, want_vol: bool = False
     R = np.vstack([np.full((1, N), np.nan), R])
     R[~np.isfinite(R)] = np.nan
     R = R.astype(np.float32)
+    extra = dict(open=op, close=close.astype(np.float32), div=div.astype(np.float32)) if want_open else {}
     del close, div, divadj
     cu = cu.astype(np.float32)
     adv = pd.DataFrame(dv).rolling(20, min_periods=20).mean().to_numpy(np.float32)
@@ -127,6 +135,7 @@ def load_panel(d0: str, d1: str, src: dict | None = None, want_vol: bool = False
     lastbar = np.where(np.isfinite(cu), np.arange(D)[:, None], -1).max(0)
     info = dict(dup=dup, N=N, D=D, spy_nan=int(np.isnan(spy[1:]).sum()),
                 delisted=int((lastbar < D - 5).sum()), names=names)
+    info.update(extra)
     if want_vol:
         info["vol"] = vol
         info["vol20"] = pd.DataFrame(vol).rolling(20, min_periods=20).mean().to_numpy(np.float32)

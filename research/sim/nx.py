@@ -551,6 +551,29 @@ def _sector_arrays(pn, master):
     return sec
 
 
+def night_outcome(tk, c, cu, o_next, has_next, dd, nxt, mt, dprice, divs, lastbar_fallback=None):
+    """Close(dd) -> open(nxt) outcome of one long night position, NX rules: open/close on the split-adjusted basis plus
+    an ex-dividend on nxt; with no next-session bar, the delisting price if the name ended (else -100%), and -100% for
+    a halt/gap. mt = master_by_ticker(master); lastbar_fallback() gives the last bar when TICKERS has no lastpricedate."""
+    if has_next:
+        ret = o_next / c - 1.0
+        dvd = divs.get((tk, np.datetime64(nxt, "ns")))
+        if dvd and 0 < dvd / cu < 0.25:
+            ret += dvd / cu
+        return ret, "open"
+    lastbar = mt.at[tk, "lastpricedate"] if tk in mt.index else pd.NaT
+    gone = bool(mt.at[tk, "delisted"]) if tk in mt.index else False
+    if pd.isna(lastbar) and lastbar_fallback is not None:
+        lastbar = pd.Timestamp(lastbar_fallback())
+    ended = gone and pd.notna(lastbar) and pd.Timestamp(lastbar) <= pd.Timestamp(dd)
+    px = dprice.get(tk, (None, None))[1] if ended else None
+    if ended and px is not None and 0 < px / cu <= 5:
+        return px / cu - 1.0, "delist_price"
+    if ended:
+        return -1.0, "delist_nopx"
+    return -1.0, "nobar_halt"
+
+
 def collect_trades(pn: dict, master: pd.DataFrame, act: pd.DataFrame | None, which: str, lo, hi) -> dict:
     """Apply the registered rule to every session in [lo, hi]. Returns trades + nights + aux series."""
     mt = master_by_ticker(master)
@@ -604,25 +627,10 @@ def collect_trades(pn: dict, master: pd.DataFrame, act: pd.DataFrame | None, whi
         w = sg.night_tilt(kept["vol20"].values, kept["day_ret"].values, TILT_K)
         x = frac * w * gs
         for k, (tk, r) in enumerate(kept.iterrows()):
-            i = int(r["row"]); kind = "open"
-            if pn["has_next"][i]:
-                ret = pn["o_next"][i] / pn["c"][i] - 1.0
-                dvd = divs.get((tk, np.datetime64(nxt, "ns")))
-                if dvd and 0 < dvd / pn["cu"][i] < 0.25:
-                    ret += dvd / pn["cu"][i]
-            else:
-                lastbar = mt.at[tk, "lastpricedate"] if tk in mt.index else pd.NaT
-                gone = bool(mt.at[tk, "delisted"]) if tk in mt.index else False
-                if pd.isna(lastbar):
-                    lastbar = pd.Timestamp(pn["date"][pn["start"][i]:][pn["tickers"][pn["start"][i]:] == tk][-1])
-                ended = gone and pd.Timestamp(lastbar) <= pd.Timestamp(dd)
-                px = dprice.get(tk, (None, None))[1] if ended else None
-                if ended and px is not None and 0 < px / pn["cu"][i] <= 5:
-                    ret, kind = px / pn["cu"][i] - 1.0, "delist_price"
-                elif ended:
-                    ret, kind = -1.0, "delist_nopx"
-                else:
-                    ret, kind = -1.0, "nobar_halt"
+            i = int(r["row"])
+            ret, kind = night_outcome(tk, pn["c"][i], pn["cu"][i], pn["o_next"][i], bool(pn["has_next"][i]), dd, nxt,
+                                      mt, dprice, divs,
+                                      lambda: pn["date"][pn["start"][i]:][pn["tickers"][pn["start"][i]:] == tk][-1])
             rows.append(dict(date=pd.Timestamp(dd), ticker=tk, x=float(x[k]), per=float(min(x[k], NAME_CAP)),
                              cu=float(r["price"]), adv=float(r["adv"]), vol20=float(r["vol20"]), day_ret=float(r["day_ret"]),
                              ret=float(ret), kind=kind, sector=sec[i], gap=float(gs), row=i))
