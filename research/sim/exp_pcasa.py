@@ -53,14 +53,33 @@ def say(*a):
 
 
 # ------------------------------------------------------------------ data (dense, float32)
-def load_panel(d0: str, d1: str):
-    """Dense session x name panels of total return (div-adjusted, split-adjusted close) and ADV20 ($, unadjusted)."""
-    t = pd.read_parquet(NXD / "cache_TICKERS.parquet", columns=["table", "ticker", "category"])
+NX_SRC = dict(sep=NXD / "cache_SEP.parquet", sfp=NXD / "cache_SFP.parquet", actions=NXD / "cache_ACTIONS.parquet",
+              tickers=NXD / "cache_TICKERS.parquet")
+
+
+def _dfilt(path, d):
+    """Filter value matching the file's date column type (timestamp in the NX caches, date32 in ~/data/sharadar)."""
+    import pyarrow as pa
+    typ = pq.read_schema(path).field("date").type
+    return pd.Timestamp(d).date() if pa.types.is_date(typ) else pd.Timestamp(d)
+
+
+def load_panel(d0: str, d1: str, src: dict | None = None, want_vol: bool = False, prefilter: bool = False):
+    """Dense session x name panels of total return (div-adjusted, split-adjusted close) and ADV20 ($, unadjusted).
+    src: file paths (default the NX caches). want_vol: also return dense share volume and its 20d mean.
+    prefilter: drop names whose daily $ volume never reaches ADV_MIN in the window (result-neutral: they can never
+    enter the top-ADV20 universe, and only universe names enter factors, regressions or books)."""
+    src = src or NX_SRC
+    t = pd.read_parquet(src["tickers"], columns=["table", "ticker", "category"])
     t = t[t.table == "SEP"]
     common = sorted(set(t.ticker[is_common(t.category.fillna("").astype(str))]))
-    tb = pq.read_table(NXD / "cache_SEP.parquet", columns=["ticker", "date", "close", "volume", "closeunadj"],
-                       filters=[("date", ">=", pd.Timestamp(d0)), ("date", "<=", pd.Timestamp(d1)),
+    tb = pq.read_table(src["sep"], columns=["ticker", "date", "close", "volume", "closeunadj"],
+                       filters=[("date", ">=", _dfilt(src["sep"], d0)), ("date", "<=", _dfilt(src["sep"], d1)),
                                 ("ticker", "in", common)])
+    if prefilter:
+        dvol = pc.multiply(tb["closeunadj"], tb["volume"])
+        mx = pa_table_groupmax(tb["ticker"], dvol)
+        tb = tb.filter(pc.is_in(tb["ticker"], value_set=mx))
     tick = pc.dictionary_encode(tb["ticker"]).combine_chunks()
     names = np.asarray(tick.dictionary.to_pylist(), dtype=object)
     code = tick.indices.to_numpy()
@@ -73,9 +92,11 @@ def load_panel(d0: str, d1: str):
     close = np.full((D, N), np.nan); cu = np.full((D, N), np.nan); dv = np.full((D, N), np.nan, np.float32)
     c_ = tb["close"].to_numpy(); u_ = tb["closeunadj"].to_numpy(); v_ = tb["volume"].to_numpy()
     close[si, code] = c_; cu[si, code] = u_; dv[si, code] = (u_ * v_).astype(np.float32)
+    if want_vol:
+        vol = np.full((D, N), np.nan, np.float32); vol[si, code] = v_.astype(np.float32)
     del tb, c_, u_, v_, dt, si, code, tick, key
     # dividends (ex-date), converted to the split-adjusted close basis like exp_rl_universe._features
-    a = pd.read_parquet(NXD / "cache_ACTIONS.parquet", columns=["date", "action", "ticker", "value"])
+    a = pd.read_parquet(src["actions"], columns=["date", "action", "ticker", "value"])
     a = a[(a.action == "dividend")]
     a["date"] = pd.to_datetime(a["date"])
     nm = pd.Series(np.arange(N), index=names)
@@ -94,11 +115,11 @@ def load_panel(d0: str, d1: str):
     adv = pd.DataFrame(dv).rolling(20, min_periods=20).mean().to_numpy(np.float32)
     del dv
     # SPY total return on the same sessions
-    sb = pq.read_table(NXD / "cache_SFP.parquet", columns=["ticker", "date", "close", "closeunadj"],
-                       filters=[("ticker", "=", "SPY"), ("date", ">=", pd.Timestamp(d0)),
-                                ("date", "<=", pd.Timestamp(d1))]).to_pandas()
+    sb = pq.read_table(src["sfp"], columns=["ticker", "date", "close", "closeunadj"],
+                       filters=[("ticker", "=", "SPY"), ("date", ">=", _dfilt(src["sfp"], d0)),
+                                ("date", "<=", _dfilt(src["sfp"], d1))]).to_pandas()
     sb["date"] = pd.to_datetime(sb["date"])
-    a0 = pd.read_parquet(NXD / "cache_ACTIONS.parquet", columns=["date", "action", "ticker", "value"])
+    a0 = pd.read_parquet(src["actions"], columns=["date", "action", "ticker", "value"])
     sd = a0[(a0.action == "dividend") & (a0.ticker == "SPY")].copy(); sd["date"] = pd.to_datetime(sd["date"])
     sb = sb.merge(sd.groupby("date")["value"].sum().rename("div").reset_index(), on="date", how="left").fillna({"div": 0})
     sb = sb.set_index("date").reindex(pd.DatetimeIndex(sessions))
@@ -106,13 +127,49 @@ def load_panel(d0: str, d1: str):
     lastbar = np.where(np.isfinite(cu), np.arange(D)[:, None], -1).max(0)
     info = dict(dup=dup, N=N, D=D, spy_nan=int(np.isnan(spy[1:]).sum()),
                 delisted=int((lastbar < D - 5).sum()), names=names)
+    if want_vol:
+        info["vol"] = vol
+        info["vol20"] = pd.DataFrame(vol).rolling(20, min_periods=20).mean().to_numpy(np.float32)
     return pd.DatetimeIndex(sessions), R, cu, adv, spy, info
 
 
+def pa_table_groupmax(tick, val):
+    """Tickers whose max daily $ volume reaches ADV_MIN."""
+    import pyarrow as pa
+    g = pa.table({"t": tick, "v": val}).group_by("t").aggregate([("v", "max")])
+    return g.filter(pc.greater_equal(g["v_max"], ADV_MIN))["t"]
+
+
 # ------------------------------------------------------------------ signal
-def build_signals(R, cu, adv, spy):
-    """Per session t (signal date): (idx, s, beta60) for names with a valid s; plus diagnostics."""
+def ou_score(E, Y, sp, cand):
+    """AL s-score from 60d residuals E (RW x n): X = cumsum(E), AR(1) fit, kappa filter, centred s; plus 60d SPY beta."""
+    Xc = np.cumsum(E, 0)
+    x0, x1 = Xc[:-1], Xc[1:]
+    m0, m1 = x0.mean(0), x1.mean(0)
+    vx = ((x0 - m0) ** 2).mean(0)
+    b = ((x0 - m0) * (x1 - m1)).mean(0) / vx
+    a = m1 - b * m0
+    z = x1 - a - b * x0
+    with np.errstate(invalid="ignore", divide="ignore"):
+        kappa = -np.log(b) * 252
+        m = a / (1 - b)
+        seq = np.sqrt(z.var(0) / (1 - b ** 2))
+        good = (b > 0) & (b < 1) & (kappa > KAPPA_MIN) & np.isfinite(seq) & (seq > 0)
+        ms = m / seq
+        s_raw = (Xc[-1] - m) / seq
+    if good.sum() < 2:
+        return None
+    s = s_raw[good] + ms[good].mean()                   # AL centring: -(m/s - <m/s>) when X_last = 0
+    spc = sp - sp.mean()                                # 60d beta vs SPY for the hedge (holdings-based book beta)
+    beta = (spc @ (Y[:, good] - Y[:, good].mean(0))) / (spc @ spc)
+    return cand[good], s.astype(np.float32), beta.astype(np.float32)
+
+
+def build_signals(R, cu, adv, spy, vscale=None):
+    """Per session t (signal date): (idx, s, beta60) for names with a valid s; plus diagnostics.
+    vscale=(vol, vol20): also return AL volume-time s (residuals x vol20/vol before cumulation) as a second list."""
     D, N = R.shape
+    out_v = [None] * D
     fin = np.isfinite(R).astype(np.int32)
     cs = np.vstack([np.zeros((1, N), np.int32), np.cumsum(fin, 0)])
     out = [None] * D
@@ -151,32 +208,21 @@ def build_signals(R, cu, adv, spy):
         Y = R[t - RW + 1:t + 1, cand].astype(np.float64)    # finite by construction (252 full)
         B = np.linalg.lstsq(X, Y, rcond=None)[0]
         E = Y - X @ B
-        Xc = np.cumsum(E, 0)                                # X_k, k = 1..60 (X_60 = 0 by the intercept)
-        x_end = max(x_end, float(np.abs(Xc[-1]).max()))
-        x0, x1 = Xc[:-1], Xc[1:]
-        m0, m1 = x0.mean(0), x1.mean(0)
-        vx = ((x0 - m0) ** 2).mean(0)
-        b = ((x0 - m0) * (x1 - m1)).mean(0) / vx
-        a = m1 - b * m0
-        z = x1 - a - b * x0
-        with np.errstate(invalid="ignore", divide="ignore"):
-            kappa = -np.log(b) * 252
-            m = a / (1 - b)
-            seq = np.sqrt(z.var(0) / (1 - b ** 2))
-            good = (b > 0) & (b < 1) & (kappa > KAPPA_MIN) & np.isfinite(seq) & (seq > 0)
-            ms = m / seq
-            s_raw = (Xc[-1] - m) / seq
-        if good.sum() < 2:
-            continue
-        s = s_raw[good] + ms[good].mean()                   # AL centring: -(m/s - <m/s>) since X_last = 0
-        # 60d beta vs SPY for the hedge (holdings-based book beta)
+        x_end = max(x_end, float(np.abs(E.sum(0)).max()))  # X_60 = 0 by the intercept
         sp = spy[t - RW + 1:t + 1].astype(np.float64)
-        spc = sp - sp.mean()
-        beta = (spc @ (Y[:, good] - Y[:, good].mean(0))) / (spc @ spc)
-        out[t] = (cand[good], s.astype(np.float32), beta.astype(np.float32))
-        nval_hist.append(int(good.sum()))
+        r0 = ou_score(E, Y, sp, cand)
+        if r0 is None:
+            continue
+        out[t] = r0
+        nval_hist.append(len(r0[0]))
+        if vscale is not None:
+            vol, vol20 = vscale
+            with np.errstate(invalid="ignore", divide="ignore"):
+                ratio = vol20[t - RW + 1:t + 1, cand].astype(np.float64) / vol[t - RW + 1:t + 1, cand]
+            ratio[~np.isfinite(ratio) | (ratio <= 0)] = 1.0     # zero / missing volume: no rescale
+            out_v[t] = ou_score(E * ratio, Y, sp, cand)
     diag = dict(nf=np.array(nf_hist), nu=np.array(nu_hist), nval=np.array(nval_hist), x_end=x_end, t_first=t_first)
-    return out, diag
+    return (out, out_v, diag) if vscale is not None else (out, diag)
 
 
 # ------------------------------------------------------------------ simulate

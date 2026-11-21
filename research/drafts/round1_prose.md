@@ -11403,3 +11403,19 @@ Common to all four:
 - **Class note:** with REGIME-X (stress/vol/credit/DD gates), R5 and the TDA forms, every market-state off-switch on this IBS+night book has failed out of sample. The book earns its best days inside stress, so a state gate removes them. Do not re-run this as a new indicator.
 - Not tested: other windows/thresholds/off rules; continuous exposure scaling; Wasserstein/entropy/Betti features; residual-correlation filtrations; learned models on topological features; an SPY-only TDA timing rule as its own registration (one form came near: 94.5th percentile, report only).
 - Run note: the agent refactored exp_tda.py for reuse. N 1245's output reproduced byte-identical.
+
+### RESULT - N 1248 PCA-SA-K30 and N 1249 PCA-SA-VOL (run 2026-11-21): both KILL, no arm passes either window
+- Benchmark: excess vs the EW universe at book beta. W1 = 1999-2010, W2 = 2011-2026-10 (`~/data/sharadar`; reproduces N 1242 exactly).
+- **K30:**
+  - W1: +2.9%/yr t 0.94, 2x -8.5%. W2: -6.4%/yr t -2.97.
+  - Gross vs EW +5.7 / +1.9bp/day, eaten by 0.9/day turnover.
+- **VOL** (volume-time s):
+  - LS W1 +1.4%/yr / W2 -7.6%. LO -0.6 / -1.3%. K30 -1.8 / -10.3%.
+  - Gross placebo 100th percentile in W1 (LS 92nd in W2).
+- DSR <= 0.015 on every arm.
+- **Family verdict (N 1242, 1248, 1249):** AL residual reversion has real gross information (placebo 100th percentile), but it is small after 2010 even gross: base LO vs EW is +0.1%/yr in W2. It does not survive 5bp/side at its turnover, in the daily close-to-close form.
+- Not tested:
+  - a low-turnover K30 (exit on s > -0.5 only);
+  - AL's exact published volume rule;
+  - a same-day MOC fill from a 15:50 signal (cache being built for 2016-26; ceiling looks marginal given the W2 gross);
+  - sector-ETF factors; longer holds.

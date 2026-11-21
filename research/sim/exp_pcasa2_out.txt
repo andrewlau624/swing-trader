@@ -1,0 +1,60 @@
+PCA-SA siblings: N 1248 K30 (long the 30 most negative s < -1.25) and N 1249 VOL (AL volume-time s: residual x vol20/vol). Sharadar ~/data/sharadar SEP common, delisted kept; benchmark EW universe at book beta; 5bp/side, shock 10bp; DSR at N 1249. A pass needs both windows.
+
+=== W1 1999-2010: load 1997-12-31..2010-12-31, evaluate 1999-01-01..2010-12-31 (halves split 2004-12-31)
+  panel: 3272 sessions x 8514 common names that ever trade $10M/day; duplicate rows 0; delisted inside the panel 4436 (last bar inside the eval window 4249); SPY missing 0; |ret|>50% cells 9881; zero/missing volume cells among priced 347503
+  signal: first 1998-12-31; universe mean 999 (min 910); MP factors kept mean 9.13 (min 7, max 12); valid s/day base 989, vol-time 883; max |X_60| base 2.5e-14
+  EW universe: +13.3%/yr, mean beta 1.08
+  base LS/LO (N 1242 replication, context) book: 3018 days; positions/day long 191.1 short 163.5 (days with 0 longs 0.0%); turnover/day long 0.23 short 0.29 hedge 0.032; long-book beta 1.09
+    gross: long +7.67bp/d, vs EW at beta +2.31bp/d; LS gross +4.06bp/d
+  LS (SPY-hedged): net +0.94bp/day (+2.4%/yr) Sharpe +0.34 t +1.07 | halves +3.27 / -1.38bp | 2x cost -1.78bp (-4.5%/yr) | ex-top5 +0.46bp | median month -0.12% (hit 0.48) | maxDD -29% | DSR(N 1249) 0.015
+  long excess vs EW at beta: net +1.18bp/day (+3.0%/yr) Sharpe +0.73 t +2.35 | halves +2.60 / -0.23bp | 2x cost +0.05bp (+0.1%/yr) | ex-top5 +0.92bp | median month +0.12% (hit 0.56) | maxDD -14% | DSR(N 1249) 0.212
+    by year (long excess bp/d): 99:+3.1 00:+6.1 01:+6.6 02:+2.1 03:-2.6 04:+0.3 05:-0.1 06:-2.0 07:+0.7 08:+0.9 09:-0.1 10:-0.8
+  K30 base (N 1248) book: 3018 days; positions/day long 30.0 short 0.0 (days with 0 longs 0.0%); turnover/day long 0.90 short 0.00 hedge 0.000; long-book beta 1.09
+    gross: long +11.49bp/d, vs EW at beta +5.66bp/d
+  long excess vs EW at beta: net +1.14bp/day (+2.9%/yr) Sharpe +0.29 t +0.94 | halves +3.97 / -1.69bp | 2x cost -3.38bp (-8.5%/yr) | ex-top5 +0.53bp | median month -0.14% (hit 0.48) | maxDD -30% | DSR(N 1249) 0.010
+    by year (long excess bp/d): 99:+6.1 00:+5.3 01:+11.7 02:+1.5 03:+0.6 04:-1.3 05:-1.1 06:-2.6 07:+0.6 08:-1.9 09:-5.2 10:+0.1
+  VOL LS/LO (N 1249) book: 3018 days; positions/day long 338.4 short 56.3 (days with 0 longs 0.0%); turnover/day long 0.20 short 0.55 hedge 0.077; long-book beta 1.08
+    gross: long +6.23bp/d, vs EW at beta +0.76bp/d; LS gross +5.09bp/d
+  LS (SPY-hedged): net +0.56bp/day (+1.4%/yr) Sharpe +0.11 t +0.39 | halves +4.10 / -2.97bp | 2x cost -3.58bp (-9.0%/yr) | ex-top5 -0.50bp | median month +0.09% (hit 0.52) | maxDD -55% | DSR(N 1249) 0.002
+  long excess vs EW at beta: net -0.25bp/day (-0.6%/yr) Sharpe -0.22 t -0.74 | halves +0.62 / -1.13bp | 2x cost -1.27bp (-3.2%/yr) | ex-top5 -0.41bp | median month -0.12% (hit 0.43) | maxDD -24% | DSR(N 1249) 0.000
+    by year (long excess bp/d): 99:+1.8 00:+2.0 01:+3.4 02:-1.3 03:-1.8 04:-0.4 05:-0.9 06:-1.3 07:+0.1 08:-1.3 09:-2.2 10:-1.0
+  VOL K30 (N 1249) book: 3018 days; positions/day long 30.0 short 0.0 (days with 0 longs 0.0%); turnover/day long 0.98 short 0.00 hedge 0.000; long-book beta 1.08
+    gross: long +9.72bp/d, vs EW at beta +4.18bp/d
+  long excess vs EW at beta: net -0.70bp/day (-1.8%/yr) Sharpe -0.20 t -0.62 | halves +2.41 / -3.80bp | 2x cost -5.58bp (-14.0%/yr) | ex-top5 -1.20bp | median month -0.24% (hit 0.47) | maxDD -61% | DSR(N 1249) 0.000
+    by year (long excess bp/d): 99:+6.5 00:+11.6 01:+3.6 02:+4.4 03:-7.3 04:-4.3 05:-4.2 06:-5.7 07:-1.7 08:-4.6 09:-5.3 10:-1.3
+  placebo VOL (within-date shuffle, 50 draws, gross): LS Sharpe 95th +0.56 vs real +1.00 (pct 100); LO-vs-EW 95th +0.4%/yr vs real +1.9% (pct 100)
+  GATES K30 base (N 1248) [W1 1999-2010]: excess>=8%/yr FAIL | t>=2 FAIL | halves>0 FAIL | 2xcost>0 FAIL | ex-top5>0 PASS -> FAIL
+  GATES VOL K30 (N 1249) [W1 1999-2010]: excess>=8%/yr FAIL | t>=2 FAIL | halves>0 FAIL | 2xcost>0 FAIL | ex-top5>0 FAIL -> FAIL
+  GATES VOL LS (N 1249) [W1 1999-2010]: Sharpe>=1.0 FAIL | t>=2.5 FAIL | halves>0 FAIL | 2xcost>0 FAIL | ex-top5>0 FAIL | median-month>0 PASS | placebo95 PASS -> FAIL
+  GATES VOL LO (N 1249) [W1 1999-2010]: excess>=8%/yr FAIL | t>=2 FAIL | halves>0 FAIL | 2xcost>0 FAIL | placebo95 PASS -> FAIL
+
+=== W2 2011-2026-10: load 2009-10-01..2026-10-05, evaluate 2011-01-01..2026-10-05 (halves split 2018-12-31)
+  panel: 4278 sessions x 10660 common names that ever trade $10M/day; duplicate rows 0; delisted inside the panel 5258 (last bar inside the eval window 5037); SPY missing 0; |ret|>50% cells 15476; zero/missing volume cells among priced 312256
+  signal: first 2010-10-01; universe mean 1000 (min 1000); MP factors kept mean 9.98 (min 5, max 15); valid s/day base 989, vol-time 896; max |X_60| base 6.4e-14
+  EW universe: +12.6%/yr, mean beta 1.09
+  base LS/LO (N 1242 replication, context) book: 3962 days; positions/day long 189.7 short 163.4 (days with 0 longs 0.0%); turnover/day long 0.23 short 0.29 hedge 0.032; long-book beta 1.08
+    gross: long +6.14bp/d, vs EW at beta +1.18bp/d; LS gross +2.64bp/d
+  LS (SPY-hedged): net -0.49bp/day (-1.2%/yr) Sharpe -0.19 t -0.68 | halves -1.02 / +0.05bp | 2x cost -3.23bp (-8.1%/yr) | ex-top5 -0.96bp | median month -0.02% (hit 0.48) | maxDD -37% | DSR(N 1249) 0.000
+  long excess vs EW at beta: net +0.05bp/day (+0.1%/yr) Sharpe +0.03 t +0.12 | halves +0.29 / -0.21bp | 2x cost -1.09bp (-2.7%/yr) | ex-top5 -0.21bp | median month -0.02% (hit 0.50) | maxDD -16% | DSR(N 1249) 0.001
+    by year (long excess bp/d): 11:+0.8 12:+0.7 13:+0.7 14:+0.1 15:+1.5 16:-0.6 17:-0.8 18:+0.0 19:-1.3 20:+1.9 21:-1.7 22:-1.2 23:-0.1 24:-2.1 25:+1.5 26:+1.8
+  K30 base (N 1248) book: 3962 days; positions/day long 30.0 short 0.0 (days with 0 longs 0.0%); turnover/day long 0.89 short 0.00 hedge 0.000; long-book beta 1.08
+    gross: long +6.50bp/d, vs EW at beta +1.91bp/d
+  long excess vs EW at beta: net -2.53bp/day (-6.4%/yr) Sharpe -0.81 t -2.97 | halves -1.22 / -3.88bp | 2x cost -6.96bp (-17.5%/yr) | ex-top5 -2.95bp | median month -0.45% (hit 0.39) | maxDD -70% | DSR(N 1249) 0.000
+    by year (long excess bp/d): 11:-1.2 12:+1.5 13:-2.5 14:+1.4 15:-1.6 16:-1.1 17:-5.2 18:-1.1 19:-3.3 20:+0.7 21:-8.1 22:-7.4 23:-6.1 24:-7.7 25:+0.6 26:+1.6
+  VOL LS/LO (N 1249) book: 3962 days; positions/day long 247.2 short 82.8 (days with 0 longs 0.0%); turnover/day long 0.23 short 0.43 hedge 0.046; long-book beta 1.10
+    gross: long +5.60bp/d, vs EW at beta +0.60bp/d; LS gross +0.89bp/d
+  LS (SPY-hedged): net -3.01bp/day (-7.6%/yr) Sharpe -1.17 t -4.42 | halves -3.18 / -2.82bp | 2x cost -6.51bp (-16.4%/yr) | ex-top5 -3.43bp | median month -0.54% (hit 0.34) | maxDD -72% | DSR(N 1249) 0.000
+  long excess vs EW at beta: net -0.53bp/day (-1.3%/yr) Sharpe -0.47 t -1.71 | halves -0.50 / -0.56bp | 2x cost -1.66bp (-4.2%/yr) | ex-top5 -0.74bp | median month -0.10% (hit 0.43) | maxDD -26% | DSR(N 1249) 0.000
+    by year (long excess bp/d): 11:-0.8 12:-1.9 13:-0.2 14:+0.5 15:+0.8 16:-0.7 17:-1.1 18:-0.8 19:-1.1 20:-1.0 21:-2.0 22:-1.1 23:-0.3 24:-1.3 25:+1.4 26:+1.5
+  VOL K30 (N 1249) book: 3962 days; positions/day long 30.0 short 0.0 (days with 0 longs 0.0%); turnover/day long 0.95 short 0.00 hedge 0.000; long-book beta 1.09
+    gross: long +5.05bp/d, vs EW at beta +0.66bp/d
+  long excess vs EW at beta: net -4.08bp/day (-10.3%/yr) Sharpe -1.38 t -5.04 | halves -3.91 / -4.25bp | 2x cost -8.81bp (-22.2%/yr) | ex-top5 -4.55bp | median month -0.66% (hit 0.36) | maxDD -81% | DSR(N 1249) 0.000
+    by year (long excess bp/d): 11:-6.5 12:-4.1 13:-2.2 14:-3.4 15:-2.9 16:-6.7 17:-2.7 18:-2.6 19:-1.1 20:-6.4 21:-3.5 22:-9.5 23:-2.9 24:-6.3 25:-2.5 26:-0.9
+  placebo VOL (within-date shuffle, 50 draws, gross): LS Sharpe 95th +0.39 vs real +0.35 (pct 92); LO-vs-EW 95th +0.8%/yr vs real +1.5% (pct 100)
+  GATES K30 base (N 1248) [W2 2011-2026-10]: excess>=8%/yr FAIL | t>=2 FAIL | halves>0 FAIL | 2xcost>0 FAIL | ex-top5>0 FAIL -> FAIL
+  GATES VOL K30 (N 1249) [W2 2011-2026-10]: excess>=8%/yr FAIL | t>=2 FAIL | halves>0 FAIL | 2xcost>0 FAIL | ex-top5>0 FAIL -> FAIL
+  GATES VOL LS (N 1249) [W2 2011-2026-10]: Sharpe>=1.0 FAIL | t>=2.5 FAIL | halves>0 FAIL | 2xcost>0 FAIL | ex-top5>0 FAIL | median-month>0 FAIL | placebo95 FAIL -> FAIL
+  GATES VOL LO (N 1249) [W2 2011-2026-10]: excess>=8%/yr FAIL | t>=2 FAIL | halves>0 FAIL | 2xcost>0 FAIL | placebo95 PASS -> FAIL
+
+VERDICT N 1248 PCA-SA-K30: KILL (W1 False, W2 False)
+VERDICT N 1249 PCA-SA-VOL: KILL (VOL LS: W1 False W2 False, VOL LO: W1 False W2 False, VOL K30 (N 1249): W1 False W2 False)
