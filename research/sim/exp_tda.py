@@ -89,9 +89,9 @@ def load_prices():
     return C
 
 
-def build_l1(C):
-    if CACHE.exists():
-        s = pd.read_parquet(CACHE)
+def build_l1(C, standardize=True, cache=CACHE):
+    if cache.exists():
+        s = pd.read_parquet(cache)
         if s.index.max() == C.index.max():
             return s
     R = np.log(C).diff()
@@ -101,11 +101,13 @@ def build_l1(C):
         cols = [j for j in range(4) if np.isfinite(win[:, j]).all()]
         if len(cols) < 3 or not all(c in cols for c in (0, 1, 2)):
             continue
-        X = win[:, cols]; X = (X - X.mean(0)) / X.std(0, ddof=1)
+        X = win[:, cols]
+        if standardize:
+            X = (X - X.mean(0)) / X.std(0, ddof=1)
         h1 = ripser(X, maxdim=1)["dgms"][1]
         rows.append((idx[i], landscape_l1(h1), len(cols), len(h1), float((h1[:, 1] - h1[:, 0]).max()) if len(h1) else 0.0))
     s = pd.DataFrame(rows, columns=["date", "l1", "dim", "nbars", "maxpers"]).set_index("date")
-    CACHE.parent.mkdir(parents=True, exist_ok=True); s.to_parquet(CACHE)
+    cache.parent.mkdir(parents=True, exist_ok=True); s.to_parquet(cache)
     P(f"[l1] {len(s)} days computed in {time.time()-t0:.0f}s")
     return s
 
@@ -165,12 +167,22 @@ def dd_episodes(px, lo, hi, n=5):
     return sorted(out, key=lambda x: x[2])[:n]
 
 
-def main():
+def main(standardize=True, cache=CACHE, n_trials=N_TRIALS, out=OUT, tag="N 1245 TDA"):
     selftest()
     C = load_prices()
     P(f"prices: {C.index.min().date()}..{C.index.max().date()} (SFP closeadj; last on-disk bar {C.index.max().date()})")
-    s = build_l1(C)
+    s = build_l1(C, standardize, cache)
     s["z"] = zscore(s.l1)
+    warn = s.z > ZTH
+    head = (f"L1: {len(s)} days, dim3 {int((s.dim==3).sum())} / dim4 {int((s.dim==4).sum())}; H1 bars/day median {s.nbars.median():.0f}; "
+            f"z available from {s.z.first_valid_index().date()}; warnings (z>2) {int(warn.sum())} days")
+    ok = run_gates(C, s.l1, s.z, warn, head, n_trials)
+    P(f"\n{'PASS' if ok[0] else 'KILL'}: {tag} - {ok[1]}")
+    out.write_text("\n".join(L) + "\n")
+
+
+def run_gates(C, score, z, warn, head, n_trials, nm="TDA", slabel="L1"):
+    """Five N 1245 gates + reports for a warning series on signal dates. score/z: the raw statistic and its trailing z."""
     legs = pd.read_parquet(D / "legs.parquet"); idx = legs.index
     book = 0.5 * legs.ibs + 0.5 * legs.night
     book2x = 0.5 * (legs.ibs - 2 * COST * (legs.ibs != 0)) + 0.5 * (legs.night - 2 * COST * (legs.night != 0))
@@ -179,7 +191,6 @@ def main():
     full = C.index[C.index >= idx.min()]
     rf_full = (tb.reindex(full, method="ffill") / 100 / 252).fillna(0.0)
     rf = rf_full.reindex(idx).fillna(0.0)
-    warn = s.z > ZTH
     # vol gate: 20d SPY realized vol, z vs trailing 500, same off rule
     lr = np.log(C.SPY).diff(); rv = lr.rolling(20).std(); vz = (rv - rv.rolling(ZWIN).mean()) / rv.rolling(ZWIN).std()
     vwarn = vz > ZTH
@@ -187,16 +198,14 @@ def main():
     e_spy = exposure(warn, full); v_spy = exposure(vwarn, full)
     spy_f = spy.reindex(full).fillna(0.0)
 
-    P(f"L1: {len(s)} days, dim3 {int((s.dim==3).sum())} / dim4 {int((s.dim==4).sum())}; H1 bars/day median {s.nbars.median():.0f}; "
-      f"z available from {s.z.first_valid_index().date()}; warnings (z>2) {int(warn.sum())} days")
-    m_j = (s.index >= JUDGE[0]) & (s.index <= JUDGE[1])
-    cj = pd.concat([s.l1, rv.reindex(s.index)], axis=1).dropna()
+    P(head)
+    cj = pd.concat([score, rv.reindex(score.index)], axis=1).dropna()
     cjj = cj[(cj.index >= JUDGE[0]) & (cj.index <= JUDGE[1])]
-    P(f"corr(L1, SPY 20d realized vol): full {cj.corr().iloc[0,1]:+.3f} (Spearman {cj.corr('spearman').iloc[0,1]:+.3f}); "
+    P(f"corr({slabel}, SPY 20d realized vol): full {cj.corr().iloc[0,1]:+.3f} (Spearman {cj.corr('spearman').iloc[0,1]:+.3f}); "
       f"JUDGE {cjj.corr().iloc[0,1]:+.3f} (Spearman {cjj.corr('spearman').iloc[0,1]:+.3f})")
-    zz = pd.concat([s.z, vz.reindex(s.index)], axis=1).dropna()
-    P(f"corr(TDA z, vol z) JUDGE {zz[(zz.index>=JUDGE[0])&(zz.index<=JUDGE[1])].corr().iloc[0,1]:+.3f}; "
-      f"warning-day overlap TDA&vol {int((warn & vwarn.reindex(warn.index, fill_value=False)).sum())} of TDA {int(warn.sum())} / vol {int(vwarn.sum())}")
+    zz = pd.concat([z, vz.reindex(z.index)], axis=1).dropna()
+    P(f"corr({nm} z, vol z) JUDGE {zz[(zz.index>=JUDGE[0])&(zz.index<=JUDGE[1])].corr().iloc[0,1]:+.3f}; "
+      f"warning-day overlap {nm}&vol {int((warn & vwarn.reindex(warn.index, fill_value=False)).sum())} of {nm} {int(warn.sum())} / vol {int(vwarn.sum())}")
     P()
 
     res = {}
@@ -208,7 +217,7 @@ def main():
             (_, _, _), (vc, vm, vk), _ = arm_stats(base, v, r_, lo, hi)
             m = (base.index >= lo) & (base.index <= hi); em = e[m]
             offr = base[m][em < 0.5]; onr = base[m][em >= 0.5]
-            P(f"  {arm:13s} ungated CAGR {bc*100:6.2f}% maxDD {bm*100:6.1f}% MAR {bk:5.2f} | TDA CAGR {gc*100:6.2f}% maxDD {gm*100:6.1f}% "
+            P(f"  {arm:13s} ungated CAGR {bc*100:6.2f}% maxDD {bm*100:6.1f}% MAR {bk:5.2f} | {nm} CAGR {gc*100:6.2f}% maxDD {gm*100:6.1f}% "
               f"MAR {gk:5.2f} (x{gk/bk:4.2f}, CAGR loss {(1-gc/bc)*100:+5.1f}%) | vol-gate CAGR {vc*100:6.2f}% maxDD {vm*100:6.1f}% MAR {vk:5.2f} | "
               f"OFF {(em<0.5).mean()*100:4.1f}% of days; base on OFF days {offr.mean()*1e4:+6.2f}bp (n {len(offr)}) vs ON {onr.mean()*1e4:+6.2f}bp")
             res[(wn, arm)] = dict(bc=bc, bm=bm, bk=bk, gc=gc, gm=gm, gk=gk, vk=vk, vc=vc, e=em, base=base[m], rf=r_[m], g=g)
@@ -241,24 +250,24 @@ def main():
         first = fired[0] if fired else None; last_pre = max([j for j in fired if j <= it - 5], default=None)
         vd = vwarn.reindex(sidx, fill_value=False).to_numpy(); vf = [j for j in range(ip, it + 1) if vd[j]]
         ok = last_pre is not None; leads_ok += ok
-        P(f"  peak {pk_.date()} trough {tr.date()} DD {dd*100:6.1f}% ({it-ip} sessions) | TDA warnings in peak..trough {len(fired)}, "
+        P(f"  peak {pk_.date()} trough {tr.date()} DD {dd*100:6.1f}% ({it-ip} sessions) | {nm} warnings in peak..trough {len(fired)}, "
           f"first {sidx[first].date() if first is not None else '-'} (lead {it-first if first is not None else '-'} sess) | "
           f">=5 sess before trough: {'yes' if ok else 'no'} | vol-gate first {sidx[vf[0]].date() if vf else '-'} (lead {it-vf[0] if vf else '-'})")
-    P(f"  troughs with a TDA warning >= 5 sessions earlier: {leads_ok} of 5")
+    P(f"  troughs with a {nm} warning >= 5 sessions earlier: {leads_ok} of 5")
 
     # DSR
-    dg = dsr(r["g"].to_numpy() - r["rf"].to_numpy(), N_TRIALS)
+    dg = dsr(r["g"].to_numpy() - r["rf"].to_numpy(), n_trials)
     dd_ = r["g"].to_numpy() - (r["base"].to_numpy())
-    P(f"\nDSR (N {N_TRIALS}) JUDGE gated book excess-of-cash daily: {dg:.3f}; ungated book: {dsr(b - rfj, N_TRIALS):.3f}; "
-      f"gated-minus-ungated: {dsr(dd_, N_TRIALS):.3f}")
+    P(f"\nDSR (N {n_trials}) JUDGE gated book excess-of-cash daily: {dg:.3f}; ungated book: {dsr(b - rfj, n_trials):.3f}; "
+      f"gated-minus-ungated: {dsr(dd_, n_trials):.3f}")
 
     # Oct-Nov 2026
-    tail = s[s.index >= "2026-08-01"][["l1", "z"]]
+    tail = pd.DataFrame({"sc": score, "z": z})[score.index >= "2026-08-01"]
     P(f"\n2026 tail (last on-disk bar {C.index.max().date()}; no data on disk covers 2026-10-06..2026-11-21):")
     for d_, row in tail.iloc[-10:].iterrows():
-        P(f"  {d_.date()} L1 {row.l1:.4f} z {row.z:+.2f}{'  WARNING' if row.z > ZTH else ''}   vol z {vz.get(d_, np.nan):+.2f}")
+        P(f"  {d_.date()} {slabel} {row.sc:.4f} z {row.z:+.2f}{'  WARNING' if warn.get(d_, False) else ''}   vol z {vz.get(d_, np.nan):+.2f}")
     last_w = warn[warn].index.max()
-    P(f"  last TDA warning on disk: {last_w.date() if pd.notna(last_w) else '-'}; 2026 warnings: "
+    P(f"  last {nm} warning on disk: {last_w.date() if pd.notna(last_w) else '-'}; 2026 warnings: "
       f"{[x.date().isoformat() for x in warn[warn & (warn.index >= '2026-01-01')].index]}")
 
     # GATES
@@ -268,12 +277,11 @@ def main():
     P(f"  G1 MAR >= 1.2x ungated: {r['gk']:.2f} vs {r['bk']:.2f} = x{r['gk']/r['bk']:.2f} -> {'PASS' if g1 else 'FAIL'}")
     P(f"  G2 CAGR loss <= 20%: {(1-r['gc']/r['bc'])*100:+.1f}% -> {'PASS' if g2 else 'FAIL'}")
     P(f"  G3 random-gate placebo >= 95th pct on MAR: {pct*100:.1f} -> {'PASS' if g3 else 'FAIL'}")
-    P(f"  G4 beats vol gate on MAR: TDA {r['gk']:.2f} vs vol {r['vk']:.2f} -> {'PASS' if g4 else 'FAIL'}")
+    P(f"  G4 beats vol gate on MAR: {nm} {r['gk']:.2f} vs vol {r['vk']:.2f} -> {'PASS' if g4 else 'FAIL'}")
     P(f"  G5 warning >= 5 sessions before trough in >= 3 of 5: {leads_ok}/5 -> {'PASS' if g5 else 'FAIL'}")
     P(f"  (2x cost shock, reported: MAR x{c2['gk']/c2['bk']:.2f}, CAGR loss {(1-c2['gc']/c2['bc'])*100:+.1f}%, gated CAGR {c2['gc']*100:.2f}%)")
     ok = g1 and g2 and g3 and g4 and g5
-    P(f"\n{'PASS' if ok else 'KILL'}: N 1245 TDA - {'all gates pass' if ok else 'fails ' + ', '.join(n for n, x in zip(['G1','G2','G3','G4','G5'], [g1,g2,g3,g4,g5]) if not x)}")
-    OUT.write_text("\n".join(L) + "\n")
+    return ok, ('all gates pass' if ok else 'fails ' + ', '.join(n for n, x in zip(['G1','G2','G3','G4','G5'], [g1,g2,g3,g4,g5]) if not x))
 
 
 if __name__ == "__main__":

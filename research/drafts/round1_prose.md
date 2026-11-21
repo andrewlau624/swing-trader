@@ -11391,3 +11391,15 @@ Common to all four:
 - **N 1251 SNAP-HGB:** the exact N 1243 pipeline with the 4 snapshot features (ret5, ret20, vol20, beta60), HGB as registered, expanding yearly refit. Long top decile, weekly, 5bp/side. JUDGE 2011-2026-10 (halves 2011-18 / 2019-26). Gates as N 1243 G1-G4 (>= +15bp/wk net, t >= 2.5, halves > 0, ex-top-5 > 0, 2x cost > 0), plus beta-matched excess (vs EW + (beta_port - 1) x SPY) > 0. DSR at N 1252.
   - Prior: weekly reversal has decayed in the literature since ~2010. WEEKWIN-SHORT and the D2a rows touched 2011-20 for related rules.
 - **N 1252 SIG-RESID:** HGB on snapshot + signature features (122), same judge window and gates. It must also beat SNAP-HGB by >= +5bp/wk.
+
+### RESULT - N 1246 TDA-RAW and N 1247 TDA-XS (run 2026-11-21): both KILL
+- **N 1246 TDA-RAW** (judge 2001-15, book):
+  - Gates: MAR x0.95 FAIL; CAGR loss 5.5%; placebo 62nd percentile FAIL; beats vol gate; lead 2/5 FAIL. Raw L1 vs vol corr +0.32.
+  - The SPY-to-cash arm (report only): MAR x1.84, placebo 94.5th percentile, the closest of any TDA form.
+  - 2016-26 book: x0.57.
+- **N 1247 TDA-XS** (H0 total persistence on top-100 correlation distance): fails all 5 gates (MAR x0.56, placebo 1.5th percentile). OFF days earn +7.6 vs +1.8bp: it removes the best days.
+  - H0 vs mean pairwise correlation: -0.93. TDA-XS is average correlation.
+  - Report arms: H1-L1 x1.11, placebo 75th percentile. A plain mean-correlation gate: x1.56, placebo 86th percentile, lead 2/5, 8 long spells; fails, and 2016-21 is x0.78.
+- **Class note:** with REGIME-X (stress/vol/credit/DD gates), R5 and the TDA forms, every market-state off-switch on this IBS+night book has failed out of sample. The book earns its best days inside stress, so a state gate removes them. Do not re-run this as a new indicator.
+- Not tested: other windows/thresholds/off rules; continuous exposure scaling; Wasserstein/entropy/Betti features; residual-correlation filtrations; learned models on topological features; an SPY-only TDA timing rule as its own registration (one form came near: 94.5th percentile, report only).
+- Run note: the agent refactored exp_tda.py for reuse. N 1245's output reproduced byte-identical.
