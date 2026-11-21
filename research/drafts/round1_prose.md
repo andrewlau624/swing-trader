@@ -11297,3 +11297,18 @@ Common to all four:
     - beats a realized-vol gate (20d SPY vol z > 2 vs trailing 500d, same 20-session off rule) on MAR — else TDA = vol;
     - the warning precedes SPY's 5 largest 2001-15 drawdowns' troughs by >= 5 sessions in at least 3 of them.
   - Kill: any gate fails. Prior: REGIME-X stress gates died because they remove the best days. TDA is only useful if it fires earlier.
+
+### RESULT - N 1245 TDA (run 2026-11-21): KILL
+- Judge 2001-15 (book 0.5 IBS + 0.5 night, 5bp/side; OFF days earn T-bills):
+  - G1 MAR 0.22 vs 0.27 ungated (x0.83): FAIL.
+  - G2 CAGR loss 19.3%: pass.
+  - G3 random-gate placebo at the 40.5th percentile: FAIL.
+  - G4 beats the vol gate (0.22 vs 0.17, both below ungated): pass.
+  - G5 lead before troughs 3/5: pass. Loose: it fired inside both long bears and never before the sharp ones (2015-08, 2007-08).
+  - DSR gated-minus-ungated 0.000.
+- OFF days earn more than ON days: JUDGE +3.11 vs +2.76bp; 2016-26 +4.17 vs +2.57bp. The gate removes average-or-better days (same as REGIME-X).
+- Fraction off: 20% JUDGE, 29% 2016-26.
+- L1 vs 20d vol: corr -0.20. The per-window standardisation turns L1 into a correlation-shape measure.
+- SPY-to-cash arm: x0.79 MAR. 2016-26 book: x0.75.
+- Oct-Nov 2026: no data on disk. The warning had fired on and off from 2026-06 to 10-02.
+- Not tested: raw-return clouds (closer to Gidea-Katz); stock cross-section correlation-distance filtrations; H0 / Wasserstein diagram distances; other w/z/off rules; TDA as a size scale or a learned feature; non-equity clouds.

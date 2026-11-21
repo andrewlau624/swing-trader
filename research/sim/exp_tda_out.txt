@@ -1,0 +1,51 @@
+selftest: circle H1 bars 1, top persistences [1.167] (one long bar expected); gaussian-blob top [0.269, 0.066]; single-tent L1 grid err 2.25e-08
+prices: 1997-12-31..2026-10-05 (SFP closeadj; last on-disk bar 2026-10-05)
+L1: 7172 days, dim3 286 / dim4 6886; H1 bars/day median 9; z available from 2000-03-23; warnings (z>2) 376 days
+corr(L1, SPY 20d realized vol): full -0.203 (Spearman -0.228); JUDGE -0.201 (Spearman -0.252)
+corr(TDA z, vol z) JUDGE -0.233; warning-day overlap TDA&vol 4 of TDA 376 / vol 494
+
+== JUDGE 2001-15
+  book          ungated CAGR   6.88% maxDD  -25.7% MAR  0.27 | TDA CAGR   5.56% maxDD  -24.9% MAR  0.22 (x0.83, CAGR loss +19.3%) | vol-gate CAGR   4.32% maxDD  -25.5% MAR  0.17 | OFF 20.3% of days; base on OFF days  +3.11bp (n 766) vs ON  +2.76bp
+  book 2x cost  ungated CAGR  -4.20% maxDD  -48.5% MAR -0.09 | TDA CAGR  -3.45% maxDD  -42.2% MAR -0.08 (x0.95, CAGR loss +17.8%) | vol-gate CAGR  -4.56% maxDD  -49.7% MAR -0.09 | OFF 20.3% of days; base on OFF days  -0.85bp (n 766) vs ON  -1.68bp
+  SPY->cash     ungated CAGR   4.98% maxDD  -55.2% MAR  0.09 | TDA CAGR   3.84% maxDD  -53.9% MAR  0.07 (x0.79, CAGR loss +22.8%) | vol-gate CAGR   4.07% maxDD  -52.5% MAR  0.08 | OFF 20.3% of days; base on OFF days  +3.22bp (n 766) vs ON  +2.59bp
+
+== REPORT 2016-26
+  book          ungated CAGR   7.54% maxDD  -13.5% MAR  0.56 | TDA CAGR   4.97% maxDD  -11.9% MAR  0.42 (x0.75, CAGR loss +34.2%) | vol-gate CAGR   6.41% maxDD  -10.0% MAR  0.64 | OFF 28.7% of days; base on OFF days  +4.17bp (n 773) vs ON  +2.57bp
+  book 2x cost  ungated CAGR  -0.72% maxDD  -41.2% MAR -0.02 | TDA CAGR  -0.88% maxDD  -34.4% MAR -0.03 (x1.46, CAGR loss -22.3%) | vol-gate CAGR  -0.46% maxDD  -34.7% MAR -0.01 | OFF 28.7% of days; base on OFF days  +1.04bp (n 773) vs ON  -0.62bp
+  SPY->cash     ungated CAGR  14.98% maxDD  -33.7% MAR  0.44 | TDA CAGR  10.34% maxDD  -28.3% MAR  0.37 (x0.82, CAGR loss +31.0%) | vol-gate CAGR  13.96% maxDD  -24.6% MAR  0.57 | OFF 28.7% of days; base on OFF days  +6.74bp (n 773) vs ON  +5.94bp
+
+placebo (JUDGE book): 26 OFF spells, lengths median 24 max 51; random-gate MAR p50 0.24 p95 0.57; real 0.22 -> percentile 40.5
+placebo (JUDGE SPY->cash, report): random MAR p50 0.08 p95 0.19; real 0.07 -> pct 35.0
+
+SPY 5 largest drawdowns with trough in 2001-15 (closeadj, peak-to-recovery episodes):
+  peak 2007-10-09 trough 2009-03-09 DD  -55.2% (355 sessions) | TDA warnings in peak..trough 11, first 2008-06-24 (lead 177 sess) | >=5 sess before trough: yes | vol-gate first 2007-11-13 (lead 330)
+  peak 2000-03-24 trough 2002-10-09 DD  -47.5% (637 sessions) | TDA warnings in peak..trough 12, first 2000-10-05 (lead 502 sess) | >=5 sess before trough: yes | vol-gate first 2000-05-10 (lead 605)
+  peak 2015-07-20 trough 2015-08-25 DD  -11.9% (26 sessions) | TDA warnings in peak..trough 0, first - (lead - sess) | >=5 sess before trough: no | vol-gate first 2015-08-24 (lead 1)
+  peak 2007-07-19 trough 2007-08-15 DD   -9.0% (19 sessions) | TDA warnings in peak..trough 0, first - (lead - sess) | >=5 sess before trough: no | vol-gate first 2007-07-30 (lead 12)
+  peak 2012-09-14 trough 2012-11-15 DD   -7.3% (42 sessions) | TDA warnings in peak..trough 8, first 2012-09-28 (lead 32 sess) | >=5 sess before trough: yes | vol-gate first - (lead -)
+  troughs with a TDA warning >= 5 sessions earlier: 3 of 5
+
+DSR (N 1245) JUDGE gated book excess-of-cash daily: 0.077; ungated book: 0.143; gated-minus-ungated: 0.000
+
+2026 tail (last on-disk bar 2026-10-05; no data on disk covers 2026-10-06..2026-11-21):
+  2026-09-22 L1 0.0807 z +1.91   vol z -0.45
+  2026-09-23 L1 0.0856 z +2.10  WARNING   vol z -0.41
+  2026-09-24 L1 0.0955 z +2.49  WARNING   vol z -0.41
+  2026-09-25 L1 0.0972 z +2.53  WARNING   vol z -0.42
+  2026-09-28 L1 0.0964 z +2.48  WARNING   vol z -0.38
+  2026-09-29 L1 0.0779 z +1.73   vol z -0.39
+  2026-09-30 L1 0.0768 z +1.67   vol z -0.42
+  2026-10-01 L1 0.0914 z +2.24  WARNING   vol z -0.43
+  2026-10-02 L1 0.0903 z +2.18  WARNING   vol z -0.47
+  2026-10-05 L1 0.0703 z +1.38   vol z -0.45
+  last TDA warning on disk: 2026-10-02; 2026 warnings: ['2026-06-12', '2026-06-15', '2026-06-18', '2026-06-22', '2026-06-24', '2026-07-07', '2026-07-14', '2026-07-16', '2026-07-17', '2026-07-20', '2026-07-21', '2026-08-05', '2026-08-06', '2026-08-07', '2026-08-10', '2026-08-20', '2026-08-21', '2026-08-24', '2026-08-25', '2026-08-26', '2026-08-27', '2026-08-28', '2026-08-31', '2026-09-01', '2026-09-02', '2026-09-03', '2026-09-04', '2026-09-08', '2026-09-09', '2026-09-11', '2026-09-21', '2026-09-23', '2026-09-24', '2026-09-25', '2026-09-28', '2026-10-01', '2026-10-02']
+
+GATES (book arm, JUDGE 2001-15):
+  G1 MAR >= 1.2x ungated: 0.22 vs 0.27 = x0.83 -> FAIL
+  G2 CAGR loss <= 20%: +19.3% -> PASS
+  G3 random-gate placebo >= 95th pct on MAR: 40.5 -> FAIL
+  G4 beats vol gate on MAR: TDA 0.22 vs vol 0.17 -> PASS
+  G5 warning >= 5 sessions before trough in >= 3 of 5: 3/5 -> PASS
+  (2x cost shock, reported: MAR x0.95, CAGR loss +17.8%, gated CAGR -3.45%)
+
+KILL: N 1245 TDA - fails G1, G3
