@@ -1,0 +1,75 @@
+EXP round 2 D2a-D2d RL-UNIVERSE (N 1219-1222), program N 1222. FIT 2002-08-01..2010-12-31, JUDGE 2011-01-01..2020-12-31. No REPORT period: Sharadar SEP ends 2021-01 (no 2021+ stock panel on disk).
+PPO 1,000,000 steps/policy, 5 seeds + 3 placebo draws x 5 seeds per universe; torch CPU (MPS available but unused: 64-row minibatches are faster on CPU)
+trained 80 policies in 121.5 min on 8 processes
+
+=== D2a RL-WEEKTOP (N 1219) cost 2.5bp/side, shock 5.0bp/side; judge 2011-01-04..2020-12-31 n 2516
+  missing next-day bar in judge slots: gap 0 (0.000%), no later bar (delisted) 1 (0.004%) -> earned 0; non-consecutive slot days 0
+  EW basket (costless benchmark): mean -8.12bp/d Sh -0.47 maxDD -97.3% | vs SPY a -13.13 t -2.64 b 0.88 | EW TO 0.863/d -> EW net at 2.5bp mean -10.28bp/d Sh -0.59; SPY Sh 0.83
+*seed 0    alpha  +3.34bp/d t +0.67 b 0.80 | 11-15  +8.21 16-20  -0.73 | Sh -0.15 vs EW -0.47 (d +0.32) | ex-top5  -1.29 | mean  -3.1 med  -5.6bp hit 48.4% maxDD -98.6% | cash 0.09 TO 1.216/d | vs SPY a  -7.77 t -1.17 b 0.82
+    shock 5bp: alpha  +0.29 t +0.06 | DSR 0.004
+ seed 1    alpha  +6.84bp/d t +1.39 b 0.76 | 11-15 +10.97 16-20  +3.80 | Sh 0.03 vs EW -0.47 (d +0.50) | ex-top5  +2.63 | mean  +0.7 med  +1.2bp hit 50.2% maxDD -91.5% | cash 0.11 TO 1.166/d | vs SPY a  -4.13 t -0.70 b 0.85
+    shock 5bp: alpha  +3.92 t +0.79 | DSR 0.029
+ seed 2    alpha  +3.11bp/d t +0.63 b 0.84 | 11-15  -0.91 16-20  +7.23 | Sh -0.18 vs EW -0.47 (d +0.29) | ex-top5  -2.33 | mean  -3.7 med  -3.3bp hit 49.1% maxDD -97.6% | cash 0.09 TO 1.169/d | vs SPY a  -8.43 t -1.39 b 0.84
+    shock 5bp: alpha  +0.19 t +0.04 | DSR 0.004
+ seed 3    alpha  -0.64bp/d t -0.15 b 0.80 | 11-15  +2.41 16-20  -2.78 | Sh -0.37 vs EW -0.47 (d +0.09) | ex-top5  -4.48 | mean  -7.2 med  -1.1bp hit 49.8% maxDD -98.4% | cash 0.14 TO 1.099/d | vs SPY a -11.43 t -1.97 b 0.75
+    shock 5bp: alpha  -3.39 t -0.79 | DSR 0.000
+ seed 4    alpha  +4.97bp/d t +0.93 b 0.70 | 11-15  +8.85 16-20  +2.17 | Sh -0.03 vs EW -0.47 (d +0.44) | ex-top5  -0.66 | mean  -0.7 med  +0.6bp hit 50.4% maxDD -91.7% | cash 0.17 TO 1.074/d | vs SPY a  -4.92 t -0.78 b 0.75
+    shock 5bp: alpha  +2.28 t +0.43 | DSR 0.009
+  placebo (15 policies, shifts [1893, 1352, 1818]): alpha median -5.87, 95th +1.18, max +3.02; seed-median +3.34 at pct 100
+  GATES: 1 a>0&t>=2: FAIL (0/5) | 2 both halves: FAIL (2/5) | 3 dSh>=.20: PASS (4/5) | 4 med 5bp a>0&t>=2: FAIL | 5 med >= placebo 95th: PASS | 6 med ex-top5>0: FAIL | seeds passing all 1-3: 0/5
+  VERDICT D2a RL-WEEKTOP (N 1219): FAIL  (seed-median DSR at N 1222: 0.004)
+
+=== D2b RL-VOLTOP (N 1220) cost 2.5bp/side, shock 5.0bp/side; judge 2011-01-04..2020-12-31 n 2516
+  missing next-day bar in judge slots: gap 0 (0.000%), no later bar (delisted) 2 (0.008%) -> earned 0; non-consecutive slot days 0
+  EW basket (costless benchmark): mean +3.57bp/d Sh 0.23 maxDD -52.2% | vs SPY a -3.38 t -0.85 b 1.23 | EW TO 0.245/d -> EW net at 2.5bp mean +2.96bp/d Sh 0.19; SPY Sh 0.83
+ seed 0    alpha  -0.89bp/d t -0.33 b 0.86 | 11-15  -0.72 16-20  -0.73 | Sh 0.13 vs EW 0.23 (d -0.10) | ex-top5  -3.20 | mean  +2.2 med  +2.3bp hit 51.0% maxDD -64.8% | cash 0.10 TO 0.851/d | vs SPY a  -3.99 t -0.91 b 1.09
+    shock 5bp: alpha  -3.02 t -1.13 | DSR 0.000
+*seed 1    alpha  +1.14bp/d t +0.44 b 0.91 | 11-15  +2.78 16-20  -0.38 | Sh 0.27 vs EW 0.23 (d +0.03) | ex-top5  -1.03 | mean  +4.4 med  +4.1bp hit 51.2% maxDD -62.6% | cash 0.08 TO 0.770/d | vs SPY a  -1.93 t -0.42 b 1.12
+    shock 5bp: alpha  -0.78 t -0.30 | DSR 0.002
+ seed 2    alpha  +1.96bp/d t +0.65 b 0.80 | 11-15  +0.28 16-20  +3.90 | Sh 0.31 vs EW 0.23 (d +0.08) | ex-top5  -0.95 | mean  +4.8 med  +4.1bp hit 51.2% maxDD -48.3% | cash 0.09 TO 0.676/d | vs SPY a  -0.68 t -0.15 b 0.97
+    shock 5bp: alpha  +0.27 t +0.09 | DSR 0.003
+ seed 3    alpha  -2.03bp/d t -0.77 b 0.86 | 11-15  -1.63 16-20  -2.06 | Sh 0.07 vs EW 0.23 (d -0.17) | ex-top5  -4.00 | mean  +1.1 med  +0.5bp hit 50.2% maxDD -60.9% | cash 0.07 TO 0.835/d | vs SPY a  -5.54 t -1.31 b 1.16
+    shock 5bp: alpha  -4.12 t -1.57 | DSR 0.000
+ seed 4    alpha  +1.51bp/d t +0.52 b 0.89 | 11-15  -0.90 16-20  +3.98 | Sh 0.29 vs EW 0.23 (d +0.05) | ex-top5  -1.45 | mean  +4.7 med  +2.2bp hit 50.6% maxDD -61.4% | cash 0.08 TO 0.743/d | vs SPY a  -1.62 t -0.34 b 1.11
+    shock 5bp: alpha  -0.34 t -0.12 | DSR 0.002
+  placebo (15 policies, shifts [1054, 1347, 1972]): alpha median -1.28, 95th +1.89, max +2.05; seed-median +1.14 at pct 73
+  GATES: 1 a>0&t>=2: FAIL (0/5) | 2 both halves: FAIL (1/5) | 3 dSh>=.20: FAIL (0/5) | 4 med 5bp a>0&t>=2: FAIL | 5 med >= placebo 95th: FAIL | 6 med ex-top5>0: FAIL | seeds passing all 1-3: 0/5
+  VERDICT D2b RL-VOLTOP (N 1220): FAIL  (seed-median DSR at N 1222: 0.002)
+
+=== D2c RL-LOSERS (N 1221) cost 5.0bp/side, shock 10.0bp/side; judge 2011-01-04..2020-12-31 n 2516
+  missing next-day bar in judge slots: gap 0 (0.000%), no later bar (delisted) 14 (0.056%) -> earned 0; non-consecutive slot days 0
+  EW basket (costless benchmark): mean -2.59bp/d Sh -0.16 maxDD -85.5% | vs SPY a -10.41 t -2.78 b 1.38 | EW TO 1.881/d -> EW net at 5.0bp mean -11.99bp/d Sh -0.75; SPY Sh 0.83
+ seed 0    alpha  +9.92bp/d t +2.47 b 1.06 | 11-15  +7.68 16-20 +11.76 | Sh 0.33 vs EW -0.16 (d +0.49) | ex-top5  +5.63 | mean  +7.2 med  -3.4bp hit 49.5% maxDD -81.5% | cash 0.15 TO 1.588/d | vs SPY a  -0.24 t -0.04 b 1.31
+    shock 10bp: alpha  +1.98 t +0.49 | DSR 0.132
+ seed 1    alpha  -2.44bp/d t -0.89 b 0.93 | 11-15  -1.38 16-20  -3.30 | Sh -0.28 vs EW -0.16 (d -0.12) | ex-top5  -4.68 | mean  -4.8 med  +1.1bp hit 50.2% maxDD -90.5% | cash 0.11 TO 1.688/d | vs SPY a -12.29 t -2.91 b 1.31
+    shock 10bp: alpha -10.88 t -3.96 | DSR 0.000
+ seed 2    alpha  -4.79bp/d t -1.80 b 0.90 | 11-15  -6.31 16-20  -3.15 | Sh -0.43 vs EW -0.16 (d -0.27) | ex-top5  -6.37 | mean  -7.1 med  -4.5bp hit 49.0% maxDD -95.5% | cash 0.11 TO 1.702/d | vs SPY a -14.77 t -3.46 b 1.35
+    shock 10bp: alpha -13.30 t -5.00 | DSR 0.000
+*seed 3    alpha  +0.73bp/d t +0.22 b 1.05 | 11-15  +1.44 16-20  -0.20 | Sh -0.10 vs EW -0.16 (d +0.06) | ex-top5  -2.48 | mean  -2.0 med  -5.8bp hit 48.9% maxDD -88.6% | cash 0.08 TO 1.738/d | vs SPY a  -9.76 t -1.96 b 1.37
+    shock 10bp: alpha  -7.96 t -2.42 | DSR 0.001
+ seed 4    alpha  +3.37bp/d t +0.94 b 1.05 | 11-15  -1.71 16-20  +8.23 | Sh 0.03 vs EW -0.16 (d +0.20) | ex-top5  -0.08 | mean  +0.7 med  +0.4bp hit 50.0% maxDD -85.1% | cash 0.09 TO 1.719/d | vs SPY a  -6.52 t -1.23 b 1.27
+    shock 10bp: alpha  -5.22 t -1.45 | DSR 0.008
+  placebo (15 policies, shifts [781, 1664, 490]): alpha median -6.82, 95th +3.26, max +8.48; seed-median +0.73 at pct 87
+  GATES: 1 a>0&t>=2: FAIL (1/5) | 2 both halves: FAIL (1/5) | 3 dSh>=.20: FAIL (1/5) | 4 med 10bp a>0&t>=2: FAIL | 5 med >= placebo 95th: FAIL | 6 med ex-top5>0: FAIL | seeds passing all 1-3: 1/5
+  VERDICT D2c RL-LOSERS (N 1221): FAIL  (seed-median DSR at N 1222: 0.001)
+  overlap with the live night rule: slots with day ret <= -8%: 34.3% of slot-days (days with all 10 <= -8%: 9.2%); slots meeting the full live rule (<= -8%, IBS<.10, $5-2000, ADV>=$10M, vol20>=.60): 8.8%; live-rule names in the top 1000 that are in a D2c slot: 54.1% (2224/4111); seed-median agent weight on <= -8% slots 36.1% of its stock weight
+
+=== D2d RL-SECTORS (N 1222) cost 1.0bp/side, shock 3.0bp/side; judge 2011-01-04..2020-12-31 n 2516
+  missing next-day bar in judge slots: gap 0 (0.000%), no later bar (delisted) 0 (0.000%) -> earned 0; non-consecutive slot days 0
+  EW basket (costless benchmark): mean +4.91bp/d Sh 0.72 maxDD -36.7% | vs SPY a -0.72 t -2.21 b 0.99 | EW TO 0.005/d -> EW net at 1.0bp mean +4.90bp/d Sh 0.72; SPY Sh 0.83
+ seed 0    alpha  -0.10bp/d t -0.24 b 0.90 | 11-15  +0.26 16-20  -0.47 | Sh 0.68 vs EW 0.72 (d -0.03) | ex-top5  -0.39 | mean  +4.3 med  +6.3bp hit 54.1% maxDD -34.4% | cash 0.09 TO 0.443/d | vs SPY a  -0.74 t -1.45 b 0.89
+    shock 3bp: alpha  -0.99 t -2.34 | DSR 0.000
+*seed 1    alpha  -0.76bp/d t -1.44 b 0.87 | 11-15  -0.34 16-20  -1.17 | Sh 0.57 vs EW 0.72 (d -0.15) | ex-top5  -1.08 | mean  +3.5 med  +6.1bp hit 54.8% maxDD -34.9% | cash 0.12 TO 0.662/d | vs SPY a  -1.35 t -2.08 b 0.86
+    shock 3bp: alpha  -2.08 t -3.95 | DSR 0.000
+ seed 2    alpha  -0.06bp/d t -0.16 b 0.90 | 11-15  -0.15 16-20  +0.05 | Sh 0.69 vs EW 0.72 (d -0.02) | ex-top5  -0.34 | mean  +4.3 med  +6.2bp hit 55.2% maxDD -34.0% | cash 0.14 TO 0.433/d | vs SPY a  -0.68 t -1.39 b 0.89
+    shock 3bp: alpha  -0.92 t -2.58 | DSR 0.000
+ seed 3    alpha  -1.02bp/d t -1.48 b 0.89 | 11-15  -0.88 16-20  -1.20 | Sh 0.52 vs EW 0.72 (d -0.20) | ex-top5  -1.47 | mean  +3.3 med  +6.8bp hit 54.5% maxDD -37.1% | cash 0.07 TO 0.706/d | vs SPY a  -1.62 t -2.00 b 0.87
+    shock 3bp: alpha  -2.44 t -3.52 | DSR 0.000
+ seed 4    alpha  -1.40bp/d t -2.10 b 0.92 | 11-15  -1.97 16-20  -0.82 | Sh 0.47 vs EW 0.72 (d -0.25) | ex-top5  -2.08 | mean  +3.1 med  +6.6bp hit 53.8% maxDD -35.1% | cash 0.10 TO 0.683/d | vs SPY a  -1.99 t -2.53 b 0.90
+    shock 3bp: alpha  -2.77 t -4.15 | DSR 0.000
+  placebo (15 policies, shifts [766, 324, 1197]): alpha median -0.71, 95th -0.01, max +0.16; seed-median -0.76 at pct 47
+  GATES: 1 a>0&t>=2: FAIL (0/5) | 2 both halves: FAIL (0/5) | 3 dSh>=.20: FAIL (0/5) | 4 med 3bp a>0&t>=2: FAIL | 5 med >= placebo 95th: FAIL | 6 med ex-top5>0: FAIL | seeds passing all 1-3: 0/5
+  VERDICT D2d RL-SECTORS (N 1222): FAIL  (seed-median DSR at N 1222: 0.000)
+
+readings/deviations: total return = SEP/SFP split-adj close + ACTIONS cash dividends; missing next bar -> earned 0 (no delisting return; biases the basket and agent alike, upward if delists are losers); cash earns 0; EW benchmark costless (gates); 'day return' = close/prev close (live night definition), so it duplicates r(t); fixed D2d slots get rank = slot position; features z-scored on fit-period slots, clipped +-5; ENT_COEF 0 = D1/SB3 default; seed-median = 3rd of 5 by judge alpha; gate 4 = seed-median alpha > 0 with t >= 2 at the shock cost; placebo = 15 shifted-label policies per universe (pre-reg minimum), 95th pct of 15; held names that leave the slots are sold at t's close (turnover); first judge day starts from cash.
+runtime: train 121.5 min, total 121.6 min

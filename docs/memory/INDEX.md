@@ -96,3 +96,4 @@ One line per file. Read a file when the task touches its subject; do not read al
 - `103-rl-alloc-d1-kill-2026-11-20.md` (130 tok): PPO ETF allocator D1 (N 1216) KILL: ~uniform weights, Sharpe below 60/40, placebo 68th pct; this form only.
 - `104-rff-ridge-a1-a2-kill-2026-11-20.md` (130 tok): random-feature ridge A1/A2 (N 1212-1213) KILL: daily ETF timing/rotation ~0 alpha, lambda maxed (no signal); monthly macro version untested.
 - `105-fly-brain-reservoir-b1-b2-kill-2026-11-20.md` (140 tok): FlyWire mushroom-body reservoir B1/B2 (N 1214-1215) KILL: ~0 alpha, wiring = random controls; connectome cached locally.
+- `106-rl-universes-d2-kill-2026-11-20.md` (130 tok): PPO on week winners / vol top / day losers / sectors (N 1219-1222) KILL vs EW slot baskets; week-winner basket -8bp/day seeded WEEKWIN-SHORT.

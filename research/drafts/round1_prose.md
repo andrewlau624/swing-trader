@@ -10875,3 +10875,16 @@ no economic content. B2 (dopamine-gated three-factor online readout, eta 1e-4): 
 adds nothing over a random reservoir on daily ETF inputs. Not tested: other circuits (central complex, whole brain), spiking/LIF
 dynamics instead of tanh ESN, richer inputs (stock cross-section, minute bars), the reservoir as an RL observation, plasticity in
 the recurrent weights.
+
+#### Result - D2a-D2d RL on other markets (N 1219-1222, judged 2026-11-20, one run, 1M steps x 5 seeds + 15 placebo policies each): KILL all four
+research/sim/exp_rl_universe.py -> exp_rl_universe_out.txt (the runner agent died on an API error after the run finished; output complete,
+121.6 min). Judge 2011-20, alpha vs the costless EW basket of the same 10 slots:
+- D2a week winners: EW basket itself -8.1bp/day gross (alpha vs SPY -13.1, t -2.6, maxDD -97%); agent seed-median +3.3bp t 0.67 (beats
+  EW on Sharpe in 4/5 seeds and the placebo 95th, but 0/5 seeds reach t 2, ex-top-5 -1.3, still -3.1bp/day absolute): FAIL.
+- D2b vol top: EW +3.6bp, agent +1.1 t 0.44, placebo 73rd: FAIL. D2c day losers (close->close): EW -2.6bp (net -12 at 5bp),
+  agent +0.7 t 0.22, placebo 87th: FAIL (54% of live-rule names appear in its slots; close->close is not the night leg).
+- D2d sectors: agent -0.1..-1.4bp, Sharpe below EW on 5/5 seeds, placebo 47th: FAIL.
+RL as tested (PPO defaults, per-slot scorer, 5 daily lags + vol/IBS) learns at most to mildly avoid the worst slots; never an edge.
+Observation (post-hoc, NOT a finding): the D2a benchmark row says the 10 top 5-day winners lose ~8bp/day close->close in 2011-20 ->
+WEEKWIN-SHORT below, judged on a period where it was not seen.
+Not tested: shorts, intraday/close->open horizons for D2a-c, longer training/entropy, reservoir observations.
