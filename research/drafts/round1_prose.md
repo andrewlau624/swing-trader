@@ -10913,3 +10913,41 @@ research/sim/weekwin_short.py -> weekwin_short_out.txt. Picks average +32% over 
 ceiling; worst day -46% (squeeze), maxDD -48..-66% at 0.5x. 2011-20 (touched): gross +8.1bp (median +1.0), net -4.0 / +2.6. A decayed
 anomaly whose remaining gross (~8bp) is smaller than its borrow. Not tested: real borrow rates (none pre-2010), 1-day / 20-day winners,
 longer holds, the MAX (single-day max) form, small caps under $10M ADV, close->open.
+
+## Amendment - EXP round 3: RL / linear models pointed at the book's EXISTING edges (user 2026-11-20: "more linear models, there is an RL leg"; pre-register before any outcome; N 1224 -> 1231)
+Rationale: N 1212-1224 asked models to find alpha in raw daily prices; there is none. Here the alpha source is given (legs with verified
+edges) and the model only decides exposure / selection. Ceiling stated up front: R1/R2 reshape returns the legs already earn, so a few
+pp/yr at best; reported against the +8pp gate honestly.
+**Common data (R1, R2, R4):** night leg = `data/research/program/sel_night_nights_primary.parquet` column `leg_current` (live rule, per-night
+net-of-nothing return, 1999-2026) and `sel_night_names_primary.parquet` rule=='current' (per pick r = close->open, price, vol20, day_ret,
+adv, w). IBS leg = the exact live rule (research/sim/ibs_oos.py `_trades`: top-3 EQ18 by 12-1 momentum, IBS < 0.2, open d+1 -> open d+2),
+rebuilt 2003-2020 from Sharadar SFP split-adjusted OHLC + ACTIONS dividends (cross-check vs etf_daily 2016-20 and report the match).
+Daily book return for weights (w_ibs, w_night) = w_ibs * IBS day return + w_night * night return, costs: IBS 1bp/side, night 5bp RT,
+weight changes free (the legs trade every day anyway). **FIT 2003-01..2012-12, JUDGE 2013-01..2020-12, REPORT 2021-01..2026-09.**
+Baseline = the live fixed weights (ibs 0.5, night 0.5, the base profile) and, separately, the best FIXED (w_ibs, w_night) on a 0.1 grid
+chosen on the fit period (so the learner must beat a tuned constant, not just the default).
+State (all known at the 15:40 decision): SPY 20d vol, SPY 50d/200d trend (close / SMA), night pool size n_picks, last-20-night night-leg
+mean and vol, last-20-day IBS-leg mean, IBS firing count, 5-day SPY return. z-scored on the fit period.
+Gates (each): judge net Sharpe minus the BETTER baseline >= +0.15; judge CAGR at matched maxDD (scale both to the baseline's judge maxDD)
+>= baseline + 2pp; both 2013-16 / 2017-20 halves beat the baseline on Sharpe; placebo: the same learner trained on state rows shuffled
+in time within the fit period (50 draws) -> real Sharpe gain >= 95th pct; ex-top-5 days keeps the gain > 0.
+- **R1-LIN (N 1225):** linear contextual bandit: ridge models predicting next-day IBS and night returns from the state (refit every 21
+  sessions, expanding, lambda chosen on the fit period), weights = clip(base + k * forecast / sd, 0, 1.3) with k chosen on the fit period
+  from {0.25, 0.5, 1}.
+- **R1-LINTS (N 1226):** linear Thompson sampling version of R1 (Bayesian ridge posterior sample each day), same action map.
+- **R2-PPO (N 1227):** PPO (exp_rl.py's agent, 5 seeds, fit-period episodes only) choosing (w_ibs, w_night) in [0,1]x[0,1.3] from the
+  state; reward = net daily log return minus 0.5 * (that day's squared return) (variance-penalised). PASS needs >= 4/5 seeds.
+- **R2-PPO-DD (N 1228):** same with reward = net log return minus 2 * (increase in drawdown that day).
+- **R4-PICK (N 1229):** night-pool RL picker: each night the live rule's picks (up to 20 slots by the live order) + cash; per-slot features
+  = price, vol20, day_ret, adv, slot rank, IBS where present, the pick's w; reward = close->open net (5bp RT) of the chosen weights.
+  Benchmark = the live leg (live weights) that night. FIT 2003-12, JUDGE 2013-20 (2016-20 touched by PATTERN-NIGHT as a judge: reported
+  separately). Note: snapshot-feature night ranking is closed (PATTERN-NIGHT, SEQ-NIGHT, MINPATH); the new part is the learned
+  deploy-vs-cash decision; if R4 only matches the live leg it closes the RL form too.
+- **R3-PREF (N 1230) / R3-CEF (N 1231):** linear per-event sizing for PREF-EX (events from research/sim/pref_fetch.events + pref_cross
+  measured costs, 2021-26) and CEF-RV (research/sim/cef_rv.build_trades, full history). Ridge on event features known at entry (yield,
+  dollar volume, spread proxy, discount z / div size, days since last event, sector/issuer type), size = clip(1 + 0.5 z, 0.5, 1.5)
+  renormalised per entry date; vs equal size. PREF: fit 2021-01..2023-12, judge 2024-01..2026-10. CEF: fit to 2015, judge 2016-26.
+  Gate: judge sized-minus-equal mean > 0 with day-clustered t >= 2, both judge halves > 0, placebo (labels shuffled within date, 200)
+  >= 95th, ex-top-5 events > 0. CEF-ML (N 1205-1207) killed Ridge/GBM RANKING and FILTER of CEF-RV; this is a continuous size tilt on
+  the same class of features: if it fails it closes CEF-RV modelling entirely.
+Runners: research/sim/exp_legalloc.py (R1, R2), exp_nightpick.py (R4), exp_eventsize.py (R3). One run each. Program N = 1231.
