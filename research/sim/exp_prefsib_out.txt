@@ -1,0 +1,43 @@
+PREF-SIB (N 1240) J1 2015-01-01..2020-12-31   code sha256 09dd96bc03c05b1b5430c309eccd65d97ffac185c43ee1c535bd9bbe694ff726
+
+universe 1816 securities / 799 issuer keys; series with a valid z in J1: 762 in 207 keys
+primary signals excluded: ex-date T-1..T+6 1290, price>25.75 4770, no T+1/exit bar 23; short exits (series stopped before T+6) 17
+issuers traded 172, series 601; PREF 3862 / ETD 997 trades; trades/yr 810
+
+J1 primary (net = gross - 20bp RT):
+  net    n  4859 mean   +11.9 med    -0.4 hit 0.49 t(day) -0.65 t(week) -0.41
+  gross  n  4859 mean   +31.9 med   +19.6 hit 0.57 t(day) +0.98 t(week) +0.83
+  2x costn  4859 mean    -8.1 med   -20.4 hit 0.42 t(day) -2.27 t(week) -1.66
+  2015-17 n  2054 mean   +10.3 med    +7.7 hit 0.54 t(day) -1.23 t(week) -0.70
+  2018-20 n  2805 mean   +13.0 med   -12.1 hit 0.46 t(day) +0.11 t(week) -0.06
+  ex-top-5 issuers mean -1.9bp  (dropped ['PREF|ASPEN INSURANCE', 'ETD|DIVERSIFIED HEALTHCARE TRUST', 'PREF|GASLOG PARTNERS', 'PREF|SITE CENTERS', 'PREF|NGL ENERGY PARTNERS'])
+    2015 n   723 mean   -16.5 med    +7.2 hit 0.53 t(day) -1.88 t(week) -1.47
+    2016 n   768 mean   +38.9 med    +7.7 hit 0.54 t(day) +0.88 t(week) +1.57
+    2017 n   563 mean    +5.7 med    +8.1 hit 0.55 t(day) +1.48 t(week) +1.00
+    2018 n  1058 mean   -26.7 med   -27.7 hit 0.41 t(day) -1.41 t(week) -0.48
+    2019 n   763 mean   +21.7 med    +5.0 hit 0.53 t(day) +0.62 t(week) -0.40
+    2020 n   984 mean   +49.1 med   -18.0 hit 0.45 t(day) +0.32 t(week) +0.31
+
+Controls / sensitivities (same exclusions, same trade):
+  mirror z>=+2           n  4339 mean   -37.7 med    -9.5 hit 0.46 t(day) -1.36 t(week) -0.92
+  placebo z(T-30)<=-2    n  4523 mean   +26.5 med    -3.9 hit 0.48 t(day) +0.92 t(week) +1.09
+  all signals            n  9617 mean   +21.9 med    -1.7 hit 0.49 t(day) -0.84 t(week) -0.22
+  March 2020 only        n   455 mean   -52.3 med  -338.0 hit 0.38 t(day) -0.54 t(week) -0.25
+  ex-March 2020          n  4404 mean   +18.5 med    +1.6 hit 0.50 t(day) -0.39 t(week) -0.01
+  ETD-only arm          n   997 mean   +25.1 med    -4.1 hit 0.48 t(day) +0.48 t(week) -0.00
+  PREF-only arm          n  3862 mean    +8.5 med    -0.3 hit 0.50 t(day) -0.75 t(week) -0.43
+  by sibling count (1 / 2-3 / 4+):
+    1    n  1318 mean   +37.6 med    -0.7 hit 0.49 t(day) +0.11 t(week) -0.31
+    2-3  n  1646 mean   +14.8 med    +1.0 hit 0.50 t(day) +1.21 t(week) +1.59
+    4+   n  1895 mean    -8.6 med    -3.3 hit 0.49 t(day) -0.90 t(week) -1.25
+  DSR(N 1241) on signal-day mean net: 0.000  (T 1277, t -0.65, skew -3.46)
+
+  gate net >= +40bp           FAIL
+  gate 2x cost > 0            FAIL
+  gate median > 0             FAIL
+  gate t(day) >= 2.5          FAIL
+  gate both halves > 0        PASS
+  gate ex-top-5 issuers > 0   FAIL
+  gate mirror mean lower      PASS
+  gate placebo mean lower     FAIL
+J1 verdict: KILL (J1 fails; J3 not run)

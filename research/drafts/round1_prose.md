@@ -11175,3 +11175,22 @@ These are siblings from the A1/A2 row's `not tested:` field: the published month
   - Gates: net >= +20bp; median > 0; date-clustered t >= 2.5; both halves (2003-09 / 2010-15) > 0; ex-top-5 > 0; placebo t < 1; DSR at N 1241.
   - Ceiling: 230-300 events/yr x 33% x 50% capture; clears only at >= +20bp net.
 - Program N = 1241.
+
+### RESULT - PREF-SIB (N 1240, run 2026-11-21): KILL at J1
+- 4,859 trades across 172 issuers, 2015-20 (about 810/yr).
+- Net result: +11.9bp, median -0.4, t(day) -0.65. Gross +31.9bp.
+  - 2x cost: -8.1bp.
+  - Ex-top-5 issuers: -1.9bp.
+  - The 30-session-shifted placebo earned +26.5bp, more than the signal.
+  - Gates failed: 6 of 8. Halves and the mirror passed.
+- March 2020: -52bp. DSR 0. J3 not run.
+- The mirror is lower, so this is not a symmetric bounce, but there is also no sibling-anchor reversion.
+- The issuer map is keyed on Sharadar name and spot-checked on 13 issuers. Three issuers mix seniorities (NEE units, DTE, AFG), and seniority cannot be cleaned without prospectus data.
+- Not tested:
+  - official-cross or NBBO prices
+  - seniority-clean groups
+  - PREF-vs-ETD or credit anchors
+  - other z thresholds and holds
+  - T-close entry
+  - pair/short legs
+  - 2021-26 and pre-2015
