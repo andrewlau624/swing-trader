@@ -11039,3 +11039,20 @@ These are siblings from the A1/A2 row's `not tested:` field: the published month
 - A paper-style standardisation was run report-only. It reproduces the published shape on 1960-2020 (alpha t 2.25, SR below the market), and on the judge window gives SR -0.15, dSR -0.93. So the paper's form also has no post-2020 edge (not gated).
 - Look-ahead: E12, infl, b/m and ntis are not known at month-end. A lagged check did not change the verdict.
 - Not tested: smaller gamma or rank standardisation as a registered rule, 60/120-month or expanding windows, about 1000-seed averaging, a complexity sweep, real-time vintages, the GWZ 2024 set, other targets and horizons, a tilt on the live book. Low power: 60 months.
+
+### RESULT - XS-RFF / XS-LIN (N 1235-1236, run 2026-11-21): both DEAD
+- Judge 2011-20, 120 months, top-50 equal-weight, monthly.
+- **XS-RFF** fails 6/6 gates:
+  - Alpha vs the EW universe is +43bp/mo (t 3.08).
+  - Alpha vs SPY is +1.4bp/mo (t 0.09).
+  - Placebo (shifted labels) at the 92nd pct; DSR 0.44.
+  - Ex-top-5 and cost shock are negative vs SPY.
+  - Turnover is about 22x/yr.
+  - At $10k: +$285/yr alpha vs EW (about 2.9pp), far under +8pp.
+  - Report 2021-26: alpha vs EW +2bp (t 0.12), vs SPY -40bp/mo.
+- **XS-LIN:** vs EW +33bp t 1.66, vs SPY -7bp, placebo 72nd.
+- Reading: a small ranking signal inside the EW small/mid universe. It is gone vs SPY and gone after 2020. SEP has no delisting returns, which biases toward the long book.
+- Not tested:
+  - 5-20d horizons or weekly rebalance; long-short or beta-hedged forms; value-weighted, large-cap or sub-$10M-ADV universes.
+  - Fundamental, earnings, short-interest, insider or analyst features; industry-neutral ranks; sequence inputs.
+  - GBM/NN/ensembles; other gamma, P or seeds; rolling windows; more frequent refits; pre-2002 data.

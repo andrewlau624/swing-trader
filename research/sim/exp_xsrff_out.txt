@@ -1,0 +1,80 @@
+EXP round 4 N 1235 XS-RFF / N 1236 XS-LIN  (program N 1236; code sha256 a8b02543987682dd; DRY False; threads 3)
+universe: SEP common, px>=$5, ADV20>=$10M, >=253 bars; decisions at month-end closes; label t->t+21 sessions; top min(50, N/10) EW; cost 2.5bp/side (shock 10); placebo 200 per-name circular label shifts U{12..S-12} months seed 12345; NW lags 5
+cache rows 352393 months 220 names 5410 (labels truncated by delisting/leaving 1472); 67s
+full-store rows 145761 months 69 (2020-12-31..2026-08-31); 96s
+months 289 (2002-08-30..2026-08-31), label segment S 220, names/month median 1739 min 927 max 2497; delisted-truncated labels 2078; 101s
+
+# FROZEN: everything below is the first and only judge read of this code (sha above)
+
+## N1236 XS-LIN
+  N1236 XS-LIN: P 19; lambda split train rows 88816 (labels <= 2007-12-31), validation rows 53024; true-label z = 0.316 (lambda 2.81e+04); placebo z median 3.16; val MSE by z (true) 1e-03:0.33403 3e-03:0.33400 1e-02:0.33395 3e-02:0.33384 1e-01:0.33370 3e-01:0.33362 1e+00:0.33365 3e+00:0.33371 1e+01:0.33375 3e+01:0.33377 1e+02:0.33377 3e+02:0.33377 1e+03:0.33377 3e+03:0.33377 1e+04:0.33377
+    refit 2010-12-31 train rows 145312 cols 201 -> months 2010-12-31..2011-11-30 (0s)
+    refit 2011-12-30 train rows 162656 cols 201 -> months 2011-12-30..2012-11-30 (0s)
+    refit 2012-12-31 train rows 180464 cols 201 -> months 2012-12-31..2013-11-29 (0s)
+    refit 2013-12-31 train rows 199091 cols 201 -> months 2013-12-31..2014-11-28 (0s)
+    refit 2014-12-31 train rows 221475 cols 201 -> months 2014-12-31..2015-11-30 (0s)
+    refit 2015-12-31 train rows 242786 cols 201 -> months 2015-12-31..2016-11-30 (1s)
+    refit 2016-12-30 train rows 261683 cols 201 -> months 2016-12-30..2017-11-30 (1s)
+    refit 2017-12-29 train rows 283193 cols 201 -> months 2017-12-29..2018-11-30 (1s)
+    refit 2018-12-31 train rows 306049 cols 201 -> months 2018-12-31..2019-11-29 (1s)
+    refit 2019-12-31 train rows 327924 cols 201 -> months 2019-12-31..2020-11-30 (1s)
+    refit 2020-12-31 train rows 352393 cols 1 -> months 2020-12-31..2021-11-30 (1s)
+    refit 2021-12-31 train rows 377644 cols 1 -> months 2021-12-31..2022-11-30 (1s)
+    refit 2022-12-30 train rows 400317 cols 1 -> months 2022-12-30..2023-11-30 (1s)
+    refit 2023-12-29 train rows 424024 cols 1 -> months 2023-12-29..2024-11-29 (1s)
+    refit 2024-12-31 train rows 448311 cols 1 -> months 2024-12-31..2025-11-28 (1s)
+    refit 2025-12-31 train rows 476881 cols 1 -> months 2025-12-31..2026-08-31 (1s)
+JUDGE decisions 2010-12-31..2020-11-30 (120 months), picks/month 50
+  N1236 XS-LIN vs EW : alpha   +33.2bp/mo NW t +1.66 beta 0.82 | halves 11-15   +33.1 16-20   +31.2 | Sharpe 0.93 vs 0.75 (d +0.19) | 10bp/side alpha   +19.3 t +0.96 | ex-top5   +17.9 | excess mean  +12.9bp t +0.63 med  +11.5 hit 53.3% | DSR(N 1236) 0.100
+  N1236 XS-LIN vs SPY: alpha    -7.1bp/mo NW t -0.27 beta 1.06 | halves 11-15   -12.0 16-20    -1.8 | Sharpe 0.93 vs 1.10 (d -0.16) | 10bp/side alpha   -21.0 t -0.81 | ex-top5   -24.0 | excess mean   -0.0bp t -0.00 med   +6.4 hit 53.3% | DSR(N 1236) 0.000
+  N1236 XS-LIN net: mean +127.4bp/mo, CAGR +14.9%, Sharpe 0.93, maxDD -28.6% (EW -29.6%, SPY -18.0%), median +158.2bp, hit 66.7%, months 120, turnover 1.85/mo (22.2x/yr), cost drag 56bp/yr
+  N1236 XS-LIN placebo: real alpha vs EW +33.2bp/mo at pct 71.5 of 200 (placebo p50 +8.8, p95 +69.6bp/mo)
+  N1236 XS-LIN gates: G1 alpha t>=2 (EW & SPY) FAIL; G2 both halves>0 FAIL; G3 dSharpe>=+0.20 FAIL; G4 10bp/side>0 FAIL; G5 placebo>=95th FAIL; G6 ex-top-5>0 FAIL => DEAD
+  N1236 XS-LIN deciles (mean 21d return bp | mean forecast): D1[f -0.0377] +106 D2[f -0.0221] +107 D3[f -0.0135] +106 D4[f -0.0069] +116 D5[f -0.0011] +106 D6[f +0.0042] +118 D7[f +0.0095] +117 D8[f +0.0150] +115 D9[f +0.0213] +126 D10[f +0.0315] +128
+  N1236 XS-LIN D10-D1 +22.2bp/mo NW t +0.64; D10-mean +13.8bp
+  N1236 XS-LIN judge $/yr: $2.3k net +351 (alpha-EW +35, vs SPY -0; whole-share deployed 27%) $10k net +1,528 (alpha-EW +154, vs SPY -0; whole-share deployed 79%) $25k net +3,821 (alpha-EW +386, vs SPY -0; whole-share deployed 91%); arithmetic mean x 12, before tax
+REPORT (descriptive, full store) decisions 2020-12-31..2026-08-31 (69 months)
+  N1236 XS-LIN REPORT vs EW : alpha   +23.6bp/mo NW t +0.70 beta 0.72 | halves 11-15    +nan 16-20   +23.6 | Sharpe 0.66 vs 0.58 (d +0.08) | 10bp/side alpha   +10.1 t +0.30 | ex-top5   -16.6 | excess mean   -1.6bp t -0.05 med   +5.1 hit 50.7% | DSR(N 1236) 0.005
+  N1236 XS-LIN REPORT vs SPY: alpha   -18.6bp/mo NW t -0.60 beta 0.82 | halves 11-15    +nan 16-20   -18.6 | Sharpe 0.66 vs 1.01 (d -0.35) | 10bp/side alpha   -32.1 t -1.03 | ex-top5   -62.7 | excess mean  -41.8bp t -1.22 med  -15.1 hit 47.8% | DSR(N 1236) 0.000
+  N1236 XS-LIN REPORT net: mean +86.9bp/mo, CAGR +9.6%, Sharpe 0.66, maxDD -21.2% (EW -20.3%, SPY -19.8%), median +128.5bp, hit 60.9%, months 69, turnover 1.80/mo (21.6x/yr), cost drag 54bp/yr
+  N1236 XS-LIN REPORT deciles (mean 21d return bp | mean forecast): D1[f -0.0408] +44 D2[f -0.0241] +53 D3[f -0.0148] +59 D4[f -0.0076] +81 D5[f -0.0014] +93 D6[f +0.0044] +116 D7[f +0.0102] +121 D8[f +0.0161] +108 D9[f +0.0232] +110 D10[f +0.0350] +99
+  N1236 XS-LIN REPORT D10-D1 +54.8bp/mo NW t +0.72; D10-mean +10.3bp
+  N1236 XS-LIN REPORT $/yr: $2.3k net +240 (alpha-EW -4, vs SPY -115; whole-share deployed 16%) $10k net +1,043 (alpha-EW -19, vs SPY -502; whole-share deployed 62%) $25k net +2,607 (alpha-EW -47, vs SPY -1,255; whole-share deployed 83%); arithmetic mean x 12, before tax
+
+## N1235 XS-RFF
+  N1235 XS-RFF: P 4000; lambda split train rows 88816 (labels <= 2007-12-31), validation rows 53024; true-label z = 10 (lambda 8.88e+05); placebo z median 100; val MSE by z (true) 1e-03:0.35344 3e-03:0.35285 1e-02:0.35126 3e-02:0.34786 1e-01:0.34279 3e-01:0.33792 1e+00:0.33499 3e+00:0.33382 1e+01:0.33352 3e+01:0.33355 1e+02:0.33366 3e+02:0.33373 1e+03:0.33376 3e+03:0.33377 1e+04:0.33377
+    refit 2010-12-31 train rows 145312 cols 201 -> months 2010-12-31..2011-11-30 (58s)
+    refit 2011-12-30 train rows 162656 cols 201 -> months 2011-12-30..2012-11-30 (73s)
+    refit 2012-12-31 train rows 180464 cols 201 -> months 2012-12-31..2013-11-29 (90s)
+    refit 2013-12-31 train rows 199091 cols 201 -> months 2013-12-31..2014-11-28 (105s)
+    refit 2014-12-31 train rows 221475 cols 201 -> months 2014-12-31..2015-11-30 (119s)
+    refit 2015-12-31 train rows 242786 cols 201 -> months 2015-12-31..2016-11-30 (133s)
+    refit 2016-12-30 train rows 261683 cols 201 -> months 2016-12-30..2017-11-30 (147s)
+    refit 2017-12-29 train rows 283193 cols 201 -> months 2017-12-29..2018-11-30 (161s)
+    refit 2018-12-31 train rows 306049 cols 201 -> months 2018-12-31..2019-11-29 (175s)
+    refit 2019-12-31 train rows 327924 cols 201 -> months 2019-12-31..2020-11-30 (190s)
+    refit 2020-12-31 train rows 352393 cols 1 -> months 2020-12-31..2021-11-30 (195s)
+    refit 2021-12-31 train rows 377644 cols 1 -> months 2021-12-31..2022-11-30 (199s)
+    refit 2022-12-30 train rows 400317 cols 1 -> months 2022-12-30..2023-11-30 (203s)
+    refit 2023-12-29 train rows 424024 cols 1 -> months 2023-12-29..2024-11-29 (207s)
+    refit 2024-12-31 train rows 448311 cols 1 -> months 2024-12-31..2025-11-28 (212s)
+    refit 2025-12-31 train rows 476881 cols 1 -> months 2025-12-31..2026-08-31 (217s)
+JUDGE decisions 2010-12-31..2020-11-30 (120 months), picks/month 50
+  N1235 XS-RFF vs EW : alpha   +43.0bp/mo NW t +3.08 beta 0.83 | halves 11-15   +46.1 16-20   +35.9 | Sharpe 1.03 vs 0.75 (d +0.28) | 10bp/side alpha   +29.3 t +2.10 | ex-top5   +25.3 | excess mean  +23.7bp t +1.48 med  +24.9 hit 57.5% | DSR(N 1236) 0.441
+  N1235 XS-RFF vs SPY: alpha    +1.4bp/mo NW t +0.09 beta 1.07 | halves 11-15    -3.0 16-20    +3.3 | Sharpe 1.03 vs 1.10 (d -0.07) | 10bp/side alpha   -12.2 t -0.75 | ex-top5   -13.6 | excess mean  +10.9bp t +0.72 med  +12.9 hit 54.2% | DSR(N 1236) 0.001
+  N1235 XS-RFF net: mean +138.3bp/mo, CAGR +16.4%, Sharpe 1.03, maxDD -23.1% (EW -29.6%, SPY -18.0%), median +200.6bp, hit 62.5%, months 120, turnover 1.82/mo (21.9x/yr), cost drag 55bp/yr
+  N1235 XS-RFF placebo: real alpha vs EW +43.0bp/mo at pct 92.0 of 200 (placebo p50 +10.0, p95 +45.6bp/mo)
+  N1235 XS-RFF gates: G1 alpha t>=2 (EW & SPY) FAIL; G2 both halves>0 FAIL; G3 dSharpe>=+0.20 FAIL; G4 10bp/side>0 FAIL; G5 placebo>=95th FAIL; G6 ex-top-5>0 FAIL => DEAD
+  N1235 XS-RFF deciles (mean 21d return bp | mean forecast): D1[f -0.0429] +85 D2[f -0.0259] +109 D3[f -0.0171] +85 D4[f -0.0101] +104 D5[f -0.0038] +116 D6[f +0.0025] +133 D7[f +0.0091] +128 D8[f +0.0164] +129 D9[f +0.0255] +124 D10[f +0.0422] +132
+  N1235 XS-RFF D10-D1 +46.7bp/mo NW t +2.10; D10-mean +17.5bp
+  N1235 XS-RFF judge $/yr: $2.3k net +382 (alpha-EW +66, vs SPY +30; whole-share deployed 32%) $10k net +1,659 (alpha-EW +285, vs SPY +131; whole-share deployed 82%) $25k net +4,148 (alpha-EW +712, vs SPY +327; whole-share deployed 92%); arithmetic mean x 12, before tax
+REPORT (descriptive, full store) decisions 2020-12-31..2026-08-31 (69 months)
+  N1235 XS-RFF REPORT vs EW : alpha    +2.1bp/mo NW t +0.12 beta 0.88 | halves 11-15    +nan 16-20    +2.1 | Sharpe 0.55 vs 0.58 (d -0.03) | 10bp/side alpha   -11.8 t -0.66 | ex-top5   -22.8 | excess mean   -8.7bp t -0.43 med  +16.2 hit 53.6% | DSR(N 1236) 0.001
+  N1235 XS-RFF REPORT vs SPY: alpha   -40.5bp/mo NW t -1.42 beta 0.93 | halves 11-15    +nan 16-20   -40.5 | Sharpe 0.55 vs 1.01 (d -0.46) | 10bp/side alpha   -54.4 t -1.90 | ex-top5   -77.0 | excess mean  -49.0bp t -1.67 med  -44.1 hit 40.6% | DSR(N 1236) 0.000
+  N1235 XS-RFF REPORT net: mean +79.7bp/mo, CAGR +8.4%, Sharpe 0.55, maxDD -18.5% (EW -20.3%, SPY -19.8%), median +127.8bp, hit 59.4%, months 69, turnover 1.85/mo (22.2x/yr), cost drag 56bp/yr
+  N1235 XS-RFF REPORT deciles (mean 21d return bp | mean forecast): D1[f -0.0451] +61 D2[f -0.0274] +69 D3[f -0.0181] +93 D4[f -0.0105] +67 D5[f -0.0036] +91 D6[f +0.0031] +87 D7[f +0.0101] +106 D8[f +0.0179] +107 D9[f +0.0275] +111 D10[f +0.0447] +93
+  N1235 XS-RFF REPORT D10-D1 +32.0bp/mo NW t +0.86; D10-mean +4.1bp
+  N1235 XS-RFF REPORT $/yr: $2.3k net +220 (alpha-EW -24, vs SPY -135; whole-share deployed 23%) $10k net +957 (alpha-EW -105, vs SPY -588; whole-share deployed 69%) $25k net +2,392 (alpha-EW -262, vs SPY -1,470; whole-share deployed 87%); arithmetic mean x 12, before tax
+
+VERDICT: N1235 XS-RFF DEAD; N1236 XS-LIN DEAD
+total 332s
