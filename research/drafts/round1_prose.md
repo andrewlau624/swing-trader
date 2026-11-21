@@ -11056,3 +11056,41 @@ These are siblings from the A1/A2 row's `not tested:` field: the published month
   - 5-20d horizons or weekly rebalance; long-short or beta-hedged forms; value-weighted, large-cap or sub-$10M-ADV universes.
   - Fundamental, earnings, short-interest, insider or analyst features; industry-neutral ranks; sequence inputs.
   - GBM/NN/ensembles; other gamma, P or seeds; rolling windows; more frequent refits; pre-2002 data.
+
+## Amendment - EXP round 5: three branches the user picked (user 2026-11-21: "Fundamentals+price model, RL as risk overlay on the book, LLM over event text, anything branch out"; pre-registered before any outcome; N 1236 -> 1239)
+- **N 1237 XS-FUND (learned fundamentals + price, monthly):** same frame, universe, portfolio, costs, placebo and gates as XS-RFF (N 1235), with three changes:
+  - Benchmark: the gates are judged vs SPY (the EW-only alpha of N 1235 was a small-cap tilt). EW is reported.
+  - Features: the 19 price ranks plus point-in-time SF1 fundamentals (ARQ/ART as of the filing `datekey`, used only on or after datekey + 1 session):
+    - value: E/P, B/P, S/P, FCF/P, EBITDA/EV;
+    - quality: ROA, ROE, gross margin/assets, accruals ((netinc - ncfo)/assets);
+    - growth: revenue and EPS growth y/y, asset growth;
+    - financing: net share issuance (sharesbas 1y change), debt/equity;
+    - size: log marketcap;
+    - recency: days since the last filing.
+    All are cross-sectionally rank-normalised, with missing values set to 0.
+  - Learner: sklearn HistGradientBoostingRegressor (max_depth 3, learning_rate 0.05, 300 iterations, min_samples_leaf 200, fixed, no tuning), plus RFF ridge (N 1235 settings) as a second model. The verdict needs the GBM to pass. Annual expanding refit with a 21-day purge.
+  - Not a re-run of MODERN-XS (N 977), which was one-factor sorts on 2021-26.
+- **N 1238 R5-OVERLAY (linear risk overlay with leverage on the whole book):**
+  - Book = 0.5 IBS + 0.5 night (R1's daily book series).
+  - State: R1's state vector, plus VIX level and its change, plus a 252-day book drawdown.
+  - Model: a ridge forecast of the next-day book return, fit on 2003-12. Scale s = clip(1 + k z, 0, 1.5), with z the standardised forecast and k chosen on the fit period so that the fit maxDD equals the flat book's.
+  - Cost: the scale change times 2.5bp. Financing on s > 1 is charged at fed funds + 1%.
+  - JUDGE 2013-20.
+  - Gates: CAGR at matched maxDD >= flat + 2pp; Sharpe gain >= +0.15; both halves; placebo (20-day-block-shuffled state) >= 95th; ex-top-5 days.
+  - 2008 and 2020 are reported as stress years.
+  - The only new element versus R1/R2 is the leverage range and the VIX/drawdown state. REGIME-X (stress gates cut the best days) is the known prior against it.
+- **N 1239 EV-TONE (8-K text tone, keyword classifier first):**
+  - Events: 8-K items 1.01/2.01/2.02/7.01/8.01 accepted after 16:00 or before 09:15 ET, 2019-01..2026-09, for common stocks $1+ with ADV $1M+ (small caps included; the filing may be the first release).
+  - Text: the main 8-K document plus EX-99.1, first 20k characters.
+  - Score: Loughran-McDonald tone (positive - negative)/(positive + negative words), public dictionary.
+  - Trade: enter at the next open cross after acceptance. Exit at the close of day 1 (primary) and the close of day 5 (secondary). Long the top tone tercile, minus the bottom tercile, each measured vs the SPY return.
+  - Cost: 10bp RT for ADV < $10M, 5bp otherwise; shock 2x.
+  - FIT/choose: none (fixed rule). JUDGE 2019-2026 with the halves 2019-22 / 2023-26.
+  - Gates: top-tercile excess > 0 net in both halves; day-clustered t >= 2; ex-top-5; a placebo shuffling tone within date >= 95th.
+  - If and only if this passes, an LLM labeller (this session's model, labelling only filings after its June 2026 training cutoff, i.e. 2026-07..09) is registered as a separate forward test.
+  - Prior: EDGAR-SESS/MICRO found the information arrives before EDGAR. This tests drift after the open, not the acceptance minute.
+- Ceilings:
+  - N 1237: monthly x 100%, needs >= 8%/yr alpha vs SPY.
+  - N 1238: reshapes the book, ceiling about +2-5pp, stated.
+  - N 1239: about 2000 events/yr; at 1-day x 20% deployable, it needs about +40bp net per event for +8pp, stated.
+- Program N = 1239.
