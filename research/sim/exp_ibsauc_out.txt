@@ -1,0 +1,22 @@
+IBS-AUC (descriptive, NOT a gate): live IBS rule (ibs_oos._trades: EQ18 top-3 12-1 momentum, IBS<0.2, open(d+1) -> open(d+2)), 1386 trades 2017-02-06..2026-09-14 (first trade needs 260 sessions of history; data start 2016-01-04)
+vendor = data/research/night/etf_daily.parquet (Alpaca SIP daily bars, adjustment=all); cross = largest opening-auction print, Alpaca SIP auctions
+
+coverage: both crosses 100.0% (entry 100.0%, exit 100.0%); median cross size entry 36,680 sh
+vendor adjustment factor (vendor close / closing cross) median 0.828, range 0.335..1.000: etf_daily is split+dividend ADJUSTED (ibs_oos's 'prices RAW' caveat is wrong)
+entry open gap (vendor open / f / opening cross - 1): mean +0.45bp | p1 -13.7 p5 -5.0 p25 -0.7 p50 +0.0 p75 +0.9 p95 +7.4 p99 +22.4 | |gap|=0 2.2%, >1bp 42.9%, >5bp 12.4%, >25bp 0.7%
+exit  open gap (vendor open / f / opening cross - 1): mean +0.45bp | p1 -17.7 p5 -6.3 p25 -0.7 p50 +0.0 p75 +0.7 p95 +7.4 p99 +22.8 | |gap|=0 2.7%, >1bp 41.3%, >5bp 13.3%, >25bp 1.2%
+  (f = vendor close / closing cross on the same day, so a gap here is the open's mismatch net of any close mismatch)
+trades spanning a split on d2: 1 (SMH 2023-05-05 x2)
+trades spanning an ex-dividend (d2 = ex-date): 20, mean dividend 26.9bp
+  by symbol (entry|exit median, share |gap|>1bp): EEM:-0.2|-0.8/90% EFA:-0.4|-0.4/40% IWM:+0.5|+0.2/81% MDY:+0.1|+0.0/60% QQQ:+0.6|-0.3/90% SMH:+0.0|-0.1/63% XBI:+0.1|+0.0/48% XLE:+0.1|+0.1/86% XLF:-0.1|-0.1/75% XLI:+0.1|+0.1/0% XLK:+0.1|+0.0/45% XLP:-0.0|+0.1/48% XLU:-0.2|+0.2/75% XLV:-0.0|+0.1/42% XLY:-0.3|+0.1/33%
+
+per-trade gross (trades with both crosses):
+  2016-20 OOS   vendor opens: n  557 mean  +29.8bp med  +23.5 t +4.02 hit 59% ex-top5  +23.9
+  2016-20 OOS   crosses (+div): n  557 mean  +29.7bp med  +24.6 t +3.98 hit 58% ex-top5  +23.9   (cross - vendor -0.02bp/trade, median diff -0.01, |diff|>1bp 47%, >25bp 2.0%); raw crosses no div +29.5bp
+  2021-26 live  vendor opens: n  829 mean  +21.6bp med  +29.4 t +3.45 hit 58% ex-top5  +17.3
+  2021-26 live  crosses (+div): n  829 mean  +21.8bp med  +29.8 t +3.47 hit 58% ex-top5  +17.5   (cross - vendor +0.19bp/trade, median diff +0.06, |diff|>1bp 54%, >25bp 2.5%); raw crosses no div +21.1bp
+  all           vendor opens: n 1386 mean  +24.9bp med  +28.9 t +5.20 hit 58% ex-top5  +22.1
+  all           crosses (+div): n 1386 mean  +25.0bp med  +29.1 t +5.20 hit 58% ex-top5  +22.3   (cross - vendor +0.11bp/trade, median diff +0.05, |diff|>1bp 51%, >25bp 2.3%); raw crosses no div +24.4bp
+
+2016-20 OOS: all trades on vendor opens +29.8bp (recorded +29.8bp; n 557); on crosses +29.7bp (n 557)
+by year (vendor/cross bp): 17:+12/+12 18:+14/+14 19:+18/+18 20:+65/+65 21:+35/+36 22:+17/+16 23:+15/+15 24:-7/-7 25:+23/+24 26:+63/+63

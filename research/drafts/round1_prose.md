@@ -11593,3 +11593,14 @@ Common to all four:
   - Missing-cross thin trades are the best on Sharadar (+70.9bp, n 734), possibly untradable.
   - Sharadar digit-suffixed tickers were mapped to their stem.
 - Not tested: whether the open gap depends on the day's return (dip picks); limit-priced auction orders; NX 2003-15 on crosses (no data).
+
+### REPORT - IBS-AUC: the IBS leg on official opening crosses, 2017-2026-09 (descriptive, 2026-11-21)
+- 1,386 trades; both crosses found for 100%.
+- The Alpaca SIP ETF daily open vs the opening cross: median gap 0, mean +0.45bp, symmetric. About 1% of opens are off by > 25bp (QQQ 2020-03-13 -142bp).
+- **IBS on crosses:**
+  - 2016-20 OOS +29.7bp/trade (recorded +29.8, t 3.98);
+  - 2021-26 +21.8 (vs +21.6);
+  - all +25.0 (t 5.2).
+- **The IBS OOS result stands.** Unlike the Sharadar stock opens (THIN-AUC, ~6.5bp overstatement), the ETF vendor opens are unbiased.
+- Doc fix noted: `data/research/night/etf_daily.parquet` is adjustment=all, not raw, despite the ibs_oos.py docstring. Returns are unaffected.
+- Not tested: the close side (the IBS signal uses vendor H/L/C).

@@ -16,3 +16,4 @@ Origin: the user asked "look at stocks that went up in the 2026-10/11 selloff" a
   - Use close*volume. Helpers are fixed.
 - Not tested: thin names on official crosses forward; non-US equity cross-sections; intraday-bar paths; s as a tilt inside existing legs; event-conditioned versions.
 - THIN-AUC (official crosses 2016-26): thin per-$ = live per-$ (+33 vs +34bp), so the thin branch is closed. **Sharadar daily OPEN overstates night exits ~6.5bp/trade vs the official opening cross** (close is exact); NX's 2003-15 +3.07bp/night is an upper bound. Live fills remain the judge.
+- IBS-AUC: the IBS leg re-priced on official opening crosses 2017-26 is unchanged (+29.7 vs +29.8bp OOS). The Alpaca ETF opens are unbiased; only Sharadar STOCK opens drift.
