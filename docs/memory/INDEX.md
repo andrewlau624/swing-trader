@@ -104,3 +104,4 @@ One line per file. Read a file when the task touches its subject; do not read al
 - `111-xs-rff-lin-kill-2026-11-21.md` (90 tok): monthly cross-sectional RFF/linear on price ranks (N 1235-1236) KILL: alpha vs EW only, ~0 vs SPY, gone post-2020.
 - `112-r5-overlay-kill-2026-11-21.md` (80 tok): ridge state overlay 0-1.5x on the book (N 1238) KILL: levers into stress, k=0 forced.
 - `113-xs-fund-gbm-kill-2026-11-21.md` (80 tok): GBM/RFF on PIT SF1 + price ranks (N 1237) KILL vs SPY; snapshot stock selection closed.
+- `114-ev-tone-8k-kill-2026-11-21.md` (80 tok): LM tone on out-of-session 8-Ks (N 1239) KILL: tone ranks but the long leg is negative (filer intraday drift -19bp).

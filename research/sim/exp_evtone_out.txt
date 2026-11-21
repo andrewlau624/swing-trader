@@ -1,0 +1,75 @@
+N 1239 EV-TONE  (round1_prose.md 'Amendment - EXP round 5')   code sha256[:16] 0b8b1b6721f66b63
+LM dictionary: Loughran-McDonald_MasterDictionary_1993-2025.csv  sha256[:16] e2d1328682bab7d2
+population: 211864 filings, 205506 events; sample cap 50000 seed 1239
+sample: 50000 events, 51555 filings; text fetched for 51555 filings; with EX-99: 0.78
+data check (not a filter): |raw day-1| > 50%: 22; x5 missing: 36
+tradable events with tone + cutoff: 49686  (2019-01-28 .. 2026-10-01); zero-hit events dropped; tone mean -0.065 sd 0.440
+
+=== PRIMARY day-1 (open -> close of entry day), excess vs SPY, bp ===
+-- net
+  ALL         TOP  n= 16752 mean= -18.48bp med= -15.86 hit=0.472 t_day=-3.91 ex-top5= -20.56
+  ALL         BOT  n= 16722 mean= -35.55bp med= -20.32 hit=0.462 t_day=-7.16 ex-top5= -38.99
+  ALL         T-B  days=1915 mean=  +5.15bp/day t=+0.72
+  H1 2019-22  TOP  n=  8889 mean= -20.48bp med= -12.72 hit=0.477 t_day=-3.24 ex-top5= -23.13
+  H1 2019-22  BOT  n=  8902 mean= -31.28bp med= -16.29 hit=0.469 t_day=-4.36 ex-top5= -37.27
+  H1 2019-22  T-B  days=983 mean=  -9.12bp/day t=-0.99
+  H2 2023-26  TOP  n=  7863 mean= -16.23bp med= -19.06 hit=0.466 t_day=-2.29 ex-top5= -20.22
+  H2 2023-26  BOT  n=  7820 mean= -40.40bp med= -25.76 hit=0.455 t_day=-5.96 ex-top5= -43.94
+  H2 2023-26  T-B  days=932 mean= +20.22bp/day t=+1.86
+-- net 2x cost
+  ALL         TOP  n= 16752 mean= -25.28bp med= -22.36 hit=0.462 t_day=-5.34 ex-top5= -27.36
+  ALL         BOT  n= 16722 mean= -42.30bp med= -26.65 hit=0.451 t_day=-8.53 ex-top5= -45.75
+  ALL         T-B  days=1915 mean=  -8.41bp/day t=-1.18
+  H1 2019-22  TOP  n=  8889 mean= -27.39bp med= -19.92 hit=0.466 t_day=-4.33 ex-top5= -30.04
+  H1 2019-22  BOT  n=  8902 mean= -38.16bp med= -22.63 hit=0.457 t_day=-5.32 ex-top5= -44.15
+  H1 2019-22  T-B  days=983 mean= -22.91bp/day t=-2.47
+  H2 2023-26  TOP  n=  7863 mean= -22.89bp med= -25.57 hit=0.457 t_day=-3.22 ex-top5= -26.88
+  H2 2023-26  BOT  n=  7820 mean= -47.03bp med= -31.64 hit=0.444 t_day=-6.94 ex-top5= -50.56
+  H2 2023-26  T-B  days=932 mean=  +6.89bp/day t=+0.63
+-- gross by tercile (ALL):  T0 -28.79 (n 16722)  T1 -18.38 (n 16212)  T2 -11.69 (n 16752)
+-- unconditional (all terciles) net: n= 49686 mean= -26.43bp med= -20.06 hit=0.467 t_day=-7.63 ex-top5= -27.67
+
+=== SECONDARY day-5 (open -> close of day 5), excess vs SPY, bp ===
+-- net
+  ALL         TOP  n= 16738 mean= -47.57bp med= -51.99 hit=0.460 t_day=-5.09 ex-top5= -53.21
+  ALL         BOT  n= 16708 mean= -66.10bp med= -58.99 hit=0.447 t_day=-6.68 ex-top5= -70.86
+  ALL         T-B  days=1913 mean=  +3.92bp/day t=+0.29
+  H1 2019-22  TOP  n=  8889 mean= -35.77bp med= -33.22 hit=0.473 t_day=-2.79 ex-top5= -42.47
+  H1 2019-22  BOT  n=  8902 mean= -41.14bp med= -45.81 hit=0.458 t_day=-2.79 ex-top5= -49.01
+  H1 2019-22  T-B  days=983 mean= -23.62bp/day t=-1.37
+  H2 2023-26  TOP  n=  7849 mean= -60.95bp med= -70.91 hit=0.445 t_day=-4.49 ex-top5= -71.91
+  H2 2023-26  BOT  n=  7806 mean= -94.57bp med= -74.09 hit=0.436 t_day=-7.39 ex-top5=-102.28
+  H2 2023-26  T-B  days=930 mean= +33.04bp/day t=+1.58
+-- net 2x cost
+  ALL         TOP  n= 16738 mean= -54.37bp med= -58.24 hit=0.454 t_day=-5.82 ex-top5= -60.01
+  ALL         BOT  n= 16708 mean= -72.86bp med= -65.31 hit=0.442 t_day=-7.36 ex-top5= -77.62
+  ALL         T-B  days=1913 mean=  -9.64bp/day t=-0.71
+  H1 2019-22  TOP  n=  8889 mean= -42.68bp med= -39.93 hit=0.467 t_day=-3.33 ex-top5= -49.38
+  H1 2019-22  BOT  n=  8902 mean= -48.02bp med= -52.10 hit=0.452 t_day=-3.26 ex-top5= -55.88
+  H1 2019-22  T-B  days=983 mean= -37.41bp/day t=-2.17
+  H2 2023-26  TOP  n=  7849 mean= -67.61bp med= -77.26 hit=0.440 t_day=-4.98 ex-top5= -78.57
+  H2 2023-26  BOT  n=  7806 mean=-101.19bp med= -80.65 hit=0.430 t_day=-7.91 ex-top5=-108.91
+  H2 2023-26  T-B  days=930 mean= +19.72bp/day t=+0.95
+-- gross by tercile (ALL):  T0 -59.34 (n 16708)  T1 -46.09 (n 16204)  T2 -40.78 (n 16738)
+-- unconditional (all terciles) net: n= 49650 mean= -55.57bp med= -57.90 hit=0.454 t_day=-7.59 ex-top5= -58.11
+
+=== placebo: tone shuffled within entry date (1000 draws; dates with one event cannot move) ===
+  x1: TOP net obs -18.48bp, placebo pctile 97.4; T-B gross obs +17.10bp, pctile 99.0
+  x5: TOP net obs -47.57bp, placebo pctile 86.0; T-B gross obs +18.56bp, pctile 90.4
+  single-event dates: 0 of 1930
+
+=== diagnostics (not gates) ===
+  2.02 earnings  TOP x1 net n=  6264 mean=  -4.78bp med=  -5.07 hit=0.493 t_day=-0.57 ex-top5=  -8.35
+  non-2.02       TOP x1 net n= 10488 mean= -26.66bp med= -19.31 hit=0.459 t_day=-5.19 ex-top5= -29.66
+  ADV<10M        TOP x1 net n=  6014 mean= -17.18bp med= -19.95 hit=0.470 t_day=-1.91 ex-top5= -22.87
+  ADV>=10M       TOP x1 net n= 10738 mean= -19.21bp med= -13.93 hit=0.473 t_day=-3.96 ex-top5= -21.35
+  full-sample cutoffs TOP x1 net n= 16569 mean= -19.70bp med= -16.37 hit=0.472 t_day=-4.19 ex-top5= -21.81
+
+=== GATES (primary day-1, TOP tercile net excess vs SPY) ===
+  FAIL  TOP net > 0 in H1
+  FAIL  TOP net > 0 in H2
+  FAIL  day-clustered t >= 2
+  FAIL  ex-top-5 > 0
+  PASS  placebo >= 95th
+VERDICT: FAIL   (mean -18.48bp, t -3.91)
+top-tercile events/yr in population ~9029; registration ceiling needs >= +40bp net/event at 1-day x 20% deployable

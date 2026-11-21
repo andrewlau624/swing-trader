@@ -11125,3 +11125,25 @@ These are siblings from the A1/A2 row's `not tested:` field: the published month
   - micro-caps under $10M ADV;
   - other SF1 fields.
 - Every cross-sectional stock selection on month-end snapshots (single sorts N 977, linear/RFF N 1235-1236, GBM N 1237) is now dead vs SPY.
+
+### RESULT - EV-TONE (N 1239, run 2026-11-21): FAIL
+- Sample: 50k events drawn from 205k, sample size declared before any outcome; 2019-26 out-of-session 8-Ks.
+- Primary, day-1 top tercile, excess vs SPY: -18.5bp net, t -3.91. Both halves negative (-20.5 / -16.2), ex-top-5 -20.6.
+- Tone does order stocks:
+  - Gross by tercile: bottom -28.8, middle -18.4, top -11.7.
+  - The within-date shuffle placebo puts the top tercile at the 97.4th pct and the top-minus-bottom spread at the 99th.
+- But every out-of-session filer drifts about -19bp gross from open to close. Top minus bottom nets +5bp (t 0.7). Day 5 is worse (-48bp).
+- Earnings 2.02 top tercile: -4.8bp.
+- LLM labeller not run (conditional on a pass).
+- Unregistered observation: shorting the bottom tercile is about +22bp net before borrow, mostly the unconditional drift. This looks like the known negative intraday leg of single stocks. Not a finding; it would need its own registration.
+- Not tested:
+  - LLM/semantic or supervised text labels;
+  - tone change vs the firm's own prior filings, or surprise;
+  - per-item dictionaries;
+  - the full 205k population;
+  - a short leg with borrow cost;
+  - sector or size hedges;
+  - overnight or 20-day horizons;
+  - exhibits other than EX-99;
+  - OTC and sub-$1 names;
+  - pre-2019.
