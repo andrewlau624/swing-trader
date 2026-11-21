@@ -1,0 +1,15 @@
+WEEKWIN-SHORT: top-10 5-day winners, short close->close, $5+/ADV $10M+ SEP common (delisted kept); beta(1998-2004) 1.17
+
+=== JUDGE 1998-02..2010: 3251 days, missing next bar 6 of 32510 slots, mean ret5 of picks 32.3%, turnover 0.96/day
+  gross short +22.2bp/day (median +16.4, t +3.97); SPY +2.4
+  placebo random-10 gross short mean -5.4bp, 95th -2.6; real at pct 100.0
+  WW-S1 raw (N 1223): net +9.8bp/day t +1.76 | halves +21.0 / -3.1 | median +4.3 hit 0.51 | ex-top5 +6.9 | shock -2.6 | worst day -46.6% | maxDD@0.5x -66% | 2000-02 +29.9 2008 +35.5
+    GATES: t>=2 FAIL | halves FAIL | median PASS | ex-top5 PASS | shock FAIL | placebo95 PASS | ceiling15bp FAIL -> KILL
+  WW-S2 SPY-hedged (N 1224): net +12.6bp/day t +2.61 | halves +23.9 / -0.5 | median +7.2 hit 0.52 | ex-top5 +9.9 | shock +0.2 | worst day -45.7% | maxDD@0.5x -48% | 2000-02 +24.6 2008 +20.0
+    GATES: t>=2 PASS | halves FAIL | median PASS | ex-top5 PASS | shock PASS | placebo95 PASS | ceiling15bp FAIL -> KILL
+
+=== REPORT 2011-20 (touched): 2517 days, missing next bar 1 of 25170 slots, mean ret5 of picks 33.9%, turnover 0.85/day
+  gross short +8.1bp/day (median +1.0, t +1.58); SPY +5.6
+  placebo random-10 gross short mean -5.4bp, 95th -3.0; real at pct 100.0
+  WW-S1 raw (N 1223): net -4.0bp/day t -0.78 | halves +nan / -4.0 | median -10.9 hit 0.47 | ex-top5 -7.4 | shock -16.1 | worst day -31.6% | maxDD@0.5x -57% | 2000-02 +nan 2008 +nan
+  WW-S2 SPY-hedged (N 1224): net +2.6bp/day t +0.53 | halves +nan / +2.6 | median -0.3 hit 0.50 | ex-top5 -0.4 | shock -9.5 | worst day -30.1% | maxDD@0.5x -40% | 2000-02 +nan 2008 +nan

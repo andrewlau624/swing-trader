@@ -10905,3 +10905,11 @@ the shock; placebo: 10 random eligible names per day (200 draws) -> real gross s
 (at a 0.5x short sleeve ~ +19%/yr; below that it cannot reach +8pp/yr). Report worst day, maxDD at 0.5x, 2008 and 2000-02 separately.
 Not tested here: 1-day or 20-day winners, close->open, longer holds, borrow data (none pre-2010 on disk). Runner research/sim/weekwin_short.py.
 Program N = 1224.
+
+#### Result - WEEKWIN-SHORT (N 1223-1224, judged 2026-11-20 on 1998-02..2010, one run): KILL both
+research/sim/weekwin_short.py -> weekwin_short_out.txt. Picks average +32% over 5 days; turnover 0.96/day. The reversal is REAL gross:
++22.2bp/day short (median +16.4, t 3.97), placebo random-10 -5.4bp, real at the 100th pct. But it lives in 1998-2004: net (2.5bp/side +
+10bp/day borrow) S1 raw +9.8bp t 1.76, halves +21.0 / -3.1; S2 SPY-hedged +12.6 t 2.61, halves +23.9 / -0.5; both under the +15bp
+ceiling; worst day -46% (squeeze), maxDD -48..-66% at 0.5x. 2011-20 (touched): gross +8.1bp (median +1.0), net -4.0 / +2.6. A decayed
+anomaly whose remaining gross (~8bp) is smaller than its borrow. Not tested: real borrow rates (none pre-2010), 1-day / 20-day winners,
+longer holds, the MAX (single-day max) form, small caps under $10M ADV, close->open.
