@@ -11512,3 +11512,15 @@ Common to all four:
     - open-auction availability (share of picks with an open print); DSR at N 1256.
   - Ceiling: night shape. If it passes it is additive capital-wise only if the live book is capital-limited; report the combined book at $10k.
   - Kill: any gate fails.
+- **N 1257 PCA-DAY (the s-score in the book's idle daytime capital):**
+  - The night leg sells at the 09:30 open, and the IBS leg holds overnight, so daytime capital is idle. N 1242's lag diagnostic puts the s-score's reversion in the close-to-close day.
+  - The s-score is as N 1242 base, computed through close T (top 1,000 by correct split-adjusted ADV).
+  - Buy the 20 most negative s (s < -1.25) at the open of T+1 and sell at the close of T+1. Fresh each day, equal weight.
+  - Costs: tier_hi per side (`nx.cost_model`); shock 2x. Benchmark: the EW top-1,000 open -> close on the same day.
+  - JUDGE 2003-2015 (halves 2003-09 / 2010-15); REPORT 2016-2026-10.
+  - Gates:
+    - net excess >= +5bp/day; NW t >= 2.5;
+    - halves > 0; 2x cost > 0; ex-top-5 days > 0;
+    - within-date shuffle placebo (net, 50 draws) >= 95th percentile.
+  - Report: the absolute net return, corr with the NX night series, DSR at N 1257.
+  - Prior: N 1253 showed no overnight reversion, so the effect, if any, must be in the daytime. Open-to-close reversal has its own literature (Heston-Korajczyk-Sadka intraday patterns).
