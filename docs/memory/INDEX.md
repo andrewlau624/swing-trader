@@ -99,3 +99,4 @@ One line per file. Read a file when the task touches its subject; do not read al
 - `106-rl-universes-d2-kill-2026-11-20.md` (130 tok): PPO on week winners / vol top / day losers / sectors (N 1219-1222) KILL vs EW slot baskets; week-winner basket -8bp/day seeded WEEKWIN-SHORT.
 - `107-weekwin-short-kill-2026-11-20.md` (110 tok): short top-10 5-day winners (N 1223-1224) KILL: gross +22bp/day pre-2005, decayed; net under borrow since.
 - `108-event-size-tilt-r3-kill-2026-11-20.md` (110 tok): ridge size tilts on PREF-EX/CEF-RV events (N 1230-1231) KILL: small real-looking tilts, placebo not beaten, money immaterial.
+- `109-kronos-finetune-ft-kill-2026-11-21.md` (110 tok): Kronos-small zero-shot + fine-tuned night-pick tilt (N 1232-1233) KILL post-release: ranking ~0, FT lowers loss but not P&L.

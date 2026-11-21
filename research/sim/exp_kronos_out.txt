@@ -1,0 +1,39 @@
+FT round: Kronos-small on the night picks (N 1232 FT-ZS, N 1233 FT-NIGHT; pre-reg round1_prose.md 'FT round').
+Model: NeoQuasar/Kronos-small + Kronos-Tokenizer-base, weights committed to HF 2025-06-30 (unchanged since; sha256
+  b082dfcb / 59d85f6a); paper arXiv 2508.02739 (2025-08-02): 'pre-training data extends up to June 2024'. Data end is
+  before the release, so the registered judge start 2025-09-01 stands. 2023-24 is inside/next to FT-ZS's pretraining.
+Fine-tune windows: 252142 events 2003-22, 150000 used (random subsample); stopping set 24785 events 2023-24, 20000 used; last train target bar 2023-01-03.
+Picks in 2023-24 + judge: 3475, without a full clean 64-bar window 96 (w = 1).
+Fine-tune: epoch-0 (pretrained) val loss 3.2438; ep1 train 3.1450 val 3.0353; ep2 train 3.0713 val 3.0205; ep3 train 3.0512 val 3.0148
+  best epoch 3 val 3.0148; stop: time budget (95 min) after epoch 3 of 5.
+
+FT-ZS (N 1232)
+  2023-24 (report only, possibly contaminated): picks 1415 (forecast 1393), nights 410 (>=2 picks 295)
+    increment +9.34 bp/night, NW t +0.83; halves +15.28 (199 nights) / +3.73 (211 nights)
+    sign-flip 80th pct, within-night shuffle 80th pct (shuffle mean +0.05, 95th +18.63)
+    rank IC f vs r (nights with >=3 forecasts, n 201): mean +0.0386, t +0.88
+    direction hit 54.4% on 1347 picks (share r>0 58.9%, share f>0 67.9%); f mean +178.9bp sd 810.2bp
+    gate (halves > 0, NW t >= 2, both placebos >= 95th): FAIL
+  JUDGE 2025-09..2026-09: picks 2060 (forecast 1986), nights 259 (>=2 picks 234)
+    increment +6.62 bp/night, NW t +1.00; halves +14.68 (118 nights) / -0.12 (141 nights)
+    sign-flip 87th pct, within-night shuffle 84th pct (shuffle mean +0.01, 95th +10.14)
+    rank IC f vs r (nights with >=3 forecasts, n 201): mean +0.0425, t +1.31
+    direction hit 54.4% on 1931 picks (share r>0 56.7%, share f>0 66.3%); f mean +127.3bp sd 570.8bp
+    gate (halves > 0, NW t >= 2, both placebos >= 95th): FAIL
+  VERDICT FT-ZS (N 1232): DEAD
+
+FT-NIGHT (N 1233)
+  2023-24 (report only, stopping set): picks 1415 (forecast 1393), nights 410 (>=2 picks 295)
+    increment +0.83 bp/night, NW t +0.06; halves +28.40 (199 nights) / -25.16 (211 nights)
+    sign-flip 55th pct, within-night shuffle 53th pct (shuffle mean +0.25, 95th +18.84)
+    rank IC f vs r (nights with >=3 forecasts, n 201): mean +0.0234, t +0.54
+    direction hit 52.5% on 1347 picks (share r>0 58.9%, share f>0 61.2%); f mean +126.0bp sd 934.9bp
+    gate (halves > 0, NW t >= 2, both placebos >= 95th): FAIL
+  JUDGE 2025-09..2026-09: picks 2060 (forecast 1986), nights 259 (>=2 picks 234)
+    increment +4.36 bp/night, NW t +0.60; halves +19.10 (118 nights) / -7.97 (141 nights)
+    sign-flip 75th pct, within-night shuffle 73th pct (shuffle mean +0.04, 95th +10.62)
+    rank IC f vs r (nights with >=3 forecasts, n 201): mean +0.0399, t +1.15
+    direction hit 52.4% on 1931 picks (share r>0 56.7%, share f>0 58.2%); f mean +53.5bp sd 559.2bp
+    gate (halves > 0, NW t >= 2, both placebos >= 95th): FAIL
+  VERDICT FT-NIGHT (N 1233): DEAD
+

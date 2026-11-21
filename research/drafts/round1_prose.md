@@ -10981,3 +10981,13 @@ shuffle placebos >= 95th pct. Also report 2023-24 (FT-NIGHT's validation; FT-ZS 
 Known priors: snapshot/sequence/minute-path night ranking is dead (PATTERN/SEQ/MINPATH-NIGHT); published zero-shot direction accuracy
 ~51% (NEXT.md row "Zero-shot TS foundation models": not run for power). A pass is a tilt (~1-3pp/yr ceiling) unless the increment is
 large. The repo's code is downloaded into its own directory and read before it runs. Runner research/sim/exp_kronos.py. Program N = 1233.
+
+### RESULT - FT round (N 1232-1233, run 2026-11-21): both DEAD
+Weights committed to HF 2025-06-30 and unchanged since. The paper says pretraining data ends June 2024, so the 2025-09-01 judge start stands.
+Judge window 2025-09..2026-09: 2060 picks, 259 nights.
+- **FT-ZS (N 1232), zero-shot:** +6.6bp/night, NW t 1.00, halves +14.7 / -0.1. Sign-flip placebo 87th pct, shuffle 84th. Rank IC +0.043 (t 1.31). Direction hit 54.4% vs share up 56.7%. DEAD.
+- **FT-NIGHT (N 1233), fine-tuned:** recipe as registered on 150k of the 252k 2003-22 dip windows, 3 of 5 epochs (stopped on the time budget). Val loss fell 3.244 to 3.015. Judge +4.4bp/night, t 0.60, halves +19.1 / -8.0. Placebos 75th / 73rd. IC +0.040. Hit 52.4%. DEAD.
+- Fine-tuning lowered token loss about 7% but did not improve within-night ranking; it was slightly worse than zero-shot. Neither model beats "always up". This agrees with PATTERN / SEQ / MINPATH-NIGHT.
+- Audit: the input includes t's full close bar, about 20 minutes of look-ahead in the model's favour. The model was dead anyway.
+- Not tested: Kronos-base/large; intraday or 15:40 bars; the full 30-epoch recipe; targets other than the next open; a filter shape instead of a tilt.
+- Output: research/sim/exp_kronos_out.txt. Weights and cache: data/research/exp_kronos (gitignored).
