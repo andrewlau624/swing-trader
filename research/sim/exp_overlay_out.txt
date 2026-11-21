@@ -1,5 +1,5 @@
 EXP round 5 R5-OVERLAY (N 1238): ridge risk overlay s = clip(1 + k z, 0, 1.5) on the flat book 0.5 IBS + 0.5 night.
-Pre-reg round1_prose.md 'Amendment - EXP round 5' + 'EXP round 3'. Code sha256[:16] 237b06f4af79e9b2 (frozen before judge).
+Pre-reg round1_prose.md 'Amendment - EXP round 5' + 'EXP round 3'. Code sha256[:16] 87c4466c043714d8 (frozen before judge).
 FIT 2003-01-01..2012-12-31  JUDGE 2013-01-01..2020-12-31  REPORT 2021-01-01..2026-09-17
 VIX: FRED VIXCLS local copy data/research/oil_shock/VIXCLS.csv (1990-01-02..2026-11-05), sessions w/o a print 0 (ffill <= 3); financing rate: FRED DTB3 (local; DFF fetch failed) as the fed-funds proxy from 1954-01-04
 IBS cross-check (exp_legalloc): {'n_sharadar': 551, 'n_alpaca': 557, 'n_both': 493, 'share_union': 0.8016260162601626, 'gap_matched_bp': -0.15960199661751465, 'gap_all_bp': 2.4829457204388103, 'gap_matched_med_bp': -0.0335555090535955, 'first_sharadar': '1999-01-14', 'x0': '2017-02-06'}
