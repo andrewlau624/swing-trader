@@ -11438,3 +11438,29 @@ Common to all four:
     - REPORT 2016-2026-10 from `~/data/sharadar`; DSR at N 1253.
   - Ceiling: daily x 100% x 5bp = ~12%/yr at $10k (20 names x $500 is fine for whole shares).
   - Kill: any gate fails.
+
+### RESULT - N 1250 CRASH-RS (run 2026-11-21): KILL. Relative strength since the peak does NOT persist inside a drawdown; it slightly reverses.
+- **MC** (judge 1999-2015, 19 episodes, 346 holds): mean per-episode rank corr -0.029, t -1.52, positive in 32% of episodes. FAIL. Pooled -0.022, t -2.52 (the wrong sign).
+- **Trading:**
+  - net -18.3bp/hold, t -1.62; halves -9.1 / -29.1; ex-best episode -21.4;
+  - placebo (fake peak) 1st percentile. Every gate fails. DSR 0.
+- It lost in every long bear: 2000-03 -14bp, 2007-09 -34, 2020 -45, 2022-23 -23.
+- **Report 2016-26:** -27.5bp/hold, MC -0.017.
+- **2026-10 episode:** D on from 2026-11-19 (P = 10-06). The top decile is 30% tech / 20% healthcare (LQDA, SGRY, BRBR, ...). No completed hold.
+- Run note: D uses a rolling 252-session max (on 40% of 1999-2015, ~20 holds/yr).
+- **Answer to the user's question** ("stocks that went up while the market fell, use the pattern"): after beta and sector, the holders-up do not keep winning. The visible pattern is beta, and beta pays only if the fall continues.
+- Not tested: a fixed-peak D; 20/60-session holds; raw (non-beta) RS; no sector demeaning; the reversal/short sibling (|rc| ~0.02, small); recovery-phase leaders; ETF/sector universes; a learned model over drawdown-path features.
+
+## Amendment - DEEP round 3b (pre-registered before any outcome; N 1253 -> 1255)
+- **N 1254 RECOVERY-RS (leaders of the rebound, not of the fall):**
+  - Same D state, universe, beta and sector demeaning as N 1250. The trough L = the min SPY close since P. Recovery is confirmed at the first close with SPY >= 1.05 x L while D is still on.
+  - From confirmation, decide every 5 sessions for at most 12 decisions or until D ends + 1 decision.
+  - Score = r_i(L..t) - beta_i x r_SPY(L..t), sector-demeaned. Long the top decile, trade the t+1 close, hold to t+6. Beta-matched excess vs EW as N 1250, 5bp/side.
+  - A new trough (SPY below L) resets L and needs a new confirmation.
+  - JUDGE 1999-2015, report 2016-26. Gates as N 1250 (MC on the recovery score, net >= +60bp/hold, t >= 2.5, halves, ex-top-5, ex-best episode, 2x cost, fake-L placebo >= 95th percentile).
+  - Prior: Daniel-Moskowitz say losers (high beta) lead rebounds. Beta-matching removes that, so this asks whether residual leaders persist.
+- **N 1255 VOLRATIO (from the N 1243 model's #2 term):**
+  - Weekly (every 5th session). Ratio = sd(daily returns, 60d) / sd(daily returns, 20d).
+  - Long the top decile (calm recent vs past), equal weight, close T -> close T+5. Excess vs the universe EW, 5bp/side. Universe and pipeline as N 1243 (top-1,500 ADV... N 1243's eligible set).
+  - JUDGE 2011-2026-10 (2003-10 was seen through the N 1243 model). Gates as N 1251: >= +15bp/wk net, t >= 2.5, halves 2011-18 / 2019-26, ex-top-5, 2x cost, beta-matched > 0.
+  - Report: the bottom decile, and the corr of the decile return with a ret5-reversal decile (is it reversal in costume?).

@@ -1,0 +1,65 @@
+CRASH-RS (N 1250): drawdown state on SPY TR (rolling 252 max, on <= 0.93, off >= 0.97); score = r(P..t) - beta_P r_SPY(P..t), sector-demeaned; long top decile of top-1500 ADV $5+ SEP common (delisted kept), close t+1 -> t+6; excess beta-matched vs EW; 5bp/side, shock 10bp; DSR N 1250
+SPY sessions 1997-12-31..2026-10-05; time in D 1999-2015 39.7%, 2016-26 27.7%; decisions judge 346, report 155
+  chunk 1/8: names so far 2157
+  chunk 2/8: names so far 4313
+  chunk 3/8: names so far 6479
+  chunk 4/8: names so far 8655
+  chunk 5/8: names so far 10797
+  chunk 6/8: names so far 12958
+  chunk 7/8: names so far 15123
+  chunk 8/8: names so far 17309
+  wide R (7234, 6826) 198MB
+
+Episodes (first decision, last decision, P at first decision, holds, mean gross/net excess per hold, mean MC rank corr):
+  ep  1 1999-08-04..1999-08-18 P 1999-07-16 holds   3 gross   +67.0bp net   +61.7bp rc -0.007
+  ep  2 1999-09-21..1999-11-02 P 1999-07-16 holds   7 gross  +138.2bp net  +135.2bp rc +0.004
+  ep  3 2000-01-28..2000-01-28 P 2000-01-19 holds   1 gross  +427.5bp net  +417.5bp rc +0.107
+  ep  4 2000-02-18..2000-03-13 P 2000-01-19 holds   4 gross  -338.5bp net  -343.0bp rc -0.245
+  ep  5 2000-04-14..2000-07-05 P 2000-03-24 holds  12 gross   -17.0bp net   -20.0bp rc -0.024
+  ep  6 2000-07-28..2000-08-04 P 2000-03-24 holds   2 gross   +51.7bp net   +45.7bp rc -0.090
+  ep  7 2000-10-06..2003-06-05 P 2000-03-24 holds 134 gross   -12.6bp net   -14.3bp rc -0.007
+  ep  8 2004-08-06..2004-08-27 P 2004-03-05 holds   4 gross   +37.1bp net   +33.6bp rc -0.029
+  ep  9 2006-06-13..2006-07-26 P 2006-05-09 holds   7 gross   -41.0bp net   -44.6bp rc -0.060
+  ep 10 2007-08-03..2007-09-17 P 2007-07-19 holds   7 gross    +1.9bp net    -2.0bp rc +0.008
+  ep 11 2007-11-09..2007-12-03 P 2007-10-09 holds   4 gross   +32.4bp net   +28.3bp rc +0.056
+  ep 12 2007-12-17..2009-09-30 P 2007-10-09 holds  91 gross   -32.7bp net   -34.3bp rc -0.048
+  ep 13 2010-02-04..2010-02-26 P 2010-01-19 holds   4 gross   -47.5bp net   -52.0bp rc -0.103
+  ep 14 2010-05-06..2010-10-05 P 2010-04-23 holds  22 gross    +5.4bp net    +3.2bp rc -0.006
+  ep 15 2011-08-02..2012-01-17 P 2011-04-29 holds  24 gross   -23.0bp net   -24.8bp rc -0.034
+  ep 16 2012-05-17..2012-06-29 P 2012-04-02 holds   7 gross   +38.2bp net   +35.4bp rc +0.086
+  ep 17 2012-11-14..2012-11-21 P 2012-09-14 holds   2 gross   -52.3bp net   -58.3bp rc -0.159
+  ep 18 2014-10-15..2014-10-22 P 2014-09-18 holds   2 gross  -110.1bp net  -116.7bp rc -0.049
+  ep 19 2015-08-24..2015-10-20 P 2015-07-20 holds   9 gross   -41.8bp net   -44.9bp rc +0.052
+  ep 20 2016-01-07..2016-03-14 P 2015-07-20 holds  10 gross   -43.8bp net   -46.4bp rc -0.091
+  ep 21 2018-02-05..2018-03-06 P 2018-01-26 holds   5 gross   +46.9bp net   +42.4bp rc +0.068
+  ep 22 2018-03-22..2018-06-04 P 2018-01-26 holds  11 gross   +18.6bp net   +16.0bp rc +0.048
+  ep 23 2018-10-24..2019-03-14 P 2018-09-20 holds  20 gross   -19.1bp net   -21.5bp rc -0.038
+  ep 24 2020-02-26..2020-07-20 P 2020-02-19 holds  21 gross   -42.0bp net   -44.6bp rc -0.049
+  ep 25 2020-09-18..2020-10-02 P 2020-09-02 holds   3 gross   +14.4bp net    +9.1bp rc -0.089
+  ep 26 2020-10-28..2020-11-04 P 2020-09-02 holds   2 gross  -149.7bp net  -155.7bp rc -0.042
+  ep 27 2022-01-21..2023-04-18 P 2022-01-03 holds  63 gross   -21.1bp net   -22.9bp rc -0.017
+  ep 28 2023-10-03..2023-11-07 P 2023-07-31 holds   6 gross    -4.1bp net    -7.3bp rc -0.016
+  ep 29 2024-08-05..2024-08-12 P 2024-07-16 holds   2 gross  -104.7bp net  -111.6bp rc +0.035
+  ep 30 2025-03-10..2025-05-13 P 2025-02-19 holds  10 gross   -82.4bp net   -86.2bp rc -0.087
+  ep 31 2026-03-27..2026-04-06 P 2026-01-27 holds   2 gross   +28.0bp net   +22.0bp rc +0.072
+
+=== JUDGE 1999-2015 (halves 1999-2007 / 2008-15): 346 holds in 19 episodes, names/decision 1436, decile 143, beta port 1.05 vs EW 0.98, turnover 0.37/hold
+  MC: mean episode rank corr(score, next-20 residual) -0.0289, t -1.52 over 19 episodes, positive 32%; pooled over decisions -0.0221 (t -2.52) -> FAIL
+  net excess -18.3bp/hold (gross -16.1, 2x cost -20.4) t -1.62 | median -14.6 hit 0.46 | halves -9.1 / -29.1 | ex-top5 -28.0 | ex-best episode (ep 2) -21.4 | episode-clustered t +0.01
+  raw legs: decile +26.9bp/hold, EW +36.7, SPY +17.5 | placebo fake-P (100): gross mean -3.2bp, 95th +3.7; real gross -16.1 at pct 1 | DSR (N 1250, per hold) 0.000
+  ceiling: 21.3 holds/yr x -18.3bp = -3.9pp/yr excess (simple sum)
+  GATES: MC FAIL | net>=60bp FAIL | t>=2.5 FAIL | halves FAIL | ex-top5 FAIL | ex-best-ep FAIL | 2xcost FAIL | placebo95 FAIL -> KILL
+
+=== REPORT 2016-2026-10 (never judged): 155 holds in 12 episodes, names/decision 1461, decile 146, beta port 1.20 vs EW 1.07, turnover 0.44/hold
+  MC: mean episode rank corr(score, next-20 residual) -0.0172, t -0.99 over 12 episodes, positive 33%; pooled over decisions -0.0259 (t -1.88) -> FAIL
+  net excess -27.5bp/hold (gross -24.9, 2x cost -30.1) t -1.28 | median -14.0 hit 0.47 | halves -17.6 / -37.5 | ex-top5 -47.2 | ex-best episode (ep 21) -29.8 | episode-clustered t -1.99
+  raw legs: decile +39.0bp/hold, EW +51.6, SPY +48.6 | placebo fake-P (100): gross mean -20.9bp, 95th -10.5; real gross -24.9 at pct 31 | DSR (N 1250, per hold) 0.000
+  ceiling: 14.4 holds/yr x -27.5bp = -4.0pp/yr excess (simple sum)
+
+=== 2026-10 episode, descriptive (Alpaca adjusted daily bars 2026-01-02..2026-11-20, ~2,400 liquid names; not Sharadar)
+  D on 2026-11-19..2026-11-20 (2 sessions, still on at the last bar: True); P 2026-10-06 (SPY 779.09); last close 2026-11-20 SPY 689.81 = -11.5% from P (bars start 2026-01; P checked against data/research/hmm_rebal/px_SPY.csv: 2026-10-06 is the 252-session max)
+  decisions: 1 (2026-11-19); completed t+1 -> t+6 holds: 0
+  decision 2026-11-19: P 2026-10-06, scored 1487 names (beta from 190 sessions ending at P, >= 100 obs), top decile 148; beta top 0.98 vs all 0.96
+    top-decile sectors: Technology 30%, Healthcare 20%, Industrials 15%, Consumer Cyclical 11%, Basic Materials 8%, Communication Services 5% | eligible: Technology 18%, Industrials 15%, Healthcare 14%, Financial Services 13%, Consumer Cyclical 11%, Basic Materials 7%
+    top 10 by score: LQDA, SGRY, BRBR, BRZE, VRDN, XERS, BILL, ADT, APP, AXGN
+    t -> last bar (2026-11-20, 1 sessions; before the registered t+1 entry): top -1.99%, all -3.01%, SPY -3.64%
