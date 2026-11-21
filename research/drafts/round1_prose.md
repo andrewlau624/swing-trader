@@ -10863,3 +10863,15 @@ pct, DSR .09; seeds 1-4 -1.22 / -0.56 / +0.63 / -1.06 (0/5 pass). A2 vs EW 8-ETF
 top of the frozen grid (1e5) for every model: validation error fell monotonically with shrinkage, i.e. 6,000 random daily price-window
 features carry no predictable signal for next-day ETF returns even in-sample. Not tested: the published Kelly-Malamud-Zhou setup itself
 (MONTHLY horizon, Welch-Goyal macro predictors), cross-sectional stock RFF, horizons of 5-20 days, other gamma.
+
+#### Result - B1 FLY-RES (N 1214) / B2 FLY-DA (N 1215) (judged 2026-11-20, one run, 200 placebo draws, 20+20 controls): KILL both
+research/sim/exp_flyres.py -> exp_flyres_out.txt. Connectome: FlyWire v783 (zenodo 10676866 proofread_connections_783.feather +
+flywire_annotations Supplemental_file1), mushroom-body subgraph 3,000 neurons (KC 2,492, ALPN 368, MBON 80, DAN 60), 32k edges >= 5
+synapses, 1.9% negative. B1 (ridge readout, lambda at grid top 1e5): alpha +0.32bp/day t 0.54, Sharpe 0.73 vs SPY 0.72, ex-top-5 -0.53,
+maxDD -48% at mean exposure 1.45: gates 1/3/4/6 FAIL (2 and 5 pass, placebo 95.5th; wiring at 95th of rewires / 100th of ER), but on a
+~0 alpha with the readout shrunk to its intercept (position parked near the 1.5x cap = leverage, not timing): the control "wins" carry
+no economic content. B2 (dopamine-gated three-factor online readout, eta 1e-4): alpha +0.06bp t 0.37, placebo 4th pct, wiring 55th /
+60th of controls: all gates FAIL. REPORT 2021-26: B1 = 1.5x SPY (alpha +0.01), B2 +0.18bp t 0.9. Prior confirmed: the fly's wiring
+adds nothing over a random reservoir on daily ETF inputs. Not tested: other circuits (central complex, whole brain), spiking/LIF
+dynamics instead of tanh ESN, richer inputs (stock cross-section, minute bars), the reservoir as an RL observation, plasticity in
+the recurrent weights.

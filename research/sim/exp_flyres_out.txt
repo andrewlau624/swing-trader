@@ -1,0 +1,69 @@
+EXP round B: FLY-RES (N 1214) and FLY-DA (N 1215) -- research/sim/exp_flyres.py
+pre-reg: research/drafts/round1_prose.md, '## Amendment - EXP round (user 2026-11-20 ...)'; program N 1218
+
+CONNECTOME: FlyWire adult whole-brain, materialization v783 (public, no login)
+  edges  : https://zenodo.org/records/10676866  proofread_connections_783.feather (16.85M pre/post/neuropil rows)
+  classes: https://github.com/flyconnectome/flywire_annotations  supplemental_files/Supplemental_file1_neuron_annotations.tsv
+  MB subgraph: classes ['Kenyon_Cell', 'ALPN', 'MBON', 'DAN']; pair synapses summed over neuropils, kept if >= 5; autapses dropped;
+  capped at 3000 by binary in+out degree inside the MB subgraph
+  kept / total in class: Kenyon_Cell 2492/5177, ALPN 368/685, MBON 80/96, DAN 60/331
+  presyn top_nt of kept neurons: dopamine 2550, acetylcholine 369, gaba 56, glutamate 25
+  sign rule: gaba/glutamate -1, acetylcholine +1, other/unknown +1 -> 2550 neurons signed + as other/unknown (KCs are predicted 'dopamine' by the FlyWire NT classifier; known_nt says ACh; both give +)
+  KC known_nt: {'acetylcholine; sNPF; acetylcholine, sNPF': 1978, 'acetylcholine; acetylcholine': 514}
+  edges 32,097, density 0.0036, negative edges 618 (1.93%), synapses 364,461
+  input units (ALPN) 368; W_in nonzeros 617 (p 0.1, U(-1,1), seed 0)
+  reservoir: spectral radius 0.9, leak 0.3, tanh; inputs = 8 ETF day-t log return + 20d vol, z-scored on fit
+  sessions 6055 (2002-08-27..2026-09-21); washout 100 (training from 2003-01-21); fit decisions end 2010-12-31; Sharadar <= 2020-12-31, Alpaca etf_daily after
+
+SPY B&H judge 2011-20: mean +4.92bp/day, Sharpe 0.72
+
+== B1 FLY-RES ridge (lambda chosen 100000) JUDGE 2011-01..2020-12 (P&L dates), 1bp/side ==
+  [judge] n=2517  alpha +0.32bp/day NW t +0.54 (beta 1.37)
+     halves: 2011-15 +0.63bp t +0.68 | 2016-20 +0.04bp t +0.05
+     Sharpe 0.73 vs SPY B&H 0.72 -> diff +0.01;  CAGR 16.0% vs SPY 11.5%
+     3bp/side: alpha +0.27bp t +0.46;  ex-top-5 alpha -0.53bp t -0.88
+     median day +8.16bp, hit 54.5%, maxDD -47.8%, mean exposure 1.452, turnover 0.024/day, DSR(N 1218) 0.002
+  placebo (200 circular label shifts 250-2000 in fit): real alpha percentile 95.5 (placebo median -0.00bp, 95th +0.18bp)
+  controls: rewire (n 20) median +0.26bp, 95th +0.30bp -> real percentile 95.0
+            ER     (n 20) median +0.29bp, 95th +0.31bp -> real percentile 100.0
+  GATES: 1 alpha>0 & NW t>=2: FAIL | 2 both halves alpha>0: PASS | 3 Sharpe - SPY >= +0.20: FAIL | 4 3bp/side alpha>0 & t>=2: FAIL | 5 placebo >= 95th: PASS | 6 ex-top-5 alpha>0: FAIL | C rewire > 95th: PASS | C ER > 95th: PASS
+  VERDICT B1 FLY-RES: FAIL -- fails the market gates
+  REPORT 2021-01..2026-09-21 (Alpaca, descriptive, not judged):
+  [report] n=1435  alpha +0.01bp/day NW t +1.16 (beta 1.50)
+     Sharpe 0.93 vs SPY B&H 0.93 -> diff +0.00;  CAGR 22.3% vs SPY 15.1%
+     median day +10.51bp, hit 54.3%, maxDD -35.5%, mean exposure 1.500, turnover 0.000/day, DSR(N 1218) 0.000
+
+== B2 FLY-DA three-factor (eta chosen 0.0001) JUDGE 2011-01..2020-12 (P&L dates), 1bp/side ==
+  [judge] n=2517  alpha +0.06bp/day NW t +0.37 (beta 0.97)
+     halves: 2011-15 +0.26bp t +1.75 | 2016-20 -0.09bp t -0.37
+     Sharpe 0.73 vs SPY B&H 0.72 -> diff +0.01;  CAGR 11.4% vs SPY 11.5%
+     3bp/side: alpha +0.03bp t +0.19;  ex-top-5 alpha -0.10bp t -0.48
+     median day +5.55bp, hit 55.1%, maxDD -34.5%, mean exposure 0.910, turnover 0.015/day, DSR(N 1218) 0.001
+  placebo (200 circular label shifts 250-2000 in fit): real alpha percentile 4.0 (placebo median +0.06bp, 95th +0.09bp)
+  controls: rewire (n 20) median +0.06bp, 95th +0.18bp -> real percentile 55.0
+            ER     (n 20) median +0.03bp, 95th +0.11bp -> real percentile 60.0
+  GATES: 1 alpha>0 & NW t>=2: FAIL | 2 both halves alpha>0: FAIL | 3 Sharpe - SPY >= +0.20: FAIL | 4 3bp/side alpha>0 & t>=2: FAIL | 5 placebo >= 95th: FAIL | 6 ex-top-5 alpha>0: FAIL | C rewire > 95th: FAIL | C ER > 95th: FAIL
+  VERDICT B2 FLY-DA: FAIL -- the fly's wiring adds nothing over a random reservoir
+  REPORT 2021-01..2026-09-21 (Alpaca, descriptive, not judged):
+  [report] n=1435  alpha +0.18bp/day NW t +0.91 (beta 0.89)
+     Sharpe 0.96 vs SPY B&H 0.93 -> diff +0.03;  CAGR 14.1% vs SPY 15.1%
+     median day +6.11bp, hit 54.3%, maxDD -20.5%, mean exposure 0.871, turnover 0.016/day, DSR(N 1218) 0.004
+
+runtime 1426s
+
+NOTES (written after the run; no rule changed after a judge number was printed)
+- Connectome: FlyWire adult v783 was public without login, so the Winding 2023 larval fallback was NOT used.
+- Open choices fixed in code before the run (see docstring): >=5-synapse edge threshold, sign from presynaptic top_nt (Dale),
+  binary in+out degree for the 3,000 cap, W_in U(-1,1) on ALPN rows only, washout 100, lambda by val MSE, refit trains on rows <= d-2,
+  sd(f_fit) = in-sample sd of the end-of-fit model, NW lags 8, gate 4 = alpha>0 & t>=2 at 3bp, no margin financing charge.
+- B2: w = 0 never learns under dw ~ (a - abar), so w0 ~ N(0,1) scaled to sd(w0'x) = 0.1 on fit rows; rbar/abar EMA tau 20; eta by
+  fit-period net Sharpe. Placebo: fit-period labels/rewards circularly shifted; judge-period refits/learning see real labels (literal).
+- Placebo ran the full 200 draws; controls the full 20 + 20. Rewire = target permutation with self-loop/duplicate repair (exact in/out
+  degree, sign and weight per source kept); ER = uniform m edges on the same 3,000 nodes with the real signed weights shuffled.
+- B1 lambda hit the grid edge (1e5): the readout shrinks to ~the intercept, so f/sd(f_fit) is large and positive and the position sits
+  at the 1.5x cap (mean exposure 1.45 judge, 1.50 report). B1's "CAGR 16% vs 11.5%" is 1.37-1.5x SPY beta, not timing: alpha +0.32bp t 0.54.
+  Its wins over the controls (rewire pct 95.0, ER 100) are wins on a ~0bp alpha with every graph also near the cap; not economically meaningful.
+- Sharadar SFP 'close' (<= 2020) and Alpaca etf_daily close (2021+) are spliced by log returns; in the 2016-20 overlap they differ by
+  >10bp on 20-60 days per ETF (dividend/bar differences). Only the descriptive REPORT uses Alpaca.
+- Runtime: first run 2,700s crashed in the REPORT block (empty halves on the report window) after printing judge numbers; fixed the
+  report guard only and reran deterministically: identical judge numbers, 1,426s.
