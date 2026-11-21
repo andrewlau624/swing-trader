@@ -102,3 +102,4 @@ One line per file. Read a file when the task touches its subject; do not read al
 - `109-kronos-finetune-ft-kill-2026-11-21.md` (110 tok): Kronos-small zero-shot + fine-tuned night-pick tilt (N 1232-1233) KILL post-release: ranking ~0, FT lowers loss but not P&L.
 - `110-rl-nightpick-rffwg-kill-2026-11-21.md` (110 tok): R4 PPO night picker (N 1229) and KMZ monthly RFF timing (N 1234) KILL; sel_night.py adv misalignment bug noted.
 - `111-xs-rff-lin-kill-2026-11-21.md` (90 tok): monthly cross-sectional RFF/linear on price ranks (N 1235-1236) KILL: alpha vs EW only, ~0 vs SPY, gone post-2020.
+- `112-r5-overlay-kill-2026-11-21.md` (80 tok): ridge state overlay 0-1.5x on the book (N 1238) KILL: levers into stress, k=0 forced.

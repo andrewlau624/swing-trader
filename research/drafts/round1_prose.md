@@ -11094,3 +11094,11 @@ These are siblings from the A1/A2 row's `not tested:` field: the published month
   - N 1238: reshapes the book, ceiling about +2-5pp, stated.
   - N 1239: about 2000 events/yr; at 1-day x 20% deployable, it needs about +40bp net per event for +8pp, stated.
 - Program N = 1239.
+
+### RESULT - R5-OVERLAY (N 1238, run 2026-11-21): DEAD
+- Ridge on R1 state + VIX + book drawdown (lambda 1000) loads positively on the VIX level and pool size, i.e. it levers up into stress.
+- No k > 0 keeps the fit maxDD at the flat book's -14.1%; DD worsens monotonically in k. So k = 0 and the overlay equals the flat book.
+- Judge 2013-20: gain 0, placebo 56th. Fixed k 0.25-1 shown descriptively: judge Sharpe -0.13 to -0.26, and maxDD worse in both 2008 and 2020.
+- Same message as REGIME-X from the other side: the book's best days are its stress days, and a state forecast only trades return for drawdown.
+- DFF fetch failed; DTB3 used instead (no effect, since s never exceeds 1).
+- Not tested: the true live book including the intraday leg; GBM/RFF/RL with a drawdown reward; a de-risk-only map; vol-target sizing; VIX term structure / variance risk premium; weekly rebalancing; per-leg overlays beyond R1.

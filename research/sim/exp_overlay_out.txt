@@ -1,0 +1,43 @@
+EXP round 5 R5-OVERLAY (N 1238): ridge risk overlay s = clip(1 + k z, 0, 1.5) on the flat book 0.5 IBS + 0.5 night.
+Pre-reg round1_prose.md 'Amendment - EXP round 5' + 'EXP round 3'. Code sha256[:16] 237b06f4af79e9b2 (frozen before judge).
+FIT 2003-01-01..2012-12-31  JUDGE 2013-01-01..2020-12-31  REPORT 2021-01-01..2026-09-17
+VIX: FRED VIXCLS local copy data/research/oil_shock/VIXCLS.csv (1990-01-02..2026-11-05), sessions w/o a print 0 (ffill <= 3); financing rate: FRED DTB3 (local; DFF fetch failed) as the fed-funds proxy from 1954-01-04
+IBS cross-check (exp_legalloc): {'n_sharadar': 551, 'n_alpaca': 557, 'n_both': 493, 'share_union': 0.8016260162601626, 'gap_matched_bp': -0.15960199661751465, 'gap_all_bp': 2.4829457204388103, 'gap_matched_med_bp': -0.0335555090535955, 'first_sharadar': '1999-01-14', 'x0': '2017-02-06'}
+rows: fit 2517 (WF from row 252) judge 2015 report 1433; fit flat mean +6.88bp/d
+
+FIT choices: lambda 1000 (WF MSE 0.1:4662.3853 1:4653.1346 10:4620.0485 100:4563.4729 1000:4521.7938 10000:4537.9182 100000:4566.3313 1e+06:4571.9694  x1e-8)
+  k 0.00 (0 grid k in (0,5] keep fit maxDD >= flat -14.1%); fit WF overlay maxDD -14.1% Sh 1.54 vs flat Sh 1.54; mean s 1.00
+  ridge b (fit 2003-12, z units, bp): spy_vol20 +0.25 spy_tr50 -0.24 spy_tr200 -1.20 npool +2.74 nmean20 -0.61 nsd20 -0.59 imean20 +0.15 ifire +0.89 spy_r5 -3.66 vix +2.59 dvix +1.45 dd252 -1.12
+  stress 2008 (FIT, walk-forward): overlay CAGR  +22.3% maxDD  -13.2% | flat CAGR  +22.3% maxDD  -13.2% | days 253 | mean s 1.00, s=0 0%, s=1.5 0%
+
+JUDGE 2013-20 (net)
+flat 0.5/0.5               Sh  1.38 CAGR  14.94% maxDD  -16.5% | 13-16 Sh  1.11 17-20 Sh  1.60 | mean  +5.74bp med +0.00 hit  41%
+R5-OVERLAY                 Sh  1.38 CAGR  14.94% maxDD  -16.5% | 13-16 Sh  1.11 17-20 Sh  1.60 | mean  +5.74bp med +0.00 hit  41% | mean s 1.00+-0.00, s=0 0%, s=1.5 0%
+  dSh +0.000 | CAGR@flat maxDD -16.5% = 14.94% (x1.00) vs 14.94% (d +0.00pp) | halves beat False | ex-top-5 dSh +0.000
+  cost drag 0.00%/yr scale changes + 0.00%/yr financing; corr(s, vix) +nan corr(s, dd252) +nan corr(s, same-day flat r) +nan
+  placebo (200, FIT state in 20-row blocks, lambda/k re-chosen; 0.4 min): judge Sh median 1.33 95th 1.38 max 1.58; real 1.38 at pct 56
+  DSR (N 1239): 0.710 (flat 0.710)
+  GATES: CAGR@DD>=+2pp: FAIL | dSh>=+0.15: FAIL | both halves: FAIL | placebo>=95th: FAIL | ex-top-5 gain>0: FAIL
+  stress 2020 (JUDGE): overlay CAGR  +75.8% maxDD  -16.5% | flat CAGR  +75.8% maxDD  -16.5% | days 253 | mean s 1.00, s=0 0%, s=1.5 0%
+  2013-2016: overlay CAGR   +9.6% maxDD  -10.4% | flat CAGR   +9.6% maxDD  -10.4% | days 1008 | mean s 1.00, s=0 0%, s=1.5 0%
+  2017-2020: overlay CAGR  +20.5% maxDD  -16.5% | flat CAGR  +20.5% maxDD  -16.5% | days 1007 | mean s 1.00, s=0 0%, s=1.5 0%
+
+REPORT 2021-26 (not judged; IBS leg on Alpaca etf_daily)
+flat 0.5/0.5               Sh  1.91 CAGR  39.01% maxDD  -20.6% | 13-16 Sh   nan 17-20 Sh   nan | mean +13.73bp med +4.76 hit  54%  [halves cols n/a]
+R5-OVERLAY                 Sh  1.91 CAGR  39.01% maxDD  -20.6% | 13-16 Sh   nan 17-20 Sh   nan | mean +13.73bp med +4.76 hit  54% | mean s 1.00
+
+DESCRIPTIVE (not judged): same forecasts, fixed k in R1's grid {0.25, 0.5, 1}
+  k 0.25: judge                      Sh  1.25 CAGR  16.18% maxDD  -21.1% | 13-16 Sh  0.94 17-20 Sh  1.50 | mean  +6.27bp med -0.15 hit  40% | dSh -0.127 CAGR@DD d -2.62pp | mean s 0.97
+    k 0.25 2008: overlay CAGR  +25.7% maxDD  -19.2% | flat CAGR  +22.3% maxDD  -13.2% | days 253 | mean s 1.16, s=0 0%, s=1.5 23%
+    k 0.25 2020: overlay CAGR  +89.6% maxDD  -21.1% | flat CAGR  +75.8% maxDD  -16.5% | days 253 | mean s 1.10, s=0 0%, s=1.5 13%
+  k 0.5: judge                      Sh  1.22 CAGR  16.30% maxDD  -21.1% | 13-16 Sh  0.88 17-20 Sh  1.49 | mean  +6.33bp med -0.29 hit  40% | dSh -0.157 CAGR@DD d -2.51pp | mean s 0.92
+    k 0.5 2008: overlay CAGR  +24.2% maxDD  -19.5% | flat CAGR  +22.3% maxDD  -13.2% | days 253 | mean s 1.17, s=0 0%, s=1.5 40%
+    k 0.5 2020: overlay CAGR  +96.3% maxDD  -21.1% | flat CAGR  +75.8% maxDD  -16.5% | days 253 | mean s 1.11, s=0 0%, s=1.5 25%
+  k 1.0: judge                      Sh  1.12 CAGR  14.97% maxDD  -21.1% | 13-16 Sh  0.73 17-20 Sh  1.42 | mean  +5.88bp med -0.51 hit  38% | dSh -0.257 CAGR@DD d -3.49pp | mean s 0.78
+    k 1.0 2008: overlay CAGR  +22.2% maxDD  -19.4% | flat CAGR  +22.3% maxDD  -13.2% | days 253 | mean s 1.11, s=0 4%, s=1.5 52%
+    k 1.0 2020: overlay CAGR  +94.8% maxDD  -21.1% | flat CAGR  +75.8% maxDD  -16.5% | days 253 | mean s 1.06, s=0 2%, s=1.5 36%
+
+SENSITIVITY (not judged) VIX/dVIX at d-1 close: lambda 1000 k 0.00 | judge                      Sh  1.38 CAGR  14.94% maxDD  -16.5% | 13-16 Sh  1.11 17-20 Sh  1.60 | mean  +5.74bp med +0.00 hit  41% | dSh vs flat +0.000
+
+VERDICT R5-OVERLAY (N 1238): KILL
+[0.4 min]
