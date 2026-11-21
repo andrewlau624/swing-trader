@@ -11230,3 +11230,70 @@ These are siblings from the A1/A2 row's `not tested:` field: the published month
   - Added a resumable per-policy cache (EXP_LA_CACHE) after the R1 numbers had printed; it does not change the experiment.
 - With R4 and R5 this closes RL/linear exposure control over the existing legs.
 - Not tested: per-leg vol targeting, the live book including the intraday leg, offline RL, richer (implied-vol) state.
+
+## Amendment - DEEP round 1: four math-method branches the user picked (user 2026-11-21: "patterns ... go deep especially like math research paper type deep"; picked all four; pre-registered before any outcome; N 1241 -> 1245)
+Common to all four:
+- Data: Sharadar SEP/SFP via the NX caches (`exp_rl_universe.load_stocks` / `load_etfs`; delisted names kept through their last bar; common stock only unless stated). $5+ close, ADV20 >= $10M at signal time.
+- JUDGE window 1998/2003-2010 as stated per study (never used to choose these rules). REPORT 2011-20 and 2021-26, never judged.
+- DSR at program N 1245. Costs per side as stated; 2x cost shock reported and gated.
+- Each kill names what was not tested. If a branch dies, its siblings are listed in the RESULT, not run under this registration.
+- **N 1242 PCA-SA (Avellaneda-Lee 2010 statistical-arbitrage residual reversion, random-matrix factor count):**
+  - Universe: each day, the 1,000 highest-ADV20 eligible names with 252 trailing returns.
+  - Factors: every 5 sessions, take the correlation matrix of standardized trailing-252 returns. Keep eigenvectors whose eigenvalue exceeds the Marchenko-Pastur edge (1+sqrt(N/T))^2, capped at 15. Factor returns = eigenportfolios (weights v_i/sigma_i).
+  - Residual: daily, regress each name's trailing 60 returns on the factor returns (OLS with intercept). X = cumulative residual. Fit AR(1) X_{k+1} = a + b X_k on the 60-day X. Require 0 < b < 1 and kappa = -ln(b)*252 > 252/30. m = a/(1-b), sigma_eq = sqrt(var(eps)/(1-b^2)). s = (X_last - m)/sigma_eq, then centred by subtracting the cross-sectional mean of m/sigma_eq (AL's centring).
+  - Rules (AL thresholds, not tuned): open long s < -1.25, close long s > -0.50; open short s > +1.25, close short s < +0.75. Signal at close T, trade at close T+1. Equal dollars per open position.
+  - Arms: LS = longs minus shorts, gross 1x each side scaled to N positions, residual SPY beta hedged with the trailing 60d book beta. LO = longs only, reported as excess vs SPY at the long book's trailing beta.
+  - Cost 5bp/side, shock 10bp. Borrow 100bp/yr on shorts.
+  - JUDGE 1998-2010 (halves 1998-2004 / 2005-10).
+  - Gates LS: net Sharpe >= 1.0; day-clustered t >= 2.5; both halves > 0; 2x cost > 0; ex-top-5 days > 0; median month > 0.
+  - Gates LO: excess >= +8%/yr; t >= 2; both halves > 0; 2x cost > 0.
+  - Placebo: within-date shuffle of s across names, 50 draws. Real must be >= the 95th percentile for the passing arm.
+  - Ceiling: daily turnover. LS needs taxable margin >= $2k; at $10k with ~20-40 names per side, whole-share rounding is fine.
+  - Kill: both arms fail any gate.
+- **N 1243 SIG (path-signature features of stock-vs-market paths, learned model):**
+  - Decision every 5th session (weekly).
+  - Path per name: the last 20 sessions, 3 channels = (time in [0,1], cumulative log return of the name, cumulative log return of SPY), each return channel scaled by the name's/SPY's own 20d sd. Also a 60-session version, from weekly-sampled points.
+  - Features: truncated signature to level 3 (39 terms) of each path, computed by Chen's identity (piecewise linear), plus the lead-lag 2-channel signature of (name, SPY) to level 2. Cross-sectionally rank-normalized per date.
+  - Target: next-5-session return minus the cross-sectional equal-weight mean (sector-demeaned using Sharadar sector).
+  - Models: ridge (alpha chosen by inner time-series CV on the training years only) and sklearn HistGradientBoosting (default params, max_iter 200). Expanding window: train on all decisions before year Y, predict year Y, refit yearly, first OOS year 2003.
+  - Trade: long the top decile, equal weight, close T -> close T+5. LS arm = top minus bottom decile.
+  - Cost 5bp/side on actual turnover, shock 10bp.
+  - JUDGE OOS 2003-2010 (halves 2003-06 / 2007-10).
+  - Gates for the better model, chosen on 2003-06 only and then judged on both halves:
+    - long-decile excess vs universe EW >= +15bp/week net, t >= 2.5;
+    - both halves > 0; ex-top-5 weeks > 0; 2x cost > 0;
+    - beats the same model trained on snapshot features (ret5, ret20, vol20, beta60) by >= +5bp/week;
+    - shuffled-target placebo (20 retrains) real >= 95th percentile.
+  - Kill: any gate fails. Ceiling: weekly x 100% capital; +15bp/week ~= +8%/yr.
+- **N 1244 TAIL (downside asymmetry / tail dependence):**
+  - Month-end features from the trailing 252 days vs SPY:
+    - beta;
+    - downside beta (days with SPY ret < its 252d mean) and upside beta;
+    - coskewness (Harvey-Siddique standardized);
+    - empirical lower-tail dependence LTD = P(name in its bottom 10% | SPY in its bottom 10%) / 0.10, and the same upper-tail UTD.
+  - Mechanism check (gate M): does trailing LTD predict the next 12 months' LTD and the name's return on SPY's worst 5% days? Pooled cross-sectional rank corr >= 0.20 for both.
+  - Portfolio: within beta terciles, the lowest-LTD quintile (crash-resilient), equal weight, held one month, rebalanced monthly. Benchmark = the whole beta tercile EW, and SPY.
+  - Second arm: the relative-downside-beta premium (Ang-Chen-Xing), quintile on (beta_down - beta), Q5 minus Q1.
+  - Cost 5bp/side.
+  - JUDGE 1999-2010 (halves 1999-2004 / 2005-10).
+  - Gates for the resilient arm:
+    - gate M passes;
+    - CAPM alpha vs SPY >= +6%/yr and monthly t >= 2;
+    - both halves > 0; median month excess vs tercile benchmark > 0;
+    - in SPY's worst decile of months, the arm beats the tercile benchmark on average;
+    - random-within-tercile placebo (200 draws) >= 95th percentile.
+  - Gates for the ACX arm: Q5-Q1 >= +0.5%/month, t >= 2, both halves > 0.
+  - Ceiling: monthly, 100%, ~+0.5%/month needed. Honest prior: monthly tilts died here (XS-FUND), so this likely fails the ceiling even if the mechanism holds. Gate M is the scientific question.
+- **N 1245 TDA (Gidea-Katz 2018 persistent-homology crash warning):**
+  - Point cloud: for each day, the last w = 50 daily log returns of SPY, DIA, MDY and QQQ (QQQ from 1999-04; before that SPY, DIA, MDY in 3-D), standardized per index over the window.
+  - Vietoris-Rips H1 persistence (ripser). Persistence landscape L1 norm (first 3 landscapes, persim or a direct computation).
+  - Signal: z = (L1_t - mean)/sd over the trailing 500 days. Warning when z > 2.0. A warning sets book exposure to 0 for the next 20 sessions (renewed while the warning holds).
+  - Book: REGIME-X leg cache (`data/research/regime_x/legs.parquet`, IBS + night at the live 0.5/0.5 weights, 5bp/side). Also an SPY-to-cash arm.
+  - JUDGE 2001-2015, report 2016-26.
+  - Gates (book arm):
+    - MAR (CAGR/|maxDD|) >= 1.2x ungated;
+    - CAGR loss <= 20%;
+    - beats a random gate with the same count and length of off-spells (200 draws) at the 95th percentile on MAR;
+    - beats a realized-vol gate (20d SPY vol z > 2 vs trailing 500d, same 20-session off rule) on MAR — else TDA = vol;
+    - the warning precedes SPY's 5 largest 2001-15 drawdowns' troughs by >= 5 sessions in at least 3 of them.
+  - Kill: any gate fails. Prior: REGIME-X stress gates died because they remove the best days. TDA is only useful if it fires earlier.
