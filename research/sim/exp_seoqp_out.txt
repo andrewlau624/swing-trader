@@ -1,0 +1,46 @@
+SEO-QP (N 1241) run 2026-11-21 06:14; code sha256 e4a9a762c8111ab9cbe948f8588eb17b93549695fb83f3abdf5df176aff2f1bf
+rule history: NASD 2711(f)(1)(B) 10 cal days (eff. 2002-07-09, SEC Rel. 34-45908) -> FINRA 2241(b)(2)(I) min 3 days (eff. 2015-09-25, Reg. Notice 15-30); both exempt Rule 139 research on Reg M 101(c)(1) actively-traded issuers
+primary = net excess vs SPY (close->close, 5bp/side); raw net reported. Q = 10 if P < 2015-09-25 else 3.
+events 2426; with a window 2426; by year 2003:61 2004:65 2005:69 2006:66 2007:77 2008:53 2009:106 2010:74 2011:69 2012:62 2013:101 2014:123 2015:148 2016:110 2017:131 2018:109 2019:130 2020:212 2021:203 2022:63 2023:89 2024:106 2025:98 2026:101
+
+JUDGE 2003-01..2015-09-24 (Q=10): x = first session >= P+10d; buy close x-3, sell close x-1
+  net excess vs SPY [primary]                  n  1051 mean    +0.3bp med   -13.3 hit 47.1% t_day +0.03 ex-top5    -7.1
+  net raw                                      n  1051 mean    -2.3bp med    -4.3 hit 49.3% t_day -0.16 ex-top5   -11.5
+  net excess, 2x cost                          n  1051 mean    -9.7bp med   -23.3 hit 44.9% t_day -0.88 ex-top5   -17.1
+  half 2003-09                                 n   497 mean   +10.4bp med    -4.0 hit 49.1% t_day +0.59 ex-top5    -5.3
+  half 2010-15                                 n   554 mean    -8.7bp med   -26.6 hit 45.3% t_day -0.64 ex-top5   -19.3
+  by year (mean bp, n): 2003:+44(61.0) 2004:-32(65.0) 2005:+11(69.0) 2006:-33(66.0) 2007:-4(77.0) 2008:+55(53.0) 2009:+32(106.0) 2010:+20(74.0) 2011:-53(69.0) 2012:+19(62.0) 2013:+17(101.0) 2014:-51(123.0) 2015:+6(125.0)
+  ex-top-5 issuers mean -9.4bp
+  DSR (N 1241): 0.001
+  vs SPY: beta +1.27 alpha +1.0bp t +0.10
+
+PLACEBO 2003-01..2015-09-24: same window at P+3 (should be ~0, t < 1)
+  placebo P+3, as registered                   n  1051 mean   -39.8bp med   -26.1 hit 45.3% t_day -2.59 ex-top5   -50.5
+  placebo P+3, entry after filing public       n   197 mean   -11.6bp med    +4.5 hit 50.8% t_day -0.40 ex-top5   -37.3
+  share of placebo entries before the filing was public: 81%
+
+REPORT 2015-09-25..2026 (Q=3, FINRA 2241; touched by G31's all-events arm)
+  net excess vs SPY, as registered             n  1375 mean   -72.7bp med   -61.1 hit 42.7% t_day -4.07 ex-top5   -83.5
+  net excess vs SPY, entry after filing public n   133 mean    -3.9bp med    -2.0 hit 48.9% t_day -0.09 ex-top5   -65.4
+  net raw, entry after filing public           n   133 mean   -11.2bp med    -1.8 hit 48.9% t_day -0.23 ex-top5   -77.0
+  share of Q=3 entries before the filing was public: 90%
+  reported: Q=10 window in the Q=3 era (regime contrast, not judged)
+  2015-09..2026 at Q=10                        n  1374 mean    +9.2bp med    -6.0 hit 48.8% t_day +0.73 ex-top5    +1.6
+
+GATES (judge 2003-01..2015-09-24):
+  net >= +20bp                       FAIL
+  median > 0                         FAIL
+  date-clustered t >= 2.5            FAIL
+  both halves > 0                    FAIL
+  ex-top-5 > 0                       FAIL
+  placebo t < 1 (as registered)      FAIL
+  DSR >= 0.95                        FAIL
+  VERDICT: KILL
+  ceiling: 83/yr x +0.3bp x 33% x 50% = +0.0pp/yr
+
+AUDITS
+  acceptance time known 2426/2426; after 16:00 ET 73%; before 09:30 14%
+  cover date parsed 1112/2426; business days cover-date -> EDGAR filing date: 0:8% 1:45% 2:41% 3:2% 4:4%
+  judged windows: entry date - P calendar days median 6, min 4
+  survivorship: tickers delisted by now 51% of judged events; events whose ticker's last bar is before the planned exit 0
+  Reg M actively-traded proxy (ADV20 >= $1M by construction, market cap >= $150M): 99% of judged events with cap known (1045); Sharadar marketcap in $M; float < cap, so this is an upper bound on exemption eligibility

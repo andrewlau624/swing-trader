@@ -11194,3 +11194,20 @@ These are siblings from the A1/A2 row's `not tested:` field: the published month
   - T-close entry
   - pair/short legs
   - 2021-26 and pre-2015
+
+### RESULT - SEO-QP (N 1241, run 2026-11-21): KILL
+- Rule history verified from primary sources (SEC Rel. 34-45908; FINRA 2241 / Reg. Notice 15-30):
+  - The NASD 2711 secondary quiet period was 10 days, effective about 2002-07.
+  - FINRA 2241 cut it to 3 days effective **2015-09-25**, not 2016. The judge window ends 2015-09-24.
+  - Premise problem: both rules exempt "actively traded" issuers (Reg M ADTV >= $1M and float >= $150M). The registered universe is almost all actively traded, so the quiet period rarely bound. This is weak by design, but the kill does not depend on it.
+- Events: 2,426 fixed-price 424B4/B5 follow-ons, all candidates classified, with no sampling. That is 60-150/yr, not the registered 230-300.
+- Judge 2003 to 2015-09, Q=10, n 1,051:
+  - Net excess vs SPY +0.3bp; median -13.3; t 0.03.
+  - Halves: +10.4 / -8.7.
+  - Ex-top-5: -7.1.
+  - DSR 0.001.
+  - All 7 gates fail; the ceiling is about 0.
+- The registered placebo (P+3, -39.8bp t -2.6) mostly measures the pricing drop: 81% of its entries come before the filing is public.
+- Audit: the EDGAR filing date lags the pricing date by 1-2 sessions. A cover-date clock (unregistered diagnostic) gives +9.5bp, t 0.59.
+- Note for memory 95: FINRA 2241's IPO minimum is 10 days from 2015-09-25. The K=25 used after that date in QP-RUNUP is industry convention, not the rule.
+- Not tested: inactively traded issuers (where the rule binds); a press-release or cover-date pricing clock; 424B7/B3/B2 and S-1 follow-ons; manager/IBES coverage data; 2002; combination with QP-RUNUP.

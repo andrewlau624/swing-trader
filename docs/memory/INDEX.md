@@ -106,3 +106,4 @@ One line per file. Read a file when the task touches its subject; do not read al
 - `113-xs-fund-gbm-kill-2026-11-21.md` (80 tok): GBM/RFF on PIT SF1 + price ranks (N 1237) KILL vs SPY; snapshot stock selection closed.
 - `114-ev-tone-8k-kill-2026-11-21.md` (80 tok): LM tone on out-of-session 8-Ks (N 1239) KILL: tone ranks but the long leg is negative (filer intraday drift -19bp).
 - `115-pref-sibling-rv-kill-2026-11-21.md` (70 tok): same-issuer pref/ETD sibling dislocation (N 1240) KILL: median ~0, placebo higher.
+- `116-seo-quiet-period-kill-2026-11-21.md` (90 tok): SEO quiet-period run-up (N 1241) KILL; FINRA 2241 dates (2015-09-25) and the actively-traded exemption.
