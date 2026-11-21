@@ -11524,3 +11524,17 @@ Common to all four:
     - within-date shuffle placebo (net, 50 draws) >= 95th percentile.
   - Report: the absolute net return, corr with the NX night series, DSR at N 1257.
   - Prior: N 1253 showed no overnight reversion, so the effect, if any, must be in the daytime. Open-to-close reversal has its own literature (Heston-Korajczyk-Sadka intraday patterns).
+
+### RESULT - N 1251 SNAP-HGB and N 1252 SIG-RESID (judge 2011-2026-10, run 2026-11-21): both KILL, every gate fails
+- **N 1251:**
+  - +4.5bp/wk net, t 0.66; halves -2.7 / +12.0; ex-top-5 -2.8; 2x -3.5;
+  - beta-matched -11.3 (book beta 1.55 vs EW 1.15). The post-2018 "edge" is high-beta weeks (2020 +70, 2022 +31, 2021 -34).
+- **N 1252:** +5.3bp/wk, t 1.01; the increment over N 1251 is +0.7bp, t 0.21. Signatures add nothing on top of the snapshot.
+- **N 1243 report (descriptive):** sig +1.7 / +1.2bp/wk in 2011-20 / 2021-26.
+- **Class verdict (DEEP rounds 1-3, N 1242-1255):** price-only cross-sectional prediction on liquid US stocks ($10M+ ADV) after 2010 has no net edge in any form tried:
+  - PCA/RMT residual reversion (close-close, K30, volume-time, overnight);
+  - path signatures and the 4-feature snapshot (ridge and HGB, weekly);
+  - tail dependence and downside beta (monthly);
+  - relative strength inside drawdowns and recoveries; the vol ratio.
+  - The pre-2010 effects (reversal, residual reversion) were real gross and decayed.
+- Not tested (open forms): thin names below $10M ADV (N 1256 running); daytime open->close holds (N 1257 running); non-US equity cross-sections; intraday-bar paths; event-conditioned versions.

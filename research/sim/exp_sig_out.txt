@@ -1,0 +1,68 @@
+DEEP round 1 N 1243 SIG (program N 1245; code sha256 4c8d4e6d076369c6; threads 3)
+universe: SEP common, px>=$5, ADV20>=$10M, >=60 bars; weekly decisions (every 5th SPY session); target close T->T+5 minus sector EW; long top decile EW; cost 5bp/side (shock 10); NW lags 4
+selftest PASS: level1_total_increment err 0.0e+00, level2_sym_shuffle err 1.4e-14, level3_sym_shuffle err 2.8e-14, chen_concat err 1.1e-14, segment_exp err 0.0e+00, leadlag_area_eq_QV err 1.8e-15, leadlag_level1 err 0.0e+00
+[cache] SEP common rows 21,887,272 names 12,643 sessions 3292 (1997-12-31..2011-01-31); rows off the SPY calendar dropped 0; load 11s
+[cache] decisions 643 (1998-03-30..2010-12-30), rows 877,230, names/decision median 1364 min 927 max 2134; features 118; build 14s
+lookahead: features from sessions T-59..T, target T+1..T+5 (disjoint, asserted); canary mean XS corr with target: ret20 through T -0.0104 vs leaky ret incl. T+1 +0.0810; names with no bar at T+5 (delisted/gap, earn 0 after last bar) 894 of 877,230
+  ridge/sig z by year: 2003:0.1 2004:0.01 2005:0.0001 2006:0.0001 2007:0.1 2008:0.1 2009:0.1 2010:0.1 (28s)
+  hgb/sig n_iter by year: 2003:71 2004:64 2005:37 2006:45 2007:30 2008:39 2009:36 2010:51 (65s)
+  ridge/snap z by year: 2003:1000 2004:100 2005:0.0001 2006:0.0001 2007:0.0001 2008:0.0001 2009:0.0001 2010:0.0001 (66s)
+  hgb/snap n_iter by year: 2003:32 2004:23 2005:29 2006:19 2007:22 2008:29 2009:33 2010:23 (68s)
+
+=== JUDGE OOS 2003-2010 (403 weeks; halves 2003-06 / 2007-10); excess = long top decile net - universe EW
+  ridge/sig: long excess net +7.7bp/wk t +1.31 | halves +7.4 / +8.1 | ex-top5 -0.0 | 2x cost +0.9 | median +0.3 hit 50% | gross long-EW +14.6 | turnover 1.37/wk | LS net +7.6bp/wk t +0.71 | weeks 403
+  hgb/sig: long excess net +12.1bp/wk t +2.32 | halves +10.9 / +13.3 | ex-top5 +5.2 | 2x cost +5.3 | median +7.1 hit 53% | gross long-EW +19.0 | turnover 1.37/wk | LS net +25.3bp/wk t +2.88 | weeks 403
+  ridge/snap: long excess net +16.9bp/wk t +1.68 | halves +0.4 / +33.4 | ex-top5 +3.2 | 2x cost +8.1 | median -2.4 hit 48% | gross long-EW +25.7 | turnover 1.76/wk | LS net +29.6bp/wk t +1.64 | weeks 403
+  hgb/snap: long excess net +22.1bp/wk t +2.70 | halves +15.4 / +28.7 | ex-top5 +11.8 | 2x cost +13.9 | median +7.4 hit 55% | gross long-EW +30.3 | turnover 1.64/wk | LS net +32.8bp/wk t +2.63 | weeks 403
+model choice on 2003-06 only: ridge +7.4 vs hgb +10.9bp/wk -> hgb
+  hgb/sig deciles (mean 5d return minus EW, bp; D10 = highest forecast): D1 -20.2  D2 -9.5  D3 -3.0  D4 -2.8  D5 +0.9  D6 +0.0  D7 +4.3  D8 +4.2  D9 +7.2  D10 +19.0
+    placebo 1/20: -9.7bp/wk (83s)
+    placebo 2/20: -6.9bp/wk (100s)
+    placebo 3/20: -10.9bp/wk (115s)
+    placebo 4/20: -5.4bp/wk (133s)
+    placebo 5/20: -9.7bp/wk (149s)
+    placebo 6/20: -6.5bp/wk (165s)
+    placebo 7/20: -6.5bp/wk (182s)
+    placebo 8/20: -8.1bp/wk (198s)
+    placebo 9/20: -6.9bp/wk (221s)
+    placebo 10/20: -7.4bp/wk (240s)
+    placebo 11/20: -13.1bp/wk (261s)
+    placebo 12/20: -8.0bp/wk (281s)
+    placebo 13/20: -8.2bp/wk (310s)
+    placebo 14/20: -1.7bp/wk (333s)
+    placebo 15/20: -3.7bp/wk (349s)
+    placebo 16/20: -9.5bp/wk (369s)
+    placebo 17/20: -15.2bp/wk (387s)
+    placebo 18/20: -13.3bp/wk (404s)
+    placebo 19/20: -10.2bp/wk (425s)
+    placebo 20/20: -13.4bp/wk (444s)
+  placebo (20 shuffled-target retrains of hgb): mean -8.7, p95 -3.6bp/wk; real at pct 100
+  DSR(N 1245) of weekly excess 0.140; weekly Sharpe 0.118 (ann 0.85)
+  top-10 signature terms (permutation drop in mean IC on 2010 OOS (fit through 2009; base IC +0.0185); sign = direction of the forecast):
+    p60:S,S,t      imp 0.00891 sign +  3rd-order ordered term: increments of stock then stock then time (60d weekly); time-shape of stock path
+    ll60:S+,S-     imp 0.00655 sign +  stock(lead) x stock(lag) of the same series: area = realized quadratic variation of stock (vol-of-path vs 20d sd) (60d weekly)
+    p20:S          imp 0.00396 sign -  stock's vol-scaled return over the 20d daily path
+    p20:t,t,S      imp 0.00378 sign -  3rd-order ordered term: increments of time then time then stock (20d daily); time-shape of stock path
+    p20:t,S,t      imp 0.00375 sign -  3rd-order ordered term: increments of time then stock then time (20d daily); time-shape of stock path
+    p20:S,M,S      imp 0.00369 sign -  3rd-order ordered term: increments of stock then SPY then stock (20d daily); order-sensitive stock-SPY interaction
+    p60:t,t,S      imp 0.00345 sign -  3rd-order ordered term: increments of time then time then stock (60d weekly); time-shape of stock path
+    p20:M,M,S      imp 0.00328 sign -  3rd-order ordered term: increments of SPY then SPY then stock (20d daily); order-sensitive stock-SPY interaction
+    p60:S,M,t      imp 0.00278 sign +  3rd-order ordered term: increments of stock then SPY then time (60d weekly); time-shape of SPY/stock path
+    p20:t,S,S      imp 0.00251 sign -  3rd-order ordered term: increments of time then stock then stock (20d daily); time-shape of stock path
+
+GATES (hgb/sig, judge 2003-10): excess +12.1bp/wk; t +2.32; halves +10.9 / +13.3; ex-top-5 +5.2; 2x cost +5.3; sig - snapshot -9.9bp/wk (snapshot +22.1); placebo pct 100; DSR(N 1245) 0.140
+  G1 excess>=+15bp/wk FAIL; G1b t>=2.5 FAIL; G2 halves>0 PASS; G3 ex-top-5>0 PASS; G4 2x cost>0 PASS; G5 beats snapshot by>=5bp FAIL; G6 placebo>=95th PASS
+KILL: N 1243 SIG (hgb chosen on 2003-06) - failed: G1 excess>=+15bp/wk, G1b t>=2.5, G5 beats snapshot by>=5bp
+
+=== REPORT (full Sharadar store; descriptive, never judged) chosen model hgb
+[full] SEP common rows 43,789,424 names 19,760 sessions 7234 (1997-12-31..2026-10-05); rows off the SPY calendar dropped 0; load 36s
+[full] decisions 1434 (1998-03-30..2026-09-23), rows 2,393,094, names/decision median 1709 min 927 max 2565; features 118; build 37s
+  hgb/sig 2011-2020 (halves split 2015): long excess net +1.7bp/wk t +0.36 | halves -3.5 / +6.8 | ex-top5 -4.7 | 2x cost -5.0 | median -3.8 hit 47% | gross long-EW +8.3 | turnover 1.33/wk | LS net +5.0bp/wk t +0.64 | weeks 503
+    deciles: D1 -10.2  D2 -3.8  D3 -6.3  D4 -4.0  D5 +1.8  D6 +1.9  D7 +2.9  D8 +5.3  D9 +4.0  D10 +8.3
+  hgb/sig 2021-2026 (halves split 2023): long excess net +1.2bp/wk t +0.16 | halves +0.6 / +1.8 | ex-top5 -8.9 | 2x cost -5.5 | median -13.6 hit 41% | gross long-EW +7.9 | turnover 1.34/wk | LS net +3.8bp/wk t +0.32 | weeks 288
+    deciles: D1 -9.3  D2 -0.5  D3 -1.7  D4 +0.4  D5 +0.7  D6 -3.4  D7 -2.5  D8 +6.0  D9 +2.5  D10 +7.9
+  (759s)
+  hgb/snap 2011-2020 (halves split 2015): long excess net +5.0bp/wk t +0.62 | halves -2.2 / +12.2 | ex-top5 -3.7 | 2x cost -3.1 | median +2.8 hit 51% | gross long-EW +13.1 | turnover 1.62/wk | LS net +8.5bp/wk t +0.65 | weeks 503
+  hgb/snap 2021-2026 (halves split 2023): long excess net +3.7bp/wk t +0.29 | halves +0.2 / +7.5 | ex-top5 -11.1 | 2x cost -4.2 | median -9.6 hit 48% | gross long-EW +11.6 | turnover 1.58/wk | LS net +11.2bp/wk t +0.63 | weeks 288
+  (766s)
+total 766s
