@@ -1,0 +1,49 @@
+PCA-SA (N 1242): Avellaneda-Lee residual reversion, top-1000 ADV20 common SEP ($5+, ADV20 $10M+, 252 full returns; delisted kept), MP-edge factors (cap 15) refit every 5 sessions, 60d OLS residual -> AR(1) s-score; signal close T, trade close T+1; cost 5bp/side (shock 10), borrow 100bp/yr; DSR at N 1245
+
+=== JUDGE 1998-2010: load 1997-12-31..2010-12-31, evaluate 1998-01-01..2010-12-31 (halves split 2004-12-31)
+  panel: 3272 sessions x 12625 common names (SEP, delisted kept: 7167 names end >5 sessions before the panel end); duplicate (ticker,date) rows 0; SPY missing returns 0; |daily ret|>50% cells 23163
+  signal: first signal 1998-12-31; universe mean 999 (min 910); MP factors kept mean 9.13 (min 7, max 12, at cap 15 0%); names passing 0<b<1 & kappa>252/30 mean 989; max |X_60| 2.5e-14 (should be ~0)
+  book: 3018 earning days (1999-01-05..2010-12-31); positions/day long 191.1 short 163.5 (days with 0 longs 0.0%, 0 shorts 0.0%); turnover/day (sum|dw|, each side 1x) long 0.23 short 0.29 hedge 0.032; mean hedge +0.01x SPY; long-book beta 1.09
+  gross LS +4.06bp/day (long +7.67, short -3.47); gross LO excess +5.52bp/day; cost drag at 5bp LS 2.72bp/day
+  diagnostic (UNTRADABLE, trade at close T): gross LS +6.46bp/day, LO excess +6.45bp/day -> the one-day lag costs this much
+  control: universe-EW excess vs SPY at its beta +3.21bp/day (+8.1%/yr, halves +4.85 / +1.58); LO gross minus universe EW +2.40bp/day (+6.1%/yr, t +4.72, halves +3.71 / +1.11); LO net of 5bp minus universe EW +3.2%/yr
+  LS (hedged, 5bp/side, borrow 100bp/yr): net +0.94bp/day (+2.4%/yr) Sharpe +0.34 t +1.07 | halves +3.27 / -1.38bp | 2x cost -1.78bp (-4.5%/yr, Sh -0.64) | ex-top5 +0.46bp | median month -0.12% (hit 0.48) | day hit 0.49 | maxDD -29% | DSR(N 1245) 0.015
+  LO excess vs SPY at long-book beta (5bp/side): net +4.39bp/day (+11.1%/yr) Sharpe +1.10 t +3.94 | halves +7.41 / +1.37bp | 2x cost +3.25bp (+8.2%/yr, Sh +0.82) | ex-top5 +3.75bp | median month +0.67% (hit 0.65) | day hit 0.53 | maxDD -15% | DSR(N 1245) 0.695
+    1999: LS  +3.02bp/d Sh +0.97 | LO-x +12.49bp/d | nL 187.6 nS 160.8
+    2000: LS  +9.74bp/d Sh +2.18 | LO-x +11.27bp/d | nL 192.6 nS 166.4
+    2001: LS +10.46bp/d Sh +3.26 | LO-x +11.97bp/d | nL 190.0 nS 159.0
+    2002: LS  +1.15bp/d Sh +0.39 | LO-x  +2.31bp/d | nL 193.2 nS 160.6
+    2003: LS  -4.43bp/d Sh -2.46 | LO-x  +2.87bp/d | nL 194.0 nS 163.9
+    2004: LS  -0.20bp/d Sh -0.12 | LO-x  +3.66bp/d | nL 193.9 nS 167.9
+    2005: LS  -0.44bp/d Sh -0.30 | LO-x  +2.74bp/d | nL 191.2 nS 166.3
+    2006: LS  -1.27bp/d Sh -0.77 | LO-x  -3.77bp/d | nL 192.9 nS 164.0
+    2007: LS  +0.13bp/d Sh +0.05 | LO-x  +2.13bp/d | nL 190.7 nS 164.2
+    2008: LS  -2.22bp/d Sh -0.54 | LO-x  +1.98bp/d | nL 188.3 nS 161.1
+    2009: LS  -2.16bp/d Sh -0.75 | LO-x  +3.70bp/d | nL 183.5 nS 159.2
+    2010: LS  -2.33bp/d Sh -1.27 | LO-x  +1.40bp/d | nL 195.2 nS 168.7
+  placebo (within-date shuffle of s, 50 draws, GROSS): LS Sharpe mean +0.03 95th +0.51 -> real gross +1.45 at pct 100; LO excess mean +8.1%/yr 95th +10.1% -> real gross +13.9% at pct 100
+    (net placebo for reference: LS Sharpe mean -6.91, LO -9.1%/yr; placebo long turnover 1.37/day vs real 0.23)
+  GATES LS: Sharpe>=1.0 FAIL | t>=2.5 FAIL | halves>0 FAIL | 2xcost>0 FAIL | ex-top5>0 PASS | median-month>0 FAIL | placebo95 PASS -> FAIL
+  GATES LO: excess>=8%/yr PASS | t>=2 PASS | halves>0 PASS | 2xcost>0 PASS | placebo95 PASS -> PASS
+  VERDICT N 1242 PCA-SA: PASS ( LO)
+
+=== REPORT 2011-20 (never judged): load 2009-10-01..2021-01-15, evaluate 2011-01-01..2020-12-31 (halves split 2015-12-31)
+  panel: 2843 sessions x 9363 common names (SEP, delisted kept: 3663 names end >5 sessions before the panel end); duplicate (ticker,date) rows 0; SPY missing returns 0; |daily ret|>50% cells 13521
+  signal: first signal 2010-10-01; universe mean 1000 (min 1000); MP factors kept mean 9.30 (min 5, max 14, at cap 15 0%); names passing 0<b<1 & kappa>252/30 mean 989; max |X_60| 5.3e-14 (should be ~0)
+  book: 2517 earning days (2011-01-03..2020-12-31); positions/day long 190.3 short 163.9 (days with 0 longs 0.0%, 0 shorts 0.0%); turnover/day (sum|dw|, each side 1x) long 0.23 short 0.29 hedge 0.028; mean hedge +0.00x SPY; long-book beta 1.10
+  gross LS +2.36bp/day (long +6.74, short -4.53); gross LO excess +0.37bp/day; cost drag at 5bp LS 2.70bp/day
+  diagnostic (UNTRADABLE, trade at close T): gross LS +3.00bp/day, LO excess +0.33bp/day -> the one-day lag costs this much
+  control: universe-EW excess vs SPY at its beta -1.10bp/day (-2.8%/yr, halves -1.53 / -0.67); LO gross minus universe EW +1.47bp/day (+3.7%/yr, t +2.95, halves +1.76 / +1.18); LO net of 5bp minus universe EW +0.8%/yr
+  LS (hedged, 5bp/side, borrow 100bp/yr): net -0.74bp/day (-1.9%/yr) Sharpe -0.30 t -0.83 | halves -0.83 / -0.65bp | 2x cost -3.44bp (-8.7%/yr, Sh -1.40) | ex-top5 -1.46bp | median month -0.13% (hit 0.45) | day hit 0.49 | maxDD -37% | DSR(N 1245) 0.000
+  LO excess vs SPY at long-book beta (5bp/side): net -0.77bp/day (-1.9%/yr) Sharpe -0.27 t -0.74 | halves -0.76 / -0.78bp | 2x cost -1.90bp (-4.8%/yr, Sh -0.66) | ex-top5 -1.56bp | median month -0.10% (hit 0.48) | day hit 0.49 | maxDD -44% | DSR(N 1245) 0.000
+    2011: LS  -1.35bp/d Sh -0.61 | LO-x  -0.94bp/d | nL 185.9 nS 160.1
+    2012: LS  -0.32bp/d Sh -0.19 | LO-x  +0.34bp/d | nL 191.6 nS 166.2
+    2013: LS  -1.13bp/d Sh -0.75 | LO-x  +0.25bp/d | nL 188.9 nS 160.2
+    2014: LS  -1.14bp/d Sh -0.65 | LO-x  -2.85bp/d | nL 185.3 nS 161.3
+    2015: LS  -0.21bp/d Sh -0.11 | LO-x  -0.59bp/d | nL 187.2 nS 161.1
+    2016: LS  -1.45bp/d Sh -0.74 | LO-x  -0.98bp/d | nL 189.0 nS 161.8
+    2017: LS  -1.84bp/d Sh -1.25 | LO-x  -1.98bp/d | nL 200.0 nS 172.0
+    2018: LS  -0.71bp/d Sh -0.40 | LO-x  -1.67bp/d | nL 193.6 nS 166.9
+    2019: LS  -3.79bp/d Sh -2.03 | LO-x  -2.14bp/d | nL 196.1 nS 166.5
+    2020: LS  +4.51bp/d Sh +0.81 | LO-x  +2.86bp/d | nL 186.0 nS 162.7
+  REPORT 2021-26: not run (NX SEP cache ends 2021-01-15; no survivorship-clean 2021+ panel in the same format)

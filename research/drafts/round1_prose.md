@@ -11321,3 +11321,25 @@ Common to all four:
   - Direction fixed in advance: falling H0 = names converging = fragility. Warning when z(H0) < -2 vs trailing 500 days. Same 20-session off rule and the same five gates as N 1245 (vol gate = SPY 20d vol z > 2).
   - Report: the H1-L1 z > 2 arm, and the corr of H0 with the mean pairwise correlation (if |corr| > 0.9, TDA-XS = average correlation; then also report a plain mean-correlation gate).
   - Judge 2001-15, report 2016-26.
+
+### RESULT - N 1242 PCA-SA (run 2026-11-21): KILL. The LO gate passes as registered, but I void it as a benchmark artifact.
+- The Marchenko-Pastur edge kept 9.1 factors on average (7-12). About 191 longs / 164 shorts a day, turnover 0.23 / 0.29.
+- **LS net (judge 1999-2010):** +0.94bp/day, Sharpe 0.34, t 1.07. Halves +3.27 / -1.38; 2x cost -1.78. FAIL.
+- **LO excess vs SPY net:** +4.39bp/day (+11.1%/yr), t 3.94; halves +7.41 / +1.37; 2x +8.2%/yr. Passes every registered LO gate. But:
+  - the equal-weight universe alone beats SPY by +8.1%/yr (1999-2002 small/value vs SPY);
+  - LO minus the EW universe is +6.1%/yr gross and **+3.2%/yr net**, below the +8pp ceiling.
+  - The registered gate benchmarked against SPY, not the universe. That was a registration error (mine); recorded, not re-gated.
+- **Placebo (within-date shuffle, gross):** 100th percentile for both arms. The s-score is real cross-sectional information. It is just too small after costs and the T+1 lag; trading at close T would be +6.5 vs +4.1bp/day LS gross, which is untradable.
+- **Report 2011-20:** LS -1.9%/yr, LO -1.9%/yr, both halves negative. LO minus EW is +0.8%/yr net.
+- 2021-26 was not run: the NX SEP cache ends 2021-01.
+- Spin-offs show as unadjusted drops (TYC 2007-07). This is a small effect at 190 names a side.
+- Not tested: volume-time s-scores (AL's own fix); sector-ETF factors; a concentrated top-K book; same-day MOC from a 15:50 snapshot (needs intraday data, not available pre-2021); 2021-26.
+
+## Amendment - DEEP round 2b: PCA-SA siblings (pre-registered before any outcome; N 1247 -> 1249)
+- Both are judged on BOTH 1999-2010 and 2011-2026-10 (Sharadar `~/data/sharadar/stocks.parquet` for 2021+), because the family's 1999-2020 results have been read. A pass needs both windows.
+- The benchmark is the EW eligible top-1000 universe at the book's beta, not SPY. Factors, s-score, T+1 close timing and costs as in N 1242.
+- **N 1248 PCA-SA-K30:** long only. Each day hold the 30 names with the most negative s among those with s < -1.25. Equal weight; a name exits when s > -0.5 or it drops out of the 30. Gates in each window:
+  - net excess vs EW universe >= +8%/yr; t >= 2;
+  - halves > 0; 2x cost > 0; ex-top-5 days > 0;
+  - DSR at N 1249 reported.
+- **N 1249 PCA-SA-VOL:** AL's volume-time s-score. Residual returns are rescaled by (20d average volume / today's volume) before the cumulation and AR(1) fit. Run as both arms of N 1242 (LS gates as N 1242; LO judged vs the EW universe, >= +8%/yr) and as a K30 arm. It passes if any arm clears its gates in both windows (3 arms; the DSR uses N 1249).
