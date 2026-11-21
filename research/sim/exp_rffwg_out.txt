@@ -1,0 +1,130 @@
+N 1234 RFF-WG  (program N 1236; pre-registered in round1_prose.md 'Amendment - EXP round 4')
+data: data/research/exp_rffwg/gw_monthly.csv  rows 1860  1871-01..2025-12
+spot-check rows:
+           Index  CRSP_SPvw   Rfree     tbl      infl
+2008-10   968.75  -0.166980  0.0008  0.0067 -0.010101
+2020-03  2584.59  -0.121997  0.0012  0.0029 -0.002176
+2025-12  6845.50   0.000834  0.0034  0.0359 -0.000210
+15 predictors complete from 1929-11 (1129 months); market excess = CRSP_SPvw - Rfree
+missing in judge window: 0 months
+
+== RFF (P=12000, gamma=2, seed 0), vol-scaled position (REGISTERED PRIMARY = z 1e3 *) ==
+ JUDGE: 2021-01..2025-12
+  z=0.001        n   60  SR +0.416  mkt SR +0.777  dSR -0.361  alpha  +0.09%/yr t +0.43  beta +0.01  ret  +0.19%/yr vol   0.4%
+  z=0.01         n   60  SR +0.416  mkt SR +0.777  dSR -0.361  alpha  +0.09%/yr t +0.43  beta +0.01  ret  +0.19%/yr vol   0.4%
+  z=0.1          n   60  SR +0.416  mkt SR +0.777  dSR -0.361  alpha  +0.09%/yr t +0.43  beta +0.01  ret  +0.19%/yr vol   0.4%
+  z=1            n   60  SR +0.416  mkt SR +0.777  dSR -0.361  alpha  +0.09%/yr t +0.43  beta +0.01  ret  +0.19%/yr vol   0.4%
+  z=10           n   60  SR +0.416  mkt SR +0.777  dSR -0.361  alpha  +0.09%/yr t +0.43  beta +0.01  ret  +0.19%/yr vol   0.4%
+  z=100          n   60  SR +0.415  mkt SR +0.777  dSR -0.361  alpha  +0.09%/yr t +0.43  beta +0.01  ret  +0.19%/yr vol   0.4%
+  z=1000 *       n   60  SR +0.415  mkt SR +0.777  dSR -0.362  alpha  +0.09%/yr t +0.42  beta +0.01  ret  +0.18%/yr vol   0.4%
+ REPORT 1960-2020: 1960-01..2020-12
+  z=0.001        n  732  SR +0.118  mkt SR +0.446  dSR -0.327  alpha  +0.04%/yr t +0.82  beta +0.00  ret  +0.04%/yr vol   0.4%
+  z=0.01         n  732  SR +0.118  mkt SR +0.446  dSR -0.327  alpha  +0.04%/yr t +0.82  beta +0.00  ret  +0.04%/yr vol   0.4%
+  z=0.1          n  732  SR +0.118  mkt SR +0.446  dSR -0.327  alpha  +0.04%/yr t +0.82  beta +0.00  ret  +0.04%/yr vol   0.4%
+  z=1            n  732  SR +0.118  mkt SR +0.446  dSR -0.327  alpha  +0.04%/yr t +0.82  beta +0.00  ret  +0.04%/yr vol   0.4%
+  z=10           n  732  SR +0.118  mkt SR +0.446  dSR -0.327  alpha  +0.04%/yr t +0.82  beta +0.00  ret  +0.04%/yr vol   0.4%
+  z=100          n  732  SR +0.119  mkt SR +0.446  dSR -0.327  alpha  +0.04%/yr t +0.82  beta +0.00  ret  +0.04%/yr vol   0.4%
+  z=1000 *       n  732  SR +0.120  mkt SR +0.446  dSR -0.325  alpha  +0.04%/yr t +0.83  beta +0.00  ret  +0.04%/yr vol   0.4%
+
+GATE (judge, z=1e3): dSR -0.362 (need >= +0.20), alpha +0.09%/yr (need > 0), t +0.42  -> DEAD
+DSR at N 1236 (judge, z=1e3): 0.012
+judge position z=1e3: mean +0.01  share long 0.65  mean|dpos| 0.03  -> net at 2.5bp/side +0.392 SR
+
+-- sensitivity (report only): unscaled pi_t * R_{t+1} (KMZ's raw timing return), seed 0 --
+ JUDGE: 2021-01..2025-12
+  z=0.001        n   60  SR +0.482  mkt SR +0.777  dSR -0.294  alpha  +0.01%/yr t +0.49  beta +0.00  ret  +0.01%/yr vol   0.0%
+  z=0.01         n   60  SR +0.482  mkt SR +0.777  dSR -0.294  alpha  +0.01%/yr t +0.49  beta +0.00  ret  +0.01%/yr vol   0.0%
+  z=0.1          n   60  SR +0.482  mkt SR +0.777  dSR -0.294  alpha  +0.01%/yr t +0.49  beta +0.00  ret  +0.01%/yr vol   0.0%
+  z=1            n   60  SR +0.482  mkt SR +0.777  dSR -0.294  alpha  +0.01%/yr t +0.49  beta +0.00  ret  +0.01%/yr vol   0.0%
+  z=10           n   60  SR +0.482  mkt SR +0.777  dSR -0.295  alpha  +0.01%/yr t +0.49  beta +0.00  ret  +0.01%/yr vol   0.0%
+  z=100          n   60  SR +0.479  mkt SR +0.777  dSR -0.298  alpha  +0.00%/yr t +0.49  beta +0.00  ret  +0.01%/yr vol   0.0%
+  z=1000 *       n   60  SR +0.469  mkt SR +0.777  dSR -0.308  alpha  +0.00%/yr t +0.46  beta +0.00  ret  +0.00%/yr vol   0.0%
+ REPORT 1960-2020: 1960-01..2020-12
+  z=0.001        n  732  SR +0.064  mkt SR +0.446  dSR -0.381  alpha  +0.00%/yr t +0.30  beta +0.00  ret  +0.00%/yr vol   0.0%
+  z=0.01         n  732  SR +0.064  mkt SR +0.446  dSR -0.381  alpha  +0.00%/yr t +0.30  beta +0.00  ret  +0.00%/yr vol   0.0%
+  z=0.1          n  732  SR +0.064  mkt SR +0.446  dSR -0.381  alpha  +0.00%/yr t +0.30  beta +0.00  ret  +0.00%/yr vol   0.0%
+  z=1            n  732  SR +0.064  mkt SR +0.446  dSR -0.381  alpha  +0.00%/yr t +0.30  beta +0.00  ret  +0.00%/yr vol   0.0%
+  z=10           n  732  SR +0.064  mkt SR +0.446  dSR -0.381  alpha  +0.00%/yr t +0.30  beta +0.00  ret  +0.00%/yr vol   0.0%
+  z=100          n  732  SR +0.064  mkt SR +0.446  dSR -0.381  alpha  +0.00%/yr t +0.30  beta +0.00  ret  +0.00%/yr vol   0.0%
+  z=1000 *       n  732  SR +0.064  mkt SR +0.446  dSR -0.382  alpha  +0.00%/yr t +0.30  beta +0.00  ret  +0.00%/yr vol   0.0%
+
+-- seed robustness (report only), judge dSR at z=1e3 over seeds 1..20: median -0.821  min -1.339  max -0.304  share >= +0.20: 0.00
+
+== LINEAR-RIDGE CONTROL (raw 15 standardised predictors, same window/z/scaling) ==
+ JUDGE: 2021-01..2025-12
+  z=0.001        n   60  SR +0.118  mkt SR +0.777  dSR -0.658  alpha  -0.37%/yr t -0.02  beta +0.35  ret  +3.74%/yr vol  31.6%
+  z=0.01         n   60  SR +0.157  mkt SR +0.777  dSR -0.620  alpha  -0.16%/yr t -0.02  beta +0.29  ret  +3.20%/yr vol  20.5%
+  z=0.1          n   60  SR +0.305  mkt SR +0.777  dSR -0.472  alpha  +3.31%/yr t +0.57  beta +0.08  ret  +4.22%/yr vol  13.8%
+  z=1            n   60  SR +0.366  mkt SR +0.777  dSR -0.410  alpha  +5.25%/yr t +0.86  beta +0.01  ret  +5.41%/yr vol  14.8%
+  z=10           n   60  SR +0.343  mkt SR +0.777  dSR -0.434  alpha  +6.56%/yr t +0.98  beta -0.06  ret  +5.82%/yr vol  17.0%
+  z=100          n   60  SR +0.512  mkt SR +0.777  dSR -0.265  alpha  +5.39%/yr t +1.02  beta +0.19  ret  +7.57%/yr vol  14.8%
+  z=1000 *       n   60  SR +0.475  mkt SR +0.777  dSR -0.301  alpha  +3.65%/yr t +0.70  beta +0.30  ret  +7.13%/yr vol  15.0%
+ REPORT 1960-2020: 1960-01..2020-12
+  z=0.001        n  732  SR -0.168  mkt SR +0.446  dSR -0.614  alpha  -5.90%/yr t -1.16  beta -0.16  ret  -6.95%/yr vol  41.4%
+  z=0.01         n  732  SR -0.135  mkt SR +0.446  dSR -0.581  alpha  -3.47%/yr t -0.96  beta -0.10  ret  -4.15%/yr vol  30.7%
+  z=0.1          n  732  SR -0.168  mkt SR +0.446  dSR -0.613  alpha  -2.84%/yr t -1.09  beta -0.12  ret  -3.67%/yr vol  21.9%
+  z=1            n  732  SR -0.111  mkt SR +0.446  dSR -0.557  alpha  -1.33%/yr t -0.60  beta -0.10  ret  -2.01%/yr vol  18.1%
+  z=10           n  732  SR +0.174  mkt SR +0.446  dSR -0.272  alpha  +2.58%/yr t +1.18  beta +0.06  ret  +2.95%/yr vol  17.0%
+  z=100          n  732  SR +0.355  mkt SR +0.446  dSR -0.090  alpha  +4.41%/yr t +2.07  beta +0.17  ret  +5.55%/yr vol  15.6%
+  z=1000 *       n  732  SR +0.339  mkt SR +0.446  dSR -0.107  alpha  +3.50%/yr t +1.74  beta +0.21  ret  +4.90%/yr vol  14.5%
+
+-- look-ahead audit (report only): infl, b/m, ntis lagged 1m; E12 (ep, de) lagged 3m; RFF seed 0 --
+ JUDGE: 2021-01..2025-12
+  z=0.001        n   60  SR -0.649  mkt SR +0.777  dSR -1.426  alpha  -0.29%/yr t -1.48  beta +0.00  ret  -0.29%/yr vol   0.4%
+  z=0.01         n   60  SR -0.649  mkt SR +0.777  dSR -1.426  alpha  -0.29%/yr t -1.48  beta +0.00  ret  -0.29%/yr vol   0.4%
+  z=0.1          n   60  SR -0.649  mkt SR +0.777  dSR -1.426  alpha  -0.29%/yr t -1.48  beta +0.00  ret  -0.29%/yr vol   0.4%
+  z=1            n   60  SR -0.649  mkt SR +0.777  dSR -1.426  alpha  -0.29%/yr t -1.48  beta +0.00  ret  -0.29%/yr vol   0.4%
+  z=10           n   60  SR -0.649  mkt SR +0.777  dSR -1.426  alpha  -0.29%/yr t -1.48  beta +0.00  ret  -0.29%/yr vol   0.4%
+  z=100          n   60  SR -0.650  mkt SR +0.777  dSR -1.426  alpha  -0.29%/yr t -1.49  beta +0.00  ret  -0.29%/yr vol   0.4%
+  z=1000 *       n   60  SR -0.651  mkt SR +0.777  dSR -1.428  alpha  -0.29%/yr t -1.51  beta +0.00  ret  -0.29%/yr vol   0.4%
+ REPORT 1960-2020: 1960-01..2020-12
+  z=0.001        n  732  SR +0.339  mkt SR +0.446  dSR -0.106  alpha  +0.14%/yr t +2.56  beta -0.00  ret  +0.13%/yr vol   0.4%
+  z=0.01         n  732  SR +0.339  mkt SR +0.446  dSR -0.106  alpha  +0.14%/yr t +2.56  beta -0.00  ret  +0.13%/yr vol   0.4%
+  z=0.1          n  732  SR +0.339  mkt SR +0.446  dSR -0.106  alpha  +0.14%/yr t +2.56  beta -0.00  ret  +0.13%/yr vol   0.4%
+  z=1            n  732  SR +0.339  mkt SR +0.446  dSR -0.106  alpha  +0.14%/yr t +2.56  beta -0.00  ret  +0.13%/yr vol   0.4%
+  z=10           n  732  SR +0.339  mkt SR +0.446  dSR -0.107  alpha  +0.14%/yr t +2.56  beta -0.00  ret  +0.13%/yr vol   0.4%
+  z=100          n  732  SR +0.338  mkt SR +0.446  dSR -0.108  alpha  +0.13%/yr t +2.55  beta -0.00  ret  +0.13%/yr vol   0.4%
+  z=1000 *       n  732  SR +0.334  mkt SR +0.446  dSR -0.111  alpha  +0.13%/yr t +2.52  beta -0.00  ret  +0.13%/yr vol   0.4%
+
+diag: registered 36m-trailing standardisation, lag-1 squared distance median 14.2 -> Gaussian kernel exp(-gamma^2 d2/2) median 4.8e-13
+
+diag: registered 36m-trailing standardisation, lag-12 squared distance median 398.4 -> Gaussian kernel exp(-gamma^2 d2/2) median 0.0e+00
+diag: KMZ-paper standardisation, lag-1 squared distance median 3.50 -> kernel median 0.00
+
+-- REPORT ONLY, NOT GATED: KMZ-paper standardisation (expanding-sd predictors, 12m-vol-scaled return), RFF seed 0 --
+ JUDGE: 2021-01..2025-12
+  z=0.001        n   60  SR -0.224  mkt SR +0.777  dSR -1.001  alpha -14.98%/yr t -0.48  beta -0.01  ret -15.09%/yr vol  67.3%
+  z=0.01         n   60  SR -0.224  mkt SR +0.777  dSR -1.001  alpha -14.98%/yr t -0.48  beta -0.01  ret -15.09%/yr vol  67.3%
+  z=0.1          n   60  SR -0.224  mkt SR +0.777  dSR -1.001  alpha -14.97%/yr t -0.48  beta -0.01  ret -15.09%/yr vol  67.3%
+  z=1            n   60  SR -0.224  mkt SR +0.777  dSR -1.001  alpha -14.92%/yr t -0.48  beta -0.01  ret -15.04%/yr vol  67.2%
+  z=10           n   60  SR -0.221  mkt SR +0.777  dSR -0.998  alpha -14.46%/yr t -0.48  beta -0.01  ret -14.56%/yr vol  65.8%
+  z=100          n   60  SR -0.201  mkt SR +0.777  dSR -0.978  alpha -11.05%/yr t -0.44  beta +0.00  ret -11.02%/yr vol  54.7%
+  z=1000 *       n   60  SR -0.151  mkt SR +0.777  dSR -0.927  alpha  -3.53%/yr t -0.37  beta +0.03  ret  -3.22%/yr vol  21.4%
+ REPORT 1960-2020: 1960-01..2020-12
+  z=0.001        n  732  SR +0.297  mkt SR +0.446  dSR -0.149  alpha +30.87%/yr t +2.24  beta +0.96  ret +37.25%/yr vol 125.5%
+  z=0.01         n  732  SR +0.297  mkt SR +0.446  dSR -0.149  alpha +30.87%/yr t +2.24  beta +0.96  ret +37.24%/yr vol 125.4%
+  z=0.1          n  732  SR +0.297  mkt SR +0.446  dSR -0.148  alpha +30.82%/yr t +2.24  beta +0.96  ret +37.18%/yr vol 125.1%
+  z=1            n  732  SR +0.301  mkt SR +0.446  dSR -0.145  alpha +30.34%/yr t +2.26  beta +0.95  ret +36.61%/yr vol 121.7%
+  z=10           n  732  SR +0.326  mkt SR +0.446  dSR -0.119  alpha +27.20%/yr t +2.40  beta +0.86  ret +32.92%/yr vol 100.8%
+  z=100          n  732  SR +0.372  mkt SR +0.446  dSR -0.073  alpha +19.98%/yr t +2.53  beta +0.70  ret +24.63%/yr vol  66.2%
+  z=1000 *       n  732  SR +0.371  mkt SR +0.446  dSR -0.075  alpha  +9.26%/yr t +2.25  beta +0.39  ret +11.82%/yr vol  31.9%
+   seeds 1..20 z=1e3 dSR: judge median -0.855 [-0.999,-0.753]  1960-2020 median -0.037 [-0.069,+0.001]
+-- REPORT ONLY: linear ridge under KMZ-paper standardisation --
+ JUDGE: 2021-01..2025-12
+  z=0.001        n   60  SR -0.145  mkt SR +0.777  dSR -0.922  alpha -248.19%/yr t -1.01  beta +15.16  ret -70.81%/yr vol 488.3%
+  z=0.01         n   60  SR +0.175  mkt SR +0.777  dSR -0.602  alpha -10.13%/yr t -0.09  beta +5.01  ret +48.52%/yr vol 277.5%
+  z=0.1          n   60  SR +0.466  mkt SR +0.777  dSR -0.311  alpha +53.30%/yr t +0.85  beta +2.33  ret +80.60%/yr vol 173.0%
+  z=1            n   60  SR +0.517  mkt SR +0.777  dSR -0.259  alpha +29.11%/yr t +0.70  beta +2.87  ret +62.69%/yr vol 121.2%
+  z=10           n   60  SR +0.438  mkt SR +0.777  dSR -0.339  alpha +10.46%/yr t +0.31  beta +2.98  ret +45.28%/yr vol 103.4%
+  z=100          n   60  SR +0.426  mkt SR +0.777  dSR -0.351  alpha  +6.09%/yr t +0.24  beta +2.32  ret +33.25%/yr vol  78.1%
+  z=1000 *       n   60  SR +0.421  mkt SR +0.777  dSR -0.355  alpha  +1.62%/yr t +0.22  beta +0.68  ret  +9.53%/yr vol  22.6%
+ REPORT 1960-2020: 1960-01..2020-12
+  z=0.001        n  732  SR -0.236  mkt SR +0.446  dSR -0.682  alpha -297.46%/yr t -1.59  beta +1.03  ret -290.67%/yr vol 1230.9%
+  z=0.01         n  732  SR -0.210  mkt SR +0.446  dSR -0.656  alpha -135.25%/yr t -1.40  beta -1.47  ret -144.99%/yr vol 689.0%
+  z=0.1          n  732  SR -0.061  mkt SR +0.446  dSR -0.507  alpha -19.12%/yr t -0.34  beta -1.09  ret -26.34%/yr vol 430.7%
+  z=1            n  732  SR +0.083  mkt SR +0.446  dSR -0.363  alpha +20.00%/yr t +0.57  beta +0.37  ret +22.46%/yr vol 271.3%
+  z=10           n  732  SR +0.223  mkt SR +0.446  dSR -0.222  alpha +36.13%/yr t +1.40  beta +0.95  ret +42.42%/yr vol 189.9%
+  z=100          n  732  SR +0.258  mkt SR +0.446  dSR -0.188  alpha +32.23%/yr t +1.62  beta +0.77  ret +37.35%/yr vol 145.0%
+  z=1000 *       n  732  SR +0.249  mkt SR +0.446  dSR -0.197  alpha +10.78%/yr t +1.57  beta +0.26  ret +12.52%/yr vol  50.3%
+
+market excess judge: n 60  mean +11.70%/yr  SR +0.777

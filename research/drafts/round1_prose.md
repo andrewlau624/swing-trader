@@ -11021,3 +11021,21 @@ These are siblings from the A1/A2 row's `not tested:` field: the published month
     - ex-top-5 months > 0.
 - **N 1236 XS-LIN:** same as N 1235 with linear ridge on the raw rank features (the linear-model control). If 1235 passes but 1236 does not, the nonlinearity is the result.
 - Ceiling: N 1234 is monthly x 100% capital, so it clears +8pp only if the timing alpha is >= 8%/yr (KMZ report about 4-8%: borderline, stated). N 1235-1236 are the monthly x 100% shape: the top decile over the EW universe needs >= 8%/yr alpha; GKX-type long-only spreads are about 6-12%/yr pre-2010. Program N = 1236.
+
+### RESULT - R4-PICK (N 1229, run 2026-11-21): DEAD
+- PPO with a per-slot scorer plus a cash logit over the night pool (at most 20 slots). 300k steps per policy, cut from 1M because of machine load. 5 seeds.
+- Judge 2013-20, net 5bp RT. The live leg makes 13.05bp per slot-night, Sharpe 1.20.
+- Agent, seed median: +0.61bp/night (t 0.43), Sharpe +0.036. CAGR at the live maxDD is 24.1% vs 20.3%, and both halves beat the live leg (both small).
+- Gates FAILED: Sharpe gain (needs +0.15), placebo (real seed median at the 52nd pct of 50 shuffled-return policies; untrained maps match it), ex-top-5 (negative for all seeds), and 0/5 seeds passing every gate.
+- 2021-26 (report only): worse than the live leg in 4/5 seeds, down to -4.2bp (t -2.2).
+- This closes RL night-pool selection and the deploy-vs-cash call.
+- Bug found: `research/sim/sel_night.py:244` writes adv from `picks["adv"].iloc[pos]`, where `pos` indexes the kept set. On nights where dedupe drops names, adv can belong to a different pick. Research only; not fixed.
+- Not tested: market-state features, per-pick IBS (not in the names file), 1M+ steps, other reward shapes, offline RL.
+
+### RESULT - RFF-WG (N 1234, run 2026-11-21): DEAD
+- Goyal-Welch file through 2025-12, so the judge window is 60 months (2021-25). Market excess Sharpe in that window is +0.78.
+- Registered RFF: timing SR +0.42, dSR -0.36. Identical at every z, and no seed of 20 reaches +0.20. Linear control: best SR +0.51. DEAD.
+- REGISTRATION ERROR (mine): standardising level predictors by a 36-month trailing sd makes the gamma=2 kernel about 0. The forecast is then mostly random-feature noise, so the registered form does not test KMZ. It does not even reproduce the paper's 1960-2020 result.
+- A paper-style standardisation was run report-only. It reproduces the published shape on 1960-2020 (alpha t 2.25, SR below the market), and on the judge window gives SR -0.15, dSR -0.93. So the paper's form also has no post-2020 edge (not gated).
+- Look-ahead: E12, infl, b/m and ntis are not known at month-end. A lagged check did not change the verdict.
+- Not tested: smaller gamma or rank standardisation as a registered rule, 60/120-month or expanding windows, about 1000-seed averaging, a complexity sweep, real-time vintages, the GWZ 2024 set, other targets and horizons, a tilt on the live book. Low power: 60 months.

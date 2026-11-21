@@ -1,0 +1,62 @@
+EXP round 3 R4-PICK (N 1229) night-pool RL picker. Pre-reg: research/drafts/round1_prose.md 'Amendment - EXP round 3'.
+Program N 1231. Run 2026-11-21 00:09.
+leg_current reproduced from names file (sum per*r per night): max |diff| 2.78e-17 over 5636 nights
+nights with >20 kept names (truncated to first 20 in live order): all 217; 2003-2012 24, 2013-2020 13, 2021-2026 60
+IBS per pick: not in the names file -> left out (no new data). Features: log price, vol20, day_ret, log adv, rank/19, w, frac (z on fit slots).
+PPO: lr 0.0003 gamma 0.99 gae 0.95 clip 0.2 n_steps 2048 epochs 10 mb 64 vf 0.5 ent 0.0 maxgn 0.5; 300000 steps/policy; episodes 252 fit slot-nights; seeds [0, 1, 2, 3, 4]; placebo 10 draws x 5 seeds
+fit slot-nights 1128
+training done 99.7 min
+sessions 5967 (SPY SFP to 2020, Alpaca 2021+); pick-nights not in calendar: 7
+live leg net judge: 13.05 bp/slot-night, Sharpe 1.20; first-20-only live 12.92 bp; live cash frac 0.628
+live leg net 2016-20: 12.25 bp/slot-night, Sharpe 1.05; first-20-only live 12.06 bp; live cash frac 0.612
+live leg net report: 23.63 bp/slot-night, Sharpe 1.60; first-20-only live 23.65 bp; live cash frac 0.428
+
+Per seed (JUDGE 2013-20, halves, 2016-20 touched, REPORT 2021-26; fit 2003-12 for reference):
+ seed 0 (log_std -0.62)
+  fit03-12    nights  1128 agent   21.09 live   15.53 bp/night | diff   +5.56 t +2.96 | Sh  1.64 vs  1.32 gain +0.32 ex5 +0.23 (diff ex5  +2.53) | cash 0.683 r(cash,log n) -0.85 r(cash,SPYvol) -0.43 | CAGR@liveDD +32.6% vs live +18.1% (DD live -17.1%)
+  judge13-20  nights  1215 agent   13.91 live   13.05 bp/night | diff   +0.85 t +0.53 | Sh  1.23 vs  1.20 gain +0.03 ex5 -0.11 (diff ex5  -1.71) | cash 0.659 r(cash,log n) -0.79 r(cash,SPYvol) -0.37 | CAGR@liveDD +24.4% vs live +20.3% (DD live -31.0%)
+  h13-16      nights   533 agent   13.37 live   13.67 bp/night | diff   -0.29 t -0.44 | Sh  1.70 vs  1.62 gain +0.07 ex5 -0.03 (diff ex5  -1.13) | cash 0.688 r(cash,log n) -0.79 r(cash,SPYvol) -0.26 | CAGR@liveDD +19.6% vs live +19.2% (DD live -9.4%)
+  h17-20      nights   682 agent   14.32 live   12.58 bp/night | diff   +1.75 t +0.61 | Sh  1.11 vs  1.05 gain +0.06 ex5 -0.20 (diff ex5  -2.83) | cash 0.636 r(cash,log n) -0.78 r(cash,SPYvol) -0.41 | CAGR@liveDD +27.6% vs live +21.3% (DD live -31.0%)
+  touch16-20  nights   832 agent   13.62 live   12.25 bp/night | diff   +1.37 t +0.59 | Sh  1.10 vs  1.05 gain +0.05 ex5 -0.16 (diff ex5  -2.37) | cash 0.643 r(cash,log n) -0.79 r(cash,SPYvol) -0.40 | CAGR@liveDD +25.5% vs live +20.3% (DD live -31.0%)
+  rep21-26    nights  1266 agent   22.10 live   23.63 bp/night | diff   -1.52 t -0.90 | Sh  1.46 vs  1.60 gain -0.14 ex5 -0.24 (diff ex5  -3.33) | cash 0.483 r(cash,log n) -0.83 r(cash,SPYvol) +0.00 | CAGR@liveDD +51.7% vs live +60.0% (DD live -37.7%)
+ seed 1 (log_std -0.70)
+  fit03-12    nights  1128 agent   19.93 live   15.53 bp/night | diff   +4.40 t +3.14 | Sh  1.59 vs  1.32 gain +0.27 ex5 +0.20 (diff ex5  +2.23) | cash 0.678 r(cash,log n) -0.86 r(cash,SPYvol) -0.42 | CAGR@liveDD +26.2% vs live +18.1% (DD live -17.1%)
+  judge13-20  nights  1215 agent   13.66 live   13.05 bp/night | diff   +0.61 t +0.46 | Sh  1.24 vs  1.20 gain +0.04 ex5 -0.12 (diff ex5  -1.62) | cash 0.652 r(cash,log n) -0.79 r(cash,SPYvol) -0.35 | CAGR@liveDD +24.1% vs live +20.3% (DD live -31.0%)
+  h13-16      nights   533 agent   12.89 live   13.67 bp/night | diff   -0.77 t -0.99 | Sh  1.68 vs  1.62 gain +0.06 ex5 -0.04 (diff ex5  -1.54) | cash 0.683 r(cash,log n) -0.79 r(cash,SPYvol) -0.23 | CAGR@liveDD +19.8% vs live +19.2% (DD live -9.4%)
+  h17-20      nights   682 agent   14.26 live   12.58 bp/night | diff   +1.68 t +0.74 | Sh  1.13 vs  1.05 gain +0.09 ex5 -0.18 (diff ex5  -2.29) | cash 0.628 r(cash,log n) -0.79 r(cash,SPYvol) -0.39 | CAGR@liveDD +27.8% vs live +21.3% (DD live -31.0%)
+  touch16-20  nights   832 agent   13.46 live   12.25 bp/night | diff   +1.21 t +0.63 | Sh  1.12 vs  1.05 gain +0.07 ex5 -0.15 (diff ex5  -2.05) | cash 0.635 r(cash,log n) -0.80 r(cash,SPYvol) -0.37 | CAGR@liveDD +25.5% vs live +20.3% (DD live -31.0%)
+  rep21-26    nights  1266 agent   21.85 live   23.63 bp/night | diff   -1.78 t -1.03 | Sh  1.61 vs  1.60 gain +0.01 ex5 -0.19 (diff ex5  -3.88) | cash 0.472 r(cash,log n) -0.85 r(cash,SPYvol) -0.00 | CAGR@liveDD +98.0% vs live +60.0% (DD live -37.7%)
+ seed 2 (log_std -0.67)
+  fit03-12    nights  1128 agent   19.43 live   15.53 bp/night | diff   +3.90 t +2.78 | Sh  1.61 vs  1.32 gain +0.29 ex5 +0.17 (diff ex5  +1.75) | cash 0.680 r(cash,log n) -0.86 r(cash,SPYvol) -0.44 | CAGR@liveDD +27.5% vs live +18.1% (DD live -17.1%)
+  judge13-20  nights  1215 agent   13.62 live   13.05 bp/night | diff   +0.57 t +0.43 | Sh  1.30 vs  1.20 gain +0.10 ex5 -0.06 (diff ex5  -1.48) | cash 0.653 r(cash,log n) -0.79 r(cash,SPYvol) -0.37 | CAGR@liveDD +26.9% vs live +20.3% (DD live -31.0%)
+  h13-16      nights   533 agent   12.11 live   13.67 bp/night | diff   -1.55 t -1.32 | Sh  1.63 vs  1.62 gain +0.01 ex5 -0.07 (diff ex5  -2.21) | cash 0.685 r(cash,log n) -0.79 r(cash,SPYvol) -0.26 | CAGR@liveDD +16.8% vs live +19.2% (DD live -9.4%)
+  h17-20      nights   682 agent   14.79 live   12.58 bp/night | diff   +2.22 t +1.02 | Sh  1.25 vs  1.05 gain +0.20 ex5 -0.07 (diff ex5  -1.42) | cash 0.628 r(cash,log n) -0.78 r(cash,SPYvol) -0.41 | CAGR@liveDD +32.6% vs live +21.3% (DD live -31.0%)
+  touch16-20  nights   832 agent   13.12 live   12.25 bp/night | diff   +0.87 t +0.45 | Sh  1.16 vs  1.05 gain +0.11 ex5 -0.12 (diff ex5  -2.11) | cash 0.636 r(cash,log n) -0.79 r(cash,SPYvol) -0.40 | CAGR@liveDD +27.7% vs live +20.3% (DD live -31.0%)
+  rep21-26    nights  1266 agent   19.44 live   23.63 bp/night | diff   -4.19 t -2.21 | Sh  1.40 vs  1.60 gain -0.20 ex5 -0.33 (diff ex5  -5.81) | cash 0.463 r(cash,log n) -0.84 r(cash,SPYvol) +0.01 | CAGR@liveDD +47.4% vs live +60.0% (DD live -37.7%)
+ seed 3 (log_std -0.52)
+  fit03-12    nights  1128 agent   20.51 live   15.53 bp/night | diff   +4.98 t +3.25 | Sh  1.69 vs  1.32 gain +0.37 ex5 +0.25 (diff ex5  +2.58) | cash 0.673 r(cash,log n) -0.85 r(cash,SPYvol) -0.42 | CAGR@liveDD +35.7% vs live +18.1% (DD live -17.1%)
+  judge13-20  nights  1215 agent   13.31 live   13.05 bp/night | diff   +0.26 t +0.22 | Sh  1.25 vs  1.20 gain +0.05 ex5 -0.08 (diff ex5  -1.64) | cash 0.647 r(cash,log n) -0.79 r(cash,SPYvol) -0.35 | CAGR@liveDD +23.1% vs live +20.3% (DD live -31.0%)
+  h13-16      nights   533 agent   13.10 live   13.67 bp/night | diff   -0.56 t -0.72 | Sh  1.72 vs  1.62 gain +0.09 ex5 +0.00 (diff ex5  -1.27) | cash 0.677 r(cash,log n) -0.79 r(cash,SPYvol) -0.26 | CAGR@liveDD +19.7% vs live +19.2% (DD live -9.4%)
+  h17-20      nights   682 agent   13.48 live   12.58 bp/night | diff   +0.90 t +0.44 | Sh  1.12 vs  1.05 gain +0.07 ex5 -0.16 (diff ex5  -2.50) | cash 0.623 r(cash,log n) -0.78 r(cash,SPYvol) -0.38 | CAGR@liveDD +25.6% vs live +21.3% (DD live -31.0%)
+  touch16-20  nights   832 agent   12.90 live   12.25 bp/night | diff   +0.65 t +0.38 | Sh  1.11 vs  1.05 gain +0.07 ex5 -0.13 (diff ex5  -2.13) | cash 0.630 r(cash,log n) -0.79 r(cash,SPYvol) -0.37 | CAGR@liveDD +23.9% vs live +20.3% (DD live -31.0%)
+  rep21-26    nights  1266 agent   20.46 live   23.63 bp/night | diff   -3.17 t -2.14 | Sh  1.49 vs  1.60 gain -0.11 ex5 -0.27 (diff ex5  -4.82) | cash 0.461 r(cash,log n) -0.84 r(cash,SPYvol) +0.01 | CAGR@liveDD +60.5% vs live +60.0% (DD live -37.7%)
+ seed 4 (log_std -0.68)
+  fit03-12    nights  1128 agent   20.88 live   15.53 bp/night | diff   +5.35 t +2.90 | Sh  1.59 vs  1.32 gain +0.27 ex5 +0.17 (diff ex5  +2.33) | cash 0.681 r(cash,log n) -0.85 r(cash,SPYvol) -0.44 | CAGR@liveDD +29.8% vs live +18.1% (DD live -17.1%)
+  judge13-20  nights  1215 agent   13.71 live   13.05 bp/night | diff   +0.65 t +0.39 | Sh  1.14 vs  1.20 gain -0.06 ex5 -0.19 (diff ex5  -2.04) | cash 0.649 r(cash,log n) -0.79 r(cash,SPYvol) -0.36 | CAGR@liveDD +23.2% vs live +20.3% (DD live -31.0%)
+  h13-16      nights   533 agent   13.29 live   13.67 bp/night | diff   -0.37 t -0.55 | Sh  1.67 vs  1.62 gain +0.04 ex5 -0.06 (diff ex5  -1.13) | cash 0.682 r(cash,log n) -0.79 r(cash,SPYvol) -0.25 | CAGR@liveDD +18.7% vs live +19.2% (DD live -9.4%)
+  h17-20      nights   682 agent   14.03 live   12.58 bp/night | diff   +1.46 t +0.49 | Sh  1.02 vs  1.05 gain -0.03 ex5 -0.29 (diff ex5  -3.36) | cash 0.624 r(cash,log n) -0.78 r(cash,SPYvol) -0.40 | CAGR@liveDD +25.8% vs live +21.3% (DD live -31.0%)
+  touch16-20  nights   832 agent   13.39 live   12.25 bp/night | diff   +1.14 t +0.47 | Sh  1.01 vs  1.05 gain -0.03 ex5 -0.25 (diff ex5  -2.81) | cash 0.632 r(cash,log n) -0.79 r(cash,SPYvol) -0.39 | CAGR@liveDD +24.1% vs live +20.3% (DD live -31.0%)
+  rep21-26    nights  1266 agent   23.55 live   23.63 bp/night | diff   -0.08 t -0.04 | Sh  1.48 vs  1.60 gain -0.12 ex5 -0.19 (diff ex5  -2.10) | cash 0.466 r(cash,log n) -0.84 r(cash,SPYvol) +0.00 | CAGR@liveDD +67.2% vs live +60.0% (DD live -37.7%)
+
+Seed-median JUDGE: agent 13.66 vs live 13.05 bp/night, diff +0.61 (t med +0.43); Sharpe gain +0.036; ex-top-5 gain -0.106; CAGR@liveDD +24.1% vs live +20.3%; halves gain +0.056 / +0.074; cash 0.652
+Placebo (50 policies, slot returns shuffled within night): judge Sharpe gain median +0.028, 95th +0.187; real seed-median at 52th pct
+DSR (N 1231) judge, median seed 1: agent 0.567, live leg 0.529
+Gates:
+  FAIL  Sharpe gain >= +0.15 (seed-median)
+  PASS  CAGR at live maxDD >= live + 2pp
+  PASS  both halves beat live on Sharpe
+  FAIL  placebo >= 95th pct
+  FAIL  ex-top-5 gain > 0
+  FAIL  >= 4/5 seeds pass all per-seed gates
+VERDICT R4-PICK (N 1229): FAIL  (seeds passing all per-seed gates: 0/5)
+runtime 99.9 min
