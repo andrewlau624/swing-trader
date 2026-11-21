@@ -11464,3 +11464,22 @@ Common to all four:
   - Long the top decile (calm recent vs past), equal weight, close T -> close T+5. Excess vs the universe EW, 5bp/side. Universe and pipeline as N 1243 (top-1,500 ADV... N 1243's eligible set).
   - JUDGE 2011-2026-10 (2003-10 was seen through the N 1243 model). Gates as N 1251: >= +15bp/wk net, t >= 2.5, halves 2011-18 / 2019-26, ex-top-5, 2x cost, beta-matched > 0.
   - Report: the bottom decile, and the corr of the decile return with a ret5-reversal decile (is it reversal in costume?).
+
+### RESULT - N 1254 RECOVERY-RS and N 1255 VOLRATIO (run 2026-11-21): both KILL, every gate fails
+- **N 1254** (judge 1999-2015, 200 holds / 31 sequences):
+  - MC -0.026, t -2.20, positive in 26% (the wrong sign again).
+  - Net -12.8bp/hold; halves -35.9 / +8.0; ex-best sequence -26.7; fake-L placebo 94th percentile (random anchors are worse, -18.9).
+  - Report 2016-26: -26.5bp.
+  - March 2020 reset L four times; one hold lost -10.8%.
+- **N 1255** (judge 2011-2026-10, 791 weeks):
+  - top decile -5.8bp/wk net, t -2.20; beta-matched -7.4, t -2.63;
+  - top-minus-bottom gross +0.3bp (t 0.07);
+  - rank corr with ret5 -0.002. It was not reversal in costume; it was nothing. The ratio's rank in the N 1243 model was an interaction artefact.
+- **N 1243 report pass (descriptive):**
+  - HGB/sig +1.7 / +1.2bp/wk in 2011-20 / 2021-26 (t < 0.4).
+  - HGB/snap +5.0 / +3.7 (t < 0.7).
+  - The 2003-10 weekly edge is gone after 2010.
+- **Class note (drawdown cross-section):** N 1250 and N 1254 both lean to slight reversal (|rc| 0.01-0.03), too small for the ceiling: about 20 holds/yr x a few bp. Ceiling-killed, not registered.
+- Not tested:
+  - N 1254: raw (non-beta-matched) rebound leaders = Daniel-Moskowitz directly; other confirmation levels; longer holds; ETF universes.
+  - N 1255: the ratio as a conditioning variable inside reversal; other windows; implied-vs-realised; an IBS filter.

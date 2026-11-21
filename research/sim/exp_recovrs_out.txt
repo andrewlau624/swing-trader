@@ -1,0 +1,70 @@
+RECOVERY-RS (N 1254): N 1250 D state/universe/beta; L = SPY TR trough since P (reset on a new low), confirmation TR >= 1.05 L while D on; decisions every 5 sessions, <= 12 per sequence, + 1 after D ends; score = r(L..t) - beta_P r_SPY(L..t), sector-demeaned; long top decile, close t+1 -> t+6, beta-matched excess vs EW; 5bp/side, shock 10bp; DSR N 1255
+SPY sessions 1997-12-31..2026-10-05; recovery decisions judge 200, report 104, sequences 54
+
+Sequences (confirmation, last decision, trough L, holds, mean gross/net excess per hold, mean MC rank corr, mean SPY/hold):
+  seq  1 1999-08-23..1999-08-30 L 1999-08-10 holds  2 gross  +109.4bp net  +102.5bp rc +0.009 SPY  -75.0bp
+  seq  2 1999-10-08..1999-10-08 L 1999-09-29 holds  1 gross  -111.6bp net  -121.6bp rc -0.070 SPY -589.2bp
+  seq  3 1999-10-28..1999-11-11 L 1999-10-15 holds  3 gross  +216.5bp net  +210.7bp rc -0.055 SPY +132.2bp
+  seq  4 2000-03-03..2000-03-17 L 2000-02-25 holds  3 gross  -490.1bp net  -496.5bp rc -0.044 SPY +295.1bp
+  seq  5 2000-04-18..2000-07-07 L 2000-04-14 holds 12 gross   -43.1bp net   -47.1bp rc -0.034 SPY  +50.4bp
+  seq  6 2000-07-31..2000-08-14 L 2000-04-14 holds  3 gross   +88.3bp net   +83.6bp rc -0.022 SPY +146.4bp
+  seq  7 2000-10-20..2000-11-17 L 2000-10-12 holds  5 gross  -275.3bp net  -280.2bp rc -0.056 SPY  -95.8bp
+  seq  8 2000-12-27..2001-02-16 L 2000-12-20 holds  8 gross  -125.7bp net  -129.8bp rc -0.064 SPY  -67.3bp
+  seq  9 2001-03-27..2001-03-27 L 2001-03-22 holds  1 gross  -593.8bp net  -603.8bp rc -0.015 SPY -364.2bp
+  seq 10 2001-04-10..2001-06-28 L 2001-04-03 holds 12 gross   +46.9bp net   +43.9bp rc -0.068 SPY  +27.1bp
+  seq 11 2001-09-27..2001-12-14 L 2001-09-21 holds 12 gross   +12.5bp net    +9.1bp rc -0.067 SPY  +83.0bp
+  seq 12 2002-07-24..2002-10-03 L 2002-07-23 holds 11 gross    -4.5bp net    -7.9bp rc -0.006 SPY  +12.3bp
+  seq 13 2002-10-11..2002-12-31 L 2002-10-09 holds 12 gross   +31.7bp net   +28.3bp rc -0.046 SPY  +84.5bp
+  seq 14 2007-08-24..2007-09-24 L 2007-08-15 holds  5 gross    +1.7bp net    -3.3bp rc +0.056 SPY +106.1bp
+  seq 15 2007-11-30..2007-12-14 L 2007-11-26 holds  3 gross    +3.0bp net    -3.5bp rc -0.076 SPY  +59.2bp
+  seq 16 2007-12-21..2007-12-31 L 2007-11-26 holds  2 gross   -62.4bp net   -68.4bp rc -0.127 SPY -301.4bp
+  seq 17 2008-01-31..2008-02-29 L 2008-01-22 holds  5 gross   -81.0bp net   -85.7bp rc -0.046 SPY -167.9bp
+  seq 18 2008-03-24..2008-06-10 L 2008-03-10 holds 12 gross   +43.8bp net   +40.5bp rc +0.035 SPY   -2.0bp
+  seq 19 2008-07-22..2008-09-10 L 2008-07-15 holds  8 gross   +91.6bp net   +88.2bp rc +0.094 SPY  -79.4bp
+  seq 20 2008-09-19..2008-09-26 L 2008-09-17 holds  2 gross  -241.4bp net  -249.2bp rc -0.157 SPY -708.3bp
+  seq 21 2008-10-13..2008-10-20 L 2008-10-10 holds  2 gross  -135.2bp net  -142.7bp rc -0.101 SPY -309.3bp
+  seq 22 2008-10-28..2008-11-18 L 2008-10-27 holds  4 gross   -79.7bp net   -86.2bp rc -0.114 SPY  -82.7bp
+  seq 23 2008-11-21..2009-02-12 L 2008-11-20 holds 12 gross   +25.3bp net   +21.9bp rc -0.002 SPY  -89.5bp
+  seq 24 2009-03-10..2009-05-28 L 2009-03-09 holds 12 gross  +207.9bp net  +204.7bp rc +0.121 SPY +232.9bp
+  seq 25 2010-05-12..2010-05-19 L 2010-05-07 holds  2 gross   -40.4bp net   -48.0bp rc -0.015 SPY -214.5bp
+  seq 26 2010-06-15..2010-06-22 L 2010-06-07 holds  2 gross   +87.7bp net   +80.5bp rc +0.116 SPY -373.8bp
+  seq 27 2010-07-09..2010-09-27 L 2010-07-02 holds 12 gross    +1.6bp net    -1.9bp rc +0.043 SPY  +66.9bp
+  seq 28 2011-08-12..2011-09-26 L 2011-08-08 holds  7 gross   -85.9bp net   -90.5bp rc -0.056 SPY  -83.8bp
+  seq 29 2011-10-06..2011-12-23 L 2011-10-03 holds 12 gross   -10.6bp net   -14.1bp rc -0.002 SPY  +93.1bp
+  seq 30 2012-06-15..2012-07-09 L 2012-06-04 holds  4 gross   -10.6bp net   -15.7bp rc -0.057 SPY  +39.5bp
+  seq 31 2015-08-27..2015-10-23 L 2015-08-25 holds  9 gross   -72.3bp net   -76.7bp rc +0.015 SPY  +70.2bp
+  seq 32 2016-02-17..2016-03-23 L 2016-02-11 holds  6 gross   -56.5bp net   -60.7bp rc -0.018 SPY +134.0bp
+  seq 33 2018-02-15..2018-03-09 L 2018-02-08 holds  4 gross    -7.0bp net   -12.2bp rc -0.018 SPY  -11.7bp
+  seq 34 2018-04-17..2018-06-06 L 2018-02-08 holds  8 gross   +60.7bp net   +57.9bp rc +0.059 SPY  +39.2bp
+  seq 35 2018-11-07..2018-11-21 L 2018-10-29 holds  3 gross   -56.5bp net   -62.2bp rc +0.014 SPY  -51.2bp
+  seq 36 2018-12-03..2018-12-11 L 2018-11-23 holds  2 gross   +17.0bp net    +9.8bp rc -0.104 SPY -356.1bp
+  seq 37 2018-12-26..2019-03-18 L 2018-12-24 holds 12 gross   +41.7bp net   +38.2bp rc +0.007 SPY +109.5bp
+  seq 38 2020-03-04..2020-03-04 L 2020-02-28 holds  1 gross  -661.8bp net  -671.8bp rc -0.110 SPY -1796.9bp
+  seq 39 2020-03-10..2020-03-10 L 2020-03-09 holds  1 gross  -708.3bp net  -718.3bp rc -0.065 SPY -1252.4bp
+  seq 40 2020-03-13..2020-03-13 L 2020-03-12 holds  1 gross  -321.4bp net  -331.4bp rc -0.031 SPY -647.5bp
+  seq 41 2020-03-17..2020-03-17 L 2020-03-16 holds  1 gross -1071.7bp net -1081.7bp rc -0.187 SPY +346.1bp
+  seq 42 2020-03-24..2020-06-11 L 2020-03-23 holds 12 gross   +10.5bp net    +7.0bp rc +0.033 SPY +198.9bp
+  seq 43 2020-10-05..2020-10-12 L 2020-09-23 holds  2 gross   -11.4bp net   -18.5bp rc -0.047 SPY +130.5bp
+  seq 44 2020-11-04..2020-11-11 L 2020-09-23 holds  2 gross   -26.6bp net   -33.5bp rc -0.012 SPY +107.1bp
+  seq 45 2022-02-01..2022-02-15 L 2022-01-27 holds  3 gross   +92.8bp net   +86.3bp rc -0.103 SPY -214.9bp
+  seq 46 2022-03-17..2022-04-22 L 2022-03-08 holds  6 gross   -69.1bp net   -73.4bp rc -0.141 SPY -114.5bp
+  seq 47 2022-05-27..2022-06-06 L 2022-05-19 holds  2 gross  +112.1bp net  +104.4bp rc -0.044 SPY -469.5bp
+  seq 48 2022-06-24..2022-09-13 L 2022-06-16 holds 12 gross    +2.0bp net    -1.4bp rc -0.006 SPY  -16.9bp
+  seq 49 2022-10-04..2022-10-11 L 2022-09-30 holds  2 gross   -78.0bp net   -86.1bp rc +0.104 SPY -104.8bp
+  seq 50 2022-10-24..2023-01-12 L 2022-10-12 holds 12 gross    -3.1bp net    -6.3bp rc -0.042 SPY  +39.5bp
+  seq 51 2023-11-03..2023-11-17 L 2023-10-27 holds  3 gross    +0.4bp net    -5.7bp rc +0.029 SPY +145.9bp
+  seq 52 2024-08-14..2024-08-21 L 2024-08-05 holds  2 gross   -79.4bp net   -85.9bp rc +0.089 SPY  +47.6bp
+  seq 53 2025-04-09..2025-05-22 L 2025-04-08 holds  7 gross   +27.2bp net   +22.1bp rc +0.014 SPY +179.3bp
+
+=== JUDGE 1999-2015 (halves 1999-2007 / 2008-15): 200 holds in 31 sequences, names/decision 1435, decile 143, beta port 1.05 vs EW 0.98, turnover 0.68/hold, sessions since L at decision 26, holds after D ended 8
+  MC: mean sequence rank corr(score, next-20 residual) -0.0261, t -2.20 over 31 sequences, positive 26%; pooled over decisions -0.0123 (t -1.85) -> FAIL
+  net excess -12.8bp/hold (gross -8.7, 2x cost -17.0) t -0.80 | median -7.8 hit 0.47 | halves -35.9 / +8.0 | ex-top5 -28.9 | ex-best sequence (seq 24) -26.7 | sequence-clustered t -1.74
+  raw legs: decile +11.8bp/hold, EW +21.8, SPY +7.9 | placebo fake-L (100): gross mean -18.9bp, 95th -7.5; real gross -8.7 at pct 94 | DSR (N 1255, per hold) 0.000
+  ceiling: 11.9 holds/yr x -12.8bp = -1.5pp/yr excess (simple sum)
+  GATES: MC FAIL | net>=60bp FAIL | t>=2.5 FAIL | halves FAIL | ex-top5 FAIL | ex-best-seq FAIL | 2xcost FAIL | placebo95 FAIL -> KILL
+
+=== REPORT 2016-2026-10 (never judged): 104 holds in 22 sequences, names/decision 1460, decile 145, beta port 1.07 vs EW 1.06, turnover 0.70/hold, sessions since L at decision 25, holds after D ended 9
+  MC: mean sequence rank corr(score, next-20 residual) -0.0262, t -1.70 over 22 sequences, positive 36%; pooled over decisions -0.0110 (t -1.24) -> FAIL
+  net excess -26.5bp/hold (gross -21.9, 2x cost -31.1) t -1.25 | median -13.2 hit 0.46 | halves -45.6 / -6.7 | ex-top5 -45.0 | ex-best sequence (seq 34) -33.5 | sequence-clustered t -2.07
+  raw legs: decile +13.4bp/hold, EW +31.0, SPY +5.9 | placebo fake-L (100): gross mean -9.3bp, 95th +7.2; real gross -21.9 at pct 3 | DSR (N 1255, per hold) 0.000
+  ceiling: 9.7 holds/yr x -26.5bp = -2.6pp/yr excess (simple sum)
