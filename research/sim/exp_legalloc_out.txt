@@ -1,0 +1,130 @@
+EXP round 3 R1/R2 (N 1225-1228): leg allocation IBS x night. Pre-reg round1_prose.md 'EXP round 3'.
+FIT 2003-01-01..2012-12-31  JUDGE 2013-01-01..2020-12-31  REPORT 2021-01-01..2026-09-17
+night file: 5636 nights with a pre-filter pick (others earn 0), 1151 with none kept; leg_current is GROSS (recon sum(per*r) max err 2.8e-17); deployed sum(per) mean 0.43 max 1.00; net = gross - 5bp x sum(per); nights not in the session calendar: 9
+IBS rebuild: Sharadar SFP first trade 1999-01-14; cross-check 2017-02-06..2020-12 vs ibs_oos on Alpaca: trades Sharadar 551 / Alpaca 557 / both 493 (overlap 80.2% of union); mean gap Sharadar-Alpaca matched -0.16bp (median -0.03), all-trade means +2.48bp (Sharadar split-adj + ACTIONS dividends, Alpaca div-adjusted bars)
+rows: fit 2517 judge 2015 report 1433; fit leg means: IBS +6.80bp/d night +6.96bp/d, corr +0.03
+best fixed on FIT (0.1 grid, w_ibs 0..1, w_night 0..1.3; ties -> gross nearest 1.0): w_ibs 0.9 w_night 1.3 (fit Sh 1.68; live 0.5/0.5 fit Sh 1.66)
+
+BASELINES (JUDGE 2013-20, net)
+live 0.5/0.5           Sh  1.38 CAGR  14.94% maxDD  -16.5% | 13-16 Sh  1.11 17-20 Sh  1.60 | mean  +5.74bp med +0.00 hit  41%
+best fixed 0.9/1.3     Sh  1.40 CAGR  36.31% maxDD  -38.2% | 13-16 Sh  1.32 17-20 Sh  1.50 | mean +13.49bp med +0.00 hit  41%
+better baseline (higher judge Sharpe): best fixed 0.9/1.3
+
+R1-LIN (N 1225): lambda ibs 10000 night 1000; k 1.0 (fit WF Sh k0.25:1.28 k0.5:1.27 k1.0:1.35)  [0.3 min]
+R1-LIN                 Sh  1.24 CAGR  30.07% maxDD  -41.7% | 13-16 Sh  0.98 17-20 Sh  1.46 | mean +11.54bp med +0.00 hit  39% | w_ibs 0.40+-0.47 w_night 0.64+-0.50
+    corr(w, state): spy_vol20: ibs +0.42 night +0.17  spy_tr200: ibs -0.56 night -0.27  spy_tr50: ibs -0.64 night -0.22  npool: ibs +0.48 night +0.78
+    vs live 0.5/0.5     dSh -0.134 | CAGR@maxDD -16.5% =  10.39% (x0.35) vs  14.94% (d -4.54pp) | halves beat False | ex-top-5 dSh -0.160
+    vs best fixed 0.9/1.3 dSh -0.152 | CAGR@maxDD -38.2% =  27.06% (x0.90) vs  36.31% (d -9.25pp) | halves beat False | ex-top-5 dSh -0.259
+    placebo (50): judge Sh median 1.18 95th 1.30 max 1.33; real 1.24 at pct 70 (gain vs better -0.152 vs placebo-95th gain -0.101)
+    DSR (N 1231): 0.576
+  GATES R1-LIN: dSh>=+0.15: FAIL | CAGR@DD>=+2pp: FAIL | both halves: FAIL | placebo>=95th: FAIL | ex-top-5 gain>0: FAIL
+  VERDICT R1-LIN (N 1225): FAIL
+
+R1-LINTS (N 1226): lambda ibs 10000 night 1000; k 0.25 (fit WF Sh k0.25:1.19 k0.5:1.13 k1.0:1.16) ; TS seed 0  [1.2 min]
+R1-LINTS               Sh  1.26 CAGR  22.54% maxDD  -35.4% | 13-16 Sh  1.22 17-20 Sh  1.35 | mean  +8.67bp med +0.00 hit  41% | w_ibs 0.47+-0.24 w_night 0.56+-0.25
+    corr(w, state): spy_vol20: ibs +0.42 night +0.26  spy_tr200: ibs -0.51 night -0.34  spy_tr50: ibs -0.62 night -0.34  npool: ibs +0.45 night +0.73
+    vs live 0.5/0.5     dSh -0.115 | CAGR@maxDD -16.5% =   9.58% (x0.43) vs  14.94% (d -5.36pp) | halves beat False | ex-top-5 dSh -0.178
+    vs best fixed 0.9/1.3 dSh -0.133 | CAGR@maxDD -38.2% =  24.66% (x1.09) vs  36.31% (d -11.64pp) | halves beat False | ex-top-5 dSh -0.319
+    placebo (50): judge Sh median 1.03 95th 1.46 max 1.56; real 1.26 at pct 88 (gain vs better -0.133 vs placebo-95th gain +0.062)
+    DSR (N 1231): 0.594
+  GATES R1-LINTS: dSh>=+0.15: FAIL | CAGR@DD>=+2pp: FAIL | both halves: FAIL | placebo>=95th: FAIL | ex-top-5 gain>0: FAIL
+  VERDICT R1-LINTS (N 1226): FAIL
+
+PPO: 1,000,000 steps/policy, 110 policies (2 rewards x (5 seeds + 50 placebo)); exp_rl SB3-default hyperparameters; obs = 9 z-state; action (1.0, 1.3) x sigmoid(first 2 Gaussian outputs); train 46.1 min
+
+R2-PPO (N 1227): reward log(1+r) - 0.5 r^2
+R2-PPO seed 0          Sh  1.10 CAGR  18.97% maxDD  -35.3% | 13-16 Sh  1.29 17-20 Sh  1.07 | mean  +7.49bp med +0.00 hit  41% | w_ibs 0.50+-0.20 w_night 0.70+-0.27
+    corr(w, state): spy_vol20: ibs +0.21 night +0.17  spy_tr200: ibs -0.40 night -0.02  spy_tr50: ibs -0.52 night +0.03  npool: ibs -0.19 night +0.40
+    vs live 0.5/0.5     dSh -0.275 | CAGR@maxDD -16.5% =   8.15% (x0.43) vs  14.94% (d -6.78pp) | halves beat False | ex-top-5 dSh -0.323
+    vs best fixed 0.9/1.3 dSh -0.293 | CAGR@maxDD -38.2% =  20.82% (x1.10) vs  36.31% (d -15.49pp) | halves beat False | ex-top-5 dSh -0.368
+    placebo (50): judge Sh median 1.34 95th 1.54 max 1.57; real 1.10 at pct 8 (gain vs better -0.293 vs placebo-95th gain +0.141)
+    DSR (N 1231): 0.432
+  GATES seed 0: dSh>=+0.15: FAIL | CAGR@DD>=+2pp: FAIL | both halves: FAIL | placebo>=95th: FAIL | ex-top-5 gain>0: FAIL -> FAIL
+R2-PPO seed 1          Sh  1.09 CAGR  19.56% maxDD  -30.6% | 13-16 Sh  1.32 17-20 Sh  1.02 | mean  +7.73bp med +0.00 hit  41% | w_ibs 0.63+-0.16 w_night 0.78+-0.30
+    corr(w, state): spy_vol20: ibs -0.49 night +0.22  spy_tr200: ibs +0.27 night -0.28  spy_tr50: ibs +0.15 night -0.06  npool: ibs -0.44 night +0.40
+    vs live 0.5/0.5     dSh -0.285 | CAGR@maxDD -16.5% =   9.98% (x0.51) vs  14.94% (d -4.95pp) | halves beat False | ex-top-5 dSh -0.343
+    vs best fixed 0.9/1.3 dSh -0.303 | CAGR@maxDD -38.2% =  25.14% (x1.29) vs  36.31% (d -11.17pp) | halves beat False | ex-top-5 dSh -0.389
+    placebo (50): judge Sh median 1.34 95th 1.54 max 1.57; real 1.09 at pct 4 (gain vs better -0.303 vs placebo-95th gain +0.141)
+    DSR (N 1231): 0.421
+  GATES seed 1: dSh>=+0.15: FAIL | CAGR@DD>=+2pp: FAIL | both halves: FAIL | placebo>=95th: FAIL | ex-top-5 gain>0: FAIL -> FAIL
+R2-PPO seed 2          Sh  1.26 CAGR  19.78% maxDD  -22.6% | 13-16 Sh  0.95 17-20 Sh  1.50 | mean  +7.64bp med +0.00 hit  41% | w_ibs 0.53+-0.17 w_night 0.57+-0.24
+    corr(w, state): spy_vol20: ibs +0.25 night +0.19  spy_tr200: ibs -0.42 night -0.02  spy_tr50: ibs -0.35 night -0.08  npool: ibs +0.26 night +0.56
+    vs live 0.5/0.5     dSh -0.123 | CAGR@maxDD -16.5% =  13.94% (x0.71) vs  14.94% (d -1.00pp) | halves beat False | ex-top-5 dSh -0.161
+    vs best fixed 0.9/1.3 dSh -0.141 | CAGR@maxDD -38.2% =  36.24% (x1.81) vs  36.31% (d -0.07pp) | halves beat False | ex-top-5 dSh -0.223
+    placebo (50): judge Sh median 1.34 95th 1.54 max 1.57; real 1.26 at pct 30 (gain vs better -0.141 vs placebo-95th gain +0.141)
+    DSR (N 1231): 0.587
+  GATES seed 2: dSh>=+0.15: FAIL | CAGR@DD>=+2pp: FAIL | both halves: FAIL | placebo>=95th: FAIL | ex-top-5 gain>0: FAIL -> FAIL
+R2-PPO seed 3          Sh  1.40 CAGR  24.99% maxDD  -24.6% | 13-16 Sh  1.34 17-20 Sh  1.48 | mean  +9.43bp med +0.00 hit  41% | w_ibs 0.47+-0.24 w_night 0.84+-0.23
+    corr(w, state): spy_vol20: ibs +0.13 night -0.35  spy_tr200: ibs -0.23 night +0.03  spy_tr50: ibs -0.23 night +0.12  npool: ibs -0.10 night +0.01
+    vs live 0.5/0.5     dSh +0.024 | CAGR@maxDD -16.5% =  16.00% (x0.65) vs  14.94% (d +1.06pp) | halves beat False | ex-top-5 dSh -0.005
+    vs best fixed 0.9/1.3 dSh +0.006 | CAGR@maxDD -38.2% =  42.17% (x1.65) vs  36.31% (d +5.86pp) | halves beat False | ex-top-5 dSh -0.112
+    placebo (50): judge Sh median 1.34 95th 1.54 max 1.57; real 1.40 at pct 66 (gain vs better +0.006 vs placebo-95th gain +0.141)
+    DSR (N 1231): 0.726
+  GATES seed 3: dSh>=+0.15: FAIL | CAGR@DD>=+2pp: FAIL | both halves: FAIL | placebo>=95th: FAIL | ex-top-5 gain>0: FAIL -> FAIL
+R2-PPO seed 4          Sh  1.23 CAGR  24.59% maxDD  -31.1% | 13-16 Sh  1.15 17-20 Sh  1.33 | mean  +9.49bp med +0.00 hit  41% | w_ibs 0.45+-0.28 w_night 0.86+-0.33
+    corr(w, state): spy_vol20: ibs +0.01 night -0.06  spy_tr200: ibs -0.27 night -0.06  spy_tr50: ibs -0.41 night +0.07  npool: ibs +0.42 night +0.31
+    vs live 0.5/0.5     dSh -0.149 | CAGR@maxDD -16.5% =  12.17% (x0.50) vs  14.94% (d -2.76pp) | halves beat False | ex-top-5 dSh -0.187
+    vs best fixed 0.9/1.3 dSh -0.167 | CAGR@maxDD -38.2% =  31.17% (x1.26) vs  36.31% (d -5.14pp) | halves beat False | ex-top-5 dSh -0.304
+    placebo (50): judge Sh median 1.34 95th 1.54 max 1.57; real 1.23 at pct 26 (gain vs better -0.167 vs placebo-95th gain +0.141)
+    DSR (N 1231): 0.559
+  GATES seed 4: dSh>=+0.15: FAIL | CAGR@DD>=+2pp: FAIL | both halves: FAIL | placebo>=95th: FAIL | ex-top-5 gain>0: FAIL -> FAIL
+  VERDICT R2-PPO (N 1227): FAIL (0/5 seeds pass all gates; need >= 4)
+
+R2-PPO-DD (N 1228): reward log(1+r) - 2 x dDD+
+R2-PPO-DD seed 0       Sh  0.82 CAGR   6.64% maxDD  -16.0% | 13-16 Sh  1.49 17-20 Sh  0.74 | mean  +2.69bp med +0.00 hit  41% | w_ibs 0.40+-0.25 w_night 0.30+-0.26
+    corr(w, state): spy_vol20: ibs -0.04 night +0.19  spy_tr200: ibs -0.00 night -0.18  spy_tr50: ibs -0.02 night -0.14  npool: ibs -0.27 night -0.35
+    vs live 0.5/0.5     dSh -0.554 | CAGR@maxDD -16.5% =   6.82% (x1.03) vs  14.94% (d -8.11pp) | halves beat False | ex-top-5 dSh -0.808
+    vs best fixed 0.9/1.3 dSh -0.572 | CAGR@maxDD -38.2% =  15.84% (x2.49) vs  36.31% (d -20.47pp) | halves beat False | ex-top-5 dSh -0.527
+    placebo (50): judge Sh median 1.16 95th 1.47 max 1.56; real 0.82 at pct 8 (gain vs better -0.572 vs placebo-95th gain +0.071)
+    DSR (N 1231): 0.191
+  GATES seed 0: dSh>=+0.15: FAIL | CAGR@DD>=+2pp: FAIL | both halves: FAIL | placebo>=95th: FAIL | ex-top-5 gain>0: FAIL -> FAIL
+R2-PPO-DD seed 1       Sh  0.67 CAGR   5.94% maxDD  -22.5% | 13-16 Sh  1.47 17-20 Sh  0.46 | mean  +2.47bp med +0.00 hit  41% | w_ibs 0.44+-0.28 w_night 0.41+-0.30
+    corr(w, state): spy_vol20: ibs -0.18 night +0.00  spy_tr200: ibs +0.26 night -0.18  spy_tr50: ibs +0.41 night -0.17  npool: ibs -0.31 night -0.48
+    vs live 0.5/0.5     dSh -0.710 | CAGR@maxDD -16.5% =   4.34% (x0.72) vs  14.94% (d -10.59pp) | halves beat False | ex-top-5 dSh -1.041
+    vs best fixed 0.9/1.3 dSh -0.728 | CAGR@maxDD -38.2% =  10.11% (x1.79) vs  36.31% (d -26.19pp) | halves beat False | ex-top-5 dSh -1.035
+    placebo (50): judge Sh median 1.16 95th 1.47 max 1.56; real 0.67 at pct 2 (gain vs better -0.728 vs placebo-95th gain +0.071)
+    DSR (N 1231): 0.109
+  GATES seed 1: dSh>=+0.15: FAIL | CAGR@DD>=+2pp: FAIL | both halves: FAIL | placebo>=95th: FAIL | ex-top-5 gain>0: FAIL -> FAIL
+R2-PPO-DD seed 2       Sh  1.05 CAGR   8.92% maxDD  -17.8% | 13-16 Sh  1.59 17-20 Sh  0.94 | mean  +3.53bp med +0.00 hit  41% | w_ibs 0.30+-0.22 w_night 0.27+-0.23
+    corr(w, state): spy_vol20: ibs -0.18 night +0.28  spy_tr200: ibs +0.02 night -0.29  spy_tr50: ibs +0.10 night -0.36  npool: ibs -0.12 night +0.10
+    vs live 0.5/0.5     dSh -0.326 | CAGR@maxDD -16.5% =   8.21% (x0.92) vs  14.94% (d -6.72pp) | halves beat False | ex-top-5 dSh -0.620
+    vs best fixed 0.9/1.3 dSh -0.344 | CAGR@maxDD -38.2% =  20.21% (x2.28) vs  36.31% (d -16.10pp) | halves beat False | ex-top-5 dSh -0.479
+    placebo (50): judge Sh median 1.16 95th 1.47 max 1.56; real 1.05 at pct 24 (gain vs better -0.344 vs placebo-95th gain +0.071)
+    DSR (N 1231): 0.385
+  GATES seed 2: dSh>=+0.15: FAIL | CAGR@DD>=+2pp: FAIL | both halves: FAIL | placebo>=95th: FAIL | ex-top-5 gain>0: FAIL -> FAIL
+R2-PPO-DD seed 3       Sh  1.31 CAGR   8.91% maxDD   -8.6% | 13-16 Sh  1.34 17-20 Sh  1.32 | mean  +3.48bp med +0.00 hit  41% | w_ibs 0.33+-0.21 w_night 0.38+-0.30
+    corr(w, state): spy_vol20: ibs -0.15 night -0.06  spy_tr200: ibs +0.09 night -0.01  spy_tr50: ibs +0.19 night -0.15  npool: ibs -0.15 night -0.38
+    vs live 0.5/0.5     dSh -0.066 | CAGR@maxDD -16.5% =  17.57% (x1.94) vs  14.94% (d +2.63pp) | halves beat False | ex-top-5 dSh -0.310
+    vs best fixed 0.9/1.3 dSh -0.084 | CAGR@maxDD -38.2% =  45.07% (x4.82) vs  36.31% (d +8.76pp) | halves beat False | ex-top-5 dSh -0.377
+    placebo (50): judge Sh median 1.16 95th 1.47 max 1.56; real 1.31 at pct 80 (gain vs better -0.084 vs placebo-95th gain +0.071)
+    DSR (N 1231): 0.671
+  GATES seed 3: dSh>=+0.15: FAIL | CAGR@DD>=+2pp: PASS | both halves: FAIL | placebo>=95th: FAIL | ex-top-5 gain>0: FAIL -> FAIL
+R2-PPO-DD seed 4       Sh  0.87 CAGR   8.95% maxDD  -22.4% | 13-16 Sh  1.90 17-20 Sh  0.68 | mean  +3.63bp med +0.00 hit  41% | w_ibs 0.32+-0.22 w_night 0.49+-0.34
+    corr(w, state): spy_vol20: ibs +0.14 night -0.05  spy_tr200: ibs -0.04 night +0.03  spy_tr50: ibs -0.02 night +0.17  npool: ibs +0.01 night -0.51
+    vs live 0.5/0.5     dSh -0.510 | CAGR@maxDD -16.5% =   6.52% (x0.72) vs  14.94% (d -8.42pp) | halves beat False | ex-top-5 dSh -0.748
+    vs best fixed 0.9/1.3 dSh -0.528 | CAGR@maxDD -38.2% =  15.72% (x1.81) vs  36.31% (d -20.58pp) | halves beat False | ex-top-5 dSh -0.730
+    placebo (50): judge Sh median 1.16 95th 1.47 max 1.56; real 0.87 at pct 10 (gain vs better -0.528 vs placebo-95th gain +0.071)
+    DSR (N 1231): 0.238
+  GATES seed 4: dSh>=+0.15: FAIL | CAGR@DD>=+2pp: FAIL | both halves: FAIL | placebo>=95th: FAIL | ex-top-5 gain>0: FAIL -> FAIL
+  VERDICT R2-PPO-DD (N 1228): FAIL (0/5 seeds pass all gates; need >= 4)
+
+REPORT 2021-01-04..2026-09-17 (descriptive, not judged; IBS from Alpaca etf_daily via ibs_oos._trades, div-adjusted bars; night from the same nights file; R1 keeps its expanding monthly refit, PPO frozen)
+live 0.5/0.5           Sh  1.91 CAGR  39.01% maxDD  -20.6%
+best fixed 0.9/1.3     Sh  1.86 CAGR 107.03% maxDD  -45.7%
+R1-LIN                 Sh  2.13 CAGR 123.94% maxDD  -45.7% | w_ibs 0.57 w_night 1.08 | dSh vs live +0.22
+R1-LINTS               Sh  2.06 CAGR  81.52% maxDD  -33.2% | w_ibs 0.54 w_night 0.77 | dSh vs live +0.14
+R2-PPO s0              Sh  1.67 CAGR  49.92% maxDD  -32.8% | w_ibs 0.36 w_night 0.68 | dSh vs live -0.25
+R2-PPO s1              Sh  1.78 CAGR  61.66% maxDD  -36.0% | w_ibs 0.52 w_night 0.76 | dSh vs live -0.14
+R2-PPO s2              Sh  1.72 CAGR  46.21% maxDD  -21.8% | w_ibs 0.47 w_night 0.57 | dSh vs live -0.20
+R2-PPO s3              Sh  1.94 CAGR  64.93% maxDD  -31.5% | w_ibs 0.38 w_night 0.81 | dSh vs live +0.03
+R2-PPO s4              Sh  1.92 CAGR  84.95% maxDD  -39.8% | w_ibs 0.33 w_night 0.99 | dSh vs live +0.01
+R2-PPO-DD s0           Sh  2.01 CAGR  36.21% maxDD  -16.7% | w_ibs 0.40 w_night 0.42 | dSh vs live +0.10
+R2-PPO-DD s1           Sh  1.47 CAGR  25.28% maxDD  -22.0% | w_ibs 0.47 w_night 0.43 | dSh vs live -0.45
+R2-PPO-DD s2           Sh  1.54 CAGR  17.11% maxDD   -9.1% | w_ibs 0.15 w_night 0.27 | dSh vs live -0.37
+R2-PPO-DD s3           Sh  1.55 CAGR  16.83% maxDD   -9.0% | w_ibs 0.25 w_night 0.26 | dSh vs live -0.36
+R2-PPO-DD s4           Sh  1.73 CAGR  35.16% maxDD  -29.8% | w_ibs 0.40 w_night 0.51 | dSh vs live -0.18
+
+VERDICTS: R1-LIN: FAIL | R1-LINTS: FAIL | R2-PPO: FAIL | R2-PPO-DD: FAIL
+
+readings/deviations: night leg_current is gross; net = gross - 5bp x deployed sum(per); sessions without a nights row earn 0 ; IBS no-fire days earn 0 (no BIL credit); IBS day = mean of fired names - 2bp ; both legs keyed by decision day d and summed (IBS d = open d+1 -> d+2, night d = close d -> open d+1) ; state at d's close stands in for 15:40; IBS rolling mean uses decisions <= d-2 (known at d), night <= d-1 ; night pool size enters as log1p(n_picks); state z clipped +-5 (fit mean/sd) ; ridge/LINTS refits every 21 sessions on rows [2003-01, r-2]; WF warm-up 252 rows; lambda per leg by WF MSE on FIT, k by WF Sharpe on FIT 2004-12; forecast/sd = centred forecast (x - xbar).b / sd of training forecasts (intercept excluded, the signals.night_tilt convention); base = live 0.5/0.5; weights clipped to [0, 1.3] both legs as the pre-reg says (so w_ibs may exceed the PPO box of 1.0) ; LINTS: posterior N(b, s2 (X'X+lam I)^-1) plus intercept N(ybar, s2/n), one draw per day; primary = TS seed 0 ; placebo R1: FIT rows of the state shuffled (judge rows unshuffled, expanding refit as real); lambda and k re-chosen ; lambda grid 0.1..1e6 (decades); forecast/sd makes the action scale-free in lambda, so lambda only sets the forecast direction ; placebo PPO: 50 policies per reward on fit-shuffled states (seeds 100-149); each real seed compared with the same 50 ; gates applied vs BOTH baselines (live and best fixed); placebo vs the higher judge Sharpe; ex-top-5 drops the 5 judge days with the largest strategy - baseline difference ; PPO PASS = >= 4/5 seeds passing every gate; deterministic policy (mean action) ; REPORT IBS from Alpaca etf_daily (dividend-adjusted bars, so dividends are inside the open->open return) and SPY state from Alpaca closes ; cross-check mismatch: etf_daily is dividend-adjusted, SFP momentum uses split-only close as the pre-reg says; 12-1 top-3 differs in 13/47 months 2017-20 (IBS<0.2 flags agree 98-100%); the overlap window starts at the first ibs_oos trade (needs 260 Alpaca bars) ; REPORT ends 2026-09-17 (last etf_daily decision with an open d+2); 9 later night rows dropped
+runtime: total 47.6 min

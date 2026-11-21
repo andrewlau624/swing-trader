@@ -107,3 +107,4 @@ One line per file. Read a file when the task touches its subject; do not read al
 - `114-ev-tone-8k-kill-2026-11-21.md` (80 tok): LM tone on out-of-session 8-Ks (N 1239) KILL: tone ranks but the long leg is negative (filer intraday drift -19bp).
 - `115-pref-sibling-rv-kill-2026-11-21.md` (70 tok): same-issuer pref/ETD sibling dislocation (N 1240) KILL: median ~0, placebo higher.
 - `116-seo-quiet-period-kill-2026-11-21.md` (90 tok): SEO quiet-period run-up (N 1241) KILL; FINRA 2241 dates (2015-09-25) and the actively-traded exemption.
+- `117-leg-allocator-r1-r2-kill-2026-11-21.md` (80 tok): R1/R2 learned IBS/night/cash weights (N 1225-1228) KILL; closes RL exposure control over the legs.

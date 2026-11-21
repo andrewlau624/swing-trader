@@ -11211,3 +11211,22 @@ These are siblings from the A1/A2 row's `not tested:` field: the published month
 - Audit: the EDGAR filing date lags the pricing date by 1-2 sessions. A cover-date clock (unregistered diagnostic) gives +9.5bp, t 0.59.
 - Note for memory 95: FINRA 2241's IPO minimum is 10 days from 2015-09-25. The K=25 used after that date in QP-RUNUP is industry convention, not the rule.
 - Not tested: inactively traded issuers (where the rule binds); a press-release or cover-date pricing clock; 424B7/B3/B2 and S-1 follow-ons; manager/IBES coverage data; 2002; combination with QP-RUNUP.
+
+### RESULT - R1/R2 leg allocator (N 1225-1228, run 2026-11-21): all FAIL
+- Judge 2013-20 baselines:
+  - live 0.5/0.5: Sharpe 1.38
+  - best fixed on fit (0.9/1.3): Sharpe 1.40, maxDD -38%
+- Variants:
+  - R1-LIN: Sharpe 1.24, placebo 70th
+  - R1-LINTS: Sharpe 1.26, placebo 88th
+  - R2-PPO: 0/5 seeds pass; best seed Sharpe 1.40 (+0.006 vs fixed), placebo 4-66th
+  - R2-PPO-DD: 0/5 pass; it learns to de-lever (maxDD -9%, CAGR 6-9%)
+- Linear weights mostly track night pool size and vol, i.e. leverage into the legs' own strong days.
+- Report 2021-26: R1-LIN Sharpe 2.13 vs 1.91, mostly from a 1.08 night weight (leverage). Not judged.
+- Run notes:
+  - The first run hung in pool.map and was killed.
+  - A reduced 300k/20-placebo rerun failed all four.
+  - The canonical 1M/50 run (47.6 min) agrees.
+  - Added a resumable per-policy cache (EXP_LA_CACHE) after the R1 numbers had printed; it does not change the experiment.
+- With R4 and R5 this closes RL/linear exposure control over the existing legs.
+- Not tested: per-leg vol targeting, the live book including the intraday leg, offline RL, richer (implied-vol) state.
