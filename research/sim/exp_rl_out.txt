@@ -1,0 +1,36 @@
+EXP D1 RL-ALLOC (N 1216) -- PPO allocator over {SPY,QQQ,TLT,XLU,cash} vs 60/40 SPY/TLT daily-rebalanced
+pre-reg: research/drafts/round1_prose.md 'Amendment - EXP round', Common frame + D1. Program N 1218.
+fit decisions 2002-08-28..2010-12-30 (2101 sessions); 1,000,000 PPO steps x 30 policies (5 real + 5x5 placebo); placebo shifts [693, 398, 1158, 1730, 762]
+PPO: SB3 defaults lr 0.0003 gamma 0.99 gae 0.95 clip 0.2 n_steps 2048 epochs 10 mb 64 vf 0.5 ent 0.0 maxgn 0.5; 2x64 tanh separate pi/vf; Gaussian logits -> softmax weights
+
+JUDGE 2011-01-03..2020-12-31 n 2517; 60/40: mean 4.83bp/d Sharpe 1.33 maxDD -17.8%; SPY Sharpe 0.84
+
+per seed, 1bp/side (alpha = OLS intercept of net on 60/40, NW t lags 5):
+seed 0       alpha  -0.40bp/d t -0.50 beta 0.98 | 11-15  -0.24 16-20  -0.45 | Sh 0.96 vs 60/40 1.33 (d -0.37) | ex-top5  -0.97 | maxDD -15.1% hit 55.1% med  +5.3bp TO 0.788/d | w SPY0.16 QQQ0.24 TLT0.23 XLU0.17 cash0.19 | 3bp alpha  -1.97 t -2.51 | DSR 0.000
+seed 1       alpha  -0.40bp/d t -0.51 beta 0.97 | 11-15  -0.56 16-20  -0.14 | Sh 0.98 vs 60/40 1.33 (d -0.34) | ex-top5  -0.96 | maxDD -14.9% hit 56.2% med  +5.9bp TO 0.818/d | w SPY0.27 QQQ0.21 TLT0.21 XLU0.14 cash0.16 | 3bp alpha  -2.04 t -2.61 | DSR 0.000
+seed 2       alpha  -0.36bp/d t -0.43 beta 0.93 | 11-15  -1.68 16-20  +0.96 | Sh 0.96 vs 60/40 1.33 (d -0.36) | ex-top5  -1.13 | maxDD -12.4% hit 55.9% med  +5.9bp TO 0.767/d | w SPY0.22 QQQ0.20 TLT0.21 XLU0.20 cash0.16 | 3bp alpha  -1.89 t -2.29 | DSR 0.000
+seed 3       alpha  -1.04bp/d t -1.24 beta 1.01 | 11-15  -0.45 16-20  -1.61 | Sh 0.86 vs 60/40 1.33 (d -0.47) | ex-top5  -1.52 | maxDD -13.4% hit 56.3% med  +6.2bp TO 0.716/d | w SPY0.20 QQQ0.24 TLT0.21 XLU0.19 cash0.16 | 3bp alpha  -2.47 t -2.96 | DSR 0.000
+seed 4       alpha  -0.29bp/d t -0.32 beta 0.99 | 11-15  -1.58 16-20  +1.03 | Sh 0.99 vs 60/40 1.33 (d -0.34) | ex-top5  -0.94 | maxDD -14.7% hit 53.8% med  +3.4bp TO 0.784/d | w SPY0.20 QQQ0.21 TLT0.20 XLU0.22 cash0.18 | 3bp alpha  -1.86 t -2.04 | DSR 0.000
+  seed 0 gates 1-3: FAIL FAIL FAIL
+  seed 1 gates 1-3: FAIL FAIL FAIL
+  seed 2 gates 1-3: FAIL FAIL FAIL
+  seed 3 gates 1-3: FAIL FAIL FAIL
+  seed 4 gates 1-3: FAIL FAIL FAIL
+
+seed-median policy = seed 0 (3rd of 5 by judge alpha)
+median s0    alpha  -0.40bp/d t -0.50 beta 0.98 | 11-15  -0.24 16-20  -0.45 | Sh 0.96 vs 60/40 1.33 (d -0.37) | ex-top5  -0.97 | maxDD -15.1% hit 55.1% med  +5.3bp TO 0.788/d | w SPY0.16 QQQ0.24 TLT0.23 XLU0.17 cash0.19
+placebo (25 shifted-label policies) judge alpha bp/d: median -0.94, 95th +0.20, min -2.18, max +0.89; real seed-median -0.40 at pct 68; real seeds above placebo 95th: 0/5
+
+seeds passing all of gates 1-3: 0/5 (need >= 4); seed-median 3bp alpha -1.97 t -2.51
+GATES: 1 alpha>0 & NW t>=2 (>=4/5 seeds): FAIL | 2 alpha>0 both halves (>=4/5 seeds): FAIL | 3 Sharpe - 60/40 >= +0.20 (>=4/5 seeds): FAIL | 4 seed-median survives 3bp/side (alpha>0, t>=2): FAIL | 5 seed-median alpha >= placebo 95th: FAIL | 6 seed-median ex-top-5 alpha > 0: FAIL
+VERDICT D1 RL-ALLOC (N 1216): FAIL  (DSR seed-median at N 1218: 0.000)
+
+REPORT 2021-01-04..2026-09-21 (Alpaca, descriptive, not judged) n 1435; 60/40 Sharpe 0.53 maxDD -27.2%
+*seed 0 alpha  +1.36bp/d t +1.22 beta 0.85 Sh 0.72 maxDD -17.6% TO 0.802 | w SPY0.16 QQQ0.24 TLT0.22 XLU0.18 cash0.20
+ seed 1 alpha  -0.52bp/d t -0.52 beta 0.86 Sh 0.35 maxDD -22.5% TO 0.827 | w SPY0.26 QQQ0.20 TLT0.23 XLU0.15 cash0.17
+ seed 2 alpha  -0.20bp/d t -0.18 beta 0.82 Sh 0.40 maxDD -19.9% TO 0.793 | w SPY0.21 QQQ0.19 TLT0.23 XLU0.20 cash0.17
+ seed 3 alpha  +2.15bp/d t +2.05 beta 0.89 Sh 0.89 maxDD -16.0% TO 0.740 | w SPY0.20 QQQ0.24 TLT0.21 XLU0.18 cash0.18
+ seed 4 alpha  +0.83bp/d t +0.80 beta 0.83 Sh 0.62 maxDD -20.1% TO 0.815 | w SPY0.20 QQQ0.19 TLT0.21 XLU0.22 cash0.18
+
+readings/deviations: total return = SFP split-adj close + ACTIONS cash dividends; cash earns 0; benchmark costless; ENT_COEF 0 (SB3/PPO-paper continuous default); 'seed-median policy' = seed ranked 3rd of 5 on judge alpha; gate 4 = 3bp alpha > 0 with t >= 2; gate 6 drops the 5 largest hedged (net - beta*60/40) days; placebo = 25 policies (not 200 draws) as D1 specifies; episodes end at 252 sessions (treated as terminal); REPORT ends at Alpaca's last bar.
+runtime: train 27.9 min, total 28.0 min

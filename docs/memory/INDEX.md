@@ -93,3 +93,4 @@ One line per file. Read a file when the task touches its subject; do not read al
 - `100-news-judge-ba1-dead-2026-11-19.md` (260 tok): LLM news judge BA1 forward DEAD at 305 picks (NW t 1.33, shuffle 28%); judge called 93% liquidity, 'fundamental' picks did not keep falling; model switched v4->v4.1 mid-count without amendment; news_judge off, registry/digest rows removed.
 - `101-quote-imbalance-bb1-dead-2026-11-20.md` (220 tok): 15:40 quote-imbalance tilt BB1 forward DEAD at 317 picks (NW t 1.85, placebos pass, halves +); T1 sell-heavy worst as in QI-HIST; ceiling ~1.8pp/yr so not re-run; registry/digest rows removed.
 - `102-leadlag-daily-e1-kill-2026-11-20.md` (120 tok): daily lead-lag E1 (N 1217) KILL: judge 2011-20 gross ~0, net -5bp/day, placebo beats it; 1998-2010 +10bp decayed.
+- `103-rl-alloc-d1-kill-2026-11-20.md` (130 tok): PPO ETF allocator D1 (N 1216) KILL: ~uniform weights, Sharpe below 60/40, placebo 68th pct; this form only.

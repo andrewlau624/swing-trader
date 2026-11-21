@@ -10847,3 +10847,11 @@ research/sim/exp_leadlag.py -> exp_leadlag_out.txt. Judge 2011-20 (2,517 days), 
 leaders do as well or better). 1998-2010 (descriptive): gross +10.5 / +11.5bp, net +5.5 / +6.5 (t 4.4 / 2.6): a real lead-lag that has
 decayed to zero since 2011, never near +15bp. 2.4 leaders/name; 1% overlap with the night rule. Not tested: supply-chain / customer
 links (named economic links), lead-lag in illiquid names outside the top 500, intraday (SECT-LAG dead), negative-beta leaders, shorts.
+
+#### Result - D1 RL-ALLOC (N 1216, judged 2026-11-20, one run, full 1M steps x 30 policies): KILL (all 6 gates)
+research/sim/exp_rl.py -> exp_rl_out.txt. Judge 2011-20 vs 60/40 (Sharpe 1.33): seed alphas -0.29..-1.04bp/day, |t| <= 1.24, Sharpe
+0.86-0.99, 3bp shock t -2.0..-3.0, DSR 0.000; seed-median at the placebo 68th pct. The policy LEARNED NOTHING: weights stayed near
+uniform (SPY .16-.27 / QQQ .22 / TLT .21 / XLU .18 / cash .17) with 0.77/day turnover, i.e. a jittery EW basket. REPORT 2021-26 mixed
+(+1.4..+2.2bp on 3 seeds), from the ~18% cash in 2022, not timing. So this kills PPO-default on 20d returns over 5 assets; it says little
+about RL as a class. Not tested: entropy-regularised or longer training, reward shaping (Sharpe/drawdown), richer observations (vol,
+IBS, macro), discrete action sets, reservoir (fly) states as the observation, offline RL.
