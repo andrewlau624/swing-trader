@@ -10840,3 +10840,10 @@ PASS = D1's rule (>= 4/5 seeds on gates 1-3, seed-median policy on 4-6, shifted-
 - **D2d RL-SECTORS (N 1222):** the 9 original SPDR sector ETFs (XLB XLE XLF XLI XLK XLP XLU XLV XLY) + SPY as 10 fixed slots.
 Not tested here: fly-reservoir states as the RL observation (B x D), intraday horizons, shorting. Runner `research/sim/exp_rl_universe.py`
 -> `exp_rl_universe_out.txt`. Program N = 1222.
+
+#### Result - E1 LEADLAG-D (N 1217, judged 2026-11-20, one run, 200 placebo draws): KILL (all 6 gates, both exits)
+research/sim/exp_leadlag.py -> exp_leadlag_out.txt. Judge 2011-20 (2,517 days), net excess vs EW top-500 at 2.5bp/side: night exit
+-4.70bp/day (NW t -4.57, gross +0.30), close exit -5.64 (t -3.27, gross -0.64); both halves negative; placebo 3rd / 4th pct (random
+leaders do as well or better). 1998-2010 (descriptive): gross +10.5 / +11.5bp, net +5.5 / +6.5 (t 4.4 / 2.6): a real lead-lag that has
+decayed to zero since 2011, never near +15bp. 2.4 leaders/name; 1% overlap with the night rule. Not tested: supply-chain / customer
+links (named economic links), lead-lag in illiquid names outside the top 500, intraday (SECT-LAG dead), negative-beta leaders, shorts.

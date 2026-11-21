@@ -1,0 +1,79 @@
+E1 LEADLAG-D (N 1217; program N 1218) -- research/sim/exp_leadlag.py; pre-reg round1_prose.md 'EXP round'
+run 2026-11-20 16:01
+bars 40,142,270 rows, 19,450 tickers (of 27,575 common+ETF listed in TICKERS); sessions 5799 1997-12-31..2021-01-15
+universe: 3,290 distinct names ever in a month-end top-500; months 277; min/median size 500/500
+check open/close adjustment: split ex-dates n 2659: median |log o(t)/c(t-1)| 0.0106, share > 20% 0.026; all rows median 0.0047, share > 20% 0.00131
+  AAPL around the 2014-06-09 7:1 split (adj close, raw close): 2014-06-06 23.056/645.57; 2014-06-09 23.425/93.70
+exits: close(t)->open(t+1) incl. ex-date dividend; close(t)->close(t+1) incl. dividend; costs charged on both sides every day (no netting of repeat names)
+  .. 1998-12 valid 475 mean leaders 3.30 (34s)
+  .. 1999-12 valid 426 mean leaders 1.06 (39s)
+  .. 2000-12 valid 481 mean leaders 2.50 (44s)
+  .. 2001-12 valid 491 mean leaders 1.67 (50s)
+  .. 2002-12 valid 497 mean leaders 1.89 (55s)
+  .. 2003-12 valid 499 mean leaders 1.23 (61s)
+  .. 2004-12 valid 491 mean leaders 1.27 (66s)
+  .. 2005-12 valid 498 mean leaders 1.49 (71s)
+  .. 2006-12 valid 489 mean leaders 0.70 (77s)
+  .. 2007-12 valid 491 mean leaders 2.37 (82s)
+  .. 2008-12 valid 490 mean leaders 8.16 (87s)
+  .. 2009-12 valid 495 mean leaders 1.33 (93s)
+  .. 2010-12 valid 496 mean leaders 1.95 (101s)
+  .. 2011-12 valid 498 mean leaders 3.09 (142s)
+  .. 2012-12 valid 495 mean leaders 1.37 (189s)
+  .. 2013-12 valid 497 mean leaders 1.45 (244s)
+  .. 2014-12 valid 494 mean leaders 1.92 (300s)
+  .. 2015-12 valid 495 mean leaders 2.65 (351s)
+  .. 2016-12 valid 498 mean leaders 2.53 (398s)
+  .. 2017-12 valid 496 mean leaders 1.62 (447s)
+  .. 2018-12 valid 495 mean leaders 1.12 (495s)
+  .. 2019-12 valid 487 mean leaders 2.87 (543s)
+  .. 2020-12 valid 490 mean leaders 8.03 (600s)
+
+months with betas 265; valid names per month median 494; avg leaders per name 2.37 (per name with >= 1 leader 3.08; share of names with >= 1 leader computed monthly)
+picks 110,900; exits filled from delisting price or 0 (no next bar) 37 (0.0334%)
+share of picks with day ret <= -8% (live night-leg overlap): all 0.0136; judge 0.0096
+days with < 20 picks: 0
+
+=== exit night (t close -> t+1 open); excess = picks - EW U_m same window; cost 2 sides/day
+  [1998-2010 DESCRIPTIVE (not judged)] n 3019  gross excess +10.48bp/day
+     net @2.5bp/side +5.48bp/day NW t 4.44 | @5bp/side +0.48bp NW t 0.39
+     ex-top-5 days +4.36bp  median day +0.54bp  hit 0.504
+  [JUDGE 2011-2020] n 2517  gross excess +0.30bp/day
+     net @2.5bp/side -4.70bp/day NW t -4.57 | @5bp/side -9.70bp NW t -9.44
+     ex-top-5 days -5.71bp  median day -4.20bp  hit 0.425
+     half 2011-15: -3.71bp NW t -3.21 n 1258
+     half 2016-20: -5.69bp NW t -3.35 n 1259
+     placebo (200 draws): actual -4.70bp vs placebo median -3.34bp, 95th -2.53bp -> percentile 3.0
+     gates: G1 net >= +15bp/day @2.5bp FAIL | G2 NW t >= 2 FAIL | G3 both halves > 0 FAIL | G4 ex-top-5 days > 0 FAIL | G5 > 0 @5bp/side FAIL | G6 placebo >= 95th FAIL
+     exit night: FAIL
+
+=== exit day (t close -> t+1 close); excess = picks - EW U_m same window; cost 2 sides/day
+  [1998-2010 DESCRIPTIVE (not judged)] n 3019  gross excess +11.53bp/day
+     net @2.5bp/side +6.53bp/day NW t 2.64 | @5bp/side +1.53bp NW t 0.62
+     ex-top-5 days +4.56bp  median day +3.62bp  hit 0.519
+  [JUDGE 2011-2020] n 2517  gross excess -0.64bp/day
+     net @2.5bp/side -5.64bp/day NW t -3.27 | @5bp/side -10.64bp NW t -6.16
+     ex-top-5 days -6.96bp  median day -6.64bp  hit 0.447
+     half 2011-15: -6.18bp NW t -3.06 n 1258
+     half 2016-20: -5.10bp NW t -1.82 n 1259
+     placebo (200 draws): actual -5.64bp vs placebo median -3.85bp, 95th -2.54bp -> percentile 4.0
+     gates: G1 net >= +15bp/day @2.5bp FAIL | G2 NW t >= 2 FAIL | G3 both halves > 0 FAIL | G4 ex-top-5 days > 0 FAIL | G5 > 0 @5bp/side FAIL | G6 placebo >= 95th FAIL
+     exit day: FAIL
+
+VERDICT E1 LEADLAG-D: FAIL (dead)  (night FAIL, day FAIL)
+runtime 600s
+
+Readings / deviations recorded after the run (no code or number changed):
+- Common stocks = nx.is_common (Domestic + ADR + Canadian "Common Stock", excl. warrant/preferred/unit); ETFs = SFP category "ETF"
+  only (ETN/ETD/CEF excluded); listed exchanges only (nx.LISTED). Month-end bar required (no bar -> not in U_m that month).
+- Dollar ADV = close*volume (= raw $ volume; Sharadar volume is split-adjusted, so closeunadj*volume would be wrong after splits).
+  20 bars ending at the month-end, inclusive. Price filter on closeunadj at the month-end.
+- Returns: SEP close is split- not dividend-adjusted; ACTIONS dividends (split-adjusted cash) added on ex-dates.
+- Regression: constant + r_B(t) + SPY r(t) controls; 249 (t,t+1) pairs in the 250-session window; a name needs >= 240 of 250
+  returns to be leader or follower (missing returns set to 0). Self pairs, SPY as a leader, and leaders collinear with B's controls
+  excluded. Leaders: t >= +3 only (negative-beta leaders with t <= -3 not used; literal reading). Names without leaders are not buyable.
+- Picks: strict top 20 by signal regardless of sign; missing r_A(t) contributes 0; exit with no next bar -> ACTIONS delisting price
+  (0 < v/c < 3) else 0 (37 of 110,900 picks). Benchmark EW U_m over names with that window's return. Costs 2 sides x cost every day,
+  no netting of repeat names (conservative for the close->close exit). G5 read as net > 0 at 5bp/side.
+- Placebo: 200 draws (none cut), judge months only; each B's leaders replaced by random valid names of the same count using their
+  own estimated betas; percentile = share of draws below the actual net excess.
