@@ -98,3 +98,4 @@ One line per file. Read a file when the task touches its subject; do not read al
 - `105-fly-brain-reservoir-b1-b2-kill-2026-11-20.md` (140 tok): FlyWire mushroom-body reservoir B1/B2 (N 1214-1215) KILL: ~0 alpha, wiring = random controls; connectome cached locally.
 - `106-rl-universes-d2-kill-2026-11-20.md` (130 tok): PPO on week winners / vol top / day losers / sectors (N 1219-1222) KILL vs EW slot baskets; week-winner basket -8bp/day seeded WEEKWIN-SHORT.
 - `107-weekwin-short-kill-2026-11-20.md` (110 tok): short top-10 5-day winners (N 1223-1224) KILL: gross +22bp/day pre-2005, decayed; net under borrow since.
+- `108-event-size-tilt-r3-kill-2026-11-20.md` (110 tok): ridge size tilts on PREF-EX/CEF-RV events (N 1230-1231) KILL: small real-looking tilts, placebo not beaten, money immaterial.

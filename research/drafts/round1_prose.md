@@ -10951,3 +10951,13 @@ in time within the fit period (50 draws) -> real Sharpe gain >= 95th pct; ex-top
   >= 95th, ex-top-5 events > 0. CEF-ML (N 1205-1207) killed Ridge/GBM RANKING and FILTER of CEF-RV; this is a continuous size tilt on
   the same class of features: if it fails it closes CEF-RV modelling entirely.
 Runners: research/sim/exp_legalloc.py (R1, R2), exp_nightpick.py (R4), exp_eventsize.py (R3). One run each. Program N = 1231.
+
+#### Result - R3-PREF (N 1230) / R3-CEF (N 1231) linear event sizing (judged 2026-11-20, one run, 200 placebo draws each): KILL both
+research/sim/exp_eventsize.py -> exp_eventsize_out.txt. PREF (CC, judge 2024-01..2026-10, 2,617 events): sized-minus-equal +2.44bp/event
+t 4.19, halves +2.5 / +2.4, ex-top-5 +2.1, but registered placebo A (training labels shuffled within date) 76th pct; yield dominates
+(the live yield-first order already does this); worth ~+$29/yr at $10k. CEF (judge 2016-26, 3,378 events): +26bp/event on a +440bp
+equal-size mean, t 4.15, halves +43.5 / +12.3 (decaying), placebo A 56th; 20d high-low range dominates (a vol tilt). Caveat recorded:
+placebo A is a weak null here (a within-date shuffle still teaches the cross-date feature-return link, e.g. yield), so the real tilts may
+be genuine; the verdict stands because the money is immaterial either way (PREF ~0.3%/yr; CEF a decaying +6% of the edge). Data gaps:
+cef_panel.parquet and the pref_cross cache are not on disk locally (used cef_stress_trades.csv = CEF-ML's trades, modelled pref costs).
+CEF-RV modelling is closed (ranking, filter, size tilt). Not tested: PREF-EX share/position caps by liquidity (an execution question).

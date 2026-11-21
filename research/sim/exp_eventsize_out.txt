@@ -1,0 +1,38 @@
+EXP round 3 R3-PREF (N 1230) / R3-CEF (N 1231): ridge per-event size tilt vs equal size. Pre-reg round1_prose.md 'EXP round 3'. sign: + = sizing beat equal size.
+
+== R3-PREF (N 1230): PREF-EX CC window (live form), cost 10bp RT auction / 20bp no-auction ==
+features: yld (div/prior close, bp), ldv (log Sharadar 20d median $vol, shifted), pband (median M-print band, 5 sessions before T-1, bp), ldiv (log $ dividend), dsl (days since previous ex-date), sector dummies fin/re/util
+fit:   2355 events / 371 entry dates (2021-01-07..2023-12-28)
+judge: 2617 events / 362 entry dates (2024-01-03..2026-10-01); dates with >= 2 events 263
+feature missing share (all rows): dsl 2%
+lambda 1000; ridge coefs (bp per fit sd of the feature): yld +11.6, ldv -2.2, pband -2.6, ldiv +4.1, dsl +3.9, s_fin -1.5, s_re -2.3, s_util -1.8
+size spread in judge: p5 0.63 p50 1.00 p95 1.39; corr(pred, r) judge +0.131
+equal-size judge mean net +4.3bp/event (date-EW +4.2bp), hit 0.53
+sized - equal: +2.44bp/event, date-mean +1.76bp/date, day-clustered t +4.19
+$ per entry date at $10k (5% of cross cap, whole shares): equal $0.54, sized $0.76, diff $+0.22 (x 132 dates/yr = $+29/yr)
+halves (split 2025-06-01): +2.49 (n 1381) / +2.39 (n 1236) bp/event
+ex-top-5 events: +2.12bp/event
+placebo A (fit labels shuffled within date, refit, 200): real at 76.5 pct (null p50 +2.26, p95 +2.57bp)
+placebo B (judge labels shuffled within date, 200): real at 100.0 pct (null p95 +0.71bp)
+gate: mean_pos ok, t_ge_2 ok, halves ok, placebo FAIL, ex_top5 ok -> FAIL
+[pref done 30s]
+
+== R3-CEF (N 1231): CEF-RV trades (frozen rule, Nasdaq NAV panel, cef_stress_trades.csv), net of 50bp RT ==
+features: yld, ladv, dz (CEF-ML builder, identical definitions), hl20 (20d median high-low range, bp; new), dsl (days since the fund's previous CEF-RV entry; new), category dummies (cef_peer.category, as CEF-ML; equity base)
+fit:   2008 events / 305 entry dates (2008-05-23..2015-11-20)
+judge: 3378 events / 465 entry dates (2016-01-15..2026-09-18); dates with >= 2 events 361
+feature missing share (all rows): dsl 6%
+lambda 0.1; ridge coefs (bp per fit sd of the feature): yld -4.4, ladv -29.0, hl20 +338.5, dz +6.4, dsl +79.4, c_muni +3.1, c_pref_conv +48.9, c_sector -61.6, c_taxable_fi -45.1, c_intl -53.6
+size spread in judge: p5 0.67 p50 0.99 p95 1.39; corr(pred, r) judge +0.374
+equal-size judge mean net +440.3bp/event (date-EW +273.6bp), hit 0.73
+sized - equal: +25.96bp/event, date-mean +14.70bp/date, day-clustered t +4.15
+$ per entry date at $10k (NOTIONAL: full $10k per entry date, overlapping holds and capacity ignored): diff $+14.70
+halves (split 2021-01-01): +43.50 (n 1478) / +12.31 (n 1900) bp/event
+ex-top-5 events: +22.76bp/event
+placebo A (fit labels shuffled within date, refit, 200): real at 56.0 pct (null p50 +24.37, p95 +32.83bp)
+placebo B (judge labels shuffled within date, 200): real at 100.0 pct (null p95 +4.09bp)
+gate: mean_pos ok, t_ge_2 ok, halves ok, placebo FAIL, ex_top5 ok -> FAIL
+
+VERDICT R3-PREF: FAIL -> KILL
+VERDICT R3-CEF: FAIL -> KILL
+runtime 40s
