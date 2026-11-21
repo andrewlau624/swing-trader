@@ -11375,3 +11375,19 @@ Common to all four:
     - placebo: the same score computed with a fake P drawn uniformly 20-120 sessions earlier, at the >= 95th percentile of 100 draws.
   - JUDGE 1999-2015 (halves 1999-2007 / 2008-15; data: NX caches + `~/data/sharadar` for continuity). REPORT 2016-2026-10, plus a descriptive count of the 2026-10 episode from Alpaca bars if available. DSR at N 1250.
   - Kill: MC fails, or any trading gate fails.
+
+### RESULT - N 1243 SIG (judge OOS 2003-10, read 2026-11-21): KILL
+- The chosen model is HGB on signature features, picked on 2003-06 (+10.9 vs ridge +7.4bp/wk):
+  - long-decile excess +12.1bp/wk net, t 2.32: FAIL on both counts;
+  - halves +10.9 / +13.3; ex-top-5 +5.2; 2x cost +5.3;
+  - **vs the snapshot model, -10.0bp/wk: FAIL**;
+  - LS +25.3 (t 2.88); turnover 1.37/wk.
+- The 4-feature snapshot model (ret5, ret20, vol20, beta60) beats all 118 signature terms under both models: HGB/snap +22.1bp/wk t 2.70, halves +15.4 / +28.7, ex-top-5 +11.8, 2x +13.9.
+- Signatures add nothing beyond short-term reversal and vol. Placebo and DSR are pending in the log and cannot reverse the kill.
+- Not tested: 60d sd scaling; rank/winsorized targets; depth 4 or log-signature; non-SPY reference paths; intraday or overnight-split channels; volume channel; hedged or short arms; signatures as a residual on the snapshot model.
+
+## Amendment - DEEP round 2d: the snapshot model that beat the signatures (pre-registered BEFORE the N 1243 report pass is read; N 1250 -> 1252)
+- The N 1243 report pass will print 2011-26 numbers for HGB/sig and HGB/snap; none had been read when this was written. The 2003-10 snapshot numbers HAVE been read, so 2003-10 cannot judge these.
+- **N 1251 SNAP-HGB:** the exact N 1243 pipeline with the 4 snapshot features (ret5, ret20, vol20, beta60), HGB as registered, expanding yearly refit. Long top decile, weekly, 5bp/side. JUDGE 2011-2026-10 (halves 2011-18 / 2019-26). Gates as N 1243 G1-G4 (>= +15bp/wk net, t >= 2.5, halves > 0, ex-top-5 > 0, 2x cost > 0), plus beta-matched excess (vs EW + (beta_port - 1) x SPY) > 0. DSR at N 1252.
+  - Prior: weekly reversal has decayed in the literature since ~2010. WEEKWIN-SHORT and the D2a rows touched 2011-20 for related rules.
+- **N 1252 SIG-RESID:** HGB on snapshot + signature features (122), same judge window and gates. It must also beat SNAP-HGB by >= +5bp/wk.
