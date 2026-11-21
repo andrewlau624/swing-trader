@@ -10961,3 +10961,23 @@ placebo A is a weak null here (a within-date shuffle still teaches the cross-dat
 be genuine; the verdict stands because the money is immaterial either way (PREF ~0.3%/yr; CEF a decaying +6% of the edge). Data gaps:
 cef_panel.parquet and the pref_cross cache are not on disk locally (used cef_stress_trades.csv = CEF-ML's trades, modelled pref costs).
 CEF-RV modelling is closed (ranking, filter, size tilt). Not tested: PREF-EX share/position caps by liquidity (an execution question).
+
+## Amendment - FT round: fine-tune an existing open model on the night leg (user 2026-11-20: "you can also fine tune existing models"; pre-register before any outcome; N 1231 -> 1233)
+Model: Kronos-small (open weights, a decoder-only model pretrained on multi-exchange OHLCV K-lines; github shiyu-coder/Kronos, HF
+NeoQuasar/Kronos-small + Kronos-Tokenizer-base). Contamination rule: the pretraining corpus may cover any date before the release, so the
+**JUDGE window = night picks dated 2025-09-01..2026-09-30** (after the public release; if the release notes give a later data end, the
+judge starts the month after it, and the report says which). This is the only clean window; it is ~13 months.
+Task: for every live night pick on decision day t (`sel_night_names_primary.parquet`, rule 'current'; bars from the Sharadar store
+~/data/sharadar/stocks.parquet, split-adjusted, regular-hours daily OHLCV), input = the last 64 daily bars through t's close (the live
+version would use the 15:40 bar for t; the ~20-minute look-ahead on t's last bar is stated, not fixed), output = forecast of t+1's OPEN
+(mean of 10 samples, temperature per the repo default) -> f = forecast open / t close - 1. Within-night tilt w = clip(1 + 0.5 z(f), 0.5,
+1.5), z within the night, renormalised; increment = sum (w-1) r / n per night (r = the pick's close->open return).
+- **N 1232 FT-ZS:** zero-shot Kronos-small.
+- **N 1233 FT-NIGHT:** Kronos-small fine-tuned (the repo's own fine-tuning recipe, predictor only, tokenizer frozen) on windows ending at
+  every day with day return <= -5% for $5+/ADV $10M+ common stocks, 2003-01..2022-12 (target = the next bar); early stopping on
+  2023-01..2024-12 windows; no judge-window data in any training or stopping step.
+Gates (both, as Study BA): judge increment > 0 in both halves (2025-09..2026-02 / 2026-03..2026-09), NW t >= 2, sign-flip and within-night
+shuffle placebos >= 95th pct. Also report 2023-24 (FT-NIGHT's validation; FT-ZS possibly contaminated there) and the rank IC of f vs r.
+Known priors: snapshot/sequence/minute-path night ranking is dead (PATTERN/SEQ/MINPATH-NIGHT); published zero-shot direction accuracy
+~51% (NEXT.md row "Zero-shot TS foundation models": not run for power). A pass is a tilt (~1-3pp/yr ceiling) unless the increment is
+large. The repo's code is downloaded into its own directory and read before it runs. Runner research/sim/exp_kronos.py. Program N = 1233.
