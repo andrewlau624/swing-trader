@@ -11419,3 +11419,22 @@ Common to all four:
   - AL's exact published volume rule;
   - a same-day MOC fill from a 15:50 signal (cache being built for 2016-26; ceiling looks marginal given the W2 gross);
   - sector-ETF factors; longer holds.
+
+## Amendment - DEEP round 3a: move the PCA residual signal to where costs are ~0 (pre-registered before any outcome; N 1252 -> 1253)
+- Why: N 1242/1248/1249 show real gross information in the AL s-score (placebo 100th percentile), killed by 5bp/side x high turnover. The live night leg trades the 16:00 / 09:30 auctions at a measured cost of about 0bp. The open question is whether the s-score's reversion shows up in the overnight hold.
+- **N 1253 PCA-NIGHT:**
+  - s-score as N 1242 base (top 1,000 ADV, Marchenko-Pastur factors refit every 5 sessions, 60d OU), computed from closes through T-1.
+  - At close T, buy the 20 most negative s (s < -1.25 required, fewer if not available), equal weight. Sell at the open of T+1. Every night is a fresh selection.
+  - Costs: the NX tier model (`nx.cost_model`, tier_hi primary, 2x tier_hi shock). Delistings as NX.
+  - Benchmark: the EW eligible top-1,000 overnight return (close T -> open T+1) on the same night. Excess = book - EW.
+  - JUDGE 2003-2015 (halves 2003-09 / 2010-15; NX touched these years for the live night rule, never for this rule).
+  - Gates:
+    - net excess at tier_hi >= +5bp/night; NW t >= 2.5;
+    - both halves > 0; 2x tier_hi > 0; ex-top-5 nights > 0;
+    - within-date shuffle placebo (50 draws, net) at the >= 95th percentile.
+  - Report:
+    - the absolute net return/night; daily corr with the NX live-rule night series (independence);
+    - the untradable diagnostic (s through close T);
+    - REPORT 2016-2026-10 from `~/data/sharadar`; DSR at N 1253.
+  - Ceiling: daily x 100% x 5bp = ~12%/yr at $10k (20 names x $500 is fine for whole shares).
+  - Kill: any gate fails.
