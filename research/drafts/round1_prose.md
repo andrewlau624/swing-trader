@@ -10855,3 +10855,11 @@ uniform (SPY .16-.27 / QQQ .22 / TLT .21 / XLU .18 / cash .17) with 0.77/day tur
 (+1.4..+2.2bp on 3 seeds), from the ~18% cash in 2022, not timing. So this kills PPO-default on 20d returns over 5 assets; it says little
 about RL as a class. Not tested: entropy-regularised or longer training, reward shaping (Sharpe/drawdown), richer observations (vol,
 IBS, macro), discrete action sets, reservoir (fly) states as the observation, offline RL.
+
+#### Result - A1 RFF-TIME (N 1212) / A2 RFF-ROT (N 1213) (judged 2026-11-20, one run, 200 placebo draws): KILL both (all 6 gates)
+research/sim/exp_rff.py -> exp_rff_out.txt. A1 seed 0 judge 2011-20: alpha -0.57bp/day t -0.39, Sharpe 0.61 vs SPY 0.84, placebo 51st
+pct, DSR .09; seeds 1-4 -1.22 / -0.56 / +0.63 / -1.06 (0/5 pass). A2 vs EW 8-ETF: +0.26bp t 0.20, Sharpe 0.71 vs 0.84, placebo 68th,
+3bp shock t -1.8. REPORT 2021-26 worse (A1 -4.1bp t -2.4, A2 -3.7). Diagnostic: the fit-period split picked lambda at or next to the
+top of the frozen grid (1e5) for every model: validation error fell monotonically with shrinkage, i.e. 6,000 random daily price-window
+features carry no predictable signal for next-day ETF returns even in-sample. Not tested: the published Kelly-Malamud-Zhou setup itself
+(MONTHLY horizon, Welch-Goyal macro predictors), cross-sectional stock RFF, horizons of 5-20 days, other gamma.

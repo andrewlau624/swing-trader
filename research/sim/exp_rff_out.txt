@@ -1,0 +1,81 @@
+EXP round A1 RFF-TIME (N 1212) / A2 RFF-ROT (N 1213) -- pre-reg round1_prose.md 'Amendment - EXP round'; program N 1218
+P_base 400, RFF 6000 (gamma 2.0), lambda grid 0.1, 0.316228, 1, 3.16228, 10, 31.6228, 100, 316.228, 1000, 3162.28, 10000, 31622.8, 100000, refit every 21, cost 1bp/side (shock 3), placebo 200 circular shifts U{250..2000}, NW lags 5
+Alpaca vs Sharadar-TR overlap 2016-2020: n 10056, median |ret diff| 1.05bp, mean 2.85bp, share >5bp 0.097
+panel 6075 sessions 2002-07-30..2026-09-21 (Sharadar TR to 2020-12-31, Alpaca after)
+  seed 0: rows 5937 from 2003-02-14, lambda-split train 1480 val 503, refits 213 (eig 0), 1150s; base stats [94, 107, 92, 107] assets [54, 36, 42, 47, 54, 51, 56, 60]
+    lambda chosen (true labels): SPY 100000, QQQ 100000, IWM 100000, TLT 31622.8, XLK 100000, XLF 100000, XLE 100000, XLU 100000
+  seed 1: rows 5935 from 2003-02-19, lambda-split train 1478 val 503, refits 213 (eig 0), 434s; base stats [101, 90, 82, 127] assets [41, 45, 53, 56, 43, 46, 65, 51]
+    lambda chosen (true labels): SPY 31622.8
+  seed 2: rows 5936 from 2003-02-18, lambda-split train 1479 val 503, refits 213 (eig 0), 341s; base stats [100, 95, 117, 88] assets [57, 38, 40, 56, 58, 49, 51, 51]
+    lambda chosen (true labels): SPY 100000
+  seed 3: rows 5940 from 2003-02-11, lambda-split train 1483 val 503, refits 213 (eig 0), 333s; base stats [100, 106, 103, 91] assets [45, 55, 50, 49, 53, 55, 46, 47]
+    lambda chosen (true labels): SPY 100000
+  seed 4: rows 5936 from 2003-02-18, lambda-split train 1479 val 503, refits 213 (eig 0), 330s; base stats [114, 98, 96, 92] assets [49, 45, 49, 44, 51, 54, 46, 62]
+    lambda chosen (true labels): SPY 31622.8
+
+=== A1 RFF-TIME (position = clip(1 + f/sd(f_fit), 0, 1.5), SPY; judged vs SPY) ===
+ seed 0 (sd(f_fit) 2.10e-04, lambda 100000)
+  A1 seed 0: judge alpha vs SPY -0.57bp/day NW t -0.39 (beta 0.89); halves 2011-15 -1.36 / 2016-20 +0.24bp
+    net Sharpe 0.61 vs SPY 0.84 (diff -0.23); CAGR +10.1%; 3bp/side alpha -1.90bp t -1.29; ex-top-5 alpha -1.05bp
+    median day -0.41bp, hit 43.8%, maxDD -29.2% (SPY -33.7%), mean exposure 0.87, DSR(N 1218) 0.087; placebo pct 51.5 (p95 +1.84bp, n 200)
+    gates: G1 alpha>0 & t>=2 FAIL; G2 both halves>0 FAIL; G3 dSharpe>=+0.20 FAIL; G4 3bp/side (alpha>0 & t>=2) FAIL; G5 placebo>=95th FAIL; G6 ex-top-5>0 FAIL
+ seed 1 (sd(f_fit) 6.30e-04, lambda 31622.8)
+  A1 seed 1: judge alpha vs SPY -1.22bp/day NW t -0.98 (beta 0.91); halves 2011-15 -0.14 / 2016-20 -2.31bp
+    net Sharpe 0.53 vs SPY 0.84 (diff -0.30); CAGR +8.6%; 3bp/side alpha -2.55bp t -2.04; ex-top-5 alpha -1.66bp
+    median day -0.42bp, hit 44.0%, maxDD -37.1% (SPY -33.7%), mean exposure 0.88, DSR(N 1218) 0.059; placebo n/a
+    gates: G1 alpha>0 & t>=2 FAIL; G2 both halves>0 FAIL; G3 dSharpe>=+0.20 FAIL; G4 3bp/side (alpha>0 & t>=2) FAIL; G5 placebo>=95th n/a; G6 ex-top-5>0 FAIL
+ seed 2 (sd(f_fit) 2.12e-04, lambda 100000)
+  A1 seed 2: judge alpha vs SPY -0.56bp/day NW t -0.47 (beta 0.88); halves 2011-15 +0.74 / 2016-20 -1.86bp
+    net Sharpe 0.62 vs SPY 0.84 (diff -0.22); CAGR +10.0%; 3bp/side alpha -1.91bp t -1.59; ex-top-5 alpha -1.11bp
+    median day -0.40bp, hit 42.9%, maxDD -36.2% (SPY -33.7%), mean exposure 0.85, DSR(N 1218) 0.090; placebo n/a
+    gates: G1 alpha>0 & t>=2 FAIL; G2 both halves>0 FAIL; G3 dSharpe>=+0.20 FAIL; G4 3bp/side (alpha>0 & t>=2) FAIL; G5 placebo>=95th n/a; G6 ex-top-5>0 FAIL
+ seed 3 (sd(f_fit) 2.08e-04, lambda 100000)
+  A1 seed 3: judge alpha vs SPY +0.63bp/day NW t +0.48 (beta 0.85); halves 2011-15 +1.84 / 2016-20 -0.59bp
+    net Sharpe 0.78 vs SPY 0.84 (diff -0.06); CAGR +13.0%; 3bp/side alpha -0.74bp t -0.56; ex-top-5 alpha +0.17bp
+    median day -0.54bp, hit 42.8%, maxDD -26.4% (SPY -33.7%), mean exposure 0.87, DSR(N 1218) 0.201; placebo n/a
+    gates: G1 alpha>0 & t>=2 FAIL; G2 both halves>0 FAIL; G3 dSharpe>=+0.20 FAIL; G4 3bp/side (alpha>0 & t>=2) FAIL; G5 placebo>=95th n/a; G6 ex-top-5>0 PASS
+ seed 4 (sd(f_fit) 6.20e-04, lambda 31622.8)
+  A1 seed 4: judge alpha vs SPY -1.06bp/day NW t -0.76 (beta 0.80); halves 2011-15 -1.66 / 2016-20 -0.53bp
+    net Sharpe 0.51 vs SPY 0.84 (diff -0.33); CAGR +7.6%; 3bp/side alpha -2.39bp t -1.70; ex-top-5 alpha -1.44bp
+    median day -0.37bp, hit 43.1%, maxDD -37.3% (SPY -33.7%), mean exposure 0.87, DSR(N 1218) 0.045; placebo n/a
+    gates: G1 alpha>0 & t>=2 FAIL; G2 both halves>0 FAIL; G3 dSharpe>=+0.20 FAIL; G4 3bp/side (alpha>0 & t>=2) FAIL; G5 placebo>=95th n/a; G6 ex-top-5>0 FAIL
+
+=== A2 RFF-ROT (top-2 of 8 by ridge forecast, EW, 1.0x; judged vs EW 8-ETF basket) ===
+  A2 seed 0: judge alpha vs EW8 +0.26bp/day NW t +0.20 (beta 0.89); halves 2011-15 -0.76 / 2016-20 +1.22bp
+    net Sharpe 0.71 vs EW8 0.84 (diff -0.13); CAGR +11.3%; 3bp/side alpha -2.30bp t -1.81; ex-top-5 alpha -0.06bp
+    median day +6.95bp, hit 54.0%, maxDD -27.6% (EW8 -33.1%), mean exposure 1.00, DSR(N 1218) 0.146; placebo pct 68.0 (p95 +1.62bp, n 200)
+    gates: G1 alpha>0 & t>=2 FAIL; G2 both halves>0 FAIL; G3 dSharpe>=+0.20 FAIL; G4 3bp/side (alpha>0 & t>=2) FAIL; G5 placebo>=95th FAIL; G6 ex-top-5>0 FAIL
+    mean daily turnover 1.28; share of days holding each ETF: SPY 1%, QQQ 42%, IWM 25%, TLT 34%, XLK 16%, XLF 7%, XLE 42%, XLU 33%
+    (A2 seeds 1-4 not run: spec states the seed rule for A1 only; A2 is gated on seed 0)
+
+=== VERDICTS ===
+A1 RFF-TIME (N 1212): seed 0 gates 1-6 not all pass; seeds passing gates 1-3: 0/5 (none) -> FAIL
+A2 RFF-ROT (N 1213): gates 1-6 not all pass -> FAIL
+
+=== REPORT 2021-01..2026-09-21 (Alpaca, descriptive, not judged; walk-forward continues, hyperparameters frozen) ===
+  A1 seed 0: alpha vs SPY -4.13bp/day t -2.35; Sharpe 0.14 vs SPY 0.93; 3bp alpha -5.52bp; maxDD -39.1% (SPY -24.5%); exposure 0.84; n 1435
+  A1 seed 1: alpha vs SPY -1.41bp/day t -0.72; Sharpe 0.53 vs SPY 0.93; 3bp alpha -2.77bp; maxDD -38.1% (SPY -24.5%); exposure 0.87; n 1435
+  A1 seed 2: alpha vs SPY -3.14bp/day t -1.82; Sharpe 0.38 vs SPY 0.93; 3bp alpha -4.50bp; maxDD -33.3% (SPY -24.5%); exposure 0.88; n 1435
+  A1 seed 3: alpha vs SPY -0.76bp/day t -0.39; Sharpe 0.63 vs SPY 0.93; 3bp alpha -2.16bp; maxDD -31.2% (SPY -24.5%); exposure 0.83; n 1435
+  A1 seed 4: alpha vs SPY +1.85bp/day t +1.04; Sharpe 1.01 vs SPY 0.93; 3bp alpha +0.46bp; maxDD -23.6% (SPY -24.5%); exposure 0.83; n 1435
+  A2 seed 0: alpha vs EW8 -3.66bp/day t -1.97; Sharpe 0.26 vs EW8 0.95; 3bp alpha -6.22bp; maxDD -30.7% (EW8 -19.1%); n 1435
+
+=== Implementation choices (spec ambiguities, conservative / stated before reading any judge number) ===
+ - Data: Sharadar SFP 'close' here is split-adjusted but NOT dividend-adjusted (close == closeunadj after the last split); a total-return close was built by adding cache_ACTIONS dividends on the ex-date (dividend assumed split-adjusted), O/H/L scaled by the same factor. Alpaca etf_daily is split+dividend-adjusted; 2021+ is chained from its close-to-close returns.
+ - FIT nominally starts 2002-08; the first row with all 400 base features defined is ~140 sessions after TLT's 2002-07-30 listing.
+ - 'max drawdown from window high' = log(close at window end / max close in window). 'mean IBS' = mean over the L+1 sessions [t-o-L, t-o]; realised vol = std (ddof 0) of the L daily log returns in the window.
+ - Ridge: unpenalised intercept (training-mean centering of features and labels), penalty lambda*||b||^2, kernel form. f = forecast minus the training-label mean (the timing signal around 1x); sd(f_fit) = sd of walk-forward out-of-sample f over 2009-01..2010-12 (refit every 21 sessions, inside the fit period). A2 ranks the full forecast (intercept + f).
+ - Lambda: one split, train = rows whose target is realised by 2008-12-31, validate = 2009-01..2010-12 rows (target realised by 2010-12-31), minimum validation MSE (ties -> larger lambda); A2 picks lambda per ETF model the same way.
+ - Walk-forward: refits at the first 2009 row and every 21 rows; a refit at row tau trains on rows < tau (last label realised at tau's close). Hyperparameters never change after the split.
+ - Placebo: the label vector (all 8 ETFs together for A2) is circularly shifted by k~U{250..2000} over the whole training segment (rows whose target is realised by 2020-12-31), and the entire pipeline (lambda, sd(f_fit), walk-forward) is rerun; P&L uses true returns. 200 draws, rng seed 12345; seed-0 features. Gate 5 compares judge alpha with the placebo alphas.
+ - Costs: c x |position change| per day (A2: sum of |weight changes|; intraday drift of weights ignored). P&L dated at t+1.
+ - Gate 4 read as gate 1 at 3bp/side (alpha > 0 AND NW t >= 2). NW lags 5 on the HAC OLS of strategy net on benchmark.
+ - Seeds: rng(seed) draws base features then the RFF matrix. A2 gated on seed 0 only (the 3-of-5 rule is stated for A1).
+ - REPORT ends at the last Alpaca session on disk, not 2026-10.
+
+runtime 2590s
+
+Post-run note (no rule changed): the fit-period split chose lambda at or one step below the top of the pre-registered grid
+(1e5 / 3.16e4) for every model and seed, i.e. validation MSE kept falling toward heavier shrinkage; the timing signal is a
+heavily shrunk forecast rescaled by sd(f_fit). Grid not extended (frozen). All placebo draws also chose <= 4 distinct lambdas
+per refit, so every refit used Cholesky per lambda (no eigendecomposition). Runtime 2590s.
