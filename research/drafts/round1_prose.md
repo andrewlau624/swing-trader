@@ -11147,3 +11147,31 @@ These are siblings from the A1/A2 row's `not tested:` field: the published month
   - exhibits other than EX-99;
   - OTC and sub-$1 names;
   - pre-2019.
+
+## Amendment - EXP round 6: two structural siblings from the ideation scan (autonomous loop 2026-11-21; pre-registered before any outcome; N 1239 -> 1241)
+- **N 1240 PREF-SIB (same-issuer preferred/baby-bond sibling dislocation):**
+  - Universe: Sharadar SEP/SFP preferreds and exchange-traded debt with 2+ live series per issuer, ADV20 >= $100k.
+  - Signal at close T: the series' 5-session total return (price + dividends) minus the median of its same-issuer siblings over the same 5 sessions. z = that residual / its own trailing 60-session sd. Fire when z <= -2.
+  - Trade: buy the close at T+1, sell the close at T+6.
+  - Exclusions:
+    - the series' own ex-dates T-1..T+2 (and any ex-date inside the hold for the residual);
+    - price > $25.75 (call-pinned);
+    - issuers with siblings of different seniority, where Sharadar descriptions allow the distinction (baby bonds vs preferreds kept as separate sibling groups).
+  - Cost: 10bp/side, shock 2x.
+  - J1 JUDGE 2015-01..2020-12 on daily closes, halves 2015-17 / 2018-20.
+  - Gates: net >= +40bp per trade; 2x cost > 0; median > 0; day-clustered t >= 2.5; both halves > 0; ex-top-5 issuers > 0.
+  - Controls: the mirror (z >= +2) mean must be lower, and a 30-session-shifted-signal placebo mean must be lower.
+  - Report: March 2020 in and out, an ETD-only arm, DSR at N 1241.
+  - J3 (only if J1 passes): official close crosses 2021-26 (auction_fetch), net >= +30bp.
+  - Kill: J1 fails any gate, or J3 < +30bp.
+  - Ceiling: about 50 rotations/yr at $10k; clears +8pp only at >= +40bp net.
+  - Prior: PRV (N 873) found universe-relative pref reversal = bid-ask bounce. The T+1 entry and the sibling anchor are the differences.
+- **N 1241 SEO-QP (follow-on offering quiet-period run-up; sibling of QP-RUNUP, memory 95):**
+  - Events: SEOs (424B4/424B5 for common stock of US-listed operating companies, $5+, ADV $10M+), pricing date P from EDGAR filing date.
+  - FIRST verify the rule history from primary sources (NASD 2711 / FINRA 2241 secondary-offering quiet periods: lengths and effective dates). If the pre-2016 secondary quiet period was not about 10 days, the regime-swap placebo is invalid: report it, and judge only the main window.
+  - Rule: x = first session >= P + Q calendar days (Q = the quiet period in force). Buy the close at x-3, sell the close at x-1.
+  - JUDGE 2003-2015 (Q = the pre-2241 length). Placebo: the P+3 window in 2003-15 should be about 0 (t < 1). REPORT 2016-26 at Q = 3 (touched by G31's all-events arm).
+  - Cost 5bp/side.
+  - Gates: net >= +20bp; median > 0; date-clustered t >= 2.5; both halves (2003-09 / 2010-15) > 0; ex-top-5 > 0; placebo t < 1; DSR at N 1241.
+  - Ceiling: 230-300 events/yr x 33% x 50% capture; clears only at >= +20bp net.
+- Program N = 1241.
