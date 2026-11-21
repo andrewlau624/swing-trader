@@ -10823,3 +10823,20 @@ turnover (live ETF close cross ~0bp, n 657), shock 3bp/side. Long-only, gross ex
   construction (training-data contamination). Built after A/B/D/E; needs the user's OK to deploy.
 Runners `research/sim/exp_rff.py` (A), `exp_flyres.py` (B), `exp_rl.py` (D), `exp_leadlag.py` (E) -> `*_out.txt`. One run each; no tuning
 after a judge-period number is printed. Program N = 1218.
+
+## Amendment - EXP round 2: the RL agent on other markets (user 2026-11-20: "top 10 stocks of the week, most volatile/liquid of the day, whatever has a pattern the neuron can leverage"; pre-register before any outcome; N 1218 -> 1222)
+
+Same PPO as D1 (exp_rl.py's agent, defaults, 5 seeds, fit-period training only, frozen policy judged 2011-20; Sharadar SEP+SFP,
+point-in-time, delisted names kept). Each universe is a daily list of K = 10 SLOTS ranked by the selection rule at t's close; the agent
+outputs softmax weights over the 10 slots + cash (long-only, gross <= 1), observation = per-slot [last 5 daily returns, 20d vol, IBS,
+day return, rank] + current weights, reward = net log return t close -> t+1 close after turnover cost. **Benchmark for gates 1-6 = the
+equal-weight 10-slot basket of the same universe** (the agent must add value over just holding the universe), and also reported vs
+SPY. Universe filter for stocks: price >= $5, 20d ADV >= $10M. Costs: ETFs 1bp/side, stocks 2.5bp/side (shock 5), D2c 5bp/side (shock 10).
+PASS = D1's rule (>= 4/5 seeds on gates 1-3, seed-median policy on 4-6, shifted-label placebo).
+- **D2a RL-WEEKTOP (N 1219):** the 10 stocks with the highest trailing 5-session return (weekly winners).
+- **D2b RL-VOLTOP (N 1220):** the 10 stocks with the highest 20d realised vol among the top 500 by ADV (most volatile liquid names).
+- **D2c RL-LOSERS (N 1221):** the 10 biggest day-t losers among the top 1000 by ADV (the night-leg pool shape; overlap with the live
+  rule reported; close->close here, not close->open, so it is not the night leg).
+- **D2d RL-SECTORS (N 1222):** the 9 original SPDR sector ETFs (XLB XLE XLF XLI XLK XLP XLU XLV XLY) + SPY as 10 fixed slots.
+Not tested here: fly-reservoir states as the RL observation (B x D), intraday horizons, shorting. Runner `research/sim/exp_rl_universe.py`
+-> `exp_rl_universe_out.txt`. Program N = 1222.
