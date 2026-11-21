@@ -15,3 +15,4 @@ Origin: the user asked "look at stocks that went up in the 2026-10/11 selloff" a
   - Audit: GAP-NIGHT N 1050 -> KILL as registered; QP-RUNUP weaker (book +4.8%/yr); EXDATE stands; live code clean.
   - Use close*volume. Helpers are fixed.
 - Not tested: thin names on official crosses forward; non-US equity cross-sections; intraday-bar paths; s as a tilt inside existing legs; event-conditioned versions.
+- THIN-AUC (official crosses 2016-26): thin per-$ = live per-$ (+33 vs +34bp), so the thin branch is closed. **Sharadar daily OPEN overstates night exits ~6.5bp/trade vs the official opening cross** (close is exact); NX's 2003-15 +3.07bp/night is an upper bound. Live fills remain the judge.

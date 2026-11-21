@@ -11577,3 +11577,19 @@ Common to all four:
 - Every other affected study is a KILL that the fix can only weaken. The exceptions are the shorts (weekwin_short, night_short_mirror), which are far from passing.
 - Helpers fixed in this commit: `exp_rl_universe._features`, `exp_tail._read`, and `exp_pcasa.load_panel` (default `adv_adj=True`). Recorded `_out.txt` files from before this commit used the old form.
 - Possible second bug, not verified: `letf_rev` uses `closeunadj / prev closeunadj` for day returns, which would show a false drop on split ex-days.
+
+### REPORT - THIN-AUC: N 1256 thin vs live band on official Alpaca crosses, 2016-2026-10 (descriptive, 2026-11-21)
+- Coverage: both crosses found for 90% (thin) / 92% (live) of trades.
+- Per-$ gross on crosses: thin +33.4bp (t 2.74) vs live +34.0bp (t 3.16). **Thin adds no per-dollar edge**, only capacity, which is not binding at $10-25k. The thin branch is closed.
+- At 10bp/side, thin is +13bp per trade (t 1.1); live leg is +5.5bp/night (t 2.3).
+- **Side finding that matters for NX:**
+  - Sharadar's close equals the official closing cross: median gap 0, > 1bp in 0.5-1.3% of trades.
+  - **Sharadar's OPEN is not the opening cross:** 25% of live-band exits differ by > 1bp; p90 +28 to +54bp; mostly ABOVE the cross.
+  - On the same trades, Sharadar overstates the night return by about **6.5bp per trade** (live +43.2 -> +36.8 on crosses). At NX weights that is roughly 1-2bp/night at book level.
+  - If the same bias held in 2003-15 (unknowable: SIP auction data starts in 2016), the NX judge result (+3.07bp/night at tier) is overstated by a similar amount, leaving the historical night-leg validation marginal.
+  - The 2016-26 live band on crosses at 5bp/side is still +8.2bp/night (t 3.4).
+  - The live leg is judged on live fills, which match the cross (582 fills, ~0bp). So this changes the historical prior, not the forward evidence.
+- Caveats:
+  - Missing-cross thin trades are the best on Sharadar (+70.9bp, n 734), possibly untradable.
+  - Sharadar digit-suffixed tickers were mapped to their stem.
+- Not tested: whether the open gap depends on the day's return (dip picks); limit-priced auction orders; NX 2003-15 on crosses (no data).

@@ -1,0 +1,46 @@
+THIN-AUC (descriptive, NOT a gate): N 1256 thin [$2M,$10M) and live [$10M,inf) night trades on official crosses, 2016-01-01..2026-10-05; entry T closing cross, exit T+1 opening cross (Alpaca SIP auctions; pref_noauc.day_table parsing)
+
+=== thin band: 7493 trades on 2041 nights
+  coverage: both crosses 90.2% (close cross 90.3%, open cross 90.7%); official '6' closing print 99.6% of closes found; non-open NX outcomes 1
+  selection check: Sharadar gross on covered +39.4bp vs uncovered +70.9bp (n 734); uncovered median ADV $4.6M vs covered $4.7M
+  Sharadar vs cross by ADV ($M):
+           2-4: n  2749 | entry gap med   +0.0bp mean|.|    9.2 p90|.|    0.0 | exit gap med   +0.0 mean|.|   23.7 p90|.|    0.0 | gross Sharadar  +43.9 cross  +35.3bp
+           4-7: n  2467 | entry gap med   +0.0bp mean|.|   45.2 p90|.|    0.0 | exit gap med   +0.0 mean|.|   55.7 p90|.|    0.0 | gross Sharadar  +52.7 cross  +47.2bp
+          7-10: n  1542 | entry gap med   +0.0bp mean|.|   39.4 p90|.|    0.0 | exit gap med   +0.0 mean|.|   50.0 p90|.|   11.3 | gross Sharadar  +10.1 cross   +5.6bp
+  Sharadar vs cross by price ($):
+          0-10: n  3511 | entry gap med   +0.0bp mean|.|   41.5 p90|.|    0.0 | exit gap med   +0.0 mean|.|   56.4 p90|.|   17.4 | gross Sharadar  +38.7 cross  +29.4bp
+         10-20: n  2183 | entry gap med   +0.0bp mean|.|   16.3 p90|.|    0.0 | exit gap med   +0.0 mean|.|   25.7 p90|.|    0.0 | gross Sharadar  +37.4 cross  +33.4bp
+        20-inf: n  1064 | entry gap med   +0.0bp mean|.|   15.3 p90|.|    0.0 | exit gap med   +0.0 mean|.|   23.9 p90|.|    0.0 | gross Sharadar  +46.0 cross  +43.1bp
+  entry gap tails: |gap|>1bp 1.3%, >25bp 1.0%, >100bp 0.7%, >500bp 0.36%
+  exit gap tails: |gap|>1bp 9.5%, >25bp 7.7%, >100bp 4.7%, >500bp 0.68%
+  trimmed (both |gaps| <= 500bp, n 6707): gross on crosses +31.3bp vs Sharadar +35.9; the 51 dropped trades: crosses +242 Sharadar +496bp
+  per trade (covered, n 6758): gross on crosses mean +32.9bp median +17.8 hit 0.55; Sharadar same trades mean +39.4 median +20.1
+  at  0bp/side: per trade mean  +32.9bp med  +17.8 | per $ deployed (traded nights)  +33.4bp t +2.74 | leg/night (NX weights, all 2418 nights) +5.89bp t +3.28 ex-top5 +4.35
+  at  5bp/side: per trade mean  +22.9bp med   +7.8 | per $ deployed (traded nights)  +23.4bp t +1.92 | leg/night (NX weights, all 2418 nights) +3.74bp t +2.09 ex-top5 +2.20
+  at 10bp/side: per trade mean  +12.9bp med   -2.2 | per $ deployed (traded nights)  +13.4bp t +1.10 | leg/night (NX weights, all 2418 nights) +1.59bp t +0.89 ex-top5 +0.06
+  per-trade gross on crosses by year: 16:+2 17:+60 18:-2 19:+27 20:+67 21:+46 22:+17 23:+18 24:+52 25:+19 26:+28
+
+=== live band: 10740 trades on 2106 nights
+  coverage: both crosses 92.3% (close cross 92.3%, open cross 92.4%); official '6' closing print 99.9% of closes found; non-open NX outcomes 1
+  selection check: Sharadar gross on covered +43.2bp vs uncovered +30.1bp (n 824); uncovered median ADV $30.2M vs covered $38.4M
+  Sharadar vs cross by ADV ($M):
+         10-50: n  5782 | entry gap med   +0.0bp mean|.|   58.8 p90|.|    0.0 | exit gap med   +0.0 mean|.|   73.4 p90|.|   28.0 | gross Sharadar  +41.6 cross  +35.7bp
+        50-inf: n  4133 | entry gap med   +0.0bp mean|.|    9.4 p90|.|    0.0 | exit gap med   +0.0 mean|.|   30.3 p90|.|   53.7 | gross Sharadar  +45.4 cross  +38.3bp
+  Sharadar vs cross by price ($):
+          0-10: n  3074 | entry gap med   +0.0bp mean|.|   30.9 p90|.|    0.0 | exit gap med   +0.0 mean|.|   50.7 p90|.|   48.1 | gross Sharadar  +42.7 cross  +35.6bp
+         10-20: n  2924 | entry gap med   +0.0bp mean|.|   90.1 p90|.|    0.0 | exit gap med   +0.0 mean|.|  107.8 p90|.|   48.2 | gross Sharadar  +45.3 cross  +39.1bp
+        20-inf: n  3917 | entry gap med   +0.0bp mean|.|    5.2 p90|.|    0.0 | exit gap med   +0.0 mean|.|   20.1 p90|.|   35.6 | gross Sharadar  +42.0 cross  +36.0bp
+  entry gap tails: |gap|>1bp 0.5%, >25bp 0.3%, >100bp 0.3%, >500bp 0.20%
+  exit gap tails: |gap|>1bp 25.0%, >25bp 14.5%, >100bp 4.1%, >500bp 0.42%
+  trimmed (both |gaps| <= 500bp, n 9872): gross on crosses +39.7bp vs Sharadar +43.6; the 43 dropped trades: crosses -626 Sharadar -63bp
+  per trade (covered, n 9915): gross on crosses mean +36.8bp median +30.9 hit 0.56; Sharadar same trades mean +43.2 median +35.7
+  at  0bp/side: per trade mean  +36.8bp med  +30.9 | per $ deployed (traded nights)  +34.0bp t +3.16 | leg/night (NX weights, all 2418 nights) +10.86bp t +4.56 ex-top5 +9.13
+  at  5bp/side: per trade mean  +26.8bp med  +20.9 | per $ deployed (traded nights)  +24.0bp t +2.23 | leg/night (NX weights, all 2418 nights) +8.19bp t +3.44 ex-top5 +6.46
+  at 10bp/side: per trade mean  +16.8bp med  +10.9 | per $ deployed (traded nights)  +14.0bp t +1.30 | leg/night (NX weights, all 2418 nights) +5.51bp t +2.32 ex-top5 +3.79
+  per-trade gross on crosses by year: 16:+17 17:+21 18:-12 19:+56 20:+78 21:+30 22:+43 23:+15 24:+32 25:+22 26:+46
+
+ANSWER at 0bp/side both bands: thin - live per trade -3.9bp (approx se 15.8); thin +32.9 vs live +36.8bp per $ per trade
+
+ANSWER at 5bp/side both bands: thin - live per trade -3.9bp (approx se 15.8); thin +22.9 vs live +26.8bp per $ per trade
+
+ANSWER at 10bp/side both bands: thin - live per trade -3.9bp (approx se 15.8); thin +12.9 vs live +16.8bp per $ per trade

@@ -65,7 +65,13 @@ def collect(lo: str, hi: str, master, act):
             col = nx.collect_trades(pn, master, act, "primary", a, b, adv_band=band)
             t = col["trades"]
             if len(t):
-                t = t.assign(o_print=np.isfinite(pn["o_next"][t.row.astype(int)]) & (pn["o_next"][t.row.astype(int)] > 0))
+                i = t.row.astype(int).to_numpy(); i1 = np.minimum(i + 1, pn["n"] - 1)
+                with np.errstate(invalid="ignore", divide="ignore"):
+                    o1u = np.where(pn["has_next"][i], pn["o_next"][i] * pn["cu"][i1] / pn["c"][i1], np.nan)  # raw next open
+                si = pn["sidx"][i]
+                nxt = pd.DatetimeIndex(pn["sessions"][np.minimum(si + 1, len(pn["sessions"]) - 1)])
+                t = t.assign(o_print=np.isfinite(pn["o_next"][i]) & (pn["o_next"][i] > 0), o1u=o1u, c0s=pn["c"][i],
+                             nxt=nxt)
             tr[k].append(t)
         nights.append(col["nights"])
         del pn; gc.collect()
