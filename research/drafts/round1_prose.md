@@ -10991,3 +10991,33 @@ Judge window 2025-09..2026-09: 2060 picks, 259 nights.
 - Audit: the input includes t's full close bar, about 20 minutes of look-ahead in the model's favour. The model was dead anyway.
 - Not tested: Kronos-base/large; intraday or 15:40 bars; the full 30-epoch recipe; targets other than the next open; a filter shape instead of a tilt.
 - Output: research/sim/exp_kronos_out.txt. Weights and cache: data/research/exp_kronos (gitignored).
+
+## Amendment - EXP round 4: linear/RFF siblings named in the A1/A2 kill (user 2026-11-21: "more research the better"; pre-registered before any outcome; N 1233 -> 1236)
+These are siblings from the A1/A2 row's `not tested:` field: the published monthly Welch-Goyal setup, cross-sectional stock RFF, and 5-20 day horizons. The daily ETF form is dead and is not re-run here.
+- **N 1234 RFF-WG (monthly market timing, Kelly-Malamud-Zhou "virtue of complexity" setup):**
+  - Data: Goyal-Welch monthly predictors (Goyal's public file, 15 variables as in KMZ). Each predictor is volatility-standardised on a 36-month trailing window.
+  - Model: RFF with P = 12000, gamma = 2. Ridge on a rolling 12-month training window, shrinkage z in {1e-3..1e3}, z = 1e3 as the registered primary (the paper's best). Lagged market return is included.
+  - Strategy: position = forecast times the excess market return, scaled to market vol on the training window.
+  - JUDGE: 2021-01 to the file's last month, which KMZ's 1926-2020 sample never saw (about 48 months, low power, stated). 1960-2020 is reported only, since it is published and touched.
+  - Gate: judge timing Sharpe >= market Sharpe + 0.20 AND alpha vs market > 0; t reported. Otherwise DEAD.
+  - Linear control: plain ridge on the same 15 predictors.
+- **N 1235 XS-RFF (cross-sectional monthly stock selection):**
+  - Universe: Sharadar SEP common stocks, $5+, ADV20 $10M+, delisted names kept, dividends added.
+  - Features: about 20 price/volume features at month-end, cross-sectionally rank-normalised to [-1, 1]:
+    - returns over 1, 5, 21, 63, 126 and 252 days, plus 252-21 momentum;
+    - vol20, vol63, max5;
+    - IBS, distance from the 52-week high, and from the 52-week low;
+    - log ADV, turnover change, beta63 vs SPY, idiosyncratic vol63;
+    - days since the 20-day high, and the 5-day volume ratio.
+  - Model: RFF (P = 4000, gamma = 1), ridge on the next-21-trading-day return cross-sectional rank. Annual expanding refit from 2002-08. Ridge lambda is chosen on 2002-2007 fit / 2008-10 validation only, then frozen.
+  - Portfolio: long top decile (EW, at most 50 names, highest forecast), rebalanced monthly at the close, held 21 days. Cost 2.5bp/side, shock 10bp/side.
+  - FIT 2002-08..2010-12; JUDGE 2011-2020; REPORT 2021-26 (full store).
+  - Gates (common frame):
+    - alpha t >= 2 vs the EW eligible universe AND vs SPY;
+    - both halves (2011-15 / 2016-20) positive;
+    - Sharpe >= benchmark + 0.20;
+    - positive under the cost shock;
+    - shifted-label placebo (labels shifted by 12 months) >= 95th pct of 200 draws;
+    - ex-top-5 months > 0.
+- **N 1236 XS-LIN:** same as N 1235 with linear ridge on the raw rank features (the linear-model control). If 1235 passes but 1236 does not, the nonlinearity is the result.
+- Ceiling: N 1234 is monthly x 100% capital, so it clears +8pp only if the timing alpha is >= 8%/yr (KMZ report about 4-8%: borderline, stated). N 1235-1236 are the monthly x 100% shape: the top decile over the EW universe needs >= 8%/yr alpha; GKX-type long-only spreads are about 6-12%/yr pre-2010. Program N = 1236.
