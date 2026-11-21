@@ -11559,3 +11559,8 @@ Common to all four:
   - price >= $10 only; limit-on-close entry;
   - a thin-only crowding/dedupe.
 - **The decisive unknown is the real auction cost in $2-10M names.** It can be measured from the live fill-cost log if the live book ever trades names near the $10M floor; see the NEXT note.
+- **Live cost check for N 1256 (server, read-only, state/fill-costs.jsonl, 2026-11-21):**
+  - 582 night fills scored vs the official auction print. Mean |cost| about 0 in every price bucket (< $10: buy +0.09bp n 87, sell 0.00 n 99), including the smallest-print quartile (< 4.5k shares).
+  - So fills match the print. The open question for thin names is whether the Sharadar daily open equals the official opening cross. In thin names, the first trade can differ from the cross.
+  - Next test, if wanted: score the 2016-26 THIN picks on Alpaca official crosses (`marketdata.official_crosses`). That window has been read, so it can only be a report or a forward shadow, not a judge.
+  - A thin-band shadow also needs a reason to beat the live band per dollar at equal cost, which has not been shown.
