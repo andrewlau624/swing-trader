@@ -11312,3 +11312,12 @@ Common to all four:
 - SPY-to-cash arm: x0.79 MAR. 2016-26 book: x0.75.
 - Oct-Nov 2026: no data on disk. The warning had fired on and off from 2026-06 to 10-02.
 - Not tested: raw-return clouds (closer to Gidea-Katz); stock cross-section correlation-distance filtrations; H0 / Wasserstein diagram distances; other w/z/off rules; TDA as a size scale or a learned feature; non-equity clouds.
+
+## Amendment - DEEP round 2a: TDA siblings (autonomous loop 2026-11-21; pre-registered before any outcome; N 1245 -> 1247)
+- **N 1246 TDA-RAW:** identical to N 1245 (same ETFs, w=50, ripser H1, first-3-landscape L1, z vs trailing 500 > 2, 20-session off, same gates, judge 2001-15). The only change is raw daily log returns with no per-window standardisation, as in Gidea-Katz 2018. G4 (beat the vol gate on MAR) is the decisive gate, since raw L1 will track vol.
+- **N 1247 TDA-XS (cross-section correlation filtration):**
+  - Each day, the 100 highest-ADV20 eligible common stocks (NX SEP, delisted kept, $5+) with 60 trailing returns. Distance d_ij = sqrt(2(1 - rho_ij)) on the 60-day returns.
+  - Vietoris-Rips on the distance matrix: total H0 persistence (sum of finite H0 deaths, = MST length) and the H1 landscape L1.
+  - Direction fixed in advance: falling H0 = names converging = fragility. Warning when z(H0) < -2 vs trailing 500 days. Same 20-session off rule and the same five gates as N 1245 (vol gate = SPY 20d vol z > 2).
+  - Report: the H1-L1 z > 2 arm, and the corr of H0 with the mean pairwise correlation (if |corr| > 0.9, TDA-XS = average correlation; then also report a plain mean-correlation gate).
+  - Judge 2001-15, report 2016-26.
