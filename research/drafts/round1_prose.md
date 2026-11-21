@@ -11343,3 +11343,35 @@ Common to all four:
   - halves > 0; 2x cost > 0; ex-top-5 days > 0;
   - DSR at N 1249 reported.
 - **N 1249 PCA-SA-VOL:** AL's volume-time s-score. Residual returns are rescaled by (20d average volume / today's volume) before the cumulation and AR(1) fit. Run as both arms of N 1242 (LS gates as N 1242; LO judged vs the EW universe, >= +8%/yr) and as a K30 arm. It passes if any arm clears its gates in both windows (3 arms; the DSR uses N 1249).
+
+### RESULT - N 1244 TAIL (run 2026-11-21): both arms KILL (judge 1999-2010)
+- **Gate M:**
+  - LTD persists, next-12m rank corr +0.33. But it predicts crash-day return only via beta: -0.185 pooled, -0.016 within beta tercile, vs beta's -0.568. FAIL.
+- **Resilient arm:**
+  - CAPM alpha +8.5%/yr t 2.89, but the tercile EW benchmark has +8.3% (t 4.4). Excess vs benchmark +0.02%/mo (t 0.16), ex-top-5 negative.
+  - SPY's worst-decile months: -0.68%/mo vs benchmark. FAIL. 2008: -45% vs SPY -37%.
+  - Placebo 85.5th percentile. FAIL. DSR 0.15.
+  - Low LTD selects high-idiosyncratic-vol, low-correlation names (vol 55% vs 46%), not defensive ones.
+- **ACX Q5-Q1:** -0.11%/mo t -0.27. FAIL.
+- **Report:**
+  - 2011-20: alpha -5.7%, placebo 2nd percentile.
+  - 2021-26: alpha -6.9%. 2022 -15.1% vs SPY -18.2%.
+  - ACX +0.28 / +0.40%/mo, t < 1.4.
+- **2026-10/11 pattern:** the arm's monthly excess has corr -0.46 with low-vol-minus-high-vol in 2021-26. It would not have caught this selloff's winners.
+- **Not tested:** conditional-on-drawdown holding; LTD residualised on beta and vol; coskew/UTD as sort keys; daily/weekly rebalance; sector/ETF-level tail dependence; options-implied downside; a learned model; a tail sleeve as a book overlay.
+
+## Amendment - DEEP round 2c: the user's original question, done properly (pre-registered before any outcome; N 1249 -> 1250)
+- **N 1250 CRASH-RS (relative strength inside a market drawdown):**
+  - State D is on at close t when SPY adjusted close <= 0.93 x its trailing-252-session max. D ends when SPY >= 0.97 x that max. P = the session of that max.
+  - While D is on, every 5 sessions starting >= 5 sessions after P, score each eligible name: top 1,500 by ADV20, $5+, common, delisted kept.
+  - Score = r_i(P..t) - beta_i * r_SPY(P..t). beta_i = 252-session beta ending at P. The score is then demeaned within Sharadar sector.
+  - Long the top decile, equal weight. Trade at close t+1, hold to close t+6. A hold that ends after D has ended is still counted.
+  - Excess = portfolio - EW eligible universe - (beta_port - beta_EW) x SPY over the same hold (beta-matched). Cost 5bp/side, shock 10bp.
+  - **Mechanism gate MC:** across episodes, the mean rank corr between the score at t and the next 20-session residual return >= +0.05, t >= 2 over episodes, positive in >= 60% of episodes.
+  - **Trading gates:**
+    - net excess >= +60bp per 5-session hold (ceiling: D is on ~13 holds/yr, so 13 x 60bp ~= 8pp);
+    - hold-clustered t >= 2.5;
+    - halves > 0; ex-top-5 holds > 0; ex-best episode > 0; 2x cost > 0;
+    - placebo: the same score computed with a fake P drawn uniformly 20-120 sessions earlier, at the >= 95th percentile of 100 draws.
+  - JUDGE 1999-2015 (halves 1999-2007 / 2008-15; data: NX caches + `~/data/sharadar` for continuity). REPORT 2016-2026-10, plus a descriptive count of the 2026-10 episode from Alpaca bars if available. DSR at N 1250.
+  - Kill: MC fails, or any trading gate fails.

@@ -1,0 +1,64 @@
+TAIL (N 1244): month-end beta / downside beta / HS coskew / empirical LTD-UTD vs SPY (trailing 252), $5+ ADV20 $10M+ SEP common, delisted kept; cost 5bp/side, shock 10bp; alpha on DTB3 excess; DSR N 1245
+[cache] sessions 1997-12-31..2021-01-15, ever-eligible names 6865, formations 265 (1998-12-31..2020-12-31), R 159MB
+
+##### PASS 1: JUDGE 1999-2010 (halves 1999-2004 / 2005-10)
+
+=== JUDGE 1999-2010: holding months 1999-01-29..2010-12-31 (144), mean eligible names 1348, resilient names/month 268
+  gate M (133 formation months with 12m forward inside window): rankcorr(LTD, fwd-12m LTD) pooled +0.333 (mean monthly +0.331, n 169159); rankcorr(LTD, fwd crash-day ret) pooled -0.185 (monthly -0.189, n 173567)
+    within beta tercile: LTD->fwdLTD +0.301, LTD->crash ret -0.016 | reference beta->crash ret -0.568
+  RESILIENT (lowest-LTD quintile within beta terciles): net +0.99%/mo, turnover 0.83/mo, beta 1.24 (bench beta 1.18)
+    CAPM alpha net +8.52%/yr t +2.89 | gross +9.02 | 2x cost +8.02 | halves +14.82 / +2.06 | bench (tercile EW) alpha +8.30 t +4.40
+    excess vs tercile bench: mean +0.020%/mo t +0.16 median +0.078 hit 0.52 ex-top5 -0.128 | SPY worst-decile months (15): excess -0.68%/mo, arm -10.82 bench -10.14 SPY -8.74
+    beta tercile 1: gross alpha +7.52%/yr t +2.19 beta 0.70 | excess vs tercile -0.061%/mo t -0.40
+    beta tercile 2: gross alpha +9.07%/yr t +3.05 beta 1.14 | excess vs tercile +0.009%/mo t +0.05
+    beta tercile 3: gross alpha +10.48%/yr t +1.76 beta 1.87 | excess vs tercile +0.238%/mo t +1.08
+    placebo random-within-tercile (200): gross alpha mean +8.32%/yr, 95th +9.44; real gross +9.02 at pct 85.5
+    DSR (N 1245, monthly beta-hedged net) 0.151
+  ACX Q5-Q1 on (beta_down - beta): net -0.111%/mo t -0.27 | gross -0.045 | 2x cost -0.177 | halves +0.052 / -0.274 | median +0.234 | CAPM alpha -1.31%/yr t -0.26 beta -0.05 | Q5 +0.98 Q1 +1.03 | turnover 0.67+0.65 | DSR 0.000
+    2000-02 (monthly): arm cum -19.0% maxDD -39.1% | tercile bench cum -19.7% maxDD -36.8% | SPY cum -37.5% maxDD -44.7%
+    2008 (monthly): arm cum -45.0% maxDD -45.1% | tercile bench cum -39.1% maxDD -42.1% | SPY cum -36.8% maxDD -35.1%
+    sector mix (name-months, arm vs eligible): Technology 21%/18%, Healthcare 18%/12%, Consumer Cyclical 14%/12%, Industrials 9%/12%, Financial Services 7%/12%, Consumer Defensive 7%/6%, Energy 7%/7%, Basic Materials 6%/6%, Communication Services 6%/6%, Real Estate 3%/4%, Utilities 2%/4%, n/a 0%/0%
+    arm features vs eligible (means): LTD 2.40/3.73, beta 1.02/1.07, vol 55%/46%, coskew +0.010/-0.010, UTD 2.88/3.43
+  GATES resilient: M FAIL | alpha>=6%&t>=2 PASS | halves PASS | median-excess PASS | worst-decile FAIL | placebo95 FAIL | 2xcost PASS -> KILL
+  GATES ACX: Q5-Q1>=0.5%&t>=2 FAIL | halves FAIL | 2xcost FAIL -> KILL
+
+##### PASS 2: REPORT, never judged
+
+=== REPORT 2011-20 (NX cache): holding months 2011-01-31..2020-12-31 (120), mean eligible names 1726, resilient names/month 344
+  gate M (109 formation months with 12m forward inside window): rankcorr(LTD, fwd-12m LTD) pooled +0.507 (mean monthly +0.507, n 178345); rankcorr(LTD, fwd crash-day ret) pooled -0.136 (monthly -0.135, n 183078)
+    within beta tercile: LTD->fwdLTD +0.477, LTD->crash ret +0.011 | reference beta->crash ret -0.582
+  RESILIENT (lowest-LTD quintile within beta terciles): net +1.01%/mo, turnover 0.69/mo, beta 1.30 (bench beta 1.24)
+    CAPM alpha net -5.73%/yr t -1.94 | gross -5.31 | 2x cost -6.14 | halves -12.44 / +1.51 | bench (tercile EW) alpha -4.32 t -2.20
+    excess vs tercile bench: mean -0.048%/mo t -0.26 median -0.038 hit 0.49 ex-top5 -0.210 | SPY worst-decile months (12): excess -0.35%/mo, arm -9.13 bench -8.78 SPY -6.61
+    beta tercile 1: gross alpha +0.88%/yr t +0.34 beta 0.85 | excess vs tercile +0.102%/mo t +0.56
+    beta tercile 2: gross alpha -6.63%/yr t -2.35 beta 1.32 | excess vs tercile -0.125%/mo t -0.68
+    beta tercile 3: gross alpha -10.19%/yr t -1.95 beta 1.74 | excess vs tercile -0.018%/mo t -0.07
+    placebo random-within-tercile (200): gross alpha mean -4.32%/yr, 95th -3.50; real gross -5.31 at pct 2.0
+    DSR (N 1245, monthly beta-hedged net) 0.000
+  ACX Q5-Q1 on (beta_down - beta): net +0.281%/mo t +1.38 | gross +0.342 | 2x cost +0.220 | halves +0.230 / +0.334 | median +0.255 | CAPM alpha +1.18%/yr t +0.47 beta +0.17 | Q5 +1.22 Q1 +0.87 | turnover 0.62+0.60 | DSR 0.015
+    sector mix (name-months, arm vs eligible): Healthcare 18%/12%, Consumer Cyclical 14%/13%, Technology 13%/14%, Energy 12%/8%, Basic Materials 9%/7%, Communication Services 7%/6%, Consumer Defensive 7%/5%, Industrials 6%/12%, Real Estate 6%/6%, Utilities 5%/4%, Financial Services 5%/13%
+    arm features vs eligible (means): LTD 2.72/4.32, beta 1.07/1.11, vol 48%/35%, coskew +0.014/-0.021, UTD 2.85/3.69
+[full] sessions 2019-06-03..2026-10-05, ever-eligible names 4483, formations 70 (2020-12-31..2026-09-30), R 33MB
+
+=== REPORT 2021-26 (~/data/sharadar full; last month partial): holding months 2021-01-29..2026-10-05 (70), mean eligible names 2117, resilient names/month 422
+  gate M (58 formation months with 12m forward inside window): rankcorr(LTD, fwd-12m LTD) pooled +0.456 (mean monthly +0.456, n 115190); rankcorr(LTD, fwd crash-day ret) pooled -0.143 (monthly -0.141, n 117900)
+    within beta tercile: LTD->fwdLTD +0.379, LTD->crash ret +0.025 | reference beta->crash ret -0.622
+  RESILIENT (lowest-LTD quintile within beta terciles): net +0.57%/mo, turnover 0.76/mo, beta 0.89 (bench beta 1.01)
+    CAPM alpha net -6.93%/yr t -1.35 | gross -6.48 | 2x cost -7.38 | halves -7.15 / -6.20 | bench (tercile EW) alpha -4.58 t -1.53
+    excess vs tercile bench: mean -0.307%/mo t -1.40 median -0.596 hit 0.37 ex-top5 -0.761 | SPY worst-decile months (7): excess -0.25%/mo, arm -7.61 bench -7.36 SPY -6.83
+    beta tercile 1: gross alpha -4.24%/yr t -0.97 beta 0.54 | excess vs tercile -0.218%/mo t -0.81
+    beta tercile 2: gross alpha -4.43%/yr t -0.83 beta 0.86 | excess vs tercile -0.101%/mo t -0.41
+    beta tercile 3: gross alpha -10.76%/yr t -1.55 beta 1.29 | excess vs tercile -0.489%/mo t -1.94
+    placebo random-within-tercile (200): gross alpha mean -4.58%/yr, 95th -3.21; real gross -6.48 at pct 1.5
+    DSR (N 1245, monthly beta-hedged net) 0.000
+  ACX Q5-Q1 on (beta_down - beta): net +0.401%/mo t +1.06 | gross +0.466 | 2x cost +0.336 | halves -0.382 / +1.230 | median +0.438 | CAPM alpha +6.70%/yr t +1.50 beta -0.16 | Q5 +1.04 Q1 +0.58 | turnover 0.64+0.66 | DSR 0.017
+    2022 (monthly): arm cum -15.1% maxDD -18.7% | tercile bench cum -17.5% maxDD -19.9% | SPY cum -18.2% maxDD -20.2%
+    sector mix (name-months, arm vs eligible): Healthcare 26%/15%, Consumer Cyclical 13%/12%, Technology 10%/16%, Energy 9%/6%, Industrials 9%/13%, Financial Services 8%/14%, Consumer Defensive 7%/5%, Basic Materials 6%/7%, Communication Services 5%/4%, Utilities 4%/3%, Real Estate 2%/6%
+    arm features vs eligible (means): LTD 2.14/3.53, beta 1.02/1.09, vol 63%/46%, coskew +0.016/-0.018, UTD 2.41/3.11
+
+=== 2026-10/11 selloff pattern (descriptive only; stock bars on disk end 2026-10-05)
+  last formation 2026-09-30 (holding to 2026-10-05): 480 resilient of 2411 eligible
+    arm: Technology 13% vs eligible 16%; beta 0.90 vs 1.00; vol 58% vs 48%; partial-month return arm +0.75% bench +1.43% SPY +1.60%
+    2021-26 monthly corr of arm excess (vs tercile bench) with low-vol-minus-high-vol tercile -0.46, with tech-minus-rest -0.06
+    months matching the pattern (SPY down, low-vol beat high-vol, tech lagged): 12; arm excess in them -0.30%/mo (hit 0.42); other months -0.31%/mo
+    SPY from 2026-09-30: to 2026-10-05 +1.6%, to 2026-11-05 -3.9% (px_SPY.csv); no stock-level bars after 2026-10-05 on disk, so the arm's Oct-Nov return is not measurable
