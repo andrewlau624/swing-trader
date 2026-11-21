@@ -20,3 +20,5 @@ Files: research/sim/qp_init.py (--runup), qp_runup_crsp.py (WRDS pull cached dat
 outs data/research/program/qp_{init,runup,runup_crsp,runup_book}_out.txt. wrds pkg was missing in stvenv; installed via uv.
 - Forward: QP-RUNUP-FWD (N 1203, prose pre-reg 2026-11-10) log-only shadow swingtrader/daily/qp_runup_shadow.py (Nasdaq IPO calendar,
   research-shadows, state/qp-runup.jsonl, make qp-runup); gate at 40 scored incl. net of the measured 15:45-15:50 half-spreads.
+
+- AMENDED 2026-11-21 (ADV-bug audit): Sharadar ADV used closeunadj x split-adjusted volume (lookahead). With close x volume, 2002-26 is +42.9bp t 3.36, DSR 0.55, 3x cost +10.5, K=25 2019-26 +14 t 0.56; book +4.8%/yr, 3x -2.4%. CRSP OOS unaffected.

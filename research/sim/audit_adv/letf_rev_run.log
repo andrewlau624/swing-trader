@@ -1,0 +1,82 @@
+LETF-REV (N 1065): panel 685,909 name-days, 1,392 names, 1,066 nights 2022-07-01..2026-09-30 (ss_letf.panel: px>=5, udv20>=100M, common stock); LETF-underlying names (fund_map) 154,728 name-days / 233 names; I>0 49,715 name-days; I>=0.05 6,442
+overnight = adjusted open(d+1)/close(d)-1 from stocks.parquet, next row within 7 calendar days; net = gross - 10bp; I from ss_letf.panel() unchanged; IBS from adjusted high/low/close
+benchmarks (gross, per night): LETF-underlying EW nights 1066 mean +8.8 med +12.6 hit 0.56 t 2.45 ex-top5 +6.5 | panel EW nights 1066 mean +3.7 med +7.9 hit 0.55 t 1.73 ex-top5 +2.2
+  LETF-underlying names/night median 130; panel names/night median 584
+
+=== RULE A: day_ret <= -3% & I >= 0.05, long close -> next open: 1,734 name-days (38 names) on 366 nights; names/night median 2, mean I 0.147
+  gross            nights 366 mean +22.4 med +42.8 hit 0.60 t 1.50 ex-top5 +14.2
+  net 10bp         nights 366 mean +12.4 med +32.8 hit 0.58 t 0.83 ex-top5 +4.2
+  x LETF-und EW    nights 366 mean -1.5 med +10.8 hit 0.53 t -0.15 ex-top5 -7.4
+  x panel EW       nights 366 mean +6.5 med +22.9 hit 0.55 t 0.52 ex-top5 -0.4
+  halves net:   H1 nights 13 mean +15.2 med +87.8 hit 0.62 t 0.24 ex-top5 -116.4 | H2 nights 353 mean +12.3 med +29.6 hit 0.58 t 0.81 ex-top5 +3.8
+  halves x letf: H1 nights 13 mean +16.0 med +43.3 hit 0.62 t 0.32 ex-top5 -87.4 | H2 nights 353 mean -2.2 med +9.1 hit 0.53 t -0.20 ex-top5 -8.3
+  by year net/x_letf/nights: 2024 +58/+46/63, 2025 +14/+3/151, 2026 -8/-25/152
+  placebo (I==0, same cut): 43,715 name-days, net nights 1057 mean -2.3 med +0.6 hit 0.50 t -0.61 ex-top5 -5.1
+  paired night diff treated-placebo: nights 365 mean +11.3 med +23.7 hit 0.57 t 0.96 ex-top5 +5.3
+  top-10 contributing names (net mean bp, n): MSTR +44/140, IONQ +61/97, AXTI +113/38, SMCI +31/102, SMR +33/73, RKLB +42/57, BMNR +27/81, CRCL +42/50, MU +128/16, QBTS +22/93
+
+--- I buckets, RULE A cut (day_ret <= -3%) (per-night EW, net 10bp; x LETF-und EW) ---
+  I [0.00,0.02) mean I 0.001: 49,248 name-days | net nights 1057 mean -2.2 med +1.5 hit 0.51 t -0.56 ex-top5 -4.8 | x letf mean -10.9 t -4.34
+  I [0.02,0.05) mean I 0.032:  1,344 name-days | net nights 362 mean +2.6 med +29.8 hit 0.54 t 0.18 ex-top5 -9.4 | x letf mean -7.1 t -0.65
+  I [0.05,0.10) mean I 0.071:    857 name-days | net nights 300 mean +7.4 med +32.8 hit 0.57 t 0.43 ex-top5 -4.3 | x letf mean -4.8 t -0.39
+  I [0.10,0.20) mean I 0.140:    533 name-days | net nights 206 mean +5.8 med +40.9 hit 0.55 t 0.30 ex-top5 -9.5 | x letf mean -6.1 t -0.50
+  I [0.20,1.00) mean I 0.334:    338 name-days | net nights 174 mean +24.8 med +24.0 hit 0.55 t 1.25 ex-top5 +5.8 | x letf mean +15.9 t 1.13
+
+GATES RULE A {'mean15': np.False_, 't2': np.False_, 'median': np.True_, 'extop5': np.True_, 'h1': np.True_, 'h2': np.True_, 'placebo': np.True_, 'mono_I': False} | net +12.4bp t 0.83 placebo diff +11.3 -> KILL
+KILL: the LETF close impact does not revert at the next open by more than the round trip in the names with it.
+
+=== RULE B (read only): day_ret >= +3% & I >= 0.05, overnight long return: 1,593 name-days (39 names) on 385 nights; names/night median 3, mean I 0.145
+  gross            nights 385 mean +17.8 med +1.1 hit 0.50 t 1.23 ex-top5 +4.4
+  net 10bp         nights 385 mean +7.8 med -8.9 hit 0.48 t 0.54 ex-top5 -5.6
+  x LETF-und EW    nights 385 mean -10.5 med -32.7 hit 0.41 t -1.00 ex-top5 -21.9
+  x panel EW       nights 385 mean -0.7 med -17.9 hit 0.45 t -0.06 ex-top5 -12.6
+  halves net:   H1 nights 12 mean -21.2 med -34.5 hit 0.42 t -0.39 ex-top5 -146.6 | H2 nights 373 mean +8.7 med -8.1 hit 0.48 t 0.59 ex-top5 -5.1
+  halves x letf: H1 nights 12 mean -47.5 med -68.6 hit 0.17 t -0.98 ex-top5 -144.6 | H2 nights 373 mean -9.3 med -30.4 hit 0.41 t -0.87 ex-top5 -21.1
+  by year net/x_letf/nights: 2024 +65/+41/73, 2025 +11/-13/162, 2026 -23/-33/150
+  placebo (I==0, same cut): 46,121 name-days, net nights 1060 mean -1.7 med +0.6 hit 0.50 t -0.44 ex-top5 -4.9
+  paired night diff treated-placebo: nights 385 mean +0.6 med -26.4 hit 0.45 t 0.05 ex-top5 -10.9
+  top-10 contributing names (net mean bp, n): AXTI +139/39, SMCI +47/110, TSLA +46/101, CRWV +55/63, AMD +76/35, OKLO +39/64, APLD +45/34, NVDA +27/54, QBTS +15/68, POET +51/14
+
+--- I buckets, RULE B cut (day_ret >= +3%) (per-night EW, net 10bp; x LETF-und EW) ---
+  I [0.00,0.02) mean I 0.001: 51,942 name-days | net nights 1060 mean +0.1 med +1.7 hit 0.51 t 0.02 ex-top5 -3.1 | x letf mean -8.8 t -3.20
+  I [0.02,0.05) mean I 0.032:  1,312 name-days | net nights 392 mean +11.2 med +6.9 hit 0.53 t 0.79 ex-top5 +0.4 | x letf mean -2.5 t -0.22
+  I [0.05,0.10) mean I 0.071:    808 name-days | net nights 332 mean +8.3 med -10.7 hit 0.48 t 0.52 ex-top5 -5.8 | x letf mean -10.7 t -0.89
+  I [0.10,0.20) mean I 0.140:    501 name-days | net nights 231 mean +32.0 med -0.3 hit 0.50 t 1.55 ex-top5 +9.1 | x letf mean +13.0 t 0.84
+  I [0.20,1.00) mean I 0.345:    277 name-days | net nights 158 mean -34.8 med -72.2 hit 0.40 t -1.40 ex-top5 -65.8 | x letf mean -49.3 t -2.46
+
+=== TILT READ: live night subset day_ret <= -8% & IBS < 0.10 ===
+  all         : 2,561 name-days (700 names) | net nights 613 mean +26.3 med +18.2 hit 0.56 t 2.29 ex-top5 +15.3 | gross name-day mean +28.4 med +21.7
+  I >= 0.05   :   176 name-days (30 names) | net nights 88 mean +99.6 med +152.6 hit 0.69 t 3.33 ex-top5 +67.3 | gross name-day mean +146.2 med +158.7
+  0 < I < 0.05:   489 name-days (150 names) | net nights 175 mean +46.0 med +57.7 hit 0.60 t 1.98 ex-top5 +24.9 | gross name-day mean +91.0 med +67.9
+  I == 0      : 1,896 name-days (677 names) | net nights 567 mean +19.5 med +15.5 hit 0.54 t 1.59 ex-top5 +6.5 | gross name-day mean +1.4 med +5.3
+  paired nights (both present) I>=0.05 minus I==0: nights 76 mean +58.8 med +62.0 hit 0.64 t 1.67 ex-top5 +15.0
+  I>=0.05 subset x LETF-und EW: nights 88 mean +81.9 med +87.3 hit 0.64 t 3.64 ex-top5 +52.5; by year net/nights: 2024 +164/6, 2025 +73/36, 2026 +112/46
+  I>=0.05 subset top names (net mean bp, n): AAOI +360/7, CRWV +301/8, IONQ +157/12, COIN +267/7, CRCL +304/6, MU +550/3, OKLO +143/11, BMNR +153/10, SMR +122/12, POET +278/5
+  I>=0.05 subset ex-top-3 names: 149 name-days | net nights 81 mean +95.9 med +135.5 hit 0.68 t 3.18 ex-top5 +61.3
+
+=== VOLUNTEERED: Rule A by day_ret depth and by I, gross name-day means ===
+  dr (-1.00,-0.08] I >=0.05:    389 nd | net nights 142 mean +74.5 med +93.1 hit 0.65 t 2.62 ex-top5 +41.2
+  dr (-1.00,-0.08] I ==0  :  4,631 nd | net nights 848 mean +4.9 med +11.3 hit 0.54 t 0.56 ex-top5 -3.0
+  dr (-0.08,-0.05] I >=0.05:    633 nd | net nights 222 mean +17.9 med +22.3 hit 0.54 t 0.96 ex-top5 +4.2
+  dr (-0.08,-0.05] I ==0  : 10,686 nd | net nights 969 mean -7.6 med -5.2 hit 0.49 t -1.42 ex-top5 -11.6
+  dr (-0.05,-0.03] I >=0.05:    706 nd | net nights 299 mean -10.9 med +10.3 hit 0.52 t -0.70 ex-top5 -21.2
+  dr (-0.05,-0.03] I ==0  : 28,398 nd | net nights 1049 mean -4.4 med -3.1 hit 0.49 t -1.23 ex-top5 -7.2
+Disclosed: daily opens as the open cross, daily closes as the close cross (Sharadar adjusted); per-night EW; t = per-night (nights are the cluster); placebo diff = paired nights where both treated and placebo exist.
+        6.38 real         8.33 user         0.48 sys
+          3691888640  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              276408  page reclaims
+                  93  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 449  voluntary context switches
+                2725  involuntary context switches
+        141172735104  instructions retired
+         34271491467  cycles elapsed
+          3646033280  peak memory footprint

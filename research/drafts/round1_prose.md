@@ -11564,3 +11564,16 @@ Common to all four:
   - So fills match the print. The open question for thin names is whether the Sharadar daily open equals the official opening cross. In thin names, the first trade can differ from the cross.
   - Next test, if wanted: score the 2016-26 THIN picks on Alpaca official crosses (`marketdata.official_crosses`). That window has been read, so it can only be a report or a forward shadow, not a judge.
   - A thin-band shadow also needs a reason to beat the live band per dollar at equal cost, which has not been shown.
+
+### AUDIT - split-adjusted volume ADV bug (2026-11-21)
+- Bug: Sharadar SEP `volume` is split-adjusted, so `closeunadj * volume` overstates past ADV by every later split. ADV filters and ranks admit future splitters (winners) early: lookahead. About 33 research files.
+- **Live code: no hits.** Every swingtrader/ dollar-volume uses Alpaca `close * volume` with matching adjustment.
+- Reruns (`research/sim/audit_adv/`):
+  - **GAP-NIGHT N 1050: PASS-SMALL -> KILL as registered.** x-univ +7.0bp t 2.42 vs the 8bp gate. The GAP-NIGHT-FWD shadow's forward data is clean; ending it is a user decision.
+  - **QP-RUNUP N 1201:** Sharadar 2002-26 +42.9bp t 3.36 (was +52.7, t 4.47); DSR 0.55; 3x cost +10.5; book +4.8%/yr, 3x -2.4%. CRSP OOS N 1202 is unaffected.
+  - **EXDATE-OOS N 899: PASS stands.** The "rises with illiquidity" claim goes (memories 34 and 35 amended).
+  - **LETF-REV / NIGHT-LETF-TILT: unchanged.**
+  - **PREF-EX / ETDX: no splits in the universe, a no-op.**
+- Every other affected study is a KILL that the fix can only weaken. The exceptions are the shorts (weekwin_short, night_short_mirror), which are far from passing.
+- Helpers fixed in this commit: `exp_rl_universe._features`, `exp_tail._read`, and `exp_pcasa.load_panel` (default `adv_adj=True`). Recorded `_out.txt` files from before this commit used the old form.
+- Possible second bug, not verified: `letf_rev` uses `closeunadj / prev closeunadj` for day returns, which would show a false drop on split ex-days.

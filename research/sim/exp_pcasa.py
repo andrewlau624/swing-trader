@@ -65,7 +65,7 @@ def _dfilt(path, d):
 
 
 def load_panel(d0: str, d1: str, src: dict | None = None, want_vol: bool = False, prefilter: bool = False,
-               want_open: bool = False, adv_adj: bool = False):
+               want_open: bool = False, adv_adj: bool = True):
     """Dense session x name panels of total return (div-adjusted, split-adjusted close) and ADV20 ($, unadjusted).
     src: file paths (default the NX caches). want_vol: also return dense share volume and its 20d mean.
     prefilter: drop names whose daily $ volume never reaches ADV_MIN in the window (result-neutral: they can never

@@ -1,0 +1,63 @@
+GAP-NIGHT (N 1050) form A: 93,116 gap name-days (|gap|>=3%, px>=5, ADV>=50M) on 2,691 nights, 2016-01-04..2026-09-30; universe 2,249,079 name-days; night-leg picks inside gaps 3,915
+
+=== arm all: names/night median 15; SPY-beta 1.56
+  JUDGE 2016-21 raw      nights 1503 mean +12.5 med +12.7 hit 0.56 t 3.00 ex-top5 +9.5
+  JUDGE 2016-21 x univ   nights 1503 mean +7.0 med +1.8 hit 0.51 t 2.42 ex-top5 +4.5  | x univ-ex-night nights 1503 mean +7.0 med +1.8 hit 0.51 t 2.43 ex-top5 +4.5
+  JUDGE 2016-21 x SPY    nights 1503 mean +8.4 med +3.6 hit 0.52 t 2.69 ex-top5 +5.8  | beta-adj nights 1503 mean +6.1 med +1.2 hit 0.51 t 2.05 ex-top5 +3.6
+    halves x univ: 2016-18 nights 748 mean +8.9 med +4.1 hit 0.53 t 2.26 ex-top5 +4.2 | 2019-21 nights 755 mean +5.0 med -0.9 hit 0.49 t 1.19 ex-top5 +1.4
+    by year raw/x_univ: 2016 +2/+2, 2017 +8/+3, 2018 +25/+21, 2019 +5/-1, 2020 +19/+9, 2021 +16/+6, 2022 -25/-18, 2023 +8/+7, 2024 +23/+15, 2025 +17/+14, 2026 +9/+3
+  touched 2022-26 raw nights 1188 mean +6.5 med +11.3 hit 0.54 t 1.37 ex-top5 +3.6 | x univ nights 1188 mean +4.3 med +3.4 hit 0.52 t 1.24 ex-top5 +1.9
+  GATES (arm all) {'mean': np.False_, 't': np.True_, 'median': np.True_, 'h1': np.True_, 'h2': np.True_, 'extop5': np.True_, 'beta': np.True_, 'xnight': np.False_} -> KILL
+
+=== arm up: names/night median 7; SPY-beta 1.12
+  JUDGE 2016-21 raw      nights 1431 mean +17.7 med +11.0 hit 0.55 t 3.68 ex-top5 +13.6
+  JUDGE 2016-21 x univ   nights 1431 mean +12.2 med +1.9 hit 0.51 t 2.85 ex-top5 +7.3  | x univ-ex-night nights 1431 mean +12.3 med +1.4 hit 0.51 t 2.87 ex-top5 +7.4
+  JUDGE 2016-21 x SPY    nights 1431 mean +13.8 med +4.2 hit 0.53 t 3.13 ex-top5 +8.8  | beta-adj nights 1431 mean +13.3 med +3.9 hit 0.53 t 3.01 ex-top5 +8.3
+    halves x univ: 2016-18 nights 706 mean +7.3 med +5.4 hit 0.55 t 1.53 ex-top5 +1.9 | 2019-21 nights 725 mean +17.1 med -4.4 hit 0.47 t 2.41 ex-top5 +7.7
+    by year raw/x_univ: 2016 +7/+7, 2017 +5/+0, 2018 +17/+15, 2019 +14/+9, 2020 +46/+36, 2021 +15/+6, 2022 -31/-26, 2023 +17/+15, 2024 +18/+10, 2025 +14/+11, 2026 +6/-0
+  touched 2022-26 raw nights 1165 mean +5.0 med +7.5 hit 0.52 t 0.91 ex-top5 +1.3 | x univ nights 1165 mean +2.3 med +2.2 hit 0.51 t 0.49 ex-top5 -1.1
+
+=== arm down: names/night median 6; SPY-beta 1.43
+  JUDGE 2016-21 raw      nights 1412 mean +2.9 med +4.2 hit 0.52 t 0.58 ex-top5 -0.8
+  JUDGE 2016-21 x univ   nights 1412 mean -2.8 med -4.0 hit 0.48 t -0.70 ex-top5 -6.5  | x univ-ex-night nights 1412 mean -2.8 med -4.0 hit 0.48 t -0.68 ex-top5 -6.5
+  JUDGE 2016-21 x SPY    nights 1412 mean -1.3 med -3.0 hit 0.48 t -0.31 ex-top5 -5.1  | beta-adj nights 1412 mean -3.1 med -4.1 hit 0.47 t -0.75 ex-top5 -7.0
+    halves x univ: 2016-18 nights 683 mean +4.0 med -2.5 hit 0.48 t 0.80 ex-top5 -1.9 | 2019-21 nights 729 mean -9.3 med -5.5 hit 0.47 t -1.50 ex-top5 -15.2
+    by year raw/x_univ: 2016 -10/-9, 2017 +8/+2, 2018 +23/+19, 2019 -12/-17, 2020 -6/-15, 2021 +13/+3, 2022 -44/-39, 2023 +16/+15, 2024 +13/+5, 2025 +7/+3, 2026 +3/-3
+  touched 2022-26 raw nights 1150 mean -1.5 med +3.9 hit 0.51 t -0.25 ex-top5 -6.6 | x univ nights 1150 mean -3.9 med +0.9 hit 0.50 t -0.76 ex-top5 -8.7
+
+=== arm 3-5%: names/night median 9; SPY-beta 1.54
+  JUDGE 2016-21 raw      nights 1481 mean +7.4 med +9.6 hit 0.55 t 1.43 ex-top5 +4.4
+  JUDGE 2016-21 x univ   nights 1481 mean +1.8 med +1.5 hit 0.51 t 0.44 ex-top5 -0.8  | x univ-ex-night nights 1481 mean +1.9 med +1.9 hit 0.51 t 0.45 ex-top5 -0.8
+  JUDGE 2016-21 x SPY    nights 1481 mean +3.3 med +3.3 hit 0.52 t 0.75 ex-top5 +0.5  | beta-adj nights 1481 mean +1.1 med +1.6 hit 0.51 t 0.25 ex-top5 -1.6
+    halves x univ: 2016-18 nights 734 mean +5.9 med +3.9 hit 0.53 t 1.63 ex-top5 +1.3 | 2019-21 nights 747 mean -2.1 med -1.9 hit 0.49 t -0.28 ex-top5 -6.3
+    by year raw/x_univ: 2016 +5/+6, 2017 +11/+6, 2018 +10/+6, 2019 -13/-18, 2020 +17/+7, 2021 +13/+3, 2022 -6/-0, 2023 +10/+8, 2024 +20/+11, 2025 +14/+11, 2026 +8/+2
+  touched 2022-26 raw nights 1185 mean +9.2 med +9.5 hit 0.54 t 2.02 ex-top5 +6.8 | x univ nights 1185 mean +6.9 med +5.7 hit 0.53 t 2.12 ex-top5 +4.7
+
+=== arm 5-10%: names/night median 5; SPY-beta 1.60
+  JUDGE 2016-21 raw      nights 1334 mean +11.2 med +7.8 hit 0.54 t 1.80 ex-top5 +5.5
+  JUDGE 2016-21 x univ   nights 1334 mean +5.5 med -1.7 hit 0.49 t 1.06 ex-top5 -0.1  | x univ-ex-night nights 1334 mean +5.5 med -1.7 hit 0.49 t 1.07 ex-top5 -0.0
+  JUDGE 2016-21 x SPY    nights 1334 mean +7.0 med +0.4 hit 0.50 t 1.31 ex-top5 +1.4  | beta-adj nights 1334 mean +4.5 med -1.1 hit 0.50 t 0.86 ex-top5 -1.1
+    halves x univ: 2016-18 nights 628 mean +14.9 med +1.5 hit 0.51 t 2.10 ex-top5 +4.3 | 2019-21 nights 706 mean -2.9 med -6.4 hit 0.46 t -0.38 ex-top5 -10.6
+    by year raw/x_univ: 2016 +1/+3, 2017 +19/+12, 2018 +31/+29, 2019 +11/+6, 2020 +8/-3, 2021 -1/-11, 2022 -43/-38, 2023 -12/-13, 2024 +42/+34, 2025 +28/+25, 2026 +5/-1
+  touched 2022-26 raw nights 1153 mean +4.1 med +7.2 hit 0.52 t 0.56 ex-top5 -1.0 | x univ nights 1153 mean +1.8 med +2.0 hit 0.51 t 0.28 ex-top5 -3.4
+
+=== arm 10%+: names/night median 2; SPY-beta 1.24
+  JUDGE 2016-21 raw      nights 982 mean +29.4 med +3.2 hit 0.51 t 2.13 ex-top5 +13.1
+  JUDGE 2016-21 x univ   nights 982 mean +23.2 med -5.9 hit 0.48 t 1.72 ex-top5 +5.8  | x univ-ex-night nights 982 mean +23.3 med -6.1 hit 0.48 t 1.73 ex-top5 +5.9
+  JUDGE 2016-21 x SPY    nights 982 mean +25.0 med -4.7 hit 0.48 t 1.84 ex-top5 +7.7  | beta-adj nights 982 mean +23.9 med -5.1 hit 0.47 t 1.75 ex-top5 +6.2
+    halves x univ: 2016-18 nights 427 mean +11.0 med -4.9 hit 0.48 t 0.54 ex-top5 -18.2 | 2019-21 nights 555 mean +32.6 med -6.9 hit 0.48 t 1.80 ex-top5 +7.6
+    by year raw/x_univ: 2016 -16/-15, 2017 -18/-21, 2018 +63/+59, 2019 -33/-39, 2020 +78/+69, 2021 +65/+52, 2022 -75/-66, 2023 -19/-19, 2024 +33/+22, 2025 +18/+18, 2026 +29/+25
+  touched 2022-26 raw nights 938 mean -2.2 med -3.1 hit 0.49 t -0.13 ex-top5 -23.9 | x univ nights 938 mean -3.3 med -7.9 hit 0.47 t -0.20 ex-top5 -24.5
+
+=== arm all ex-night-picks: names/night median 15; SPY-beta 1.55
+  JUDGE 2016-21 raw      nights 1502 mean +11.6 med +11.6 hit 0.56 t 2.80 ex-top5 +8.6
+  JUDGE 2016-21 x univ   nights 1502 mean +6.1 med +0.8 hit 0.51 t 2.14 ex-top5 +3.6  | x univ-ex-night nights 1502 mean +6.2 med +1.0 hit 0.51 t 2.16 ex-top5 +3.7
+  JUDGE 2016-21 x SPY    nights 1502 mean +7.5 med +2.6 hit 0.52 t 2.43 ex-top5 +4.9  | beta-adj nights 1502 mean +5.3 med +1.1 hit 0.51 t 1.80 ex-top5 +2.8
+    halves x univ: 2016-18 nights 747 mean +7.8 med +4.2 hit 0.53 t 2.02 ex-top5 +3.3 | 2019-21 nights 755 mean +4.4 med -2.9 hit 0.48 t 1.06 ex-top5 +0.7
+    by year raw/x_univ: 2016 +1/+2, 2017 +8/+3, 2018 +21/+18, 2019 +3/-2, 2020 +18/+8, 2021 +17/+7, 2022 -23/-17, 2023 +11/+10, 2024 +23/+15, 2025 +15/+12, 2026 +9/+3
+  touched 2022-26 raw nights 1188 mean +6.9 med +10.4 hit 0.53 t 1.46 ex-top5 +3.8 | x univ nights 1188 mean +4.6 med +3.3 hit 0.52 t 1.35 ex-top5 +2.0
+
+universe overnight (EW, all eligible): 2016-21 nights 1511 mean +5.6 med +9.2 hit 0.58 t 2.48 ex-top5 +3.9; 2022-26 nights 1190 mean +2.3 med +6.0 hit 0.54 t 1.06 ex-top5 +0.9; SPY overnight 2016-21 nights 1511 mean +4.2 med +6.7 hit 0.57 t 2.12 ex-top5 +2.7
+
+=== form B (inplay pool G, PIT, 2019-26): 45,914 name-days matched; JUDGE 2019-21 raw nights 757 mean +17.3 med +18.8 hit 0.59 t 2.45 ex-top5 +11.3 | x univ nights 757 mean +8.8 med +6.8 hit 0.55 t 2.24 ex-top5 +5.2; touched 2022-26 raw nights 1190 mean +9.1 med +11.9 hit 0.54 t 1.97 ex-top5 +6.5 | x univ nights 1190 mean +6.9 med +6.7 hit 0.54 t 2.17 ex-top5 +4.9
+Disclosed: daily opens as the open cross, daily closes as the close cross; per-night EW; t = per-night (nights are the cluster).

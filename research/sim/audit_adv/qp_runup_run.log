@@ -1,0 +1,48 @@
+QP-INIT (N 1200) IPO quiet-period expiry; Sharadar SEP; run 2026-11-21 14:27
+events after universe filters: 5019; by first-trade year:
+  1998:271 1999:497 2000:402 2001:95 2002:77 2003:79 2004:214 2005:186 2006:184 2007:209 2008:35 2009:60 2010:144 2011:113 2012:120 2013:207 2014:270 2015:164 2016:104 2017:153 2018:186 2019:152 2020:220 2021:412 2022:63 2023:79 2024:93 2025:118 2026:112
+QP-RUNUP (N 1201): buy close x-3, sell close x-1, x = first session >= F+K; run 2026-11-21 14:27
+
+JUDGE 1 (unseen): 1998-01..2002-07, K=25 (overlaps BJR 1996-2000, disclosed)
+  net excess vs cohort               n  955 mean  +389.0bp med  +193.6 hit 59.7% t_day +7.78 ex-top5  +354.2
+  net raw                            n  993 mean  +442.0bp med  +220.0 hit 61.6% t_day +7.41 ex-top5  +407.2
+  1998-1999                          n  507 mean  +506.0bp med  +279.7 hit 64.9% t_day +7.24 ex-top5  +445.7
+  2000-2002-07                       n  448 mean  +256.6bp med   +81.1 hit 53.8% t_day +3.60 ex-top5  +197.0
+
+CONFIRMATION (SEEN via the QP-INIT profile): 2002-08..2026-10
+  net excess vs cohort               n 2407 mean   +42.9bp med   +33.5 hit 53.1% t_day +3.36 ex-top5   +36.6
+  net raw                            n 2407 mean   +39.3bp med   +21.5 hit 52.6% t_day +2.77 ex-top5   +33.1
+  net excess vs SPY                  n 2407 mean   +28.0bp med   +11.1 hit 51.6% t_day +2.03 ex-top5   +21.5
+  net excess, 2x cost                n 2407 mean   +26.7bp med   +15.8 hit 51.9% t_day +2.09 ex-top5   +20.4
+  net excess, 3x cost                n 2407 mean   +10.5bp med    +0.2 hit 50.0% t_day +0.82 ex-top5    +4.2
+  K=40 era                           n  720 mean   +58.4bp med   +29.5 hit 53.2% t_day +3.06 ex-top5   +42.1
+  K=25 era                           n 1687 mean   +36.2bp med   +35.9 hit 53.0% t_day +2.23 ex-top5   +27.4
+  K=25 2012-2018                     n  755 mean   +63.4bp med   +32.9 hit 54.0% t_day +3.50 ex-top5   +48.9
+  K=25 2019-2026                     n  932 mean   +14.2bp med   +42.6 hit 52.1% t_day +0.56 ex-top5    -1.2
+  vs SPY: beta +0.91 alpha +29.0bp/event t +2.29
+  vs QQQ: beta +0.71 alpha +33.0bp/event t +2.61
+  DSR (N 1207): 0.552
+
+JUDGE 2 (unseen): regime-swap placebo on 2002-26 (run-up placed at the other era's K)
+  swap placebo                       n 2401 mean   +14.0bp med    +0.4 hit 50.0% t_day +1.14 ex-top5    +6.0
+  swap, 40-era at K=25               n  809 mean   +12.7bp med    -6.8 hit 49.1% t_day +0.85 ex-top5    +1.8
+  swap, 25-era at K=40               n 1592 mean   +14.6bp med    +4.2 hit 50.5% t_day +0.86 ex-top5    +2.6
+ceiling (2002-26 mean, 50% share, 50% capture): 100/yr x +42.9bp -> +10.7pp/yr
+        9.59 real        10.42 user         0.92 sys
+          4593221632  maximum resident set size
+                   0  average shared memory size
+                   0  average unshared data size
+                   0  average unshared stack size
+              527988  page reclaims
+                 748  page faults
+                   0  swaps
+                   0  block input operations
+                   0  block output operations
+                   0  messages sent
+                   0  messages received
+                   0  signals received
+                 640  voluntary context switches
+               16968  involuntary context switches
+        141912861304  instructions retired
+         44536690277  cycles elapsed
+          5813293808  peak memory footprint

@@ -120,7 +120,7 @@ def _read(path, tickers, start, act_path, sessions=None):
     ret[~np.isfinite(ret)] = np.nan
     ret = np.clip(ret, -0.999, None).astype(np.float32)
     del c64, cprev, divadj, div
-    dvol = cu.astype(np.float64) * vol.astype(np.float64)
+    dvol = close.astype(np.float64) * vol.astype(np.float64)   # split-adjusted both sides (closeunadj*volume was lookahead; fixed 2026-11-21)
     cs = np.cumsum(np.nan_to_num(dvol))
     adv = np.full(n, np.nan)
     i = np.where(pos >= 19)[0]

@@ -106,7 +106,7 @@ def _features(b: pd.DataFrame) -> pd.DataFrame:
     for L in range(5):
         b[f"r{L}"] = g["ret"].shift(L)                        # r0 = day t, r4 = day t-4
     b["vol20"] = g["ret"].rolling(20, min_periods=20).std().reset_index(level=0, drop=True) * math.sqrt(252)
-    b["dvol"] = b.closeunadj * b.volume
+    b["dvol"] = b.close * b.volume          # SEP volume is split-adjusted: closeunadj*volume was lookahead (fixed 2026-11-21)
     b["adv20"] = g["dvol"].rolling(20, min_periods=20).mean().reset_index(level=0, drop=True)
     hl = (b.high - b.low).to_numpy(float)
     with np.errstate(divide="ignore", invalid="ignore"):
