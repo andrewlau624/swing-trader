@@ -11668,3 +11668,14 @@ Written before any ARK trade data is fetched or read. Hypothesis-space Tier B ce
 - Not tested: entries before the open (pre-market on the email), other fully transparent active ETFs (the 10x-event-count condition in U7),
   holdings-file-derived trades (creations mixed in), the trade day D itself (unknowable at the time), Sharadar opens vs official crosses.
 - Runner research/sim/u7_ark_copy.py <dir of trades_*.json>, out research/sim/u7_ark_copy_out.txt.
+
+### PREF-EX live gate amendment (2026-11-21, POST-HOC: written after 21 of 30 trips were seen; no N)
+- User asked (2026-11-21) to settle gate scoring before trip 30. Adopted: the 30-trip count and both kill criteria are read from
+  trips whose entry is on/after 2026-10-27 (the SELL_SHORT rejected-sell fix). The 4 trips of 10-20..10-23 failed on a fixed order
+  bug, not on the strategy. They stay in the log and are reported next to the gate.
+- NOT adopted: re-scoring no-auction sessions against the listing exchange's close, or trimming at +-100bp. Checked CDR.PRB 11-10:
+  NYSE's official close was 17.8342 and our MOC sell filled at 17.05 (-440bp); the buy on 11-09 was +97bp vs the cross. That is
+  real no-auction slippage, not a measurement artifact, so it stays in the cost mean. Memory 99's INN.PRE case (picker took the
+  Nasdaq M print) is a real picker error; fixing the picker to prefer the listing-exchange M print is a code change, not a gate change.
+- Kill rule unchanged: cost > 25bp RT or event mean net <= 0 at 30 trips (counted from 10-27). Post-fix n 17 so far: net +25.8bp,
+  cost RT +36.8bp incl. CDR.PRB, so the cost criterion currently reads KILL. Weight this as post-hoc when reading the verdict.
