@@ -52,10 +52,17 @@ def book_capital() -> float:
 
 
 def overlay_cap() -> float | None:
-    """Half the book sleeve for BOTH Roth overlays (PREF-EX + CEF-RV) combined;
-    the other half is the night leg's. None when no cap is configured."""
+    """Night leg first (user 2026-11-21): BOTH Roth overlays (PREF-EX + CEF-RV) combined get only the sleeve left after
+    the IBS and night budgets, i.e. sleeve x (1 - ibs_weight - night_weight). A cash account rescales the legs to 1.0x,
+    so at 0.5 + 0.5 this is $0: neither overlay opens new positions until the sleeve or the weights change (was 50% of
+    the sleeve, which on IBS days left the night leg ~nothing: 11-16..11-20 funded 35%). None when no cap is configured."""
+    from ..config import Config
     cap = book_capital()
-    return 0.5 * cap if cap else None
+    if not cap:
+        return None
+    d = Config.load().daily
+    legs = min(1.0, float(d.ibs_weight or 0.0) + float(d.night_weight or 0.0))
+    return max(0.0, (1.0 - legs) * cap)
 
 
 def _cef_held(state_dir: Path, today: dt.date) -> float:

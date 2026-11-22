@@ -148,8 +148,26 @@ def test_dry_run_sizes_logs_and_reserves_but_places_nothing(tmp_path):
     assert set(st["open"]) == {"BAC.PRP", "GLADZ"} and st["open"]["BAC.PRP"]["schwab"] == "BAC/PRP"
 
 
+def _weights(monkeypatch, ibs, night):
+    import types
+    from swingtrader import config
+    d = types.SimpleNamespace(ibs_weight=ibs, night_weight=night, live_capital=0.0)
+    monkeypatch.setattr(config.Config, "load", classmethod(lambda cls, *a, **k: types.SimpleNamespace(daily=d)))
+
+
+def test_night_first_leaves_the_overlays_nothing_at_full_leg_weights(tmp_path, monkeypatch):
+    monkeypatch.setenv("DAILY_ROTH_CAPITAL", "1000")
+    _weights(monkeypatch, 0.5, 0.5)
+    assert P.overlay_cap() == 0.0                               # night leg first (user 2026-11-21)
+    from swingtrader.daily import cef_rv_live as C
+    assert C.overlay_cap() == 0.0                               # one shared rule
+    _weights(monkeypatch, 0.4, 0.4)
+    assert abs(P.overlay_cap() - 200.0) < 1e-9 and abs(C.overlay_cap() - 200.0) < 1e-9
+
+
 def test_overlay_sizes_against_the_book_sleeve_not_the_whole_account(tmp_path, monkeypatch):
     monkeypatch.setenv("DAILY_ROTH_CAPITAL", "1000")
+    _weights(monkeypatch, 0.25, 0.25)                           # leaves 50% of the sleeve to the overlays
     events(tmp_path, ev("BAC.PRP"))
 
     def big_crosses(syms, start, end, H):
@@ -163,6 +181,7 @@ def test_overlay_sizes_against_the_book_sleeve_not_the_whole_account(tmp_path, m
 
 def test_the_shared_overlay_pool_blocks_pref_when_cef_holds_it(tmp_path, monkeypatch):
     monkeypatch.setenv("DAILY_ROTH_CAPITAL", "1000")
+    _weights(monkeypatch, 0.25, 0.25)
     events(tmp_path, ev("BAC.PRP"))
     (tmp_path / "cef-rv-held.json").write_text(json.dumps({"date": TODAY.isoformat(), "usd": 500.0}))
     ad = FakeAd({"BAC/PRP": 25.0}, settled=5000, equity=7722)
@@ -172,6 +191,7 @@ def test_the_shared_overlay_pool_blocks_pref_when_cef_holds_it(tmp_path, monkeyp
 
 def test_the_pool_counts_pref_exs_own_holdings(tmp_path, monkeypatch):
     monkeypatch.setenv("DAILY_ROTH_CAPITAL", "1000")
+    _weights(monkeypatch, 0.25, 0.25)
     events(tmp_path, ev("BAC.PRP"))
     (tmp_path / P.STATE_NAME).write_text(json.dumps({"open": {
         "OLD.PRA": dict(schwab="OLD/PRA", qty=32, ex="2026-10-30", bought="2026-10-13", px=16.0)}}))

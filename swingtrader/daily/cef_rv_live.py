@@ -56,10 +56,9 @@ def book_capital() -> float:
 
 
 def overlay_cap() -> float | None:
-    """Half the book sleeve for BOTH Roth overlays (PREF-EX + CEF-RV) combined;
-    the other half is the night leg's. None when no cap is configured."""
-    cap = book_capital()
-    return 0.5 * cap if cap else None
+    """The shared PREF-EX + CEF-RV pool (night leg first); one rule, kept in pref_ex_live."""
+    from .pref_ex_live import overlay_cap as shared
+    return shared()
 
 
 def _pref_held(state_dir: Path) -> float:
