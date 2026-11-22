@@ -115,7 +115,7 @@ def test_edgar_discovery_parses_hits_and_keeps_one_row_per_filing(monkeypatch):
     assert "efts.sec.gov" in w.discovery_url(today) and "startdt=2026-10-19" in w.discovery_url(today)
 
 
-def _run_patched(monkeypatch, tmp_path, today, alpaca, edgar, order_mode="day", auto=False, manage=None):
+def _run_patched(monkeypatch, tmp_path, today, alpaca, edgar, order_mode="day", auto=False, manage=None, qualify=None):
     """run() with every network call faked; returns (new, rows on file, mails)."""
     import pandas as pd
     from swingtrader.daily import roundup_orders as ro
@@ -123,7 +123,8 @@ def _run_patched(monkeypatch, tmp_path, today, alpaca, edgar, order_mode="day", 
     monkeypatch.setattr(w, "upcoming", lambda t, days=14: alpaca)
     monkeypatch.setattr(w, "edgar_upcoming", lambda t, skip=frozenset(), days=7, fetch=None: [
         c for c in edgar if c["adsh"] not in skip])
-    monkeypatch.setattr(w, "qualify", lambda cik, ex: dict(sentence="will be rounded up", url="u", form="8-K", filed="2026-10-20"))
+    monkeypatch.setattr(w, "qualify", qualify or (lambda cik, ex: dict(sentence="will be rounded up", url="u", form="8-K",
+                                                                         filed="2026-10-20")))
     monkeypatch.setattr(w, "score", lambda r, t: None)
     monkeypatch.setattr("swingtrader.daily.news_judge._cik_map", lambda d: {"AAA": 1, "LATE": 2, "PASW": 1897532})
     monkeypatch.setattr("swingtrader.data.trading_days",
@@ -191,3 +192,76 @@ def test_run_emails_unconfirmed_alone_and_writes_order_outcomes(monkeypatch, tmp
     assert sum(r.get("outcome") == "unconfirmed-expired" for r in rows3) == 1
     _, rows4, _ = _run_patched(monkeypatch, tmp_path, dt.date(2026, 11, 4), [], edgar, auto=False)
     assert sum(r.get("outcome") == "unconfirmed-expired" for r in rows4) == 1
+
+
+# ---- 2026-11-21 audit: participant-level over-match, preferred clauses, re-qualification, manual-mode outcomes
+def test_participant_level_only_vetoes_a_fraction_sentence():
+    plan = ("<p>Any fractional shares resulting from the Reverse Stock Split will be rounded up to the nearest whole share.</p>"
+            "<p>The Committee may, upon written notice to a participant, provide that the participant's awards will "
+            "terminate.</p><p>DTC Participant: ______ Check here if requesting delivery by Deposit/Withdrawal.</p>")
+    assert not w.participant_level(plan)                          # PARA / SMTK / MOBX 2026-11: equity-plan and form text
+    assert w.round_up_sentence(plan)
+    for pl in ("Any fractional shares will be rounded up to the next whole number at the participant level.",
+               "Fractional shares will be rounded up. The rounding will be applied at the DTC participant level.",
+               "Fractional entitlements will be rounded up and the additional shares delivered to Cede & Co."):
+        assert w.participant_level(pl), pl
+
+
+def test_preferred_conversion_clause_does_not_qualify():
+    lsta = ("Any fractional shares of Common Stock that a Holder of Series C Non-Voting Preferred Stock would otherwise be "
+            "entitled to receive shall be aggregated with all fractional shares of Common Stock issuable to such Holder and "
+            "any remaining fractional shares shall be rounded up to the nearest whole share.")
+    assert w.round_up_sentence(lsta) is None
+
+
+def test_no_roundup_split_is_requalified_until_ex_and_edgar_find_alerts_it(monkeypatch, tmp_path):
+    today = dt.date(2026, 11, 3)
+    alpaca = [dict(ticker="AAA", ex_date="2026-11-06", ratio=5.0), dict(ticker="PASW", ex_date="2026-11-06", ratio=10.0)]
+    calls = []
+    def qual(found):
+        def q(cik, ex):
+            calls.append(cik)
+            return dict(sentence="will be rounded up", url="u", form="8-K", filed="2026-11-03") if found else None
+        return q
+    _, rows, _ = _run_patched(monkeypatch, tmp_path, today, alpaca, [], qualify=qual(False))
+    assert sum(r.get("outcome") == "no-roundup" for r in rows) == 2
+    # next morning still nothing: re-checked, no duplicate rows
+    _, rows, _ = _run_patched(monkeypatch, tmp_path, dt.date(2026, 11, 4), alpaca, [], qualify=qual(False))
+    assert len(calls) == 4 and sum(r.get("outcome") == "no-roundup" for r in rows) == 2
+    # the EDGAR discovery finds PASW's 8-K while the CIK search still misses it: the split is alerted from that filing
+    edgar = [dict(ticker="PASW", cik=1897532, adsh="0001-26-1", form="8-K", filed="2026-11-04", url="u1",
+                  sentence="will be rounded up", source="edgar", ex_date=None, ratio=10.0)]
+    new, rows, _ = _run_patched(monkeypatch, tmp_path, dt.date(2026, 11, 5), alpaca, edgar, qualify=qual(False))
+    assert [(r["ticker"], r["buy_by"], r["url"]) for r in new] == [("PASW", "2026-11-05", "u1")]
+    assert any(r.get("outcome") == "qualified-alpaca" and r["adsh"] == "0001-26-1" for r in rows)
+    # manual mode: every account gets a no-order row saying why
+    no = [r for r in rows if r.get("outcome") == "no-order"]
+    assert {r["account"] for r in no} == {"live", "roth"} and all("ROUNDUP_AUTO off" in r["reason"] for r in no)
+    # AAA's 8-K is finally indexed: the re-check alerts it; after the ex-date it is not re-checked
+    new, rows, _ = _run_patched(monkeypatch, tmp_path, dt.date(2026, 11, 5), alpaca, edgar, qualify=qual(True))
+    assert [r["ticker"] for r in new] == ["AAA"]
+    n = len(calls)
+    _run_patched(monkeypatch, tmp_path, dt.date(2026, 11, 6), alpaca, edgar, qualify=qual(True))
+    assert len(calls) == n
+
+
+def test_discretion_cash_option_past_and_merger_clauses_do_not_qualify():
+    no = ["We will either pay cash in respect of any fraction or round up to the next whole share after the reverse split.",
+          "The Company may at the discretion of the Board, but shall not otherwise be obliged to, issue fractional Shares "
+          "or round up or down fractional holdings to the nearest whole share in a share consolidation.",
+          "(c) authorize the Board to settle any difficulty so that fractional shares will be rounded up to a whole share "
+          "in the share consolidation.",
+          "Any fractional shares that would otherwise be issued as a result of the reverse stock splits were rounded up to "
+          "the nearest whole share.",
+          "In the event the Reverse Stock Split occurs, the Merger Consideration will be adjusted and fractional shares "
+          "will be rounded up to the nearest whole share.",
+          "In lieu thereof, the Exchange Agent shall round each fractional share up or down to the nearest whole share "
+          "after the reverse split.",
+          "No cash or fractional shares were issued in connection with the May 2026 Reverse Stock Split, and any "
+          "fractional share would be rounded up to the nearest whole share."]
+    for t in no:
+        assert w.round_up_sentence(t) is None, t
+    assert w.round_up_sentence("Fractional shares resulting from the reverse stock split will be rounded up to the "
+                               "nearest whole share. " + "x " * 400) is not None
+    assert w.round_up_sentence("Address of principal executive offices " + "x " * 400 + "fractional shares will be "
+                               "rounded up to the nearest whole share in the reverse split") is None   # cover-page run

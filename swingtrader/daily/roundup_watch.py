@@ -44,12 +44,26 @@ QUERIES = ['"rounded up to the nearest whole share" "reverse stock split"',
            # index-beat R7-1 (2026-10-02): wordings the four phrases miss (~2.5 genuine deals/yr 2023-26)
            '"round up any fractional" "reverse stock split"',
            '"one whole share in lieu" "reverse stock split"',
-           '"additional fraction of a share" "reverse stock split" "round up"']
-PL = re.compile(r"participant level|DTC participant|at the participant|Cede ?& ?Co", re.I)
+           '"additional fraction of a share" "reverse stock split" "round up"',
+           # audit 2026-11-21: OFAL "will round up each holder's fractional share" matched none of the phrases above
+           '"fractional" "round up"', '"fractional" "rounded up"', '"fractional" "rounded upward"']
+# only checked in sentences about fractions / rounding (participant_level): the bare substring "at the participant"
+# matched "that the participant" in every proxy's equity-plan text and "DTC Participant:" on warrant exercise forms,
+# vetoing genuine round-ups (PARA, SMTK, MOBX 2026-11)
+PL = re.compile(r"participant level|\bDTC participants?\b|\bat the (?:DTC )?participant\b|Cede ?& ?Co", re.I)
 # a cash alternative in the same sentence ("... or we will pay a cash adjustment", AXNX 2026-10) = not a round-up
-CASH = re.compile(r"cash (?:in lieu|payment|adjustment)|paid in cash|receive (?:a )?cash|or to entitle", re.I)
+CASH = re.compile(r"cash (?:in lieu|payment|adjustment)|paid in cash|receive (?:a )?cash|or to entitle"
+                  r"|\bpay(?:ing)? cash\b|\bin cash\b", re.I)          # WFF "we will either pay cash ... or round up"
+# board discretion / an authority to round rather than a commitment (SGRX/NTCL "authorize the Board to settle",
+# LOBO "may at the discretion of the Board ... round up or down"), and a past split described with a "would"
+# clause (AUUD "that would otherwise be issued ... were rounded up")
+NOT_COMMITTED = re.compile(r"\bdiscretion\b|\bauthori[sz]e[sd]?\b|\bround(?:ed)? (?:up )?or (?:round(?:ed)? )?down\b"
+                           r"|\bround(?:ed)? down\b|\bup or down\b|\bwere issued\b"
+                           r"|\b(?:were|was|had been|have been)\b[^.;]{0,40}\bround", re.I)
 # warrant / convertible clauses round their own fractions up ("upon the exercise of this Warrant", GCTK 2026-10)
-NOT_SPLIT = re.compile(r"\bwarrants?\b|\bexercis(?:e|ed|es|able)\b|\bconversion\b", re.I)
+# ... and so do preferred-stock conversion clauses ("fractional shares that a Holder of Series C Preferred Stock would
+# otherwise be entitled to receive", LSTA / INM 2026-11)
+NOT_SPLIT = re.compile(r"\bwarrants?\b|\bexercis(?:e|ed|es|able)\b|\bconversion\b|\bpreferred\b|\bmerger\b", re.I)
 # EDGAR full-text discovery (lead time): forms, query and the effective-date / ratio wording parsed from the filing
 DISCOVERY_FORMS = "8-K,6-K,DEF 14A"
 DISCOVERY_QUERY = '"reverse stock split" "rounded up"'
@@ -72,9 +86,16 @@ def round_up_sentence(text: str) -> str | None:
     for sen in re.split(r"(?<=[.;])\s+", clean(text)):
         if (re.search(r"fraction", sen, re.I) and re.search(r"round(?:ed|ing)? up|(?:one )?whole share in lieu", sen, re.I)
                 and re.search(r"split|whole (?:share|number)", sen, re.I) and re.search(r"\b(?:will|shall|would)\b", sen, re.I)
-                and not CASH.search(sen) and not NOT_SPLIT.search(sen)):
+                and not CASH.search(sen) and not NOT_SPLIT.search(sen) and not NOT_COMMITTED.search(sen)
+                and len(sen) <= 700):                # a cover page / table run with no sentence breaks is not a clause
             return sen.strip()[:400]
     return None
+
+
+def participant_level(text: str) -> bool:
+    """True when a sentence about fractional shares / rounding says the rounding is done at the DTC participant level
+    (a 1-share street-name holder then gets cash or nothing)."""
+    return any(PL.search(sen) for sen in re.split(r"(?<=[.;])\s+", clean(text)) if re.search(r"fraction|round", sen, re.I))
 
 
 def _parse_date(s: str) -> dt.date | None:
@@ -161,7 +182,7 @@ def edgar_upcoming(today: dt.date, skip: set[str] = frozenset(), days: int = DIS
         t = clean(fetch(url) or "")
         if not t:
             continue
-        sen = None if PL.search(t) else round_up_sentence(t)
+        sen = None if participant_level(t) else round_up_sentence(t)
         row = dict(ticker=h["ticker"], cik=h["cik"], adsh=h["adsh"], form=h["form"], filed=h["date"], url=url,
                    sentence=sen, source="edgar")
         if sen:
@@ -202,7 +223,7 @@ def qualify(cik: int, ex_date: str) -> dict | None:
     for h in search(cik, ex - dt.timedelta(days=180), ex):
         url = filing_url(cik, h)
         t = _sec_get(url) or ""
-        if PL.search(clean(t)):
+        if participant_level(t):
             return None                             # rounded at the broker level: a 1-share holder gets nothing
         sen = round_up_sentence(t)
         if sen and not found:
@@ -331,15 +352,18 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
       qualified      the alert row (alert=True, buy_by, trade_date, sentence, url; promoted_from=adsh when an EDGAR
                      unconfirmed row preceded it)
       qualified-known  a discovery filing for a split Alpaca already lists (the Alpaca path owns the alert)
+      qualified-alpaca a discovery filing that qualifies a split Alpaca lists but the Alpaca path judged no-roundup
+                     (the alert row is written alongside it)
       no-roundup     an upcoming split (Alpaca, `checked`) or a discovery filing (`source` edgar, `adsh`) with no
-                     holder-level round-up sentence
+                     holder-level round-up sentence; an Alpaca split is re-qualified each morning until its ex-date
       late-dropped   qualified, but the buy-by session had passed when first seen (`checked` so it is not re-run)
       no-cik         Alpaca symbol not in SEC's ticker file
       unconfirmed    EDGAR-only find: sentence + effective date parsed from the filing, Alpaca has not listed it
                      (`unconfirmed`=True, ex_date=parsed date or None, emailed only when the date is on/after today)
       unconfirmed-expired  the parsed date passed with no Alpaca listing
       order-placed / no-order   one row per account per deal from roundup_orders.manage (`account`, `reason`,
-                     `order_id`, `limit`); no-order carries the exact reason (no usable quote, cap, broker error)
+                     `order_id`, `limit`); no-order carries the exact reason (no usable quote, cap, broker error,
+                     ROUNDUP_AUTO off)
     `order_mode`: roundup_orders mode ("day" = the current DAY limit at the ask; "gtc" = GTC at or below the last
     close); None reads config.yaml daily.roundup_order_mode."""
     from ..data import trading_days
@@ -350,6 +374,11 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
     rows = _read(path)
     alerted = {(r["ticker"], r["trade_date"]): r for r in rows if r.get("alert")}
     checked = {(r["ticker"], r["ex_date"]) for r in rows if r.get("checked")}
+    # an Alpaca split judged no-roundup is re-qualified each morning until its ex-date: the issuer's 8-K often lands
+    # (or is indexed) after the first check (ZONE, NXTS 2026-10/11); a repeat no-roundup writes no new row
+    retry = {(r["ticker"], r["ex_date"]) for r in rows if r.get("checked") and r.get("outcome") == "no-roundup"
+             and r.get("source") != "edgar"}
+    retry -= {(r["ticker"], r["ex_date"]) for r in rows if r.get("checked") and r.get("outcome") != "no-roundup"}
     seen_adsh = {r["adsh"] for r in rows if r.get("adsh") and r.get("source") == "edgar"}
     closed = {r.get("promoted_from") or r.get("adsh") for r in rows
               if r.get("promoted_from") or r.get("outcome") == "unconfirmed-expired"}
@@ -363,9 +392,31 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
     # 1. Alpaca (authoritative ex-date)
     alp = upcoming(today)
     alp_tickers = {u["ticker"] for u in alp}
+
+    def decide(u: dict, q: dict) -> None:
+        """A qualified Alpaca split: an alert row (new) or, when its buy-by session has passed, late-dropped."""
+        sess = [d.date() for d in trading_days(today - dt.timedelta(days=7), dt.date.fromisoformat(u["ex_date"]))]
+        buy_by = max(d for d in sess if d < dt.date.fromisoformat(u["ex_date"]))
+        if buy_by < today:
+            misses.append(dict(checked=str(today), outcome="late-dropped", buy_by=str(buy_by), **u, **q))
+            log(f"[roundup] {u['ticker']} 1-for-{u['ratio']:g} ex {u['ex_date']} qualified but buy-by {buy_by} has "
+                f"passed (first seen {today}): LATE, no alert")
+            return
+        b = md.sip_daily([u["ticker"]], today - dt.timedelta(days=10)).get(u["ticker"])
+        r = dict(date=str(today), ticker=u["ticker"], trade_date=u["ex_date"], buy_by=str(buy_by), ratio=u["ratio"],
+                 last_close=float(b.close.iloc[-1]) if b is not None and len(b) else None, alert=True, outcome="qualified",
+                 **q)
+        prev = [x for x in unconf.values() if x.get("ticker") == u["ticker"] or x.get("cik") == cik.get(u["ticker"])]
+        if prev:
+            r["promoted_from"] = prev[0]["adsh"]
+            log(f"[roundup] {u['ticker']} confirmed by Alpaca (EDGAR unconfirmed since {prev[0]['date']})")
+        new.append(r)
+        log(f"[roundup] {r['ticker']} 1-for-{r['ratio']:g} ex {r['trade_date']} buy by {r['buy_by']}: {q['sentence'][:90]}")
+
     for u in alp:
         key = (u["ticker"], u["ex_date"])
-        if key in alerted or key in checked:
+        again = key in retry and u["ex_date"] > str(today)
+        if key in alerted or (key in checked and not again):
             continue
         if u["ticker"] not in cik:
             r = dict(checked=str(today), outcome="no-cik", **u)
@@ -373,26 +424,10 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
             continue
         q = qualify(cik[u["ticker"]], u["ex_date"])
         if not q:
-            misses.append(dict(checked=str(today), outcome="no-roundup", **u))
+            if not again:
+                misses.append(dict(checked=str(today), outcome="no-roundup", **u))
             continue
-        sess = [d.date() for d in trading_days(today - dt.timedelta(days=7), dt.date.fromisoformat(u["ex_date"]))]
-        buy_by = max(d for d in sess if d < dt.date.fromisoformat(u["ex_date"]))
-        if buy_by < today:
-            r = dict(checked=str(today), outcome="late-dropped", buy_by=str(buy_by), **u, **q)
-            misses.append(r)
-            log(f"[roundup] {u['ticker']} 1-for-{u['ratio']:g} ex {u['ex_date']} qualified but buy-by {buy_by} has "
-                f"passed (first seen {today}): LATE, no alert")
-            continue
-        b = md.sip_daily([u["ticker"]], today - dt.timedelta(days=10)).get(u["ticker"])
-        r = dict(date=str(today), ticker=u["ticker"], trade_date=u["ex_date"], buy_by=str(buy_by), ratio=u["ratio"],
-                 last_close=float(b.close.iloc[-1]) if b is not None and len(b) else None, alert=True, outcome="qualified",
-                 **q)
-        prev = [x for x in unconf.values() if x.get("ticker") == u["ticker"] or x.get("cik") == cik[u["ticker"]]]
-        if prev:
-            r["promoted_from"] = prev[0]["adsh"]
-            log(f"[roundup] {u['ticker']} confirmed by Alpaca (EDGAR unconfirmed since {prev[0]['date']})")
-        new.append(r)
-        log(f"[roundup] {r['ticker']} 1-for-{r['ratio']:g} ex {r['trade_date']} buy by {r['buy_by']}: {q['sentence'][:90]}")
+        decide(u, q)
     # 2. EDGAR full-text discovery (lead time): unconfirmed until Alpaca lists the split
     new_unconf = []
     try:
@@ -406,6 +441,12 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
         elif c["ticker"] in alp_tickers or any(k[0] == c["ticker"] and k[1] >= str(today - dt.timedelta(days=30))
                                                for k in alerted):
             r["outcome"] = "qualified-known"        # Alpaca lists it (or alerted it in the last 30 days): the Alpaca path owns it
+            done_t = {k[0] for k in alerted} | {x["ticker"] for x in new} | {x["ticker"] for x in misses
+                                                                            if x.get("outcome") == "late-dropped"}
+            u = next((u for u in alp if u["ticker"] == c["ticker"] and u["ex_date"] >= str(today)), None)
+            if u and c["ticker"] not in done_t:     # ... but the Alpaca path judged it no-roundup: this filing qualifies it
+                decide(u, dict(sentence=c["sentence"], url=c["url"], form=c["form"], filed=c["filed"]))
+                r["outcome"] = "qualified-alpaca"
         elif c["ex_date"] and c["ex_date"] < str(today):
             r["outcome"] = "late-dropped"
             log(f"[roundup] EDGAR {c['ticker']} {c['form']} {c['filed']}: round-up split effective {c['ex_date']} "
@@ -445,6 +486,13 @@ def run(state_dir: Path, today: dt.date | None = None, email: bool = True, log=p
             with path.open("a") as f:
                 for o in outcomes:
                     f.write(json.dumps(dict(date=str(today), **o)) + "\n")
+    if not ro.enabled() and new:                # manual mode: say why the qualified deal has no order
+        with path.open("a") as f:
+            for r in new:
+                for a in ro.accounts():
+                    f.write(json.dumps(dict(date=str(today), ticker=r["ticker"], trade_date=r["trade_date"], account=a,
+                                            outcome="no-order", reason="ROUNDUP_AUTO off: alert emailed, no auto-buy"))
+                            + "\n")
     msg = build_email(new, due, events, ro.enabled(), unconfirmed=new_unconf)
     if note and msg:
         note.mail(*msg)
