@@ -153,6 +153,10 @@ def official_crosses(symbols: list[str], start, end) -> dict[tuple[str, str], tu
     if not syms:
         return {}
     a, b = str(pd.Timestamp(start).date()), str(pd.Timestamp(end).date())
+    # the free SIP plan 403s on data < 15 min old, and a bare end date >= today reaches past now (executor 11-10..11-20)
+    cap = pd.Timestamp.now(tz="UTC") - pd.Timedelta(minutes=16)
+    if b >= str(cap.date()):
+        b = cap.strftime("%Y-%m-%dT%H:%M:%SZ")
     out: dict[tuple[str, str], tuple] = {}
     H = _headers()
     for i in range(0, len(syms), 100):
