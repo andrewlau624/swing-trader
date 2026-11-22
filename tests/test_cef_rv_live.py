@@ -127,8 +127,10 @@ def test_slots_and_sizing_deepest_discount_first():
 
 def test_the_shared_overlay_pool_blocks_cef_when_pref_ex_holds_it(tmp_path, monkeypatch):
     monkeypatch.setenv("DAILY_ROTH_CAPITAL", "1000")
-    from tests.test_pref_ex_live import _weights
-    _weights(monkeypatch, 0.25, 0.25)
+    import types
+    from swingtrader import config
+    d = types.SimpleNamespace(ibs_weight=0.25, night_weight=0.25, live_capital=0.0)   # leaves the overlays 50%
+    monkeypatch.setattr(config.Config, "load", classmethod(lambda cls, *a, **k: types.SimpleNamespace(daily=d)))
     panel(tmp_path, A=-0.20)
     signals(tmp_path, sig("A"))
     (tmp_path / C.STATE_NAME).write_text(json.dumps({"open": {}}))
