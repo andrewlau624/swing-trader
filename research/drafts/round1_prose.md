@@ -11604,3 +11604,67 @@ Common to all four:
 - **The IBS OOS result stands.** Unlike the Sharadar stock opens (THIN-AUC, ~6.5bp overstatement), the ETF vendor opens are unbiased.
 - Doc fix noted: `data/research/night/etf_daily.parquet` is adjustment=all, not raw, despite the ibs_oos.py docstring. Returns are unaffected.
 - Not tested: the close side (the IBS signal uses vendor H/L/C).
+
+## Study U9 RSPLIT-LONG — reverse-split ex-date night, LONG side, Sharadar SEP (pre-register 2026-11-21; N 1258)
+Written before any reverse-split return is read. Hypothesis-space Tier B cell U9 (ceiling-killed on paper at < 2pp; run as a class-kill).
+- Rule: buy the close of E-1, sell the open of E (E = reverse-split ex-date). Secondary (reported, judged the same way): close E-1 -> close E.
+- Events: Sharadar `actions` action == "split" with value < 1, ticker in SEP Domestic/Canadian Common. **Factor-confirmed only** (SPECIAL-EX data
+  rule): f = closeunadj/close must jump by ~value from E-1 to E (|f(E)/f(E-1) / value - 1| < 5%); unconfirmed rows counted and dropped.
+  Convention check before any return is computed: hand-check >= 4 known reverse splits (C 1:10 2011-05, AIG 1:20 2009-07, ETFC 1:10 2010-06 and
+  one more) that raw closeunadj(E) ~ closeunadj(E-1)/value and that value = new/old shares (< 1).
+- Return of one pre-split share: open_raw(E) * value / closeunadj(E-1) - 1, open_raw = open * closeunadj/close. Equivalently the adjusted
+  open(E)/close(E-1) - 1 (checked to agree). |T0| > 100% dropped (counted).
+- Filters: raw close(E-1) >= $1; ADV20 = mean(close * volume) over 20 days ending E-1 (ADJUSTED close x adjusted volume — not closeunadj*volume,
+  the program-wide ADV bug) >= $250k; E-1 within 5 calendar days of E.
+- Benchmark: equal-weight same-night close->open return of all SEP common stocks with raw close >= $1 and ADV20 >= $250k (the universe). Excess = T0 - EW.
+- Costs: per-side book.cost_bps "tier+tick" (half-cent tick floor), round trip x2; shock = 2 x "tier_hi+tick". Sharadar open is a first print, not
+  the official cross (THIN-AUC: overstates thin night exits ~6.5bp) - recorded as a caveat; no cross data pre-2016.
+- Judge window 1998-2012 (halves 1998-2005 / 2006-12). 2013-26 reported only (2016-26 touched).
+- Stats: mean, median, hit, ex-top-5, day-clustered t, by price bucket ($1-5, $5+), events/yr.
+- Ceiling (at $10k): events/yr x mean net (tier+tick) x share 0.25 of account per event x capture 0.5. $2.3k/$25k same formula (whole-share
+  rounding immaterial at these prices); capacity line: <= 5% of ADV20 per event.
+- PASS (all): excess mean > 0 with day-clustered t >= 2; median excess > 0; ex-top-5 > 0; both halves > 0; net (tier+tick) mean > 0 and
+  median > 0; 2x-shock net mean > 0; ceiling >= +8pp/yr at $10k.
+- KILL: median excess <= 0, or t < 1, or net tier+tick mean <= 0, or ceiling < +8pp/yr at $10k. Anything else = WEAK (no deployment).
+- Runner research/sim/u9_rsplit_long.py -> research/sim/u9_rsplit_long_out.txt.
+
+## Study U7 ARK-COPY — daily-disclosed ARK trades -> next-day return in traded names (pre-register 2026-11-21; N 1259)
+Written before any ARK trade data is fetched or read. Hypothesis-space Tier B cell U7 (paper ceiling +2-5pp).
+- Step 0 (data availability, <= 30 min): free public archives of ARK daily trade emails / daily holdings CSVs (GitHub, 2020+). If none
+  obtainable with trade date, ticker, direction and shares: record BLOCKED with the sources checked; no test.
+- Rule (primary): ARK publishes day-D trades after the close of D. For each (ticker, D) net ARK BUY (summed over funds) with trade $ (shares x
+  adjusted close D) >= 1% of ADV20 (adjusted close x volume): buy the open of D+1, sell the close of D+1 (long). Secondary (reported): sells as
+  short open->close D+1; open D+1 -> close D+2; the untradable gap close D -> open D+1 (reported to show whether the effect is in the gap).
+- Prices: Sharadar SEP (adjusted open/close, split-consistent). Benchmark: EW same-day open->close of SEP commons with close >= $1, ADV20 >= $250k.
+- Costs: tier+tick round trip; shock 2 x tier_hi+tick.
+- Period: all available (2020+; never inspected in this program), halves split at the median date. No untouched OOS exists; a PASS = forward shadow only.
+- Ceiling at $10k: events/yr x mean net x share 0.2 x capture 0.5 (per-day concurrency cap: shares sum <= 1).
+- PASS: excess mean > 0 t >= 2 (day-clustered), median > 0, ex-top-5 > 0, both halves > 0, net mean > 0, 2x shock > 0, ceiling >= +8pp at $10k.
+- KILL: median <= 0, or t < 1, or net <= 0, or ceiling < +8pp at $10k. Else WEAK.
+- Runner research/sim/u7_ark_copy.py -> research/sim/u7_ark_copy_out.txt (only if Step 0 passes).
+
+### RESULT - N 1258 U9 RSPLIT-LONG (run 2026-11-21): KILL
+- Convention verified by hand (C 2011-05-09 .10, AIG 2009-07-01 .05, ETFC 2010-06-02 .10, XRX 2017-06-15 .25): value = new/old; f = closeunadj/close
+  is value on E-1 and 1 on E; raw-form and adjusted-form T0 agree (median |diff| 0.2bp, cent rounding). 56 unconfirmed rows dropped.
+- Data fix after the first run, before judging: 28 reverse splits paired with a same-day spin-off (TYC 2007, ITT/EXPE 2011, MSI 2011, T 2002...) were
+  booking the child as a parent loss (that is the EXDATE-OOS "rev -1000bp" problem); dropped. As-registered first run was worse (judged mean -577bp).
+- Judged 1998-2012 night, n 181 (12/yr after price >= $1 & ADV20 >= $250k; 3,083 of 3,773 events are sub-$1): excess EW mean -178bp, median -72,
+  hit 0.34, day-clustered t -2.37, ex-top-5 -269; halves -228 / -140; net tier+tick -222 (median -110); 2x shock -287. $1-5 median -58, $5+ -95.
+  Close->close: excess mean -93 median -60 t -1.59 (2006-12 half +46/+116, 1998-05 -273). 2013-26 (report): night median -93, t -3.79.
+- Ceiling at $10k: 12.1/yr x -222bp x 0.25 x 0.5 = -3.4pp/yr. Fails every gate.
+- Not tested: sub-$1 names (82% of events) and ADV20 < $250k; official crosses (Sharadar open = first print); short side here (already in do-not-redo);
+  E-1 open or intraday entries; exit later than E close (post-split drift windows); reverse splits combined with spin-offs (dropped as data).
+- Runner research/sim/u9_rsplit_long.py, out research/sim/u9_rsplit_long_out.txt.
+
+### RESULT - N 1259 U7 ARK-COPY (run 2026-11-21): KILL (gross effect real, below cost; the move is in the gap)
+- Data: arkfunds.io v2 trades API (github.com/frefrik/ark-invest-api), 6 funds, 27,191 trade rows 2020-09-09..2026-11-20; 17,245 of 20,390
+  ticker-days matched to SEP (ends 2026-10-05).
+- Primary (net buy >= 1% ADV20, long open D+1 -> close D+1), n 6,812 (~1,120/yr): excess EW mean +15.2bp, median +5.0, hit 0.51, t 3.33, ex-top-5 +12.8,
+  halves +9.1 / +21.3; net tier+tick -4.2 (median -13.7); 2x shock -40.8. Untradable gap close D -> open D+1: +25.3bp t 7.6.
+- Ceiling at $10k (share min(0.2, 1/k), capture 0.5): -2.4pp/yr. KILL on net <= 0 and ceiling.
+- Secondary (reported, not judged): open D+1 -> close D+2 net +13.6 (median -18, 2x shock -23); sells shorted open->close net +7.7 t 0.41 (2nd half
+  +13.6 gross t 0.77); >= 5% ADV buys gross +1.0; first ARK buy in 60 days (unregistered cut) n 668 net +47.5bp t 2.31 but median +8.5, 2nd half median
+  -11, 2025 -13 / 2026 -49, 2x shock ex-top-5 -5.0, ceiling ~+5pp: decaying, below gate, not a pass.
+- Not tested: entries before the open (pre-market on the email), other fully transparent active ETFs (the 10x-event-count condition in U7),
+  holdings-file-derived trades (creations mixed in), the trade day D itself (unknowable at the time), Sharadar opens vs official crosses.
+- Runner research/sim/u7_ark_copy.py <dir of trades_*.json>, out research/sim/u7_ark_copy_out.txt.

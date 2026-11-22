@@ -109,3 +109,4 @@ One line per file. Read a file when the task touches its subject; do not read al
 - `116-seo-quiet-period-kill-2026-11-21.md` (90 tok): SEO quiet-period run-up (N 1241) KILL; FINRA 2241 dates (2015-09-25) and the actively-traded exemption.
 - `117-leg-allocator-r1-r2-kill-2026-11-21.md` (80 tok): R1/R2 learned IBS/night/cash weights (N 1225-1228) KILL; closes RL exposure control over the legs.
 - `118-deep-math-round-price-xs-dead-2026-11-21.md` (420 tok): DEEP round N 1242-1257: PCA/RMT stat-arb (real 1-4bp gross, dead at cost in every daily form), path signatures, tail dependence, drawdown RS (reverses after beta), TDA gates, vol ratio, thin-name night all KILL; split-adjusted-volume ADV lookahead bug + audit (GAP-NIGHT -> KILL).
+- `119-structural-turn-live-audit-2026-11-21.md` (~330 tok): U9/U7 kills, Tier C data status, round-ups ~$0 at Schwab (cash in lieu 15/17), live audit: exit-cost 403 fix, CEF-RV starving Roth night cash, PREF-EX gate scoring.

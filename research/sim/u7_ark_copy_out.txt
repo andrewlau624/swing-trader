@@ -1,0 +1,58 @@
+ARK trade rows 27191 (2020-09-09..2026-11-20), ticker-days 20390, net buys 11197, net sells 9193
+SEP last date 2026-10-05
+ticker-days matched to SEP: 17245 of 20390
+== PRIMARY net BUY, trade >= 1% ADV20, long open D+1 -> close D+1 [oc1]
+ excess EW    n  6812 mean   +15.2bp med   +5.0 hit 0.51 t  3.33 ex-top5   +12.8
+ net tier+tk  n  6812 mean    -4.2bp med  -13.7 hit 0.48 t  0.53 ex-top5    -6.6
+ 2x hi+tk     n  6812 mean   -40.8bp med  -47.5 hit 0.43 t -4.66 ex-top5   -43.2
+ gap D->D+1 (untradable) excess n  6812 mean   +25.3bp med   +9.6 hit 0.54 t  7.58 ex-top5   +22.2
+ halves (split 2022-05-24): n  3408 mean    +9.1bp med   -0.1 hit 0.50 t  2.19 ex-top5    +5.5 | n  3404 mean   +21.3bp med   +7.9 hit 0.52 t  2.62 ex-top5   +17.1
+ by year excess median/mean bp (n): 2020:+20/+42(344)  2021:+2/+10(2456)  2022:+7/+10(1169)  2023:+18/+42(804)  2024:+1/+7(923)  2025:-14/+6(654)  2026:+6/+20(462)
+== ceiling primary: 1123.8 events/yr, sum(share x net)/yr x 0.5 = -2.40pp/yr (same % at $2.3k/$10k/$25k)
+   $  2300: 0.2 x acct <= 5% ADV20 in 1.00 of events
+   $ 10000: 0.2 x acct <= 5% ADV20 in 1.00 of events
+   $ 25000: 0.2 x acct <= 5% ADV20 in 1.00 of events
+   $100000: 0.2 x acct <= 5% ADV20 in 1.00 of events
+-- secondary (reported, not judged)
+== net BUY >= 1% ADV, hold open D+1 -> close D+2 [oc2]
+ excess EW    n  6809 mean   +33.1bp med   +0.6 hit 0.50 t  4.19 ex-top5   +29.6
+ net tier+tk  n  6809 mean   +13.6bp med  -18.1 hit 0.48 t  2.36 ex-top5   +10.2
+ 2x hi+tk     n  6809 mean   -22.9bp med  -49.3 hit 0.44 t -1.04 ex-top5   -26.4
+ gap D->D+1 (untradable) excess n  6812 mean   +25.3bp med   +9.6 hit 0.54 t  7.58 ex-top5   +22.2
+ halves (split 2022-05-24): n  3408 mean   +12.1bp med   -6.4 hit 0.49 t  1.62 ex-top5    +6.5 | n  3401 mean   +54.1bp med   +8.9 hit 0.51 t  3.89 ex-top5   +48.1
+ by year excess median/mean bp (n): 2020:+26/+109(344)  2021:-3/+8(2456)  2022:-4/+19(1169)  2023:+30/+85(804)  2024:-8/+29(923)  2025:-18/+41(654)  2026:-42/+49(462)
+== net SELL >= 1% ADV, SHORT open D+1 -> close D+1 [oc1]
+ excess EW    n  4322 mean   +25.8bp med  +19.3 hit 0.54 t  3.11 ex-top5   +23.4
+ net tier+tk  n  4322 mean    +7.7bp med   +4.1 hit 0.51 t  0.41 ex-top5    +5.3
+ 2x hi+tk     n  4322 mean   -25.1bp med  -28.5 hit 0.45 t -4.48 ex-top5   -27.5
+ gap D->D+1 (untradable) excess n  4322 mean    +2.6bp med   +6.6 hit 0.53 t  0.12 ex-top5    +0.6
+ halves (split 2022-08-24): n  2163 mean   +38.0bp med  +24.9 hit 0.55 t  4.66 ex-top5   +34.9 | n  2159 mean   +13.6bp med  +11.6 hit 0.53 t  0.77 ex-top5    +8.8
+ by year excess median/mean bp (n): 2020:+11/+8(321)  2021:+20/+37(1416)  2022:+51/+57(634)  2023:+12/+32(407)  2024:+12/+6(637)  2025:-8/-20(415)  2026:+36/+26(492)
+== ALL net buys (any size), long [oc1]
+ excess EW    n  9536 mean   +14.4bp med   +4.6 hit 0.51 t  2.54 ex-top5   +12.7
+ net tier+tk  n  9536 mean    -3.5bp med  -12.3 hit 0.48 t -0.56 ex-top5    -5.2
+ 2x hi+tk     n  9536 mean   -37.6bp med  -43.9 hit 0.43 t -6.42 ex-top5   -39.3
+ gap D->D+1 (untradable) excess n  9536 mean   +20.9bp med   +7.3 hit 0.53 t  6.55 ex-top5   +18.7
+ halves (split 2022-10-18): n  4768 mean   +13.6bp med   +6.3 hit 0.51 t  2.24 ex-top5   +11.0 | n  4768 mean   +15.2bp med   +2.5 hit 0.51 t  1.50 ex-top5   +12.1
+ by year excess median/mean bp (n): 2020:+20/+39(453)  2021:+7/+11(2969)  2022:-3/+5(1590)  2023:+27/+47(1155)  2024:+2/+9(1372)  2025:-13/+6(1120)  2026:-1/+5(877)
+== ALL net sells (any size), short [oc1]
+ excess EW    n  7529 mean   +12.9bp med  +10.1 hit 0.52 t  2.00 ex-top5   +11.5
+ net tier+tk  n  7529 mean    -3.3bp med   -4.7 hit 0.49 t -1.07 ex-top5    -4.7
+ 2x hi+tk     n  7529 mean   -33.2bp med  -31.8 hit 0.44 t -6.68 ex-top5   -34.6
+ gap D->D+1 (untradable) excess n  7529 mean    -3.1bp med   +6.0 hit 0.53 t -1.21 ex-top5    -4.4
+ halves (split 2023-04-05): n  3767 mean   +29.4bp med  +19.8 hit 0.54 t  4.42 ex-top5   +27.2 | n  3762 mean    -3.6bp med   +1.4 hit 0.50 t -0.94 ex-top5    -6.4
+ by year excess median/mean bp (n): 2020:+13/+16(418)  2021:+21/+33(2090)  2022:+33/+34(1000)  2023:+4/+11(772)  2024:+7/-2(1213)  2025:-16/-22(964)  2026:+6/+2(1072)
+== net BUY >= 5% ADV, long [oc1]
+ excess EW    n  3546 mean    +1.0bp med   -4.8 hit 0.49 t  0.32 ex-top5    -3.5
+ net tier+tk  n  3546 mean   -20.6bp med  -27.4 hit 0.46 t -2.11 ex-top5   -25.1
+ 2x hi+tk     n  3546 mean   -60.1bp med  -66.0 hit 0.41 t -6.39 ex-top5   -64.6
+ gap D->D+1 (untradable) excess n  3546 mean   +37.8bp med  +16.8 hit 0.57 t  8.08 ex-top5   +31.9
+ halves (split 2022-01-27): n  1778 mean    -3.7bp med   -9.2 hit 0.49 t  0.97 ex-top5   -10.5 | n  1768 mean    +5.9bp med   -0.6 hit 0.50 t -0.06 ex-top5    -2.0
+ by year excess median/mean bp (n): 2020:+17/+29(193)  2021:-6/-2(1462)  2022:+11/+6(674)  2023:+25/+28(418)  2024:-29/-12(403)  2025:-48/-45(241)  2026:+0/+6(155)
+== net BUY, first ARK buy of the name (new position proxy: no ARK trade in prior 60d) [oc1]
+ excess EW    n   668 mean   +64.7bp med  +27.2 hit 0.53 t  3.19 ex-top5   +45.3
+ net tier+tk  n   668 mean   +47.5bp med   +8.5 hit 0.51 t  2.31 ex-top5   +28.2
+ 2x hi+tk     n   668 mean   +14.2bp med  -19.9 hit 0.48 t  0.57 ex-top5    -5.0
+ gap D->D+1 (untradable) excess n   668 mean   +59.6bp med  +24.3 hit 0.60 t  4.72 ex-top5   +45.7
+ halves (split 2023-06-12): n   335 mean  +103.0bp med  +54.8 hit 0.57 t  2.64 ex-top5   +69.1 | n   333 mean   +26.2bp med  -11.4 hit 0.48 t  1.83 ex-top5    +1.0
+ by year excess median/mean bp (n): 2020:+62/+92(76)  2021:+80/+132(112)  2022:+35/+108(92)  2023:+40/+67(117)  2024:+5/+56(100)  2025:-13/+15(102)  2026:-49/-49(69)

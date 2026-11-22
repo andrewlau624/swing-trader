@@ -165,7 +165,7 @@ nothing. Kill: 2024-26 excess vs the leg's same-day picks <= 0; else forward sha
 -34bp (t -1.75), 2024 +54 but 2025-26 -81 (t -3.70). Universe extension -10bp/day (t -1.88), -24bp on crypto-picked days.
 `u6_crypto_ibs_out.txt`. The wrapper does not revive the crypto premium.
 
-**U7. Daily-disclosed active-ETF trades (ARK-class) -> next-day in thin holdings** (information asymmetry x ETFs).
+**U7. Daily-disclosed active-ETF trades (ARK-class) -> next-day in thin holdings** **MEASURED 2026-11-21 (N 1259): KILL** (gross +15bp t 3.3, net -4bp, move in the gap +25bp; data free from arkfunds.io, no longer blocked; open sibling: all transparent active ETFs). (information asymmetry x ETFs).
 Named counterparty publishes its own trades after the close; copycat and continuation flow in names where the trade
 is > 1% of ADV. Data: historical daily holdings CSVs (not on disk; github archives 2020+, a scrape). Ceiling: ~5-10
 trades/day in thin names, +20bp next day, 20% of capital, 50% -> **+2-5pp**, and ARK AUM is ~1/5 of 2021. Below gate;
@@ -175,7 +175,7 @@ run only if a larger disclosed-trade universe (all fully transparent active ETFs
 leaf of the NIGHT-BAND tree. Ceiling-marginal: the -4..-8% band is +4bp gross (inside cost); the shallower band is
 expected lower. Run only if NIGHT-BAND-FWD passes its 60 nights. Otherwise ceiling-killed.
 
-**U9. Reverse-split ex-date night, long side** (corporate actions x liquidity provision; EXDATE-OOS left it "data
+**U9. Reverse-split ex-date night, long side** **MEASURED 2026-11-21 (N 1258): KILL** (1998-2012 n 181 median -72bp t -2.37, net -222bp; drop rsplit+spin same-day rows). (corporate actions x liquidity provision; EXDATE-OOS left it "data
 convention untested"). ~300/yr, mostly sub-$5 junk; post-reverse-split drift is negative in the literature; ceiling < 2pp.
 Run only as a 20-minute Sharadar look if a reverse-split-adjustment convention is needed for another study anyway.
 
@@ -186,7 +186,8 @@ Ceiling-killed as a leg; only a > 5%/event median would reopen it.
 
 ### Tier C: untested and blocked (do not write code; record the data unlock first)
 
-- ETF creation/redemption pressure at daily horizon on constituents / "ETF fire sales" (needs daily shares outstanding
+- (2026-11-21) ETF creation/redemption pressure: NOT blocked (SSGA navhist daily shares outstanding, Study EF); ceiling-killed 3.8pp. Newly free: CME margin history PDFs 2003+, SEC 17g-7(b) rating histories 2015+ (12-mo lag); N-PORT quarter-end 2019Q4+ (partial); Russell via IWM/IWB holdings proxy.
+- (old text) ETF creation/redemption pressure at daily horizon on constituents / "ETF fire sales" (needs daily shares outstanding
   per fund; CRSP MF has monthly TNA only; at the quarterly horizon it is a costume of F-SALE2). Intraday iNAV entries for
   ETF-PD / CEFs (blocked). N-PORT monthly holdings (blocked). Margin-call cascades (no data). CME margin-hike
   deleveraging (no margin-rate history). Custodial borrow/recall fees (U4's rebate). Russell membership (paid). PIT issuer
